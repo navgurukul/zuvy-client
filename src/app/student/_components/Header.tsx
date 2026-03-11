@@ -7,12 +7,14 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
+import { useOnboardingStorage } from '@/hooks/use-profile'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
     const { studentData } = useLazyLoadedStudentData()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [isClient, setIsClient] = useState(false)
+    const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
 
@@ -55,6 +57,11 @@ const Header = () => {
     const handleProfileClick = () => {
         router.push('/student/profile')
     }
+
+    const isProfileComplete = Boolean(onboardingData?.isCompleted)
+    const isOnStudentHome = pathname === '/student'
+    const showProfileOption =
+        !isOnboardingLoading && isProfileComplete && isOnStudentHome
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')
@@ -187,6 +194,7 @@ const Header = () => {
                         setShowLogoutDialog={setShowLogoutDialog}
                         handleLogout={handleLogout}
                         onProfileClick={handleProfileClick}
+                        showProfileOption={showProfileOption}
                     />
                 </div>
             </header>
@@ -258,6 +266,7 @@ const Header = () => {
                     setShowLogoutDialog={setShowLogoutDialog}
                     handleLogout={handleLogout}
                     onProfileClick={handleProfileClick}
+                    showProfileOption={showProfileOption}
                 />
             </div>
         </header>

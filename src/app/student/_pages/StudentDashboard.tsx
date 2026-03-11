@@ -613,31 +613,31 @@ const StudentDashboard = () => {
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="20" id="20" />
-                      <Label htmlFor="20" className="text-sm cursor-pointer">Beginner (20%)</Label>
+                      <Label htmlFor="20" className="text-sm cursor-pointer mt-4">Beginner (20%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="40" id="40" />
-                      <Label htmlFor="40" className="text-sm cursor-pointer">Basic (40%)</Label>
+                      <Label htmlFor="40" className="text-sm cursor-pointer mt-4">Basic (40%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="60" id="60" />
-                      <Label htmlFor="60" className="text-sm cursor-pointer">Intermediate (60%)</Label>
+                      <Label htmlFor="60" className="text-sm cursor-pointer mt-4">Intermediate (60%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="80" id="80" />
-                      <Label htmlFor="80" className="text-sm cursor-pointer">Job Ready (80%)</Label>
+                      <Label htmlFor="80" className="text-sm cursor-pointer mt-4">Job Ready (80%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="90" id="90" />
-                      <Label htmlFor="90" className="text-sm cursor-pointer">Almost Complete (90%)</Label>
+                      <Label htmlFor="90" className="text-sm cursor-pointer mt-4">Almost Complete (90%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="95" id="95" />
-                      <Label htmlFor="95" className="text-sm cursor-pointer">Nearly Done (95%)</Label>
+                      <Label htmlFor="95" className="text-sm cursor-pointer mt-4">Nearly Done (95%)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="100" id="100" />
-                      <Label htmlFor="100" className="text-sm cursor-pointer">Complete (100%)</Label>
+                      <Label htmlFor="100" className="text-sm cursor-pointer mt-4">Complete (100%)</Label>
                     </div>
                   </div>
                 </RadioGroup>

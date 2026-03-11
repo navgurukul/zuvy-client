@@ -27,6 +27,7 @@ interface StudentProfileDropDownProps {
     setShowLogoutDialog: (value: boolean) => void
     handleLogout: () => void
     onProfileClick: () => void
+    showProfileOption?: boolean
 }
 
 const StudentProfileDropDown = ({
@@ -36,6 +37,7 @@ const StudentProfileDropDown = ({
     setShowLogoutDialog,
     handleLogout,
     onProfileClick,
+    showProfileOption = true,
 }: StudentProfileDropDownProps) => {
     return (
         <>
@@ -63,14 +65,18 @@ const StudentProfileDropDown = ({
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200" />
-                    <DropdownMenuItem
-                        onClick={onProfileClick}
-                        className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-zinc-800 focus:bg-zinc-50"
-                    >
-                        <UserRound className="h-5 w-5" />
-                        <span>View/Edit Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200" />
+                    {showProfileOption && (
+                        <>
+                            <DropdownMenuItem
+                                onClick={onProfileClick}
+                                className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-zinc-800 focus:bg-zinc-50"
+                            >
+                                <UserRound className="h-5 w-5" />
+                                <span>View/Edit Profile</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200" />
+                        </>
+                    )}
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
                         className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-red-500 focus:bg-red-50 focus:text-red-600"

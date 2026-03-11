@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -9,11 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap, Upload, Sparkles, Calendar } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap } from 'lucide-react';
 import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
-import { COLLEGES, DEGREES, BRANCHES_BY_DEGREE, MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
+import { DEGREES, MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -50,13 +48,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [collegeSearch, setCollegeSearch] = useState('');
-  const [filteredColleges, setFilteredColleges] = useState(COLLEGES);
+  const [filteredColleges, setFilteredColleges] = useState<{ name: string; state: string }[]>([]);
+  const [isLoadingColleges, setIsLoadingColleges] = useState(false);
   const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
   const [validations, setValidations] = useState<Record<string, boolean>>({});
   const [showGraduationDatePicker, setShowGraduationDatePicker] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>(formData.graduationDate.month || '');
   const [selectedYear, setSelectedYear] = useState<string>(formData.graduationDate.year || '');
-
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
   const graduationDateDropdownRef = useRef<HTMLDivElement>(null);
   
@@ -70,19 +68,160 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     }
   }, [formData]);
 
-  // Filter colleges based on search
+  const lastAutofillRef = useRef<string>('');
+
   useEffect(() => {
-    if (collegeSearch.trim()) {
-      const filtered = COLLEGES.filter(
-        (college) =>
-          college.name.toLowerCase().includes(collegeSearch.toLowerCase()) ||
-          college.state.toLowerCase().includes(collegeSearch.toLowerCase())
-      );
-      setFilteredColleges(filtered);
-    } else {
-      setFilteredColleges(COLLEGES);
+    if (!initialData) {
+      console.log('ProfileStep1: initialData is empty, skipping autofill');
+      return;
     }
-  }, [collegeSearch]);
+    
+    const signature = [
+      initialData.fullName ?? '',
+      initialData.phoneNumber ?? '',
+      initialData.linkedin ?? '',
+      initialData.collegeName ?? '',
+      initialData.customCollege ?? '',
+      initialData.degree ?? '',
+      initialData.branch ?? '',
+      initialData.graduationDate?.month ?? '',
+      initialData.graduationDate?.year ?? '',
+      initialData.yearOfStudy ?? '',
+      initialData.currentStatus ?? '',
+    ].join('|');
+    if (signature === lastAutofillRef.current) {
+      console.log('ProfileStep1: initialData unchanged, skipping autofill');
+      return;
+    }
+
+    // Debug log with full initialData details
+    console.log('ProfileStep1 autofill triggered:', {
+      fullName: initialData.fullName,
+      phoneNumber: initialData.phoneNumber,
+      linkedin: initialData.linkedin,
+      collegeName: initialData.collegeName,
+      customCollege: initialData.customCollege,
+      degree: initialData.degree,
+      branch: initialData.branch,
+      yearOfStudy: initialData.yearOfStudy,
+      currentStatus: initialData.currentStatus,
+      graduationDate: initialData.graduationDate,
+    });
+
+    setFormData((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      
+      // Update if value exists and is different
+      if (initialData.fullName && initialData.fullName !== prev.fullName) {
+        next.fullName = initialData.fullName;
+        changed = true;
+      }
+      if (initialData.phoneNumber && initialData.phoneNumber !== prev.phoneNumber) {
+        next.phoneNumber = initialData.phoneNumber;
+        changed = true;
+      }
+      if (initialData.linkedin && initialData.linkedin !== prev.linkedin) {
+        next.linkedin = initialData.linkedin;
+        changed = true;
+      }
+      if (initialData.collegeName && initialData.collegeName !== prev.collegeName) {
+        next.collegeName = initialData.collegeName;
+        changed = true;
+      }
+      if (initialData.customCollege && initialData.customCollege !== prev.customCollege) {
+        next.customCollege = initialData.customCollege;
+        changed = true;
+      }
+      if (initialData.degree && initialData.degree !== prev.degree) {
+        next.degree = initialData.degree;
+        changed = true;
+      }
+      if (initialData.branch && initialData.branch !== prev.branch) {
+        next.branch = initialData.branch;
+        changed = true;
+      }
+      if (initialData.yearOfStudy && initialData.yearOfStudy !== prev.yearOfStudy) {
+        next.yearOfStudy = initialData.yearOfStudy as any;
+        changed = true;
+      }
+      if (initialData.currentStatus && initialData.currentStatus !== prev.currentStatus) {
+        next.currentStatus = initialData.currentStatus as any;
+        changed = true;
+      }
+
+      if (initialData.graduationDate?.month && initialData.graduationDate.month !== prev.graduationDate.month) {
+        next.graduationDate = {
+          ...next.graduationDate,
+          month: initialData.graduationDate.month,
+        };
+        changed = true;
+      }
+      if (initialData.graduationDate?.year && initialData.graduationDate.year !== prev.graduationDate.year) {
+        next.graduationDate = {
+          ...next.graduationDate,
+          year: initialData.graduationDate.year,
+        };
+        changed = true;
+      }
+
+      if (!changed) {
+        return prev;
+      }
+      
+      console.log('ProfileStep1 formData updated:', {
+        fullName: next.fullName,
+        phoneNumber: next.phoneNumber,
+        linkedin: next.linkedin,
+        collegeName: next.collegeName,
+        degree: next.degree,
+        branch: next.branch,
+      });
+      
+      return next;
+    });
+
+    if (initialData.phoneNumber) {
+      setValidations((prev) => ({
+        ...prev,
+        phoneNumber: validatePhoneNumber(initialData.phoneNumber as string),
+      }));
+    }
+
+    lastAutofillRef.current = signature;
+  }, [initialData]);
+
+  // Filter colleges based on search
+ useEffect(() => {
+  const fetchColleges = async () => {
+    if (!collegeSearch.trim()) {
+      setFilteredColleges([]);
+      return;
+    }
+
+    setIsLoadingColleges(true);
+    try {
+      const res = await fetch(
+        `http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(collegeSearch)}`
+      );
+      const data = await res.json();
+      const mapped = data.map((u: any) => ({
+        name: u.name,
+        state: u['state-province'] || 'India',
+      }));
+      setFilteredColleges(mapped);
+    } catch (err) {
+      console.error('Failed to fetch colleges:', err);
+      setFilteredColleges([]);
+    } finally {
+      setIsLoadingColleges(false);
+    }
+  };
+
+  // Debounce to avoid hammering the API
+  const debounce = setTimeout(fetchColleges, 400);
+  return () => clearTimeout(debounce);
+}, [collegeSearch]);
 
   // Close college dropdown when clicking outside
   useEffect(() => {
@@ -315,107 +454,107 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
             <div className="space-y-6">
               {/* Row 1: Full Name and Phone Number */}
               <div className="grid gap-4 md:grid-cols-2">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="font-medium text-left block">
-                Full Name <span className="text-destructive">*</span>
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  placeholder="Aditya Kumar"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
-                />
-              </div>
-              {errors.fullName && (
-                <p className="text-sm text-destructive flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.fullName}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber" className="font-medium text-left block">
-                Phone Number <span className="text-destructive">*</span>
-              </Label>
-              <div className="flex">
-                <div className="flex items-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground border-input">
-                  <Phone className="w-4 h-4 mr-2" />
-                  <span className="text-sm">+91</span>
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="font-medium text-left block">
+                    Full Name <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      placeholder="Aditya Kumar"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
+                    />
+                  </div>
+                  {errors.fullName && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.fullName}
+                    </p>
+                  )}
                 </div>
-                <div className="relative flex-1">
-                  <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    placeholder="9999999999"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    maxLength={10}
-                    className={`rounded-l-none ${errors.phoneNumber ? 'border-destructive' : ''}`}
-                  />
-                  {validations.phoneNumber && formData.phoneNumber.length === 10 && (
-                    <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-success w-5 h-5" />
+
+                {/* Phone Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber" className="font-medium text-left block">
+                    Phone Number <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex">
+                    <div className="flex items-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground border-input">
+                      <Phone className="w-4 h-4 mr-2" />
+                      <span className="text-sm">+91</span>
+                    </div>
+                    <div className="relative flex-1">
+                      <Input
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        placeholder="9999999999"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        maxLength={10}
+                        className={`rounded-l-none ${errors.phoneNumber ? 'border-destructive' : ''}`}
+                      />
+                      {validations.phoneNumber && formData.phoneNumber.length === 10 && (
+                        <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-success w-5 h-5" />
+                      )}
+                    </div>
+                  </div>
+                  {errors.phoneNumber && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.phoneNumber}
+                    </p>
                   )}
                 </div>
               </div>
-              {errors.phoneNumber && (
-                <p className="text-sm text-destructive flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.phoneNumber}
-                </p>
-              )}
-            </div>
-          </div>
 
-          {/* Row 2: Email Address - Full Width */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-medium text-left block">
-              Email Address <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="aditya.student@zuvy.org"
-                value={formData.email}
-                disabled
-                className="pl-10 bg-muted"
-              />
-            </div>
-          </div>
+              {/* Row 2: Email Address - Full Width */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="font-medium text-left block">
+                  Email Address <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="aditya.student@zuvy.org"
+                    value={formData.email}
+                    disabled
+                    className="pl-10 bg-muted"
+                  />
+                </div>
+              </div>
 
-          {/* Row 3: LinkedIn Profile - Full Width */}
-          <div className="space-y-2">
-            <Label htmlFor="linkedin" className="font-medium text-left block">
-              LinkedIn Profile <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              <Input
-                id="linkedin"
-                name="linkedin"
-                type="url"
-                placeholder="linkedin.com/in/yourname"
-                value={formData.linkedin}
-                onChange={handleInputChange}
-                className="pl-10"
-                required
-              />
-            </div>
-            {errors.linkedin && (
-              <p className="text-sm text-destructive">{errors.linkedin}</p>
-            )}
-          </div>
+              {/* Row 3: LinkedIn Profile - Full Width */}
+              <div className="space-y-2">
+                <Label htmlFor="linkedin" className="font-medium text-left block">
+                  LinkedIn Profile <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  <Input
+                    id="linkedin"
+                    name="linkedin"
+                    type="url"
+                    placeholder="linkedin.com/in/yourname"
+                    value={formData.linkedin}
+                    onChange={handleInputChange}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+                {errors.linkedin && (
+                  <p className="text-sm text-destructive">{errors.linkedin}</p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -458,32 +597,48 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                     className={errors.college ? 'border-destructive' : ''}
                   />
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
+{showCollegeDropdown && (
+  <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+    
+    {/* Loading state */}
+    {isLoadingColleges && (
+      <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+        Searching colleges...
+      </div>
+    )}
 
-                  {showCollegeDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
-                      {filteredColleges.map((college) => (
-                        <button
-                          key={college.id}
-                          type="button"
-                          onClick={() => handleCollegeSelect(college.name)}
-                          className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors"
-                        >
-                          <div className="font-medium">{college.name}</div>
-                          <div className="text-xs text-muted-foreground">{college.state}</div>
-                        </button>
-                      ))}
-                      {collegeSearch.trim() && filteredColleges.length === 0 && (
-                        <button
-                          type="button"
-                          onClick={handleCustomCollege}
-                          className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors border-t border-border/30"
-                        >
-                          <div className="font-medium text-primary">Add "{collegeSearch}" as custom college</div>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
+    {/* Empty state before typing */}
+    {!isLoadingColleges && !collegeSearch.trim() && (
+      <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+        Start typing to search colleges
+      </div>
+    )}
+
+    {/* Results */}
+    {!isLoadingColleges && filteredColleges.map((college, index) => (
+      <button
+        key={index}
+        type="button"
+        onClick={() => handleCollegeSelect(college.name)}
+        className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors"
+      >
+        <div className="font-medium">{college.name}</div>
+        <div className="text-xs text-muted-foreground">{college.state}</div>
+      </button>
+    ))}
+
+    {/* No results + custom add */}
+    {!isLoadingColleges && collegeSearch.trim() && filteredColleges.length === 0 && (
+      <button
+        type="button"
+        onClick={handleCustomCollege}
+        className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors"
+      >
+        <div className="font-medium text-primary">Add "{collegeSearch}" as custom college</div>
+      </button>
+    )}
+  </div>
+)}
                 {errors.college && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
@@ -491,6 +646,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   </p>
                 )}
               </div>
+            </div>
 
               {/* Row: Degree and Branch */}
               <div className="grid gap-4 md:grid-cols-2">

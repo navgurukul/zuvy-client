@@ -1,7 +1,7 @@
 'use client';
 import ProfilePage from '@/app/student/_pages/ProfilePage';
 import EditProfilePage from '@/app/student/_pages/EditProfilePage';
-import { calculateProfileStrength, useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/hooks/use-profile';
 
 export default function Page() {
   const { onboardingData, isLoading } = useOnboardingStorage();
@@ -10,9 +10,9 @@ export default function Page() {
     return null;
   }
 
-  const profileStrength = calculateProfileStrength(onboardingData);
+  const isProfileComplete = Boolean(onboardingData?.isCompleted);
 
-  if (profileStrength > 20) {
+  if (isProfileComplete) {
     return <EditProfilePage />;
   }
 

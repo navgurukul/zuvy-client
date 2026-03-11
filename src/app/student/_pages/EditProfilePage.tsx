@@ -48,6 +48,7 @@ import { useOnboardingStorage } from '@/hooks/use-profile';
 import { SKILLS_BY_CATEGORY, COLLEGES, CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
 import type { CompetitiveProfile } from '@/lib/profile.types';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
+import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 
 type TabType = 'basic-info' | 'skills-projects' | 'education' | 'career-goals';
 type EditingCard = 'personal-info' | 'skills' | 'projects' | 'academic-info' | 'academic-performance' | 'work-experience' | 'competitive-profiles' | 'career-goals' | null;
@@ -77,6 +78,9 @@ export const EditProfilePage: React.FC = () => {
   const [customSkill, setCustomSkill] = useState('');
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [verifyingPlatform, setVerifyingPlatform] = useState<string | null>(null);
+  const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
+  const [rankError, setRankError] = useState<Record<string, string>>({});
+  const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   
   // College search state
   const [collegeSearch, setCollegeSearch] = useState('');
@@ -204,6 +208,12 @@ export const EditProfilePage: React.FC = () => {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSkillDropdown]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
+    };
+  }, []);
   
   // College search filtering
   useEffect(() => {
@@ -341,7 +351,35 @@ export const EditProfilePage: React.FC = () => {
     const currentUsername = editedData.competitiveProfiles?.[profileIndex]?.username ?? step3.competitiveProfiles[profileIndex].username;
     
     if (currentUsername) {
-      // Simulate API call
+      if (isSupportedCompetitivePlatform(platform)) {
+        try {
+          const stats = await fetchCompetitiveProfileStats(platform, currentUsername);
+          const updatedProfiles = step3.competitiveProfiles.map((p, idx) =>
+            idx === profileIndex
+              ? {
+                  ...p,
+                  ...stats,
+                  username: currentUsername,
+                  isVerified: true,
+                  verifiedUsername: currentUsername,
+                  lastVerifiedAt: new Date().toISOString(),
+                }
+              : p
+          );
+          updateStepData(3, {
+            ...step3,
+            competitiveProfiles: updatedProfiles,
+          });
+          setEditedData({ ...editedData, competitiveProfiles: undefined });
+        } catch (error) {
+          setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
+        } finally {
+          setVerifyingPlatform(null);
+        }
+        return;
+      }
+
+      // Simulate API call for unsupported platforms
       setTimeout(() => {
         if (step3) {
           const updatedProfiles = step3.competitiveProfiles.map((p, idx) =>
@@ -367,6 +405,46 @@ export const EditProfilePage: React.FC = () => {
         setVerifyingPlatform(null);
       }, 1500);
     }
+  };
+
+  const scheduleRankFetch = (platform: string, username: string, index: number) => {
+    if (!isSupportedCompetitivePlatform(platform)) return;
+
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
+    const key = `${platform}-${index}`;
+    const existingTimeout = rankFetchTimeoutsRef.current[key];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+
+    rankFetchTimeoutsRef.current[key] = setTimeout(async () => {
+      setRankLoading((prev) => ({ ...prev, [platform]: true }));
+      setRankError((prev) => ({ ...prev, [platform]: '' }));
+      try {
+        const stats = await fetchCompetitiveProfileStats(platform, trimmed);
+        setEditedData((prev) => {
+          const baseProfiles = prev.competitiveProfiles
+            || (step3?.competitiveProfiles || []).map((p) => ({ ...p }));
+          const nextProfiles = [...baseProfiles];
+          const current = nextProfiles[index] || { platform, isVerified: false };
+          nextProfiles[index] = {
+            ...current,
+            ...stats,
+            username: trimmed,
+            isVerified: true,
+            verifiedUsername: trimmed,
+            lastVerifiedAt: new Date().toISOString(),
+          };
+          return { ...prev, competitiveProfiles: nextProfiles };
+        });
+      } catch (error) {
+        setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
+      } finally {
+        setRankLoading((prev) => ({ ...prev, [platform]: false }));
+      }
+    }, 700);
   };
 
   // Get initials for avatar
@@ -1553,6 +1631,9 @@ export const EditProfilePage: React.FC = () => {
                         <div key={profile.platform} className="space-y-1">
                           <p className="text-xs text-muted-foreground font-medium">{profile.platform}</p>
                           <p className="font-medium">{profile.username || 'Not Added'}</p>
+                          {profile.rank !== undefined && (
+                            <p className="text-xs text-muted-foreground">Rank: {profile.rank}</p>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -1579,9 +1660,10 @@ export const EditProfilePage: React.FC = () => {
                         { platform: 'Codeforces', username: '', isVerified: false },
                         { platform: 'HackerRank', username: '', isVerified: false }
                       ] as CompetitiveProfile[]).map((profile, index) => {
-                          const currentUsername = editedData.competitiveProfiles?.[index]?.username ?? profile.username ?? '';
-                          const hasUsername = profile.username && profile.username.trim() !== '';
-                          const hasModified = hasUsername && currentUsername !== profile.username;
+                          const currentProfile = editedData.competitiveProfiles?.[index] ?? profile;
+                          const currentUsername = currentProfile.username ?? '';
+                          const hasUsername = currentUsername.trim() !== '';
+                          const hasModified = Boolean(profile.username && profile.username.trim()) && currentUsername !== profile.username;
                           
                           return (
                             <div key={profile.platform} className="space-y-4">
@@ -1591,11 +1673,40 @@ export const EditProfilePage: React.FC = () => {
                                 value={currentUsername}
                                 placeholder="Username"
                                 onChange={(e) => {
+                                  const nextUsername = e.target.value;
                                   const newProfiles = editedData.competitiveProfiles || (step3?.competitiveProfiles || []).map(p => ({...p}));
-                                  newProfiles[index] = { ...newProfiles[index], ...profile, username: e.target.value };
+                                  newProfiles[index] = { 
+                                    ...newProfiles[index], 
+                                    ...profile, 
+                                    username: nextUsername,
+                                    isVerified: false,
+                                    verifiedUsername: undefined,
+                                    problemsSolved: undefined,
+                                    rating: undefined,
+                                    rank: undefined,
+                                    lastVerifiedAt: undefined,
+                                  };
                                   setEditedData({...editedData, competitiveProfiles: newProfiles});
+                                  setRankError((prev) => ({ ...prev, [profile.platform]: '' }));
+                                  if (!nextUsername.trim()) {
+                                    const key = `${profile.platform}-${index}`;
+                                    const existingTimeout = rankFetchTimeoutsRef.current[key];
+                                    if (existingTimeout) {
+                                      clearTimeout(existingTimeout);
+                                    }
+                                    setRankLoading((prev) => ({ ...prev, [profile.platform]: false }));
+                                    return;
+                                  }
+                                  scheduleRankFetch(profile.platform, nextUsername, index);
                                 }}
                               />
+
+                              {rankLoading[profile.platform] && (
+                                <p className="text-xs text-muted-foreground">Fetching rank...</p>
+                              )}
+                              {rankError[profile.platform] && (
+                                <p className="text-xs text-destructive">{rankError[profile.platform]}</p>
+                              )}
                               
                               {/* Show Verify button for empty profiles or newly entered usernames */}
                               {!hasUsername && (
@@ -1627,12 +1738,19 @@ export const EditProfilePage: React.FC = () => {
                                     )}
                                     Re-Verify
                                   </Button>
-                                  {profile.problemsSolved && (
+                                  {(currentProfile.problemsSolved || currentProfile.rating || currentProfile.rank !== undefined) && (
                                     <>
-                                      <span className="text-muted-foreground">•</span>
-                                      <span className="text-muted-foreground">{profile.problemsSolved} problems solved</span>
-                                      <span className="text-muted-foreground">•</span>
-                                      <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                                      {currentProfile.problemsSolved !== undefined && (
+                                        <span className="text-muted-foreground">
+                                          {currentProfile.problemsSolved} problems solved
+                                        </span>
+                                      )}
+                                      {currentProfile.rating !== undefined && (
+                                        <span className="text-muted-foreground">Rating: {currentProfile.rating}</span>
+                                      )}
+                                      {currentProfile.rank !== undefined && (
+                                        <span className="text-muted-foreground">Rank: {currentProfile.rank}</span>
+                                      )}
                                     </>
                                   )}
                                 </div>
@@ -1645,12 +1763,19 @@ export const EditProfilePage: React.FC = () => {
                                     <Check className="w-4 h-4 text-green-600" />
                                     <span className="font-medium text-green-600">Verified</span>
                                   </div>
-                                  {profile.problemsSolved && (
+                                  {(currentProfile.problemsSolved || currentProfile.rating || currentProfile.rank !== undefined) && (
                                     <>
-                                      <span className="text-muted-foreground">•</span>
-                                      <span className="text-muted-foreground">{profile.problemsSolved} problems solved</span>
-                                      <span className="text-muted-foreground">•</span>
-                                      <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                                      {currentProfile.problemsSolved !== undefined && (
+                                        <span className="text-muted-foreground">
+                                          {currentProfile.problemsSolved} problems solved
+                                        </span>
+                                      )}
+                                      {currentProfile.rating !== undefined && (
+                                        <span className="text-muted-foreground">Rating: {currentProfile.rating}</span>
+                                      )}
+                                      {currentProfile.rank !== undefined && (
+                                        <span className="text-muted-foreground">Rank: {currentProfile.rank}</span>
+                                      )}
                                     </>
                                   )}
                                 </div>

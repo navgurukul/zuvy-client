@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ import { AlertCircle, Check, Plus, Trash2, Loader2, Code, Briefcase, GraduationC
 import type { OnboardingStep3 as Step3Type, AcademicPerformance, WorkExperience, CompetitiveProfile } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STACK } from '@/lib/profile.mockData';
 import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceComponents';
+import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 
 interface ProfileStep3Props {
   initialData?: Partial<Step3Type>;
@@ -92,8 +93,17 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   const [verifyingPlatform, setVerifyingPlatform] = useState<string | null>(null);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
+  const [rankError, setRankError] = useState<Record<string, string>>({});
+  const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const years = getYearsArray(1990);
+
+  useEffect(() => {
+    return () => {
+      Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
+    };
+  }, []);
   
   // Auto-save form data on change
   useEffect(() => {
@@ -142,7 +152,31 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
     setVerifyingPlatform(platform);
     const profile = competitiveProfiles.find((p) => p.platform === platform);
     if (profile?.username) {
-      // Simulate API call
+      if (isSupportedCompetitivePlatform(platform)) {
+        try {
+          const stats = await fetchCompetitiveProfileStats(platform, profile.username);
+          setCompetitiveProfiles((prev) =>
+            prev.map((p) =>
+              p.platform === platform
+                ? {
+                    ...p,
+                    ...stats,
+                    isVerified: true,
+                    verifiedUsername: profile.username?.trim(),
+                    lastVerifiedAt: new Date().toISOString(),
+                  }
+                : p
+            )
+          );
+        } catch (error) {
+          setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
+        } finally {
+          setVerifyingPlatform(null);
+        }
+        return;
+      }
+
+      // Simulate API call for unsupported platforms
       setTimeout(() => {
         setCompetitiveProfiles((prev) =>
           prev.map((p) =>
@@ -161,6 +195,43 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
         setVerifyingPlatform(null);
       }, 1500);
     }
+  };
+
+  const scheduleRankFetch = (platform: string, username: string) => {
+    if (!isSupportedCompetitivePlatform(platform)) return;
+
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
+    const existingTimeout = rankFetchTimeoutsRef.current[platform];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+
+    rankFetchTimeoutsRef.current[platform] = setTimeout(async () => {
+      setRankLoading((prev) => ({ ...prev, [platform]: true }));
+      setRankError((prev) => ({ ...prev, [platform]: '' }));
+      try {
+        const stats = await fetchCompetitiveProfileStats(platform, trimmed);
+        setCompetitiveProfiles((prev) =>
+          prev.map((p) =>
+            p.platform === platform
+              ? {
+                  ...p,
+                  ...stats,
+                  isVerified: true,
+                  verifiedUsername: trimmed,
+                  lastVerifiedAt: new Date().toISOString(),
+                }
+              : p
+          )
+        );
+      } catch (error) {
+        setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
+      } finally {
+        setRankLoading((prev) => ({ ...prev, [platform]: false }));
+      }
+    }, 700);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -577,17 +648,44 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                     <Input
                       placeholder="Username"
                       value={profile.username || ''}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const nextUsername = e.target.value;
                         setCompetitiveProfiles((prev) =>
                           prev.map((p) =>
                             p.platform === profile.platform
-                              ? { ...p, username: e.target.value }
+                              ? {
+                                  ...p,
+                                  username: nextUsername,
+                                  isVerified: false,
+                                  verifiedUsername: undefined,
+                                  problemsSolved: undefined,
+                                  rating: undefined,
+                                  rank: undefined,
+                                  lastVerifiedAt: undefined,
+                                }
                               : p
                           )
-                        )
-                      }
+                        );
+                        setRankError((prev) => ({ ...prev, [profile.platform]: '' }));
+                        if (!nextUsername.trim()) {
+                          const existingTimeout = rankFetchTimeoutsRef.current[profile.platform];
+                          if (existingTimeout) {
+                            clearTimeout(existingTimeout);
+                          }
+                          setRankLoading((prev) => ({ ...prev, [profile.platform]: false }));
+                          return;
+                        }
+                        scheduleRankFetch(profile.platform, nextUsername);
+                      }}
                       className="w-full"
                     />
+
+                    {rankLoading[profile.platform] && (
+                      <p className="text-xs text-muted-foreground">Fetching rank...</p>
+                    )}
+                    {rankError[profile.platform] && (
+                      <p className="text-xs text-destructive">{rankError[profile.platform]}</p>
+                    )}
                     
                     {!profile.isVerified && (
                       <Button
@@ -603,7 +701,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                       </Button>
                     )}
                     
-                    {profile.isVerified && hasModified && profile.problemsSolved && (
+                    {profile.isVerified && hasModified && (profile.problemsSolved || profile.rating || profile.rank !== undefined) && (
                       <div className="flex items-center gap-2 text-sm flex-wrap">
                         <Button
                           type="button"
@@ -617,23 +715,37 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                           )}
                           Re-Verify
                         </Button>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">{profile.problemsSolved} problems solved</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                        {profile.problemsSolved !== undefined && (
+                          <span className="text-muted-foreground">
+                            {profile.problemsSolved} problems solved
+                          </span>
+                        )}
+                        {profile.rating !== undefined && (
+                          <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                        )}
+                        {profile.rank !== undefined && (
+                          <span className="text-muted-foreground">Rank: {profile.rank}</span>
+                        )}
                       </div>
                     )}
                     
-                    {profile.isVerified && !hasModified && profile.problemsSolved && (
+                    {profile.isVerified && !hasModified && (profile.problemsSolved || profile.rating || profile.rank !== undefined) && (
                       <div className="flex items-center gap-2 text-sm flex-wrap">
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-600" />
                           <span className="font-medium text-green-600">Verified</span>
                         </div>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">{profile.problemsSolved} problems solved</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                        {profile.problemsSolved !== undefined && (
+                          <span className="text-muted-foreground">
+                            {profile.problemsSolved} problems solved
+                          </span>
+                        )}
+                        {profile.rating !== undefined && (
+                          <span className="text-muted-foreground">Rating: {profile.rating}</span>
+                        )}
+                        {profile.rank !== undefined && (
+                          <span className="text-muted-foreground">Rank: {profile.rank}</span>
+                        )}
                       </div>
                     )}
                   </div>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import ProfileStep1Component from '@/app/student/profile/ProfileStep1';
 import ProfileStep2Component from '@/app/student/profile/ProfileStep2';
 import ProfileStep3Component from '@/app/student/profile/ProfileStep3';
@@ -9,6 +10,8 @@ import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
 import { useOnboardingStorage } from '@/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
+import { AlertCircle, Sparkles } from 'lucide-react';
+import { MONTHS } from '@/lib/profile.mockData';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -33,6 +36,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const [showAlert, setShowAlert] = useState(false);
   const [autofillMethod, setAutofillMethod] = useState<'resume' | 'linkedin'>('resume');
   const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [isParsingResume, setIsParsingResume] = useState(false);
+  const [resumeError, setResumeError] = useState('');
+  const [resumeFileName, setResumeFileName] = useState('');
+  const [resumeSkills, setResumeSkills] = useState<string[]>([]);
   
   // Track current step data to auto-save
   const [currentStepData, setCurrentStepData] = useState<any>(null);
@@ -99,12 +106,593 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     }
   };
 
-  const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+
+  const extractTextFromPdf = async (data: ArrayBuffer) => {
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/legacy/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
+    }
+
+    let pdf: any;
+    try {
+      pdf = await pdfjs.getDocument({ data }).promise;
+    } catch {
+      // Fallback path for environments where worker bootstrapping fails.
+      pdf = await pdfjs.getDocument({ data, disableWorker: true } as any).promise;
+    }
+    let fullText = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      const plainText = content.items
+        .map((item: any) => (item?.str || '').trim())
+        .filter(Boolean)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Reconstruct lines using y-position so section parsing remains accurate.
+      const rows = new Map<number, string[]>();
+      content.items.forEach((item: any) => {
+        const str = (item?.str || '').trim();
+        if (!str) {
+          return;
+        }
+        const yRaw = Array.isArray(item?.transform) ? item.transform[5] : 0;
+        const y = Math.round(Number(yRaw) || 0);
+        if (!rows.has(y)) {
+          rows.set(y, []);
+        }
+        rows.get(y)?.push(str);
+      });
+
+      const pageText = Array.from(rows.entries())
+        .sort((a, b) => b[0] - a[0])
+        .map(([, chunks]) => chunks.join(' ').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .join('\n');
+
+      fullText += `${pageText.length >= plainText.length * 0.4 ? pageText : plainText}\n`;
+    }
+    return fullText;
+  };
+
+  const extractTextFromDocx = async (data: ArrayBuffer) => {
+    const mammoth = await import('mammoth');
+    const result = await mammoth.extractRawText({ arrayBuffer: data });
+    return result.value || '';
+  };
+
+  const extractSkillsFromText = (text: string): string[] => {
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const skillHeadingIndex = lines.findIndex((line) =>
+      /^(skills|technical skills|key skills|technologies)\b/i.test(line)
+    );
+    if (skillHeadingIndex === -1) {
+      return [];
+    }
+    const skillsLines: string[] = [];
+    for (let i = skillHeadingIndex + 1; i < Math.min(lines.length, skillHeadingIndex + 8); i += 1) {
+      const line = lines[i];
+      if (/^(education|experience|projects|certifications|summary|objective)\b/i.test(line)) {
+        break;
+      }
+      skillsLines.push(line);
+    }
+    const raw = skillsLines.join(' ');
+    const parts = raw
+      .split(/[,|\\-\\/]+/)
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length >= 2 && skill.length <= 32);
+    const unique = Array.from(new Set(parts));
+    return unique.slice(0, 12);
+  };
+
+  const extractCollegeFromText = (text: string): string => {
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const cleanedLines = lines.map((line) => line.replace(/[|•]+/g, ' ').replace(/\s{2,}/g, ' ').trim());
+    const candidates = cleanedLines.filter((line) => {
+      if (line.length < 4 || line.length > 90) {
+        return false;
+      }
+      if (/(@|linkedin\.com|github\.com|\+?\d{8,}|summary|experience|projects|skills|certification)/i.test(line)) {
+        return false;
+      }
+      return /(university|college|institute|school|iit|nit|iiit|polytechnic)/i.test(line);
+    });
+    if (candidates.length === 0) {
+      return '';
+    }
+    const best = candidates.sort((a, b) => a.length - b.length)[0];
+    return best;
+  };
+
+  const normalizeMonth = (raw?: string): string => {
+    if (!raw) {
+      return '';
+    }
+    const key = raw.toLowerCase();
+    const map: Record<string, string> = {
+      jan: 'January',
+      january: 'January',
+      feb: 'February',
+      february: 'February',
+      mar: 'March',
+      march: 'March',
+      apr: 'April',
+      april: 'April',
+      may: 'May',
+      jun: 'June',
+      june: 'June',
+      jul: 'July',
+      july: 'July',
+      aug: 'August',
+      august: 'August',
+      sep: 'September',
+      sept: 'September',
+      september: 'September',
+      oct: 'October',
+      october: 'October',
+      nov: 'November',
+      november: 'November',
+      dec: 'December',
+      december: 'December',
+    };
+    const month = map[key] || '';
+    return MONTHS.includes(month) ? month : '';
+  };
+
+  const extractGraduationDate = (text: string) => {
+    const monthYearMatch = text.match(
+      /(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|sept|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s\-\/,]+(20\d{2})/i
+    );
+    const month = normalizeMonth(monthYearMatch?.[1]);
+    const year = monthYearMatch?.[2] || '';
+
+    if (year) {
+      return { month, year };
+    }
+
+    const yearMatches = text.match(/\b(20\d{2})\b/g) || [];
+    const years = yearMatches.map((value) => parseInt(value, 10)).filter((value) => value >= 2000 && value <= 2100);
+    if (years.length === 0) {
+      return { month: '', year: '' };
+    }
+    const latestYear = Math.max(...years).toString();
+    return { month: '', year: latestYear };
+  };
+
+  const extractDegreeAndBranch = (text: string) => {
+    const normalized = text.replace(/\s+/g, ' ').toLowerCase();
+    let degree = '';
+    if (/\bbe\s*\(cs\)/i.test(normalized)) {
+      degree = 'BE (CS)';
+    } else if (/b\.?\s*tech|bachelor of technology|btech/i.test(normalized)) {
+      degree = 'B.Tech';
+    } else if (/\bb\.?\s*e\b|bachelor of engineering|beng/i.test(normalized)) {
+      degree = 'B.E';
+    } else if (/b\.?\s*tech\s*it|btech\s*it/i.test(normalized)) {
+      degree = 'B.Tech IT';
+    } else if (/\bdiploma\b/i.test(normalized)) {
+      degree = 'Diploma';
+    } else if (/\bb\.?\s*sc\b|bachelor of science/i.test(normalized)) {
+      degree = 'BSc';
+    } else if (/\bbs\b|bachelor of science/i.test(normalized)) {
+      degree = 'BS';
+    }
+
+    const branchPatterns: Array<{ regex: RegExp; value: string }> = [
+      { regex: /(computer science|c\.?s\.?e\b|cse\b)/i, value: 'Computer Science & Engineering' },
+      { regex: /(information technology|\bit\b)/i, value: 'Information Technology' },
+      { regex: /(electronics( and| &)? communication|e\.?c\.?e\b|ece\b)/i, value: 'Electronics & Communication' },
+      { regex: /(electrical)/i, value: 'Electrical Engineering' },
+      { regex: /(mechanical)/i, value: 'Mechanical Engineering' },
+      { regex: /(civil)/i, value: 'Civil Engineering' },
+      { regex: /(chemical)/i, value: 'Chemical Engineering' },
+      { regex: /(biotech|biotechnology)/i, value: 'Biotechnology' },
+      { regex: /(aerospace)/i, value: 'Aerospace Engineering' },
+      { regex: /(automobile)/i, value: 'Automobile Engineering' },
+    ];
+
+    let branch = '';
+    for (const entry of branchPatterns) {
+      if (entry.regex.test(normalized)) {
+        branch = entry.value;
+        break;
+      }
+    }
+
+    if (!degree && /engineering/i.test(normalized)) {
+      degree = 'B.Tech';
+    }
+
+    return { degree, branch };
+  };
+
+  const extractProjectsFromText = (text: string, skills: string[]): Step2Type['externalProjects'] => {
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.replace(/[•|]+/g, ' ').trim())
+      .filter(Boolean);
+
+    const headingIndex = lines.findIndex((line) => /^(projects?|academic projects?)\b/i.test(line));
+    if (headingIndex === -1) {
+      return [];
+    }
+
+    const projectLines: string[] = [];
+    for (let i = headingIndex + 1; i < Math.min(lines.length, headingIndex + 20); i += 1) {
+      const line = lines[i];
+      if (/^(education|experience|internships?|skills|certifications?|achievements|summary|objective)\b/i.test(line)) {
+        break;
+      }
+      if (line.length < 4) {
+        continue;
+      }
+      projectLines.push(line.replace(/^[-*\d.)\s]+/, '').trim());
+    }
+
+    const uniqueLines = Array.from(new Set(projectLines)).slice(0, 3);
+    return uniqueLines.map((line, index) => {
+      const titlePart = line.split(/[:|-]/)[0]?.trim() || `Project ${index + 1}`;
+      const titleWords = titlePart.split(/\s+/).slice(0, 6).join(' ');
+      const loweredLine = line.toLowerCase();
+      const inferredTech = skills.filter((skill) => {
+        const normalizedSkill = (skill || '').trim().toLowerCase();
+        return normalizedSkill ? loweredLine.includes(normalizedSkill) : false;
+      });
+
+      return {
+        id: `resume-project-${Date.now()}-${index}`,
+        title: titleWords || `Project ${index + 1}`,
+        oneLineDescription: line.slice(0, 180),
+        detailedDescription: line,
+        techStack: inferredTech,
+        projectType: 'Solo',
+      };
+    });
+  };
+
+  const extractAcademicPerformanceFromText = (text: string): Step3Type['academicPerformance'] => {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    const cgpaMatch = normalized.match(/(?:cgpa|gpa)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
+    const percentageMatch = normalized.match(/(?:percentage|percent|\bmarks\b)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
+
+    if (cgpaMatch?.[1]) {
+      const cgpa = Number(cgpaMatch[1]);
+      if (!Number.isNaN(cgpa) && cgpa > 0 && cgpa <= 10) {
+        return { marksFormat: 'CGPA', cgpa };
+      }
+    }
+
+    if (percentageMatch?.[1]) {
+      const percentage = Number(percentageMatch[1]);
+      if (!Number.isNaN(percentage) && percentage > 0 && percentage <= 100) {
+        return { marksFormat: 'Percentage', percentage };
+      }
+    }
+
+    return undefined;
+  };
+
+  const extractHasInternshipExperience = (text: string): boolean =>
+    /\b(internship|intern|worked at|work experience|software engineer intern)\b/i.test(text);
+
+  const extractTargetRoles = (text: string): string[] => {
+    const roleCandidates = [
+      'Frontend Developer',
+      'Backend Developer',
+      'Full Stack Developer',
+      'Data Analyst',
+      'Data Scientist',
+      'Machine Learning Engineer',
+      'Software Engineer',
+      'DevOps Engineer',
+    ];
+    return roleCandidates.filter((role) => new RegExp(role.replace(/\s+/g, '\\s+'), 'i').test(text));
+  };
+
+  const parseResumeText = (text: string, filename?: string) => {
+    const normalizedText = text.replace(/\s+/g, ' ').trim();
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    // Try multiple name extraction strategies
+    const nameMatch =
+      normalizedText.match(/(?:name[:\s]+)([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+){0,3})/i) ||
+      null;
+    const leadingNameMatch = normalizedText.match(/^([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+){1,3})\b/);
+
+    // Broader name pattern: Any line in top 15 that's 2-4 capitalized words
+    const topLines = lines.slice(0, 15);
+    const capitalizedLineName = topLines.find((line) => {
+      if (line.length < 3 || line.length > 60) return false;
+      if (/[0-9@+]/.test(line)) return false;
+      if (/resume|curriculum|vitae|email|phone|linkedin|mobile|contact|summary|objective|skills|experience|education|projects/i.test(line)) return false;
+      const words = line.split(/\s+/);
+       // More flexible: at least 1 word starting with capital, others can be any case (but not all lowercase)
+       return (
+         words.length >= 1 &&
+         words.length <= 4 &&
+         words[0] && /^[A-Z]/.test(words[0]) && // First word must start with capital
+         words.some((w) => /^[A-Z][a-z]/.test(w)) && // At least one word with proper title case
+         !/^\d/.test(line) && // Don't start with number
+         !/^[a-z]/.test(line) // Don't start with lowercase
+       );
+    });
+
+    // Extract name from filename if all else fails (e.g., "Abhay_DTU_C1.pdf" -> "Abhay")
+    const filenameExtractedName = filename ?
+      filename
+        .replace(/\.(pdf|docx)$/i, '')
+        .split(/[_\-()]/)[0] // Take first part before underscore/dash/paren
+        .trim()
+      : '';
+    const isValidNameFromFile = filenameExtractedName && 
+      filenameExtractedName.length >= 2 && 
+      filenameExtractedName.length <= 30 &&
+      /^[A-Za-z]/.test(filenameExtractedName) &&
+      !/resume|cv|curriculum|document/i.test(filenameExtractedName);
+
+    const fallbackName =
+      topLines.find((line) =>
+        /^[A-Za-z][A-Za-z.'-]+(\s+[A-Za-z.'-]+){0,3}$/.test(line) &&
+        !/(resume|curriculum|vitae|email|phone|linkedin|mobile|contact)/i.test(line)
+      ) ||
+      topLines.find((line) =>
+        line.length <= 60 &&
+        !/(resume|curriculum|vitae|email|phone|linkedin|mobile|contact|summary|objective)/i.test(line) &&
+        /^[A-Za-z][A-Za-z.'-]+(\s+[A-Za-z.'-]+){0,4}$/.test(line)
+      ) ||
+      '';
+    const fullName = nameMatch?.[1] || leadingNameMatch?.[1] || capitalizedLineName || fallbackName || (isValidNameFromFile ? filenameExtractedName : '');
+
+    // More lenient phone extraction: allow formatting variations
+    const phoneMatch = normalizedText.match(
+      /(?:\+?91[\s.\-]?)?([6-9]\d{9})|(?:\+?91)?[\s.\-]?([6-9])[\s.\-]?(\d[\s.\-]?){8}/
+    );
+    let phoneNumber = phoneMatch?.[1] || '';
+    if (!phoneNumber && phoneMatch) {
+      const allDigits = (phoneMatch[0] || '')
+        .replace(/[^\d]/g, '')
+        .replace(/^91/, '');
+      phoneNumber = allDigits.slice(-10);
+    }
+
+    const emailMatch = normalizedText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+    const email = emailMatch?.[0] || '';
+
+    const linkedinMatch = normalizedText.match(
+      /(https?:\/\/)?(www\.)?linkedin\.com\/[a-z0-9\-_/]+/i
+    );
+    const rawLinkedin = linkedinMatch?.[0] || '';
+    const linkedin = rawLinkedin
+      ? rawLinkedin.startsWith('http')
+        ? rawLinkedin
+        : `https://${rawLinkedin.replace(/^\/+/, '')}`
+      : '';
+
+    const skills = extractSkillsFromText(text);
+    const collegeName = extractCollegeFromText(text);
+    const { degree, branch } = extractDegreeAndBranch(text);
+    const graduationDate = extractGraduationDate(text);
+    const projects = extractProjectsFromText(text, skills);
+    const academicPerformance = extractAcademicPerformanceFromText(text);
+    const hasInternshipExperience = extractHasInternshipExperience(text);
+    const targetRoles = extractTargetRoles(text);
+
+    // Detailed extraction logging for debugging
+    if (typeof window !== 'undefined') {
+      console.log('Resume extraction details:', {
+        fullName: { value: fullName, strategies: { nameMatch: !!nameMatch, leadingName: !!leadingNameMatch, capitalizedLine: !!capitalizedLineName, fallback: !!fallbackName, filename: isValidNameFromFile && filenameExtractedName } },
+        phoneNumber: { value: phoneNumber, found: !!phoneMatch },
+        email: { value: email, found: !!emailMatch },
+        linkedin: { value: linkedin, found: !!linkedinMatch },
+        collegeName: { value: collegeName, found: !!collegeName },
+        degree: { value: degree, found: !!degree },
+        branch: { value: branch, found: !!branch },
+        graduationDate: { month: graduationDate.month, year: graduationDate.year },
+        projectsCount: projects.length,
+        hasAcademicPerformance: !!academicPerformance,
+        hasInternshipExperience,
+        targetRoles,
+        skillsCount: skills.length,
+      });
+    }
+
+    return {
+      fullName,
+      phoneNumber,
+      email,
+      linkedin,
+      skills,
+      collegeName,
+      degree,
+      branch,
+      graduationDate,
+      projects,
+      academicPerformance,
+      hasInternshipExperience,
+      targetRoles,
+    };
+  };
+
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      // TODO: Implement resume parsing logic
-      console.log('Resume uploaded:', file.name);
-      // Here you would typically send the file to a backend API for parsing
+    if (!file) {
+      return;
+    }
+    setResumeError('');
+    setResumeFileName(file.name);
+    setIsParsingResume(true);
+    try {
+      const arrayBuffer = await readFileAsArrayBuffer(file);
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      const isDocx =
+        file.type ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        file.name.toLowerCase().endsWith('.docx');
+
+      if (!isPdf && !isDocx) {
+        throw new Error('Please upload a PDF or DOCX resume.');
+      }
+
+      const extractedText = isPdf
+        ? await extractTextFromPdf(arrayBuffer)
+        : await extractTextFromDocx(arrayBuffer);
+
+      const parsed = parseResumeText(extractedText, file.name);
+      
+      // Debug logging
+      console.log('Parsed resume data:', {
+        fullName: parsed.fullName,
+        phoneNumber: parsed.phoneNumber,
+        linkedin: parsed.linkedin,
+        collegeName: parsed.collegeName,
+        degree: parsed.degree,
+        branch: parsed.branch,
+        projectsCount: parsed.projects.length,
+        hasAcademicPerformance: !!parsed.academicPerformance,
+        hasInternshipExperience: parsed.hasInternshipExperience,
+        targetRoles: parsed.targetRoles,
+        skillsCount: parsed.skills.length,
+      });
+      const hasAnyParsedField = Boolean(
+        parsed.fullName ||
+          parsed.phoneNumber ||
+          parsed.linkedin ||
+          parsed.collegeName ||
+          parsed.degree ||
+          parsed.branch ||
+          parsed.graduationDate?.month ||
+          parsed.graduationDate?.year ||
+            parsed.projects.length ||
+            parsed.academicPerformance ||
+            parsed.targetRoles.length ||
+          parsed.skills.length
+      );
+
+      if (!hasAnyParsedField) {
+        throw new Error('Could not extract details from this resume. Please try another PDF/DOCX format.');
+      }
+
+      setResumeSkills(parsed.skills);
+
+      const existing: Partial<Step1Type> = onboardingData?.step1 ?? {};
+      const next: Step1Type = {
+        ...(existing as Step1Type),
+        fullName: parsed.fullName || existing.fullName || '',
+        phoneNumber: parsed.phoneNumber || existing.phoneNumber || '',
+        linkedin: parsed.linkedin || existing.linkedin || '',
+        email: existing.email || userEmail || '',
+        graduationDate: {
+          month: parsed.graduationDate?.month || existing.graduationDate?.month || '',
+          year: parsed.graduationDate?.year || existing.graduationDate?.year || '',
+        },
+        yearOfStudy: existing.yearOfStudy || '1st',
+        currentStatus: existing.currentStatus || 'Learning',
+        collegeName: parsed.collegeName || existing.collegeName || '',
+        customCollege: existing.customCollege || '',
+        degree: parsed.degree || existing.degree || '',
+        branch: parsed.branch || existing.branch || '',
+      };
+
+      // Detailed logging before saving
+      console.log('Step1 data before updateStepData:', {
+        parsed: {
+          fullName: parsed.fullName,
+          phoneNumber: parsed.phoneNumber,
+          linkedin: parsed.linkedin,
+          collegeName: parsed.collegeName,
+          degree: parsed.degree,
+          branch: parsed.branch,
+        },
+        toBeStored: {
+          fullName: next.fullName,
+          phoneNumber: next.phoneNumber,
+          linkedin: next.linkedin,
+          collegeName: next.collegeName,
+          degree: next.degree,
+          branch: next.branch,
+        },
+      });
+
+      updateStepData(1, next);
+      if (onboardingData?.currentStep === 1) {
+        setCurrentStepData(next);
+      }
+
+      if (parsed.skills.length > 0) {
+        const existingStep2: Partial<Step2Type> = onboardingData?.step2 ?? {};
+        const nextStep2: Step2Type = {
+          externalProjects:
+            parsed.projects.length > 0
+              ? parsed.projects
+              : existingStep2.externalProjects || [],
+          additionalSkills: existingStep2.additionalSkills || [],
+          autoDetectedSkills: parsed.skills,
+        };
+        updateStepData(2, nextStep2);
+      }
+
+      const existingStep3: Partial<Step3Type> = onboardingData?.step3 ?? {};
+      const nextStep3: Step3Type = {
+        academicPerformance: parsed.academicPerformance || existingStep3.academicPerformance,
+        workExperiences: existingStep3.workExperiences || [],
+        competitiveProfiles: existingStep3.competitiveProfiles || [],
+        hasInternshipExperience:
+          parsed.hasInternshipExperience || existingStep3.hasInternshipExperience || false,
+      };
+      updateStepData(3, nextStep3);
+
+      if ((parsed.targetRoles?.length || 0) > 0 || parsed.linkedin) {
+        const existingStep4: Partial<Step4Type> = onboardingData?.step4 ?? {};
+        const nextStep4: Step4Type = {
+          targetRoles:
+            parsed.targetRoles.length > 0
+              ? parsed.targetRoles
+              : existingStep4.targetRoles || [],
+          locationPreferences: existingStep4.locationPreferences || {
+            remote: true,
+            cities: [],
+          },
+          salaryExpectations: existingStep4.salaryExpectations,
+          linkedinUrl: parsed.linkedin || existingStep4.linkedinUrl || '',
+          communicationPreferences: existingStep4.communicationPreferences || {
+            email: true,
+            whatsapp: true,
+            phone: false,
+          },
+          allowCompaniesViewProfile: existingStep4.allowCompaniesViewProfile ?? true,
+          consentTimestamp: existingStep4.consentTimestamp || new Date().toISOString(),
+        };
+        updateStepData(4, nextStep4);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to parse resume.';
+      setResumeError(message);
+      setResumeSkills([]);
+    } finally {
+      setIsParsingResume(false);
+      event.target.value = '';
     }
   };
 
@@ -219,7 +807,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         {currentStep === 1 && (
           <>
             {/* Auto-fill Options with Dotted Border */}
-            <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 bg-primary/5 mb-6">
+            <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 bg-primary/5 mb-8 relative z-10">
               <div className="mb-3">
                 <div className="flex items-center gap-2 mb-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
@@ -233,10 +821,11 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 <div className="flex-1">
                   <Input
                     type="file"
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={handleResumeUpload}
                     className="hidden"
                     id="resume-upload"
+                    disabled={isParsingResume}
                   />
                   <label htmlFor="resume-upload" className="block h-full">
                     <div className="border-2 border-dashed border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
@@ -294,6 +883,31 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-3 space-y-2 relative z-20">
+                {isParsingResume && (
+                  <p className="text-xs text-muted-foreground">Reading resume...</p>
+                )}
+                {!isParsingResume && resumeFileName && (
+                  <p className="text-xs text-muted-foreground">Selected: {resumeFileName}</p>
+                )}
+                {resumeError && (
+                  <Alert variant="destructive">
+                    <AlertDescription className="flex items-center gap-2 text-xs">
+                      <AlertCircle className="w-4 h-4" />
+                      {resumeError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {!resumeError && resumeSkills.length > 0 && (
+                  <Alert>
+                    <AlertDescription className="flex items-center gap-2 text-xs">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      Detected skills: {resumeSkills.join(', ')}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
           </>

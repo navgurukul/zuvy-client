@@ -53,8 +53,8 @@ export const ProjectModal: React.FC<{
     if (formData.detailedDescription && formData.detailedDescription.length > 500) {
       newErrors.detailedDescription = 'Description cannot exceed 500 characters';
     }
-    if (formData.githubUrl && !isValidUrl(formData.githubUrl)) {
-      newErrors.githubUrl = 'GitHub URL must be valid';
+    if (formData.githubUrl && !isValidGithubUrl(formData.githubUrl)) {
+      newErrors.githubUrl = 'GitHub URL must be a valid github.com link';
     }
     if (formData.demoUrl && !isValidUrl(formData.demoUrl)) {
       newErrors.demoUrl = 'Demo URL must be valid';
@@ -70,6 +70,35 @@ export const ProjectModal: React.FC<{
     } catch {
       return false;
     }
+  };
+  const isValidGithubUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.toLowerCase();
+      if (host === 'github.com' || host === 'www.github.com') return true;
+      return false;
+    } catch {
+      return false;
+    }
+  };
+  const validateUrlField = (field: 'githubUrl' | 'demoUrl', value: string) => {
+    if (!value.trim()) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+      return;
+    }
+    const isValid = field === 'githubUrl' ? isValidGithubUrl(value) : isValidUrl(value);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: isValid
+        ? undefined
+        : field === 'githubUrl'
+          ? 'GitHub URL must be a valid github.com link'
+          : 'Demo URL must be valid',
+    }));
   };
 
   const handleTechStackSelect = (tech: string) => {
@@ -320,9 +349,12 @@ export const ProjectModal: React.FC<{
                   id="githubUrl"
                   placeholder="github.com/username/repo"
                   value={formData.githubUrl || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, githubUrl: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({ ...prev, githubUrl: value }));
+                    validateUrlField('githubUrl', value);
+                  }}
+                  onBlur={(e) => validateUrlField('githubUrl', e.target.value)}
                   className={`pl-10 ${errors.githubUrl ? 'border-destructive' : ''}`}
                 />
               </div>
@@ -343,9 +375,12 @@ export const ProjectModal: React.FC<{
                   id="demoUrl"
                   placeholder="project-demo.com"
                   value={formData.demoUrl || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, demoUrl: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({ ...prev, demoUrl: value }));
+                    validateUrlField('demoUrl', value);
+                  }}
+                  onBlur={(e) => validateUrlField('demoUrl', e.target.value)}
                   className={`pl-10 ${errors.demoUrl ? 'border-destructive' : ''}`}
                 />
               </div>

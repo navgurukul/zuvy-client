@@ -22,7 +22,6 @@ import { getUser } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
-import { calculateProfileStrength } from '@/hooks/use-profile'
 import type { OnboardingData } from '@/lib/profile.types'
 
 
@@ -181,19 +180,19 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    let profileStrength = 0
+                    let isProfileComplete = false
 
                     try {
                         const storedOnboarding = localStorage.getItem('zuvy_onboarding_data')
                         if (storedOnboarding) {
                             const parsedOnboarding = JSON.parse(storedOnboarding) as OnboardingData
-                            profileStrength = calculateProfileStrength(parsedOnboarding)
+                            isProfileComplete = Boolean(parsedOnboarding?.isCompleted)
                         }
                     } catch (onboardingError) {
                         console.error('Error reading onboarding data:', onboardingError)
                     }
 
-                    if (profileStrength > 20 || hasFilled) {
+                    if (isProfileComplete || hasFilled) {
                         router.push('/student')
                     } else {
                         router.push('/student/profile')

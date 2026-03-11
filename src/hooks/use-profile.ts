@@ -146,16 +146,32 @@ export const useOnboardingStorage = () => {
   // Update specific step data
   const updateStepData = useCallback(
     (stepNumber: number, data: any) => {
-      if (!onboardingData) return false;
+      let updated = false;
+      setOnboardingData((prev) => {
+        if (!prev) {
+          return prev;
+        }
 
-      const key = `step${stepNumber}` as keyof OnboardingData;
-      const updatedData = {
-        ...onboardingData,
-        [key]: data,
-      };
-      return saveOnboardingData(updatedData);
+        const key = `step${stepNumber}` as keyof OnboardingData;
+        const updatedData = {
+          ...prev,
+          [key]: data,
+          lastUpdated: new Date().toISOString(),
+        };
+
+        try {
+          localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(updatedData));
+          updated = true;
+        } catch (error) {
+          console.error('Error saving onboarding data:', error);
+        }
+
+        return updatedData;
+      });
+
+      return updated;
     },
-    [onboardingData, saveOnboardingData]
+    []
   );
 
   // Move to next step

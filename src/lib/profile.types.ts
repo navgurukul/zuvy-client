@@ -67,9 +67,11 @@ export interface WorkExperience {
 export interface CompetitiveProfile {
   platform: 'LeetCode' | 'CodeChef' | 'Codeforces' | 'HackerRank' | 'GeeksforGeeks';
   username?: string;
+  verifiedUsername?: string;
   isVerified: boolean;
   problemsSolved?: number;
   rating?: number;
+  rank?: string | number;
   lastVerifiedAt?: string;
 }
 
