@@ -51,12 +51,18 @@ export const UpdateManagementType = ({ org, managementType, management, onUpdate
             }
 
             const response = await updateOrgById(org.id, payload)
-            isZuvyManaged && onEdit?.(selectedRole)
 
             if (response.status === 200) {
                 // Update original management type after successful save
                 setOriginalRole(newRoleName)
                 onUpdateSuccess?.()
+
+                if (isZuvyManaged) {
+                    onEdit?.({
+                        ...org,
+                        managementType: selectedRole.name,
+                    })
+                }
 
                 toast.success({
                     title: 'Management Type Updated',

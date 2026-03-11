@@ -368,12 +368,13 @@ const BatchesInfo = ({
                                                 <DialogTitle>
                                                     Update Batch
                                                 </DialogTitle>
+                                            </DialogHeader>
                                                 <Form {...form}>
                                                     <form
                                                         onSubmit={form.handleSubmit(
                                                             onSubmit
                                                         )}
-                                                        className="space-y-8"
+                                                        className="space-y-8 text-start"
                                                     >
                                                         <FormField
                                                             control={
@@ -487,7 +488,7 @@ const BatchesInfo = ({
                                                         </div>
                                                     </form>
                                                 </Form>
-                                            </DialogHeader>
+                                            
                                         </DialogContent>
                                     </Dialog>
                                 )}

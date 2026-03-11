@@ -60,7 +60,11 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
 
             const queryParams = new URLSearchParams()
             if (searchTerm) queryParams.append('search', searchTerm)
-            if (!params.all) {
+
+            if (params.all) {
+                queryParams.append('limit', (limit || params.limit || 100).toString())
+                queryParams.append('page', '1')
+            } else {
                 if (limit) queryParams.append('limit', limit.toString())
                 if (page) queryParams.append('page', page.toString())
             }
@@ -72,9 +76,9 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
 
             if (response.data.status === 'success') {
                 setOrganizations(response.data.data)
-                setTotalCount(response.data.meta.total)
-                setTotalPages(response.data.meta.totalPages)
-                setCurrentPage(response.data.meta.page)
+                setTotalCount(response.data.meta?.total ?? response.data.data.length)
+                setTotalPages(response.data.meta?.totalPages ?? 1)
+                setCurrentPage(response.data.meta?.page ?? 1)
             } else {
                 throw new Error(response.data.message || 'Failed to fetch organizations')
             }
@@ -89,7 +93,7 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
         } finally {
             setLoading(false)
         }
-    }, []) // Empty dependency array
+    }, [params.all, params.limit])
 
     const refetchOrganizations = useCallback((searchTerm?: string, page?: number, limit?: number, filterType?: string) => {
         fetchOrganizations(searchTerm, page, limit, filterType)
@@ -100,7 +104,7 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
         if (params.auto !== false) {
             fetchOrganizations(debouncedSearch, params.page, params.limit)
         }
-    }, [debouncedSearch])
+    }, [debouncedSearch, fetchOrganizations, params.auto, params.page, params.limit])
 
     return {
         organizations,
