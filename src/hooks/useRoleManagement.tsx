@@ -116,6 +116,46 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
     }, [hasUnsavedChanges])
 
     useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const handleDocumentNavigation = (event: MouseEvent) => {
+            if (!hasUnsavedChanges || event.defaultPrevented) return
+            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+            const target = event.target as HTMLElement | null
+            const anchor = target?.closest('a[href]') as HTMLAnchorElement | null
+
+            if (!anchor) return
+            if (anchor.target === '_blank' || anchor.hasAttribute('download')) return
+
+            const href = anchor.getAttribute('href')
+            if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+
+            const currentUrl = new URL(window.location.href)
+            const nextUrl = new URL(anchor.href, currentUrl.href)
+
+            if (nextUrl.origin !== currentUrl.origin) return
+
+            const currentRoute = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`
+            const nextRoute = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`
+
+            if (nextRoute === currentRoute) return
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            setPendingRoute(nextRoute)
+            setShowWarningModal(true)
+        }
+
+        document.addEventListener('click', handleDocumentNavigation, true)
+
+        return () => {
+            document.removeEventListener('click', handleDocumentNavigation, true)
+        }
+    }, [hasUnsavedChanges])
+
+    useEffect(() => {
         setCurrentPath(pathname)
     }, [pathname])
 

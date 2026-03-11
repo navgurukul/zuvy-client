@@ -23,7 +23,7 @@ const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({ open, onOpe
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={onKeep}>Keep Changes</Button>
+                    <Button variant="outline" onClick={onKeep}>Save & Continue</Button>
                     <Button variant="destructive" onClick={onDiscard}>Discard Changes</Button>
                 </div>
             </DialogContent>
