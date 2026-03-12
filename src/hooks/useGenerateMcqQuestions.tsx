@@ -74,80 +74,113 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
       return;
     }
 
+    if (!user?.id) {
+      console.warn('No user ID available for Socket.IO connection');
+      return;
+    }
+
     console.log('Connecting to Socket.IO server:', apiUrl);
     console.log('User ID:', user.id);
+    console.log('Token present:', !!accessToken);
 
     // Connect to the API URL with JWT in auth
     const socket = io(apiUrl, {
       auth: {
         token: accessToken,
       },
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      timeout: 10000,
+      withCredentials: true,
     });
 
     socketRef.current = socket;
 
     // Connection successful
     socket.on('connect', () => {
-      console.log('✓ Socket.IO connected successfully');
+      console.log('✅ Socket.IO connected successfully!');
       console.log('Socket ID:', socket.id);
+      console.log('Transport:', socket.io.engine.transport.name);
       setIsSocketConnected(true);
       setError(null);
     });
     
     socket.on('questions:ready', (data: QuestionsReadyPayload) => {
-      console.log('🎉 Questions ready!', data);
+      console.log('🎉 Questions ready event received!');
+      console.log('Data:', JSON.stringify(data, null, 2));
       console.log(`Indexed ${data.count} questions`);
       console.log('Question IDs:', data.questionIds);
-      
       // Update state with the ready questions
       setQuestionsReady(data);
       setIsLoading(false);
     });
+    
     // Connection lost
     socket.on('disconnect', (reason) => {
-      console.log('Socket.IO disconnected:', reason);
+      console.warn('⚠️ Socket disconnected. Reason:', reason);
       setIsSocketConnected(false);
+      
+      if (reason === 'io server disconnect') {
+        console.log('Server disconnected. Will try to reconnect...');
+        socket.connect();
+      }
     });
 
     // Listen for the questions:ready event from backend
 
     // Handle connection errors
-    socket.on('connect_error', (err) => {
-      console.error('❌ Socket connection error:', err.message);
+    socket.on('connect_error', (err: any) => {
+      console.error('❌ Socket connection error:');
+      console.error('Message:', err.message);
+      console.error('Description:', err.description);
+      console.error('Context:', err.context);
       setError(`Socket connection failed: ${err.message}`);
       setIsSocketConnected(false);
     });
 
+    // General socket errors
+    socket.on('error', (err: any) => {
+      console.error('❌ Socket error:', err);
+      setError(`Socket error: ${err.message || err}`);
+    });
+
     // Handle reconnection attempts
     socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`Reconnection attempt ${attemptNumber}...`);
+      console.log(`🔄 Reconnection attempt ${attemptNumber}...`);
     });
 
     socket.on('reconnect', (attemptNumber) => {
-      console.log(`✓ Reconnected after ${attemptNumber} attempts`);
+      console.log(`✅ Reconnected after ${attemptNumber} attempts!`);
       setIsSocketConnected(true);
       setError(null);
     });
 
     socket.on('reconnect_error', (err) => {
-      console.error('Reconnection error:', err.message);
+      console.error('❌ Reconnection error:', err.message);
     });
 
     socket.on('reconnect_failed', () => {
-      console.error('❌ Reconnection failed');
-      setError('Socket reconnection failed');
+      console.error('❌ All reconnection attempts failed');
+      setError('Socket reconnection failed after all attempts');
+    });
+
+    // Transport monitoring
+    socket.io.engine.on('upgrade', (transport: any) => {
+      console.log('🔄 Transport upgraded to:', transport.name);
     });
 
     // Cleanup on unmount
     return () => {
-      console.log('Disconnecting Socket.IO...');
-      socket.disconnect();
+      console.log('🔌 Cleaning up Socket.IO connection...');
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current.disconnect();
+      }
     };
-  }, [accessToken, apiUrl, user.id]);
+  }, [accessToken, apiUrl, user?.id]);
 
   const generateQuestions = async (payload: GenerateMcqPayload) => {
     setIsLoading(true);
