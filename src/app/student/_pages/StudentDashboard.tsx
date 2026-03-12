@@ -165,7 +165,7 @@ const StudentDashboard = () => {
         </div>
 
         {/* Zoe Assistant Card */}
-        <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
+        <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden rounded-3xl">
           <CardContent className="p-0 relative">
             <div 
               className="absolute inset-0 w-full h-full"
@@ -304,7 +304,7 @@ const StudentDashboard = () => {
 
         {/* My Courses Section */}
         <div className="mb-6">
-          <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
+          <h2 className="text-xl font-heading text-left font-semibold mb-6">My Courses</h2>
 
           {/* Filter Chips */}
           <div className="flex gap-3 mb-6">
@@ -335,9 +335,9 @@ const StudentDashboard = () => {
         </div>
 
         {/* Course Cards */}
-        <div className="space-y-6 mb-12">
+        <div className="space-y-6">
           {filteredBootcamps.map((bootcamp) => (
-            <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card ">
+            <Card key={bootcamp.id} className="w-full rounded-3xl bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}
