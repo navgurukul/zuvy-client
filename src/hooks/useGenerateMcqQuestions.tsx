@@ -51,6 +51,8 @@ interface UseGenerateMcqQuestionsReturn {
 export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQuestionsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const accessToken = localStorage.getItem('access_token') || '';
+  console.log(accessToken)
 
   const generateQuestions = async (payload: GenerateMcqPayload) => {
     setIsLoading(true);
@@ -61,6 +63,7 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(payload),
       });
