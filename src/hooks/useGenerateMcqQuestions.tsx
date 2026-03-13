@@ -53,7 +53,6 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
   const [error, setError] = useState<string | null>(null);
   const { startGeneratingQuestions, stopGeneratingQuestions } = getSocketConnectionStore();
   const accessToken = localStorage.getItem('access_token') || '';
-  const apiUrl = 'http://localhost:5000';
 
   /**
    * Note: WebSocket connection and global generation loader are handled
@@ -66,7 +65,7 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
     startGeneratingQuestions();
 
     try {
-      const response = await fetch(`${apiUrl}/questions/generate?orgId=${organizationId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/questions/generate?orgId=${organizationId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

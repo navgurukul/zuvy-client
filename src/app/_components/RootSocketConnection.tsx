@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client'
 import { toast } from '@/components/ui/use-toast'
 import { getSocketConnectionStore, getUser } from '@/store/store'
 
-const API_URL = 'http://localhost:5000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL 
 
 export default function RootSocketConnection() {
     const socketRef = useRef<Socket | null>(null)
