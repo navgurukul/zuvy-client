@@ -73,7 +73,7 @@ export default function RescheduleBookingPage() {
 						type="number"
 						value={newSlotIdInput}
 						onChange={(event) => setNewSlotIdInput(event.target.value)}
-						placeholder="35"
+						placeholder=""
 						className="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-green-200"
 					/>
 				</div>

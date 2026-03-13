@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Calendar, Clock, ChevronRight } from "lucide-react"
+import { Calendar, Clock, ChevronRight, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -195,14 +195,13 @@ export default function SessionsPage() {
 
       <div className="rounded-xl border bg-card overflow-hidden flex h-[720px]">
         <div className="w-[380px] border-r flex flex-col">
-          <div className="flex gap-1 px-3 pt-3 overflow-x-auto">
+          <div className="flex gap-2 px-3 pt-3 overflow-x-auto whitespace-nowrap border-b-4 [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setActiveTab("all")}
-              className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 rounded-t-lg ${
-                activeTab === "all"
+              className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
                   ? "border-green-600 bg-green-50"
                   : "border-transparent text-muted-foreground"
-              }`}
+                }`}
             >
               All
               <span className="bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -212,33 +211,30 @@ export default function SessionsPage() {
 
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${
-                activeTab === "upcoming"
+              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "upcoming"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
-              }`}
+                }`}
             >
               Upcoming
             </button>
 
             <button
               onClick={() => setActiveTab("reschedule")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${
-                activeTab === "reschedule"
+              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "reschedule"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
-              }`}
+                }`}
             >
               Reschedule Requests
             </button>
 
             <button
               onClick={() => setActiveTab("completed")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${
-                activeTab === "completed"
+              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "completed"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
-              }`}
+                }`}
             >
               Completed
             </button>
@@ -263,11 +259,10 @@ export default function SessionsPage() {
                   <button
                     key={session.id}
                     onClick={() => setSelectedBookingId(session.id)}
-                    className={`w-full text-left rounded-xl border p-4 transition hover:shadow-sm ${
-                      isSelected
+                    className={`w-full text-left rounded-xl border p-4 transition hover:shadow-sm ${isSelected
                         ? "border-green-600 bg-green-50"
                         : "border-border bg-card hover:border-green-400"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="h-9 w-9 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
@@ -314,9 +309,9 @@ export default function SessionsPage() {
         <div className="flex-1 p-5 overflow-y-auto">
           {!selectedSession ? (
             <div className="h-full flex items-center justify-center text-center">
-              <div>
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground mx-auto mb-4">
-                  👤
+              <div className="hidden lg:flex flex-col items-center justify-center h-full text-center px-8">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                  <User className="h-7 w-7 text-text-muted" />
                 </div>
                 <p className="text-sm font-semibold">Select a session</p>
                 <p className="text-xs text-muted-foreground mt-1">

@@ -567,11 +567,11 @@ export default function CalendarPage() {
       <div className="max-w-7xl space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={prevWeek}>
+            <Button variant="outline" size="icon" className="rounded-3xl" onClick={prevWeek}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            <Button variant="outline" size="icon" onClick={nextWeek}>
+            <Button variant="outline" size="icon"  className="rounded-3xl" onClick={nextWeek}>
               <ChevronRight className="h-4 w-4" />
             </Button>
 
@@ -789,8 +789,8 @@ export default function CalendarPage() {
               )}
 
               <Card className="rounded-xl border border-border bg-card shadow-sm">
-                <CardContent className="space-y-3 p-4">
-                  <p className="text-xs font-bold text-text-primary">Legend</p>
+                <CardContent className="space-y-3 p-4 text-left">
+                  <p className="text-sm font-bold text-text-primary ">Legend</p>
 
                   <div className="space-y-2">
                     {[
@@ -836,7 +836,7 @@ export default function CalendarPage() {
               </Card>
 
               <Card className="rounded-xl border border-border bg-card shadow-sm">
-                <CardContent className="space-y-2 p-4">
+                <CardContent className="space-y-2 p-4 text-left">
                   <p className="text-xs font-bold text-text-primary">This Week</p>
 
                   <div className="grid grid-cols-2 gap-2">

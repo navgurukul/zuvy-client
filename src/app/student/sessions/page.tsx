@@ -192,7 +192,7 @@ export default function MySessions() {
                     </p>
 
                     <p className="text-sm text-muted-foreground text-left">
-                      Slot #{session.slotAvailabilityId}
+                      Slot {session.slotAvailabilityId}
                     </p>
 
                   </div>
@@ -323,7 +323,7 @@ export default function MySessions() {
 
       {activeTab === "upcoming" && counts.upcoming > 0 &&
         upcomingSessions.map((session) => (
-          <Card key={session.id}>
+          <Card key={session.id} className="rounded-3xl">
             <CardContent className="p-6 rounded-3xl">
 
               <div className="flex justify-between">
@@ -336,8 +336,8 @@ export default function MySessions() {
 
                   <div>
                     <p className="font-semibold">Mentor {session.mentorUserId}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Slot #{session.slotAvailabilityId}
+                    <p className="text-sm text-muted-foreground text-left">
+                      Slot {session.slotAvailabilityId}
                     </p>
                   </div>
 
@@ -353,7 +353,7 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar size={14} />
-                  Booking #{session.id}
+                  Booking {session.id}
                 </div>
 
                 <div className="flex items-center gap-1 text-sm">

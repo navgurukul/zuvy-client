@@ -58,7 +58,7 @@ export default function PerformanceMetrics() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">{completionRate}%</p>
             <p className="text-sm font-medium">Completion Rate</p>
@@ -68,7 +68,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">—</p>
             <p className="text-sm font-medium">Average Rating</p>
@@ -76,7 +76,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">{totalScheduledHours.toFixed(1)}h</p>
             <p className="text-sm font-medium">Scheduled Hours</p>
@@ -84,7 +84,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">{upcomingSlots.length}</p>
             <p className="text-sm font-medium">Upcoming Slots</p>
@@ -94,24 +94,24 @@ export default function PerformanceMetrics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
+        <Card className='rounded-3xl'>
           <CardHeader>
             <CardTitle className="text-base text-left">Session Summary</CardTitle>
           </CardHeader>
 
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-gray-100 rounded-lg p-3 text-center">
+              <div className="bg-gray-100 rounded-3xl p-3 text-center">
                 <p className="font-semibold">{sessions.length}</p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
 
-              <div className="bg-gray-100 rounded-lg p-3 text-center">
+              <div className="bg-gray-100 rounded-3xl p-3 text-center">
                 <p className="font-semibold">{completedSessions.length}</p>
                 <p className="text-xs text-muted-foreground">Completed</p>
               </div>
 
-              <div className="bg-gray-100 rounded-lg p-3 text-center">
+              <div className="bg-gray-100 rounded-3xl p-3 text-center">
                 <p className="font-semibold">{averageSessionLength}m</p>
                 <p className="text-xs text-muted-foreground">Avg duration</p>
               </div>
@@ -131,7 +131,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardHeader>
             <CardTitle className="text-base text-left">Recent Completed</CardTitle>
           </CardHeader>
@@ -161,7 +161,7 @@ export default function PerformanceMetrics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-xl font-semibold">{upcomingSlots.length}</p>
             <p className="text-sm font-medium">Upcoming Slots</p>
@@ -169,7 +169,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-xl font-semibold">{averageSessionLength}m</p>
             <p className="text-sm font-medium">Avg Slot Length</p>
@@ -177,7 +177,7 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
             <p className="text-xl font-semibold">{slots.length}</p>
             <p className="text-sm font-medium">Total Slots</p>

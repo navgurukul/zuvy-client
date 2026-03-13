@@ -1426,7 +1426,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 </CardContent>
               </Card>
               <div className="rounded-3xl border border-border bg-card p-5 space-y-1 text-left">
-                <p className="text-sm font-bold text-text-primary mb-3">Quick Actions</p>
+                <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
                 {QUICK_ACTIONS.map((a) => (
                   <Link
                     key={a.href}

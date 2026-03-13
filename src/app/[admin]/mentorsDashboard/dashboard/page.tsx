@@ -474,9 +474,9 @@ export default function DashboardPage() {
           <Card className='rounded-3xl shadow-sm border-slate-200 hover:shadow-md transition-shadow min-h-[300px] flex flex-col'>
             <CardHeader className="flex flex-row justify-between items-center">
               <CardTitle>Upcoming Slots</CardTitle>
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild  size="sm" variant="link" className="text-emerald-700 text-xs font-semibold p-0 h-auto">
                 <Link href={`/${role}/mentorsDashboard/availability`}>
-                  View all <ArrowRight className="ml-1 w-4 h-4" />
+                  View all <ArrowRight className="ml-1 w-3 h-3" />
                 </Link>
               </Button>
             </CardHeader>
@@ -514,9 +514,9 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-bold text-text-primary">Recent Sessions</CardTitle>
                 <p className="text-xs text-text-muted">{completedSessions.length} completed</p>
               </div>
-              <Button asChild variant="ghost" size="sm" className="h-auto px-0 text-xs font-semibold">
+              <Button asChild variant="link" size="sm" className="text-emerald-700 text-xs font-semibold p-0 h-autod">
                 <Link href={`/${role}/mentorsDashboard/sessions`}>
-                  View all <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  View all <ArrowRight className="ml-1 w-3 h-3" />
                 </Link>
               </Button>
             </CardHeader>

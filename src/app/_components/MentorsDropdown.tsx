@@ -34,7 +34,7 @@ const MentorsDropdown = ({ role, orgId }: MentorsDropdownProps) => {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
-                    className='gap-2'
+                    className='gap-2 text-muted-foreground'
                 >
                     <Users className="h-4 w-4" />
                     <span>Mentors</span>
