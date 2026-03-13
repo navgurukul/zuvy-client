@@ -925,17 +925,20 @@ export interface SwitchOrgPayload {
 }
 
 export interface SwitchOrgResponse {
-  isSuccess: boolean;
-  status: string;
-  message: string;
+  isSuccess?: boolean;
+  status?: string;
+  message?: string;
   access_token: string;
   refresh_token: string;
-  data: {
+  user: {
     rolesList: any[];
     id: string;
     email: string;
     name: string;
+    profilePicture?: string;
     profile_picture?: string;
+    orgId: number;
+    orgName: string;
   };
 }
 

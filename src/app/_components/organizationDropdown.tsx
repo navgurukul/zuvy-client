@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, Check, Search } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,6 +21,7 @@ import useSwitchOrg from '@/hooks/useSwitchOrg';
 
 export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const pathname = usePathname();
+    const router = useRouter();
     const role = pathname.split('/')[1]; // Extract role from pathname
     const inOrg = pathname.split('/').length > 3
     const { user } = getUser();
@@ -67,7 +68,7 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
 
         if (result.success) {
             setIsOpen(false);
-            window.location.reload();
+            router.push(`/${role}/organizations/${org.id}/courses`);
         }
     }
 

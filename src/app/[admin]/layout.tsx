@@ -46,9 +46,9 @@ export default function RootLayout({
     }
     
     // 🏢 Organization validation check
-    if (organizationId && userRole !== 'super_admin' && user.orgId !== Number(organizationId)) {
-        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
-    }
+    // if (organizationId && userRole !== 'super_admin' && user.orgId !== Number(organizationId)) {
+    //     return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
+    // }
 
     if(roleFromPath === userRole) {
             // ✅ Authorized user

@@ -3,7 +3,6 @@ import { api } from '@/utils/axios.config';
 import { UseSwitchOrgReturn, SwitchOrgPayload, SwitchOrgResponse, SwitchOrgResult } from '@/hooks/hookType';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
-
 const useSwitchOrg = (): UseSwitchOrgReturn => {
     const [isSwitching, setIsSwitching] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -22,18 +21,21 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
         try {
             const response = await api.post<SwitchOrgResponse>('/org/switch-org', payload);
             const data = response.data;
+            console.log('Switch Org Response:', data);
 
-            if (data.isSuccess || data.status === 'success') {
+            if (data.access_token) {
                 // Update tokens in localStorage
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('AUTH', JSON.stringify(data.user))
 
                 // Update user in store
-                setUser(data.data);
+                setUser(data.user);
 
                 toast({
                     title: 'Success',
                     description: data.message || 'Switched organization successfully.',
+                    variant: 'success',
                 });
 
                 return {
@@ -42,7 +44,7 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
                 };
             }
 
-            const message = data.message || 'Failed to switch organization';
+            const message = 'Failed to switch organization';
             setError(message);
             toast({
                 title: 'Error',
