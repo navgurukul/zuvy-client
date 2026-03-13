@@ -9,8 +9,7 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
     const router = useRouter()
     const { organizationId } = useParams()
     const { user } = getUser()
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     return (
         <div className="flex flex-col items-center pt-24">

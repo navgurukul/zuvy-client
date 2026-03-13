@@ -52,8 +52,7 @@ const Courses: React.FC = () => {
     const { organizationId } = useParams()
     const { studentData } = useStudentData()
     const userRole = studentData?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : studentData?.orgId 
+    const orgId = Number(organizationId) || studentData?.orgId
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
 
     // pagination & layout

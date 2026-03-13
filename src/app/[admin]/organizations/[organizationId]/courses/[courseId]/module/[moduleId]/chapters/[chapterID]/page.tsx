@@ -36,8 +36,7 @@ export default function Page({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const { courseId, moduleId, chapterID } = useParams()
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)

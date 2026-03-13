@@ -28,8 +28,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     const [loading, setLoading] = useState(true)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     const getLiveClassData = useCallback(async () => {
         try {

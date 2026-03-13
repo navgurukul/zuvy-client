@@ -21,8 +21,7 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()

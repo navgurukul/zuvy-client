@@ -21,8 +21,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId;
     const { userId, bootcampId, name, email, status, batchId } = student
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [editModalOpen, setEditModalOpen] = useState(false)

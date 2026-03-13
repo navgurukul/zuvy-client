@@ -39,8 +39,7 @@ const Page = ({ params }: { params: any }) => {
     const [batches, setBatches] = useState<BatchFilter[]>([])
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
      // Fetch batches from API
     const fetchBatches = useCallback(async () => {
