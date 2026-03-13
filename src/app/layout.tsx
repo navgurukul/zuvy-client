@@ -9,6 +9,7 @@ import '@remirror/styles/all.css'
 import '@/app/globals.css'
 import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
 import SessionModalWrapper from '@/components/SessionModalWrapper'
+import RootSocketConnection from '@/app/_components/RootSocketConnection'
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -40,6 +41,7 @@ export default function RootLayout({
                 {children}
                 <Toaster />
                 <AnalyticsScripts />
+                <RootSocketConnection />
                 <SessionModalWrapper />
             </body>
         </html>

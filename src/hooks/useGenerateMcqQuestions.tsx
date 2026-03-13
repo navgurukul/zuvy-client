@@ -1,12 +1,5 @@
-import { useSearchParams } from 'next/navigation';
-import { use, useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-import { getUser } from '@/store/store';
-
-interface QuestionsReadyPayload {
-  count: number;
-  questionIds: number[];
-}
+import { useState } from 'react';
+import { getSocketConnectionStore } from '@/store/store';
 
 interface GenerateMcqPayload {
   domainName: string;
@@ -53,138 +46,24 @@ interface UseGenerateMcqQuestionsReturn {
   isLoading: boolean;
   error: string | null;
   organizationId: number;
-  isSocketConnected: boolean;
-  questionsReady: QuestionsReadyPayload | null;
 }
 
 export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQuestionsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [questionsReady, setQuestionsReady] = useState<QuestionsReadyPayload | null>(null);
+  const { startGeneratingQuestions, stopGeneratingQuestions } = getSocketConnectionStore();
   const accessToken = localStorage.getItem('access_token') || '';
-  const { user } = getUser();
-  const socketRef = useRef<Socket | null>(null);
   const apiUrl = 'http://localhost:5000';
 
-  // Set up Socket.IO connection with JWT authentication
-  useEffect(() => {
-    if (!accessToken) {
-      console.warn('No access token available for Socket.IO connection');
-      return;
-    }
-
-    if (!user?.id) {
-      console.warn('No user ID available for Socket.IO connection');
-      return;
-    }
-
-    console.log('Connecting to Socket.IO server:', apiUrl);
-    console.log('User ID:', user.id);
-    console.log('Token present:', !!accessToken);
-
-    // Connect to the API URL with JWT in auth
-    const socket = io(apiUrl, {
-      auth: {
-        token: accessToken,
-      },
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 10,
-      timeout: 10000,
-      withCredentials: true,
-    });
-
-    socketRef.current = socket;
-
-    // Connection successful
-    socket.on('connect', () => {
-      console.log('✅ Socket.IO connected successfully!');
-      console.log('Socket ID:', socket.id);
-      console.log('Transport:', socket.io.engine.transport.name);
-      setIsSocketConnected(true);
-      setError(null);
-    });
-    
-    socket.on('questions:ready', (data: QuestionsReadyPayload) => {
-      console.log('🎉 Questions ready event received!');
-      console.log('Data:', JSON.stringify(data, null, 2));
-      console.log(`Indexed ${data.count} questions`);
-      console.log('Question IDs:', data.questionIds);
-      // Update state with the ready questions
-      setQuestionsReady(data);
-      setIsLoading(false);
-    });
-    
-    // Connection lost
-    socket.on('disconnect', (reason) => {
-      console.warn('⚠️ Socket disconnected. Reason:', reason);
-      setIsSocketConnected(false);
-      
-      if (reason === 'io server disconnect') {
-        console.log('Server disconnected. Will try to reconnect...');
-        socket.connect();
-      }
-    });
-
-    // Listen for the questions:ready event from backend
-
-    // Handle connection errors
-    socket.on('connect_error', (err: any) => {
-      console.error('❌ Socket connection error:');
-      console.error('Message:', err.message);
-      console.error('Description:', err.description);
-      console.error('Context:', err.context);
-      setError(`Socket connection failed: ${err.message}`);
-      setIsSocketConnected(false);
-    });
-
-    // General socket errors
-    socket.on('error', (err: any) => {
-      console.error('❌ Socket error:', err);
-      setError(`Socket error: ${err.message || err}`);
-    });
-
-    // Handle reconnection attempts
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`🔄 Reconnection attempt ${attemptNumber}...`);
-    });
-
-    socket.on('reconnect', (attemptNumber) => {
-      console.log(`✅ Reconnected after ${attemptNumber} attempts!`);
-      setIsSocketConnected(true);
-      setError(null);
-    });
-
-    socket.on('reconnect_error', (err) => {
-      console.error('❌ Reconnection error:', err.message);
-    });
-
-    socket.on('reconnect_failed', () => {
-      console.error('❌ All reconnection attempts failed');
-      setError('Socket reconnection failed after all attempts');
-    });
-
-    // Transport monitoring
-    socket.io.engine.on('upgrade', (transport: any) => {
-      console.log('🔄 Transport upgraded to:', transport.name);
-    });
-
-    // Cleanup on unmount
-    return () => {
-      console.log('🔌 Cleaning up Socket.IO connection...');
-      if (socketRef.current) {
-        socketRef.current.removeAllListeners();
-        socketRef.current.disconnect();
-      }
-    };
-  }, [accessToken, apiUrl, user?.id]);
+  /**
+   * Note: WebSocket connection and global generation loader are handled
+   * at the app root for persistence across route changes.
+   */
 
   const generateQuestions = async (payload: GenerateMcqPayload) => {
     setIsLoading(true);
     setError(null);
+    startGeneratingQuestions();
 
     try {
       const response = await fetch(`${apiUrl}/questions/generate?orgId=${organizationId}`, {
@@ -202,10 +81,15 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
       }
 
       const data = await response.json();
+      console.log('✅ Question generation request submitted successfully');
+      console.log('Response:', data);
+      
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate questions';
       setError(errorMessage);
+      stopGeneratingQuestions();
+      console.error('❌ Failed to generate questions:', errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -217,7 +101,5 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
     isLoading,
     error,
     organizationId,
-    isSocketConnected,
-    questionsReady,
   };
 };

@@ -968,6 +968,39 @@ export const useSessionModalStore = create<SessionStore>((set) => ({
     setShowModal: (value) => set({ showModal: value }),
 }))
 
+type QuestionsReadyEvent = {
+    count: number
+    questionIds: number[]
+    receivedAt: number
+}
+
+type SocketConnectionStore = {
+    isConnected: boolean
+    lastQuestionsReadyEvent: QuestionsReadyEvent | null
+    isGeneratingQuestions: boolean
+    generationProgress: number
+    setIsConnected: (value: boolean) => void
+    setLastQuestionsReadyEvent: (value: QuestionsReadyEvent | null) => void
+    startGeneratingQuestions: () => void
+    stopGeneratingQuestions: () => void
+    setGenerationProgress: (value: number) => void
+}
+
+export const getSocketConnectionStore = create<SocketConnectionStore>((set) => ({
+    isConnected: false,
+    lastQuestionsReadyEvent: null,
+    isGeneratingQuestions: false,
+    generationProgress: 0,
+    setIsConnected: (value) => set({ isConnected: value }),
+    setLastQuestionsReadyEvent: (value) => set({ lastQuestionsReadyEvent: value }),
+    startGeneratingQuestions: () =>
+        set({ isGeneratingQuestions: true, generationProgress: 1 }),
+    stopGeneratingQuestions: () =>
+        set({ isGeneratingQuestions: false, generationProgress: 0 }),
+    setGenerationProgress: (value) =>
+        set({ generationProgress: Math.max(0, Math.min(100, value)) }),
+}))
+
 // ------------------------- User ------------------------
 interface User {
     rolesList: any[]

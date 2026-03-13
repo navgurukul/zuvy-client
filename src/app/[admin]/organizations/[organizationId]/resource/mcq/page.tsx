@@ -19,6 +19,7 @@ import {
     getEditQuizQuestion,
     getmcqdifficulty,
     getMcqSearch,
+    getSocketConnectionStore,
     getSelectedMCQOptions,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
@@ -98,6 +99,9 @@ const Mcqs = (props: Props) => {
     ])
     const [loading, setLoading] = useState(true)
     const [isCreateMcqDialogOpen, setIsCreateMcqDialogOpen] = useState(false)
+
+    const { isConnected: isSocketConnected, lastQuestionsReadyEvent } =
+        getSocketConnectionStore()
 
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
@@ -446,6 +450,12 @@ const Mcqs = (props: Props) => {
         return fetchCodingQuestions(0, '');
     }, [selectedOptions, difficulty, updateURL, fetchCodingQuestions]);
 
+    useEffect(() => {
+        if (lastQuestionsReadyEvent) {
+            fetchCodingQuestions(offset)
+        }
+    }, [lastQuestionsReadyEvent, fetchCodingQuestions, offset])
+
     // Effect to fetch data when filters change
     useEffect(() => {
         if (options.length > 0) {
@@ -622,10 +632,19 @@ const Mcqs = (props: Props) => {
             {!isMcqModalOpen && (
                 <MaxWidthWrapper className="h-screen">
                     <div className="flex items-center justify-between mb-6">
-                        <div>
+                        <div className="flex items-center gap-3">
                             <h1 className="text-left font-heading font-bold text-3xl text-foreground">
                                 Content Bank - MCQ Questions
                             </h1>
+                            {/* Socket Connection Status Indicator */}
+                            {isSocketConnected && (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-full">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                                        Live
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-row items-center gap-2">
                             <Button
