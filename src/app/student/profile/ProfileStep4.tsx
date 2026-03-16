@@ -463,7 +463,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
               className="w-4 h-4 rounded accent-green-600"
             />
             <label htmlFor="allowCompanies-consent" className="text-sm text-primary cursor-pointer">
-              I agree to Zuvy's Terms & Conditions and Privacy Policy.
+              I agree to Zuvy&apos;s Terms & Conditions and Privacy Policy.
             </label>
           </div>
         </CardContent>

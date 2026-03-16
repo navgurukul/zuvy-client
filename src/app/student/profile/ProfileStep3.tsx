@@ -668,7 +668,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                     onClick={() => setHasInternship(false)}
                     className="h-10"
                   >
-                    No, I'm a Fresher
+                    No, I&apos;m a Fresher
                   </Button>
                   <Button
                     type="button"

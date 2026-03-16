@@ -424,7 +424,7 @@ export const EditProfilePage: React.FC = () => {
       setRankError((prev) => ({ ...prev, [platform]: '' }));
       try {
         const stats = await fetchCompetitiveProfileStats(platform, trimmed);
-        setEditedData((prev) => {
+        setEditedData((prev: any) => {
           const baseProfiles = prev.competitiveProfiles
             || (step3?.competitiveProfiles || []).map((p) => ({ ...p }));
           const nextProfiles = [...baseProfiles];

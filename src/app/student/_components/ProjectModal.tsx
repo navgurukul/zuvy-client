@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, X } from 'lucide-react';
-import { ExternalProject } from '@/lib/onboarding.types';
+import { ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK } from '@/lib/profile.mockData';
 
 interface ProjectModalProps {

@@ -728,7 +728,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         onClick={handleCustomCollege}
         className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors"
       >
-        <div className="font-medium text-primary">Add "{collegeSearch}" as custom college</div>
+        <div className="font-medium text-primary">Add &quot;{collegeSearch}&quot; as custom college</div>
       </button>
     )}
   </div>
