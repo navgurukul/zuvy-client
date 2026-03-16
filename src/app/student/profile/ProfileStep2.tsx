@@ -18,6 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Lock, Code, Calendar } from 'lucide-react';
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
+import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
 
 interface ProfileStep2Props {
   initialData?: Partial<Step2Type>;
@@ -32,7 +33,9 @@ export const ProjectModal: React.FC<{
   onOpenChange: (open: boolean) => void;
   onSave: (project: ExternalProject) => void;
   initialProject?: ExternalProject;
-}> = ({ isOpen, onOpenChange, onSave, initialProject }) => {
+  techStackOptions?: string[];
+  isLoadingTechStack?: boolean;
+}> = ({ isOpen, onOpenChange, onSave, initialProject, techStackOptions, isLoadingTechStack }) => {
   const [formData, setFormData] = useState<ExternalProject>(
     initialProject || {
       id: Date.now().toString(),
@@ -91,14 +94,22 @@ export const ProjectModal: React.FC<{
       return;
     }
     const isValid = field === 'githubUrl' ? isValidGithubUrl(value) : isValidUrl(value);
-    setErrors((prev) => ({
-      ...prev,
-      [field]: isValid
-        ? undefined
-        : field === 'githubUrl'
+    if (isValid) {
+      // Clear error if valid
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    } else {
+      // Set error if invalid
+      setErrors((prev) => ({
+        ...prev,
+        [field]: field === 'githubUrl'
           ? 'GitHub URL must be a valid github.com link'
           : 'Demo URL must be valid',
-    }));
+      }));
+    }
   };
 
   const handleTechStackSelect = (tech: string) => {
@@ -186,25 +197,32 @@ export const ProjectModal: React.FC<{
             </Label>
             <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Select technologies..." />
+                <SelectValue placeholder={isLoadingTechStack ? 'Loading technologies...' : 'Select technologies...'} />
               </SelectTrigger>
               <SelectContent>
-                <div className="p-2 space-y-1">
-                  {TECH_STACK.map((tech) => (
-                    <div
-                      key={tech}
-                      className="flex items-center space-x-2 hover:bg-accent p-2 rounded cursor-pointer"
-                      onClick={() => handleTechStackSelect(tech)}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.techStack.includes(tech)}
-                        onChange={() => handleTechStackSelect(tech)}
-                        className="rounded"
-                      />
-                      <span className="text-sm">{tech}</span>
-                    </div>
-                  ))}
+                <div
+                  className="p-2 space-y-1 max-h-60 overflow-y-auto"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {isLoadingTechStack ? (
+                    <div className="p-4 text-center text-muted-foreground text-sm">Loading...</div>
+                  ) : (
+                    (techStackOptions ?? TECH_STACK).map((tech) => (
+                      <div
+                        key={tech}
+                        className="flex items-center space-x-2 hover:bg-accent p-2 rounded cursor-pointer"
+                        onClick={() => handleTechStackSelect(tech)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.techStack.includes(tech)}
+                          onChange={() => handleTechStackSelect(tech)}
+                          className="rounded"
+                        />
+                        <span className="text-sm">{tech}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </SelectContent>
             </Select>
@@ -511,8 +529,17 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const skillDropdownRef = useRef<HTMLDivElement>(null);
+  const { technicalSkills, loading: isSkillsLoading } = useLearnerTechnicalSkills();
 
-  const allAvailableSkills = Object.values(SKILLS_BY_CATEGORY).flat();
+  // Combine API skills with mock data as fallback
+  const allAvailableSkills = (() => {
+    // If we have API skills, use them
+    if (technicalSkills.length > 0) {
+      return technicalSkills.map(skill => skill.name);
+    }
+    // Fallback to mock data
+    return Object.values(SKILLS_BY_CATEGORY).flat();
+  })();
 
   // Close skill dropdown when clicking outside
   useEffect(() => {
@@ -667,7 +694,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
           {/* Separate input field */}
           <div className="relative" ref={skillDropdownRef}>
             <Input
-              placeholder="Type a skill and press Enter (e.g. React)..."
+              placeholder={isSkillsLoading ? "Loading skills..." : "Type a skill and press Enter (e.g. React)..."}
               value={customSkill}
               onChange={(e) => setCustomSkill(e.target.value)}
               onFocus={() => setShowSkillDropdown(true)}
@@ -677,31 +704,42 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                   handleAddCustomSkill();
                 }
               }}
-              disabled={totalSkills >= 20}
+              disabled={totalSkills >= 20 || isSkillsLoading}
             />
             
             {/* Dropdown with skill suggestions */}
-            {showSkillDropdown && filteredSkills.length > 0 && (
+            {showSkillDropdown && !isSkillsLoading && filteredSkills.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
-                <div className="flex flex-wrap gap-2 p-3">
-                  {filteredSkills.map((skill) => (
-                    <Badge
-                      key={skill}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() => handleAddSkill(skill)}
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
+                {isSkillsLoading ? (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    Loading skills...
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2 p-3">
+                    {filteredSkills.map((skill) => (
+                      <Badge
+                        key={skill}
+                        variant="outline"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => handleAddSkill(skill)}
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
             
           {/* Skills counter positioned below on the right */}
-          <div className="flex justify-end mt-2">
-            <p className="text-xs text-muted-foreground">
+          <div className="flex justify-between items-center mt-2">
+            {isSkillsLoading && (
+              <p className="text-xs text-muted-foreground">
+                Loading available skills...
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground ml-auto">
               {totalSkills}/20 added
             </p>
           </div>
@@ -729,6 +767,8 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
           onOpenChange={setIsProjectModalOpen}
           onSave={handleAddProject}
           initialProject={editingProject}
+          techStackOptions={allAvailableSkills}
+          isLoadingTechStack={isSkillsLoading}
         />
 
         {projects.length > 0 && (

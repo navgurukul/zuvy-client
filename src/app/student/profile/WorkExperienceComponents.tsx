@@ -16,7 +16,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertCircle, Calendar, X, Briefcase } from 'lucide-react';
 import type { WorkExperience } from '@/lib/profile.types';
-import { MONTHS, TECH_STACK } from '@/lib/profile.mockData';
+import { MONTHS, TECH_STACK, SKILLS_BY_CATEGORY } from '@/lib/profile.mockData';
+import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
 
 export const WorkExperienceModal: React.FC<{
   isOpen: boolean;
@@ -39,6 +40,11 @@ export const WorkExperienceModal: React.FC<{
     }
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { technicalSkills, loading: isLoadingTechStack } = useLearnerTechnicalSkills();
+
+  const allTechOptions = technicalSkills.length > 0
+    ? technicalSkills.map((s) => s.name)
+    : Object.values(SKILLS_BY_CATEGORY).flat();
 
   useEffect(() => {
     if (initialExperience) {
@@ -270,11 +276,17 @@ export const WorkExperienceModal: React.FC<{
             </Label>
             <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Select technologies..." />
+                <SelectValue placeholder={isLoadingTechStack ? 'Loading technologies...' : 'Select technologies...'} />
               </SelectTrigger>
               <SelectContent>
-                <div className="p-2 space-y-1">
-                  {TECH_STACK.map((tech) => (
+                <div
+                  className="p-2 space-y-1 max-h-60 overflow-y-auto"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {isLoadingTechStack ? (
+                    <div className="p-4 text-center text-muted-foreground text-sm">Loading...</div>
+                  ) : null}
+                  {!isLoadingTechStack && allTechOptions.map((tech) => (
                     <div
                       key={tech}
                       className="flex items-center space-x-2 hover:bg-accent p-2 rounded cursor-pointer"

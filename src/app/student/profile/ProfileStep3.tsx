@@ -21,6 +21,7 @@ import type { OnboardingStep3 as Step3Type, AcademicPerformance, WorkExperience,
 import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STACK } from '@/lib/profile.mockData';
 import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceComponents';
 import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
+import { useLearnerBoards } from '@/hooks/useLearnerBoards';
 
 interface ProfileStep3Props {
   initialData?: Partial<Step3Type>;
@@ -95,9 +96,22 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
   const [rankError, setRankError] = useState<Record<string, string>>({});
+  const [customClass12Board, setCustomClass12Board] = useState<string>('');
+  const [customClass10Board, setCustomClass10Board] = useState<string>('');
   const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const { boards, loading: isBoardsLoading } = useLearnerBoards();
 
   const years = getYearsArray(1990);
+  
+  // Combine API boards with mock data as fallback
+  const boardOptions = (() => {
+    // If we have API boards, use them
+    if (boards.length > 0) {
+      return boards.map(board => board.name);
+    }
+    // Fallback to mock data
+    return CLASS_12_BOARDS;
+  })();
 
   useEffect(() => {
     return () => {
@@ -116,6 +130,34 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
       });
     }
   }, [academicData, workExperiences, competitiveProfiles, hasInternship]);
+
+  // Handle custom board initialization
+  useEffect(() => {
+    // Initialize custom Class 12 board if needed
+    if (academicData.class12Board && !boardOptions.includes(academicData.class12Board) && academicData.class12Board !== 'Other') {
+      setCustomClass12Board(academicData.class12Board);
+    }
+    // Initialize custom Class 10 board if needed
+    if (academicData.class10Board && !boardOptions.includes(academicData.class10Board) && academicData.class10Board !== 'Other') {
+      setCustomClass10Board(academicData.class10Board);
+    }
+  }, [academicData.class12Board, academicData.class10Board, boardOptions]);
+
+  const handleCustomClass12BoardChange = (value: string) => {
+    setCustomClass12Board(value);
+    setAcademicData((prev) => ({
+      ...prev,
+      class12Board: value.trim() || 'Other',
+    }));
+  };
+
+  const handleCustomClass10BoardChange = (value: string) => {
+    setCustomClass10Board(value);
+    setAcademicData((prev) => ({
+      ...prev,
+      class10Board: value.trim() || 'Other',
+    }));
+  };
 
   const validateAcademic = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -266,7 +308,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                     <Label htmlFor="stream" className="font-medium text-left block">Stream</Label>
                     <Input
                       id="stream"
-                      value={initialData?.stream || ''}
+                      value=""
                       disabled
                       className="bg-muted"
                       placeholder="Auto-filled from Step 1"
@@ -296,7 +338,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                               : { percentage: value as number | undefined })
                           }));
                         }}
-                        className={`flex-1 ${errors.cgpa || errors.percentage ? 'border-destructive' : ''}`}
+                        className={`flex-1 mt-0 ${errors.cgpa || errors.percentage ? 'border-destructive' : ''}`}
                       />
                       <button
                         type="button"
@@ -350,22 +392,65 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   <div className="space-y-2">
                     <Label htmlFor="class12Board" className="font-medium text-left block">Board</Label>
                     <Select
-                      value={academicData.class12Board || ''}
-                      onValueChange={(value) =>
-                        setAcademicData((prev) => ({ ...prev, class12Board: value }))
-                      }
+                      value={(() => {
+                        const board = academicData.class12Board ?? '';
+                        // If it's empty, return empty
+                        if (!board) return '';
+                        // If it's a predefined board, show it
+                        if (boardOptions.includes(board)) return board;
+                        // If it's a custom board, always show 'Other' in dropdown
+                        return 'Other';
+                      })()}
+                      onValueChange={(value) => {
+                        if (value === 'Other') {
+                          setAcademicData((prev) => ({ ...prev, class12Board: 'Other' }));
+                        } else {
+                          setAcademicData((prev) => ({ ...prev, class12Board: value }));
+                          setCustomClass12Board('');
+                        }
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Board" />
+                        <SelectValue placeholder={isBoardsLoading ? "Loading boards..." : "Select Board"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {CLASS_12_BOARDS.map((board) => (
-                          <SelectItem key={board} value={board}>
-                            {board}
+                        {isBoardsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading boards...
                           </SelectItem>
-                        ))}
+                        ) : boardOptions.length > 0 ? (
+                          <>
+                            {boardOptions.map((board) => (
+                              <SelectItem key={board} value={board}>
+                                {board}
+                              </SelectItem>
+                            ))}
+                            {/* Only show "Other" option if it's not already in the API data */}
+                            {!boardOptions.includes('Other') && (
+                              <SelectItem value="Other">
+                                Other
+                              </SelectItem>
+                            )}
+                          </>
+                        ) : (
+                          <SelectItem value="no-boards" disabled>
+                            No boards available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    
+                    {/* Custom Class 12 Board Input */}
+                    {(academicData.class12Board === 'Other' || (academicData.class12Board && !boardOptions.includes(academicData.class12Board))) && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Enter your board name"
+                          value={customClass12Board}
+                          onChange={(e) => handleCustomClass12BoardChange(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -385,7 +470,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                             class12Percentage: parseFloat(e.target.value) || undefined,
                           }));
                         }}
-                        className={`flex-1 ${errors.class12Percentage ? 'border-destructive' : ''}`}
+                        className={`flex-1 mt-0 ${errors.class12Percentage ? 'border-destructive' : ''}`}
                       />
                       <button
                         type="button"
@@ -439,22 +524,65 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   <div className="space-y-2">
                     <Label htmlFor="class10Board" className="font-medium text-left block">Board</Label>
                     <Select
-                      value={academicData.class10Board || ''}
-                      onValueChange={(value) =>
-                        setAcademicData((prev) => ({ ...prev, class10Board: value }))
-                      }
+                      value={(() => {
+                        const board = academicData.class10Board ?? '';
+                        // If it's empty, return empty
+                        if (!board) return '';
+                        // If it's a predefined board, show it
+                        if (boardOptions.includes(board)) return board;
+                        // If it's a custom board, always show 'Other' in dropdown
+                        return 'Other';
+                      })()}
+                      onValueChange={(value) => {
+                        if (value === 'Other') {
+                          setAcademicData((prev) => ({ ...prev, class10Board: 'Other' }));
+                        } else {
+                          setAcademicData((prev) => ({ ...prev, class10Board: value }));
+                          setCustomClass10Board('');
+                        }
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Board" />
+                        <SelectValue placeholder={isBoardsLoading ? "Loading boards..." : "Select Board"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {CLASS_12_BOARDS.map((board) => (
-                          <SelectItem key={board} value={board}>
-                            {board}
+                        {isBoardsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading boards...
                           </SelectItem>
-                        ))}
+                        ) : boardOptions.length > 0 ? (
+                          <>
+                            {boardOptions.map((board) => (
+                              <SelectItem key={board} value={board}>
+                                {board}
+                              </SelectItem>
+                            ))}
+                            {/* Only show "Other" option if it's not already in the API data */}
+                            {!boardOptions.includes('Other') && (
+                              <SelectItem value="Other">
+                                Other
+                              </SelectItem>
+                            )}
+                          </>
+                        ) : (
+                          <SelectItem value="no-boards" disabled>
+                            No boards available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    
+                    {/* Custom Class 10 Board Input */}
+                    {(academicData.class10Board === 'Other' || (academicData.class10Board && !boardOptions.includes(academicData.class10Board))) && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Enter your board name"
+                          value={customClass10Board}
+                          onChange={(e) => handleCustomClass10BoardChange(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -474,7 +602,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                             class10Marks: parseFloat(e.target.value) || undefined,
                           }));
                         }}
-                        className={`flex-1 ${errors.class10Marks ? 'border-destructive' : ''}`}
+                        className={`flex-1 mt-0 ${errors.class10Marks ? 'border-destructive' : ''}`}
                       />
                       <button
                         type="button"

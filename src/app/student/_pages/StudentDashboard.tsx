@@ -27,11 +27,12 @@ import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
 import { useOnboardingStatus } from "@/hooks/use-profile";
+import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const [enrollingBootcampId, setEnrollingBootcampId] = useState<number | null>(null);
-  const [simulationProgress, setSimulationProgress] = useState<string>('65');
+  const [simulationProgress, setSimulationProgress] = useState<string>('');
   const { studentData, loading, error, refetch } = useStudentData();
   
   // ✅ Fix: Use correct property name 'globalCourses'
@@ -40,6 +41,7 @@ const StudentDashboard = () => {
   const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
   const { progress } = useOnboardingStatus();
+  const { strengthPercentage } = useLearnerProfileStrength();
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore();
@@ -52,7 +54,8 @@ const StudentDashboard = () => {
     : studentData?.completedBootcamps || [];
 
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
-  const displayProgress = simulationProgress ? parseInt(simulationProgress, 10) : Math.round(progress);
+  const liveProfileStrength = strengthPercentage ?? Math.round(progress);
+  const displayProgress = simulationProgress ? parseInt(simulationProgress, 10) : liveProfileStrength;
 
   useEffect(() => {
     if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {

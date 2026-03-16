@@ -11,7 +11,9 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap } from 'lucide-react';
 import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
-import { DEGREES, MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
+import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
+import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
+import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -55,11 +57,55 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [showGraduationDatePicker, setShowGraduationDatePicker] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>(formData.graduationDate.month || '');
   const [selectedYear, setSelectedYear] = useState<string>(formData.graduationDate.year || '');
+  const [customDegree, setCustomDegree] = useState<string>('');
+  const [customBranch, setCustomBranch] = useState<string>('');
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
   const graduationDateDropdownRef = useRef<HTMLDivElement>(null);
+  const { degreeDetails, loading: isDegreeLoading } = useLearnerDegreeDetails();
+  const { branchDetails, loading: isBranchLoading } = useLearnerBranchDetails();
   
   const years = getYearsArray();
-  const branches = formData.degree ? getBranchesByDegree(formData.degree) : [];
+  const degreeOptions = degreeDetails.map((item) => item.name);
+  const branchOptions = branchDetails.map((item) => item.name);
+  
+  // Handle branches from API with fallback to mock data
+  const branches = (() => {
+    // If we have API branch data, use it
+    if (branchDetails.length > 0) {
+      return branchOptions;
+    }
+    
+    // Fallback to degree-specific branches from mock data
+    const currentDegree = formData.degree;
+    if (!currentDegree || currentDegree === 'Other') return [];
+    
+    const selectedDegreeDetails = degreeDetails.find((item) => item.name === currentDegree);
+    return selectedDegreeDetails?.branches?.length
+      ? selectedDegreeDetails.branches
+      : getBranchesByDegree(currentDegree);
+  })();
+  
+  // Handle custom degree initialization
+  useEffect(() => {
+    // Prevent infinite loops by checking if degreeOptions is loaded and degree exists
+    if (degreeDetails.length > 0 && formData.degree && formData.degree !== 'Other') {
+      const isCustomDegree = !degreeOptions.includes(formData.degree);
+      if (isCustomDegree && customDegree !== formData.degree) {
+        setCustomDegree(formData.degree);
+      }
+    }
+  }, [degreeDetails, formData.degree, degreeOptions, customDegree]);
+
+  // Handle custom branch initialization
+  useEffect(() => {
+    // Prevent infinite loops by checking if branchOptions is loaded and branch exists
+    if (branchDetails.length > 0 && formData.branch && formData.branch !== 'Other') {
+      const isCustomBranch = !branchOptions.includes(formData.branch);
+      if (isCustomBranch && customBranch !== formData.branch) {
+        setCustomBranch(formData.branch);
+      }
+    }
+  }, [branchDetails, formData.branch, branchOptions, customBranch]);
   
   // Auto-save form data on change
   useEffect(() => {
@@ -357,11 +403,41 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleSelectChange = (name: string, value: string) => {
     if (name === 'degree') {
-      setFormData((prev) => ({
-        ...prev,
-        degree: value,
-        branch: '', // Reset branch when degree changes
-      }));
+      if (value === 'Other') {
+        // When "Other" is selected, keep the dropdown value as "Other"
+        setFormData((prev) => ({
+          ...prev,
+          degree: 'Other',
+          branch: '', // Reset branch when degree changes
+        }));
+        // Don't clear customDegree here - let user continue typing
+      } else {
+        // When a predefined degree is selected
+        setFormData((prev) => ({
+          ...prev,
+          degree: value,
+          branch: '', // Reset branch when degree changes
+        }));
+        // Clear custom degree when switching to a predefined option
+        setCustomDegree('');
+      }
+    } else if (name === 'branch') {
+      if (value === 'Other') {
+        // When "Other" is selected for branch, keep the dropdown value as "Other"
+        setFormData((prev) => ({
+          ...prev,
+          branch: 'Other',
+        }));
+        // Don't clear customBranch here - let user continue typing
+      } else {
+        // When a predefined branch is selected
+        setFormData((prev) => ({
+          ...prev,
+          branch: value,
+        }));
+        // Clear custom branch when switching to a predefined option
+        setCustomBranch('');
+      }
     } else if (name === 'graduationMonth' || name === 'graduationYear') {
       setFormData((prev) => ({
         ...prev,
@@ -385,6 +461,24 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         return newErrors;
       });
     }
+  };
+
+  const handleCustomDegreeChange = (value: string) => {
+    setCustomDegree(value);
+    // Always update form data when typing in custom field
+    setFormData((prev) => ({
+      ...prev,
+      degree: value.trim() || 'Other', // Use the custom value or fallback to "Other"
+    }));
+  };
+
+  const handleCustomBranchChange = (value: string) => {
+    setCustomBranch(value);
+    // Always update form data when typing in custom field
+    setFormData((prev) => ({
+      ...prev,
+      branch: value.trim() || 'Other', // Use the custom value or fallback to "Other"
+    }));
   };
 
   const handleGraduationDateSave = () => {
@@ -496,7 +590,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                         value={formData.phoneNumber}
                         onChange={handleInputChange}
                         maxLength={10}
-                        className={`rounded-l-none ${errors.phoneNumber ? 'border-destructive' : ''}`}
+                        className={`rounded-l-none mt-0 ${errors.phoneNumber ? 'border-destructive' : ''}`}
                       />
                       {validations.phoneNumber && formData.phoneNumber.length === 10 && (
                         <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-success w-5 h-5" />
@@ -653,20 +747,53 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                 {/* Degree */}
                 <div className="space-y-2">
                   <Label htmlFor="degree" className="font-medium text-left block">
-                    Degree
+                    Degree <span className="text-destructive">*</span>
                   </Label>
-                  <Select value={formData.degree || ''} onValueChange={(value) => handleSelectChange('degree', value)}>
+                  <Select 
+                    value={(() => {
+                      const degree = formData.degree ?? '';
+                      // If it's empty, return empty
+                      if (!degree) return '';
+                      // If it's a predefined degree, show it
+                      if (degreeOptions.includes(degree)) return degree;
+                      // If it's a custom degree, always show 'Other' in dropdown
+                      return 'Other';
+                    })()} 
+                    onValueChange={(value) => handleSelectChange('degree', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Degree" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DEGREES.map((degree) => (
-                        <SelectItem key={degree} value={degree}>
-                          {degree}
+                      {isDegreeLoading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading degrees...
                         </SelectItem>
-                      ))}
+                      ) : degreeOptions.length > 0 ? (
+                        degreeOptions.map((degree) => (
+                          <SelectItem key={degree} value={degree}>
+                            {degree}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-degrees" disabled>
+                          No degrees available
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Custom Degree Input - Show when "Other" is selected */}
+                  {(formData.degree === 'Other' || (formData.degree && !degreeOptions.includes(formData.degree))) && (
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Enter your degree name"
+                        value={customDegree}
+                        onChange={(e) => handleCustomDegreeChange(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Branch */}
@@ -674,24 +801,60 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   <Label htmlFor="branch" className="font-medium text-left block">
                     Branch <span className="text-destructive">*</span>
                   </Label>
-                  <Select value={formData.branch || ''} onValueChange={(value) => handleSelectChange('branch', value)}>
+                  <Select 
+                    value={(() => {
+                      const branch = formData.branch ?? '';
+                      // If it's empty, return empty
+                      if (!branch) return '';
+                      // If it's a predefined branch (either API or mock data), show it
+                      if (branches.includes(branch)) return branch;
+                      // If it's a custom branch, always show 'Other' in dropdown
+                      return 'Other';
+                    })()} 
+                    onValueChange={(value) => handleSelectChange('branch', value)}
+                  >
                     <SelectTrigger className={errors.branch ? 'border-destructive' : ''}>
                       <SelectValue placeholder="Select Branch" />
                     </SelectTrigger>
                     <SelectContent>
-                      {branches.length > 0 ? (
-                        branches.map((branch) => (
-                          <SelectItem key={branch} value={branch}>
-                            {branch}
-                          </SelectItem>
-                        ))
+                      {isBranchLoading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading branches...
+                        </SelectItem>
+                      ) : branches.length > 0 ? (
+                        <>
+                          {branches.map((branch) => (
+                            <SelectItem key={branch} value={branch}>
+                              {branch}
+                            </SelectItem>
+                          ))}
+                          {/* Only show "Other" option if it's not already in the API data */}
+                          {!branches.includes('Other') && (
+                            <SelectItem value="Other">
+                              Other
+                            </SelectItem>
+                          )}
+                        </>
                       ) : (
                         <SelectItem value="none" disabled>
-                          Select a degree first
+                          {formData.degree ? 'No branches available' : 'Select a degree first'}
                         </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Custom Branch Input - Show when "Other" is selected or custom branch */}
+                  {(formData.branch === 'Other' || (formData.branch && !branches.includes(formData.branch))) && (
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Enter your branch name"
+                        value={customBranch}
+                        onChange={(e) => handleCustomBranchChange(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                  
                   {errors.branch && (
                     <p className="text-sm text-destructive flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />

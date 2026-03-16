@@ -12,6 +12,10 @@ import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, Onboar
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Sparkles } from 'lucide-react';
 import { MONTHS } from '@/lib/profile.mockData';
+import { toast } from '@/components/ui/use-toast';
+import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
+import useResumeParse from '@/hooks/useResumeParse';
+import useParsedResume from '@/hooks/useParsedResume';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -40,9 +44,140 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const [resumeError, setResumeError] = useState('');
   const [resumeFileName, setResumeFileName] = useState('');
   const [resumeSkills, setResumeSkills] = useState<string[]>([]);
+  const [isSavingStepData, setIsSavingStepData] = useState(false);
   
   // Track current step data to auto-save
   const [currentStepData, setCurrentStepData] = useState<any>(null);
+  const { saveLearnerProfile, loading: isLearnerProfileSaving } = useSaveLearnerProfile();
+  const { parseResume } = useResumeParse();
+  const { refetchParsedResume } = useParsedResume(false);
+
+  const formatMonthYearToDate = (value?: { month: string; year: string }) => {
+    if (!value?.year) {
+      return undefined;
+    }
+    const monthIndex = MONTHS.indexOf(value.month || '');
+    const month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
+    return `${value.year}-${month}-01`;
+  };
+
+  const toMonthNumber = (month?: string) => {
+    if (!month) {
+      return undefined;
+    }
+    const monthIndex = MONTHS.indexOf(month);
+    return monthIndex >= 0 ? monthIndex + 1 : undefined;
+  };
+
+  const buildLearnerProfilePayload = (
+    step1Data: Step1Type,
+    step2Data?: Step2Type,
+    step3Data?: Step3Type,
+    step4Data?: Step4Type
+  ) => {
+    const normalizeText = (value?: string) => {
+      const trimmed = value?.trim();
+      return trimmed ? trimmed : null;
+    };
+
+    const normalizeEmail = (value?: string) => {
+      const trimmed = value?.trim();
+      if (!trimmed) return null;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(trimmed) ? trimmed : null;
+    };
+
+    const isValidOtherCollege = (value?: string) => {
+      const trimmed = value?.trim();
+      if (!trimmed) return false;
+      if (trimmed.length < 3) return false;
+      return /^[a-zA-Z0-9\s.,'&()\-]+$/.test(trimmed);
+    };
+
+    const collegeNameValue = normalizeText(step1Data.collegeName);
+    const otherCollegeValue = isValidOtherCollege(step1Data.customCollege)
+      ? step1Data.customCollege!.trim()
+      : null;
+
+    const finalCollegeName = collegeNameValue || null;
+    const finalOtherCollegeName = finalCollegeName ? null : otherCollegeValue;
+
+    const technicalSkills = Array.from(
+      new Set([...(step2Data?.autoDetectedSkills || []), ...(step2Data?.additionalSkills || [])].filter(Boolean))
+    );
+
+    const projects = (step2Data?.externalProjects || []).map((project) => ({
+      title: project.title,
+      description: project.oneLineDescription,
+      techStack: project.techStack || [],
+      projectType: project.projectType,
+      startDate: formatMonthYearToDate(project.startDate),
+      endDate: formatMonthYearToDate(project.endDate),
+      githubUrl: project.githubUrl,
+      demoUrl: project.demoUrl,
+      detailedDescription: project.detailedDescription,
+    }));
+
+    const academicPerformance = step3Data?.academicPerformance;
+    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
+      ? academicPerformance?.cgpa
+      : academicPerformance?.percentage;
+
+    const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
+      title: experience.role,
+      company: experience.companyName,
+      startDate: formatMonthYearToDate(experience.startDate),
+      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+      description: experience.responsibilities,
+    }));
+
+    const leetcodeUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode')?.username;
+    const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
+    const codeforcesUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'Codeforces')?.username;
+
+    const preferredContactMethods = [
+      step4Data?.communicationPreferences?.email ? 'Email' : null,
+      step4Data?.communicationPreferences?.whatsapp ? 'Whatsapp' : null,
+      step4Data?.communicationPreferences?.phone ? 'Phone' : null,
+    ].filter(Boolean) as string[];
+
+    return {
+      fullName: normalizeText(step1Data.fullName),
+      phoneNumber: normalizeText(step1Data.phoneNumber),
+      email: normalizeEmail(step1Data.email),
+      linkedinProfile: normalizeText(step1Data.linkedin),
+      collegeName: finalCollegeName,
+      otherCollegeName: finalOtherCollegeName,
+      degree: normalizeText(step1Data.degree),
+      branch: normalizeText(step1Data.branch),
+      yearOfStudy: normalizeText(step1Data.yearOfStudy),
+      graduationMonth: toMonthNumber(step1Data.graduationDate?.month),
+      graduationYear: step1Data.graduationDate?.year ? Number(step1Data.graduationDate.year) : undefined,
+      currentStatus: normalizeText(step1Data.currentStatus),
+      technicalSkills,
+      projects,
+      collegeStream: normalizeText(step1Data.branch),
+      collegeScore: collegeScore !== undefined ? String(collegeScore) : undefined,
+      collegeScoreType: academicPerformance?.marksFormat === 'Percentage' ? '%' : academicPerformance?.marksFormat,
+      class12Board: normalizeText(academicPerformance?.class12Board),
+      class12Score: academicPerformance?.class12Percentage !== undefined ? String(academicPerformance.class12Percentage) : undefined,
+      class12ScoreType: academicPerformance?.class12Format === 'Percentage' ? '%' : academicPerformance?.class12Format,
+      class10Board: normalizeText(academicPerformance?.class10Board),
+      class10Score: academicPerformance?.class10Marks !== undefined ? String(academicPerformance.class10Marks) : undefined,
+      class10ScoreType: academicPerformance?.class10Format === 'Percentage' ? '%' : academicPerformance?.class10Format,
+      hasWorkExperience: step3Data?.hasInternshipExperience,
+      workExperiences,
+      leetcodeUsername: normalizeText(leetcodeUsername),
+      codechefUsername: normalizeText(codechefUsername),
+      codeforcesUsername: normalizeText(codeforcesUsername),
+      targetRoles: step4Data?.targetRoles || [],
+      preferredLocations: step4Data?.locationPreferences?.cities || [],
+      openToRemote: step4Data?.locationPreferences?.remote,
+      internshipStipend: normalizeText(step4Data?.salaryExpectations?.internship),
+      fullTimeCtc: normalizeText(step4Data?.salaryExpectations?.fullTime),
+      preferredContactMethods,
+    };
+  };
 
   // Auto-save current step data
   const handleAutoSave = (stepNumber: number, data: any) => {
@@ -86,10 +221,54 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     goToNextStep();
   };
 
-  const handleStep4Complete = (data: Step4Type) => {
+  const handleStep4Complete = async (data: Step4Type) => {
+    if (!onboardingData?.step1) {
+      toast.error({
+        title: 'Missing basic details',
+        description: 'Please complete Step 1 before finishing setup.',
+      });
+      return;
+    }
+
     updateStepData(4, data);
+    setIsSavingStepData(true);
+
+    let latestData = onboardingData;
+    try {
+      const raw = localStorage.getItem('zuvy_onboarding_data');
+      if (raw) {
+        latestData = JSON.parse(raw);
+      }
+    } catch (err) {
+      console.error('Failed to read latest onboarding draft from storage:', err);
+    }
+
+    const payload = buildLearnerProfilePayload(
+      (latestData?.step1 || onboardingData?.step1) as Step1Type,
+      latestData?.step2 || onboardingData?.step2,
+      latestData?.step3 || onboardingData?.step3,
+      data
+    );
+
+    const result = await saveLearnerProfile(payload);
+
+    if (!result.success) {
+      toast.error({
+        title: 'Save failed',
+        description: 'Could not save complete profile. Please check your details and try again.',
+      });
+      setIsSavingStepData(false);
+      return;
+    }
+
+    toast.success({
+      title: 'Profile saved',
+      description: 'Your profile has been saved successfully.',
+    });
+
     completeOnboarding();
-    // Redirect to dashboard after a short delay
+    setIsSavingStepData(false);
+
     setTimeout(() => {
       router.push('/student');
     }, 500);
@@ -544,7 +723,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     setResumeFileName(file.name);
     setIsParsingResume(true);
     try {
-      const arrayBuffer = await readFileAsArrayBuffer(file);
       const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
       const isDocx =
         file.type ===
@@ -555,11 +733,71 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         throw new Error('Please upload a PDF or DOCX resume.');
       }
 
-      const extractedText = isPdf
-        ? await extractTextFromPdf(arrayBuffer)
-        : await extractTextFromDocx(arrayBuffer);
+      const postResult = await parseResume(file);
+      if (!postResult?.success) {
+        throw new Error(postResult?.error || 'Failed to upload and parse resume.');
+      }
 
-      const parsed = parseResumeText(extractedText, file.name);
+      const parsedResponse = await refetchParsedResume();
+      const parsedData = parsedResponse?.data;
+
+      const normalizeProjects = (projects: any[]): Step2Type['externalProjects'] => {
+        if (!Array.isArray(projects)) {
+          return [];
+        }
+
+        return projects.map((project: any, index: number) => {
+          if (typeof project === 'string') {
+            return {
+              id: `resume-project-${Date.now()}-${index}`,
+              title: project || `Project ${index + 1}`,
+              oneLineDescription: '',
+              detailedDescription: '',
+              techStack: [],
+              githubUrl: '',
+              demoUrl: '',
+              projectType: 'Solo' as const,
+            };
+          }
+
+          const techStack = Array.isArray(project?.techStack)
+            ? project.techStack.filter(Boolean)
+            : [];
+
+          return {
+            id: `resume-project-${Date.now()}-${index}`,
+            title: project?.title || project?.name || `Project ${index + 1}`,
+            oneLineDescription: project?.oneLineDescription || project?.description || '',
+            detailedDescription: project?.detailedDescription || project?.description || '',
+            techStack,
+            githubUrl: project?.githubUrl || project?.github || '',
+            demoUrl: project?.demoUrl || project?.liveUrl || '',
+            projectType: 'Solo' as const,
+          };
+        });
+      };
+
+      const parsed = {
+        fullName: parsedData?.name || '',
+        phoneNumber: parsedData?.phone || '',
+        email: parsedData?.email || '',
+        linkedin: parsedData?.linkedin || '',
+        skills: Array.isArray(parsedData?.skills) ? parsedData.skills.filter(Boolean) : [],
+        collegeName: '',
+        degree:
+          Array.isArray(parsedData?.education) && parsedData.education.length > 0
+            ? String(parsedData.education[0] || '')
+            : '',
+        branch: '',
+        graduationDate: {
+          month: '',
+          year: '',
+        },
+        projects: normalizeProjects(parsedData?.projects || []),
+        academicPerformance: undefined,
+        hasInternshipExperience: false,
+        targetRoles: [],
+      };
       
       // Debug logging
       console.log('Parsed resume data:', {
@@ -602,7 +840,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         fullName: parsed.fullName || existing.fullName || '',
         phoneNumber: parsed.phoneNumber || existing.phoneNumber || '',
         linkedin: parsed.linkedin || existing.linkedin || '',
-        email: existing.email || userEmail || '',
+        email: parsed.email || existing.email || userEmail || '',
         graduationDate: {
           month: parsed.graduationDate?.month || existing.graduationDate?.month || '',
           year: parsed.graduationDate?.year || existing.graduationDate?.year || '',
@@ -870,7 +1108,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                           placeholder="Paste profile URL..."
                           value={linkedinUrl}
                           onChange={(e) => setLinkedinUrl(e.target.value)}
-                          className="flex-1"
+                          className="flex-1 mt-0"
                         />
                         <Button
                           type="button"
@@ -990,9 +1228,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 form.requestSubmit();
               }
             }}
+            disabled={isSavingStepData || isLearnerProfileSaving}
             className="flex-1 md:flex-none"
           >
-            {currentStep === 4 ? 'Complete Setup' : 'Save & Continue'}
+            {isSavingStepData || isLearnerProfileSaving
+              ? 'Saving...'
+              : currentStep === 4
+                ? 'Complete Setup'
+                : 'Save & Continue'}
           </Button>
         </div>
       </div>

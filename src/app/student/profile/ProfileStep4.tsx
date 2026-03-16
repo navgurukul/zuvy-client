@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle, Check, Loader2, Target, Globe, DollarSign, MessageSquare } from 'lucide-react';
 import type { OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
+import { useLearnerRoles } from '@/hooks/useLearnerRoles';
+import { useLearnerRemoteLocations } from '@/hooks/useLearnerRemoteLocations';
 
 interface ProfileStep4Props {
   initialData?: Partial<Step4Type>;
@@ -42,12 +43,38 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   const [phonePref, setPhonePref] = useState(initialData?.communicationPreferences?.phone ?? false);
   const [allowCompanies, setAllowCompanies] = useState(initialData?.allowCompaniesViewProfile ?? false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { roles, loading: isRolesLoading } = useLearnerRoles();
+  const { remoteLocations } = useLearnerRemoteLocations();
+
+  // Combine API roles with mock data as fallback
+  const availableRoles = (() => {
+    // If we have API roles, use them
+    if (roles.length > 0) {
+      return roles.map(role => role.name);
+    }
+    // Fallback to mock data
+    return CAREER_ROLES;
+  })();
+
+  const availableCities = (() => {
+    const apiLocations = remoteLocations.map((location) => location.name);
+    const hasApiLocations = apiLocations.length > 0;
+    const source = hasApiLocations ? apiLocations : INDIAN_CITIES;
+
+    return source.filter((location) => {
+      const normalized = location.toLowerCase();
+      return !normalized.includes('remote') && !normalized.includes('work from home') && !normalized.includes('wfh');
+    });
+  })();
 
   const internshipSalaryRanges = ['₹10–20k', '₹20–30k', '₹30–40k', '₹40k+'];
   const fullTimeSalaryRanges = ['₹3–5 LPA', '₹5–7 LPA', '₹7–10 LPA', '₹10+ LPA'];
 
-  const totalRoles = selectedRoles.length + (customRole ? 1 : 0);
-  const totalLocations = (remotePreference ? 1 : 0) + selectedCities.length + (customCity ? 1 : 0);
+  const totalRoles = selectedRoles.filter((role) => role !== 'Other').length + (customRole.trim() ? 1 : 0);
+  const totalLocations =
+    (remotePreference ? 1 : 0) +
+    selectedCities.filter((city) => city !== 'Other').length +
+    (selectedCities.includes('Other') && customCity.trim() ? 1 : 0);
 
   const validateLinkedInUrl = (url: string): boolean => {
     const linkedInRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w\-]+\/?$/i;
@@ -76,21 +103,50 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   };
 
   const handleToggleRole = (role: string) => {
+    if (role === 'Other') {
+      if (selectedRoles.includes('Other')) {
+        setSelectedRoles((prev) => prev.filter((r) => r !== 'Other'));
+        setCustomRole('');
+      } else {
+        setSelectedRoles((prev) => [...prev, 'Other']);
+      }
+
+      if (errors.roles) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.roles;
+          return newErrors;
+        });
+      }
+      return;
+    }
+
     if (selectedRoles.includes(role)) {
       setSelectedRoles((prev) => prev.filter((r) => r !== role));
     } else if (totalRoles < 5) {
       setSelectedRoles((prev) => [...prev, role]);
     }
-  };
-
-  const handleAddCustomRole = () => {
-    if (customRole.trim() && totalRoles < 5 && !selectedRoles.includes(customRole)) {
-      setSelectedRoles((prev) => [...prev, customRole]);
-      setCustomRole('');
+    // Clear errors if any
+    if (errors.roles) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.roles;
+        return newErrors;
+      });
     }
   };
 
   const handleToggleCity = (city: string) => {
+    if (city === 'Other') {
+      if (selectedCities.includes('Other')) {
+        setSelectedCities((prev) => prev.filter((c) => c !== 'Other'));
+        setCustomCity('');
+      } else if (selectedCities.filter((c) => c !== 'Other').length < 5) {
+        setSelectedCities((prev) => [...prev, 'Other']);
+      }
+      return;
+    }
+
     if (selectedCities.includes(city)) {
       setSelectedCities((prev) => prev.filter((c) => c !== city));
     } else if (selectedCities.length < 5) {
@@ -125,8 +181,11 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const allRoles = [...selectedRoles, customRole].filter(Boolean);
-      const allLocations = [...selectedCities, customCity].filter(Boolean);
+      const allRoles = [...selectedRoles.filter((role) => role !== 'Other'), customRole.trim()].filter(Boolean);
+      const allLocations = [
+        ...selectedCities.filter((city) => city !== 'Other'),
+        ...(selectedCities.includes('Other') ? [customCity.trim()] : []),
+      ].filter(Boolean);
 
       onNext({
         targetRoles: allRoles,
@@ -171,27 +230,47 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
               <div>
                 <Label className="font-medium text-sm tracking-wide text-left block">Target roles <span className="text-destructive">*</span></Label>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                {CAREER_ROLES.map((role) => (
-                  <label
-                    key={role}
-                    className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
-                      selectedRoles.includes(role)
-                        ? 'bg-primary/5'
-                        : 'bg-muted/30'
-                    } ${!selectedRoles.includes(role) && totalRoles >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedRoles.includes(role)}
-                      onChange={() => handleToggleRole(role)}
-                      disabled={!selectedRoles.includes(role) && totalRoles >= 5}
-                      className="w-4 h-4 rounded accent-green-600"
-                    />
-                    <span className="text-sm font-medium text-muted-foreground">{role}</span>
-                  </label>
-                ))}
-              </div>
+              
+              {isRolesLoading ? (
+                <div className="text-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mt-2">Loading available roles...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {(availableRoles.includes('Other') ? availableRoles : [...availableRoles, 'Other']).map((role) => (
+                    <label
+                      key={role}
+                      className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+                        selectedRoles.includes(role)
+                          ? 'bg-primary/5'
+                          : 'bg-muted/30'
+                      } ${!selectedRoles.includes(role) && totalRoles >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedRoles.includes(role)}
+                        onChange={() => handleToggleRole(role)}
+                        disabled={!selectedRoles.includes(role) && totalRoles >= 5}
+                        className="w-4 h-4 rounded accent-green-600"
+                      />
+                      <span className="text-sm font-medium text-muted-foreground">{role}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {selectedRoles.includes('Other') && (
+                <div className="space-y-2">
+                  <Label className="font-medium text-sm tracking-wide text-left block">Custom Role</Label>
+                  <Input
+                    placeholder="Enter custom role"
+                    value={customRole}
+                    onChange={(e) => setCustomRole(e.target.value)}
+                    disabled={isRolesLoading}
+                  />
+                </div>
+              )}
 
               {errors.roles && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -224,12 +303,12 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
 
               {/* Cities Grid */}
               <div className="grid grid-cols-3 gap-3">
-                {INDIAN_CITIES.map((city) => (
+                {(availableCities.includes('Other') ? availableCities : [...availableCities, 'Other']).map((city) => (
                   <button
                     key={city}
                     type="button"
                     onClick={() => handleToggleCity(city)}
-                    disabled={!selectedCities.includes(city) && selectedCities.length >= 5}
+                    disabled={!selectedCities.includes(city) && selectedCities.filter((c) => c !== 'Other').length >= 5}
                     className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                       selectedCities.includes(city)
                         ? 'border-primary bg-primary text-primary-foreground'
@@ -240,6 +319,17 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
                   </button>
                 ))}
               </div>
+
+              {selectedCities.includes('Other') && (
+                <div className="space-y-2">
+                  <Label className="font-medium text-sm tracking-wide text-left block">Custom Location</Label>
+                  <Input
+                    placeholder="Enter custom location"
+                    value={customCity}
+                    onChange={(e) => setCustomCity(e.target.value)}
+                  />
+                </div>
+              )}
 
               {errors.locations && (
                 <p className="text-sm text-destructive flex items-center gap-1">
