@@ -8,8 +8,10 @@ import { toast } from '@/components/ui/use-toast'
 // // import { store as sessionModalStore } from '@/store/store'
 // import { sessionModalStore } from '@/store/store'
 import { useSessionModalStore } from '@/store/session.store'
+import { useUnauthorizedModalStore } from '@/store/unauthorized.store'
 
 const sessionModalStore = useSessionModalStore.getState()
+const unauthorizedModalStore = useUnauthorizedModalStore.getState()
 
 let mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
@@ -93,7 +95,7 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
-          // :no_entry_sign: Skip token refresh if on login route or calling login/refresh endpoints
+        // :no_entry_sign: Skip token refresh if on login route or calling login/refresh endpoints
         const isLoginOrRefresh =
             originalRequest.url.includes('/auth/login') ||
             originalRequest.url.includes('/auth/refresh')
@@ -147,8 +149,8 @@ api.interceptors.response.use(
             } finally {
                 isRefreshing = false
             }
-        // } else if (error.response?.status === 403) {
-
+        } else if (error.response?.status === 403) {
+            unauthorizedModalStore.setShowModal(true)
         }
 
 

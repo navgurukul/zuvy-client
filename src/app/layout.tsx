@@ -8,6 +8,7 @@ import '@remirror/styles/all.css'
 import '@/app/globals.css'
 import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
 import SessionModalWrapper from '@/components/SessionModalWrapper'
+import NotAuthorizedUserWrapper from '@/components/NotAuthorizedUserWrapper'
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -40,6 +41,7 @@ export default function RootLayout({
                 <Toaster />
                 <AnalyticsScripts />
                 <SessionModalWrapper />
+                <NotAuthorizedUserWrapper />
             </body>
         </html>
     )
