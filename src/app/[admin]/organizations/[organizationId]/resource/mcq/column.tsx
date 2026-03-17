@@ -41,6 +41,7 @@ import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
+import PreviewZuvyEvalQuestion from '../_components/PreviewZuvyEvalQuestion'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -334,6 +335,113 @@ export const columns: ColumnDef<quiz>[] = [
                     />
                 </div>
             )
+        },
+    },
+]
+
+export const zuvyEvalColumns: ColumnDef<any>[] = [
+    {
+        accessorKey: 'domainName',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex text-left"
+                column={column}
+                title="Domain Name"
+            />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex text-left">
+                    <span className="text-foreground rounded-md text-sm font-medium">
+                        {row.original.domainName || 'No Domain'}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'question',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Question Name"
+            />
+        ),
+        cell: ({ row }) => {
+            const question = row.original?.question
+
+            return (
+                <div
+                    className="text-left text-md p-1 w-[460px] text-sm hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                    style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                    }}
+                >
+                    {renderQuestionPreview(question)}
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'topicName',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex text-left"
+                column={column}
+                title="Topic"
+            />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex text-left">
+                    <span className="text-foreground rounded-md text-sm font-medium">
+                        {row.original.topicName || 'No Topic'}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'difficulty',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className=""
+                column={column}
+                title="Difficulty"
+            />
+        ),
+        cell: ({ row, table }) => {
+            const difficulty = row.original.difficulty
+
+            return (
+                <p
+                    className={`flex text-[12px] items-center capitalize w-1/2 p-1 rounded-full border justify-center  ${difficultyColor(
+                        difficulty
+                    )}`}
+                >
+                    {difficulty}
+                </p>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        id: 'actions-preview',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Preview"
+            />
+        ),
+        cell: ({ row }) => {
+            return <PreviewZuvyEvalQuestion questionId={row.original.id} />
         },
     },
 ]

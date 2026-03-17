@@ -1,16 +1,25 @@
 'use client'
 // External imports
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { ChevronLeft,Search } from 'lucide-react'
+import { ChevronLeft, Search, ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
 import { SearchBox } from '@/utils/searchBox'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { columns } from './column'
+import { columns, zuvyEvalColumns } from './column'
 import dynamic from 'next/dynamic'
 import { api } from '@/utils/axios.config'
 import {
@@ -26,9 +35,10 @@ import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { POSITION, OFFSET } from '@/utils/constant'
+import { POSITION, OFFSET, ROWS_PER_PAGE } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {McqSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
@@ -46,6 +56,7 @@ import { filteredQuizQuestions } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
+import { useZuvyEvalQuestions } from '@/hooks/useZuvyEvalQuestions'
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm').then(mod => ({ default: mod.CreateProblemForm })), {
     ssr: false,
@@ -97,8 +108,21 @@ const Mcqs = (props: Props) => {
     const [options, setOptions] = useState<PageOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
+    const [showZuvyEvalOnly, setShowZuvyEvalOnly] = useState(false)
     const [loading, setLoading] = useState(true)
     const [isCreateMcqDialogOpen, setIsCreateMcqDialogOpen] = useState(false)
+    const [zuvyEvalPage, setZuvyEvalPage] = useState(1)
+    const [zuvyEvalLimit, setZuvyEvalLimit] = useState('20')
+    const {
+        questions: zuvyEvalQuestions,
+        loading: zuvyEvalLoading,
+        error: zuvyEvalError,
+        totalPages: zuvyEvalTotalPages,
+    } = useZuvyEvalQuestions({
+        page: zuvyEvalPage,
+        limit: parseInt(zuvyEvalLimit),
+        enabled: showZuvyEvalOnly,
+    })
 
     const { isConnected: isSocketConnected, lastQuestionsReadyEvent } =
         getSocketConnectionStore()
@@ -502,6 +526,17 @@ const Mcqs = (props: Props) => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
+    const tableData = useMemo(() => {
+        if (showZuvyEvalOnly) {
+            return zuvyEvalQuestions
+        }
+
+        return quizData || []
+    }, [showZuvyEvalOnly, zuvyEvalQuestions, quizData])
+
+    const tableColumns = useMemo(() => {
+        return showZuvyEvalOnly ? zuvyEvalColumns : columns
+    }, [showZuvyEvalOnly])
 
     const renderTabContent = (tabValue: string) => {
         switch (tabValue) {
@@ -700,9 +735,19 @@ const Mcqs = (props: Props) => {
                                 handleOptionClick={handleTagOption}
                                 type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                             />
-                        </div>   
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <Switch
+                                id="zuvy-eval-toggle"
+                                checked={showZuvyEvalOnly}
+                                onCheckedChange={setShowZuvyEvalOnly}
+                            />
+                            <Label htmlFor="zuvy-eval-toggle" className="text-sm font-medium cursor-pointer mt-4">
+                                Show Zuvy Eval Questions
+                            </Label>
+                        </div>
                         <div className="ml-auto">
-                            {logSelectedRowsFunction && tableInstance && (
+                            {!showZuvyEvalOnly && logSelectedRowsFunction && tableInstance && (
                                 <McqDeleteVaiarntComp
                                     table={tableInstance}
                                     logSelectedRows={logSelectedRowsFunction}
@@ -710,17 +755,27 @@ const Mcqs = (props: Props) => {
                             )}
                         </div> 
                     </div>
+                    {showZuvyEvalOnly && zuvyEvalLoading && (
+                        <div className="flex justify-center py-4">
+                            <Spinner />
+                        </div>
+                    )}
+                    {showZuvyEvalOnly && zuvyEvalError && (
+                        <p className="text-sm text-destructive mb-3">{zuvyEvalError}</p>
+                    )}
                     
 
                     <DataTable
-                        data={quizData || []} // Ensure data is never undefined
-                        columns={columns}
+                        data={tableData}
+                        columns={tableColumns as any}
                         mcqSide={true}
-                        getSelectedRowsFunction={handleGetSelectedRowsFunction}
+                        getSelectedRowsFunction={
+                            showZuvyEvalOnly ? undefined : handleGetSelectedRowsFunction
+                        }
                     />
 
 
-                    {totalMCQQuestion > 0 && (
+                    {!showZuvyEvalOnly && totalMCQQuestion > 0 && (
                         <div className='py-4 flex justify-end'>
                             <DataTablePagination
                                 totalStudents={totalMCQQuestion}
@@ -728,6 +783,79 @@ const Mcqs = (props: Props) => {
                                 pages={totalPages}
                                 fetchStudentData={fetchCodingQuestions}
                             />
+                        </div>
+                    )}
+                    
+                    {showZuvyEvalOnly && zuvyEvalTotalPages > 0 && (
+                        <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">
+                            <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button className='border border-input bg-background-secondary text-gray-600 hover:text-primary-foreground'>
+                                        {zuvyEvalLimit} <ChevronDown className="ml-2" size={15} />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-full" align="start">
+                                    <DropdownMenuLabel>Rows</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuRadioGroup
+                                        value={zuvyEvalLimit}
+                                        onValueChange={(newLimit) => {
+                                            setZuvyEvalLimit(newLimit)
+                                            setZuvyEvalPage(1)
+                                        }}
+                                    >
+                                        {ROWS_PER_PAGE.map((rows) => (
+                                            <DropdownMenuRadioItem key={rows} value={rows}>
+                                                {rows}
+                                            </DropdownMenuRadioItem>
+                                        ))}
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <div className="flex items-center space-x-6 lg:space-x-8">
+                                <div className="flex w-[100px] items-center text-gray-600 justify-center text-sm font-medium">
+                                    Page {zuvyEvalPage} of {zuvyEvalTotalPages}
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        className="hidden h-8 w-8 p-0 lg:flex"
+                                        onClick={() => setZuvyEvalPage(1)}
+                                        disabled={zuvyEvalPage === 1}
+                                    >
+                                        <span className="sr-only">Go to first page</span>
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => setZuvyEvalPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={zuvyEvalPage === 1}
+                                    >
+                                        <span className="sr-only">Go to previous page</span>
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => setZuvyEvalPage((prev) => Math.min(prev + 1, zuvyEvalTotalPages))}
+                                        disabled={zuvyEvalPage === zuvyEvalTotalPages}
+                                    >
+                                        <span className="sr-only">Go to next page</span>
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="hidden h-8 w-8 p-0 lg:flex"
+                                        onClick={() => setZuvyEvalPage(zuvyEvalTotalPages)}
+                                        disabled={zuvyEvalPage === zuvyEvalTotalPages}
+                                    >
+                                        <span className="sr-only">Go to last page</span>
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </MaxWidthWrapper>

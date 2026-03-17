@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client'
 import { toast } from '@/components/ui/use-toast'
 import { getSocketConnectionStore, getUser } from '@/store/store'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL 
+const API_URL = process.env.NEXT_PUBLIC_LOCAL_URL 
 
 export default function RootSocketConnection() {
     const socketRef = useRef<Socket | null>(null)
@@ -43,6 +43,7 @@ export default function RootSocketConnection() {
         socketRef.current = socket
 
         socket.on('connect', () => {
+            console.log('WebSocket connected with ID:', socket.id)
             setIsConnected(true)
         })
 
