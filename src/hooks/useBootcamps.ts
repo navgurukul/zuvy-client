@@ -94,7 +94,7 @@ export function useBootcamps({
 }: UseBootcampsArgs) {
     const { organizationId } = useParams()
     const { user } = getUser()
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
     const stableLimit = useMemo(() => {
         const n = typeof limit === 'string' ? Number(limit) : limit
         return Number.isFinite(n) ? n : 10
@@ -132,7 +132,10 @@ export function useBootcamps({
             const ctrl = (abortRef.current = new AbortController())
 
             try {
-                if(orgId === undefined) return []
+                if (!orgId || isNaN(orgId)) {
+                    setCourses([])
+                    return
+                }
                 const base = `/bootcamp/all/${orgId}?limit=${stableLimit}&offset=${off}`
                 const url = searchTerm
                     ? `${base}&searchTerm=${encodeURIComponent(searchTerm)}`
@@ -144,14 +147,19 @@ export function useBootcamps({
 
                 lastKeyRef.current = key
             } catch (err: any) {
-                if (!ctrl.signal.aborted) setError(err)
+                if (!ctrl.signal.aborted) {
+                    setError(err)
+                    // On error, we should also update lastKeyRef to avoid immediate loop if effect triggers again
+                    // But we want to allow manual refetch, so we only block if it's the exact same automated trigger
+                    lastKeyRef.current = key
+                }
             } finally {
                 if (inFlightKeyRef.current === key) inFlightKeyRef.current = ''
                 if (abortRef.current === ctrl) abortRef.current = null
                 setLoading(false)
             }
         },
-        [stableLimit, searchTerm]
+        [stableLimit, searchTerm, orgId]
     )
 
     // auto fetch on primitive inputs change

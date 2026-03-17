@@ -33,7 +33,7 @@ import { useBootcamps } from '@/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
-import {CoursesSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { CoursesSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import { useParams } from 'next/navigation'
 
 const statusOptions = [
@@ -82,29 +82,29 @@ const Courses: React.FC = () => {
     const { createBootcamp, creating } = useCreateBootcamp()
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
-        if(orgId === undefined) return []
+        if (orgId === undefined) return []
         const response = await api.get(
             `/bootcamp/all/${orgId}?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
         );
         return response.data.data;
-    }, []);
+    }, [orgId]);
 
-const fetchSearchResultsApi = useCallback(
-    async (query: string, pageOffset: number = 0) => {
-        console.log("SEARCH API CALLED", { query, pageOffset });
+    const fetchSearchResultsApi = useCallback(
+        async (query: string, pageOffset: number = 0) => {
+            console.log("SEARCH API CALLED", { query, pageOffset });
 
-        setCurrentSearchQuery(query);
-        setOffset(0);   
+            setCurrentSearchQuery(query);
+            setOffset(0);
 
-        await refetchBootcamps(0);  
-        return [];
-    },
-    [refetchBootcamps]
-);
+            await refetchBootcamps(0);
+            return [];
+        },
+        [refetchBootcamps]
+    );
 
 
 
-const defaultFetchApi = useCallback(
+    const defaultFetchApi = useCallback(
         async (offsetParam = offset) => {
             setCurrentSearchQuery('');
             setOffset(offsetParam);
@@ -115,7 +115,7 @@ const defaultFetchApi = useCallback(
     );
 
 
-// Use the search hook
+    // Use the search hook
     const {
         clearSearch,
     } = useSearchWithSuggestions({
@@ -177,9 +177,9 @@ const defaultFetchApi = useCallback(
         }
     }
     const handleCardClick = (id: number) => {
-        if(permissions.editCourse) {
+        if (permissions.editCourse) {
             router.push(`courses/${id}/details`)
-        }else {
+        } else {
             router.push(`courses/${id}/curriculum`)
         }
         // localStorage.setItem('courseId', id.toString())
@@ -226,7 +226,7 @@ const defaultFetchApi = useCallback(
     return (
         <>
             {loading ? (
-                <CoursesSkeleton/>
+                <CoursesSkeleton />
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
@@ -295,7 +295,7 @@ const defaultFetchApi = useCallback(
                                     )}
                                     getSuggestionValue={(s) => s.name}
                                     inputWidth="w-full"
-                                    
+
                                 />
                             </div>
 
@@ -508,10 +508,10 @@ const defaultFetchApi = useCallback(
                                             // }
 
                                             if (currentSearchQuery.trim()) {
-                                                fetchSearchResultsApi(currentSearchQuery) 
+                                                fetchSearchResultsApi(currentSearchQuery)
                                             } else {
                                                 defaultFetchApi(newOffset)
-                                           }
+                                            }
                                         }}
                                     />
                                 </div>
