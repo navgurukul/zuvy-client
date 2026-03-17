@@ -109,9 +109,7 @@ const BatchesInfo = ({
     } = useBatchDetail(params)
     const { organizationId } = useParams()
     const { user } = getUser()
-    // const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const pathname = usePathname()
     const role = pathname.split('/')[1]
 
@@ -368,12 +366,13 @@ const BatchesInfo = ({
                                                 <DialogTitle>
                                                     Update Batch
                                                 </DialogTitle>
+                                            </DialogHeader>
                                                 <Form {...form}>
                                                     <form
                                                         onSubmit={form.handleSubmit(
                                                             onSubmit
                                                         )}
-                                                        className="space-y-8"
+                                                        className="space-y-8 text-start"
                                                     >
                                                         <FormField
                                                             control={
@@ -487,7 +486,7 @@ const BatchesInfo = ({
                                                         </div>
                                                     </form>
                                                 </Form>
-                                            </DialogHeader>
+                                            
                                         </DialogContent>
                                     </Dialog>
                                 )}

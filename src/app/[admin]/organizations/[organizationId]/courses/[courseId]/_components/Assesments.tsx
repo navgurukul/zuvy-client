@@ -11,8 +11,7 @@ const Assesments = (props: ModuleProps) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     return (
         <div className="w-full">

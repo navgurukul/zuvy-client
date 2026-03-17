@@ -54,8 +54,7 @@ export function UserManagementTable<TData extends User, TValue>({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})

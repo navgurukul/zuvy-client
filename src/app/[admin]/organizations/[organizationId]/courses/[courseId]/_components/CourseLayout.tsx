@@ -30,8 +30,7 @@ function CourseLayout() {
     const { organizationId, courseId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const { courseData, Permissions } = getCourseData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]

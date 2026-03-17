@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
 import type {
     Course,
@@ -13,23 +13,33 @@ import { useParams } from 'next/navigation'
 export function useAllCourses(initialFetch = true) {
     const { organizationId } = useParams()
     const { user } = getUser()
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId;
     const [allCourses, setAllCourses] = useState<Course[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
 
+    // track last completed request to avoid loop on error
+    const lastKeyRef = useRef<string>('')
+    const inFlightKeyRef = useRef<string>('')
+
     const getAllCourses = useCallback(async () => {
+        const key = `${orgId}`;
+        if (key === inFlightKeyRef.current || key === lastKeyRef.current) {
+            return
+        }
+
         try {
+            inFlightKeyRef.current = key
             setLoading(true)
-            if(orgId === undefined) return []
+            if (!orgId || isNaN(orgId)) {
+                setAllCourses([])
+                return
+            }
             const res = await api.get<CoursesResponse>(
-                // '/bootcamp?limit=10&offset=0'
-                 `/bootcamp/all/${orgId}`
+                `/bootcamp/all/${orgId}`
             )
             setAllCourses(res.data.data)
-            
+
             // Save permissions to IndexedDB
             const newPermissions = res.data.permissions;
             const existing = await db.permissions.toArray()
@@ -44,16 +54,18 @@ export function useAllCourses(initialFetch = true) {
                 )
                 await db.permissions.bulkPut(entries)
             }
-            
+
             setError(null)
+            lastKeyRef.current = key
         } catch (err) {
             setError(err)
-            // keep previous allCourses on error
-            // console.error('Error fetching all courses:', err)
+            // Block loop on error by marking as fetched for this orgId
+            lastKeyRef.current = key
         } finally {
+            inFlightKeyRef.current = ''
             setLoading(false)
         }
-    }, [])
+    }, [orgId])
 
     useEffect(() => {
         if (initialFetch) getAllCourses()

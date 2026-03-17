@@ -16,8 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const { permissions, loading } = useModuleChapters(moduleID)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || 'admin'
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     if (loading) {
         return (

@@ -34,8 +34,7 @@ const IndividualStudentAssesment = ({
     const color = getAssesmentBackgroundColorClass(25, 5)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     const renderQuestion = () => {
         switch (type) {

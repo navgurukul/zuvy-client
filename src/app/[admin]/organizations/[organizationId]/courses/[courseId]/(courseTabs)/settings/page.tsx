@@ -27,8 +27,7 @@ const Page = ({ params }: { params: PageProps }) => {
     const { courseData } = getCourseData()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     // Use the custom hooks
     const { bootcampSettings, loading, error, updateError, updateSettings } =

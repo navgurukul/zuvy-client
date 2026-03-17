@@ -36,9 +36,8 @@ export default function AuditLogPage() {
 
   // Get user and org info (same pattern as courses page)
   const { user } = getUser();
-  const userRole = user?.rolesList?.[0]?.toLowerCase() || '';
-  const isSuperAdmin = userRole === 'super_admin';
-  const orgId = isSuperAdmin ? Number(organizationId) : user?.orgId;
+  const orgId = Number(organizationId) || user?.orgId;
+
 
   // Use the tracking log hook with current filter values - using actual search term
   const { trackingLogs, loading, error, totalRows, refetch } = useTrackingLog({
