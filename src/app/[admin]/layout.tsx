@@ -18,7 +18,6 @@ export default function RootLayout({
 }) {
     const { refetchAllCourses } = useAllCourses(true)
     const pathname = usePathname()
-    const { organizationId } = useParams()
     const { roles, loading } = useRoles()
     const { user } = getUser()
     const router = useRouter()
@@ -44,11 +43,6 @@ export default function RootLayout({
             />
         )
     }
-    
-    // 🏢 Organization validation check
-    // if (organizationId && userRole !== 'super_admin' && user.orgId !== Number(organizationId)) {
-    //     return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
-    // }
 
     if(roleFromPath === userRole) {
             // ✅ Authorized user

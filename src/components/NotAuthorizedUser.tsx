@@ -2,12 +2,14 @@
 
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { getUser } from '@/store/store'
-import { useUnauthorizedModalStore } from '@/store/unauthorized.store'
+import { useUnauthorizedModalStore, unauthorizedMessage } from '@/store/session.store'
 
 const NotAuthorizedUser = () => {
     const router = useRouter()
+    const { setShowModal } = useUnauthorizedModalStore()
+    const { message } = unauthorizedMessage()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = user?.orgId;
@@ -28,13 +30,11 @@ const NotAuthorizedUser = () => {
                         Unauthorized Access
                     </h1>
                     <p className="text-md mt-3 mb-5 capitalize">
-                        {/* {`The page is meant to be viewed with specific permissions. You do
-                        not have access to view this page.`} */}
-                        This page is accessible only to Genisys Group Admins. You are currently associated with the NG organization and do not have permission to view this page.
+                        {message}
                     </p>
                     <Button onClick={() => {
-                        useUnauthorizedModalStore.getState().setShowModal(false);
-                        router.push(`/${userRole}/organizations/${orgId || user?.orgId}/courses`);
+                        setShowModal(false);
+                        router.push(`/${userRole}/organizations/${orgId}/courses`);
                     }}>
                         Return to my Organisation
                     </Button>

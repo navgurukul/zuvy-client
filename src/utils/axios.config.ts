@@ -7,11 +7,11 @@ import { toast } from '@/components/ui/use-toast'
 // import { useSessionModal } from '@/store/store'
 // // import { store as sessionModalStore } from '@/store/store'
 // import { sessionModalStore } from '@/store/store'
-import { useSessionModalStore } from '@/store/session.store'
-import { useUnauthorizedModalStore } from '@/store/unauthorized.store'
+import { useSessionModalStore, useUnauthorizedModalStore, unauthorizedMessage } from '@/store/session.store'
 
 const sessionModalStore = useSessionModalStore.getState()
 const unauthorizedModalStore = useUnauthorizedModalStore.getState()
+const unauthorizedMessageStore = unauthorizedMessage.getState()
 
 let mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
@@ -150,7 +150,9 @@ api.interceptors.response.use(
                 isRefreshing = false
             }
         } else if (error.response?.status === 403) {
+            console.error('Unauthorized access - 403', error.response.data.message)
             unauthorizedModalStore.setShowModal(true)
+            unauthorizedMessageStore.setMessage(error.response.data.message || 'You do not have permission to access this resource.')
         }
 
 

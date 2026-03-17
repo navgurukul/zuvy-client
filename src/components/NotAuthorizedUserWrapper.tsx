@@ -1,11 +1,10 @@
 'use client'
 
-import { useUnauthorizedModalStore } from '@/store/unauthorized.store'
 import NotAuthorizedUser from '@/components/NotAuthorizedUser'
+import { useUnauthorizedModalStore } from '@/store/session.store'
 
 export default function NotAuthorizedUserWrapper() {
     const showModal = useUnauthorizedModalStore((state) => state.showModal)
-    console.log('NotAuthorizedUserWrapper showModal:', showModal)
 
     if (!showModal) return null;
 
