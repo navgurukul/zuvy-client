@@ -75,23 +75,25 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     step3Data?: Step3Type,
     step4Data?: Step4Type
   ) => {
-    const normalizeText = (value?: string) => {
-      const trimmed = value?.trim();
-      return trimmed ? trimmed : null;
+    const normalizeText = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      return stringValue ? stringValue : null;
     };
 
-    const normalizeEmail = (value?: string) => {
-      const trimmed = value?.trim();
-      if (!trimmed) return null;
+    const normalizeEmail = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      if (!stringValue) return null;
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(trimmed) ? trimmed : null;
+      return emailRegex.test(stringValue) ? stringValue : null;
     };
 
-    const isValidOtherCollege = (value?: string) => {
-      const trimmed = value?.trim();
-      if (!trimmed) return false;
-      if (trimmed.length < 3) return false;
-      return /^[a-zA-Z0-9\s.,'&()\-]+$/.test(trimmed);
+    const isValidOtherCollege = (value?: any) => {
+      if (value === null || value === undefined || value === '') return false;
+      const stringValue = String(value).trim();
+      if (!stringValue || stringValue.length < 3) return false;
+      return /^[a-zA-Z0-9\s.,'&()\-]+$/.test(stringValue);
     };
 
     const collegeNameValue = normalizeText(step1Data.collegeName);

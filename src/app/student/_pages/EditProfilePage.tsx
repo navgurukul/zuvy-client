@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,9 +45,26 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStorage } from '@/hooks/use-profile';
-import { SKILLS_BY_CATEGORY, COLLEGES, CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
-import type { CompetitiveProfile } from '@/lib/profile.types';
+import { SKILLS_BY_CATEGORY, COLLEGES, MONTHS } from '@/lib/profile.mockData';
+import type {
+  CompetitiveProfile,
+  WorkExperience,
+  OnboardingStep1 as Step1Type,
+  OnboardingStep2 as Step2Type,
+  OnboardingStep3 as Step3Type,
+  OnboardingStep4 as Step4Type,
+} from '@/lib/profile.types';
+import useLearnerProfile from '@/hooks/useLearnerProfile';
+import useUpdateLearnerProfile from '@/hooks/useUpdateLearnerProfile';
+import useLearnerTechnicalSkills from '@/hooks/useLearnerTechnicalSkills';
+import useLearnerDegreeDetails from '@/hooks/useLearnerDegreeDetails';
+import useLearnerBranchDetails from '@/hooks/useLearnerBranchDetails';
+import useLearnerBoards from '@/hooks/useLearnerBoards';
+import useLearnerRoles from '@/hooks/useLearnerRoles';
+import useLearnerRemoteLocations from '@/hooks/useLearnerRemoteLocations';
+import { toast } from '@/components/ui/use-toast';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
+import { WorkExperienceModal, WorkExperienceCard } from '@/app/student/profile/WorkExperienceComponents';
 import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 
 type TabType = 'basic-info' | 'skills-projects' | 'education' | 'career-goals';
@@ -57,6 +74,71 @@ export const EditProfilePage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboardingData, updateStepData } = useOnboardingStorage();
+  const { learnerProfile } = useLearnerProfile();
+  const { updateLearnerProfile } = useUpdateLearnerProfile();
+  const { technicalSkills, loading: isLoadingTechnicalSkills } = useLearnerTechnicalSkills();
+  const { degreeDetails } = useLearnerDegreeDetails();
+  const { branchDetails } = useLearnerBranchDetails();
+  const { boards } = useLearnerBoards();
+  const { roles, loading: isLoadingRoles } = useLearnerRoles();
+  const { remoteLocations, loading: isLoadingRemoteLocations } = useLearnerRemoteLocations();
+  const technicalSkillOptions = useMemo(
+    () =>
+      (technicalSkills || [])
+        .map((skill) => (skill?.name ? String(skill.name).trim() : ''))
+        .filter(Boolean),
+    [technicalSkills]
+  );
+  const degreeOptions = useMemo(
+    () => {
+      const options = Array.from(
+        new Set(
+          (degreeDetails || [])
+            .map((item) => (item?.name ? String(item.name).trim() : ''))
+            .filter(Boolean)
+        )
+      );
+      return options.includes('Other') ? options : [...options, 'Other'];
+    },
+    [degreeDetails]
+  );
+  const boardOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (boards || [])
+            .map((item) => (item?.name ? String(item.name).trim() : ''))
+            .filter(Boolean)
+        )
+      ),
+    [boards]
+  );
+  const roleOptions = useMemo(
+    () => {
+      const options = Array.from(
+        new Set(
+          (roles || [])
+            .map((item) => (item?.name ? String(item.name).trim() : ''))
+            .filter(Boolean)
+        )
+      );
+      return options.includes('Other') ? options : [...options, 'Other'];
+    },
+    [roles]
+  );
+  const locationOptions = useMemo(
+    () => {
+      const options = Array.from(
+        new Set(
+          (remoteLocations || [])
+            .map((item) => (item?.name ? String(item.name).trim() : ''))
+            .filter(Boolean)
+        )
+      );
+      return options.includes('Other') ? options : [...options, 'Other'];
+    },
+    [remoteLocations]
+  );
   const [activeTab, setActiveTab] = useState<TabType>('basic-info');
   const [editingCard, setEditingCard] = useState<EditingCard>(null);
   
@@ -72,6 +154,8 @@ export const EditProfilePage: React.FC = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
+  const [editingExperience, setEditingExperience] = useState<WorkExperience | undefined>(undefined);
   
   // State for edit forms
   const [editedData, setEditedData] = useState<any>({});
@@ -81,6 +165,35 @@ export const EditProfilePage: React.FC = () => {
   const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
   const [rankError, setRankError] = useState<Record<string, string>>({});
   const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const hydratedProfileIdRef = useRef<number | null>(null);
+  const rawDegreeValue = editedData?.step1?.degree ?? onboardingData?.step1?.degree ?? '';
+  const isCustomDegreeValue =
+    Boolean(rawDegreeValue) && rawDegreeValue !== 'Other' && !degreeOptions.includes(rawDegreeValue);
+  const selectedDegreeValue = isCustomDegreeValue ? 'Other' : rawDegreeValue;
+  const degreeCustomValue = editedData?.step1?.customDegree ?? (isCustomDegreeValue ? rawDegreeValue : '');
+  const selectedDegreeForBranch = selectedDegreeValue === 'Other' ? '' : rawDegreeValue;
+  const branchOptions = useMemo(() => {
+    const matchedDegree = (degreeDetails || []).find(
+      (item) => String(item?.name || '').trim() === selectedDegreeForBranch
+    );
+    const degreeBranches = Array.isArray(matchedDegree?.branches)
+      ? matchedDegree.branches
+          .map((item) => (item ? String(item).trim() : ''))
+          .filter(Boolean)
+      : [];
+    const fallbackBranches = (branchDetails || [])
+      .map((item) => (item?.name ? String(item.name).trim() : ''))
+      .filter(Boolean);
+
+    const source = degreeBranches.length > 0 ? degreeBranches : fallbackBranches;
+    const unique = Array.from(new Set(source));
+    return unique.includes('Other') ? unique : [...unique, 'Other'];
+  }, [degreeDetails, branchDetails, selectedDegreeForBranch]);
+  const rawBranchValue = editedData?.step1?.branch ?? onboardingData?.step1?.branch ?? '';
+  const isCustomBranchValue =
+    Boolean(rawBranchValue) && rawBranchValue !== 'Other' && !branchOptions.includes(rawBranchValue);
+  const selectedBranchValue = isCustomBranchValue ? 'Other' : rawBranchValue;
+  const branchCustomValue = editedData?.step1?.customBranch ?? (isCustomBranchValue ? rawBranchValue : '');
   
   // College search state
   const [collegeSearch, setCollegeSearch] = useState('');
@@ -94,6 +207,8 @@ export const EditProfilePage: React.FC = () => {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [remotePreference, setRemotePreference] = useState(false);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [customTargetRole, setCustomTargetRole] = useState('');
+  const [customLocation, setCustomLocation] = useState('');
   const [internshipSalary, setInternshipSalary] = useState('');
   const [fullTimeSalary, setFullTimeSalary] = useState('');
   const [allowCompanies, setAllowCompanies] = useState(false);
@@ -107,7 +222,14 @@ export const EditProfilePage: React.FC = () => {
   // Skills management state - must be before early return
   const skillDropdownRef = useRef<HTMLDivElement>(null);
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
-  const allSkills = Object.values(SKILLS_BY_CATEGORY).flat();
+  const allSkills = useMemo(() => {
+    const apiSkills = (technicalSkills || [])
+      .map((skill) => (skill?.name ? String(skill.name).trim() : ''))
+      .filter(Boolean);
+
+    const sourceSkills = apiSkills.length > 0 ? apiSkills : Object.values(SKILLS_BY_CATEGORY).flat();
+    return Array.from(new Set(sourceSkills));
+  }, [technicalSkills]);
   const [skills, setSkills] = useState<string[]>([]);
   const [filteredSkills, setFilteredSkills] = useState<string[]>(allSkills);
 
@@ -115,62 +237,510 @@ export const EditProfilePage: React.FC = () => {
   const step2 = onboardingData?.step2;
   const step3 = onboardingData?.step3;
   const step4 = onboardingData?.step4;
+  const mergedAcademicPerformance = {
+    ...(step3?.academicPerformance || {}),
+    ...(editedData?.step3?.academicPerformance || {}),
+  };
+
+  const updateAcademicPerformance = (updates: Record<string, any>) => {
+    setEditedData((prev: any) => ({
+      ...prev,
+      step3: {
+        ...(prev.step3 || {}),
+        academicPerformance: {
+          ...(step3?.academicPerformance || {}),
+          ...(prev.step3?.academicPerformance || {}),
+          ...updates,
+        },
+      },
+    }));
+  };
+
+  const formatMonthYearToDate = (value?: { month: string; year: string }) => {
+    if (!value?.year) {
+      return undefined;
+    }
+    const monthIndex = MONTHS.indexOf(value.month || '');
+    const month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
+    return `${value.year}-${month}-01`;
+  };
+
+  const toMonthNumber = (month?: string) => {
+    if (!month) return undefined;
+    const monthIndex = MONTHS.indexOf(month);
+    return monthIndex >= 0 ? monthIndex + 1 : undefined;
+  };
+
+  const buildLearnerProfilePayload = (
+    step1Data: Step1Type,
+    step2Data?: Step2Type,
+    step3Data?: Step3Type,
+    step4Data?: Step4Type
+  ) => {
+    const normalizeText = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      return stringValue ? stringValue : null;
+    };
+
+    const normalizeEmail = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      if (!stringValue) return null;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(stringValue) ? stringValue : null;
+    };
+
+    const technicalSkills = Array.from(
+      new Set([...(step2Data?.autoDetectedSkills || []), ...(step2Data?.additionalSkills || [])].filter(Boolean))
+    );
+
+    const projects = (step2Data?.externalProjects || []).map((project) => ({
+      title: project.title,
+      description: project.oneLineDescription || project.detailedDescription || '',
+      techStack: project.techStack || [],
+      projectType: project.projectType,
+      startDate: formatMonthYearToDate(project.startDate),
+      endDate: formatMonthYearToDate(project.endDate),
+      githubUrl: project.githubUrl,
+      demoUrl: project.demoUrl,
+      detailedDescription: project.detailedDescription,
+    }));
+
+    const academicPerformance = step3Data?.academicPerformance;
+    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
+      ? academicPerformance?.cgpa
+      : academicPerformance?.percentage;
+
+    const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
+      title: experience.role,
+      company: experience.companyName,
+      startDate: formatMonthYearToDate(experience.startDate),
+      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+      description: experience.responsibilities,
+    }));
+
+    const leetcodeUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode')?.username;
+    const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
+    const codeforcesUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'Codeforces')?.username;
+    const buildPlatformProfiles = (platform: CompetitiveProfile['platform']) =>
+      (step3Data?.competitiveProfiles || [])
+        .filter((item) => item.platform === platform)
+        .map((item) => ({
+          username: normalizeText(item.username),
+          rating: item.rating !== undefined ? String(item.rating) : undefined,
+          rank: item.rank !== undefined ? String(item.rank) : undefined,
+        }))
+        .filter((item) => item.username);
+
+    const preferredContactMethods = [
+      step4Data?.communicationPreferences?.email ? 'Email' : null,
+      step4Data?.communicationPreferences?.whatsapp ? 'Whatsapp' : null,
+      step4Data?.communicationPreferences?.phone ? 'Phone' : null,
+    ].filter(Boolean) as string[];
+
+    return {
+      fullName: normalizeText(step1Data.fullName),
+      phoneNumber: normalizeText(step1Data.phoneNumber),
+      email: normalizeEmail(step1Data.email),
+      linkedinProfile: normalizeText(step1Data.linkedin),
+      collegeName: normalizeText(step1Data.collegeName),
+      otherCollegeName: normalizeText(step1Data.customCollege),
+      degree: normalizeText(step1Data.degree),
+      branch: normalizeText(step1Data.branch),
+      yearOfStudy: normalizeText(step1Data.yearOfStudy),
+      graduationMonth: toMonthNumber(step1Data.graduationDate?.month),
+      graduationYear: step1Data.graduationDate?.year ? Number(step1Data.graduationDate.year) : undefined,
+      currentStatus: normalizeText(step1Data.currentStatus),
+      technicalSkills,
+      projects,
+      collegeStream: normalizeText(step1Data.branch),
+      collegeScore: collegeScore !== undefined ? String(collegeScore) : undefined,
+      collegeScoreType: academicPerformance?.marksFormat === 'Percentage' ? '%' : academicPerformance?.marksFormat,
+      class12Board: normalizeText(academicPerformance?.class12Board),
+      class12Score: academicPerformance?.class12Percentage !== undefined ? String(academicPerformance.class12Percentage) : undefined,
+      class12ScoreType: academicPerformance?.class12Format === 'Percentage' ? '%' : academicPerformance?.class12Format,
+      class10Board: normalizeText(academicPerformance?.class10Board),
+      class10Score: academicPerformance?.class10Marks !== undefined ? String(academicPerformance.class10Marks) : undefined,
+      class10ScoreType: academicPerformance?.class10Format === 'Percentage' ? '%' : academicPerformance?.class10Format,
+      hasWorkExperience: step3Data?.hasInternshipExperience,
+      workExperiences,
+      leetcodeUsername: normalizeText(leetcodeUsername),
+      codechefUsername: normalizeText(codechefUsername),
+      codeforcesUsername: normalizeText(codeforcesUsername),
+      leetcodeProfiles: buildPlatformProfiles('LeetCode'),
+      codechefProfiles: buildPlatformProfiles('CodeChef'),
+      codeforcesProfiles: buildPlatformProfiles('Codeforces'),
+      hackerrankProfiles: buildPlatformProfiles('HackerRank'),
+      targetRoles: step4Data?.targetRoles || [],
+      preferredLocations: step4Data?.locationPreferences?.cities || [],
+      openToRemote: step4Data?.locationPreferences?.remote,
+      internshipStipend: normalizeText(step4Data?.salaryExpectations?.internship),
+      fullTimeCtc: normalizeText(step4Data?.salaryExpectations?.fullTime),
+      preferredContactMethods,
+    };
+  };
+
+  const persistProfileChanges = async (
+    nextStep1?: Step1Type,
+    nextStep2?: Step2Type,
+    nextStep3?: Step3Type,
+    nextStep4?: Step4Type
+  ) => {
+    const step1Payload = nextStep1 || step1;
+    if (!step1Payload) {
+      toast.error({
+        title: 'Missing basic details',
+        description: 'Please complete basic info before saving changes.',
+      });
+      return false;
+    }
+
+    const profileId = learnerProfile?.userId || learnerProfile?.id;
+    if (!profileId) {
+      toast.error({
+        title: 'Profile not loaded',
+        description: 'Unable to identify learner profile. Please refresh and try again.',
+      });
+      return false;
+    }
+
+    const payload = buildLearnerProfilePayload(step1Payload, nextStep2 || step2, nextStep3 || step3, nextStep4 || step4);
+    const result = await updateLearnerProfile(profileId, payload);
+
+    if (!result.success) {
+      toast.error({
+        title: 'Save failed',
+        description: 'Could not save profile changes. Please try again.',
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const toMonthName = (value?: string | number | null) => {
+    if (value === null || value === undefined) return '';
+    const monthNumber = Number(value);
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    if (Number.isFinite(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
+      return monthNames[monthNumber - 1];
+    }
+    const normalized = String(value).trim().toLowerCase();
+    const mapped = monthNames.find((month) => month.toLowerCase() === normalized);
+    return mapped || '';
+  };
+
+  useEffect(() => {
+    if (!learnerProfile || hydratedProfileIdRef.current === learnerProfile.id) {
+      return;
+    }
+
+    const profileStep1 = {
+      fullName: learnerProfile.fullName || '',
+      email: learnerProfile.email || '',
+      phoneNumber: learnerProfile.phoneNumber || '',
+      linkedin: learnerProfile.linkedinProfile || '',
+      collegeName: learnerProfile.collegeName || '',
+      customCollege: learnerProfile.otherCollegeName || '',
+      degree: learnerProfile.degree || '',
+      branch: learnerProfile.branch || '',
+      yearOfStudy: (learnerProfile.yearOfStudy as '1st' | '2nd' | '3rd' | '4th') || '1st',
+      graduationDate: {
+        month: toMonthName(learnerProfile.graduationMonth),
+        year: learnerProfile.graduationYear ? String(learnerProfile.graduationYear) : '',
+      },
+      currentStatus:
+        (learnerProfile.currentStatus as 'Learning' | 'Looking for Job' | 'Working') || 'Learning',
+    };
+
+    const profileStep2 = {
+      externalProjects: (learnerProfile.projects || []).map((project, index) => ({
+        id: `api-project-${learnerProfile.id}-${index}`,
+        title: project.title || `Project ${index + 1}`,
+        oneLineDescription: project.description || '',
+        detailedDescription: project.description || '',
+        techStack: project.techStack || [],
+        projectType: 'Solo' as const,
+      })),
+      autoDetectedSkills: learnerProfile.technicalSkills || [],
+      additionalSkills: [],
+    };
+
+    const parseScore = (value: string | number | null) => {
+      if (value === null || value === undefined || value === '') return undefined;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
+    const buildCompetitiveProfile = (
+      platform: CompetitiveProfile['platform'],
+      profiles: any[]
+    ): CompetitiveProfile => {
+      const firstProfile = profiles?.[0];
+      let username = '';
+      let rank: string | number | undefined = undefined;
+      let rating: number | undefined = undefined;
+      let problemsSolved: number | undefined = undefined;
+      
+      if (typeof firstProfile === 'object' && firstProfile !== null) {
+        username = String(firstProfile.username || '').trim();
+        
+        // Extract rank from API - use globalRank if available, otherwise check rank field
+        if (typeof firstProfile.globalRank === 'number' && firstProfile.globalRank !== null) {
+          rank = firstProfile.globalRank;
+        } else if (typeof firstProfile.countryRank === 'number' && firstProfile.countryRank !== null) {
+          rank = firstProfile.countryRank;
+        } else if (typeof firstProfile.rank === 'number') {
+          rank = firstProfile.rank;
+        }
+        
+        // Safe rating extraction - API returns string, convert to number
+        if (firstProfile.rating !== undefined && firstProfile.rating !== null) {
+          const ratingNum = Number(firstProfile.rating);
+          rating = Number.isFinite(ratingNum) ? ratingNum : undefined;
+        }
+        
+        // Safe problemsSolved extraction
+        if (typeof firstProfile.problemsSolved === 'number') {
+          problemsSolved = firstProfile.problemsSolved;
+        }
+      } else if (typeof firstProfile === 'string') {
+        username = String(firstProfile).trim();
+      }
+      
+      const result: CompetitiveProfile = {
+        platform,
+        username,
+        isVerified: false,
+      };
+      
+      if (rank !== undefined) result.rank = rank;
+      if (rating !== undefined) result.rating = rating;
+      if (problemsSolved !== undefined) result.problemsSolved = problemsSolved;
+      
+      return result;
+    };
+
+    const profileStep3 = {
+      academicPerformance:
+        learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
+          ? {
+              marksFormat:
+                learnerProfile.collegeScoreType === '%' ? 'Percentage' : ('CGPA' as const),
+              cgpa:
+                learnerProfile.collegeScoreType !== '%'
+                  ? parseScore(learnerProfile.collegeScore)
+                  : undefined,
+              percentage:
+                learnerProfile.collegeScoreType === '%'
+                  ? parseScore(learnerProfile.collegeScore)
+                  : undefined,
+              class12Format:
+                learnerProfile.class12ScoreType === '%' ? ('Percentage' as const) : ('CGPA' as const),
+              class12Percentage: parseScore(learnerProfile.class12Score),
+              class12Board: learnerProfile.class12Board || undefined,
+              class10Format:
+                learnerProfile.class10ScoreType === '%' ? ('Percentage' as const) : ('CGPA' as const),
+              class10Marks: parseScore(learnerProfile.class10Score),
+              class10Board: learnerProfile.class10Board || undefined,
+            }
+          : undefined,
+      workExperiences: (learnerProfile.workExperiences || []).map((experience: any, index: number) => ({
+        id: `api-work-${learnerProfile.id}-${index}`,
+        companyName: experience?.company || experience?.companyName || '',
+        role: experience?.title || experience?.role || '',
+        startDate: { month: '', year: '' },
+        endDate: { month: '', year: '' },
+        isCurrentlyWorking: false,
+        workMode: 'Remote' as const,
+        responsibilities: experience?.description || '',
+      })),
+      competitiveProfiles: [
+        buildCompetitiveProfile('LeetCode', learnerProfile.leetcodeProfiles || []),
+        buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles || []),
+        buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles || []),
+      ],
+      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+    };
+
+    const preferredMethods = new Set((learnerProfile.preferredContactMethods || []).map((item) => item.toLowerCase()));
+
+    const profileStep4 = {
+      targetRoles: learnerProfile.targetRoles || [],
+      locationPreferences: {
+        remote: learnerProfile.openToRemote || false,
+        cities: learnerProfile.preferredLocations || [],
+      },
+      salaryExpectations: {
+        internship: learnerProfile.internshipStipend ? String(learnerProfile.internshipStipend) : '',
+        fullTime: learnerProfile.fullTimeCtc ? String(learnerProfile.fullTimeCtc) : '',
+      },
+      linkedinUrl: learnerProfile.linkedinProfile || '',
+      communicationPreferences: {
+        email: preferredMethods.has('email'),
+        whatsapp: preferredMethods.has('whatsapp'),
+        phone: preferredMethods.has('phone'),
+      },
+      allowCompaniesViewProfile: true,
+      consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
+    };
+
+    updateStepData(1, profileStep1);
+    updateStepData(2, profileStep2);
+    updateStepData(3, profileStep3);
+    updateStepData(4, profileStep4);
+
+    hydratedProfileIdRef.current = learnerProfile.id;
+  }, [learnerProfile, updateStepData]);
   
   // Save handlers
-  const handleSavePersonalInfo = () => {
+  const handleSavePersonalInfo = async () => {
     if (step1) {
-      updateStepData(1, {
+      const updatedStep1 = {
         ...step1,
         fullName: editedData.fullName || step1.fullName,
         phoneNumber: editedData.phoneNumber || step1.phoneNumber,
         linkedin: editedData.linkedin || step1.linkedin,
-      });
+      };
+
+      updateStepData(1, updatedStep1);
+      const isSaved = await persistProfileChanges(updatedStep1, step2, step3, step4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setEditedData({});
     }
   };
   
-  const handleSaveSkills = () => {
+  const handleSaveSkills = async () => {
     if (step2) {
-      updateStepData(2, {
+      const updatedStep2 = {
         ...step2,
         additionalSkills: editedData.skills || step2.additionalSkills,
-      });
+      };
+
+      updateStepData(2, updatedStep2);
+      const isSaved = await persistProfileChanges(step1, updatedStep2, step3, step4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setEditedData({});
     }
   };
   
-  const handleSaveAcademic = () => {
+  const handleSaveAcademic = async () => {
     if (step1 && step3) {
+      const step1Edits = editedData.step1 || {};
+      const shouldApplyCustomDegree = selectedDegreeValue === 'Other' && (step1Edits.degree === 'Other' || step1Edits.customDegree !== undefined);
+      const shouldApplyCustomBranch = selectedBranchValue === 'Other' && (step1Edits.branch === 'Other' || step1Edits.customBranch !== undefined);
+      const resolvedDegree =
+        shouldApplyCustomDegree
+          ? (String(step1Edits.customDegree || degreeCustomValue || '').trim() || step1.degree)
+          : step1Edits.degree;
+      const resolvedBranch =
+        shouldApplyCustomBranch
+          ? (String(step1Edits.customBranch || branchCustomValue || '').trim() || step1.branch)
+          : step1Edits.branch;
+      const { customDegree, customBranch, ...remainingStep1Edits } = step1Edits;
+      const normalizedStep1Edits = {
+        ...remainingStep1Edits,
+        ...(step1Edits.degree || shouldApplyCustomDegree ? { degree: resolvedDegree } : {}),
+        ...(step1Edits.branch || shouldApplyCustomBranch ? { branch: resolvedBranch } : {}),
+      };
+
+      const updatedStep1 = editedData.step1 ? { ...step1, ...normalizedStep1Edits } : step1;
+      const updatedStep3 = editedData.step3 ? { ...step3, ...editedData.step3 } : step3;
+
       if (editedData.step1) {
-        updateStepData(1, { ...step1, ...editedData.step1 });
+        updateStepData(1, updatedStep1);
       }
       if (editedData.step3) {
-        updateStepData(3, { ...step3, ...editedData.step3 });
+        updateStepData(3, updatedStep3);
       }
+
+      const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setEditedData({});
     }
   };
   
-  const handleSaveCompetitive = () => {
+  const handleSaveCompetitive = async () => {
     if (step3) {
-      updateStepData(3, {
+      const nextCompetitiveProfiles = Array.isArray(editedData.competitiveProfiles)
+        ? editedData.competitiveProfiles
+        : step3.competitiveProfiles;
+      const sanitizedCompetitiveProfiles = nextCompetitiveProfiles.map((profile: CompetitiveProfile) => ({
+        ...profile,
+        username: typeof profile.username === 'string' ? profile.username.trim() : profile.username,
+      }));
+      const updatedStep3 = {
         ...step3,
-        competitiveProfiles: editedData.competitiveProfiles || step3.competitiveProfiles,
-      });
+        competitiveProfiles: sanitizedCompetitiveProfiles,
+      };
+
+      updateStepData(3, updatedStep3);
+      const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setEditedData({});
     }
   };
   
-  const handleSaveCareerGoals = () => {
+  const handleSaveCareerGoals = async () => {
     if (step4) {
-      updateStepData(4, {
+      const normalizedTargetRoles = selectedRoles.filter((role) => role !== 'Other');
+      const trimmedCustomRole = customTargetRole.trim();
+      if (selectedRoles.includes('Other') && trimmedCustomRole && !normalizedTargetRoles.includes(trimmedCustomRole)) {
+        normalizedTargetRoles.push(trimmedCustomRole);
+      }
+
+      const normalizedLocations = selectedCities.filter((city) => city !== 'Other');
+      const trimmedCustomLocation = customLocation.trim();
+      if (selectedCities.includes('Other') && trimmedCustomLocation && !normalizedLocations.includes(trimmedCustomLocation)) {
+        normalizedLocations.push(trimmedCustomLocation);
+      }
+
+      const updatedStep4 = {
         ...step4,
-        ...editedData.step4,
-      });
+        ...(editedData.step4 || {}),
+        targetRoles: normalizedTargetRoles,
+        locationPreferences: {
+          remote: remotePreference,
+          cities: normalizedLocations,
+        },
+        salaryExpectations: {
+          internship: internshipSalary || '',
+          fullTime: fullTimeSalary || '',
+        },
+        communicationPreferences: {
+          email: emailPref,
+          whatsapp: whatsappPref,
+          phone: phonePref,
+        },
+        allowCompaniesViewProfile: allowCompanies,
+      };
+
+      updateStepData(4, updatedStep4);
+      const isSaved = await persistProfileChanges(step1, step2, step3, updatedStep4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setEditedData({});
     }
@@ -252,9 +822,21 @@ export const EditProfilePage: React.FC = () => {
   // Initialize career goals edit state
   useEffect(() => {
     if (editingCard === 'career-goals' && step4) {
-      setSelectedRoles(step4.targetRoles || []);
+      const existingRoles = step4.targetRoles || [];
+      const detectedCustomRole = existingRoles.find((role) => role && !roleOptions.includes(role));
+      const normalizedRoles = detectedCustomRole
+        ? [...existingRoles.filter((role) => roleOptions.includes(role) && role !== 'Other'), 'Other']
+        : existingRoles;
+      setSelectedRoles(normalizedRoles);
+      setCustomTargetRole(detectedCustomRole || '');
       setRemotePreference(step4.locationPreferences?.remote ?? false);
-      setSelectedCities(step4.locationPreferences?.cities || []);
+      const existingCities = step4.locationPreferences?.cities || [];
+      const detectedCustomLocation = existingCities.find((city) => city && !locationOptions.includes(city));
+      const normalizedCities = detectedCustomLocation
+        ? [...existingCities.filter((city) => locationOptions.includes(city) && city !== 'Other'), 'Other']
+        : existingCities;
+      setSelectedCities(normalizedCities);
+      setCustomLocation(detectedCustomLocation || '');
       setInternshipSalary(step4.salaryExpectations?.internship || '');
       setFullTimeSalary(step4.salaryExpectations?.fullTime || '');
       setEmailPref(step4.communicationPreferences?.email ?? true);
@@ -262,7 +844,7 @@ export const EditProfilePage: React.FC = () => {
       setPhonePref(step4.communicationPreferences?.phone ?? false);
       setAllowCompanies(step4.allowCompaniesViewProfile ?? false);
     }
-  }, [editingCard, step4]);
+  }, [editingCard, step4, roleOptions, locationOptions]);
   
   const handleCollegeSelect = (collegeName: string) => {
     setEditedData({...editedData, collegeName, customCollege: ''});
@@ -293,36 +875,47 @@ export const EditProfilePage: React.FC = () => {
     }
   };
   
-  const handleSaveSkillsUpdated = () => {
+  const handleSaveSkillsUpdated = async () => {
     if (step2) {
-      updateStepData(2, {
+      const updatedStep2 = {
         ...step2,
         additionalSkills: skills,
-      });
+      };
+
+      updateStepData(2, updatedStep2);
+      const isSaved = await persistProfileChanges(step1, updatedStep2, step3, step4);
+      if (!isSaved) return;
+
       setEditingCard(null);
       setCustomSkill('');
     }
   };
   
-  const handleAddProject = (project: any) => {
+  const handleAddProject = async (project: any) => {
     if (step2) {
       const updatedProjects = [...(step2.externalProjects || []), project];
-      updateStepData(2, {
+      const updatedStep2 = {
         ...step2,
         externalProjects: updatedProjects,
-      });
+      };
+
+      updateStepData(2, updatedStep2);
+      await persistProfileChanges(step1, updatedStep2, step3, step4);
     }
   };
   
-  const handleEditProject = (project: any) => {
+  const handleEditProject = async (project: any) => {
     if (step2) {
       const updatedProjects = (step2.externalProjects || []).map(p => 
         p.id === project.id ? project : p
       );
-      updateStepData(2, {
+      const updatedStep2 = {
         ...step2,
         externalProjects: updatedProjects,
-      });
+      };
+
+      updateStepData(2, updatedStep2);
+      await persistProfileChanges(step1, updatedStep2, step3, step4);
     }
   };
   
@@ -330,15 +923,52 @@ export const EditProfilePage: React.FC = () => {
     setProjectToDelete(projectId);
   };
   
-  const confirmDeleteProject = () => {
+  const confirmDeleteProject = async () => {
     if (projectToDelete && step2) {
       const updatedProjects = (step2.externalProjects || []).filter(p => p.id !== projectToDelete);
-      updateStepData(2, {
+      const updatedStep2 = {
         ...step2,
         externalProjects: updatedProjects,
-      });
+      };
+
+      updateStepData(2, updatedStep2);
+      await persistProfileChanges(step1, updatedStep2, step3, step4);
       setProjectToDelete(null);
     }
+  };
+
+  const handleAddOrEditExperience = async (experience: WorkExperience) => {
+    if (!step3) return;
+
+    const previousExperiences = step3.workExperiences || [];
+    const alreadyExists = previousExperiences.some((item) => item.id === experience.id);
+    const updatedWorkExperiences = alreadyExists
+      ? previousExperiences.map((item) => (item.id === experience.id ? experience : item))
+      : [...previousExperiences, experience];
+
+    const updatedStep3 = {
+      ...step3,
+      workExperiences: updatedWorkExperiences,
+      hasInternshipExperience: true,
+    };
+
+    updateStepData(3, updatedStep3);
+    await persistProfileChanges(step1, step2, updatedStep3, step4);
+    setEditingExperience(undefined);
+  };
+
+  const handleDeleteExperience = async (experienceId: string) => {
+    if (!step3) return;
+
+    const updatedWorkExperiences = (step3.workExperiences || []).filter((item) => item.id !== experienceId);
+    const updatedStep3 = {
+      ...step3,
+      workExperiences: updatedWorkExperiences,
+      hasInternshipExperience: updatedWorkExperiences.length > 0,
+    };
+
+    updateStepData(3, updatedStep3);
+    await persistProfileChanges(step1, step2, updatedStep3, step4);
   };
 
   const handleVerifyProfile = async (platform: string) => {
@@ -370,7 +1000,7 @@ export const EditProfilePage: React.FC = () => {
             ...step3,
             competitiveProfiles: updatedProfiles,
           });
-          setEditedData({ ...editedData, competitiveProfiles: undefined });
+          setEditedData((prev: any) => ({ ...prev, competitiveProfiles: undefined }));
         } catch (error) {
           setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
         } finally {
@@ -400,7 +1030,7 @@ export const EditProfilePage: React.FC = () => {
             competitiveProfiles: updatedProfiles,
           });
           // Clear edited data for this profile since it's now saved
-          setEditedData({...editedData, competitiveProfiles: undefined});
+          setEditedData((prev: any) => ({ ...prev, competitiveProfiles: undefined }));
         }
         setVerifyingPlatform(null);
       }, 1500);
@@ -491,7 +1121,7 @@ export const EditProfilePage: React.FC = () => {
       <div className="w-full pt-6">
         <div className="flex justify-start px-4 md:px-6">
           <Button variant="ghost" asChild className="gap-1 text-muted-foreground hover:text-foreground ml-0">
-            <Link href="/student?stay=dashboard">
+            <Link href="/student">
               <ChevronLeft className="w-4 h-4" />
               Back to Dashboard
             </Link>
@@ -510,6 +1140,8 @@ export const EditProfilePage: React.FC = () => {
         }}
         onSave={editingProject ? handleEditProject : handleAddProject}
         initialProject={editingProject}
+        techStackOptions={technicalSkillOptions}
+        isLoadingTechStack={isLoadingTechnicalSkills}
       />
       
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-4xl">
@@ -983,6 +1615,12 @@ export const EditProfilePage: React.FC = () => {
                         <Button
                           size="sm"
                           className="gap-2"
+                          onClick={async () => {
+                            const isSaved = await persistProfileChanges(step1, step2, step3, step4);
+                            if (isSaved) {
+                              setEditingCard(null);
+                            }
+                          }}
                         >
                           <Save className="w-4 h-4" />
                           Save Changes
@@ -1153,35 +1791,101 @@ export const EditProfilePage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="font-medium">Degree</Label>
-                                <Select defaultValue={step1.degree}>
+                                <Select
+                                  value={selectedDegreeValue || undefined}
+                                  onValueChange={(value) =>
+                                    setEditedData((prev: any) => ({
+                                      ...prev,
+                                      step1: {
+                                        ...(prev.step1 || {}),
+                                        degree: value,
+                                        customDegree: value === 'Other' ? (prev.step1?.customDegree || '') : '',
+                                      },
+                                    }))
+                                  }
+                                >
                                   <SelectTrigger className="mt-2 bg-muted/30">
                                     <SelectValue placeholder="Select Degree" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="B.Tech">B.Tech</SelectItem>
-                                    <SelectItem value="B.E.">B.E.</SelectItem>
-                                    <SelectItem value="BCA">BCA</SelectItem>
-                                    <SelectItem value="MCA">MCA</SelectItem>
-                                    <SelectItem value="M.Tech">M.Tech</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    {degreeOptions.length > 0 ? (
+                                      degreeOptions.map((degree) => (
+                                        <SelectItem key={degree} value={degree}>
+                                          {degree}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="no-degree-data" disabled>
+                                        No degree options available
+                                      </SelectItem>
+                                    )}
                                   </SelectContent>
                                 </Select>
+                                {selectedDegreeValue === 'Other' && (
+                                  <Input
+                                    className="mt-2 bg-muted/30"
+                                    placeholder="Enter custom degree"
+                                    value={degreeCustomValue}
+                                    onChange={(e) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          customDegree: e.target.value,
+                                        },
+                                      }))
+                                    }
+                                  />
+                                )}
                               </div>
                               <div>
                                 <Label className="font-medium">Branch *</Label>
-                                <Select defaultValue={step1.branch}>
+                                <Select
+                                  value={selectedBranchValue || undefined}
+                                  onValueChange={(value) =>
+                                    setEditedData((prev: any) => ({
+                                      ...prev,
+                                      step1: {
+                                        ...(prev.step1 || {}),
+                                        branch: value,
+                                        customBranch: value === 'Other' ? (prev.step1?.customBranch || '') : '',
+                                      },
+                                    }))
+                                  }
+                                >
                                   <SelectTrigger className="mt-2 bg-muted/30">
                                     <SelectValue placeholder="Select Branch" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="Computer Science">Computer Science</SelectItem>
-                                    <SelectItem value="Information Technology">Information Technology</SelectItem>
-                                    <SelectItem value="Electronics">Electronics</SelectItem>
-                                    <SelectItem value="Mechanical">Mechanical</SelectItem>
-                                    <SelectItem value="Civil">Civil</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    {branchOptions.length > 0 ? (
+                                      branchOptions.map((branch) => (
+                                        <SelectItem key={branch} value={branch}>
+                                          {branch}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="no-branch-data" disabled>
+                                        No branch options available
+                                      </SelectItem>
+                                    )}
                                   </SelectContent>
                                 </Select>
+                                {selectedBranchValue === 'Other' && (
+                                  <Input
+                                    className="mt-2 bg-muted/30"
+                                    placeholder="Enter custom branch"
+                                    value={branchCustomValue}
+                                    onChange={(e) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          customBranch: e.target.value,
+                                        },
+                                      }))
+                                    }
+                                  />
+                                )}
                               </div>
                             </div>
                             
@@ -1256,30 +1960,51 @@ export const EditProfilePage: React.FC = () => {
                                   <Input 
                                     id="collegeScore"
                                     type="number"
-                                    step={step3.academicPerformance.marksFormat === 'CGPA' ? '0.01' : '1'}
+                                    step={mergedAcademicPerformance.marksFormat === 'CGPA' ? '0.01' : '1'}
                                     min="0"
-                                    max={step3.academicPerformance.marksFormat === 'CGPA' ? '10' : '100'}
-                                    placeholder={step3.academicPerformance.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85'}
-                                    defaultValue={step3.academicPerformance.marksFormat === 'CGPA' ? step3.academicPerformance.cgpa : step3.academicPerformance.percentage}
+                                    max={mergedAcademicPerformance.marksFormat === 'CGPA' ? '10' : '100'}
+                                    placeholder={mergedAcademicPerformance.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85'}
+                                    value={
+                                      mergedAcademicPerformance.marksFormat === 'CGPA'
+                                        ? (mergedAcademicPerformance.cgpa ?? '')
+                                        : (mergedAcademicPerformance.percentage ?? '')
+                                    }
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      const parsed = value === '' ? undefined : Number(value);
+                                      if (mergedAcademicPerformance.marksFormat === 'CGPA') {
+                                        updateAcademicPerformance({
+                                          cgpa: Number.isFinite(parsed) ? parsed : undefined,
+                                          percentage: undefined,
+                                        });
+                                      } else {
+                                        updateAcademicPerformance({
+                                          percentage: Number.isFinite(parsed) ? parsed : undefined,
+                                          cgpa: undefined,
+                                        });
+                                      }
+                                    }}
                                     className="flex-1 bg-muted/30"
                                   />
                                   <button
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                      step3.academicPerformance.marksFormat === 'CGPA'
+                                      mergedAcademicPerformance.marksFormat === 'CGPA'
                                         ? 'bg-primary text-primary-foreground'
                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                     }`}
+                                    onClick={() => updateAcademicPerformance({ marksFormat: 'CGPA' })}
                                   >
                                     CGPA
                                   </button>
                                   <button
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                      step3.academicPerformance.marksFormat === 'Percentage'
+                                      mergedAcademicPerformance.marksFormat === 'Percentage'
                                         ? 'bg-primary text-primary-foreground'
                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                     }`}
+                                    onClick={() => updateAcademicPerformance({ marksFormat: 'Percentage' })}
                                   >
                                     %
                                   </button>
@@ -1294,16 +2019,25 @@ export const EditProfilePage: React.FC = () => {
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                   <Label htmlFor="class12Board" className="font-medium">Board</Label>
-                                  <Select defaultValue={step3.academicPerformance.class12Board || ''}>
+                                  <Select
+                                    value={mergedAcademicPerformance.class12Board || undefined}
+                                    onValueChange={(value) => updateAcademicPerformance({ class12Board: value })}
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Board" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="CBSE">CBSE</SelectItem>
-                                      <SelectItem value="ICSE">ICSE</SelectItem>
-                                      <SelectItem value="State Board">State Board</SelectItem>
-                                      <SelectItem value="IB">IB</SelectItem>
-                                      <SelectItem value="Other">Other</SelectItem>
+                                      {boardOptions.length > 0 ? (
+                                        boardOptions.map((board) => (
+                                          <SelectItem key={board} value={board}>
+                                            {board}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="no-board-data" disabled>
+                                          No board options available
+                                        </SelectItem>
+                                      )}
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -1314,30 +2048,39 @@ export const EditProfilePage: React.FC = () => {
                                     <Input 
                                       id="class12Score"
                                       type="number"
-                                      step={(step3.academicPerformance.class12Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                                      step={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
                                       min="0"
-                                      max={(step3.academicPerformance.class12Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                                      placeholder={(step3.academicPerformance.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'Score'}
-                                      defaultValue={step3.academicPerformance.class12Percentage}
+                                      max={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? '10' : '100'}
+                                      placeholder={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'Score'}
+                                      value={mergedAcademicPerformance.class12Percentage ?? ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        const parsed = value === '' ? undefined : Number(value);
+                                        updateAcademicPerformance({
+                                          class12Percentage: Number.isFinite(parsed) ? parsed : undefined,
+                                        });
+                                      }}
                                       className="flex-1 bg-muted/30"
                                     />
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (step3.academicPerformance.class12Format || 'Percentage') === 'CGPA'
+                                        (mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA'
                                           ? 'bg-primary text-primary-foreground'
                                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                       }`}
+                                      onClick={() => updateAcademicPerformance({ class12Format: 'CGPA' })}
                                     >
                                       CGPA
                                     </button>
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (step3.academicPerformance.class12Format || 'Percentage') === 'Percentage'
+                                        (mergedAcademicPerformance.class12Format || 'Percentage') === 'Percentage'
                                           ? 'bg-primary text-primary-foreground'
                                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                       }`}
+                                      onClick={() => updateAcademicPerformance({ class12Format: 'Percentage' })}
                                     >
                                       %
                                     </button>
@@ -1353,16 +2096,25 @@ export const EditProfilePage: React.FC = () => {
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                   <Label htmlFor="class10Board" className="font-medium">Board</Label>
-                                  <Select defaultValue={step3.academicPerformance.class10Board || ''}>
+                                  <Select
+                                    value={mergedAcademicPerformance.class10Board || undefined}
+                                    onValueChange={(value) => updateAcademicPerformance({ class10Board: value })}
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Board" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="CBSE">CBSE</SelectItem>
-                                      <SelectItem value="ICSE">ICSE</SelectItem>
-                                      <SelectItem value="State Board">State Board</SelectItem>
-                                      <SelectItem value="IB">IB</SelectItem>
-                                      <SelectItem value="Other">Other</SelectItem>
+                                      {boardOptions.length > 0 ? (
+                                        boardOptions.map((board) => (
+                                          <SelectItem key={board} value={board}>
+                                            {board}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="no-board-data" disabled>
+                                          No board options available
+                                        </SelectItem>
+                                      )}
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -1373,30 +2125,39 @@ export const EditProfilePage: React.FC = () => {
                                     <Input 
                                       id="class10Marks"
                                       type="number"
-                                      step={(step3.academicPerformance.class10Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                                      step={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
                                       min="0"
-                                      max={(step3.academicPerformance.class10Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                                      placeholder={(step3.academicPerformance.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'Score'}
-                                      defaultValue={step3.academicPerformance.class10Marks}
+                                      max={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? '10' : '100'}
+                                      placeholder={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'Score'}
+                                      value={mergedAcademicPerformance.class10Marks ?? ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        const parsed = value === '' ? undefined : Number(value);
+                                        updateAcademicPerformance({
+                                          class10Marks: Number.isFinite(parsed) ? parsed : undefined,
+                                        });
+                                      }}
                                       className="flex-1 bg-muted/30"
                                     />
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (step3.academicPerformance.class10Format || 'Percentage') === 'CGPA'
+                                        (mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA'
                                           ? 'bg-primary text-primary-foreground'
                                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                       }`}
+                                      onClick={() => updateAcademicPerformance({ class10Format: 'CGPA' })}
                                     >
                                       CGPA
                                     </button>
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (step3.academicPerformance.class10Format || 'Percentage') === 'Percentage'
+                                        (mergedAcademicPerformance.class10Format || 'Percentage') === 'Percentage'
                                           ? 'bg-primary text-primary-foreground'
                                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                       }`}
+                                      onClick={() => updateAcademicPerformance({ class10Format: 'Percentage' })}
                                     >
                                       %
                                     </button>
@@ -1419,6 +2180,7 @@ export const EditProfilePage: React.FC = () => {
                           <Button
                             size="sm"
                             className="gap-2"
+                            onClick={handleSaveAcademic}
                           >
                             <Save className="w-4 h-4" />
                             Save Changes
@@ -1521,42 +2283,31 @@ export const EditProfilePage: React.FC = () => {
                         {/* Show Experience Form only if hasInternship is true */}
                         {hasInternship && (
                           <>
+                            <WorkExperienceModal
+                              isOpen={isExperienceModalOpen}
+                              onOpenChange={(open) => {
+                                setIsExperienceModalOpen(open);
+                                if (!open) {
+                                  setEditingExperience(undefined);
+                                }
+                              }}
+                              onSave={handleAddOrEditExperience}
+                              initialExperience={editingExperience}
+                            />
+
                             {/* Existing Work Experiences */}
                             {step3?.workExperiences && step3.workExperiences.length > 0 && (
-                              <div className="space-y-3">
-                                {step3.workExperiences.map((exp) => (
-                            <Card key={exp.id} className="bg-muted/30 border-border/30">
-                              <CardContent className="p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-medium">{exp.role}</h4>
-                                    <p className="text-sm text-muted-foreground">{exp.companyName}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      {exp.startDate.month} {exp.startDate.year} →{' '}
-                                      {exp.isCurrentlyWorking ? 'Present' : `${exp.endDate?.month} ${exp.endDate?.year}`}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <Badge variant="outline" className="text-xs">
-                                        {exp.workMode}
-                                      </Badge>
-                                      {exp.city && (
-                                        <Badge variant="outline" className="text-xs">
-                                          {exp.city}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm">
-                                      <Edit2 className="w-3 h-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm">
-                                      <X className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
+                              <div className="divide-y divide-border">
+                                {step3.workExperiences.map((experience) => (
+                                  <WorkExperienceCard
+                                    key={experience.id}
+                                    experience={experience}
+                                    onEdit={(exp) => {
+                                      setEditingExperience(exp);
+                                      setIsExperienceModalOpen(true);
+                                    }}
+                                    onDelete={handleDeleteExperience}
+                                  />
                                 ))}
                               </div>
                             )}
@@ -1572,6 +2323,10 @@ export const EditProfilePage: React.FC = () => {
                                 type="button"
                                 size="sm"
                                 className="bg-primary hover:bg-primary/90"
+                                onClick={() => {
+                                  setEditingExperience(undefined);
+                                  setIsExperienceModalOpen(true);
+                                }}
                               >
                                 <Plus className="w-3 h-3 mr-1" />
                                 Add Work Experience
@@ -1631,8 +2386,14 @@ export const EditProfilePage: React.FC = () => {
                         <div key={profile.platform} className="space-y-1">
                           <p className="text-xs text-muted-foreground font-medium">{profile.platform}</p>
                           <p className="font-medium">{profile.username || 'Not Added'}</p>
+                          {profile.rating !== undefined && (
+                            <p className="text-xs text-muted-foreground">Rating: {profile.rating}</p>
+                          )}
                           {profile.rank !== undefined && (
                             <p className="text-xs text-muted-foreground">Rank: {profile.rank}</p>
+                          )}
+                          {profile.problemsSolved !== undefined && (
+                            <p className="text-xs text-muted-foreground">Problems Solved: {profile.problemsSolved}</p>
                           )}
                         </div>
                       ))
@@ -1674,19 +2435,21 @@ export const EditProfilePage: React.FC = () => {
                                 placeholder="Username"
                                 onChange={(e) => {
                                   const nextUsername = e.target.value;
-                                  const newProfiles = editedData.competitiveProfiles || (step3?.competitiveProfiles || []).map(p => ({...p}));
-                                  newProfiles[index] = { 
-                                    ...newProfiles[index], 
-                                    ...profile, 
-                                    username: nextUsername,
-                                    isVerified: false,
-                                    verifiedUsername: undefined,
-                                    problemsSolved: undefined,
-                                    rating: undefined,
-                                    rank: undefined,
-                                    lastVerifiedAt: undefined,
-                                  };
-                                  setEditedData({...editedData, competitiveProfiles: newProfiles});
+                                  setEditedData((prev: any) => {
+                                    const newProfiles = prev.competitiveProfiles || (step3?.competitiveProfiles || []).map(p => ({...p}));
+                                    newProfiles[index] = {
+                                      ...newProfiles[index],
+                                      ...profile,
+                                      username: nextUsername,
+                                      isVerified: false,
+                                      verifiedUsername: undefined,
+                                      problemsSolved: undefined,
+                                      rating: undefined,
+                                      rank: undefined,
+                                      lastVerifiedAt: undefined,
+                                    };
+                                    return { ...prev, competitiveProfiles: newProfiles };
+                                  });
                                   setRankError((prev) => ({ ...prev, [profile.platform]: '' }));
                                   if (!nextUsername.trim()) {
                                     const key = `${profile.platform}-${index}`;
@@ -1889,6 +2652,35 @@ export const EditProfilePage: React.FC = () => {
                       )}
                     </div>
                   )}
+
+                  {/* Preferred Contact Methods */}
+                  {step4.communicationPreferences &&
+                    (step4.communicationPreferences.email ||
+                      step4.communicationPreferences.whatsapp ||
+                      step4.communicationPreferences.phone) && (
+                      <div className="mb-6 pb-6 border-b border-border/30">
+                        <Label className="text-xs font-medium text-muted-foreground mb-3 block">
+                          Preferred contact methods
+                        </Label>
+                        <div className="flex flex-wrap gap-2">
+                          {step4.communicationPreferences.email && (
+                            <Badge variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                              Email
+                            </Badge>
+                          )}
+                          {step4.communicationPreferences.whatsapp && (
+                            <Badge variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                              Whatsapp
+                            </Badge>
+                          )}
+                          {step4.communicationPreferences.phone && (
+                            <Badge variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                              Phone
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   
                   {/* Allow Companies to View Profile */}
                   {step4.allowCompaniesViewProfile !== undefined && (
@@ -1912,32 +2704,49 @@ export const EditProfilePage: React.FC = () => {
                         <Label className="font-medium text-sm tracking-wide text-left block">Target roles <span className="text-destructive">*</span></Label>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
-                        {CAREER_ROLES.map((role) => (
-                          <label
-                            key={role}
-                            className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
-                              selectedRoles.includes(role)
-                                ? 'bg-primary/5'
-                                : 'bg-muted/30'
-                            } ${!selectedRoles.includes(role) && selectedRoles.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedRoles.includes(role)}
-                              onChange={() => {
-                                if (selectedRoles.includes(role)) {
-                                  setSelectedRoles(selectedRoles.filter(r => r !== role));
-                                } else if (selectedRoles.length < 5) {
-                                  setSelectedRoles([...selectedRoles, role]);
-                                }
-                              }}
-                              disabled={!selectedRoles.includes(role) && selectedRoles.length >= 5}
-                              className="w-4 h-4 rounded accent-green-600"
-                            />
-                            <span className="text-sm font-medium text-muted-foreground">{role}</span>
-                          </label>
-                        ))}
+                        {isLoadingRoles ? (
+                          <p className="col-span-3 text-sm text-muted-foreground">Loading roles...</p>
+                        ) : roleOptions.length > 0 ? (
+                          roleOptions.map((role) => (
+                            <label
+                              key={role}
+                              className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+                                selectedRoles.includes(role)
+                                  ? 'bg-primary/5'
+                                  : 'bg-muted/30'
+                              } ${!selectedRoles.includes(role) && selectedRoles.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedRoles.includes(role)}
+                                onChange={() => {
+                                  if (selectedRoles.includes(role)) {
+                                    setSelectedRoles(selectedRoles.filter(r => r !== role));
+                                    if (role === 'Other') {
+                                      setCustomTargetRole('');
+                                    }
+                                  } else if (selectedRoles.length < 5) {
+                                    setSelectedRoles([...selectedRoles, role]);
+                                  }
+                                }}
+                                disabled={!selectedRoles.includes(role) && selectedRoles.length >= 5}
+                                className="w-4 h-4 rounded accent-green-600"
+                              />
+                              <span className="text-sm font-medium text-muted-foreground">{role}</span>
+                            </label>
+                          ))
+                        ) : (
+                          <p className="col-span-3 text-sm text-muted-foreground">No role options available</p>
+                        )}
                       </div>
+                      {selectedRoles.includes('Other') && (
+                        <Input
+                          className="bg-muted/30"
+                          placeholder="Enter custom target role"
+                          value={customTargetRole}
+                          onChange={(e) => setCustomTargetRole(e.target.value)}
+                        />
+                      )}
                     </div>
 
                     {/* Location Preferences */}
@@ -1963,28 +2772,45 @@ export const EditProfilePage: React.FC = () => {
 
                       {/* Cities Grid */}
                       <div className="grid grid-cols-3 gap-3">
-                        {INDIAN_CITIES.map((city) => (
-                          <button
-                            key={city}
-                            type="button"
-                            onClick={() => {
-                              if (selectedCities.includes(city)) {
-                                setSelectedCities(selectedCities.filter(c => c !== city));
-                              } else if (selectedCities.length < 5) {
-                                setSelectedCities([...selectedCities, city]);
-                              }
-                            }}
-                            disabled={!selectedCities.includes(city) && selectedCities.length >= 5}
-                            className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                              selectedCities.includes(city)
-                                ? 'border-primary bg-primary text-primary-foreground'
-                                : 'border-border text-muted-foreground hover:border-primary/50'
-                            }`}
-                          >
-                            {city}
-                          </button>
-                        ))}
+                        {isLoadingRemoteLocations ? (
+                          <p className="col-span-3 text-sm text-muted-foreground">Loading locations...</p>
+                        ) : locationOptions.length > 0 ? (
+                          locationOptions.map((city) => (
+                            <button
+                              key={city}
+                              type="button"
+                              onClick={() => {
+                                if (selectedCities.includes(city)) {
+                                  setSelectedCities(selectedCities.filter(c => c !== city));
+                                  if (city === 'Other') {
+                                    setCustomLocation('');
+                                  }
+                                } else if (selectedCities.length < 5) {
+                                  setSelectedCities([...selectedCities, city]);
+                                }
+                              }}
+                              disabled={!selectedCities.includes(city) && selectedCities.length >= 5}
+                              className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                                selectedCities.includes(city)
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : 'border-border text-muted-foreground hover:border-primary/50'
+                              }`}
+                            >
+                              {city}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="col-span-3 text-sm text-muted-foreground">No location options available</p>
+                        )}
                       </div>
+                      {selectedCities.includes('Other') && (
+                        <Input
+                          className="bg-muted/30"
+                          placeholder="Enter custom location"
+                          value={customLocation}
+                          onChange={(e) => setCustomLocation(e.target.value)}
+                        />
+                      )}
                     </div>
 
                     {/* Salary Expectations */}
@@ -2094,29 +2920,7 @@ export const EditProfilePage: React.FC = () => {
                       <Button
                         size="sm"
                         className="gap-2"
-                        onClick={() => {
-                          if (step4) {
-                            updateStepData(4, {
-                              ...step4,
-                              targetRoles: selectedRoles,
-                              locationPreferences: {
-                                remote: remotePreference,
-                                cities: selectedCities,
-                              },
-                              salaryExpectations: {
-                                internship: internshipSalary || undefined,
-                                fullTime: fullTimeSalary || undefined,
-                              },
-                              communicationPreferences: {
-                                email: emailPref,
-                                whatsapp: whatsappPref,
-                                phone: phonePref,
-                              },
-                              allowCompaniesViewProfile: allowCompanies,
-                            });
-                            setEditingCard(null);
-                          }
-                        }}
+                        onClick={handleSaveCareerGoals}
                       >
                         <Save className="w-4 h-4" />
                         Save Changes

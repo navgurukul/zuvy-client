@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,6 +48,43 @@ export const ProjectModal: React.FC<{
     }
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showCustomTechInput, setShowCustomTechInput] = useState(false);
+  const [customTechStack, setCustomTechStack] = useState('');
+  const resolvedTechStackOptions = useMemo(() => {
+    const baseOptions = (techStackOptions ?? TECH_STACK)
+      .map((item) => (item ? String(item).trim() : ''))
+      .filter(Boolean);
+    const uniqueOptions = Array.from(new Set(baseOptions));
+    return uniqueOptions.includes('Other') ? uniqueOptions : [...uniqueOptions, 'Other'];
+  }, [techStackOptions]);
+
+  // Sync formData with initialProject when modal opens/initialProject changes
+  useEffect(() => {
+    if (isOpen && initialProject) {
+      setFormData(initialProject);
+      setErrors({});
+      setShowCustomTechInput(false);
+      setCustomTechStack('');
+    }
+  }, [isOpen, initialProject]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        id: Date.now().toString(),
+        title: '',
+        oneLineDescription: '',
+        detailedDescription: '',
+        techStack: [],
+        projectType: 'Solo',
+        teamSize: 2,
+      });
+      setErrors({});
+      setShowCustomTechInput(false);
+      setCustomTechStack('');
+    }
+  }, [isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -113,12 +150,31 @@ export const ProjectModal: React.FC<{
   };
 
   const handleTechStackSelect = (tech: string) => {
+    if (tech === 'Other') {
+      setShowCustomTechInput(true);
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       techStack: prev.techStack.includes(tech)
         ? prev.techStack.filter((t) => t !== tech)
         : [...prev.techStack, tech],
     }));
+  };
+
+  const handleAddCustomTechStack = () => {
+    const normalizedTech = customTechStack.trim();
+    if (!normalizedTech) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      techStack: prev.techStack.includes(normalizedTech)
+        ? prev.techStack
+        : [...prev.techStack, normalizedTech],
+    }));
+    setCustomTechStack('');
+    setShowCustomTechInput(false);
   };
 
   const handleSubmit = () => {
@@ -207,7 +263,7 @@ export const ProjectModal: React.FC<{
                   {isLoadingTechStack ? (
                     <div className="p-4 text-center text-muted-foreground text-sm">Loading...</div>
                   ) : (
-                    (techStackOptions ?? TECH_STACK).map((tech) => (
+                    resolvedTechStackOptions.map((tech) => (
                       <div
                         key={tech}
                         className="flex items-center space-x-2 hover:bg-accent p-2 rounded cursor-pointer"
@@ -215,7 +271,7 @@ export const ProjectModal: React.FC<{
                       >
                         <input
                           type="checkbox"
-                          checked={formData.techStack.includes(tech)}
+                          checked={tech === 'Other' ? showCustomTechInput : formData.techStack.includes(tech)}
                           onChange={() => handleTechStackSelect(tech)}
                           className="rounded"
                         />
@@ -226,6 +282,24 @@ export const ProjectModal: React.FC<{
                 </div>
               </SelectContent>
             </Select>
+            {showCustomTechInput && (
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={customTechStack}
+                  onChange={(e) => setCustomTechStack(e.target.value)}
+                  placeholder="Enter custom tech stack"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomTechStack();
+                    }
+                  }}
+                />
+                <Button type="button" size="sm" className="mt-2" onClick={handleAddCustomTechStack}>
+                  Add
+                </Button>
+              </div>
+            )}
             {formData.techStack.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.techStack.map((tech) => (

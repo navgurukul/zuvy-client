@@ -28,6 +28,7 @@ import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
 import { useOnboardingStatus } from "@/hooks/use-profile";
 import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
+import useLearnerProfile from "@/hooks/useLearnerProfile";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -42,6 +43,7 @@ const StudentDashboard = () => {
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
   const { progress } = useOnboardingStatus();
   const { strengthPercentage } = useLearnerProfileStrength();
+  const { refetchLearnerProfile } = useLearnerProfile(false);
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore();
@@ -595,7 +597,10 @@ const StudentDashboard = () => {
                 </div>
 
                 <button
-                  onClick={() => router.push('/student/profile')}
+                  onClick={async () => {
+                    await refetchLearnerProfile();
+                    router.push('/student/profile');
+                  }}
                   className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary-light hover:bg-primary-light/80 transition-all group border border-transparent hover:border-primary"
                 >
                   <div className="w-12 h-12 rounded-full bg-card flex items-center justify-center shadow-sm flex-shrink-0">
