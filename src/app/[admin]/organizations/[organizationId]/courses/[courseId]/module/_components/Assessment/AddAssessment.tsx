@@ -473,7 +473,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             Open-Ended Questions (
                             {selectedOpenEndedQuestions.length})
                         </Button>
-                            <Button
+                            {/* <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'adaptive-assessment'
                                     ? 'border-primary text-foreground hover:bg-transparent'
@@ -483,7 +483,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         >
                             <Sparkle size={18} className='text-primary' />
                        Create Adaptive Assessment
-                        </Button>
+                        </Button> */}
                     </div>
                 )}
             </div>

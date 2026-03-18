@@ -7,35 +7,31 @@ import {
     BookOpenCheck,
     Newspaper,
     Play,
-    LibraryBig,
+    Sparkle,
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { getUser } from '@/store/store'
 import {
     Dialog,
-    DialogClose,
     DialogContent,
-    DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog'
 
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter, useParams } from 'next/navigation'
 import { getTopicId } from '@/store/store'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
+import AdaptiveAssessmentTopicForm from './Assessment/AdaptiveAssessmentTopicForm'
 import { ChapterModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
 
 function ChapterModal({
     fetchChapters,
-    newChapterOrder,
     moduleId,
     courseId,
-    scrollToBottom,
     onClose,
 }: ChapterModalProps) {
     const { setTopicId } = getTopicId()
@@ -45,7 +41,20 @@ function ChapterModal({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [classType, setClassType] = useState('createLiveClass')
     const [liveDialogOpen, setLiveDialogOpen] = useState(false)
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+    const [adaptiveDialogOpen, setAdaptiveDialogOpen] = useState(false)
+
+    const handleAdaptiveAssessmentSave = ({
+        topic,
+    }: {
+        topic: string
+        description: string
+    }) => {
+        toast.success({
+            title: 'Adaptive assessment details saved',
+            description: `Topic: ${topic}`,
+        })
+        setAdaptiveDialogOpen(false)
+    }
 
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
@@ -139,7 +148,13 @@ function ChapterModal({
                         <Play className="mr-2 h-6 w-6" />
                         <span>Live Classes</span>
                     </div>
-                   
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        onClick={() => setAdaptiveDialogOpen(true)}
+                    >
+                        <Sparkle className="mr-2 h-6 w-6" />
+                        <span>Adaptive Assessment</span>
+                    </div>
                 </div>
 
                 {/* Dialog for users WITH CREATE access */}
@@ -215,9 +230,18 @@ function ChapterModal({
                         </div>
                     </DialogContent>
                 </Dialog>
+
+                <AdaptiveAssessmentTopicForm
+                    open={adaptiveDialogOpen}
+                    onOpenChange={setAdaptiveDialogOpen}
+                    onSave={handleAdaptiveAssessmentSave}
+                    moduleId={Number(moduleId)}
+                    bootcampId={Number(courseId)}
+                />
             </DialogContent>
         </Dialog>
     )
 }
 
 export default ChapterModal
+    
