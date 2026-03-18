@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 
@@ -9,15 +9,28 @@ import { getSocketConnectionStore, getUser } from '@/store/store'
 
 const API_URL = process.env.NEXT_PUBLIC_LOCAL_URL 
 
+const GENERATION_STATUS_LINES = [
+    'Analyzing topic coverage and intent',
+    'Designing question structure by difficulty',
+    'Generating clear and exam-ready MCQs',
+    'Validating options and answer quality',
+    'Finalizing question set for delivery',
+]
+
 export default function RootSocketConnection() {
     const socketRef = useRef<Socket | null>(null)
+    const [retryKey, setRetryKey] = useState(0)
+    const [statusLineIndex, setStatusLineIndex] = useState(0)
     const { user } = getUser()
     const {
         isGeneratingQuestions,
         generationProgress,
+        totalJobs,
+        completedJobs,
         setIsConnected,
         setLastQuestionsReadyEvent,
         setGenerationProgress,
+        incrementCompletedJobs,
         stopGeneratingQuestions,
     } = getSocketConnectionStore()
 
@@ -27,6 +40,18 @@ export default function RootSocketConnection() {
         if (!accessToken || !user?.id) {
             setIsConnected(false)
             stopGeneratingQuestions()
+
+            // Retry bootstrap while auth/user state is hydrating.
+            if (accessToken || user?.id) {
+                const retryTimer = window.setTimeout(() => {
+                    setRetryKey((value) => value + 1)
+                }, 1200)
+
+                return () => {
+                    window.clearTimeout(retryTimer)
+                }
+            }
+
             return
         }
 
@@ -58,17 +83,18 @@ export default function RootSocketConnection() {
                 questionIds: data.questionIds,
                 receivedAt: Date.now(),
             })
-            setGenerationProgress(100)
+            incrementCompletedJobs()
+
+            const state = getSocketConnectionStore.getState()
+            const safeTotalJobs = Math.max(1, state.totalJobs)
+            const nextCompleted = Math.min(safeTotalJobs, state.completedJobs + 1)
+            const committedProgress = Math.floor((nextCompleted / safeTotalJobs) * 100)
+            setGenerationProgress(committedProgress)
 
             toast.success({
                 title: 'Questions Generated Successfully!',
                 description: `${data.count} MCQ questions have been generated and indexed.`,
             })
-
-            // Keep 100% briefly for a smoother visual completion signal.
-            setTimeout(() => {
-                stopGeneratingQuestions()
-            }, 600)
         })
 
         socket.on('connect_error', (err) => {
@@ -82,9 +108,11 @@ export default function RootSocketConnection() {
         }
     }, [
         user?.id,
+        retryKey,
         setIsConnected,
         setLastQuestionsReadyEvent,
         setGenerationProgress,
+        incrementCompletedJobs,
         stopGeneratingQuestions,
     ])
 
@@ -93,29 +121,94 @@ export default function RootSocketConnection() {
             return
         }
 
+        const singleJobCompletedByMock = totalJobs === 1 && generationProgress >= 100
+        const multiJobCompletedByServer = totalJobs > 1 && completedJobs >= totalJobs
+
+        if (singleJobCompletedByMock || multiJobCompletedByServer) {
+            setGenerationProgress(100)
+
+            // Keep 100% briefly for a smoother visual completion signal.
+            const completeTimer = window.setTimeout(() => {
+                stopGeneratingQuestions()
+            }, 600)
+
+            return () => {
+                window.clearTimeout(completeTimer)
+            }
+        }
+    }, [
+        isGeneratingQuestions,
+        generationProgress,
+        completedJobs,
+        totalJobs,
+        setGenerationProgress,
+        stopGeneratingQuestions,
+    ])
+
+    useEffect(() => {
+        if (!isGeneratingQuestions) {
+            setStatusLineIndex(0)
+            return
+        }
+
+        const statusTimer = window.setInterval(() => {
+            setStatusLineIndex((current) =>
+                (current + 1) % GENERATION_STATUS_LINES.length
+            )
+        }, 2200)
+
+        return () => {
+            window.clearInterval(statusTimer)
+        }
+    }, [isGeneratingQuestions])
+
+    useEffect(() => {
+        if (!isGeneratingQuestions) {
+            return
+        }
+
         const intervalId = window.setInterval(() => {
-            const current = getSocketConnectionStore.getState().generationProgress
+            const state = getSocketConnectionStore.getState()
+            const current = state.generationProgress
+            const safeTotalJobs = Math.max(1, state.totalJobs)
+            const committedProgress = Math.floor(
+                (state.completedJobs / safeTotalJobs) * 100
+            )
+
+            const maxMockProgress =
+                safeTotalJobs === 1
+                    ? 100
+                    : Math.min(95, committedProgress + 20)
+
+            if (current >= maxMockProgress) {
+                return
+            }
 
             // Mocked progress: fast at start, slower near completion.
             if (current < 65) {
-                setGenerationProgress(current + 4)
+                setGenerationProgress(Math.min(current + 4, maxMockProgress))
                 return
             }
 
             if (current < 85) {
-                setGenerationProgress(current + 2)
+                setGenerationProgress(Math.min(current + 2, maxMockProgress))
                 return
             }
 
             if (current < 95) {
-                setGenerationProgress(current + 1)
+                setGenerationProgress(Math.min(current + 1, maxMockProgress))
             }
         }, 900)
 
         return () => {
             window.clearInterval(intervalId)
         }
-    }, [isGeneratingQuestions, setGenerationProgress])
+    }, [
+        isGeneratingQuestions,
+        totalJobs,
+        completedJobs,
+        setGenerationProgress,
+    ])
 
     return (
         <div
@@ -134,6 +227,16 @@ export default function RootSocketConnection() {
                             {generationProgress}%
                         </span>
                     </div>
+                    <p
+                        key={statusLineIndex}
+                        className="mt-1 text-[11px] leading-4 text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-1 duration-300"
+                    >
+                        {
+                            GENERATION_STATUS_LINES[
+                                statusLineIndex % GENERATION_STATUS_LINES.length
+                            ]
+                        }
+                    </p>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
                             className="h-full rounded-full bg-primary transition-all duration-700"

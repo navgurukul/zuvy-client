@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { getSocketConnectionStore } from '@/store/store';
 
+type GenerateMcqResponse = {
+  message?: string;
+  totalJobs?: number;
+  jobIds?: string[];
+  [key: string]: any;
+};
+
 interface GenerateMcqPayload {
   domainName: string;
   topicNames: string[];
@@ -62,9 +69,9 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
   const generateQuestions = async (payload: GenerateMcqPayload) => {
     setIsLoading(true);
     setError(null);
-    startGeneratingQuestions();
 
     try {
+      const accessToken = localStorage.getItem('access_token') || '';
       const response = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/questions/generate?orgId=${organizationId}`, {
         method: 'POST',
         headers: {
@@ -79,7 +86,14 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: GenerateMcqResponse = await response.json();
+
+      startGeneratingQuestions({
+        message: data?.message || '',
+        totalJobs: data?.totalJobs || 1,
+        jobIds: Array.isArray(data?.jobIds) ? data.jobIds : [],
+      });
+
       console.log('✅ Question generation request submitted successfully');
       console.log('Response:', data);
       
