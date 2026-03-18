@@ -66,8 +66,7 @@ const Page = ({ params }: any) => {
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     // Separate state for overall statistics (NEVER changes during search)
     const [overallStats, setOverallStats] = useState({

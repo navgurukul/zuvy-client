@@ -15,8 +15,7 @@ const ProjectPreview = () => {
     const { organizationId, courseId, moduleId, projectID } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const { projectPreviewContent, setProjectPreviewContent } =
         getProjectPreviewStore()
     const [initialContent, setInitialContent] = useState()

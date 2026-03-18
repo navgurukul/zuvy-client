@@ -32,8 +32,7 @@ function Page() {
     const { organizationId, courseId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId;
     const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
     const [originalCurriculum, setOriginalCurriculum] = useState<

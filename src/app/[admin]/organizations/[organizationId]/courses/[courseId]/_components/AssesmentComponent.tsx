@@ -13,8 +13,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     return (
         <div className="bg-card border border-gray-200 rounded-md p-3 hover:shadow-lg transition-shadow w-full mb-4">
