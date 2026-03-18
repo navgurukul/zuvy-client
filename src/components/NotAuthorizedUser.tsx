@@ -2,17 +2,20 @@
 
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useUnauthorizedModalStore, unauthorizedMessage } from '@/store/session.store'
 
-const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleFromPath?: string }) => {
+const NotAuthorizedUser = () => {
     const router = useRouter()
-    const { organizationId } = useParams()
+    const { setShowModal } = useUnauthorizedModalStore()
+    const { message } = unauthorizedMessage()
     const { user } = getUser()
-    const orgId = Number(organizationId) || user?.orgId; 
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const orgId = user?.orgId;
 
     return (
-        <div className="flex flex-col items-center pt-24">
+        <div className="flex flex-col items-center pt-24 w-full h-full">
             {/* Set a smaller max width for the main container */}
             <div className="w-full max-w-lg flex flex-col items-center justify-center gap-8">
                 <div className="flex flex-col items-center justify-center text-center">
@@ -21,17 +24,19 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
                         alt="User Not Authorized"
                         width={180}
                         height={180}
-                        className="mx-auto" 
+                        className="mx-auto"
                     />
                     <h1 className="text-xl font-bold text-destructive mt-3">
                         Unauthorized Access
                     </h1>
                     <p className="text-md mt-3 mb-5 capitalize">
-                        {`The page is meant to be viewed by Zuvy ${roleFromPath}. You do
-                        not have ${roleFromPath} access to access this page`}
+                        {message}
                     </p>
-                    <Button onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}>
-                        Return to Dashboard
+                    <Button onClick={() => {
+                        setShowModal(false);
+                        router.push(`/${userRole}/organizations/${orgId}/courses`);
+                    }}>
+                        Return to my Organisation
                     </Button>
                 </div>
             </div>
@@ -39,4 +44,4 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
     )
 }
 
-export default UnauthorizedUser
+export default NotAuthorizedUser

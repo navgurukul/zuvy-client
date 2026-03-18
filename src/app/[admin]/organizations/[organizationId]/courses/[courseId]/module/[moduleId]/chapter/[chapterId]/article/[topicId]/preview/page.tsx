@@ -26,8 +26,7 @@ const PreviewArticle = ({ params }: { params: PageParams }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     useEffect(() => {
         fetchPreviewData(params, setArticlePreviewContent)

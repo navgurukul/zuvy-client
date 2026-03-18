@@ -51,8 +51,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
 
     const [collaborator, setCollaborator] = useState('')
