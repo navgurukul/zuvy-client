@@ -37,12 +37,12 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
                     : null
 
             const response = await fetch(
-                `http://localhost:5000/questions?page=${page}&limit=${limit}`,
+                `${process.env.NEXT_PUBLIC_LOCAL_URL}/questions?page=${page}&limit=${limit}`,
                 {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+                        'Authorization': `Bearer ${accessToken}`
                     },
                     
                 }
