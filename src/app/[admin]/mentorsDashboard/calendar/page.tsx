@@ -250,7 +250,7 @@ function SlotDetailPanel({
       <CardContent className="space-y-5 p-5">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-sm font-bold text-text-primary">Slot Details</h3>
+            <h3 className="text-sm font-bold text-text-primary text-left">Slot Details</h3>
             <p className="mt-0.5 text-xs text-text-muted">
               {past ? "This slot has passed" : "Active availability slot"}
             </p>
@@ -288,17 +288,16 @@ function SlotDetailPanel({
           <div className="flex items-start gap-2.5">
             <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div>
-              <p className="text-xs font-medium text-text-muted">Date</p>
+              <p className="text-xs font-medium text-text-muted text-left">Date</p>
               <p className="mt-0.5 text-sm font-semibold text-text-primary">
                 {formatLongDate(slot.slotStartDateTime)}
               </p>
             </div>
           </div>
-
           <div className="flex items-start gap-2.5">
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div>
-              <p className="text-xs font-medium text-text-muted">Time</p>
+              <p className="text-xs font-medium text-text-muted text-left">Time</p>
               <p className="mt-0.5 text-sm font-semibold text-text-primary">
                 {formatTime(slot.slotStartDateTime)} — {formatTime(slot.slotEndDateTime)}
               </p>

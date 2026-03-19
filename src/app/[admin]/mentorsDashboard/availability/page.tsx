@@ -377,14 +377,14 @@ export default function AvailabilityPage() {
           <Card className="rounded-2xl text-left">
             <CardHeader>
               <CardTitle>Your Availability</CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground ">
                 {openSlotsCount} open · {bookedSlotsCount} booked
               </p>
             </CardHeader>
 
             {/* <CardContent className="space-y-4"> */}
-<CardContent className="space-y-4 max-h-[420px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">              
-  {loading && (
+            <CardContent className="space-y-4 max-h-[420px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+              {loading && (
                 <p className="text-sm text-muted-foreground">Loading slots...</p>
               )}
 
@@ -418,6 +418,7 @@ export default function AvailabilityPage() {
                         {formatDuration(slot.durationMinutes)}
                       </p>
                     </div>
+  <div className="flex items-center gap-2">
 
                     <Badge
                       className={
@@ -456,6 +457,7 @@ export default function AvailabilityPage() {
                         <Trash2 size={16} />
                       )}
                     </Button>
+                    </div>
                   </div>
                 ))}
             </CardContent>

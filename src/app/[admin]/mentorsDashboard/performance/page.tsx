@@ -15,7 +15,11 @@ const formatDateTime = (value: string) =>
   })
 
 export default function PerformanceMetrics() {
-  const { sessions, loading: sessionsLoading, error: sessionsError } = useMyMentorSessions()
+  const {
+    sessions,
+    loading: sessionsLoading,
+    error: sessionsError,
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
   const { slots, loading: slotsLoading, error: slotsError } = useMyMentorSlots()
 
   const completedSessions = useMemo(

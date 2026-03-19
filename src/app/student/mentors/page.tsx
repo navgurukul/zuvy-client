@@ -1,33 +1,95 @@
 "use client";
 
+import { useCallback } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
-import { useMentors } from "@/hooks/useMentors";
+import { useSearchParams } from "next/navigation";
+import { Mentor, useMentors } from "@/hooks/useMentors";
+import { api } from "@/utils/axios.config";
+import { SearchBox } from "@/utils/searchBox";
+
+type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
+
+const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
+    if (Array.isArray(response)) {
+        return response;
+    }
+
+    if (response && Array.isArray(response.data)) {
+        return response.data;
+    }
+
+    return [];
+};
 
 export default function MentorsPage() {
-    const { mentors, loading, error } = useMentors();
+    const searchParams = useSearchParams();
+    const searchQuery = searchParams.get("search")?.trim() || "";
+    const { mentors, loading, error } = useMentors(searchQuery);
+
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        try {
+            const response = await api.get<MentorsSearchResponse>(
+                `/mentors?search=${encodeURIComponent(query)}`
+            );
+
+            const mentorList = parseMentors(response.data);
+
+            return mentorList.map((mentor) => ({
+                ...mentor,
+                id: mentor.userId,
+            }));
+        } catch (fetchError) {
+            console.error("Error fetching mentor suggestions:", fetchError);
+            return [];
+        }
+    }, []);
+
+    const fetchSearchResultsApi = useCallback(async () => {
+        return [];
+    }, []);
+
+    const defaultFetchApi = useCallback(async () => {
+        return [];
+    }, []);
 
     return (
         <div className=" p-6">
 
             {/* Filter buttons */}
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col gap-3 mb-6 lg:flex-row lg:items-start lg:justify-between">
 
-                <div className="flex gap-2">
-                    <button className="bg-green-800 text-white text-xs px-4 py-1.5 rounded-full">
-                        All mentors
-                    </button>
+                <div className="flex flex-col gap-3">
+                    <div className="flex gap-2 flex-wrap">
+                        <button className="bg-green-800 text-white text-xs px-4 py-1.5 rounded-full">
+                            All mentors
+                        </button>
 
-                    <button className="border text-xs px-4 py-1.5 rounded-full">
-                        Accepting sessions
-                    </button>
+                        <button className="border text-xs px-4 py-1.5 rounded-full">
+                            Accepting sessions
+                        </button>
 
-                    <button className="border text-xs px-4 py-1.5 rounded-full">
-                        Verified only
-                    </button>
+                        <button className="border text-xs px-4 py-1.5 rounded-full">
+                            Verified only
+                        </button>
+                    </div>
+
+                    <SearchBox
+                        placeholder="Search mentors..."
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(mentor) => (
+                            <div>
+                                <p className="text-sm font-medium">{mentor.name}</p>
+                                <p className="text-xs text-gray-500">{mentor.email}</p>
+                            </div>
+                        )}
+                        inputWidth="w-full sm:w-[300px]"
+                    />
                 </div>
 
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 whitespace-nowrap">
                     {mentors.length} results
                 </p>
 
@@ -73,10 +135,9 @@ export default function MentorsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <p className="inline-flex items-center text-xs font-medium bg-green-100 text-green-700 px-2.5 py-1 rounded-full">
-                                        <span className="mr-1 text-green-500">•</span>
-                                        Accepting
-                                    </p>
+                                    <span className="inline-flex items-center text-xs font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                                       • Accepting
+                                    </span>
                                 </div>
 
                                 {/* Skills */}

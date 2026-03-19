@@ -27,8 +27,9 @@ export default function MentorProfilePage() {
 
   const { mentorProfile, loading, error } = useMentorProfile(mentorId);
 
-  const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
-  const initials = getInitials(mentorDisplayName);
+  // const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
+const mentorDisplayName =
+  mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor");  const initials = getInitials(mentorDisplayName);
   const expertise = mentorProfile?.expertise || [];
   const acceptsNewMentees = mentorProfile?.acceptsNewMentees ?? true;
 

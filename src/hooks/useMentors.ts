@@ -34,17 +34,23 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch mentors'
 }
 
-export function useMentors(initialFetch = true) {
+export function useMentors(search?: string, initialFetch = true) {
     const [mentors, setMentors] = useState<Mentor[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
-    const getMentors = useCallback(async () => {
+    const getMentors = useCallback(async (searchTerm?: string) => {
         try {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MentorsApiResponse>('/mentors')
+            const queryParams = new URLSearchParams()
+            if (searchTerm?.trim()) {
+                queryParams.append('search', searchTerm.trim())
+            }
+
+            const url = `/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+            const response = await api.get<MentorsApiResponse>(url)
             setMentors(parseMentorsResponse(response.data))
         } catch (error) {
             console.error('Error fetching mentors:', error)
@@ -56,8 +62,8 @@ export function useMentors(initialFetch = true) {
     }, [])
 
     useEffect(() => {
-        if (initialFetch) getMentors()
-    }, [initialFetch, getMentors])
+        if (initialFetch) getMentors(search)
+    }, [initialFetch, getMentors, search])
 
     return {
         mentors,

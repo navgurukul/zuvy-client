@@ -45,7 +45,14 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch sessions'
 }
 
-export function useMyMentorSessions(initialFetch = true) {
+export type MyMentorSessionsEndpoint =
+    | '/mentor-sessions/my'
+    | '/mentor-sessions/mentor/my'
+
+export function useMyMentorSessions(
+    initialFetch: boolean,
+    endpoint: MyMentorSessionsEndpoint
+) {
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -55,9 +62,7 @@ export function useMyMentorSessions(initialFetch = true) {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MyMentorSessionsResponse>(
-                '/mentor-sessions/my'
-            )
+            const response = await api.get<MyMentorSessionsResponse>(endpoint)
 
             setSessions(parseSessionsResponse(response.data))
         } catch (error) {
@@ -67,7 +72,7 @@ export function useMyMentorSessions(initialFetch = true) {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [endpoint])
 
     useEffect(() => {
         if (initialFetch) getMySessions()

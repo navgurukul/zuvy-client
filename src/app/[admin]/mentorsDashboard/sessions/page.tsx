@@ -52,7 +52,7 @@ export default function SessionsPage() {
     loading,
     error,
     refetchMySessions,
-  } = useMyMentorSessions()
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
 
   const filteredSessions = useMemo(() => {
     switch (activeTab) {
@@ -198,20 +198,20 @@ export default function SessionsPage() {
           <div className="flex gap-2 px-3 pt-3 overflow-x-auto whitespace-nowrap border-b-4 [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setActiveTab("all")}
-              className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
                   ? "border-green-600 bg-green-50"
                   : "border-transparent text-muted-foreground"
                 }`}
             >
               All
-              <span className="bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+              <span className="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                 {sessions.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "upcoming"
+              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -221,7 +221,7 @@ export default function SessionsPage() {
 
             <button
               onClick={() => setActiveTab("reschedule")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "reschedule"
+              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -231,7 +231,7 @@ export default function SessionsPage() {
 
             <button
               onClick={() => setActiveTab("completed")}
-              className={`px-3 py-2 text-xs border-b-2 rounded-t-lg ${activeTab === "completed"
+              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -259,9 +259,9 @@ export default function SessionsPage() {
                   <button
                     key={session.id}
                     onClick={() => setSelectedBookingId(session.id)}
-                    className={`w-full text-left rounded-xl border p-4 transition hover:shadow-sm ${isSelected
+                    className={`w-full text-left rounded-xl border p-4 ${isSelected
                         ? "border-green-600 bg-green-50"
-                        : "border-border bg-card hover:border-green-400"
+                        : "border-border bg-card"
                       }`}
                   >
                     <div className="flex items-start gap-3">
@@ -271,9 +271,9 @@ export default function SessionsPage() {
 
                       <div className="flex-1">
                         <p className="text-sm font-semibold">Booking #{session.id}</p>
-                        <p className="text-xs text-muted-foreground">Slot #{session.slotAvailabilityId}</p>
+                        <p className="text-sm text-muted-foreground">Slot #{session.slotAvailabilityId}</p>
 
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
                           <span className="flex items-center gap-1">
                             <Calendar size={12} />
                             {formatDateTime(session.joinedAt)}
@@ -314,7 +314,7 @@ export default function SessionsPage() {
                   <User className="h-7 w-7 text-text-muted" />
                 </div>
                 <p className="text-sm font-semibold">Select a session</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Click any session on the left to view and manage details.
                 </p>
               </div>
@@ -322,9 +322,9 @@ export default function SessionsPage() {
           ) : (
             <div className="space-y-5">
               <div className="rounded-xl border p-4 text-left space-y-2">
-                <p className="text-sm font-semibold">Session Details</p>
-                <p className="text-xs text-muted-foreground">Booking #{selectedSession.id}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-base font-semibold">Session Details</p>
+                <p className="text-sm text-muted-foreground">Booking #{selectedSession.id}</p>
+                <p className="text-sm text-muted-foreground">
                   Slot ID: {selectedSession.slotAvailabilityId}
                 </p>
                 <div className="flex gap-2 flex-wrap">
@@ -336,24 +336,24 @@ export default function SessionsPage() {
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-2">
-                <p className="text-sm font-semibold">Slot & Bookings</p>
+                <p className="text-base font-semibold">Slot & Bookings</p>
                 {slotDetailsLoading && (
-                  <p className="text-xs text-muted-foreground">Loading slot details...</p>
+                  <p className="text-sm text-muted-foreground">Loading slot details...</p>
                 )}
                 {!slotDetailsLoading && slotDetailsError && (
-                  <p className="text-xs text-red-500">{slotDetailsError}</p>
+                  <p className="text-sm text-red-500">{slotDetailsError}</p>
                 )}
                 {!slotDetailsLoading && !slotDetailsError && details?.slot && (
                   <>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Start: {formatDateTime(details.slot.slotStartDateTime as string)}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Total bookings: {details.bookings.length}
                     </p>
                     <div className="space-y-1">
                       {details.bookings.map((booking) => (
-                        <div key={booking.id} className="text-xs text-muted-foreground">
+                        <div key={booking.id} className="text-sm text-muted-foreground">
                           Booking #{booking.id} · Student #{booking.studentUserId} · {booking.status}
                         </div>
                       ))}
@@ -363,7 +363,7 @@ export default function SessionsPage() {
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-sm font-semibold">Reschedule Request</p>
+                <p className="text-base font-semibold">Reschedule Request</p>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -382,17 +382,17 @@ export default function SessionsPage() {
                     Decline Reschedule
                   </Button>
                 </div>
-                {rescheduleError && <p className="text-xs text-red-500">{rescheduleError}</p>}
+                {rescheduleError && <p className="text-sm text-red-500">{rescheduleError}</p>}
                 {rescheduleResponse?.message && (
-                  <p className="text-xs text-green-700">{rescheduleResponse.message}</p>
+                  <p className="text-sm text-green-700">{rescheduleResponse.message}</p>
                 )}
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-sm font-semibold">Mark Attendance</p>
+                <p className="text-base font-semibold">Mark Attendance</p>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Joined At</p>
+                    <p className="text-sm text-muted-foreground">Joined At</p>
                     <Input
                       type="datetime-local"
                       value={joinedAt}
@@ -400,7 +400,7 @@ export default function SessionsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Left At</p>
+                    <p className="text-sm text-muted-foreground">Left At</p>
                     <Input
                       type="datetime-local"
                       value={leftAt}
@@ -416,14 +416,14 @@ export default function SessionsPage() {
                 >
                   {isMarkingAttendance ? "Saving..." : "Mark Attendance"}
                 </Button>
-                {attendanceError && <p className="text-xs text-red-500">{attendanceError}</p>}
+                {attendanceError && <p className="text-sm text-red-500">{attendanceError}</p>}
                 {attendanceData?.message && (
-                  <p className="text-xs text-green-700">{attendanceData.message}</p>
+                  <p className="text-sm text-green-700">{attendanceData.message}</p>
                 )}
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-sm font-semibold">Complete Session</p>
+                <p className="text-base font-semibold">Complete Session</p>
                 <Button
                   type="button"
                   className="bg-green-700 hover:bg-green-800"
@@ -432,17 +432,17 @@ export default function SessionsPage() {
                 >
                   {isCompleting ? "Completing..." : "Complete Session"}
                 </Button>
-                {completeError && <p className="text-xs text-red-500">{completeError}</p>}
+                {completeError && <p className="text-sm text-red-500">{completeError}</p>}
                 {completionData?.message && (
-                  <p className="text-xs text-green-700">{completionData.message}</p>
+                  <p className="text-sm text-green-700">{completionData.message}</p>
                 )}
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-sm font-semibold">Submit Feedback</p>
+                <p className="text-base font-semibold">Submit Feedback</p>
                 <div className="grid sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-1 space-y-1">
-                    <p className="text-xs text-muted-foreground">Rating (1-5)</p>
+                    <p className="text-sm text-muted-foreground">Rating (1-5)</p>
                     <Input
                       type="number"
                       min={1}
@@ -452,7 +452,7 @@ export default function SessionsPage() {
                     />
                   </div>
                   <div className="sm:col-span-2 space-y-1">
-                    <p className="text-xs text-muted-foreground">Notes</p>
+                    <p className="text-sm text-muted-foreground">Notes</p>
                     <Textarea
                       value={notes}
                       onChange={(event) => setNotes(event.target.value)}
@@ -461,7 +461,7 @@ export default function SessionsPage() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Areas of Improvement</p>
+                  <p className="text-sm text-muted-foreground">Areas of Improvement</p>
                   <Textarea
                     value={areasOfImprovement}
                     onChange={(event) => setAreasOfImprovement(event.target.value)}
@@ -476,9 +476,9 @@ export default function SessionsPage() {
                 >
                   {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
                 </Button>
-                {feedbackError && <p className="text-xs text-red-500">{feedbackError}</p>}
+                {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
                 {feedbackData?.message && (
-                  <p className="text-xs text-green-700">{feedbackData.message}</p>
+                  <p className="text-sm text-green-700">{feedbackData.message}</p>
                 )}
               </div>
             </div>

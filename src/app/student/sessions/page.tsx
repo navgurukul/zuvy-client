@@ -57,7 +57,10 @@ const getMentorAvatarFallback = (mentorUserId: number) =>
 export default function MySessions() {
 
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
-  const { sessions, loading, error, refetchMySessions } = useMyMentorSessions()
+  const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
+    true,
+    "/mentor-sessions/my"
+  )
 
   const upcomingSessions = sessions.filter(isUpcomingSession)
   const completedSessions = sessions.filter(isCompletedSession)
@@ -373,7 +376,7 @@ export default function MySessions() {
 
             <CardFooter className="flex gap-3">
 
-              <Button className="flex gap-2" disabled>
+              <Button className="flex gap-2">
                 <Video size={14} />
                 Join Session
               </Button>

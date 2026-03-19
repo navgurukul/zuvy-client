@@ -13,13 +13,16 @@ import {
   Star,
   ArrowRight,
   Clock,
-  XCircle,
   BookOpen,
   BarChart3,
   CalendarX,
+  Bell,
+  BellOff,
+  CheckCheck,
 } from "lucide-react"
 import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useMyMentorSessions, type MyMentorSession } from "@/hooks/useMyMentorSessions"
+import { useNotifications } from "@/hooks/useNotifications"
 import { Progress } from "@nextui-org/react"
 import { cn } from "@/lib/utils"
 
@@ -126,13 +129,6 @@ const getInitials = (name: string) => {
   return initials || trimmedName.slice(0, 2).toUpperCase()
 }
 
-type SessionNotification = {
-  id: number
-  message: string
-  eventTime: string | null
-  type: "cancelled" | "booked"
-}
-
 const normalizeSessionValue = (value: string | null | undefined) =>
   (value || "").toLowerCase()
 
@@ -141,22 +137,6 @@ const isCancelledSession = (session: MyMentorSession) => {
   const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
 
   return status.includes("cancel") || lifecycle.includes("cancel")
-}
-
-const isBookedSession = (session: MyMentorSession) => {
-  if (isCancelledSession(session)) {
-    return false
-  }
-
-  const status = normalizeSessionValue(session.status)
-  const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
-
-  return (
-    status.includes("book") ||
-    status.includes("confirm") ||
-    lifecycle.includes("schedule") ||
-    lifecycle.includes("pending")
-  )
 }
 
 const isCompletedSession = (session: MyMentorSession) => {
@@ -206,30 +186,6 @@ const getLearnerLabel = (session: MyMentorSession) => {
   return "A learner"
 }
 
-const getEventTimestamp = (
-  session: MyMentorSession,
-  eventType: SessionNotification["type"]
-) => {
-  if (eventType === "cancelled") {
-    return getFirstValidTimestamp(session, [
-      "cancelledAt",
-      "updatedAt",
-      "createdAt",
-      "bookedAt",
-      "completedAt",
-      "joinedAt",
-    ])
-  }
-
-  return getFirstValidTimestamp(session, [
-    "bookedAt",
-    "createdAt",
-    "updatedAt",
-    "joinedAt",
-    "completedAt",
-  ])
-}
-
 export default function DashboardPage() {
   const pathname = usePathname()
   const role = pathname.split("/")[1]
@@ -239,7 +195,16 @@ export default function DashboardPage() {
     sessions,
     loading: sessionsLoading,
     error: sessionsError,
-  } = useMyMentorSessions()
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
+  const {
+    notifications: apiNotifications,
+    loading: notificationsLoading,
+    error: notificationsError,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    markingRead,
+  } = useNotifications()
 
   const now = new Date()
 
@@ -351,41 +316,6 @@ export default function DashboardPage() {
     return learnerKeys.size
   }, [sessions])
 
-  const notifications = useMemo<SessionNotification[]>(() => {
-    return sessions
-      .reduce<SessionNotification[]>((items, session) => {
-        const learnerLabel = getLearnerLabel(session)
-
-        if (isCancelledSession(session)) {
-          items.push({
-            id: session.id,
-            message: `${learnerLabel} has cancelled their session with you.`,
-            eventTime: getEventTimestamp(session, "cancelled"),
-            type: "cancelled",
-          })
-
-          return items
-        }
-
-        if (isBookedSession(session)) {
-          items.push({
-            id: session.id,
-            message: `${learnerLabel} booked a session.`,
-            eventTime: getEventTimestamp(session, "booked"),
-            type: "booked",
-          })
-        }
-
-        return items
-      }, [])
-      .sort((left, right) => {
-        const leftTime = getDateValue(left.eventTime)?.getTime() || 0
-        const rightTime = getDateValue(right.eventTime)?.getTime() || 0
-        return rightTime - leftTime
-      })
-      .slice(0, 5)
-  }, [sessions])
-
   return (
     <div className="space-y-6">
       <div className="text-left">
@@ -485,13 +415,12 @@ export default function DashboardPage() {
               {slotsLoading && <p className="text-sm text-muted-foreground">Loading upcoming slots...</p>}
               {!slotsLoading && slotsError && <p className="text-sm text-red-500">{slotsError}</p>}
               {!slotsLoading && !slotsError && upcomingSlots.length === 0 && (
-                 <div className='vv'>  
+                 <div className='flex flex-col items-center justify-center text-center mt-10'>  
                       <CalendarX className="h-10 w-10 text-muted-foreground" />
                       <p className="text-sm font-semibold text-text-primary">No upcoming sessions</p>
                       <p className="text-xs text-text-muted mt-0.5">Update your availability to let learners book sessions</p>
                     </div>
               )}
-
               {!slotsLoading &&
                 !slotsError &&
                 upcomingSlots.slice(0, 5).map((slot) => (
@@ -614,38 +543,75 @@ export default function DashboardPage() {
 
         <div className="space-y-6">
            <Card className="rounded-3xl shadow-sm border-slate-200 hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-left">Notifications</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-left">Notifications</CardTitle>
+                {unreadCount > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </div>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-1 text-xs text-emerald-700 font-semibold hover:underline"
+                >
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  Mark all read
+                </button>
+              )}
             </CardHeader>
-            <CardContent className="space-y-4 text-left">
-              {sessionsLoading && (
+            <CardContent className="space-y-3 text-left">
+              {notificationsLoading && (
                 <p className="text-xs text-muted-foreground text-left">Loading notifications...</p>
               )}
 
-              {!sessionsLoading && sessionsError && (
-                <p className="text-xs text-red-500">{sessionsError}</p>
+              {!notificationsLoading && notificationsError && (
+                <p className="text-xs text-red-500">{notificationsError}</p>
               )}
 
-              {!sessionsLoading && !sessionsError && notifications.length === 0 && (
-                <p className="text-xs text-muted-foreground">No notifications available yet.</p>
+              {!notificationsLoading && !notificationsError && apiNotifications.length === 0 && (
+                <div className="flex flex-col items-center py-6 gap-2 text-center">
+                  <BellOff className="w-8 h-8 text-muted-foreground/50" />
+                  <p className="text-xs text-muted-foreground">No notifications yet.</p>
+                </div>
               )}
 
-              {!sessionsLoading &&
-                !sessionsError &&
-                notifications.map((notification) => (
-                  <div key={notification.id} className="flex items-start gap-3">
-                    {notification.type === "cancelled" ? (
-                      <XCircle className="text-red-500 w-5 h-5" />
-                    ) : (
-                      <Calendar className="text-green-600 w-5 h-5" />
-                    )}
+              {!notificationsLoading &&
+                !notificationsError &&
+                apiNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-start gap-3 rounded-xl p-2 transition-colors ${
+                      notification.isRead ? "opacity-60" : "bg-slate-50"
+                    }`}
+                  >
+                    <div className="mt-0.5 shrink-0">
+                      {notification.isRead ? (
+                        <Bell className="w-4 h-4 text-slate-400" />
+                      ) : (
+                        <Bell className="w-4 h-4 text-emerald-600" />
+                      )}
+                    </div>
 
-                    <div className="text-sm">
-                      <p>{notification.message}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {getRelativeTime(notification.eventTime)}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-700 truncate">{notification.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{notification.message}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {getRelativeTime(notification.createdAt)}
                       </p>
                     </div>
+
+                    {!notification.isRead && (
+                      <button
+                        disabled={markingRead.has(notification.id)}
+                        onClick={() => markAsRead(notification.id)}
+                        className="shrink-0 mt-0.5 text-[10px] font-semibold text-emerald-700 hover:underline disabled:opacity-40"
+                      >
+                        {markingRead.has(notification.id) ? "..." : "Mark read"}
+                      </button>
+                    )}
                   </div>
                 ))}
             </CardContent>

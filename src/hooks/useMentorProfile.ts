@@ -5,6 +5,7 @@ import { api } from '@/utils/axios.config'
 
 export interface MentorProfile {
     mentorUserId: number
+    name?: string
     bio: string
     expertise: string[]
     title: string
@@ -174,6 +175,7 @@ const parseMentorProfileResponse = (
             profile.mentorUserId ?? profile.userId ?? profile.id,
             0
         ),
+        name: parseString(profile.name),
         bio: parseString(profile.bio),
         expertise: parseExpertise(profile.expertise),
         title: parseString(profile.title ?? profile.role),
