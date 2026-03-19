@@ -14,6 +14,7 @@ import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
 import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
 import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
+import { getUser } from '@/store/store';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -34,9 +35,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   onBack,
   onFieldChange,
 }) => {
+  const { user } = getUser();
+  const loggedInEmail = user?.email?.trim() || '';
+  const resolvedUserEmail = userEmail?.trim() || loggedInEmail;
+
   const [formData, setFormData] = useState<Step1Type>({
     fullName: initialData?.fullName || userFullName || '',
-    email: initialData?.email || userEmail || '',
+    email: resolvedUserEmail || initialData?.email || '',
     phoneNumber: initialData?.phoneNumber || '',
     linkedin: initialData?.linkedin || '',
     collegeName: initialData?.collegeName || '',
@@ -59,12 +64,25 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [selectedYear, setSelectedYear] = useState<string>(formData.graduationDate.year || '');
   const [customDegree, setCustomDegree] = useState<string>('');
   const [customBranch, setCustomBranch] = useState<string>('');
+
+  useEffect(() => {
+    const nextEmail = resolvedUserEmail || initialData?.email || '';
+    if (!nextEmail) return;
+
+    setFormData((prev) => {
+      if (prev.email === nextEmail) {
+        return prev;
+      }
+      return { ...prev, email: nextEmail };
+    });
+  }, [resolvedUserEmail, initialData?.email]);
+
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
   const graduationDateDropdownRef = useRef<HTMLDivElement>(null);
   const { degreeDetails, loading: isDegreeLoading } = useLearnerDegreeDetails();
   const { branchDetails, loading: isBranchLoading } = useLearnerBranchDetails();
   
-  const years = getYearsArray();
+  const years = getYearsArray(1990);
   const degreeOptions = degreeDetails.map((item) => item.name);
   const branchOptions = branchDetails.map((item) => item.name);
   
@@ -341,12 +359,6 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
     if (!formData.graduationDate.year) {
       newErrors.graduationYear = 'Graduation year is required';
-    } else {
-      const selectedDate = new Date(`${formData.graduationDate.month} 1, ${formData.graduationDate.year}`);
-      const today = new Date();
-      if (selectedDate <= today) {
-        newErrors.graduationDate = 'Graduation date must be in the future';
-      }
     }
 
     setErrors(newErrors);

@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Carousel,
   CarouselContent,
@@ -26,14 +24,12 @@ import { Bootcamp } from '@/app/student/_pages/pageStudentType';
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
-import { useOnboardingStatus } from "@/hooks/use-profile";
 import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/hooks/useLearnerProfile";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const [enrollingBootcampId, setEnrollingBootcampId] = useState<number | null>(null);
-  const [simulationProgress, setSimulationProgress] = useState<string>('');
   const { studentData, loading, error, refetch } = useStudentData();
   
   // ✅ Fix: Use correct property name 'globalCourses'
@@ -41,8 +37,7 @@ const StudentDashboard = () => {
   
   const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
-  const { progress } = useOnboardingStatus();
-  const { strengthPercentage } = useLearnerProfileStrength();
+  const { strengthPercentage, strengthLevel, strengthMessage } = useLearnerProfileStrength();
   const { refetchLearnerProfile } = useLearnerProfile(false);
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
@@ -56,8 +51,7 @@ const StudentDashboard = () => {
     : studentData?.completedBootcamps || [];
 
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
-  const liveProfileStrength = strengthPercentage ?? Math.round(progress);
-  const displayProgress = simulationProgress ? parseInt(simulationProgress, 10) : liveProfileStrength;
+  const displayProgress = strengthPercentage ?? 0;
 
   useEffect(() => {
     if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
@@ -150,6 +144,18 @@ const StudentDashboard = () => {
     return { label: 'Beginner', color: 'text-muted-foreground' };
   };
 
+  const getProfileStatusColor = (level: string | null, prog: number) => {
+    if (!level) return getProfileStatus(prog).color;
+
+    const normalizedLevel = level.trim().toLowerCase();
+    if (normalizedLevel === 'complete') return 'text-success';
+    if (normalizedLevel === 'job ready') return 'text-primary';
+    if (normalizedLevel === 'intermediate') return 'text-foreground';
+    if (normalizedLevel === 'beginner') return 'text-muted-foreground';
+
+    return getProfileStatus(prog).color;
+  };
+
   const getSubtext = (prog: number) => {
     if (prog >= 100) return 'Your profile is ready! Start applying for jobs.';
     if (prog >= 95) return 'Almost there! One step away from being job ready.';
@@ -173,6 +179,9 @@ const StudentDashboard = () => {
   };
 
   const profileStatus = getProfileStatus(displayProgress);
+  const profileLevel = strengthLevel ?? profileStatus.label;
+  const profileMessage = strengthMessage ?? getSubtext(displayProgress);
+  const profileLevelColor = getProfileStatusColor(strengthLevel, displayProgress);
   const nextAction = getNextAction(displayProgress);
 
   if (loading) {
@@ -589,10 +598,10 @@ const StudentDashboard = () => {
 
                 <div className="text-center mb-8">
                   <p className="text-base mb-1">
-                    Your profile is <span className={`font-semibold ${profileStatus.color}`}>{profileStatus.label}</span>.
+                    Your profile is <span className={`font-semibold ${profileLevelColor}`}>{profileLevel}</span>.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {getSubtext(displayProgress)}
+                    {profileMessage}
                   </p>
                 </div>
 
@@ -611,44 +620,6 @@ const StudentDashboard = () => {
                     <p className="text-xs text-primary font-medium">{nextAction.score} Score</p>
                   </div>
                 </button>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm">
-              <CardContent className="p-4">
-                <p className="text-xs font-semibold text-muted-foreground mb-3">SIMULATION MODE</p>
-                <RadioGroup value={simulationProgress} onValueChange={setSimulationProgress}>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="20" id="20" />
-                      <Label htmlFor="20" className="text-sm cursor-pointer mt-4">Beginner (20%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="40" id="40" />
-                      <Label htmlFor="40" className="text-sm cursor-pointer mt-4">Basic (40%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="60" id="60" />
-                      <Label htmlFor="60" className="text-sm cursor-pointer mt-4">Intermediate (60%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="80" id="80" />
-                      <Label htmlFor="80" className="text-sm cursor-pointer mt-4">Job Ready (80%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="90" id="90" />
-                      <Label htmlFor="90" className="text-sm cursor-pointer mt-4">Almost Complete (90%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="95" id="95" />
-                      <Label htmlFor="95" className="text-sm cursor-pointer mt-4">Nearly Done (95%)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="100" id="100" />
-                      <Label htmlFor="100" className="text-sm cursor-pointer mt-4">Complete (100%)</Label>
-                    </div>
-                  </div>
-                </RadioGroup>
               </CardContent>
             </Card>
           </div>

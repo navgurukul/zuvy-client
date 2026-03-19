@@ -18,7 +18,7 @@ export function useResumeParse() {
             formData.append('file', file)
 
             const res = await api.post<ResumeParseApiResponse>(
-                '/resume/parse',
+                'http://localhost:5000/resume/parse',
                 formData,
                 {
                     headers: {

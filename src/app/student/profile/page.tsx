@@ -10,9 +10,7 @@ export default function Page() {
     return null;
   }
 
-  const isProfileComplete = Boolean(onboardingData?.isCompleted);
-
-  if (isProfileComplete) {
+  if (onboardingData?.isCompleted) {
     return <EditProfilePage />;
   }
 

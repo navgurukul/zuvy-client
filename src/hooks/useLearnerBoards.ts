@@ -47,7 +47,7 @@ export function useLearnerBoards(initialFetch = true) {
     const fetchLearnerBoards = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerBoardsResponse>('/besic/learner-boards')
+            const res = await api.get<LearnerBoardsResponse>('http://localhost:5000/besic/learner-boards')
             // Access boards array from nested data structure
             let boardsData: LearnerBoard[] | string[] | undefined
             

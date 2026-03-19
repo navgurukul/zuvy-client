@@ -23,6 +23,22 @@ import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceCompone
 import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 import { useLearnerBoards } from '@/hooks/useLearnerBoards';
 
+const DEFAULT_COMPETITIVE_PROFILES: CompetitiveProfile[] = COMPETITIVE_PLATFORMS.slice(0, 3).map((platform) => ({
+  platform: platform.name as CompetitiveProfile['platform'],
+  isVerified: false,
+}));
+
+const normalizeCompetitiveProfiles = (profiles?: CompetitiveProfile[]): CompetitiveProfile[] => {
+  if (!profiles?.length) {
+    return DEFAULT_COMPETITIVE_PROFILES.map((profile) => ({ ...profile }));
+  }
+
+  return DEFAULT_COMPETITIVE_PROFILES.map((defaultProfile) => {
+    const existingProfile = profiles.find((profile) => profile.platform === defaultProfile.platform);
+    return existingProfile ? { ...defaultProfile, ...existingProfile } : { ...defaultProfile };
+  });
+};
+
 interface ProfileStep3Props {
   initialData?: Partial<Step3Type>;
   onNext: (data: Step3Type) => void;
@@ -87,7 +103,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   );
   const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>(initialData?.workExperiences || []);
   const [competitiveProfiles, setCompetitiveProfiles] = useState<CompetitiveProfile[]>(
-    initialData?.competitiveProfiles || COMPETITIVE_PLATFORMS.slice(0, 3).map((p) => ({ platform: p.name as any, isVerified: false }))
+    normalizeCompetitiveProfiles(initialData?.competitiveProfiles)
   );
   const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState<WorkExperience | undefined>();

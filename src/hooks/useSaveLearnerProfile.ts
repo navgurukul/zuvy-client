@@ -14,7 +14,7 @@ export function useSaveLearnerProfile() {
     const saveLearnerProfile = useCallback(async (payload: LearnerProfilePayload) => {
         try {
             setLoading(true)
-            const res = await api.post('/learner-profile', payload)
+            const res = await api.post('http://localhost:5000/learner-profile', payload)
             setError(null)
             return { success: true, data: res.data }
         } catch (err) {

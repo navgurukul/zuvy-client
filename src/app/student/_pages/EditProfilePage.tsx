@@ -222,14 +222,15 @@ export const EditProfilePage: React.FC = () => {
   // Skills management state - must be before early return
   const skillDropdownRef = useRef<HTMLDivElement>(null);
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
+  const mockSkills = useMemo(() => Object.values(SKILLS_BY_CATEGORY).flat(), []);
   const allSkills = useMemo(() => {
     const apiSkills = (technicalSkills || [])
       .map((skill) => (skill?.name ? String(skill.name).trim() : ''))
       .filter(Boolean);
 
-    const sourceSkills = apiSkills.length > 0 ? apiSkills : Object.values(SKILLS_BY_CATEGORY).flat();
+    const sourceSkills = apiSkills.length > 0 ? apiSkills : mockSkills;
     return Array.from(new Set(sourceSkills));
-  }, [technicalSkills]);
+  }, [technicalSkills, mockSkills]);
   const [skills, setSkills] = useState<string[]>([]);
   const [filteredSkills, setFilteredSkills] = useState<string[]>(allSkills);
 
@@ -326,11 +327,15 @@ export const EditProfilePage: React.FC = () => {
     const buildPlatformProfiles = (platform: CompetitiveProfile['platform']) =>
       (step3Data?.competitiveProfiles || [])
         .filter((item) => item.platform === platform)
-        .map((item) => ({
-          username: normalizeText(item.username),
-          rating: item.rating !== undefined ? String(item.rating) : undefined,
-          rank: item.rank !== undefined ? String(item.rank) : undefined,
-        }))
+        .map((item) => {
+          const profile: any = {
+            username: normalizeText(item.username),
+          };
+          if (item.rating !== undefined) {
+            profile.rating = String(item.rating);
+          }
+          return profile;
+        })
         .filter((item) => item.username);
 
     const preferredContactMethods = [
@@ -371,7 +376,6 @@ export const EditProfilePage: React.FC = () => {
       leetcodeProfiles: buildPlatformProfiles('LeetCode'),
       codechefProfiles: buildPlatformProfiles('CodeChef'),
       codeforcesProfiles: buildPlatformProfiles('Codeforces'),
-      hackerrankProfiles: buildPlatformProfiles('HackerRank'),
       targetRoles: step4Data?.targetRoles || [],
       preferredLocations: step4Data?.locationPreferences?.cities || [],
       openToRemote: step4Data?.locationPreferences?.remote,

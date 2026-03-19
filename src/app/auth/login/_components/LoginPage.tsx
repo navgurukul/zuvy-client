@@ -22,7 +22,7 @@ import { getUser } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
-import type { OnboardingData } from '@/lib/profile.types'
+
 
 
 
@@ -180,23 +180,43 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    let isProfileComplete = false
+                    let studentDestination = '/student/profile'
 
                     try {
-                        const storedOnboarding = localStorage.getItem('zuvy_onboarding_data')
-                        if (storedOnboarding) {
-                            const parsedOnboarding = JSON.parse(storedOnboarding) as OnboardingData
-                            isProfileComplete = Boolean(parsedOnboarding?.isCompleted)
+                        const strengthRes = await api.get('http://localhost:5000/learner-profile/strength')
+                        const raw = strengthRes.data
+                        let strength: number | null = null
+
+                        if (typeof raw === 'number' && Number.isFinite(raw)) {
+                            strength = raw
+                        } else if (typeof raw === 'string') {
+                            const n = Number(raw)
+                            if (Number.isFinite(n)) strength = n
+                        } else if (raw && typeof raw === 'object') {
+                            const data = (raw as any).data
+                            if (typeof data === 'number' && Number.isFinite(data)) {
+                                strength = data
+                            } else if (typeof data === 'string') {
+                                const n = Number(data)
+                                if (Number.isFinite(n)) strength = n
+                            } else if (data && typeof data === 'object') {
+                                const s = (data as any).strength ?? (data as any).percentage
+                                if (typeof s === 'number' && Number.isFinite(s)) strength = s
+                                else if (typeof s === 'string') {
+                                    const n = Number(s)
+                                    if (Number.isFinite(n)) strength = n
+                                }
+                            }
                         }
-                    } catch (onboardingError) {
-                        console.error('Error reading onboarding data:', onboardingError)
+
+                        if (strength !== null && strength >= 80) {
+                            studentDestination = '/student'
+                        }
+                    } catch {
+                        // fall back to profile setup if strength check fails
                     }
 
-                    if (isProfileComplete || hasFilled) {
-                        router.push('/student')
-                    } else {
-                        router.push('/student/profile')
-                    }
+                    router.push(studentDestination)
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/organizations/${organizationId}/setting`)

@@ -47,7 +47,7 @@ export function useLearnerTechnicalSkills(initialFetch = true) {
     const fetchLearnerTechnicalSkills = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerTechnicalSkillsResponse>('/besic/learner-technical-skills')
+            const res = await api.get<LearnerTechnicalSkillsResponse>('http://localhost:5000/besic/learner-technical-skills')
             // Access skills array from nested data structure
             let skillsData: LearnerTechnicalSkill[] | string[] | undefined
             

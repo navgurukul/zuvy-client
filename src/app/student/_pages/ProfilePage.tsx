@@ -10,12 +10,13 @@ import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
 import { useOnboardingStorage } from '@/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { AlertCircle, Info, Sparkles } from 'lucide-react';
 import { MONTHS } from '@/lib/profile.mockData';
 import { toast } from '@/components/ui/use-toast';
 import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
 import useResumeParse from '@/hooks/useResumeParse';
 import useParsedResume from '@/hooks/useParsedResume';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -38,8 +39,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes in seconds
   const [showAlert, setShowAlert] = useState(false);
-  const [autofillMethod, setAutofillMethod] = useState<'resume' | 'linkedin'>('resume');
-  const [linkedinUrl, setLinkedinUrl] = useState('');
   const [isParsingResume, setIsParsingResume] = useState(false);
   const [resumeError, setResumeError] = useState('');
   const [resumeFileName, setResumeFileName] = useState('');
@@ -137,6 +136,28 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
     const codeforcesUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'Codeforces')?.username;
 
+    const normalizedLeetcodeUsername = normalizeText(leetcodeUsername);
+    const normalizedCodechefUsername = normalizeText(codechefUsername);
+    const normalizedCodeforcesUsername = normalizeText(codeforcesUsername);
+
+    // Build platform profiles as objects with username and optional rating
+    const buildProfileObject = (username?: string | null, profile?: any) => {
+      if (!username) return null;
+      const obj: any = { username };
+      if (profile?.rating !== undefined && profile?.rating !== null) {
+        obj.rating = String(profile.rating);
+      }
+      return obj;
+    };
+
+    const leetcodeProfile = buildProfileObject(normalizedLeetcodeUsername, step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode'));
+    const codechefProfile = buildProfileObject(normalizedCodechefUsername, step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef'));
+    const codeforcesProfile = buildProfileObject(normalizedCodeforcesUsername, step3Data?.competitiveProfiles?.find((item) => item.platform === 'Codeforces'));
+
+    const leetcodeProfiles = leetcodeProfile ? [leetcodeProfile] : [];
+    const codechefProfiles = codechefProfile ? [codechefProfile] : [];
+    const codeforcesProfiles = codeforcesProfile ? [codeforcesProfile] : [];
+
     const preferredContactMethods = [
       step4Data?.communicationPreferences?.email ? 'Email' : null,
       step4Data?.communicationPreferences?.whatsapp ? 'Whatsapp' : null,
@@ -169,9 +190,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       class10ScoreType: academicPerformance?.class10Format === 'Percentage' ? '%' : academicPerformance?.class10Format,
       hasWorkExperience: step3Data?.hasInternshipExperience,
       workExperiences,
-      leetcodeUsername: normalizeText(leetcodeUsername),
-      codechefUsername: normalizeText(codechefUsername),
-      codeforcesUsername: normalizeText(codeforcesUsername),
+      leetcodeUsername: normalizedLeetcodeUsername,
+      codechefUsername: normalizedCodechefUsername,
+      codeforcesUsername: normalizedCodeforcesUsername,
+      leetcodeProfiles,
+      codechefProfiles,
+      codeforcesProfiles,
       targetRoles: step4Data?.targetRoles || [],
       preferredLocations: step4Data?.locationPreferences?.cities || [],
       openToRemote: step4Data?.locationPreferences?.remote,
@@ -714,11 +738,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     };
   };
 
-  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+  const processResumeFile = async (
+    file: File,
+    source: 'resume' | 'linkedin-pdf'
+  ) => {
     setResumeError('');
     setResumeFileName(file.name);
     setIsParsingResume(true);
@@ -729,8 +752,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         file.name.toLowerCase().endsWith('.docx');
 
-      if (!isPdf && !isDocx) {
-        throw new Error('Please upload a PDF or DOCX resume.');
+      const isAllowedFile = source === 'linkedin-pdf' ? isPdf : isPdf || isDocx;
+
+      if (!isAllowedFile) {
+        throw new Error(
+          source === 'linkedin-pdf'
+            ? 'Please upload a LinkedIn downloaded resume in PDF format.'
+            : 'Please upload a PDF or DOCX resume.'
+        );
       }
 
       const postResult = await parseResume(file);
@@ -930,16 +959,27 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       setResumeSkills([]);
     } finally {
       setIsParsingResume(false);
-      event.target.value = '';
     }
   };
 
-  const handleLinkedinFetch = () => {
-    if (linkedinUrl.trim()) {
-      // TODO: Implement LinkedIn profile fetching logic
-      console.log('Fetching LinkedIn profile:', linkedinUrl);
-      // Here you would typically call an API to fetch LinkedIn profile data
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
     }
+
+    await processResumeFile(file, 'resume');
+    event.target.value = '';
+  };
+
+  const handleLinkedinResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    await processResumeFile(file, 'linkedin-pdf');
+    event.target.value = '';
   };
 
   const handleBackClick = () => {
@@ -1092,34 +1132,44 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
                 {/* Import from LinkedIn */}
                 <div className="flex-1">
-                  <div className="border-2 border-border rounded-lg p-4 bg-background h-full">
-                    <div className="flex flex-col justify-center h-full space-y-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded flex items-center justify-center bg-[#0A66C2]">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                          </svg>
+                  <Input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handleLinkedinResumeUpload}
+                    className="hidden"
+                    id="linkedin-resume-upload"
+                    disabled={isParsingResume}
+                  />
+                  <label htmlFor="linkedin-resume-upload" className="block h-full">
+                    <div className="border-2 border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
+                      <div className="flex flex-col items-center justify-center text-center h-full space-y-2">
+                        <div className="w-9 h-9 rounded-md flex items-center justify-center bg-[#0A66C2]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
                         </div>
-                        <span className="text-sm font-medium text-foreground">Import from LinkedIn</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Input
-                          type="url"
-                          placeholder="Paste profile URL..."
-                          value={linkedinUrl}
-                          onChange={(e) => setLinkedinUrl(e.target.value)}
-                          className="flex-1 mt-0"
-                        />
-                        <Button
-                          type="button"
-                          onClick={handleLinkedinFetch}
-                          disabled={!linkedinUrl.trim()}
-                        >
-                          Fetch
-                        </Button>
+                        <p className="text-sm font-medium text-foreground text-center">Upload LinkedIn Resume</p>
+                        <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <span>Downloaded LinkedIn PDF</span>
+                          <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  className="inline-flex items-center justify-center"
+                                  aria-label="How to upload LinkedIn PDF"
+                                >
+                                  <Info className="w-4 h-4" />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                                First download your profile details as a PDF from LinkedIn, then upload that PDF here.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </label>
                 </div>
               </div>
 

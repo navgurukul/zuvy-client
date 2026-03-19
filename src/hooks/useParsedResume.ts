@@ -45,7 +45,7 @@ export function useParsedResume(initialFetch = true) {
     const fetchParsedResume = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<ParsedResumeResponse>('/resume/parsed')
+            const res = await api.get<ParsedResumeResponse>('http://localhost:5000/resume/parsed')
             const payload = res?.data || {}
 
             setResumeUrl(payload?.resumeUrl || '')
