@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Loader2, Sparkles, Brain, Zap, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Difficulty, MCQQuestion } from './adminResourceComponentType';
+import { MCQQuestion } from './adminResourceComponentType';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { useForm } from 'react-hook-form';
@@ -20,7 +20,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useAllCourses } from '@/hooks/useAllCourses';
+import { useAllModulesByCourse } from '@/hooks/useAllModulesByCourse';
+import { useTopics } from '@/hooks/useTopics';
 
 interface CreateProblemFormProps {
   onClose: () => void;
@@ -29,6 +32,7 @@ interface CreateProblemFormProps {
 
 // Zod schema for form validation
 const formSchema = z.object({
+  bootcampId: z.string().min(1, 'Bootcamp is required'),
   domainName: z.string().min(1, 'Domain is required'),
   topicNames: z.array(z.string()).min(1, 'At least one topic is required'),
   learningObjectives: z.string().min(10, 'Learning objectives are required (minimum 10 characters)'),
@@ -39,12 +43,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const difficultyColors: Record<Difficulty, string> = {
-  Easy: 'bg-green-100 text-green-700 border-green-300',
-  Medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-  Hard: 'bg-red-100 text-red-700 border-red-300',
-};
 
 const bloomsLevels = [
   { value: 'remember', label: 'Remember (Recall facts)' },
@@ -61,66 +59,12 @@ const questionStyles = [
   { value: 'mixed', label: 'Mixed (Variety)' },
 ];
 
-// Mock domains with topics - replace with actual data from your backend
-const availableDomains = [
-  {
-    id: 'programming',
-    name: 'Programming',
-    topics: ['Python Basics', 'Java Fundamentals', 'C++ Programming', 'JavaScript ES6+', 'Data Structures', 'Algorithms']
-  },
-  {
-    id: 'web-dev',
-    name: 'Web Development',
-    topics: ['React Fundamentals', 'Vue.js', 'Angular', 'HTML/CSS', 'Node.js', 'REST APIs', 'GraphQL']
-  },
-  {
-    id: 'data-science',
-    name: 'Data Science',
-    topics: ['Statistical Analysis', 'Machine Learning Basics', 'Data Visualization', 'Pandas', 'NumPy', 'SQL for Data']
-  },
-  {
-    id: 'cloud',
-    name: 'Cloud Computing',
-    topics: ['AWS Services', 'Azure Fundamentals', 'Google Cloud Platform', 'Docker', 'Kubernetes', 'Serverless']
-  },
-  {
-    id: 'database',
-    name: 'Database Management',
-    topics: ['SQL Queries', 'Database Design', 'PostgreSQL', 'MongoDB', 'Redis', 'Database Optimization']
-  },
-  {
-    id: 'mobile',
-    name: 'Mobile Development',
-    topics: ['React Native', 'Flutter', 'iOS Swift', 'Android Kotlin', 'Mobile UI/UX']
-  },
-  {
-    id: 'devops',
-    name: 'DevOps',
-    topics: ['CI/CD Pipelines', 'Jenkins', 'GitLab CI', 'Infrastructure as Code', 'Monitoring', 'Linux Administration']
-  },
-  {
-    id: 'security',
-    name: 'Cybersecurity',
-    topics: ['Network Security', 'Cryptography', 'Web Application Security', 'Penetration Testing', 'Security Best Practices']
-  },
-  {
-    id: 'ml',
-    name: 'Machine Learning',
-    topics: ['Neural Networks', 'Deep Learning', 'NLP', 'Computer Vision', 'Model Training', 'TensorFlow', 'PyTorch']
-  },
-  {
-    id: 'software-eng',
-    name: 'Software Engineering',
-    topics: ['Design Patterns', 'SOLID Principles', 'Agile Methodology', 'Testing Strategies', 'Code Review', 'System Design']
-  },
-];
-
 export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedDifficulty] = useState<Difficulty>('Medium');
   const searchParams = usePathname();
   const organizationId = +searchParams.split('/')[3] || 0;
-  const { generateQuestions, isLoading, error  } = useGenerateMcqQuestions(organizationId);
+  const { generateQuestions } = useGenerateMcqQuestions(organizationId);
+  const { allCourses, loading: loadingBootcamps, error: bootcampError } = useAllCourses();
   
   // State to track question count for each topic
   const [topicQuestionCounts, setTopicQuestionCounts] = useState<{ [key: string]: number }>({});
@@ -141,6 +85,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
+      bootcampId: '',
       domainName: '',
       topicNames: [],
       learningObjectives: '',
@@ -152,20 +97,134 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   });
 
   // Watch form values
+  const watchedBootcampId = form.watch('bootcampId');
   const watchedDomain = form.watch('domainName');
   const watchedTopics = form.watch('topicNames');
+  const selectedBootcampId = Number(watchedBootcampId || 0);
+
+  const {
+    modules,
+    loading: loadingModules,
+    error: modulesError,
+  } = useAllModulesByCourse(selectedBootcampId, Boolean(selectedBootcampId));
+
+  const selectedModule = modules.find((module) => module.name === watchedDomain);
+  const selectedModuleId = selectedModule?.id || 0;
+
+  const {
+    topics: domainTopics,
+    loading: loadingTopics,
+    error: topicsError,
+  } = useTopics(
+    selectedModuleId,
+    selectedBootcampId,
+    Boolean(selectedBootcampId && selectedModuleId)
+  );
+
+  const availableTopicOptions = domainTopics.reduce<
+    Array<{ id: string; name: string }>
+  >((acc, topic) => {
+    const topicName = topic.name?.trim()
+    if (!topicName) {
+      return acc
+    }
+
+    const topicId = topic.id ? String(topic.id) : `name:${topicName.toLowerCase()}`
+    const alreadyExists = acc.some((item) => item.id === topicId)
+
+    if (!alreadyExists) {
+      acc.push({ id: topicId, name: topicName })
+    }
+
+    return acc
+  }, [])
+
+  const topicNameById = availableTopicOptions.reduce<Record<string, string>>(
+    (acc, topic) => {
+      acc[topic.id] = topic.name
+      return acc
+    },
+    {}
+  )
+
+  const getTopicLabel = (topicId: string) => topicNameById[topicId] || topicId
   
   // Calculate total number of questions from all topics
   const totalQuestions = Object.values(topicQuestionCounts).reduce((sum, count) => sum + count, 0);
 
-  // Get topics for selected domain
-  const selectedDomain = availableDomains.find(d => d.name === watchedDomain);
-  const availableTopics = selectedDomain?.topics || [];
-
-  // Reset topics when domain changes
-  const handleDomainChange = (domainName: string) => {
-    form.setValue('topicNames', []);
+  const clearTopicSelections = () => {
+    form.setValue('topicNames', [], { shouldValidate: true, shouldDirty: true });
     setTopicQuestionCounts({});
+    setTopicDifficultyDistributions({});
+    setTopicDescriptions({});
+    setExpandedTopics(new Set());
+    form.clearErrors('topicNames');
+  };
+
+  // Keep selected topics in sync with API-driven options.
+  useEffect(() => {
+    const validTopicIds = new Set(availableTopicOptions.map((topic) => topic.id))
+    const filteredTopics = watchedTopics.filter((topic) =>
+      validTopicIds.has(topic)
+    );
+
+    if (filteredTopics.length !== watchedTopics.length) {
+      form.setValue('topicNames', filteredTopics, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
+      setTopicQuestionCounts((prev) => {
+        const next: Record<string, number> = {};
+        filteredTopics.forEach((topic) => {
+          if (prev[topic]) {
+            next[topic] = prev[topic];
+          }
+        });
+        return next;
+      });
+
+      setTopicDifficultyDistributions((prev) => {
+        const next: Record<string, { easy: number; medium: number; hard: number }> = {};
+        filteredTopics.forEach((topic) => {
+          if (prev[topic]) {
+            next[topic] = prev[topic];
+          }
+        });
+        return next;
+      });
+
+      setTopicDescriptions((prev) => {
+        const next: Record<string, string> = {};
+        filteredTopics.forEach((topic) => {
+          if (prev[topic]) {
+            next[topic] = prev[topic];
+          }
+        });
+        return next;
+      });
+
+      setExpandedTopics((prev) => {
+        const next = new Set<string>();
+        filteredTopics.forEach((topic) => {
+          if (prev.has(topic)) {
+            next.add(topic);
+          }
+        });
+        return next;
+      });
+    }
+  }, [availableTopicOptions, form, watchedTopics]);
+
+  const handleBootcampChange = (bootcampId: string) => {
+    form.setValue('domainName', '', { shouldValidate: true, shouldDirty: true });
+    clearTopicSelections();
+    return bootcampId;
+  };
+
+  // Reset dependent selections when domain changes.
+  const handleDomainChange = (domainName: string) => {
+    clearTopicSelections();
     return domainName;
   };
   
@@ -387,9 +446,10 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     // Validate that all topics have question counts > 0
     const topicsWithoutCounts = values.topicNames.filter(topic => !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0);
     if (topicsWithoutCounts.length > 0) {
+      const topicLabels = topicsWithoutCounts.map((topicId) => getTopicLabel(topicId));
       form.setError('topicNames', {
         type: 'manual',
-        message: `Please specify questions for: ${topicsWithoutCounts.join(', ')}`
+        message: `Please specify questions for: ${topicLabels.join(', ')}`
       });
       return;
     }
@@ -413,11 +473,16 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     
     // Clear any previous errors
     form.clearErrors('topicNames');
+    const selectedTopicNames = values.topicNames.map((topicId) => getTopicLabel(topicId));
+    const selectedTopicIds = values.topicNames
+      .map((topicId) => Number(topicId))
+      .filter((topicId) => Number.isFinite(topicId) && topicId > 0);
     
     // Prepare topic-specific configuration
     const topicConfigurations = values.topicNames.map(topic => {
       const count = topicQuestionCounts[topic] || 0;
       const distribution = topicDifficultyDistributions[topic] || difficultyDistribution;
+      const topicId = Number(topic);
       
       // Calculate question counts for this topic
       const easyRaw = (distribution.easy / 100) * count;
@@ -445,7 +510,8 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       }
       
       return {
-        topicName: topic,
+        topicId: Number.isFinite(topicId) ? topicId : null,
+        topicName: getTopicLabel(topic),
         topicDescription: topicDescriptions[topic] || '',
         totalQuestions: count,
         difficultyDistribution: distribution,
@@ -458,8 +524,11 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     });
     
     const payload = {
+      bootcampId: Number(values.bootcampId),
+      moduleId: selectedModuleId,
       domainName: values.domainName,
-      topicNames: values.topicNames,
+      topicIds: selectedTopicIds,
+      topicNames: selectedTopicNames,
       numberOfQuestions: totalQuestions,
       learningObjectives: values.learningObjectives,
       targetAudience: values.targetAudience || '',
@@ -496,6 +565,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
   const handleCancel = () => {
     form.reset({
+      bootcampId: '',
       domainName: '',
       topicNames: [],
       learningObjectives: '',
@@ -554,7 +624,61 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
             </div>
             
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField
+                  control={form.control}
+                  name="bootcampId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                        Select Bootcamp
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(handleBootcampChange(value))
+                        }
+                        value={field.value}
+                        disabled={loadingBootcamps}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl disabled:opacity-50">
+                            <SelectValue
+                              placeholder={
+                                loadingBootcamps
+                                  ? 'Loading bootcamps...'
+                                  : 'Choose a bootcamp'
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {allCourses.length > 0 ? (
+                            allCourses.map((course) => (
+                              <SelectItem
+                                key={course.id}
+                                value={String(course.id)}
+                                className="rounded-lg"
+                              >
+                                {course.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-8 text-sm text-center text-muted-foreground">
+                              No bootcamps available
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {Boolean(bootcampError) && (
+                        <FormDescription className="text-xs text-destructive mt-2">
+                          Failed to load bootcamps.
+                        </FormDescription>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="domainName"
@@ -563,20 +687,47 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                       <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
                         Domain
                       </FormLabel>
-                      <Select onValueChange={(value) => field.onChange(handleDomainChange(value))} value={field.value}>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(handleDomainChange(value))
+                        }
+                        value={field.value}
+                        disabled={!watchedBootcampId || loadingModules || modules.length === 0}
+                      >
                         <FormControl>
-                          <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl">
-                            <SelectValue placeholder="Choose a domain" />
+                          <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl disabled:opacity-50">
+                            <SelectValue
+                              placeholder={
+                                !watchedBootcampId
+                                  ? 'Select bootcamp first'
+                                  : loadingModules
+                                  ? 'Loading domains...'
+                                  : modules.length === 0
+                                  ? 'No domains available'
+                                  : 'Choose a domain'
+                              }
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {availableDomains.map((domain) => (
-                            <SelectItem key={domain.id} value={domain.name} className="rounded-lg">
-                              {domain.name}
-                            </SelectItem>
-                          ))}
+                          {modules.length > 0 ? (
+                            modules.map((module) => (
+                              <SelectItem key={module.id} value={module.name} className="rounded-lg">
+                                {module.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-8 text-sm text-center text-muted-foreground">
+                              No domains available
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
+                      {modulesError && watchedBootcampId && (
+                        <FormDescription className="text-xs text-destructive mt-2">
+                          Failed to load domains for the selected bootcamp.
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -601,34 +752,51 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                           }
                         }} 
                         value=""
-                        disabled={!watchedDomain}
+                        disabled={!watchedDomain || loadingTopics}
                       >
                         <FormControl>
                           <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl disabled:opacity-50">
-                            <SelectValue placeholder={watchedDomain ? "Select topics" : "Select domain first"} />
+                            <SelectValue
+                              placeholder={
+                                !watchedBootcampId
+                                  ? 'Select bootcamp first'
+                                  : !watchedDomain
+                                  ? 'Select domain first'
+                                  : loadingTopics
+                                  ? 'Loading topics...'
+                                  : 'Select topics'
+                              }
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {availableTopics.length > 0 ? (
-                            availableTopics
-                              .filter((topic) => !field.value.includes(topic))
+                          {availableTopicOptions.length > 0 ? (
+                            availableTopicOptions
+                              .filter((topic) => !field.value.includes(topic.id))
                               .map((topic) => (
-                                <SelectItem key={topic} value={topic} className="rounded-lg">
-                                  {topic}
+                                <SelectItem key={topic.id} value={topic.id} className="rounded-lg">
+                                  {topic.name}
                                 </SelectItem>
                               ))
                           ) : (
                             <div className="px-2 py-8 text-sm text-center text-muted-foreground">
-                              No topics available
+                              {loadingTopics
+                                ? 'Loading topics...'
+                                : 'No topics available'}
                             </div>
                           )}
-                          {availableTopics.length > 0 && availableTopics.every((topic) => field.value.includes(topic)) && (
+                          {availableTopicOptions.length > 0 && availableTopicOptions.every((topic) => field.value.includes(topic.id)) && (
                             <div className="px-2 py-8 text-sm text-center text-muted-foreground">
                               All topics selected
                             </div>
                           )}
                         </SelectContent>
                       </Select>
+                      {topicsError && watchedBootcampId && watchedDomain && (
+                        <FormDescription className="text-xs text-destructive mt-2">
+                          Failed to load topics for the selected domain.
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -663,14 +831,15 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                     </div>
                   </div>
                   <div className="space-y-3">
-                    {watchedTopics.map((topic, index) => {
-                      const isExpanded = expandedTopics.has(topic);
-                      const topicDist = getTopicDifficulty(topic);
-                      const topicCounts = getTopicQuestionCounts(topic);
+                    {watchedTopics.map((topicId, index) => {
+                      const topicName = getTopicLabel(topicId);
+                      const isExpanded = expandedTopics.has(topicId);
+                      const topicDist = getTopicDifficulty(topicId);
+                      const topicCounts = getTopicQuestionCounts(topicId);
                       
                       return (
                         <div 
-                          key={topic} 
+                          key={topicId} 
                           className="border border-border/40 hover:border-primary/30 bg-card rounded-lg transition-all duration-200 animate-in fade-in zoom-in-95 overflow-hidden"
                           style={{ animationDelay: `${index * 40}ms` }}
                         >
@@ -679,7 +848,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               <button
                                 type="button"
-                                onClick={() => toggleTopicExpansion(topic)}
+                                onClick={() => toggleTopicExpansion(topicId)}
                                 className="shrink-0 p-1 hover:bg-primary/10 rounded transition-colors"
                               >
                                 {isExpanded ? (
@@ -689,7 +858,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 )}
                               </button>
                               <span className="text-xs font-medium text-foreground/70 leading-snug truncate flex-1">
-                                {topic}
+                                {topicName}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
@@ -697,21 +866,21 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 type="number"
                                 min={1}
                                 max={50}
-                                value={topicQuestionCounts[topic] || ''}
+                                value={topicQuestionCounts[topicId] || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
                                   const numValue = value === '' ? 0 : parseInt(value);
-                                  handleTopicQuestionChange(topic, numValue);
+                                  handleTopicQuestionChange(topicId, numValue);
                                 }}
                                 onBlur={(e) => {
                                   const value = parseInt(e.target.value);
                                   if (!value || value === 0) {
-                                    handleTopicQuestionChange(topic, 1);
+                                    handleTopicQuestionChange(topicId, 1);
                                   }
                                 }}
                                 placeholder="1"
                                 className={`h-7 w-12 px-1.5 text-xs text-center border rounded-md font-semibold tabular-nums transition-all duration-200 ${
-                                  !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0
+                                  !topicQuestionCounts[topicId] || topicQuestionCounts[topicId] === 0
                                     ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10 focus:bg-destructive/10'
                                     : 'border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80'
                                 }`}
@@ -720,7 +889,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => toggleTopicExpansion(topic)}
+                                onClick={() => toggleTopicExpansion(topicId)}
                                 className="h-6 w-6 p-0 rounded-md opacity-60 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
                                 title="Configure difficulty"
                               >
@@ -731,7 +900,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 w-6 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => handleTopicRemove(topic)}
+                                onClick={() => handleTopicRemove(topicId)}
                               >
                                 <X className="h-3 w-3" />
                               </Button>
@@ -750,11 +919,11 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                               <div className="space-y-2">
                                 <label className="text-xs font-medium text-foreground/70">Description</label>
                                 <Textarea
-                                  value={topicDescriptions[topic] || ''}
+                                  value={topicDescriptions[topicId] || ''}
                                   onChange={(e) => {
                                     setTopicDescriptions(prev => ({
                                       ...prev,
-                                      [topic]: e.target.value
+                                      [topicId]: e.target.value
                                     }));
                                   }}
                                   placeholder="Provide context about this topic..."
@@ -781,7 +950,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 </div>
                                 <Slider
                                   value={[topicDist.easy]}
-                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'easy', value)}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topicId, 'easy', value)}
                                   min={0}
                                   max={100}
                                   step={5}
@@ -803,7 +972,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 </div>
                                 <Slider
                                   value={[topicDist.medium]}
-                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'medium', value)}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topicId, 'medium', value)}
                                   min={0}
                                   max={100}
                                   step={5}
@@ -825,7 +994,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                                 </div>
                                 <Slider
                                   value={[topicDist.hard]}
-                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'hard', value)}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topicId, 'hard', value)}
                                   min={0}
                                   max={100}
                                   step={5}

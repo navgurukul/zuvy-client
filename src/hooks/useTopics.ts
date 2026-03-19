@@ -58,7 +58,7 @@ export function useTopics(
             setError(null)
 
             const response = await api.get<TopicsApiResponse>(
-                `http://localhost:5000/topic/by-module/${moduleId}?bootcampId=${bootcampId}`
+                `${process.env.NEXT_PUBLIC_LOCAL_URL}/topic/by-module/${moduleId}?bootcampId=${bootcampId}`
             )
 
             setTopics(normalizeTopics(response.data))
