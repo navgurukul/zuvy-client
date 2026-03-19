@@ -231,6 +231,10 @@ export default function Page({
                             topicId={topicId}
                         />
                     )
+                case 9:
+                    return (
+                        <AdaptiveAssessment />
+                    )    
                     
                 default:
                     return <h1>Create New Chapter</h1>

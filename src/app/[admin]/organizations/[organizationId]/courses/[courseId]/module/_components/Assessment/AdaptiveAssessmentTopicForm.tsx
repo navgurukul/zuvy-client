@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog'
-import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -87,7 +80,6 @@ function AdaptiveAssessmentTopicForm({
 			}))
 
 		setTopicOptions(apiTopics)
-		console.log('API Topics:', apiTopics, 'Total:', apiTopics.length)
 	}, [topics])
 
 	useEffect(() => {
@@ -158,141 +150,141 @@ function AdaptiveAssessmentTopicForm({
 		})
 	}
 
+	if (!open) {
+		return null
+	}
+
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-lg w-full p-0 overflow-hidden border-border/60">
-				<DialogHeader className="px-6 pt-6 pb-4 border-b bg-muted/20">
-					<DialogTitle className="text-foreground text-[18px] font-semibold">
-						Create Adaptive Assessment
-					</DialogTitle>
-					<DialogDescription className="text-sm text-muted-foreground">
-						Select a topic and add a short description for this
-						adaptive assessment.
-					</DialogDescription>
-				</DialogHeader>
+		<section className="w-full lg:w-1/2 border border-border/60 rounded-xl overflow-hidden bg-background">
+			<div className="px-6 pt-6 pb-4 border-b bg-muted/20">
+				<h2 className="text-foreground text-left text-[18px] font-semibold">
+					Create Adaptive Assessment
+				</h2>
+				<p className="text-sm text-left text-muted-foreground">
+					Select a topic and add a short description for this adaptive
+					assessment.
+				</p>
+			</div>
 
-				<div className="space-y-5 px-6 py-5">
-					<div className="space-y-2.5">
-						<Label
-							htmlFor="adaptive-topic"
-							className="text-sm flex font-medium text-foreground"
-						>
-							Select Topic
-						</Label>
-						<Select
-							value={selectedTopicId}
-							open={selectOpen}
-							onOpenChange={setSelectOpen}
-							onValueChange={(value) => {
-								setSelectedTopicId(value)
-								if (newTopicName) {
-									setNewTopicName('')
-								}
-							}}
-							disabled={hasNewTopicName || creating}
-						>
-							<SelectTrigger
-								id="adaptive-topic"
-								className="h-11 border-border/70 disabled:opacity-60"
-							>
-								<SelectValue
-									placeholder={
-										loadingTopics
-											? 'Loading topics...'
-											: 'Select topic'
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{topicOptions.map((topic) => (
-									<SelectItem
-										key={topic.id}
-										value={String(topic.id)}
-									>
-										{topic.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-
-					<div className="space-y-2.5 rounded-lg border border-border/70 bg-background p-4">
-						<Label
-							htmlFor="new-topic-name"
-							className="text-sm flex font-medium text-foreground"
-						>
-							Create New Topic
-						</Label>
-						<Input
-							id="new-topic-name"
-							value={newTopicName}
-							onChange={(event) => {
-								setNewTopicName(event.target.value)
-								if (selectedTopicId) {
-									setSelectedTopicId('')
-								}
-							}}
-							placeholder="Topic name"
-							className="h-11 border-border/70"
-							disabled={hasSelectedTopic || creating}
-						/>
-						<p className="text-xs text-muted-foreground leading-relaxed">
-							If a topic name is entered here, Save And Generate will
-							create it automatically.
-						</p>
-						{hasSelectedTopic && (
-							<p className="text-xs text-amber-600">
-								Clear selected topic to create a new one.
-							</p>
-						)}
-						{hasNewTopicName && (
-							<p className="text-xs text-amber-600">
-								Clear new topic name to choose from dropdown.
-							</p>
-						)}
-					</div>
-
-					<div className="space-y-2.5">
-						<Label
-							htmlFor="adaptive-topic-description"
-							className="text-sm flex font-medium text-foreground"
-						>
-							Topic Description
-						</Label>
-						<Textarea
-							id="adaptive-topic-description"
-							value={description}
-							onChange={(event) =>
-								setDescription(event.target.value)
+			<div className="space-y-5 px-6 py-5">
+				<div className="space-y-2.5">
+					<Label
+						htmlFor="adaptive-topic"
+						className="text-sm flex font-medium text-foreground"
+					>
+						Select Topic
+					</Label>
+					<Select
+						value={selectedTopicId}
+						open={selectOpen}
+						onOpenChange={setSelectOpen}
+						onValueChange={(value) => {
+							setSelectedTopicId(value)
+							if (newTopicName) {
+								setNewTopicName('')
 							}
-							placeholder="Write topic description"
-							className="min-h-[120px] border-border/70"
-						/>
-					</div>
-
-					<div className="flex justify-end gap-2 pt-1">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => onOpenChange(false)}
-							className="h-10 px-4"
+						}}
+						disabled={hasNewTopicName || creating}
+					>
+						<SelectTrigger
+							id="adaptive-topic"
+							className="h-11 border-border/70 disabled:opacity-60"
 						>
-							Cancel
-						</Button>
-						<Button
-							type="button"
-							onClick={handleSave}
-							disabled={creating}
-							className="h-10 px-4"
-						>
-							{creating
-								? 'Saving...'
-								: 'Save And Generate Assessment'}
-						</Button>
-					</div>
+							<SelectValue
+								placeholder={
+									loadingTopics
+										? 'Loading topics...'
+										: 'Select topic'
+								}
+							/>
+						</SelectTrigger>
+						<SelectContent>
+							{topicOptions.map((topic) => (
+								<SelectItem
+									key={topic.id}
+									value={String(topic.id)}
+								>
+									{topic.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
-			</DialogContent>
-		</Dialog>
+
+				<div className="space-y-2.5 rounded-lg border border-border/70 bg-background p-4">
+					<Label
+						htmlFor="new-topic-name"
+						className="text-sm flex font-medium text-foreground"
+					>
+						Create New Topic
+					</Label>
+					<Input
+						id="new-topic-name"
+						value={newTopicName}
+						onChange={(event) => {
+							setNewTopicName(event.target.value)
+							if (selectedTopicId) {
+								setSelectedTopicId('')
+							}
+						}}
+						placeholder="Topic name"
+						className="h-11 border-border/70"
+						disabled={hasSelectedTopic || creating}
+					/>
+					<p className="text-xs text-left text-muted-foreground leading-relaxed">
+						If a topic name is entered here, Save And Generate will create
+						it automatically.
+					</p>
+					{hasSelectedTopic && (
+						<p className="text-xs text-amber-600">
+							Clear selected topic to create a new one.
+						</p>
+					)}
+					{hasNewTopicName && (
+						<p className="text-xs text-amber-600">
+							Clear new topic name to choose from dropdown.
+						</p>
+					)}
+				</div>
+
+				<div className="space-y-2.5">
+					<Label
+						htmlFor="adaptive-topic-description"
+						className="text-sm flex font-medium text-foreground"
+					>
+						Topic Description
+					</Label>
+					<Textarea
+						id="adaptive-topic-description"
+						value={description}
+						onChange={(event) => setDescription(event.target.value)}
+						placeholder="Write topic description"
+						className="min-h-[120px] border-border/70"
+					/>
+				</div>
+
+				<div className="flex justify-end gap-2 pt-1">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => onOpenChange(false)}
+						className="h-10 px-4"
+					>
+						Cancel
+					</Button>
+					<Button
+						type="button"
+						onClick={handleSave}
+						disabled={creating}
+						className="h-10 px-4"
+					>
+						{creating
+							? 'Saving...'
+							: 'Save And Generate Assessment'}
+					</Button>
+				</div>
+			</div>
+		</section>
 	)
 }
 
