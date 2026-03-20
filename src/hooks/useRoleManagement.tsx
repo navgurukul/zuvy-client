@@ -7,6 +7,9 @@ import { useRoles } from '@/hooks/useRoles'
 import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { getUser } from '@/store/store'
+import { toast } from '@/components/ui/use-toast'
 import { getPermissionLevelFromPermissions, permissionLevelToTier, PERMISSION_TIERS, PERMISSION_LEVELS } from '@/utils/types/rbac'
 
 import type { PermissionLevel, PermissionTier } from '@/utils/types/rbac'
@@ -35,6 +38,9 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     const router = useRouter()
     const pathname = usePathname()
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const orgId = Number(organizationId) || user?.orgId
     const [currentPath, setCurrentPath] = useState<string>(pathname)
     const [pendingRoute, setPendingRoute] = useState<string | null>(null)
 
@@ -47,6 +53,15 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
     const [hoveredRowId, setHoveredRowId] = useState<number | null>(null)
     const [parentLockedModules, setParentLockedModules] = useState<Set<string>>(new Set())
+
+    useEffect(() => {
+        if (!selectedRole || roles.length === 0) return
+
+        const selected = roles.find((role) => role.name?.toLowerCase() === selectedRole.toLowerCase())
+        if (!selected?.id) return
+
+        setRoleId((prev) => (prev === selected.id ? prev : selected.id))
+    }, [selectedRole, roles])
 
     useEffect(() => {
         if (roleId && resourceIds.length > 0 && roleId !== lastFetchedRoleId) {
@@ -139,8 +154,8 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
             const title = (action.title || '').toLowerCase()
             const description = (action.description || '').toLowerCase()
 
-            if (title.includes('mcq') || 
-                title.includes('question') || 
+            if (title.includes('mcq') ||
+                title.includes('question') ||
                 title.includes('coding') ||
                 description.includes('content bank') ||
                 description.includes('mcq') ||
@@ -171,10 +186,19 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
         }
 
         const level = tierToLevel[tier]
-            const levelPermissions = PERMISSION_LEVELS
+        const levelPermissions = PERMISSION_LEVELS
         // build new permissions for a resource
         const updateResourcePermissions = (resId: number) => {
             const permissions = permissionsData[resId] || []
+
+            if (permissions.length === 0) {
+                toast.info({
+                    title: 'Please wait',
+                    description: 'Permissions are still loading for this role.',
+                })
+                return null
+            }
+
             const newPerms: Record<number, boolean> = {}
 
             const levelPerms = PERMISSION_LEVELS
@@ -203,7 +227,9 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
             for (const [moduleName, module] of Object.entries(groupedResources)) {
                 if (module.children.some(child => child.id === resourceId)) {
                     module.children.forEach(child => {
-                        newResourcePermissions[child.id] = updateResourcePermissions(child.id)
+                        const updated = updateResourcePermissions(child.id)
+                        if (!updated) return
+                        newResourcePermissions[child.id] = updated
                         newPermissionLevels[child.id] = tierToLevel[tier]
                     })
                     if (tierToLevel[tier] === 'No access') {
@@ -228,6 +254,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
             setPermissionLevels(newPermissionLevels)
         } else {
             const newPerms = updateResourcePermissions(resourceId)
+            if (!newPerms) return
 
             setResourcePermissions((prev) => ({
                 ...prev,
@@ -255,9 +282,25 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     const handleSaveAllPermissions = async (resolveRoleId: () => number | undefined) => {
         const currentRoleId = resolveRoleId()
-        if (!currentRoleId) return
+        if (!currentRoleId) {
+            toast.error({
+                title: 'Error',
+                description: 'Unable to resolve role for saving permissions.',
+            })
+            return
+        }
+
+        if (!orgId) {
+            toast.error({
+                title: 'Error',
+                description: 'Unable to resolve organization for saving permissions.',
+            })
+            return
+        }
 
         try {
+            const payloads: { resourceId: number; roleId: number; orgId: number; permissions: Record<string | number, boolean> }[] = []
+
             for (const resourceId of Object.keys(resourcePermissions).map(Number)) {
                 const currentPerms = resourcePermissions[resourceId] || {}
                 const originalPerms = originalResourcePermissions[resourceId] || {}
@@ -265,16 +308,25 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                 const hasChanged = JSON.stringify(currentPerms) !== JSON.stringify(originalPerms)
 
                 if (hasChanged && Object.keys(currentPerms).length > 0) {
-                    await assignPermissions({
+                    payloads.push({
                         resourceId,
                         roleId: currentRoleId,
+                        orgId,
                         permissions: currentPerms,
                     })
                 }
             }
 
-            setOriginalResourcePermissions(JSON.parse(JSON.stringify(resourcePermissions)))
-        } catch (error) {
+            if (payloads.length > 0) {
+                await assignPermissions(payloads)
+                setOriginalResourcePermissions(JSON.parse(JSON.stringify(resourcePermissions)))
+            } else {
+                toast.info({
+                    title: 'No changes',
+                    description: 'There are no permission changes to save.',
+                })
+            }
+        } catch (error: any) {
             console.error('Error saving permissions:', error)
         }
     }

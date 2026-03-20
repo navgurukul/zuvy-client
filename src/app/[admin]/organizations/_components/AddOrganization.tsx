@@ -232,7 +232,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     }
 
     const isFormValid =
-        newUser.orgName.trim().length > 0 &&
+        newUser.orgName.trim().length > 0 && newUser.orgName.trim().length <= MAX_NAME_LENGTH &&
         newUser.name.trim().length > 0 &&
         newUser.name.trim().length <= MAX_NAME_LENGTH &&
         validateEmail(newUser.email.trim()) &&
@@ -419,8 +419,11 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                             value={newUser.orgName}
                             onChange={handleInputChange}
                             placeholder="Enter Organisation Name"
-                            className="mt-2"
+                            className={`mt-2 ${newUser.orgName.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         />
+                        {newUser.orgName.trim().length > MAX_NAME_LENGTH && (
+                            <p className="text-red-500 text-xs mt-1">Organisation name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                        )}
                     </div>
 
                     <div className="text-left">
