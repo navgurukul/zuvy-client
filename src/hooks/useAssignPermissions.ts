@@ -23,7 +23,7 @@ export function useAssignPermissions() {
     const [success, setSuccess] = useState<boolean>(false)
 
     const assignPermissions = useCallback(
-        async (payload: AssignPermissionsPayload) => {
+        async (payload: AssignPermissionsPayload | AssignPermissionsPayload[]) => {
             try {
                 setLoading(true)
                 setError(null)

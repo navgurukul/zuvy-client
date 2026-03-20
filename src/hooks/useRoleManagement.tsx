@@ -139,8 +139,8 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
             const title = (action.title || '').toLowerCase()
             const description = (action.description || '').toLowerCase()
 
-            if (title.includes('mcq') || 
-                title.includes('question') || 
+            if (title.includes('mcq') ||
+                title.includes('question') ||
                 title.includes('coding') ||
                 description.includes('content bank') ||
                 description.includes('mcq') ||
@@ -171,7 +171,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
         }
 
         const level = tierToLevel[tier]
-            const levelPermissions = PERMISSION_LEVELS
+        const levelPermissions = PERMISSION_LEVELS
         // build new permissions for a resource
         const updateResourcePermissions = (resId: number) => {
             const permissions = permissionsData[resId] || []
@@ -258,6 +258,8 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
         if (!currentRoleId) return
 
         try {
+            const payloads: { resourceId: number; roleId: number; permissions: Record<string | number, boolean> }[] = []
+
             for (const resourceId of Object.keys(resourcePermissions).map(Number)) {
                 const currentPerms = resourcePermissions[resourceId] || {}
                 const originalPerms = originalResourcePermissions[resourceId] || {}
@@ -265,12 +267,16 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                 const hasChanged = JSON.stringify(currentPerms) !== JSON.stringify(originalPerms)
 
                 if (hasChanged && Object.keys(currentPerms).length > 0) {
-                    await assignPermissions({
+                    payloads.push({
                         resourceId,
                         roleId: currentRoleId,
                         permissions: currentPerms,
                     })
                 }
+            }
+
+            if (payloads.length > 0) {
+                await assignPermissions(payloads)
             }
 
             setOriginalResourcePermissions(JSON.parse(JSON.stringify(resourcePermissions)))
