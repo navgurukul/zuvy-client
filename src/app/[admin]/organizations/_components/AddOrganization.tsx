@@ -1,180 +1,3 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { X } from 'lucide-react';
-
-// type AddUserModalProps = {
-//   isEditMode: boolean;
-// //   user?: any | null;
-// //   refetchUsers?: () => void;
-//   selectedId?: number; 
-//   onClose?: () => void;
-//   isOpen?: boolean;
-// };
-
-// const AddOrganization: React.FC<AddUserModalProps> = ({ 
-//     isEditMode, 
-//     // user, 
-//     // refetchUsers, 
-//     onClose,
-//     isOpen = false,
-// }) => {
-//     const [formData, setFormData] = useState({
-//         organisationName: '',
-//         managementType: 'Self Managed',
-//         pointOfContactName: '',
-//         emailId: '',
-//     });
-
-//     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//         const { name, value } = e.target;
-//         setFormData((prev) => ({
-//             ...prev,
-//             [name]: value,
-//         }));
-//     };
-
-//     const handleManagementTypeChange = (type: string) => {
-//         setFormData((prev) => ({
-//             ...prev,
-//             managementType: type,
-//         }));
-//     };
-
-//     const handleSubmit = (e: React.FormEvent) => {
-//         e.preventDefault();
-//         console.log('Form submitted:', formData);
-//     };
-
-//     const handleCancel = () => {
-//         console.log('Form cancelled');
-//     };
-
-//     return (
-//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-//             <div className="bg-white rounded-lg p-8 max-w-2xl w-full">
-//                 <div className="flex justify-between items-center mb-6">
-//                     <h1 className="text-2xl font-bold text-gray-900">Add Organisation</h1>
-//                     <button className="text-gray-500 hover:text-gray-700">
-//                         <X size={24} />
-//                     </button>
-//                 </div>
-
-//                 <form onSubmit={handleSubmit} className="space-y-6">
-//                     {/* Organisation Name */}
-//                     <div>
-//                         <label className="block text-sm font-medium text-gray-900 mb-2">
-//                             Organisation Name <span className="text-red-500">*</span>
-//                         </label>
-//                         <input
-//                             type="text"
-//                             name="organisationName"
-//                             placeholder="Enter organisation name"
-//                             value={formData.organisationName}
-//                             onChange={handleInputChange}
-//                             required
-//                             className="w-full px-4 py-2 border-2 border-green-600 rounded-lg focus:outline-none focus:border-green-700"
-//                         />
-//                     </div>
-
-//                     {/* Management Type */}
-//                     <div>
-//                         <label className="block text-sm font-medium text-gray-900 mb-4">
-//                             Management Type <span className="text-red-500">*</span>
-//                         </label>
-//                         <div className="grid grid-cols-2 gap-4">
-//                             <button
-//                                 type="button"
-//                                 onClick={() => handleManagementTypeChange('Self Managed')}
-//                                 className={`p-4 border-2 rounded-lg text-left transition ${
-//                                     formData.managementType === 'Self Managed'
-//                                         ? 'border-green-600 bg-green-50'
-//                                         : 'border-gray-200'
-//                                 }`}
-//                             >
-//                                 <h3 className="font-bold text-gray-900">Self Managed</h3>
-//                                 <p className="text-sm text-gray-600">
-//                                     Organisations who manage all functions on the platform
-//                                 </p>
-//                             </button>
-//                             <button
-//                                 type="button"
-//                                 onClick={() => handleManagementTypeChange('Zuvy Managed')}
-//                                 className={`p-4 border-2 rounded-lg text-left transition ${
-//                                     formData.managementType === 'Zuvy Managed'
-//                                         ? 'border-green-600 bg-green-50'
-//                                         : 'border-gray-200'
-//                                 }`}
-//                             >
-//                                 <h3 className="font-bold text-gray-900">Zuvy Managed</h3>
-//                                 <p className="text-sm text-gray-600">
-//                                     Organisations for whom Zuvy manages all functions on the platform
-//                                 </p>
-//                             </button>
-//                         </div>
-//                     </div>
-
-//                     {/* Point of Contact */}
-//                     <div>
-//                         <label className="block text-sm font-medium text-gray-900 mb-4">
-//                             Point of Contact <span className="text-red-500">*</span>
-//                         </label>
-//                         <div className="grid grid-cols-2 gap-4">
-//                             <div>
-//                                 <label className="block text-sm text-gray-700 mb-2">
-//                                     Point of Contact Name <span className="text-red-500">*</span>
-//                                 </label>
-//                                 <input
-//                                     type="text"
-//                                     name="pointOfContactName"
-//                                     placeholder="Enter name"
-//                                     value={formData.pointOfContactName}
-//                                     onChange={handleInputChange}
-//                                     required
-//                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-600"
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <label className="block text-sm text-gray-700 mb-2">
-//                                     Email Id <span className="text-red-500">*</span>
-//                                 </label>
-//                                 <input
-//                                     type="email"
-//                                     name="emailId"
-//                                     placeholder="Enter email"
-//                                     value={formData.emailId}
-//                                     onChange={handleInputChange}
-//                                     required
-//                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-600"
-//                                 />
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     {/* Buttons */}
-//                     <div className="flex justify-end gap-4 mt-8">
-//                         <button
-//                             type="button"
-//                             onClick={handleCancel}
-//                             className="px-6 py-2 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition"
-//                         >
-//                             Cancel
-//                         </button>
-//                         <button
-//                             type="submit"
-//                             className="px-6 py-2 bg-green-700 text-white font-medium rounded-lg hover:bg-green-800 transition"
-//                         >
-//                             Add Organisation
-//                         </button>
-//                     </div>
-//                 </form>
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default AddOrganization
-
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
@@ -318,7 +141,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     const fetchedAssigneeName = data.zuvyPocName || ''
                     const fetchedAssigneeEmail = data.zuvyPocEmail || ''
                     // Mapping isManagedByZuvy to role id (1: Self, 2: Zuvy)
-                    const fetchedRoleId = data.isManagedByZuvy ? 2 : 1
+                    const fetchedRoleId = user.managementType || data.isManagedByZuvy ? 2 : 1
 
                     setNewUser({
                         orgName: fetchedOrgName,
@@ -409,7 +232,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     }
 
     const isFormValid =
-        newUser.orgName.trim().length > 0 &&
+        newUser.orgName.trim().length > 0 && newUser.orgName.trim().length <= MAX_NAME_LENGTH &&
         newUser.name.trim().length > 0 &&
         newUser.name.trim().length <= MAX_NAME_LENGTH &&
         validateEmail(newUser.email.trim()) &&
@@ -596,8 +419,11 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                             value={newUser.orgName}
                             onChange={handleInputChange}
                             placeholder="Enter Organisation Name"
-                            className="mt-2"
+                            className={`mt-2 ${newUser.orgName.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         />
+                        {newUser.orgName.trim().length > MAX_NAME_LENGTH && (
+                            <p className="text-red-500 text-xs mt-1">Organisation name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                        )}
                     </div>
 
                     <div className="text-left">

@@ -142,7 +142,6 @@ export default function OrganizationsPage() {
     }, [managementTypeFilter]) // ADD managementTypeFilter as dependency
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        console.log("SEARCH API CALLED", { query });
         setCurrentSearchQuery(query);
         updateURLParams(1, limit, getFilterQuery());
         await fetchOrganizations(query, 1, limit, getFilterQuery());
