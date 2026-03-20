@@ -19,7 +19,7 @@ const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({ open, onOpe
                 <DialogHeader>
                     <DialogTitle>Unsaved Changes</DialogTitle>
                     <DialogDescription>
-                        You have unsaved changes for <strong>{selectedRole}</strong>. Do you want to discard them?
+                        You have unsaved changes for <strong>{selectedRole}</strong>. Please save configuration before switching to any other role
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-end gap-3">
