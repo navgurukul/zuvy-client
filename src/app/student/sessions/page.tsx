@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   XCircle,
   Video,
-  Users
+  Users,
+  ArrowLeft
 } from "lucide-react"
 
 type Tab = "upcoming" | "completed" | "cancelled"
@@ -94,6 +95,14 @@ export default function MySessions() {
   return (
 
     <div className="max-w-7xl mx-auto p-6 space-y-6">
+
+      <Link
+        href="/student"
+        className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
+      >
+        <ArrowLeft size={16} />
+        Back to dashboard
+      </Link>
 
       {/* HEADER */}
 
@@ -329,7 +338,7 @@ export default function MySessions() {
           <Card key={session.id} className="rounded-3xl">
             <CardContent className="p-6 rounded-3xl">
 
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
 
                 <div className="flex gap-3">
 
@@ -346,7 +355,7 @@ export default function MySessions() {
 
                 </div>
 
-                <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-2 text-xs font-medium leading-none rounded-full bg-green-100 text-green-700">
                   Upcoming
                 </span>
 

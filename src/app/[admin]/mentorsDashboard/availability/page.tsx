@@ -19,6 +19,10 @@ import { useDeleteMentorSlot } from "@/hooks/useDeleteMentorSlot"
 
 const durationOptions = [30, 45, 60, 90]
 const minimumDeleteLeadTimeMs = 12 * 60 * 60 * 1000
+const defaultStartTime = "09:00"
+const defaultDurationMinutes = "60"
+
+const getDefaultSlotDate = () => new Date().toISOString().slice(0, 10)
 
 const startTimeOptions = Array.from({ length: 32 }, (_, index) => {
   const totalMinutes = 6 * 60 + index * 30
@@ -91,7 +95,7 @@ const combineDateAndTime = (date: string, time: string): Date | null => {
 }
 
 export default function AvailabilityPage() {
-  const { slots, loading, error, refetchMySlots } = useMyMentorSlots()
+  const { slots, loading, error, refetchMySlots, upsertMySlot } = useMyMentorSlots()
   const { isCreating, error: createError, createSlot } = useCreateMentorSlot()
   const {
     isDeleting,
@@ -102,10 +106,10 @@ export default function AvailabilityPage() {
   } = useDeleteMentorSlot()
 
   const [slotDate, setSlotDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
+    getDefaultSlotDate()
   )
-  const [startTime, setStartTime] = useState<string>("09:00")
-  const [durationMinutes, setDurationMinutes] = useState<string>("60")
+  const [startTime, setStartTime] = useState<string>(defaultStartTime)
+  const [durationMinutes, setDurationMinutes] = useState<string>(defaultDurationMinutes)
   const [formError, setFormError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
@@ -181,16 +185,34 @@ export default function AvailabilityPage() {
       return
     }
 
-    const createdSlot = await createSlot({
+    const creationResult = await createSlot({
       slotStartDateTime: proposedStart.toISOString(),
       slotEndDateTime: proposedEnd.toISOString(),
       durationMinutes: Number(durationMinutes),
     })
 
-    if (createdSlot) {
+    if (creationResult.success) {
+      const createdSlot = creationResult.slot
+
+      if (createdSlot) {
+      upsertMySlot({
+        id: createdSlot.id,
+        mentorSlotManagementId: createdSlot.mentorSlotManagementId,
+        slotStartDateTime: createdSlot.slotStartDateTime,
+        slotEndDateTime: createdSlot.slotEndDateTime,
+        durationMinutes: createdSlot.durationMinutes,
+        maxCapacity: createdSlot.maxCapacity,
+        currentBookedCount: createdSlot.currentBookedCount,
+        status: createdSlot.status,
+      })
+      }
+
       setSuccessMessage("Slot created successfully.")
       setRemoveError(null)
-      await refetchMySlots()
+      setSlotDate(getDefaultSlotDate())
+      setStartTime(defaultStartTime)
+      setDurationMinutes(defaultDurationMinutes)
+      void refetchMySlots()
     }
   }
 

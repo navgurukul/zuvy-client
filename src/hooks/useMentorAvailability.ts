@@ -5,6 +5,7 @@ import { api } from '@/utils/axios.config'
 
 export interface MentorAvailabilitySlot {
     id: number
+    mentorSlotManagementId?: number
     slotStartDateTime: string
     slotEndDateTime: string
     durationMinutes: number

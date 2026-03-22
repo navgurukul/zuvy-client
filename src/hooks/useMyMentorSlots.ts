@@ -14,6 +14,10 @@ export interface MentorCreatedSlot {
     status: string
 }
 
+type UpsertMySlotPayload = Omit<MentorCreatedSlot, 'mentorSlotManagementId'> & {
+    mentorSlotManagementId?: number
+}
+
 type MyMentorSlotsApiResponse = MentorCreatedSlot[] | { data: MentorCreatedSlot[] }
 
 const parseMySlotsResponse = (
@@ -61,6 +65,27 @@ export function useMyMentorSlots(initialFetch = true) {
         }
     }, [])
 
+    const upsertMySlot = useCallback((slot: UpsertMySlotPayload) => {
+        const normalizedSlot: MentorCreatedSlot = {
+            ...slot,
+            mentorSlotManagementId: slot.mentorSlotManagementId ?? 0,
+        }
+
+        setSlots((previousSlots) => {
+            const existingIndex = previousSlots.findIndex(
+                (previousSlot) => previousSlot.id === normalizedSlot.id
+            )
+
+            if (existingIndex === -1) {
+                return [...previousSlots, normalizedSlot]
+            }
+
+            const updatedSlots = [...previousSlots]
+            updatedSlots[existingIndex] = normalizedSlot
+            return updatedSlots
+        })
+    }, [])
+
     useEffect(() => {
         if (initialFetch) getMySlots()
     }, [initialFetch, getMySlots])
@@ -70,5 +95,6 @@ export function useMyMentorSlots(initialFetch = true) {
         loading,
         error,
         refetchMySlots: getMySlots,
+        upsertMySlot,
     }
 }
