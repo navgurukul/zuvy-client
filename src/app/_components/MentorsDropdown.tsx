@@ -52,7 +52,7 @@ const MentorsDropdown = ({ role, orgId }: MentorsDropdownProps) => {
                             <Link
                                 href={href}
                                 className={cn(
-                                    'w-full',
+                                    'w-full cursor-pointer',
                                     pathname === basePath ? 'bg-gray-100' : ''
                                 )}
                             >

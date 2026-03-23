@@ -9,9 +9,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
 import {
   useMyMentorSessions,
-  type MyMentorSession,
+  type SessionFilter,
 } from "@/hooks/useMyMentorSessions"
-
 import {
   CalendarDays,
   Calendar,
@@ -19,58 +18,62 @@ import {
   CheckCircle2,
   XCircle,
   Video,
-  Users
+  Users,
+  ArrowLeft
 } from "lucide-react"
 
 type Tab = "upcoming" | "completed" | "cancelled"
 
-const normalizeSessionValue = (value: string | null | undefined) =>
-  (value || "").toLowerCase()
-
 const formatLifecycleValue = (value: string | null | undefined) =>
   (value || "-").replaceAll("_", " ")
 
-const isCancelledSession = (session: MyMentorSession) => {
-  const status = normalizeSessionValue(session.status)
-  const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
+const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
+  mentorName?.trim() || `Mentor ${mentorUserId}`
 
-  return status === "cancelled" || lifecycle.includes("cancel")
-}
-
-const isCompletedSession = (session: MyMentorSession) => {
-  if (isCancelledSession(session)) {
-    return false
+const getMentorAvatarFallback = (mentorName: string | null | undefined, mentorUserId: number | string) => {
+  if (mentorName?.trim()) {
+    const words = mentorName.trim().split(/\s+/)
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+    return `${words[0][0] || "M"}${words[1][0] || ""}`.toUpperCase()
   }
 
-  const status = normalizeSessionValue(session.status)
-  const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
-
-  return status === "completed" || lifecycle === "completed" || session.completedAt !== null
+  return `M${String(mentorUserId).slice(-1)}`
 }
-
-const isUpcomingSession = (session: MyMentorSession) =>
-  !isCancelledSession(session) && !isCompletedSession(session)
-
-const getMentorAvatarFallback = (mentorUserId: number) =>
-  `M${String(mentorUserId).slice(-1)}`
 
 export default function MySessions() {
-
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
+
   const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
     true,
-    "/mentor-sessions/my"
+    "/mentor-sessions/my",
+    activeTab as SessionFilter
   )
 
-  const upcomingSessions = sessions.filter(isUpcomingSession)
-  const completedSessions = sessions.filter(isCompletedSession)
-  const cancelledSessions = sessions.filter(isCancelledSession)
+  const { sessions: upcomingSessionsForCount } = useMyMentorSessions(
+    true,
+    "/mentor-sessions/my",
+    "upcoming"
+  )
+
+  const { sessions: completedSessionsForCount } = useMyMentorSessions(
+    true,
+    "/mentor-sessions/my",
+    "completed"
+  )
+
+  const { sessions: cancelledSessionsForCount } = useMyMentorSessions(
+    true,
+    "/mentor-sessions/my",
+    "cancelled"
+  )
 
   const counts = {
-    upcoming: upcomingSessions.length,
-    completed: completedSessions.length,
-    cancelled: cancelledSessions.length,
+    upcoming: upcomingSessionsForCount.length,
+    completed: completedSessionsForCount.length,
+    cancelled: cancelledSessionsForCount.length,
   }
+
+  const totalSessions = counts.upcoming + counts.completed + counts.cancelled
 
   if (loading) {
     return (
@@ -96,6 +99,13 @@ export default function MySessions() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
 
       {/* HEADER */}
+      <Link
+                href="/student"
+                className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+                <ArrowLeft size={16} />
+                Back to dashboard
+            </Link>
 
       <div className="flex items-center justify-between">
 
@@ -105,7 +115,7 @@ export default function MySessions() {
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            {counts.upcoming} upcoming · {sessions.length} total
+            {counts.upcoming} upcoming · {totalSessions} total
           </p>
         </div>
       </div>
@@ -173,7 +183,7 @@ export default function MySessions() {
       {/* SESSION CARD */}
 
       {activeTab === "cancelled" && counts.cancelled > 0 &&
-        cancelledSessions.map((session) => (
+        sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
 
             <CardContent className="p-6 space-y-4">
@@ -184,14 +194,14 @@ export default function MySessions() {
 
                   <Avatar className="bg-green-700 text-white">
                     <AvatarFallback>
-                      {getMentorAvatarFallback(session.mentorUserId)}
+                      {getMentorAvatarFallback(session.mentorName, session.mentorUserId)}
                     </AvatarFallback>
                   </Avatar>
 
                   <div>
 
                     <p className="font-semibold">
-                      Mentor {session.mentorUserId}
+                      {getMentorDisplayName(session.mentorName, session.mentorUserId)}
                     </p>
 
                     <p className="text-sm text-muted-foreground text-left">
@@ -233,7 +243,7 @@ export default function MySessions() {
 
                 <CalendarDays size={16} />
 
-                Book again with Mentor {session.mentorUserId} →
+                Book again with {getMentorDisplayName(session.mentorName, session.mentorUserId)} →
 
               </Link>
 
@@ -285,17 +295,17 @@ export default function MySessions() {
       )}
 
       {activeTab === "completed" && counts.completed > 0 &&
-        completedSessions.map((session) => (
+        sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
             <CardContent className="p-6 rounded-3xl">
               <div className="flex justify-between">
                 <div className="flex gap-3">
                   <Avatar>
-                    <AvatarFallback>{getMentorAvatarFallback(session.mentorUserId)}</AvatarFallback>
+                    <AvatarFallback>{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
                   <div>
-                    <p className="font-semibold">Mentor {session.mentorUserId}</p>
+                    <p className="font-semibold">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
                     <p className="text-sm text-muted-foreground">
                       Slot #{session.slotAvailabilityId}
                     </p>
@@ -325,7 +335,7 @@ export default function MySessions() {
         ))}
 
       {activeTab === "upcoming" && counts.upcoming > 0 &&
-        upcomingSessions.map((session) => (
+        sessions.map((session) => (
           <Card key={session.id} className="rounded-3xl">
             <CardContent className="p-6 rounded-3xl">
 
@@ -334,11 +344,11 @@ export default function MySessions() {
                 <div className="flex gap-3">
 
                   <Avatar>
-                    <AvatarFallback>{getMentorAvatarFallback(session.mentorUserId)}</AvatarFallback>
+                    <AvatarFallback>{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
                   <div>
-                    <p className="font-semibold">Mentor {session.mentorUserId}</p>
+                    <p className="font-semibold">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
                     <p className="text-sm text-muted-foreground text-left">
                       Slot {session.slotAvailabilityId}
                     </p>
@@ -375,10 +385,26 @@ export default function MySessions() {
             </CardContent>
 
             <CardFooter className="flex gap-3">
-
-              <Button className="flex gap-2">
-                <Video size={14} />
-                Join Session
+              <Button
+                className="flex gap-2"
+                asChild={!!session.meetingLink}
+                disabled={!session.meetingLink}
+              >
+                {session.meetingLink ? (
+                  <Link
+                    href={`/student/sessions/${session.id}/join?meetingLink=${encodeURIComponent(session.meetingLink)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Video size={14} />
+                    Join Session
+                  </Link>
+                ) : (
+                  <>
+                    <Video size={14} />
+                    Join Unavailable
+                  </>
+                )}
               </Button>
 
               <Button variant="outline" asChild>

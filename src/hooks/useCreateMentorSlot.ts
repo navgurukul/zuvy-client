@@ -13,16 +13,45 @@ export interface CreateMentorSlotPayload {
 type CreateMentorSlotApiResponse =
     | MentorAvailabilitySlot
     | { data: MentorAvailabilitySlot }
+    | {
+          data?: MentorAvailabilitySlot | MentorAvailabilitySlot[]
+          slot?: MentorAvailabilitySlot
+      }
+
+interface CreateMentorSlotResult {
+    success: boolean
+    slot: MentorAvailabilitySlot | null
+}
+
+const hasSlotId = (value: unknown): value is MentorAvailabilitySlot => {
+    return !!value && typeof value === 'object' && 'id' in value
+}
 
 const parseCreateSlotResponse = (
     response: CreateMentorSlotApiResponse
 ): MentorAvailabilitySlot | null => {
-    if (response && 'id' in response) {
+    if (hasSlotId(response)) {
         return response
     }
 
-    if (response && 'data' in response && response.data) {
-        return response.data
+    if (!response || typeof response !== 'object') {
+        return null
+    }
+
+    if ('slot' in response && hasSlotId(response.slot)) {
+        return response.slot
+    }
+
+    if ('data' in response) {
+        const responseData = response.data
+
+        if (hasSlotId(responseData)) {
+            return responseData
+        }
+
+        if (Array.isArray(responseData)) {
+            return responseData.find(hasSlotId) || null
+        }
     }
 
     return null
@@ -44,7 +73,7 @@ export function useCreateMentorSlot() {
 
     const createSlot = async (
         payload: CreateMentorSlotPayload
-    ): Promise<MentorAvailabilitySlot | null> => {
+    ): Promise<CreateMentorSlotResult> => {
         try {
             setIsCreating(true)
             setError(null)
@@ -56,11 +85,17 @@ export function useCreateMentorSlot() {
 
             const slot = parseCreateSlotResponse(response.data)
             setCreatedSlot(slot)
-            return slot
+            return {
+                success: true,
+                slot,
+            }
         } catch (error) {
             console.error('Error creating mentor slot:', error)
             setError(getErrorMessage(error))
-            return null
+            return {
+                success: false,
+                slot: null,
+            }
         } finally {
             setIsCreating(false)
         }

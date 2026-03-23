@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { Mentor, useMentors } from "@/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
-
+import {ArrowLeft } from "lucide-react"
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 
 const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
@@ -55,7 +55,13 @@ export default function MentorsPage() {
 
     return (
         <div className=" p-6">
-
+<Link
+                href="/student"
+                className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+                <ArrowLeft size={16} />
+                Back to dashboard
+            </Link>
             {/* Filter buttons */}
             <div className="flex flex-col gap-3 mb-6 lg:flex-row lg:items-start lg:justify-between">
 
@@ -67,10 +73,6 @@ export default function MentorsPage() {
 
                         <button className="border text-xs px-4 py-1.5 rounded-full">
                             Accepting sessions
-                        </button>
-
-                        <button className="border text-xs px-4 py-1.5 rounded-full">
-                            Verified only
                         </button>
                     </div>
 

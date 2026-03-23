@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { ArrowLeft, CalendarDays, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/axios.config";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 
 const getMentorId = (idParam: string | string[] | undefined) => {
@@ -24,9 +28,112 @@ const getInitials = (label: string) =>
 export default function MentorProfilePage() {
   const params = useParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
+  const [isGoogleConnecting, setIsGoogleConnecting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null)
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("access_token") || localStorage.getItem("token")
+      : null
 
   const { mentorProfile, loading, error } = useMentorProfile(mentorId);
 
+
+  const handleGoogleConnect = () => {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("accessToken")
+
+    if (!token) {
+      toast.error({
+        title: "Error",
+        description: "Token not found. Please login again.",
+      })
+      return
+    }
+
+    setIsGoogleConnecting(true)
+
+    // ✅ Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
+    const popup = window.open(
+      `https://dev.api.zuvy.org/google/connect?token=${token}`,
+      "googleConnect",
+      "width=500,height=600"
+    )
+
+    const timer = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(timer)
+          setIsGoogleConnecting(false)
+        checkGoogleConnectionStatus()
+      }
+    }, 1000)
+  }
+  const checkGoogleConnectionStatus = async () => {
+  try {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("accessToken")
+
+    if (!token) {
+      toast.error({
+        title: "Error",
+        description: "Token not found. Please login again.",
+      })
+      return
+    }
+
+    const response = await api.get("/google/status", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (response.data?.connected) {
+      toast.success({
+        title: "Success",
+        description:
+          response.data?.message ||
+          "Google Calendar connected successfully.",
+      })
+    } else {
+      toast.error({
+        title: "Failed",
+        description: "Google connection not completed.",
+      })
+    }
+  } catch (error: any) {
+    toast.error({
+      title: "Error",
+      description:
+        error?.response?.data?.message || "Failed to check Google connection",
+    })
+  } finally {
+    setIsGoogleConnecting(false) 
+  }
+}
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const params = new URLSearchParams(window.location.search)
+
+    const success = params.get("success")
+    const error = params.get("error")
+
+    if (success === "true") {
+      // setSuccessMessage("Google Calendar connected successfully ✅")
+      toast.success({
+        title: "Success",
+        description: "Google Calendar connected successfully.",
+      })
+    }
+
+    if (error) {
+      setFormError("Google connection failed ❌")
+    }
+  }, [])
   // const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
 const mentorDisplayName =
   mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor");  const initials = getInitials(mentorDisplayName);
@@ -163,6 +270,14 @@ const mentorDisplayName =
           <p className="text-sm text-green-700 flex items-center gap-2">
             ● {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
           </p>
+
+        <Button
+          variant="outline"
+          onClick={handleGoogleConnect}
+          disabled={isGoogleConnecting || !token}
+        >
+          {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
+        </Button>
 
           <Link
             href={mentorId ? `/student/mentors/${mentorId}/book` : "/student/mentors"}

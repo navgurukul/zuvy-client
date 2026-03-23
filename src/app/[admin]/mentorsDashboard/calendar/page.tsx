@@ -418,13 +418,22 @@ export default function CalendarPage() {
   const role = pathname.split("/")[1]
   const today = toDateStr(new Date())
 
-  const { slots, loading, error, refetchMySlots } = useMyMentorSlots()
-  const { isDeleting, deletingSlotId, error: deleteError, deleteSlot } = useDeleteMentorSlot()
-
   const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()))
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedMobileDay, setSelectedMobileDay] = useState(0)
+
+  const weekEndExclusive = useMemo(() => addDays(weekStart, 7), [weekStart])
+  const slotFilters = useMemo(
+    () => ({
+      startDateTime: weekStart.toISOString(),
+      endDateTime: weekEndExclusive.toISOString(),
+    }),
+    [weekEndExclusive, weekStart]
+  )
+
+  const { slots, loading, error, refetchMySlots } = useMyMentorSlots(true, slotFilters)
+  const { isDeleting, deletingSlotId, error: deleteError, deleteSlot } = useDeleteMentorSlot()
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -439,21 +448,15 @@ export default function CalendarPage() {
   )
 
   const weekEnd = weekDays[6]
-  const weekEndExclusive = useMemo(() => addDays(weekStart, 7), [weekStart])
 
   const weekSlots = useMemo(
     () =>
-      slots
-        .filter((slot) => {
-          const start = new Date(slot.slotStartDateTime)
-          return start >= weekStart && start < weekEndExclusive
-        })
-        .sort(
-          (left, right) =>
-            new Date(left.slotStartDateTime).getTime() -
-            new Date(right.slotStartDateTime).getTime()
-        ),
-    [slots, weekStart, weekEndExclusive]
+      [...slots].sort(
+        (left, right) =>
+          new Date(left.slotStartDateTime).getTime() -
+          new Date(right.slotStartDateTime).getTime()
+      ),
+    [slots]
   )
 
   const slotsByDate = useMemo(() => {

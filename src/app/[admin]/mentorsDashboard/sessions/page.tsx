@@ -1,12 +1,15 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Calendar, Clock, ChevronRight, User } from "lucide-react"
+import { Calendar, Clock, ChevronRight, User, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { useMyMentorSessions, type MyMentorSession } from "@/hooks/useMyMentorSessions"
+import {
+  useMyMentorSessions,
+  type MyMentorSession,
+} from "@/hooks/useMyMentorSessions"
 import { useMentorSlotDetails } from "@/hooks/useMentorSlotDetails"
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking"
 import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
@@ -48,39 +51,50 @@ export default function SessionsPage() {
   const [rating, setRating] = useState("4")
 
   const {
-    sessions,
+    sessions: apiSessions,
     loading,
     error,
     refetchMySessions,
   } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
 
-  const filteredSessions = useMemo(() => {
-    switch (activeTab) {
-      case "upcoming":
-        return sessions.filter((session) => session.sessionLifecycleState !== "COMPLETED")
-      case "reschedule":
-        return sessions.filter((session) => Boolean(getRescheduleStatus(session)))
-      case "completed":
-        return sessions.filter((session) => session.sessionLifecycleState === "COMPLETED")
-      default:
-        return sessions
+  const sessions = useMemo(() => {
+    if (activeTab === "all") return apiSessions
+
+    if (activeTab === "upcoming") {
+      return apiSessions.filter(
+        (session) =>
+          session.sessionLifecycleState === "SCHEDULED" &&
+          !getRescheduleStatus(session)
+      )
     }
-  }, [activeTab, sessions])
+
+    if (activeTab === "completed") {
+      return apiSessions.filter(
+        (session) => session.sessionLifecycleState === "COMPLETED"
+      )
+    }
+
+    return apiSessions.filter((session) => Boolean(getRescheduleStatus(session)))
+  }, [activeTab, apiSessions])
 
   useEffect(() => {
-    if (filteredSessions.length === 0) {
+    if (sessions.length === 0) {
       setSelectedBookingId(null)
       return
     }
 
-    const selectedStillExists = filteredSessions.some(
+    if (selectedBookingId === null) {
+      return
+    }
+
+    const selectedStillExists = sessions.some(
       (session) => session.id === selectedBookingId
     )
 
     if (!selectedStillExists) {
-      setSelectedBookingId(filteredSessions[0].id)
+      setSelectedBookingId(null)
     }
-  }, [filteredSessions, selectedBookingId])
+  }, [sessions, selectedBookingId])
 
   const selectedSession = useMemo(
     () => sessions.find((session) => session.id === selectedBookingId) || null,
@@ -197,7 +211,10 @@ export default function SessionsPage() {
         <div className="w-[380px] border-r flex flex-col">
           <div className="flex gap-2 px-3 pt-3 overflow-x-auto whitespace-nowrap border-b-4 [&::-webkit-scrollbar]:hidden">
             <button
-              onClick={() => setActiveTab("all")}
+              onClick={() => {
+                setActiveTab("all")
+                setSelectedBookingId(null)
+              }}
               className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
                   ? "border-green-600 bg-green-50"
                   : "border-transparent text-muted-foreground"
@@ -205,12 +222,15 @@ export default function SessionsPage() {
             >
               All
               <span className="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {sessions.length}
+                {apiSessions.length}
               </span>
             </button>
 
             <button
-              onClick={() => setActiveTab("upcoming")}
+              onClick={() => {
+                setActiveTab("upcoming")
+                setSelectedBookingId(null)
+              }}
               className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
@@ -220,7 +240,10 @@ export default function SessionsPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("reschedule")}
+              onClick={() => {
+                setActiveTab("reschedule")
+                setSelectedBookingId(null)
+              }}
               className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
@@ -230,7 +253,10 @@ export default function SessionsPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("completed")}
+              onClick={() => {
+                setActiveTab("completed")
+                setSelectedBookingId(null)
+              }}
               className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
@@ -245,13 +271,13 @@ export default function SessionsPage() {
           <div className="p-3 space-y-2 overflow-y-auto flex-1">
             {loading && <p className="text-sm text-muted-foreground">Loading sessions...</p>}
             {!loading && error && <p className="text-sm text-red-500">{error}</p>}
-            {!loading && !error && filteredSessions.length === 0 && (
+            {!loading && !error && sessions.length === 0 && (
               <p className="text-sm text-muted-foreground">No sessions found for this tab.</p>
             )}
 
             {!loading &&
               !error &&
-              filteredSessions.map((session) => {
+              sessions.map((session) => {
                 const isSelected = selectedBookingId === session.id
                 const rescheduleStatus = getRescheduleStatus(session)
 
@@ -272,6 +298,9 @@ export default function SessionsPage() {
                       <div className="flex-1">
                         <p className="text-sm font-semibold">Booking #{session.id}</p>
                         <p className="text-sm text-muted-foreground">Slot #{session.slotAvailabilityId}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Student: {session.studentName || session.studentUserName || `#${session.studentUserId ?? "-"}`}
+                        </p>
 
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
                           <span className="flex items-center gap-1">
@@ -286,12 +315,12 @@ export default function SessionsPage() {
                         </div>
 
                         <div className="mt-3 flex items-center gap-2 flex-wrap">
-                          <Badge className="bg-gray-100 text-gray-600">{session.status}</Badge>
-                          <Badge className="bg-blue-100 text-blue-700">
+                          <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 hover:text-gray-600">{session.status}</Badge>
+                          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 hover:text-blue-700">
                             {session.sessionLifecycleState}
                           </Badge>
                           {rescheduleStatus && (
-                            <Badge className="bg-orange-100 text-orange-700">
+                            <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 hover:text-orange-700">
                               Reschedule: {rescheduleStatus}
                             </Badge>
                           )}
@@ -327,12 +356,32 @@ export default function SessionsPage() {
                 <p className="text-sm text-muted-foreground">
                   Slot ID: {selectedSession.slotAvailabilityId}
                 </p>
+                <p className="text-sm text-muted-foreground">
+                  Student: {selectedSession.studentName || selectedSession.studentUserName || `#${selectedSession.studentUserId ?? "-"}`}
+                </p>
                 <div className="flex gap-2 flex-wrap">
-                  <Badge className="bg-gray-100 text-gray-600">{selectedSession.status}</Badge>
-                  <Badge className="bg-blue-100 text-blue-700">
+                  <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 hover:text-gray-600">{selectedSession.status}</Badge>
+                  <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 hover:text-blue-700">
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
+                {selectedSession.meetingLink ? (
+                  <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
+                    <a
+                      href={selectedSession.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Video size={16} className="mr-2" />
+                      Join the Session
+                    </a>
+                  </Button>
+                ) : (
+                  <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
+                    <Video size={16} className="mr-2" />
+                    Join unavailable
+                  </Button>
+                )}
               </div>
 
               <div className="rounded-xl border p-4 text-left space-y-2">

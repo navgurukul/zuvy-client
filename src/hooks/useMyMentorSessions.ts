@@ -6,10 +6,11 @@ import { api } from '@/utils/axios.config'
 export interface MyMentorSession {
     id: number
     slotAvailabilityId: number
-    mentorUserId: number
-    studentUserId?: number | null
+    mentorUserId: number | string
+    studentUserId?: number | string | null
     status: string
     sessionLifecycleState: string
+    meetingLink?: string | null
     joinedAt: string | null
     completedAt: string | null
     cancelledAt?: string | null
@@ -20,19 +21,50 @@ export interface MyMentorSession {
     studentUserName?: string | null
     studentFullName?: string | null
     learnerName?: string | null
+    mentorName?: string | null
 }
 
-type MyMentorSessionsResponse = MyMentorSession[] | { data: MyMentorSession[] }
+type WrappedMyMentorSession = {
+    booking: MyMentorSession
+    mentorName?: string | null
+    studentName?: string | null
+}
+
+type MyMentorSessionsPayload = MyMentorSession[] | WrappedMyMentorSession[]
+
+type MyMentorSessionsResponse =
+    | MyMentorSessionsPayload
+    | { data: MyMentorSessionsPayload }
+
+const isWrappedSession = (
+    value: MyMentorSession | WrappedMyMentorSession
+): value is WrappedMyMentorSession => {
+    return !!value && typeof value === 'object' && 'booking' in value
+}
+
+const normalizeSession = (
+    value: MyMentorSession | WrappedMyMentorSession
+): MyMentorSession => {
+    if (isWrappedSession(value)) {
+        return {
+            ...value.booking,
+            mentorName: value.mentorName ?? value.booking.mentorName ?? null,
+            studentName: value.studentName ?? value.booking.studentName ?? null,
+        }
+    }
+
+    return value
+}
 
 const parseSessionsResponse = (
     response: MyMentorSessionsResponse
 ): MyMentorSession[] => {
     if (Array.isArray(response)) {
-        return response
+        return response.map(normalizeSession)
     }
 
     if (response && Array.isArray(response.data)) {
-        return response.data
+        return response.data.map(normalizeSession)
     }
 
     return []
@@ -49,9 +81,16 @@ export type MyMentorSessionsEndpoint =
     | '/mentor-sessions/my'
     | '/mentor-sessions/mentor/my'
 
+export type SessionFilter =
+    | 'upcoming'
+    | 'completed'
+    | 'cancelled'
+    | 'reschedule'
+
 export function useMyMentorSessions(
     initialFetch: boolean,
-    endpoint: MyMentorSessionsEndpoint
+    endpoint: MyMentorSessionsEndpoint,
+    filter?: SessionFilter
 ) {
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
@@ -62,7 +101,8 @@ export function useMyMentorSessions(
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MyMentorSessionsResponse>(endpoint)
+            const params = filter ? { status: filter } : {}
+            const response = await api.get<MyMentorSessionsResponse>(endpoint, { params })
 
             setSessions(parseSessionsResponse(response.data))
         } catch (error) {
@@ -72,7 +112,7 @@ export function useMyMentorSessions(
         } finally {
             setLoading(false)
         }
-    }, [endpoint])
+    }, [endpoint, filter])
 
     useEffect(() => {
         if (initialFetch) getMySessions()

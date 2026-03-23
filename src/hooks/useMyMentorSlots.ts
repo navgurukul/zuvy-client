@@ -14,7 +14,16 @@ export interface MentorCreatedSlot {
     status: string
 }
 
+type UpsertMySlotPayload = Omit<MentorCreatedSlot, 'mentorSlotManagementId'> & {
+    mentorSlotManagementId?: number
+}
+
 type MyMentorSlotsApiResponse = MentorCreatedSlot[] | { data: MentorCreatedSlot[] }
+
+export interface MyMentorSlotsFilters {
+    startDateTime?: string
+    endDateTime?: string
+}
 
 const parseMySlotsResponse = (
     response: MyMentorSlotsApiResponse
@@ -37,7 +46,10 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch slots'
 }
 
-export function useMyMentorSlots(initialFetch = true) {
+export function useMyMentorSlots(
+    initialFetch = true,
+    filters?: MyMentorSlotsFilters
+) {
     const [slots, setSlots] = useState<MentorCreatedSlot[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -48,7 +60,17 @@ export function useMyMentorSlots(initialFetch = true) {
             setError(null)
 
             const response = await api.get<MyMentorSlotsApiResponse>(
-                '/mentor-slots/my'
+                '/mentor-slots/my',
+                {
+                    params: {
+                        ...(filters?.startDateTime
+                            ? { startDateTime: filters.startDateTime }
+                            : {}),
+                        ...(filters?.endDateTime
+                            ? { endDateTime: filters.endDateTime }
+                            : {}),
+                    },
+                }
             )
 
             setSlots(parseMySlotsResponse(response.data))
@@ -59,6 +81,27 @@ export function useMyMentorSlots(initialFetch = true) {
         } finally {
             setLoading(false)
         }
+    }, [filters?.endDateTime, filters?.startDateTime])
+
+    const upsertMySlot = useCallback((slot: UpsertMySlotPayload) => {
+        const normalizedSlot: MentorCreatedSlot = {
+            ...slot,
+            mentorSlotManagementId: slot.mentorSlotManagementId ?? 0,
+        }
+
+        setSlots((previousSlots) => {
+            const existingIndex = previousSlots.findIndex(
+                (previousSlot) => previousSlot.id === normalizedSlot.id
+            )
+
+            if (existingIndex === -1) {
+                return [...previousSlots, normalizedSlot]
+            }
+
+            const updatedSlots = [...previousSlots]
+            updatedSlots[existingIndex] = normalizedSlot
+            return updatedSlots
+        })
     }, [])
 
     useEffect(() => {
@@ -70,5 +113,6 @@ export function useMyMentorSlots(initialFetch = true) {
         loading,
         error,
         refetchMySlots: getMySlots,
+        upsertMySlot,
     }
 }

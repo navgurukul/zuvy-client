@@ -129,27 +129,6 @@ const getInitials = (name: string) => {
   return initials || trimmedName.slice(0, 2).toUpperCase()
 }
 
-const normalizeSessionValue = (value: string | null | undefined) =>
-  (value || "").toLowerCase()
-
-const isCancelledSession = (session: MyMentorSession) => {
-  const status = normalizeSessionValue(session.status)
-  const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
-
-  return status.includes("cancel") || lifecycle.includes("cancel")
-}
-
-const isCompletedSession = (session: MyMentorSession) => {
-  if (isCancelledSession(session)) {
-    return false
-  }
-
-  const status = normalizeSessionValue(session.status)
-  const lifecycle = normalizeSessionValue(session.sessionLifecycleState)
-
-  return status === "completed" || lifecycle === "completed" || session.completedAt !== null
-}
-
 const getFirstValidTimestamp = (
   session: MyMentorSession,
   fields: readonly (keyof MyMentorSession)[]
@@ -189,13 +168,23 @@ const getLearnerLabel = (session: MyMentorSession) => {
 export default function DashboardPage() {
   const pathname = usePathname()
   const role = pathname.split("/")[1]
+  const initialNowIso = useMemo(() => new Date().toISOString(), [])
 
-  const { slots, loading: slotsLoading, error: slotsError } = useMyMentorSlots()
+  const {
+    slots,
+    loading: slotsLoading,
+    error: slotsError,
+  } = useMyMentorSlots(true, { startDateTime: initialNowIso })
   const {
     sessions,
     loading: sessionsLoading,
     error: sessionsError,
   } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
+  const {
+    sessions: completedSessions,
+    loading: completedSessionsLoading,
+    error: completedSessionsError,
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed")
   const {
     notifications: apiNotifications,
     loading: notificationsLoading,
@@ -206,24 +195,19 @@ export default function DashboardPage() {
     markingRead,
   } = useNotifications()
 
-  const now = new Date()
-
   const upcomingSlots = useMemo(
     () =>
       [...slots]
-        .filter((slot) => new Date(slot.slotStartDateTime) > now)
         .sort(
           (left, right) =>
             new Date(left.slotStartDateTime).getTime() -
             new Date(right.slotStartDateTime).getTime()
         ),
-    [slots, now]
+    [slots]
   )
 
-  const completedSessions = useMemo(
-    () => sessions.filter(isCompletedSession),
-    [sessions]
-  )
+  const sessionsDataLoading = sessionsLoading || completedSessionsLoading
+  const sessionsDataError = sessionsError || completedSessionsError
 
   const recentCompletedSessions = useMemo(
     () =>
@@ -431,7 +415,7 @@ export default function DashboardPage() {
                         {slot.durationMinutes} min · {slot.currentBookedCount}/{slot.maxCapacity} booked
                       </p>
                     </div>
-                    <Badge className="bg-green-100 text-green-700">{slot.status}</Badge>
+                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 hover:text-green-700">{slot.status}</Badge>
                   </div>
                 ))}
             </CardContent>
@@ -450,19 +434,19 @@ export default function DashboardPage() {
               </Button>
             </CardHeader>
             <CardContent className="text-left">
-              {sessionsLoading && (
+              {sessionsDataLoading && (
                 <p className="py-6 text-center text-sm text-text-muted">Loading recent sessions...</p>
               )}
 
-              {!sessionsLoading && sessionsError && (
-                <p className="py-6 text-center text-sm text-red-500">{sessionsError}</p>
+              {!sessionsDataLoading && sessionsDataError && (
+                <p className="py-6 text-center text-sm text-red-500">{sessionsDataError}</p>
               )}
 
-              {!sessionsLoading && !sessionsError && recentCompletedSessions.length === 0 && (
+              {!sessionsDataLoading && !sessionsDataError && recentCompletedSessions.length === 0 && (
                 <p className="py-6 text-center text-sm text-text-muted">No completed sessions yet.</p>
               )}
 
-              {!sessionsLoading && !sessionsError && recentCompletedSessions.length > 0 && (
+              {!sessionsDataLoading && !sessionsDataError && recentCompletedSessions.length > 0 && (
                 <div>
                   {recentCompletedSessions.map((session) => (
                     <div
@@ -580,40 +564,42 @@ export default function DashboardPage() {
 
               {!notificationsLoading &&
                 !notificationsError &&
-                apiNotifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`flex items-start gap-3 rounded-xl p-2 transition-colors ${
-                      notification.isRead ? "opacity-60" : "bg-slate-50"
-                    }`}
-                  >
-                    <div className="mt-0.5 shrink-0">
-                      {notification.isRead ? (
-                        <Bell className="w-4 h-4 text-slate-400" />
-                      ) : (
-                        <Bell className="w-4 h-4 text-emerald-600" />
+                <div className="max-h-[280px] overflow-y-auto space-y-2 pr-1">
+                  {apiNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`flex items-start gap-3 rounded-xl p-2 transition-colors ${
+                        notification.isRead ? "opacity-60" : "bg-slate-50"
+                      }`}
+                    >
+                      <div className="mt-0.5 shrink-0">
+                        {notification.isRead ? (
+                          <Bell className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <Bell className="w-4 h-4 text-emerald-600" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 truncate">{notification.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{notification.message}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {getRelativeTime(notification.createdAt)}
+                        </p>
+                      </div>
+
+                      {!notification.isRead && (
+                        <button
+                          disabled={markingRead.has(notification.id)}
+                          onClick={() => markAsRead(notification.id)}
+                          className="shrink-0 mt-0.5 text-[10px] font-semibold text-emerald-700 hover:underline disabled:opacity-40"
+                        >
+                          {markingRead.has(notification.id) ? "..." : "Mark read"}
+                        </button>
                       )}
                     </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-700 truncate">{notification.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{notification.message}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        {getRelativeTime(notification.createdAt)}
-                      </p>
-                    </div>
-
-                    {!notification.isRead && (
-                      <button
-                        disabled={markingRead.has(notification.id)}
-                        onClick={() => markAsRead(notification.id)}
-                        className="shrink-0 mt-0.5 text-[10px] font-semibold text-emerald-700 hover:underline disabled:opacity-40"
-                      >
-                        {markingRead.has(notification.id) ? "..." : "Mark read"}
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>}
             </CardContent>
           </Card>
           <Card className='rounded-3xl shadow-sm border-slate-200 hover:shadow-md transition-shadow'>
