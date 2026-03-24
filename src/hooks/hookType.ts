@@ -732,7 +732,19 @@ export interface UseCreateCodingQuestionReturn {
   error: string | null;
 }
 
+// useEnrollCourse
+export interface EnrollCourseResponse {
+  isSuccess?: boolean;
+  status?: 'success' | 'error';
+  message?: string;
+  code?: number;
+}
 
+export interface EnrollCourseResult {
+  success: boolean;
+  message: string;
+  code?: number;
+}
 
 // useEditCodingQuestion
 export interface EditCodingQuestionData {
@@ -811,23 +823,15 @@ export interface GlobalCourseResponse {
 }
 
 export interface UseFetchGlobalCoursesReturn {
-  globalCourse: GlobalCourseData | null;
+  globalCourses: GlobalCourseData[]; // Changed to array
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
 
-// useEnrollCourse
-export interface EnrollCourseResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data?: any;
-}
-
 export interface UseEnrollCourseReturn {
-  enrollCourse: (courseId: number) => Promise<boolean>;
+  enrollCourse: (courseId: number) => Promise<EnrollCourseResult>;
   isEnrolling: boolean;
   error: string | null;
 }
