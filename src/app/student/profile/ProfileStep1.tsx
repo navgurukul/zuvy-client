@@ -400,6 +400,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       collegeName,
       customCollege: '',
     }));
+    if (errors.college) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.college;
+        return next;
+      });
+    }
     setShowCollegeDropdown(false);
     setCollegeSearch('');
   };
@@ -410,7 +417,29 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       collegeName: '',
       customCollege: collegeSearch,
     }));
+    if (errors.college) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.college;
+        return next;
+      });
+    }
+    setCollegeSearch('');
     setShowCollegeDropdown(false);
+  };
+
+  const clearSelectedCollege = () => {
+    setFormData((prev) => ({
+      ...prev,
+      collegeName: '',
+    }));
+  };
+
+  const clearManualCollege = () => {
+    setFormData((prev) => ({
+      ...prev,
+      customCollege: '',
+    }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -547,6 +576,11 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     (formData.collegeName || formData.customCollege) &&
     formData.branch;
 
+  const hasSelectedCollege = Boolean(formData.collegeName?.trim());
+  const hasManualCollege = Boolean(formData.customCollege?.trim());
+  const isSearchCollegeDisabled = hasManualCollege;
+  const isManualCollegeDisabled = hasSelectedCollege;
+
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -680,30 +714,36 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                 <div className="relative" ref={collegeDropdownRef}>
                   <Input
                     placeholder="Search college name or state..."
-                    value={formData.collegeName || formData.customCollege || collegeSearch}
+                    value={formData.collegeName || collegeSearch}
+                    disabled={isSearchCollegeDisabled}
                     onChange={(e) => {
+                      if (isSearchCollegeDisabled) {
+                        return;
+                      }
                       setCollegeSearch(e.target.value);
                       setShowCollegeDropdown(true);
                       // Clear selected college when user types
-                      if (formData.collegeName || formData.customCollege) {
+                      if (formData.collegeName) {
                         setFormData((prev) => ({
                           ...prev,
                           collegeName: '',
-                          customCollege: '',
                         }));
                       }
                     }}
                     onFocus={() => {
+                      if (isSearchCollegeDisabled) {
+                        return;
+                      }
                       setShowCollegeDropdown(true);
-                      // If college is already selected, clear it to show dropdown
-                      if (formData.collegeName || formData.customCollege) {
+                      // If college is already selected, clear search keyword and keep selected value
+                      if (formData.collegeName) {
                         setCollegeSearch('');
                       }
                     }}
                     className={errors.college ? 'border-destructive' : ''}
                   />
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
-{showCollegeDropdown && (
+{showCollegeDropdown && !isSearchCollegeDisabled && (
   <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
     
     {/* Loading state */}
@@ -745,13 +785,66 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     )}
   </div>
 )}
+                </div>
+
+                {hasSelectedCollege && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={clearSelectedCollege}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Clear selected college
+                    </button>
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">OR</p>
+
+                <Input
+                  placeholder="Enter college name manually"
+                  value={formData.customCollege}
+                  disabled={isManualCollegeDisabled}
+                  onChange={(e) => {
+                    if (isManualCollegeDisabled) {
+                      return;
+                    }
+                    const value = e.target.value;
+                    setShowCollegeDropdown(false);
+                    setCollegeSearch('');
+                    setFormData((prev) => ({
+                      ...prev,
+                      collegeName: '',
+                      customCollege: value,
+                    }));
+                    if (errors.college) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.college;
+                        return next;
+                      });
+                    }
+                  }}
+                />
+
+                {hasManualCollege && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={clearManualCollege}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Clear manual college
+                    </button>
+                  </div>
+                )}
+
                 {errors.college && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
                     {errors.college}
                   </p>
                 )}
-              </div>
             </div>
 
               {/* Row: Degree and Branch */}

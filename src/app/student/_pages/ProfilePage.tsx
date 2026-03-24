@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/use-toast';
 import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
 import useResumeParse from '@/hooks/useResumeParse';
 import useParsedResume from '@/hooks/useParsedResume';
+import useLearnerProfile from '@/hooks/useLearnerProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface OnboardingPageProps {
@@ -44,12 +45,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const [resumeFileName, setResumeFileName] = useState('');
   const [resumeSkills, setResumeSkills] = useState<string[]>([]);
   const [isSavingStepData, setIsSavingStepData] = useState(false);
+  const [isTermsAgreed, setIsTermsAgreed] = useState(false);
   
   // Track current step data to auto-save
   const [currentStepData, setCurrentStepData] = useState<any>(null);
+  const hydratedProfileIdRef = useRef<number | null>(null);
   const { saveLearnerProfile, loading: isLearnerProfileSaving } = useSaveLearnerProfile();
   const { parseResume } = useResumeParse();
   const { refetchParsedResume } = useParsedResume(false);
+  const { learnerProfile } = useLearnerProfile();
 
   const formatMonthYearToDate = (value?: { month: string; year: string }) => {
     if (!value?.year) {
@@ -66,6 +70,18 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     }
     const monthIndex = MONTHS.indexOf(month);
     return monthIndex >= 0 ? monthIndex + 1 : undefined;
+  };
+
+  const toMonthName = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return '';
+    const monthNumber = Number(value);
+    if (Number.isFinite(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
+      return MONTHS[monthNumber - 1] || '';
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    const mapped = MONTHS.find((month) => month.toLowerCase() === normalized);
+    return mapped || '';
   };
 
   const buildLearnerProfilePayload = (
@@ -144,6 +160,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     const buildProfileObject = (username?: string | null, profile?: any) => {
       if (!username) return null;
       const obj: any = { username };
+      if (profile?.rank !== undefined) {
+          obj.rank = String(profile.rank);
+      }
       if (profile?.rating !== undefined && profile?.rating !== null) {
         obj.rating = String(profile.rating);
       }
@@ -201,6 +220,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       openToRemote: step4Data?.locationPreferences?.remote,
       internshipStipend: normalizeText(step4Data?.salaryExpectations?.internship),
       fullTimeCtc: normalizeText(step4Data?.salaryExpectations?.fullTime),
+      termsAndCondition: step4Data?.termsAndCondition ?? false,
       preferredContactMethods,
     };
   };
@@ -225,6 +245,246 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       setShowAlert(true);
     }
   }, [timeRemaining, onboardingData?.currentStep]);
+
+  useEffect(() => {
+    if (onboardingData?.currentStep === 4) {
+      setIsTermsAgreed(Boolean(onboardingData.step4?.termsAndCondition));
+    }
+  }, [onboardingData?.currentStep, onboardingData?.step4?.termsAndCondition]);
+
+  useEffect(() => {
+    if (!learnerProfile || !onboardingData) {
+      return;
+    }
+
+    if (hydratedProfileIdRef.current === learnerProfile.id) {
+      return;
+    }
+
+    const parseScore = (value: string | number | null) => {
+      if (value === null || value === undefined || value === '') return undefined;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
+    const hasText = (value?: string | null) => Boolean(String(value || '').trim());
+
+    const buildCompetitiveProfile = (platform: Step3Type['competitiveProfiles'][number]['platform'], profiles: any[]) => {
+      const firstProfile = profiles?.[0];
+      let username = '';
+      let rank: string | number | undefined;
+      let rating: number | undefined;
+      let problemsSolved: number | undefined;
+
+      if (typeof firstProfile === 'object' && firstProfile !== null) {
+        username = String(firstProfile.username || '').trim();
+
+        if (typeof firstProfile.globalRank === 'number' && firstProfile.globalRank !== null) {
+          rank = firstProfile.globalRank;
+        } else if (typeof firstProfile.countryRank === 'number' && firstProfile.countryRank !== null) {
+          rank = firstProfile.countryRank;
+        } else if (typeof firstProfile.rank === 'number' || typeof firstProfile.rank === 'string') {
+          rank = firstProfile.rank;
+        }
+
+        if (firstProfile.rating !== undefined && firstProfile.rating !== null) {
+          const ratingNum = Number(firstProfile.rating);
+          rating = Number.isFinite(ratingNum) ? ratingNum : undefined;
+        }
+
+        if (typeof firstProfile.problemsSolved === 'number') {
+          problemsSolved = firstProfile.problemsSolved;
+        }
+      } else if (typeof firstProfile === 'string') {
+        username = String(firstProfile).trim();
+      }
+
+      const profile: Step3Type['competitiveProfiles'][number] = {
+        platform,
+        username,
+        isVerified: false,
+      };
+
+      if (rank !== undefined) profile.rank = rank;
+      if (rating !== undefined) profile.rating = rating;
+      if (problemsSolved !== undefined) profile.problemsSolved = problemsSolved;
+
+      return profile;
+    };
+
+    const profileStep1: Step1Type = {
+      fullName: learnerProfile.fullName || userFullName || '',
+      email: learnerProfile.email || userEmail || '',
+      phoneNumber: learnerProfile.phoneNumber || '',
+      linkedin: learnerProfile.linkedinProfile || '',
+      collegeName: learnerProfile.collegeName || '',
+      customCollege: learnerProfile.otherCollegeName || '',
+      degree: learnerProfile.degree || '',
+      branch: learnerProfile.branch || '',
+      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+      graduationDate: {
+        month: toMonthName(learnerProfile.graduationMonth),
+        year: learnerProfile.graduationYear ? String(learnerProfile.graduationYear) : '',
+      },
+      currentStatus:
+        (learnerProfile.currentStatus as Step1Type['currentStatus']) || 'Learning',
+    };
+
+    const mergedStep1: Step1Type = {
+      fullName: hasText(onboardingData.step1?.fullName) ? String(onboardingData.step1?.fullName) : profileStep1.fullName,
+      email: hasText(onboardingData.step1?.email) ? String(onboardingData.step1?.email) : profileStep1.email,
+      phoneNumber: hasText(onboardingData.step1?.phoneNumber) ? String(onboardingData.step1?.phoneNumber) : profileStep1.phoneNumber,
+      linkedin: hasText(onboardingData.step1?.linkedin) ? onboardingData.step1?.linkedin : profileStep1.linkedin,
+      collegeName: hasText(onboardingData.step1?.collegeName) ? String(onboardingData.step1?.collegeName) : profileStep1.collegeName,
+      customCollege: hasText(onboardingData.step1?.customCollege) ? onboardingData.step1?.customCollege : profileStep1.customCollege,
+      degree: hasText(onboardingData.step1?.degree) ? onboardingData.step1?.degree : profileStep1.degree,
+      branch: hasText(onboardingData.step1?.branch) ? String(onboardingData.step1?.branch) : profileStep1.branch,
+      yearOfStudy: onboardingData.step1?.yearOfStudy || profileStep1.yearOfStudy,
+      graduationDate: {
+        month: hasText(onboardingData.step1?.graduationDate?.month)
+          ? String(onboardingData.step1?.graduationDate?.month)
+          : profileStep1.graduationDate.month,
+        year: hasText(onboardingData.step1?.graduationDate?.year)
+          ? String(onboardingData.step1?.graduationDate?.year)
+          : profileStep1.graduationDate.year,
+      },
+      currentStatus: onboardingData.step1?.currentStatus || profileStep1.currentStatus,
+    };
+
+    const profileStep2: Step2Type = {
+      externalProjects: (learnerProfile.projects || []).map((project: any, index: number) => ({
+        id: `api-project-${learnerProfile.id}-${index}`,
+        title: project.title || `Project ${index + 1}`,
+        oneLineDescription: project.description || '',
+        detailedDescription: project.description || '',
+        techStack: project.techStack || [],
+        projectType: 'Solo',
+      })),
+      autoDetectedSkills: learnerProfile.technicalSkills || [],
+      additionalSkills: [],
+    };
+
+    const mergedStep2: Step2Type = {
+      externalProjects:
+        (onboardingData.step2?.externalProjects?.length || 0) > 0
+          ? onboardingData.step2!.externalProjects
+          : profileStep2.externalProjects,
+      autoDetectedSkills:
+        (onboardingData.step2?.autoDetectedSkills?.length || 0) > 0
+          ? onboardingData.step2!.autoDetectedSkills
+          : profileStep2.autoDetectedSkills,
+      additionalSkills: onboardingData.step2?.additionalSkills || profileStep2.additionalSkills,
+    };
+
+    const profileStep3: Step3Type = {
+      academicPerformance:
+        learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
+          ? {
+              marksFormat: learnerProfile.collegeScoreType === '%' ? 'Percentage' : 'CGPA',
+              cgpa: learnerProfile.collegeScoreType !== '%' ? parseScore(learnerProfile.collegeScore) : undefined,
+              percentage: learnerProfile.collegeScoreType === '%' ? parseScore(learnerProfile.collegeScore) : undefined,
+              class12Format: learnerProfile.class12ScoreType === '%' ? 'Percentage' : 'CGPA',
+              class12Percentage: parseScore(learnerProfile.class12Score),
+              class12Board: learnerProfile.class12Board || undefined,
+              class10Format: learnerProfile.class10ScoreType === '%' ? 'Percentage' : 'CGPA',
+              class10Marks: parseScore(learnerProfile.class10Score),
+              class10Board: learnerProfile.class10Board || undefined,
+            }
+          : undefined,
+      workExperiences: (learnerProfile.workExperiences || []).map((experience: any, index: number) => ({
+        id: `api-work-${learnerProfile.id}-${index}`,
+        companyName: experience?.company || experience?.companyName || '',
+        role: experience?.title || experience?.role || '',
+        startDate: { month: '', year: '' },
+        endDate: { month: '', year: '' },
+        isCurrentlyWorking: false,
+        workMode: 'Remote',
+        responsibilities: experience?.description || '',
+      })),
+      competitiveProfiles: [
+        buildCompetitiveProfile('LeetCode', learnerProfile.leetcodeProfiles as any[]),
+        buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles as any[]),
+        buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles as any[]),
+      ],
+      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+    };
+
+    const mergedStep3: Step3Type = {
+      academicPerformance: onboardingData.step3?.academicPerformance || profileStep3.academicPerformance,
+      workExperiences:
+        (onboardingData.step3?.workExperiences?.length || 0) > 0
+          ? onboardingData.step3!.workExperiences
+          : profileStep3.workExperiences,
+      competitiveProfiles:
+        (onboardingData.step3?.competitiveProfiles?.length || 0) > 0
+          ? onboardingData.step3!.competitiveProfiles
+          : profileStep3.competitiveProfiles,
+      hasInternshipExperience:
+        onboardingData.step3?.hasInternshipExperience ?? profileStep3.hasInternshipExperience,
+    };
+
+    const preferredMethods = new Set(
+      (learnerProfile.preferredContactMethods || []).map((item) => String(item).toLowerCase())
+    );
+
+    const profileStep4: Step4Type = {
+      targetRoles: learnerProfile.targetRoles || [],
+      locationPreferences: {
+        remote: learnerProfile.openToRemote || false,
+        cities: learnerProfile.preferredLocations || [],
+      },
+      salaryExpectations: {
+        internship: learnerProfile.internshipStipend ? String(learnerProfile.internshipStipend) : '',
+        fullTime: learnerProfile.fullTimeCtc ? String(learnerProfile.fullTimeCtc) : '',
+      },
+      linkedinUrl: learnerProfile.linkedinProfile || '',
+      communicationPreferences: {
+        email: preferredMethods.has('email'),
+        whatsapp: preferredMethods.has('whatsapp'),
+        phone: preferredMethods.has('phone'),
+      },
+      termsAndCondition: Boolean((learnerProfile as any)?.termsAndCondition),
+      allowCompaniesViewProfile: true,
+      consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
+    };
+
+    const mergedStep4: Step4Type = {
+      targetRoles:
+        (onboardingData.step4?.targetRoles?.length || 0) > 0
+          ? onboardingData.step4!.targetRoles
+          : profileStep4.targetRoles,
+      locationPreferences: {
+        remote: onboardingData.step4?.locationPreferences?.remote ?? profileStep4.locationPreferences.remote,
+        cities:
+          (onboardingData.step4?.locationPreferences?.cities?.length || 0) > 0
+            ? onboardingData.step4!.locationPreferences.cities
+            : profileStep4.locationPreferences.cities,
+      },
+      salaryExpectations: {
+        internship:
+          onboardingData.step4?.salaryExpectations?.internship || profileStep4.salaryExpectations?.internship,
+        fullTime:
+          onboardingData.step4?.salaryExpectations?.fullTime || profileStep4.salaryExpectations?.fullTime,
+      },
+      linkedinUrl: onboardingData.step4?.linkedinUrl || profileStep4.linkedinUrl,
+      communicationPreferences: {
+        email: onboardingData.step4?.communicationPreferences?.email ?? profileStep4.communicationPreferences.email,
+        whatsapp: onboardingData.step4?.communicationPreferences?.whatsapp ?? profileStep4.communicationPreferences.whatsapp,
+        phone: onboardingData.step4?.communicationPreferences?.phone ?? profileStep4.communicationPreferences.phone,
+      },
+      termsAndCondition: onboardingData.step4?.termsAndCondition ?? profileStep4.termsAndCondition,
+      allowCompaniesViewProfile:
+        onboardingData.step4?.allowCompaniesViewProfile ?? profileStep4.allowCompaniesViewProfile,
+      consentTimestamp: onboardingData.step4?.consentTimestamp || profileStep4.consentTimestamp,
+    };
+
+    updateStepData(1, mergedStep1);
+    updateStepData(2, mergedStep2);
+    updateStepData(3, mergedStep3);
+    updateStepData(4, mergedStep4);
+
+    hydratedProfileIdRef.current = learnerProfile.id;
+  }, [learnerProfile, onboardingData, updateStepData, userEmail, userFullName]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -256,8 +516,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       return;
     }
 
-    updateStepData(4, data);
     setIsSavingStepData(true);
+
+    const finalStep4Data: Step4Type = {
+      ...data,
+      termsAndCondition: isTermsAgreed,
+    };
+
+    updateStepData(4, finalStep4Data);
 
     let latestData = onboardingData;
     try {
@@ -273,7 +539,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       (latestData?.step1 || onboardingData?.step1) as Step1Type,
       latestData?.step2 || onboardingData?.step2,
       latestData?.step3 || onboardingData?.step3,
-      data
+      finalStep4Data
     );
 
     const result = await saveLearnerProfile(payload);
@@ -1246,6 +1512,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 onSkip={handleSkip}
                 onBack={handleBackClick}
                 onFieldChange={(data) => handleAutoSave(4, data)}
+                onTermsAgreementChange={setIsTermsAgreed}
               />
             )}
         </div>
@@ -1278,7 +1545,11 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 form.requestSubmit();
               }
             }}
-            disabled={isSavingStepData || isLearnerProfileSaving}
+            disabled={
+              isSavingStepData ||
+              isLearnerProfileSaving ||
+              (currentStep === 4 && !isTermsAgreed)
+            }
             className="flex-1 md:flex-none"
           >
             {isSavingStepData || isLearnerProfileSaving

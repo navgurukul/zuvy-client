@@ -99,6 +99,7 @@ export interface OnboardingStep4 {
     whatsapp: boolean;
     phone: boolean;
   };
+  termsAndCondition?: boolean;
   allowCompaniesViewProfile: boolean;
   consentTimestamp: string;
 }

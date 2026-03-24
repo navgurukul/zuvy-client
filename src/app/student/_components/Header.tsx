@@ -8,6 +8,7 @@ import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
 import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
+import { useOnboardingStorage } from '@/hooks/use-profile'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -15,6 +16,7 @@ const Header = () => {
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [isClient, setIsClient] = useState(false)
     const { strengthPercentage, loading: isStrengthLoading } = useLearnerProfileStrength()
+    const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
 
@@ -58,8 +60,16 @@ const Header = () => {
         router.push('/student/profile')
     }
 
+    const isInProfileSetupFlow =
+        pathname === '/student/profile' &&
+        !isOnboardingLoading &&
+        !onboardingData?.isCompleted
+
     const showProfileOption =
-        !isStrengthLoading && strengthPercentage !== null && strengthPercentage >= 20
+        !isInProfileSetupFlow &&
+        !isStrengthLoading &&
+        strengthPercentage !== null &&
+        strengthPercentage >= 20
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')

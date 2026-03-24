@@ -331,6 +331,9 @@ export const EditProfilePage: React.FC = () => {
           const profile: any = {
             username: normalizeText(item.username),
           };
+          if (item.rank !== undefined) {
+            profile.rank = String(item.rank);
+          }
           if (item.rating !== undefined) {
             profile.rating = String(item.rating);
           }
@@ -609,7 +612,7 @@ export const EditProfilePage: React.FC = () => {
     updateStepData(4, profileStep4);
 
     hydratedProfileIdRef.current = learnerProfile.id;
-  }, [learnerProfile, updateStepData]);
+  }, [learnerProfile, onboardingData, updateStepData]);
   
   // Save handlers
   const handleSavePersonalInfo = async () => {
@@ -1707,7 +1710,7 @@ export const EditProfilePage: React.FC = () => {
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class12Percentage 
-                                  ? `${step3.academicPerformance.class12Percentage}%` 
+                                  ? `${step3.academicPerformance.class12Percentage}${step3.academicPerformance.class12Format === 'CGPA' ? ' CGPA' : '%'}` 
                                   : 'Not Added'}
                               </p>
                             </div>

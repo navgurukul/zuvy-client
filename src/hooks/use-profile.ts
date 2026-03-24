@@ -78,6 +78,7 @@ export const useOnboardingStorage = () => {
                 whatsapp: true,
                 phone: false,
               },
+              termsAndCondition: false,
               allowCompaniesViewProfile: true,
               consentTimestamp: new Date().toISOString(),
             };
@@ -106,6 +107,7 @@ export const useOnboardingStorage = () => {
                 whatsapp: true,
                 phone: false,
               },
+              termsAndCondition: false,
               allowCompaniesViewProfile: true,
               consentTimestamp: new Date().toISOString(),
             },

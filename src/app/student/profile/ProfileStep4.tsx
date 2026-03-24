@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Check, Loader2, Target, Globe, DollarSign, MessageSquare } from 'lucide-react';
 import type { OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
@@ -19,6 +20,7 @@ interface ProfileStep4Props {
   onSkip: () => void;
   onBack?: () => void;
   onFieldChange?: (data: Step4Type) => void;
+  onTermsAgreementChange?: (isAgreed: boolean) => void;
 }
 
 export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
@@ -27,6 +29,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   onSkip,
   onBack,
   onFieldChange,
+  onTermsAgreementChange,
 }) => {
   const [selectedRoles, setSelectedRoles] = useState<string[]>(initialData?.targetRoles || []);
   const [customRole, setCustomRole] = useState('');
@@ -42,6 +45,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   const [whatsappPref, setWhatsappPref] = useState(initialData?.communicationPreferences?.whatsapp ?? false);
   const [phonePref, setPhonePref] = useState(initialData?.communicationPreferences?.phone ?? false);
   const [allowCompanies, setAllowCompanies] = useState(initialData?.allowCompaniesViewProfile ?? false);
+  const [termsAgreed, setTermsAgreed] = useState(initialData?.termsAndCondition ?? false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { roles, loading: isRolesLoading } = useLearnerRoles();
   const { remoteLocations } = useLearnerRemoteLocations();
@@ -203,6 +207,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
           whatsapp: whatsappPref,
           phone: phonePref,
         },
+        termsAndCondition: termsAgreed,
         allowCompaniesViewProfile: allowCompanies,
         consentTimestamp: new Date().toISOString(),
       });
@@ -214,6 +219,10 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
     totalRoles <= 5 &&
     totalLocations >= 1 &&
     totalLocations <= 6;
+
+  useEffect(() => {
+    onTermsAgreementChange?.(termsAgreed);
+  }, [termsAgreed, onTermsAgreementChange]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -454,17 +463,30 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       {/* Profile Sharing Consent */}
       <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
         <CardContent className="py-4">
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="allowCompanies-consent"
-              checked={allowCompanies}
-              onChange={(e) => setAllowCompanies(e.target.checked)}
-              className="w-4 h-4 rounded accent-green-600"
+          <div className="space-y-3">
+            <Label htmlFor="terms-demo" className="font-medium text-sm tracking-wide text-left block">
+              Terms &amp; Conditions (Demo)
+            </Label>
+            <Textarea
+              id="terms-demo"
+              readOnly
+              value={
+                'This is demo Terms & Conditions content. By proceeding, you confirm that the information in your profile is accurate and you agree to follow platform guidelines, privacy standards, and fair usage policies. You can review full legal documents at any time before final submission.'
+              }
+              className="min-h-[130px] resize-none bg-muted/30"
             />
-            <label htmlFor="allowCompanies-consent" className="text-sm text-primary cursor-pointer">
-              I agree to Zuvy&apos;s Terms & Conditions and Privacy Policy.
-            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="allowCompanies-consent"
+                checked={termsAgreed}
+                onChange={(e) => setTermsAgreed(e.target.checked)}
+                className="w-4 h-4 rounded accent-green-600"
+              />
+              <label htmlFor="allowCompanies-consent" className="text-sm text-primary cursor-pointer">
+                I agree to Zuvy&apos;s Terms &amp; Conditions and Privacy Policy.
+              </label>
+            </div>
           </div>
         </CardContent>
       </Card>
