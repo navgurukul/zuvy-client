@@ -13,7 +13,7 @@ import {
 import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
+import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useFetchGlobalCourses } from "@/hooks/useFetchGlobalCourses";
@@ -27,11 +27,13 @@ import {StudentDashboardSkeleton, CarouselSkeleton} from "@/app/student/_compone
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
+  const [enrollingBootcampId, setEnrollingBootcampId] = useState<number | null>(null);
   const { studentData, loading, error, refetch } = useStudentData();
-  const { globalCourse, loading: globalLoading, error: globalError, refetch: refetchGlobalCourses } = useFetchGlobalCourses();
-  const { enrollCourse, isEnrolling } = useEnrollCourse();
-  const { isDark } = useThemeStore()
   
+  // ✅ Fix: Use correct property name 'globalCourses'
+  const { globalCourses, loading: globalLoading, error: globalError, refetch: refetchGlobalCourses } = useFetchGlobalCourses();
+  
+  const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
   const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
@@ -49,22 +51,27 @@ const StudentDashboard = () => {
     }
   }, [isStudentEnroledInOneBootcamp]);
 
-  const handleEnrollCourse = async (courseId: number) => {
-    const success = await enrollCourse(courseId);
-    if (success) {
-      toast({
+  const handleEnrollCourse = async (bootcampId: number) => {
+    if (!bootcampId || isEnrolling) return;
+
+    setEnrollingBootcampId(bootcampId);
+    const result = await enrollCourse(bootcampId);
+
+    if (result.success) {
+      toast.success({
         title: "Enrollment Successful!",
-        description: "You have successfully enrolled in the course.",
+        description: result.message || "You have successfully enrolled in the course.",
       });
       refetchGlobalCourses();
       refetch();
     } else {
-      toast({
+      toast.error({
         title: "Enrollment Failed",
-        description: "Failed to enroll in the course. Please try again.",
-        variant: "destructive",
+        description: result.message || "Failed to enroll in the course. Please try again.",
       });
     }
+
+    setEnrollingBootcampId(null);
   };
 
   const getActionButton = (bootcamp: Bootcamp) => {
@@ -142,6 +149,7 @@ const StudentDashboard = () => {
     );
   }
 
+  console.log('studentData:', studentProfile);
 
   return (
     <div className="mb-12">
@@ -202,87 +210,91 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-
-        {/* Global Courses Section */}
-        {globalCourse && Object.keys(globalCourse).length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
-          
-          {/* Global Course Cards */}
-          {globalLoading ? (
-            <CarouselSkeleton />
-          ) : globalError ? (
-            <Card className="w-full shadow-4dp">
-              <CardContent className="p-6 text-center">
-                <p className="text-destructive mb-4">{globalError}</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              <Card key={globalCourse.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Course Image */}
-                    <div className="mt-2">
-                      <Image
-                        src={globalCourse.coverImage || (isDark ? '/zuvy-logo-horizontal-dark (1).png' : '/zuvy-logo-horizontal (1).png')}
-                        alt={globalCourse.name}
-                        width={128}
-                        height={128}
-                        className="rounded-lg object-contain"
-                      />
-                    </div>
-
-                    {/* Course Info */}
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                        <div className="flex-1 text-left">
-                          <h3 className="text-xl font-heading font-semibold mb-2">
-                            {globalCourse.name}
-                          </h3>
-                          <TruncatedDescription 
-                            text={globalCourse.description || ''}
-                            maxLength={150}
-                            className="text-muted-foreground mb-3"
-                          />
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className="text-sm text-muted-foreground capitalize">
-                              Instructor: {globalCourse.instructorDetails?.name || 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Action Button - Desktop */}
-                        <div className="hidden md:flex flex-shrink-0">
-                          <Button 
-                            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                            onClick={() => handleEnrollCourse(globalCourse.id)}
-                            disabled={isEnrolling}
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Action Button - Mobile */}
-                      <div className="md:hidden mt-4">
-                        <Button 
-                          className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                          onClick={() => handleEnrollCourse(globalCourse.id)}
-                          disabled={isEnrolling}
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+        {/* ✅ Fixed Global Courses Section */}
+        {globalCourses && globalCourses.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
+            
+            {globalLoading ? (
+              <CarouselSkeleton />
+            ) : globalError ? (
+              <Card className="w-full shadow-4dp">
+                <CardContent className="p-6 text-center">
+                  <p className="text-destructive mb-4">{globalError}</p>
+                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
                 </CardContent>
               </Card>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="space-y-6">
+                {/* ✅ Map over globalCourses array */}
+                {globalCourses.map((course:any) => (
+                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-center gap-6">
+                        {/* Course Image */}
+                        <div>
+                          <Image
+                            src={course.coverImage || '/logo.PNG'}
+                            alt={course.name}
+                            width={128}
+                            height={128}
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="flex-1">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                            <div className="flex-1 text-left">
+                              <h3 className="text-xl font-heading font-semibold mb-2">
+                                {course.name}
+                              </h3>
+                              <TruncatedDescription 
+                                text={course.description || ''}
+                                maxLength={150}
+                                className="text-muted-foreground mb-3"
+                              />
+                              
+                              {/* ✅ Fixed instructor path */}
+                              <div className="flex items-center gap-2 mb-4">
+                                <span className="text-sm text-muted-foreground capitalize">
+                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Action Button - Desktop */}
+                            <div className="hidden md:flex flex-shrink-0">
+                              <Button 
+                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                                onClick={() => handleEnrollCourse(course.bootcampId)}
+                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Action Button - Mobile */}
+                          <div className="md:hidden mt-4">
+                            <Button 
+                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                              onClick={() => handleEnrollCourse(course.bootcampId)}
+                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {/* My Courses Section */}
@@ -326,9 +338,7 @@ const StudentDashboard = () => {
                   {/* Course Image */}
                   <div className="mt-2">
                     <Image
-                      src={bootcamp.coverImage ||  (isDark
-                                ? '/zuvy-logo-horizontal-dark (1).png'
-                                : '/zuvy-logo-horizontal (1).png')}
+                      src={bootcamp.coverImage || '/logo.PNG'}
                       alt={bootcamp.name}
                       width={128}
                      height={128}
@@ -343,6 +353,11 @@ const StudentDashboard = () => {
                         <h3 className="text-xl font-heading font-semibold mb-2">
                           {bootcamp.name}
                         </h3>
+                        {/* <div className="mb-3">
+                          <Badge variant="outline" className="capitalize">
+                            {bootcamp.courseOrgName || "N/A"}
+                          </Badge>
+                        </div> */}
                         <TruncatedDescription 
                           text={bootcamp.description || ``}
                           maxLength={150}
@@ -500,7 +515,7 @@ const StudentDashboard = () => {
             <CardContent>
               <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-heading font-semibold mb-2">
-                No {filter} courses found
+                No {filter} courses found   
               </h3>
               <p className="text-muted-foreground">
                 {filter === 'enrolled'

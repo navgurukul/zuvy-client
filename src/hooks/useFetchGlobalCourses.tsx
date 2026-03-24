@@ -3,7 +3,7 @@ import { api } from "@/utils/axios.config";
 import { UseFetchGlobalCoursesReturn, GlobalCourseData } from '@/hooks/hookType';
 
 export const useFetchGlobalCourses = () => {
-  const [globalCourse, setGlobalCourse] = useState<GlobalCourseData | null>(null);
+  const [globalCourses, setGlobalCourses] = useState<GlobalCourseData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,8 +11,8 @@ export const useFetchGlobalCourses = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/student/fetchGlobalCourses');
-      setGlobalCourse(response.data.data);
+      const response = await api.get('student/bootcamp/global');
+      setGlobalCourses(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (err) {
       console.error('Error fetching global courses:', err);
       setError('Failed to load global courses');
@@ -30,7 +30,7 @@ export const useFetchGlobalCourses = () => {
   }, []);
 
   return {
-    globalCourse,
+    globalCourses,
     loading,
     error,
     refetch
