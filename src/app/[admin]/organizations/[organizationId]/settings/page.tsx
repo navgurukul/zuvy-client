@@ -83,9 +83,23 @@ const SettingsPage: React.FC = () => {
         [router]
     )
 
+    const [pendingTab, setPendingTab] = useState<string | null>(null)
+
     const handleTabChange = (tab: 'users' | 'roles') => {
+        if (tab === activeTab) return
+
+        if (activeTab === 'roles' && tab === 'users') {
+            setPendingTab(tab)
+            return
+        }
+
+        executeTabSwitch(tab)
+    }
+
+    const executeTabSwitch = (tab: string) => {
         setActiveTab(tab)
         updateURL(tab)
+        setPendingTab(null)
     }
 
     const handleRoleChange = async (userId: number, roleId: number, roleName: string) => {
@@ -261,6 +275,8 @@ const SettingsPage: React.FC = () => {
                 <RoleManagementPanel
                     selectedRole={selectedRole}
                     onRoleChange={setSelectedRole}
+                    pendingTab={pendingTab}
+                    onTabSwitch={executeTabSwitch}
                 />
             )}
         </div>
