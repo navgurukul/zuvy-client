@@ -99,22 +99,26 @@ export function UserManagementTable<TData extends User, TValue>({
     // Sync search data when prop data changes (for updates from external sources)
     useEffect(() => {
         if (isSearching && propData) {
-            // Update search data to reflect changes in prop data
+            // Update search data to reflect changes in prop data and remove delete users
             setSearchData(prevSearchData => {
                 return prevSearchData.map(searchUser => {
                     const updatedUser = propData.find(propUser => 
                         (propUser as User).userId === (searchUser as User).userId
                     );
                     return updatedUser || searchUser;
-                });
+                })
+                .filter(searchUser =>
+                    propData.some(propUser => (propUser as User).userId === searchUser.userId)
+                );
             });
         }
     }, [propData, isSearching]);
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
+            const roleParam = roleId !== 'all' ? `&roleId=${encodeURIComponent(roleId)}` : ''
             const response = await api.get(
-                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}${roleParam}`
             )
             const suggestions = (response.data.data || []).map((user: User) => ({
                 ...user,
@@ -126,7 +130,7 @@ export function UserManagementTable<TData extends User, TValue>({
             console.error('Error fetching suggestions:', error)
             return []
         }
-    }, [])
+    }, [orgId, roleId])
 
     // Fetch search results with filters applied
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -135,8 +139,9 @@ export function UserManagementTable<TData extends User, TValue>({
         onSearchChange?.(true)
         
         try {
+            const roleParam = roleId !== 'all' ? `&roleId=${encodeURIComponent(roleId)}` : ''
             const response = await api.get(
-                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}${roleParam}`
             )
 
             setSearchData(response.data.data || [])
@@ -147,7 +152,7 @@ export function UserManagementTable<TData extends User, TValue>({
         } finally {
             setLoading(false)
         }
-    }, [onSearchChange])
+    }, [onSearchChange, orgId, roleId])
 
     // Default fetch - clear search and show parent data
     const defaultFetchApi = useCallback(async () => {
