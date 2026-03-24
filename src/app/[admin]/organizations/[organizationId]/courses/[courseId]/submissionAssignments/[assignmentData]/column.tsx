@@ -125,8 +125,7 @@ export const columns: ColumnDef<Task>[] = [
             const organizationId = pathname.split('/')[3]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-            const isSuperAdmin = userRole === 'super_admin';
-            const orgId = isSuperAdmin ? organizationId : user?.orgId 
+            const orgId = Number(organizationId) || user?.orgId; 
 
             return (
                 <div className="flex space-x-2">

@@ -19,9 +19,10 @@ type roleCellProps = {
     managementType: string;
     management: any;
     onUpdateSuccess?: () => void;
+    onEdit?: (org: any) => void;
 };
 
-export const UpdateManagementType = ({ org, managementType, management, onUpdateSuccess }: roleCellProps) => {
+export const UpdateManagementType = ({ org, managementType, management, onUpdateSuccess, onEdit }: roleCellProps) => {
     const { updateOrgById } = useOrgSettings()
     const [isUpdating, setIsUpdating] = useState(false)
     const [originalRole, setOriginalRole] = useState(managementType)
@@ -45,21 +46,29 @@ export const UpdateManagementType = ({ org, managementType, management, onUpdate
 
             const isZuvyManaged = selectedRole.id === 2 
 
-            const payload = {
-                isManagedByZuvy: isZuvyManaged,
-            }
-
-            const response = await updateOrgById(org.id, payload)
-
-            if (response.status === 200) {
-                // Update original management type after successful save
-                setOriginalRole(newRoleName)
-                onUpdateSuccess?.()
-
-                toast.success({
-                    title: 'Management Type Updated',
-                    description: `Organisation management type has been updated to ${selectedRole.name}.`,
+            if (isZuvyManaged) {
+                onEdit?.({
+                    ...org,
+                    managementType: selectedRole.name,
                 })
+            } else {
+
+                const payload = {
+                    isManagedByZuvy: isZuvyManaged,
+                }
+
+                const response = await updateOrgById(org.id, payload)
+
+                if (response.status === 200) {
+                    // Update original management type after successful save
+                    setOriginalRole(newRoleName)
+                    onUpdateSuccess?.()
+
+                    toast.success({
+                        title: 'Management Type Updated',
+                        description: `Organisation management type has been updated to ${selectedRole.name}.`,
+                    })
+                }
             }
         } catch (error) {
             console.error('Error updating organisation management type:', error)

@@ -78,6 +78,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
     }
 
     const onRoleSelect = (roleName: string, newRoleId: number) => {
+        const isSameRoleById = newRoleId === roleId
+
+        if (isSameRoleById) {
+            return
+        }
+
         const changeRole = () => {
             onRoleChange(roleName)
             setRoleId(newRoleId)
