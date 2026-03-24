@@ -206,6 +206,9 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const { difficulty, setDifficulty } = getDifficulty()
             const { offset, setOffset } = getOffset()
             const { position, setPosition } = getPosition()
+            const pathname = window.location.pathname
+            const organizationId = pathname.split('/')[3]
+            const orgId = Number(organizationId)
 
             return (
                 <>
@@ -243,6 +246,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     handleDelete,
                                     setDeleteModalOpen,
                                     deleteCodingQuestionId,
+                                    orgId,
                                     filteredCodingQuestions,
                                     setCodingQuestions,
                                     selectedOptions,

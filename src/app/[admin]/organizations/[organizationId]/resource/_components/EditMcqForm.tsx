@@ -40,6 +40,7 @@ import {
     Tag,
     QuizDataType,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 type Props = {}
 
@@ -75,6 +76,8 @@ const EditMcqForm = ({
     setStoreQuizData: any
     getAllQuizQuesiton: any
 }) => {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const { quizQuestionId } = getEditQuizQuestion()
     const { quizData, noofExistingVariants, refetch } = useGetMCQs({
         id: quizQuestionId,
@@ -152,7 +155,7 @@ const EditMcqForm = ({
         }
         await api({
             method: 'delete',
-            url: `/Content/deleteMainQuizOrVariant`,
+            url: `/Content/${orgId}/deleteMainQuizOrVariant`,
             data: reqBody,
         })
             .then((res) => {
@@ -228,7 +231,7 @@ const EditMcqForm = ({
 
             try {
                 await api
-                    .post(`/Content/quiz/add/variants`, reqBody)
+                    .post(`/Content/${orgId}/quiz/add/variants`, reqBody)
                     .then((res) => {
                         toast.success({
                             title: 'Success',
@@ -244,6 +247,7 @@ const EditMcqForm = ({
                 try {
                     await getAllQuizQuesiton(
                         setStoreQuizData,
+                        orgId,
                         0, // Reset offset  
                         10, // Limit
                         [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
@@ -285,7 +289,7 @@ const EditMcqForm = ({
             }
             try {
                 await api
-                    .post(`/Content/editquiz`, transformedObj)
+                    .post(`/Content/${orgId}/editquiz`, transformedObj)
                     .then((res) => {
                         toast.success({
                             title: 'Success',
@@ -299,6 +303,7 @@ const EditMcqForm = ({
                 try {
                     await getAllQuizQuesiton(
                         setStoreQuizData,
+                        orgId,
                         0, // Reset offset
                         10, // Limit  
                         [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter

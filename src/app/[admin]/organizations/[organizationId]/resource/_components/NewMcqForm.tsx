@@ -39,6 +39,7 @@ import {
     NewMcqFormProps,
     TransformedMCQ,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -67,6 +68,8 @@ export default function NewMcqForm({
     getAllQuizQuesiton,
     setIsMcqModalOpen,
 }: NewMcqFormProps) {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
@@ -147,7 +150,7 @@ export default function NewMcqForm({
         }
 
         try {
-            const res = await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
+            const res = await api.post(`/content/${orgId}/quiz`, { quizzes: [transformedObj] })
 
             toast.success({
                 title: 'Success',
@@ -158,6 +161,7 @@ export default function NewMcqForm({
                 // Use the proper function signature for getAllQuizQuesiton
                 await getAllQuizQuesiton(
                     setStoreQuizData,
+                    orgId,
                     0, // Reset offset
                     10, // Limit
                     [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter

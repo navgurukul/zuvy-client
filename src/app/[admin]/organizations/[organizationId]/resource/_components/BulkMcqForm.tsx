@@ -12,6 +12,7 @@ import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
 import { api } from '@/utils/axios.config'
 import { BulkMcqProps } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 // type Props = {
 //     setIsMcqModalOpen: any
@@ -25,6 +26,8 @@ const FormSchema = z.object({
 
 const BulkUploadMcq = ({ closeModal, getAllQuizQuesiton }: BulkMcqProps) => {
     const [mcqData, setMcqData] = useState(null)
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     async function handleSubmit(e: any) {
         e.preventDefault()
@@ -36,7 +39,7 @@ const BulkUploadMcq = ({ closeModal, getAllQuizQuesiton }: BulkMcqProps) => {
             return
         }
         try {
-            await api.post(`/Content/quiz`, mcqData)
+            await api.post(`/content/${orgId}/quiz`, mcqData)
             toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',

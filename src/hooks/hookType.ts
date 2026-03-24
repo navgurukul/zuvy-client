@@ -758,7 +758,7 @@ export interface EditCodingQuestionData {
 }
 
 export interface UseEditCodingQuestionReturn {
-  editQuestion: (questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
+  editQuestion: (orgId: number, questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
   loading: boolean;
   error: string | null;
 }
