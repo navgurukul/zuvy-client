@@ -45,7 +45,7 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import ManageTopics from '../_components/ManageTopics'
 import { toast } from '@/components/ui/use-toast'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, useParams } from 'next/navigation'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import {
     Tag,
@@ -61,6 +61,8 @@ const CodingProblems = () => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
     const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     const {
         isCodingEditDialogOpen,
@@ -103,7 +105,7 @@ const CodingProblems = () => {
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
     try {
-        const response = await api.get('/Content/allCodingQuestions', {
+        const response = await api.get(`/Content/${orgId}/allCodingQuestions`, {
             params: {
                 searchTerm: query,
             },
@@ -151,10 +153,11 @@ const CodingProblems = () => {
                 setLastPage,
                 setTotalPages,
                 query,
-                ''
+                '',
+                orgId
             )
         },
-    [position, difficulty, selectedOptions]
+    [position, difficulty, selectedOptions, orgId]
 )
 
     // Modified defaultFetchApi - no automatic calls
@@ -172,9 +175,10 @@ const CodingProblems = () => {
             setLastPage,
             setTotalPages,
             '',
-            ''
+            '',
+            orgId
         )
-    }, [offset, position, difficulty, selectedOptions])
+    }, [offset, position, difficulty, selectedOptions, orgId])
 
     // First, load all tags and options
     async function getAllTags() {
@@ -319,7 +323,8 @@ const CodingProblems = () => {
                     setLastPage,
                     setTotalPages,
                     '', // Always empty for filter-based fetch
-                    ''
+                    '',
+                    orgId
                 )
             } catch (error) {
                 toast({
@@ -337,10 +342,10 @@ const CodingProblems = () => {
         if (!urlInitialized) return
 
         const fetchData = async () => {
-            await getAllCodingQuestions(setAllCodingQuestions)
+            await getAllCodingQuestions(setAllCodingQuestions, orgId)
         }
         fetchData()
-    }, [urlInitialized])
+    }, [urlInitialized, orgId])
 
     // Modified: Only fetch when filters change and search is not active
     useEffect(() => {

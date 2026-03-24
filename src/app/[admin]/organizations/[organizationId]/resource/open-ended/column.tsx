@@ -177,6 +177,10 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             const { difficulty, setDifficulty } = getOpenEndedDifficulty()
             const { offset, setOffset } = getOffset()
             const { position, setPosition } = getPosition()
+            
+            const pathname = window.location.pathname
+            const organizationId = pathname.split('/')[3]
+            const orgId = Number(organizationId)
 
             return (
                 <>
@@ -241,7 +245,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                     deleteOpenEndedQuestion,
                                     setDeleteModalOpen,
                                     deleteOpenEndedQuestionId,
-
+                                    orgId,
                                     filteredOpenEndedQuestions,
                                     setOpenEndedQuestions,
                                     selectedOptions,

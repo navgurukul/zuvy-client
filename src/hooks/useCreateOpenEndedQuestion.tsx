@@ -3,7 +3,11 @@ import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { UseCreateOpenEndedQuestionReturn, CreateOpenEndedQuestionData } from './hookType';
 
+import { useParams } from 'next/navigation';
+
 export const useCreateOpenEndedQuestion = (): UseCreateOpenEndedQuestionReturn => {
+  const { organizationId } = useParams();
+  const orgId = Number(organizationId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,7 +16,7 @@ export const useCreateOpenEndedQuestion = (): UseCreateOpenEndedQuestionReturn =
       setLoading(true);
       setError(null);
 
-      const response = await api.post('Content/createOpenEndedQuestion', data);
+      const response = await api.post(`Content/${orgId}/createOpenEndedQuestion`, data);
 
       toast.success({
         title: 'Success',

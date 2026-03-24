@@ -208,6 +208,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         if (questionType === 'coding') {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,
@@ -217,6 +218,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         } else if (questionType === 'mcq') {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,
@@ -226,6 +228,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         } else {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,

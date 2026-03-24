@@ -46,6 +46,7 @@ import {
 import { Input as PostcssInput } from 'postcss'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useEditCodingQuestion } from '@/hooks/useEditCodingQuestion'
+import { useParams } from 'next/navigation'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -111,6 +112,8 @@ const formSchema = z.object({
 })
 
 export default function EditCodingQuestionForm() {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -825,14 +828,14 @@ export default function EditCodingQuestionForm() {
         }
 
         // Use hook instead of direct API call
-        const success = await editQuestion(editCodingQuestionId, formattedData)
+        const success = await editQuestion(orgId, editCodingQuestionId, formattedData)
 
         if (success) {
             // Close dialog
             setIsCodingEditDialogOpen(false)
 
             // Refresh data
-            getAllCodingQuestions(setCodingQuestions)
+            getAllCodingQuestions(setCodingQuestions, orgId)
         }
         // Error case automatically handled by hook
     }

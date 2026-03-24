@@ -5,6 +5,7 @@ import { api } from '@/utils/axios.config'
 export function handleDelete(
     deleteCodingQuestionId: any,
     setCodingQuestions: any,
+    orgId: number,
     filteredCodingQuestions?: any,
     selectedOptions?: any,
     difficulty?: any,
@@ -13,7 +14,7 @@ export function handleDelete(
 ) {
     api({
         method: 'delete',
-        url: 'Content/deleteCodingQuestion',
+        url: `Content/${orgId}/deleteCodingQuestion`,
         data: {
             questionIds: [deleteCodingQuestionId],
         },
@@ -60,6 +61,7 @@ export function getCleanFileName(url: string) {
 export function deleteOpenEndedQuestion(
     deleteOpenEndedQuestionId: any,
     setOpenEndedQuestions: any,
+    orgId: number,
     // getAllOpenEndedQuestions?: any,
     filteredOpenEndedQuestions?: any,
     selectedOptions?: any,
@@ -69,7 +71,7 @@ export function deleteOpenEndedQuestion(
 ) {
     api({
         method: 'delete',
-        url: 'Content/deleteOpenEndedQuestion',
+        url: `Content/${orgId}/deleteOpenEndedQuestion`,
         data: {
             questionIds: [deleteOpenEndedQuestionId],
         },
@@ -81,6 +83,7 @@ export function deleteOpenEndedQuestion(
             })
             filteredOpenEndedQuestions(
                 setOpenEndedQuestions,
+                orgId,
                 offset,
                 position,
                 difficulty,
@@ -109,6 +112,7 @@ export const handleConfirm = (
     handleDelete: any,
     setDeleteModalOpen: any,
     deleteCodingQuestionId: any,
+    orgId: number,
     filteredCodingQuestions: any,
     setCodingQuestions: any,
     difficulty?: any,
@@ -119,18 +123,19 @@ export const handleConfirm = (
     handleDelete(
         deleteCodingQuestionId,
         setCodingQuestions,
+        orgId,
         filteredCodingQuestions,
-        difficulty,
         selectedOptions,
+        difficulty,
         offset,
         position
     )
     setDeleteModalOpen(false)
 }
 
-export async function getAllCodingQuestions(setCodingQuestions: any) {
+export async function getAllCodingQuestions(setCodingQuestions: any, orgId: number) {
     try {
-        const response = await api.get('Content/allCodingQuestions')
+        const response = await api.get(`Content/${orgId}/allCodingQuestions`)
         setCodingQuestions(response.data.data)
     } catch (error) {
         console.error(error)
@@ -262,10 +267,11 @@ export async function getAllQuizQuestion(
 }
 
 export const getAllOpenEndedQuestions = async (
-    setAllOpenEndedQuestions: any
+    setAllOpenEndedQuestions: any,
+    orgId: number
 ) => {
     try {
-        const response = await api.get('/Content/openEndedQuestions')
+        const response = await api.get(`/Content/${orgId}/openEndedQuestions`)
         setAllOpenEndedQuestions(response.data.data)
     } catch (error) {
         console.error(error)
@@ -357,19 +363,14 @@ export async function filteredCodingQuestions(
     setTotalCodingQuestion?: any,
     setLastPage?: any,
     setTotalPages?: any,
-    // difficulty?: any,
-    // selectedOptions?: any,
     debouncedSearch?: string | undefined,
-    // position?: any,
-    // TotalCodingQuestion?: any,
-    selectedLanguage?: string
-
-    // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
+    selectedLanguage?: string,
+    orgId?: number
 ) {
     try {
         const safeOffset = Math.max(0, offset)
 
-        let url = `/Content/allCodingQuestions?limit=${position}&offset=${offset}`
+        let url = `/Content/${orgId}/allCodingQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
         selectedOptions?.map(
@@ -521,6 +522,7 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     setFilteredQuestions: (newValue: any[]) => void,
+    orgId: number,
     offset: number,
     position?: string,
     difficulty?: any,
@@ -534,7 +536,7 @@ export async function filteredOpenEndedQuestions(
     try {
         const safeOffset = Math.max(0, offset)
 
-        let url = `/Content/openEndedQuestions?limit=${position}&offset=${offset}`
+        let url = `/Content/${orgId}/openEndedQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -596,13 +598,13 @@ export async function filterQuestions(
 
         switch (questionType) {
             case 'coding':
-                url = `/Content/allCodingQuestions`
+                url = `/Content/${orgId}/allCodingQuestions`
                 break
             case 'mcq':
                 url = `/Content/${orgId}/allQuizQuestions`
                 break
             case 'open-ended':
-                url = `/Content/openEndedQuestions`
+                url = `/Content/${orgId}/openEndedQuestions`
                 break
         }
 
