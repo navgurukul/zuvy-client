@@ -43,6 +43,7 @@ import {
     NewMcqRequestBodyType,
     NewMcqProblemFormProps,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 type Props = {}
 
@@ -85,6 +86,8 @@ const NewMcqProblemForm = ({
     setIsMcqModalOpen,
     setMcqType,
 }: NewMcqProblemFormProps) => {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [loadingAI, setLoadingAI] = useState<boolean>(false)
     const [saving, setSaving] = useState<boolean>(false)
     const [bulkDifficulties, setBulkDifficulties] = useState<string[]>([])
@@ -149,7 +152,7 @@ const NewMcqProblemForm = ({
     setSaving(true)
     
     try {
-        const res = await api.post(`/Content/quiz`, requestBody)
+        const res = await api.post(`/Content/${orgId}/quiz`, requestBody)
 
         toast.success({
             title: res.data.status || 'Success',
@@ -167,6 +170,7 @@ const NewMcqProblemForm = ({
                 if (typeof getAllQuizQuesiton === 'function') {
                     await getAllQuizQuesiton(
                         setStoreQuizData,
+                        orgId,
                         0, // Reset offset
                         10, // Limit
                         [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
@@ -523,7 +527,7 @@ const NewMcqProblemForm = ({
             }
 
             const existingQuestionsResponse = await api.get(
-                '/Content/allQuizQuestions'
+                `/Content/${orgId}/allQuizQuestions`
             )
             const existingQuestions: string[] =
                 existingQuestionsResponse.data.questions?.map((q: any) =>

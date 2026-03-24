@@ -1,13 +1,6 @@
 import { set } from 'date-fns'
-import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
-import { useEffect, useRef } from 'react'
-import useDebounce from '@/hooks/useDebounce'
-import { getEditCodingQuestionDialogs } from '@/store/store'
-import { Search } from 'lucide-react'
-import { SelectScrollDownButton } from '@radix-ui/react-select'
-import { POSITION } from './constant'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -145,6 +138,7 @@ export async function getAllCodingQuestions(setCodingQuestions: any) {
 }
 export function handleQuizDelete(
     deleteQuizQuestionId: any,
+    orgId: number,
     // getAllQUizQuestions: any,
     filteredQuizQuestions?: any,
     setStoreQuizData?: any,
@@ -155,7 +149,7 @@ export function handleQuizDelete(
 ) {
     api({
         method: 'delete',
-        url: 'Content/deleteMainQuizOrVariant',
+        url: `Content/${orgId}/deleteMainQuizOrVariant`,
         data: {
             questionIds: [
                 {
@@ -173,6 +167,7 @@ export function handleQuizDelete(
             // getAllQUizQuestions(getAllQUizQuestions,offset,position,difficulty,selectedOptions)
             filteredQuizQuestions(
                 setStoreQuizData,
+                orgId,
                 offset,
                 position,
                 difficulty,
@@ -201,6 +196,7 @@ export const handleQuizConfirm = (
     handleQuizDelete: any,
     setDeleteModalOpen: any,
     deleteQuizQuestionId: any,
+    orgId: number,
     // getAllQuizQuestions: any,
     filteredQuizQuestions: any,
     setQuizQuestions: any,
@@ -211,6 +207,7 @@ export const handleQuizConfirm = (
 ) => {
     handleQuizDelete(
         deleteQuizQuestionId,
+        orgId,
         // getAllQuizQuestions,
         filteredQuizQuestions,
         setQuizQuestions,
@@ -224,13 +221,14 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(
     setQuizQuestion: any,
+    orgId: number,
     difficulty?: any,
     mcqSearch?: string
 ) {
     try {
         const mcqtagId: any = localStorage.getItem('MCQCurrentTag')
         const MCQCurrentTagId = JSON.parse(mcqtagId)
-        let url = `/Content/allQuizQuestions`
+        let url = `/Content/${orgId}/allQuizQuestions`
 
         let selectedDiff = ''
         difficulty?.map(
@@ -463,6 +461,7 @@ export const fetchStudentAssessments = async (
 
 export async function filteredQuizQuestions(
     setStoreQuizData: (newValue: any[]) => void,
+    orgId: number,
     offset?: number,
     position?: string,
     difficulty?: any,
@@ -476,7 +475,7 @@ export async function filteredQuizQuestions(
 ) {
     try {
         // const safeOffset = Math.max(0, offset)
-        let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
+        let url = `/Content/${orgId}/allQuizQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
         selectedOptions?.map(
@@ -584,6 +583,7 @@ export async function filteredOpenEndedQuestions(
 
 export async function filterQuestions(
     setFilteredQuestions: any,
+    orgId: number,
     selectedDifficulties: any[], // Array of difficulties
     selectedTopics: any[], // Array of topics
     selectedLanguage: string,
@@ -599,7 +599,7 @@ export async function filterQuestions(
                 url = `/Content/allCodingQuestions`
                 break
             case 'mcq':
-                url = `/Content/allQuizQuestions`
+                url = `/Content/${orgId}/allQuizQuestions`
                 break
             case 'open-ended':
                 url = `/Content/openEndedQuestions`
