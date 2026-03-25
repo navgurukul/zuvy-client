@@ -27,6 +27,7 @@ export function handleDelete(
             // getAllCodingQuestions(setCodingQuestions)
             filteredCodingQuestions(
                 setCodingQuestions,
+                orgId,
                 offset,
                 position,
                 difficulty,
@@ -356,6 +357,7 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 export async function filteredCodingQuestions(
     // offset: number,
     setFilteredQuestions: (newValue: any[]) => void,
+    orgId: number,
     offset: number,
     position?: string,
     difficulty?: any,
@@ -365,7 +367,6 @@ export async function filteredCodingQuestions(
     setTotalPages?: any,
     debouncedSearch?: string | undefined,
     selectedLanguage?: string,
-    orgId?: number
 ) {
     try {
         const safeOffset = Math.max(0, offset)
