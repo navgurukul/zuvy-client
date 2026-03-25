@@ -196,13 +196,20 @@ export default function DashboardPage() {
   } = useNotifications()
 
   const upcomingSlots = useMemo(
-    () =>
-      [...slots]
+    () => {
+      const nowMs = Date.now()
+
+      return [...slots]
+        .filter((slot) => {
+          const slotStartMs = new Date(slot.slotStartDateTime).getTime()
+          return !Number.isNaN(slotStartMs) && slotStartMs >= nowMs
+        })
         .sort(
           (left, right) =>
             new Date(left.slotStartDateTime).getTime() -
             new Date(right.slotStartDateTime).getTime()
-        ),
+        )
+    },
     [slots]
   )
 

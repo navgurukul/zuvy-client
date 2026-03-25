@@ -82,6 +82,7 @@ export type MyMentorSessionsEndpoint =
     | '/mentor-sessions/mentor/my'
 
 export type SessionFilter =
+    | 'all'
     | 'upcoming'
     | 'completed'
     | 'cancelled'
@@ -101,8 +102,8 @@ export function useMyMentorSessions(
             setLoading(true)
             setError(null)
 
-            const params = filter ? { status: filter } : {}
-            const response = await api.get<MyMentorSessionsResponse>(endpoint, { params })
+            const query = filter ? `?filter=${encodeURIComponent(filter)}` : ''
+            const response = await api.get<MyMentorSessionsResponse>(`${endpoint}${query}`)
 
             setSessions(parseSessionsResponse(response.data))
         } catch (error) {

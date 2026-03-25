@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   useMyMentorSessions,
   type MyMentorSession,
+  type SessionFilter,
 } from "@/hooks/useMyMentorSessions"
 import { useMentorSlotDetails } from "@/hooks/useMentorSlotDetails"
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking"
@@ -48,34 +49,16 @@ export default function SessionsPage() {
   const [leftAt, setLeftAt] = useState("")
   const [notes, setNotes] = useState("")
   const [areasOfImprovement, setAreasOfImprovement] = useState("")
-  const [rating, setRating] = useState("4")
+  const [rating, setRating] = useState("")
 
   const {
     sessions: apiSessions,
     loading,
     error,
     refetchMySessions,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", activeTab as SessionFilter)
 
-  const sessions = useMemo(() => {
-    if (activeTab === "all") return apiSessions
-
-    if (activeTab === "upcoming") {
-      return apiSessions.filter(
-        (session) =>
-          session.sessionLifecycleState === "SCHEDULED" &&
-          !getRescheduleStatus(session)
-      )
-    }
-
-    if (activeTab === "completed") {
-      return apiSessions.filter(
-        (session) => session.sessionLifecycleState === "COMPLETED"
-      )
-    }
-
-    return apiSessions.filter((session) => Boolean(getRescheduleStatus(session)))
-  }, [activeTab, apiSessions])
+  const sessions = apiSessions
 
   useEffect(() => {
     if (sessions.length === 0) {
@@ -183,14 +166,15 @@ export default function SessionsPage() {
   }
 
   const handleSubmitFeedback = async () => {
-    if (!selectedSession) return
+    const numericRating = Number(rating)
+    if (!selectedSession || !Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) return
 
     const ok = await submitFeedback(selectedSession.id, {
       feedback: {
         notes,
         areasOfImprovement,
       },
-      rating: Number(rating),
+      rating: numericRating,
     })
 
     if (ok) {
@@ -365,22 +349,24 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
-                {selectedSession.meetingLink ? (
-                  <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
-                    <a
-                      href={selectedSession.meetingLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                {selectedSession.sessionLifecycleState !== "COMPLETED" && (
+                  selectedSession.meetingLink ? (
+                    <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
+                      <a
+                        href={selectedSession.meetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Video size={16} className="mr-2" />
+                        Join the Session
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
                       <Video size={16} className="mr-2" />
-                      Join the Session
-                    </a>
-                  </Button>
-                ) : (
-                  <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
-                    <Video size={16} className="mr-2" />
-                    Join unavailable
-                  </Button>
+                      Join unavailable
+                    </Button>
+                  )
                 )}
               </div>
 
@@ -411,125 +397,133 @@ export default function SessionsPage() {
                 )}
               </div>
 
-              <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-base font-semibold">Reschedule Request</p>
-                <div className="flex gap-2">
+              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+                <div className="rounded-xl border p-4 text-left space-y-3">
+                  <p className="text-base font-semibold">Reschedule Request</p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      className="bg-green-700 hover:bg-green-800"
+                      onClick={handleAcceptReschedule}
+                      disabled={isRescheduling}
+                    >
+                      {isRescheduling ? "Please wait..." : "Accept Reschedule"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDeclineReschedule}
+                      disabled={isRescheduling}
+                    >
+                      Decline Reschedule
+                    </Button>
+                  </div>
+                  {rescheduleError && <p className="text-sm text-red-500">{rescheduleError}</p>}
+                  {rescheduleResponse?.message && (
+                    <p className="text-sm text-green-700">{rescheduleResponse.message}</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+                <div className="rounded-xl border p-4 text-left space-y-3">
+                  <p className="text-base font-semibold">Mark Attendance</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Joined At</p>
+                      <Input
+                        type="datetime-local"
+                        value={joinedAt}
+                        onChange={(event) => setJoinedAt(event.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Left At</p>
+                      <Input
+                        type="datetime-local"
+                        value={leftAt}
+                        onChange={(event) => setLeftAt(event.target.value)}
+                      />
+                    </div>
+                  </div>
                   <Button
                     type="button"
                     className="bg-green-700 hover:bg-green-800"
-                    onClick={handleAcceptReschedule}
-                    disabled={isRescheduling}
+                    onClick={handleMarkAttendance}
+                    disabled={isMarkingAttendance || !joinedAt || !leftAt}
                   >
-                    {isRescheduling ? "Please wait..." : "Accept Reschedule"}
+                    {isMarkingAttendance ? "Saving..." : "Mark Attendance"}
                   </Button>
+                  {attendanceError && <p className="text-sm text-red-500">{attendanceError}</p>}
+                  {attendanceData?.message && (
+                    <p className="text-sm text-green-700">{attendanceData.message}</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+                <div className="rounded-xl border p-4 text-left space-y-3">
+                  <p className="text-base font-semibold">Complete Session</p>
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={handleDeclineReschedule}
-                    disabled={isRescheduling}
+                    className="bg-green-700 hover:bg-green-800"
+                    onClick={handleCompleteSession}
+                    disabled={isCompleting}
                   >
-                    Decline Reschedule
+                    {isCompleting ? "Completing..." : "Complete Session"}
                   </Button>
+                  {completeError && <p className="text-sm text-red-500">{completeError}</p>}
+                  {completionData?.message && (
+                    <p className="text-sm text-green-700">{completionData.message}</p>
+                  )}
                 </div>
-                {rescheduleError && <p className="text-sm text-red-500">{rescheduleError}</p>}
-                {rescheduleResponse?.message && (
-                  <p className="text-sm text-green-700">{rescheduleResponse.message}</p>
-                )}
-              </div>
+              )}
 
-              <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-base font-semibold">Mark Attendance</p>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Joined At</p>
-                    <Input
-                      type="datetime-local"
-                      value={joinedAt}
-                      onChange={(event) => setJoinedAt(event.target.value)}
-                    />
+              {activeTab !== "upcoming" && (
+                <div className="rounded-xl border p-4 text-left space-y-3">
+                  <p className="text-base font-semibold">Submit Feedback</p>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-1 space-y-1">
+                      <p className="text-sm text-muted-foreground">Rating (1-5)</p>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={5}
+                        value={rating}
+                        onChange={(event) => setRating(event.target.value)}
+                      />
+                    </div>
+                    <div className="sm:col-span-2 space-y-1">
+                      <p className="text-sm text-muted-foreground">Notes</p>
+                      <Textarea
+                        value={notes}
+                        onChange={(event) => setNotes(event.target.value)}
+                        placeholder="Good progress"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Left At</p>
-                    <Input
-                      type="datetime-local"
-                      value={leftAt}
-                      onChange={(event) => setLeftAt(event.target.value)}
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  className="bg-green-700 hover:bg-green-800"
-                  onClick={handleMarkAttendance}
-                  disabled={isMarkingAttendance || !joinedAt || !leftAt}
-                >
-                  {isMarkingAttendance ? "Saving..." : "Mark Attendance"}
-                </Button>
-                {attendanceError && <p className="text-sm text-red-500">{attendanceError}</p>}
-                {attendanceData?.message && (
-                  <p className="text-sm text-green-700">{attendanceData.message}</p>
-                )}
-              </div>
-
-              <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-base font-semibold">Complete Session</p>
-                <Button
-                  type="button"
-                  className="bg-green-700 hover:bg-green-800"
-                  onClick={handleCompleteSession}
-                  disabled={isCompleting}
-                >
-                  {isCompleting ? "Completing..." : "Complete Session"}
-                </Button>
-                {completeError && <p className="text-sm text-red-500">{completeError}</p>}
-                {completionData?.message && (
-                  <p className="text-sm text-green-700">{completionData.message}</p>
-                )}
-              </div>
-
-              <div className="rounded-xl border p-4 text-left space-y-3">
-                <p className="text-base font-semibold">Submit Feedback</p>
-                <div className="grid sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-1 space-y-1">
-                    <p className="text-sm text-muted-foreground">Rating (1-5)</p>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={5}
-                      value={rating}
-                      onChange={(event) => setRating(event.target.value)}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 space-y-1">
-                    <p className="text-sm text-muted-foreground">Notes</p>
+                    <p className="text-sm text-muted-foreground">Areas of Improvement</p>
                     <Textarea
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      placeholder="Good progress"
+                      value={areasOfImprovement}
+                      onChange={(event) => setAreasOfImprovement(event.target.value)}
+                      placeholder="Time management"
                     />
                   </div>
+                  <Button
+                    type="button"
+                    className="bg-green-700 hover:bg-green-800"
+                    onClick={handleSubmitFeedback}
+                    disabled={isSubmittingFeedback || Number(rating) < 1 || Number(rating) > 5}
+                  >
+                    {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
+                  </Button>
+                  {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
+                  {feedbackData?.message && (
+                    <p className="text-sm text-green-700">{feedbackData.message}</p>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Areas of Improvement</p>
-                  <Textarea
-                    value={areasOfImprovement}
-                    onChange={(event) => setAreasOfImprovement(event.target.value)}
-                    placeholder="Time management"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  className="bg-green-700 hover:bg-green-800"
-                  onClick={handleSubmitFeedback}
-                  disabled={isSubmittingFeedback}
-                >
-                  {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
-                </Button>
-                {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
-                {feedbackData?.message && (
-                  <p className="text-sm text-green-700">{feedbackData.message}</p>
-                )}
-              </div>
+              )}
             </div>
           )}
         </div>

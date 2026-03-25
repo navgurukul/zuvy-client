@@ -77,7 +77,7 @@ function StudentLayoutContent({
     };
 
     return (
-        <div className="h-screen bg-background flex flex-col font-manrope">
+        <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
 
             <ThemeInitializer />
             <div className="sticky top-0 z-50">
@@ -89,7 +89,7 @@ function StudentLayoutContent({
                 />
                 {!hideHeader && !isOnCourseModulePage && <Header />}
             </div>
-            <main className="flex-1 overflow-y-auto ">
+            <main className="flex-1 overflow-y-auto">
                 {children}
             </main>
         </div>

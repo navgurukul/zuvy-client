@@ -7,8 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { Mentor, useMentors } from "@/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
-import {ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
 
 const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
     if (Array.isArray(response)) {
@@ -23,10 +24,33 @@ const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
 };
 
 export default function MentorsPage() {
-    const searchParams = useSearchParams();
-    const searchQuery = searchParams.get("search")?.trim() || "";
-    const { mentors, loading, error } = useMentors(searchQuery);
+    // const searchParams = useSearchParams();
+    // const searchQuery = searchParams.get("search")?.trim() || "";
+    // const { mentors, loading, error } = useMentors(searchQuery);
 
+    const searchParams = useSearchParams()
+
+    const page = parseInt(searchParams.get("page") || "1")
+    const limit = parseInt(searchParams.get("limit") || "10")
+    const offset = (page - 1) * limit
+    const searchQuery = searchParams.get("search")?.trim() || ""
+
+    const { mentors, total, loading, error, refetchMentors } = useMentors(
+        searchQuery,
+        true,
+        limit,
+        offset
+    )
+
+    const totalPages = Math.max(1, Math.ceil(total / limit))
+
+    const fetchMentorsData = useCallback((nextOffset: number) => {
+        refetchMentors({
+            searchTerm: searchQuery,
+            limit,
+            offset: nextOffset,
+        })
+    }, [limit, refetchMentors, searchQuery])
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get<MentorsSearchResponse>(
@@ -54,8 +78,10 @@ export default function MentorsPage() {
     }, []);
 
     return (
-        <div className=" p-6">
-<Link
+        // <div className="w-full max-w-full min-w-0 overflow-x-hidden px-6 py-8 font-manrope">
+        <div className="w-full max-w-full min-w-0 px-6 py-8 font-manrope">
+
+            <Link
                 href="/student"
                 className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
             >
@@ -63,17 +89,11 @@ export default function MentorsPage() {
                 Back to dashboard
             </Link>
             {/* Filter buttons */}
-            <div className="flex flex-col gap-3 mb-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="mb-6 flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
 
-                <div className="flex flex-col gap-3">
+                <div className="flex min-w-0 flex-col gap-3">
                     <div className="flex gap-2 flex-wrap">
-                        <button className="bg-green-800 text-white text-xs px-4 py-1.5 rounded-full">
-                            All mentors
-                        </button>
-
-                        <button className="border text-xs px-4 py-1.5 rounded-full">
-                            Accepting sessions
-                        </button>
+                           <h1 className="text-xl font-semibold text-left">All Mentors</h1>
                     </div>
 
                     <SearchBox
@@ -87,11 +107,11 @@ export default function MentorsPage() {
                                 <p className="text-xs text-gray-500">{mentor.email}</p>
                             </div>
                         )}
-                        inputWidth="w-full sm:w-[300px]"
+                        inputWidth="w-full sm:w-[400px]"
                     />
                 </div>
 
-                <p className="text-xs text-gray-400 whitespace-nowrap">
+                <p className="text-xs text-gray-400">
                     {mentors.length} results
                 </p>
 
@@ -104,8 +124,7 @@ export default function MentorsPage() {
             ) : mentors.length === 0 ? (
                 <p className="text-sm text-gray-500">No mentors available right now.</p>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 bg-white">
-
+                <div className="grid w-full grid-cols-1 gap-5 bg-white md:grid-cols-2 lg:grid-cols-3">
                     {mentors.map((mentor) => {
                         const expertise = Array.isArray(mentor.expertise)
                             ? mentor.expertise
@@ -123,22 +142,22 @@ export default function MentorsPage() {
                                 className="group relative overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                             >
                                 {/* Top */}
-                                <div className="flex justify-between">
-                                    <div className="flex gap-3">
+                                <div className="flex min-w-0 justify-between gap-2">
+                                    <div className="flex min-w-0 gap-3">
                                         <div className="h-10 w-10 rounded-full bg-green-800 flex items-center justify-center text-white text-sm font-bold">
                                             {initials}
                                         </div>
-                                        <div>
-                                            <p className="text-base font-semibold  text-left">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-left text-base font-semibold">
                                                 {mentor.name}
                                             </p>
-                                            <p className="text-sm text-gray-500 text-left">
+                                            <p className="truncate text-left text-sm text-gray-500">
                                                 {mentor.title || mentor.role}
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="inline-flex items-center text-xs font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                                       • Accepting
+                                    <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                        • Accepting
                                     </span>
                                 </div>
 
@@ -194,7 +213,12 @@ export default function MentorsPage() {
 
                 </div>
             )}
-
+            <DataTablePagination
+                totalStudents={total}
+                lastPage={totalPages}
+                pages={totalPages}
+                fetchStudentData={fetchMentorsData}
+            />
         </div>
     );
 }

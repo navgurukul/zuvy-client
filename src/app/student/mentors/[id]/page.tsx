@@ -66,54 +66,55 @@ export default function MentorProfilePage() {
       if (!popup || popup.closed) {
         clearInterval(timer)
           setIsGoogleConnecting(false)
-        checkGoogleConnectionStatus()
+        // checkGoogleConnectionStatus()
       }
     }, 1000)
   }
-  const checkGoogleConnectionStatus = async () => {
-  try {
-    const token =
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("token") ||
-      localStorage.getItem("accessToken")
+//   const checkGoogleConnectionStatus = async () => {
+//   try {
+//     const token =
+//       localStorage.getItem("access_token") ||
+//       localStorage.getItem("token") ||
+//       localStorage.getItem("accessToken")
 
-    if (!token) {
-      toast.error({
-        title: "Error",
-        description: "Token not found. Please login again.",
-      })
-      return
-    }
+//     if (!token) {
+//       toast.error({
+//         title: "Error",
+//         description: "Token not found. Please login again.",
+//       })
+//       return
+//     }
 
-    const response = await api.get("/google/status", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+//     const response = await api.get("/google/status", {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     })
 
-    if (response.data?.connected) {
-      toast.success({
-        title: "Success",
-        description:
-          response.data?.message ||
-          "Google Calendar connected successfully.",
-      })
-    } else {
-      toast.error({
-        title: "Failed",
-        description: "Google connection not completed.",
-      })
-    }
-  } catch (error: any) {
-    toast.error({
-      title: "Error",
-      description:
-        error?.response?.data?.message || "Failed to check Google connection",
-    })
-  } finally {
-    setIsGoogleConnecting(false) 
-  }
-}
+//     if (response.data?.connected) {
+//       toast.success({
+//         title: "Success",
+//         description:
+//           response.data?.message ||
+//           "Google Calendar connected successfully.",
+//       })
+//     } else {
+//       toast.error({
+//         title: "Failed",
+//         description: "Google connection not completed.",
+//       })
+//     }
+//   } catch (error: any) {
+//     toast.error({
+//       title: "Error",
+//       description:
+//         error?.response?.data?.message || "Failed to check Google connection",
+//     })
+//   } finally {
+//     setIsGoogleConnecting(false) 
+//   }
+// }
+
   useEffect(() => {
     if (typeof window === "undefined") return
 
@@ -123,7 +124,6 @@ export default function MentorProfilePage() {
     const error = params.get("error")
 
     if (success === "true") {
-      // setSuccessMessage("Google Calendar connected successfully ✅")
       toast.success({
         title: "Success",
         description: "Google Calendar connected successfully.",
@@ -131,7 +131,7 @@ export default function MentorProfilePage() {
     }
 
     if (error) {
-      setFormError("Google connection failed ❌")
+      setFormError("Google connection failed")
     }
   }, [])
   // const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
@@ -274,6 +274,7 @@ const mentorDisplayName =
         <Button
           variant="outline"
           onClick={handleGoogleConnect}
+          className="w-full py-3 rounded-xl flex items-center justify-center"
           disabled={isGoogleConnecting || !token}
         >
           {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
