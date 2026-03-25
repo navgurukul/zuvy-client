@@ -56,64 +56,14 @@ export default function MentorProfilePage() {
     setIsGoogleConnecting(true)
 
     // ✅ Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
-    const popup = window.open(
-      `https://dev.api.zuvy.org/google/connect?token=${token}`,
-      "googleConnect",
-      "width=500,height=600"
-    )
+    const currentPage = encodeURIComponent(window.location.href)
 
-    const timer = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(timer)
-          setIsGoogleConnecting(false)
-        // checkGoogleConnectionStatus()
-      }
-    }, 1000)
+    const API_BASE = process.env.NEXT_PUBLIC_MAIN_URL;
+
+    window.location.href =
+      `${API_BASE}/google/connect?token=${token}&redirectUrl=${currentPage}`;
+
   }
-//   const checkGoogleConnectionStatus = async () => {
-//   try {
-//     const token =
-//       localStorage.getItem("access_token") ||
-//       localStorage.getItem("token") ||
-//       localStorage.getItem("accessToken")
-
-//     if (!token) {
-//       toast.error({
-//         title: "Error",
-//         description: "Token not found. Please login again.",
-//       })
-//       return
-//     }
-
-//     const response = await api.get("/google/status", {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     })
-
-//     if (response.data?.connected) {
-//       toast.success({
-//         title: "Success",
-//         description:
-//           response.data?.message ||
-//           "Google Calendar connected successfully.",
-//       })
-//     } else {
-//       toast.error({
-//         title: "Failed",
-//         description: "Google connection not completed.",
-//       })
-//     }
-//   } catch (error: any) {
-//     toast.error({
-//       title: "Error",
-//       description:
-//         error?.response?.data?.message || "Failed to check Google connection",
-//     })
-//   } finally {
-//     setIsGoogleConnecting(false) 
-//   }
-// }
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -135,8 +85,8 @@ export default function MentorProfilePage() {
     }
   }, [])
   // const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
-const mentorDisplayName =
-  mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor");  const initials = getInitials(mentorDisplayName);
+  const mentorDisplayName =
+    mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor"); const initials = getInitials(mentorDisplayName);
   const expertise = mentorProfile?.expertise || [];
   const acceptsNewMentees = mentorProfile?.acceptsNewMentees ?? true;
 
@@ -271,14 +221,14 @@ const mentorDisplayName =
             ● {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
           </p>
 
-        <Button
-          variant="outline"
-          onClick={handleGoogleConnect}
-          className="w-full py-3 rounded-xl flex items-center justify-center"
-          disabled={isGoogleConnecting || !token}
-        >
-          {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
-        </Button>
+          <Button
+            variant="outline"
+            onClick={handleGoogleConnect}
+            className="w-full py-3 rounded-xl flex items-center justify-center"
+            disabled={isGoogleConnecting || !token}
+          >
+            {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
+          </Button>
 
           <Link
             href={mentorId ? `/student/mentors/${mentorId}/book` : "/student/mentors"}

@@ -139,64 +139,14 @@ export default function AvailabilityPage() {
     setIsGoogleConnecting(true)
 
     // ✅ Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
-    const popup = window.open(
-      `https://dev.api.zuvy.org/google/connect?token=${token}`,
-      "googleConnect",
-      "width=500,height=600"
-    )
+    const currentPage = encodeURIComponent(window.location.href)
 
-    const timer = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(timer)
-          setIsGoogleConnecting(false)
-        // checkGoogleConnectionStatus()
-      }
-    }, 1000)
+    const API_BASE = process.env.NEXT_PUBLIC_MAIN_URL;
+
+    window.location.href =
+      `${API_BASE}/google/connect?token=${token}&redirectUrl=${currentPage}`;
+
   }
-//   const checkGoogleConnectionStatus = async () => {
-//   try {
-//     const token =
-//       localStorage.getItem("access_token") ||
-//       localStorage.getItem("token") ||
-//       localStorage.getItem("accessToken")
-
-//     if (!token) {
-//       toast.error({
-//         title: "Error",
-//         description: "Token not found. Please login again.",
-//       })
-//       return
-//     }
-
-//     const response = await api.get("/google/status", {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     })
-
-//     if (response.data?.connected) {
-//       toast.success({
-//         title: "Success",
-//         description:
-//           response.data?.message ||
-//           "Google Calendar connected successfully.",
-//       })
-//     } else {
-//       toast.error({
-//         title: "Failed",
-//         description: "Google connection not completed.",
-//       })
-//     }
-//   } catch (error: any) {
-//     toast.error({
-//       title: "Error",
-//       description:
-//         error?.response?.data?.message || "Failed to check Google connection",
-//     })
-//   } finally {
-//     setIsGoogleConnecting(false) 
-//   }
-// }
 
   useEffect(() => {
     if (typeof window === "undefined") return

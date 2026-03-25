@@ -16,6 +16,7 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback"
+import { toast } from "@/components/ui/use-toast"
 
 type SessionTab = "all" | "upcoming" | "reschedule" | "completed"
 
@@ -42,14 +43,35 @@ const getRescheduleStatus = (session: MyMentorSession) => {
   return maybeSession.rescheduleStatus || ""
 }
 
+const isCancelledValue = (value?: string | null) => {
+  if (!value) return false
+  const normalized = value.toLowerCase()
+  return normalized === "cancelled" || normalized === "canceled"
+}
+
+const isMissedValue = (value?: string | null) => {
+  if (!value) return false
+  return value.toLowerCase() === "missed"
+}
+
+const isUpcomingValue = (value?: string | null) => {
+  if (!value) return false
+  const normalized = value.toLowerCase()
+  return normalized === "scheduled" || normalized === "upcoming"
+}
+
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<SessionTab>("all")
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
   const [joinedAt, setJoinedAt] = useState("")
   const [leftAt, setLeftAt] = useState("")
-  const [notes, setNotes] = useState("")
-  const [areasOfImprovement, setAreasOfImprovement] = useState("")
-  const [rating, setRating] = useState("")
+
+  const [feedbackDrafts, setFeedbackDrafts] = useState<
+    Record<number, { rating: string; notes: string; areasOfImprovement: string }>
+  >({})
+  const [locallySubmittedBookingIds, setLocallySubmittedBookingIds] = useState<
+    Record<number, true>
+  >({})
 
   const {
     sessions: apiSessions,
@@ -84,6 +106,21 @@ export default function SessionsPage() {
     [sessions, selectedBookingId]
   )
 
+  const isReadOnlySession = Boolean(
+    selectedSession &&
+      (isCancelledValue(selectedSession.status) ||
+        isCancelledValue(selectedSession.sessionLifecycleState) ||
+        isMissedValue(selectedSession.status) ||
+        isMissedValue(selectedSession.sessionLifecycleState))
+  )
+
+  const isUpcomingSession = Boolean(
+    selectedSession &&
+      (activeTab === "upcoming" ||
+        isUpcomingValue(selectedSession.status) ||
+        isUpcomingValue(selectedSession.sessionLifecycleState))
+  )
+
   const selectedSlotId = selectedSession?.slotAvailabilityId
 
   const {
@@ -92,6 +129,110 @@ export default function SessionsPage() {
     error: slotDetailsError,
     refetchSlotDetails,
   } = useMentorSlotDetails(selectedSlotId, Boolean(selectedSlotId))
+
+  const selectedSlotBooking = useMemo(() => {
+    if (!selectedBookingId || !details?.bookings?.length) return null
+    return details.bookings.find((booking) => booking.id === selectedBookingId) || null
+  }, [details, selectedBookingId])
+
+  const backendFeedbackSubmitted = useMemo(() => {
+    if (!selectedSlotBooking) return false
+
+    const mentorFeedback = selectedSlotBooking.mentorFeedback
+    const hasNotes = typeof mentorFeedback?.notes === "string" && mentorFeedback.notes.trim().length > 0
+    const hasAreas =
+      typeof mentorFeedback?.areasOfImprovement === "string" &&
+      mentorFeedback.areasOfImprovement.trim().length > 0
+    const hasRating =
+      typeof selectedSlotBooking.mentorRating === "number" &&
+      Number.isFinite(selectedSlotBooking.mentorRating)
+
+    return Boolean(
+      selectedSlotBooking.mentorFeedbackSubmittedAt ||
+      selectedSlotBooking.mentorFeedbackLocked ||
+      hasNotes ||
+      hasAreas ||
+      hasRating
+    )
+  }, [selectedSlotBooking])
+
+  const isAlreadySubmitted =
+    (selectedBookingId ? locallySubmittedBookingIds[selectedBookingId] : undefined) ||
+    backendFeedbackSubmitted
+
+  const currentFeedbackDraft = selectedBookingId
+    ? feedbackDrafts[selectedBookingId] || {
+      rating: "",
+      notes: "",
+      areasOfImprovement: "",
+    }
+    : {
+      rating: "",
+      notes: "",
+      areasOfImprovement: "",
+    }
+
+  useEffect(() => {
+    if (!selectedBookingId) return
+
+    setFeedbackDrafts((prev) => {
+      const existingDraft = prev[selectedBookingId]
+
+      if (!backendFeedbackSubmitted) {
+        if (existingDraft) return prev
+
+        return {
+          ...prev,
+          [selectedBookingId]: {
+            rating: "",
+            notes: "",
+            areasOfImprovement: "",
+          },
+        }
+      }
+
+      const mentorFeedback = selectedSlotBooking?.mentorFeedback
+      const nextDraft = {
+        rating:
+          typeof selectedSlotBooking?.mentorRating === "number" &&
+            Number.isFinite(selectedSlotBooking.mentorRating)
+            ? String(selectedSlotBooking.mentorRating)
+            : "",
+        notes: mentorFeedback?.notes || "",
+        areasOfImprovement: mentorFeedback?.areasOfImprovement || "",
+      }
+
+      if (
+        existingDraft?.rating === nextDraft.rating &&
+        existingDraft?.notes === nextDraft.notes &&
+        existingDraft?.areasOfImprovement === nextDraft.areasOfImprovement
+      ) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        [selectedBookingId]: nextDraft,
+      }
+    })
+  }, [selectedBookingId, selectedSlotBooking, backendFeedbackSubmitted])
+
+  const updateFeedbackDraft = (
+    field: "rating" | "notes" | "areasOfImprovement",
+    value: string
+  ) => {
+    if (!selectedBookingId) return
+
+    setFeedbackDrafts((prev) => ({
+      ...prev,
+      [selectedBookingId]: {
+        rating: prev[selectedBookingId]?.rating || "",
+        notes: prev[selectedBookingId]?.notes || "",
+        areasOfImprovement: prev[selectedBookingId]?.areasOfImprovement || "",
+        [field]: value,
+      },
+    }))
+  }
 
   const {
     isRescheduling,
@@ -121,6 +262,15 @@ export default function SessionsPage() {
     feedbackData,
     submitFeedback,
   } = useSubmitMentorSlotFeedback()
+
+  useEffect(() => {
+    if (!feedbackError) return
+
+    toast.error({
+      title: "Feedback submission failed",
+      description: feedbackError,
+    })
+  }, [feedbackError])
 
   const handleAcceptReschedule = async () => {
     if (!selectedSession) return
@@ -166,19 +316,32 @@ export default function SessionsPage() {
   }
 
   const handleSubmitFeedback = async () => {
-    const numericRating = Number(rating)
-    if (!selectedSession || !Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) return
+    if (!selectedSession || isAlreadySubmitted) return
+
+    const numericRating = Number(currentFeedbackDraft.rating)
+    if (!Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) return
 
     const ok = await submitFeedback(selectedSession.id, {
       feedback: {
-        notes,
-        areasOfImprovement,
+        notes: currentFeedbackDraft.notes,
+        areasOfImprovement: currentFeedbackDraft.areasOfImprovement,
       },
       rating: numericRating,
     })
 
     if (ok) {
+      setLocallySubmittedBookingIds((prev) => ({
+        ...prev,
+        [selectedSession.id]: true,
+      }))
+      toast.success({
+        title: "Feedback submitted successfully",
+        description:
+          (typeof feedbackData?.message === "string" && feedbackData.message) ||
+          "Your feedback has been submitted successfully.",
+      })
       await refetchMySessions()
+      await refetchSlotDetails()
     }
   }
 
@@ -349,7 +512,7 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
-                {selectedSession.sessionLifecycleState !== "COMPLETED" && (
+                {selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                   selectedSession.meetingLink ? (
                     <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
                       <a
@@ -397,7 +560,7 @@ export default function SessionsPage() {
                 )}
               </div>
 
-              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Reschedule Request</p>
                   <div className="flex gap-2">
@@ -425,7 +588,7 @@ export default function SessionsPage() {
                 </div>
               )}
 
-              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Mark Attendance</p>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -461,7 +624,7 @@ export default function SessionsPage() {
                 </div>
               )}
 
-              {activeTab !== "upcoming" && selectedSession.sessionLifecycleState !== "COMPLETED" && (
+              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Complete Session</p>
                   <Button
@@ -479,7 +642,7 @@ export default function SessionsPage() {
                 </div>
               )}
 
-              {activeTab !== "upcoming" && (
+              {!isUpcomingSession && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Submit Feedback</p>
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -489,34 +652,46 @@ export default function SessionsPage() {
                         type="number"
                         min={1}
                         max={5}
-                        value={rating}
-                        onChange={(event) => setRating(event.target.value)}
+                        value={currentFeedbackDraft.rating}
+                        onChange={(event) => updateFeedbackDraft("rating", event.target.value)}
+                        disabled={isAlreadySubmitted}
                       />
                     </div>
                     <div className="sm:col-span-2 space-y-1">
                       <p className="text-sm text-muted-foreground">Notes</p>
                       <Textarea
-                        value={notes}
-                        onChange={(event) => setNotes(event.target.value)}
-                        placeholder="Good progress"
+                        value={currentFeedbackDraft.notes}
+                        onChange={(event) => updateFeedbackDraft("notes", event.target.value)}
+                        disabled={isAlreadySubmitted}
                       />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Areas of Improvement</p>
                     <Textarea
-                      value={areasOfImprovement}
-                      onChange={(event) => setAreasOfImprovement(event.target.value)}
-                      placeholder="Time management"
+                      value={currentFeedbackDraft.areasOfImprovement}
+                      onChange={(event) =>
+                        updateFeedbackDraft("areasOfImprovement", event.target.value)
+                      }
+                      disabled={isAlreadySubmitted}
                     />
                   </div>
                   <Button
                     type="button"
                     className="bg-green-700 hover:bg-green-800"
                     onClick={handleSubmitFeedback}
-                    disabled={isSubmittingFeedback || Number(rating) < 1 || Number(rating) > 5}
+                    disabled={
+                      isAlreadySubmitted ||
+                      isSubmittingFeedback ||
+                      Number(currentFeedbackDraft.rating) < 1 ||
+                      Number(currentFeedbackDraft.rating) > 5
+                    }
                   >
-                    {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
+                    {isAlreadySubmitted
+                      ? "Feedback Submitted"
+                      : isSubmittingFeedback
+                        ? "Submitting..."
+                        : "Submit Feedback"}
                   </Button>
                   {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
                   {feedbackData?.message && (
