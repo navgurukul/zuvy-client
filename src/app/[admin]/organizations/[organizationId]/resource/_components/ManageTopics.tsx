@@ -254,7 +254,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                     <DialogHeader>
                         <div className="flex items-center justify-between">
                             <DialogTitle className="text-xl font-semibold">
-                                Manage Topics
+                                Manage Topics 
                             </DialogTitle>
                         </div>
                         

@@ -113,6 +113,11 @@ const Mcqs = (props: Props) => {
     const [isCreateMcqDialogOpen, setIsCreateMcqDialogOpen] = useState(false)
     const [zuvyEvalPage, setZuvyEvalPage] = useState(1)
     const [zuvyEvalLimit, setZuvyEvalLimit] = useState('20')
+    const [zuvyEvalDifficulty, setZuvyEvalDifficulty] = useState('all')
+    const normalizedZuvyEvalDifficulty = useMemo(() => {
+        const normalized = zuvyEvalDifficulty.toLowerCase()
+        return normalized === 'all' ? undefined : normalized
+    }, [zuvyEvalDifficulty])
     const {
         questions: zuvyEvalQuestions,
         loading: zuvyEvalLoading,
@@ -121,6 +126,7 @@ const Mcqs = (props: Props) => {
     } = useZuvyEvalQuestions({
         page: zuvyEvalPage,
         limit: parseInt(zuvyEvalLimit),
+        difficulty: normalizedZuvyEvalDifficulty,
         enabled: showZuvyEvalOnly,
     })
 
@@ -524,6 +530,13 @@ const Mcqs = (props: Props) => {
         }
     }
 
+    const handleZuvyEvalToggle = (checked: boolean) => {
+        setShowZuvyEvalOnly(checked)
+        if (checked) {
+            setZuvyEvalPage(1)
+        }
+    }
+
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
     const tableData = useMemo(() => {
@@ -700,47 +713,79 @@ const Mcqs = (props: Props) => {
                     </div>
                  
                     <div className="flex items-center gap-4 mb-6">
-                        
-                         <div className="relative [&_input]:pl-10">
-                            <SearchBox
-                                placeholder="Search for Question"
-                                fetchSuggestionsApi={fetchSuggestionsApi}
-                                fetchSearchResultsApi={fetchSearchResultsApi}
-                                defaultFetchApi={defaultFetchApi}
-                                getSuggestionLabel={(suggestion) => suggestion.question}
-                                getSuggestionValue={(suggestion) => suggestion.question}
-                                inputWidth="w-[350px]"
-                                onSearchChange={handleSearchChange}
-                            /> 
-                        </div>
+                        {!showZuvyEvalOnly && (
+                            <>
+                                <div className="relative [&_input]:pl-10">
+                                    <SearchBox
+                                        placeholder="Search for Question"
+                                        fetchSuggestionsApi={fetchSuggestionsApi}
+                                        fetchSearchResultsApi={fetchSearchResultsApi}
+                                        defaultFetchApi={defaultFetchApi}
+                                        getSuggestionLabel={(suggestion) => suggestion.question}
+                                        getSuggestionValue={(suggestion) => suggestion.question}
+                                        inputWidth="w-[350px]"
+                                        onSearchChange={handleSearchChange}
+                                    />
+                                </div>
 
-                        <div className="w-[180px] flex-shrink-0">
-                            <MultiSelector
-                                selectedCount={difficultyCount}
-                                options={difficultyOptions}
-                                selectedOptions={difficulty}
-                                handleOptionClick={handleDifficulty}
-                                type={
-                                    difficultyCount > 1
-                                        ? 'Difficulties'
-                                        : 'Difficulty'
-                                }
-                            />
-                        </div>
-                        <div className="w-[180px] flex-shrink-0">
-                            <MultiSelector
-                                selectedCount={selectedTagCount}
-                                options={options}
-                                selectedOptions={selectedOptions}
-                                handleOptionClick={handleTagOption}
-                                type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
-                            />
-                        </div>
+                                <div className="w-[180px] flex-shrink-0">
+                                    <MultiSelector
+                                        selectedCount={difficultyCount}
+                                        options={difficultyOptions}
+                                        selectedOptions={difficulty}
+                                        handleOptionClick={handleDifficulty}
+                                        type={
+                                            difficultyCount > 1
+                                                ? 'Difficulties'
+                                                : 'Difficulty'
+                                        }
+                                    />
+                                </div>
+                                <div className="w-[180px] flex-shrink-0">
+                                    <MultiSelector
+                                        selectedCount={selectedTagCount}
+                                        options={options}
+                                        selectedOptions={selectedOptions}
+                                        handleOptionClick={handleTagOption}
+                                        type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {showZuvyEvalOnly && (
+                            <div className="w-[220px] flex-shrink-0">
+                                {/* <p className="text-xs text-muted-foreground mb-1">Filter by difficulty</p> */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="w-full justify-between">
+                                            {zuvyEvalDifficulty === 'all' ? 'All Difficulty' : zuvyEvalDifficulty}
+                                            <ChevronDown className="ml-2" size={15} />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-[220px]" align="start">
+                                        <DropdownMenuRadioGroup
+                                            value={zuvyEvalDifficulty}
+                                            onValueChange={(value) => {
+                                                setZuvyEvalDifficulty(value)
+                                                setZuvyEvalPage(1)
+                                            }}
+                                        >
+                                            <DropdownMenuRadioItem value="all">All Difficulty</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="easy">Easy</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="hard">Hard</DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <Switch
                                 id="zuvy-eval-toggle"
                                 checked={showZuvyEvalOnly}
-                                onCheckedChange={setShowZuvyEvalOnly}
+                                onCheckedChange={handleZuvyEvalToggle}
                             />
                             <Label htmlFor="zuvy-eval-toggle" className="text-sm font-medium cursor-pointer mt-4">
                                 Show Zuvy Eval Questions

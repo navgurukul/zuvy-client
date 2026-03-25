@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
+import Lottie from 'lottie-react'
+import animationData from '../../../../zuvy-client/public/animations/sparkle.json'
 
 import { toast } from '@/components/ui/use-toast'
 import { getSocketConnectionStore, getUser } from '@/store/store'
+import SparkleLoader from './isGeneratingCard'
+import MiniSparkle from './isGeneratingCard'
 
-const API_URL = process.env.NEXT_PUBLIC_LOCAL_URL 
+const API_URL = process.env.NEXT_PUBLIC_LOCAL_URL
 
 const GENERATION_STATUS_LINES = [
     'Analyzing topic coverage and intent',
@@ -19,6 +23,8 @@ const GENERATION_STATUS_LINES = [
 
 export default function RootSocketConnection() {
     const socketRef = useRef<Socket | null>(null)
+    const generatedQuestionsCountRef = useRef(0)
+    const hasShownCompletionToastRef = useRef(false)
     const [retryKey, setRetryKey] = useState(0)
     const [statusLineIndex, setStatusLineIndex] = useState(0)
     const { user } = getUser()
@@ -77,25 +83,36 @@ export default function RootSocketConnection() {
             setIsConnected(false)
         })
 
-        socket.on('questions:ready', (data: { count: number; questionIds: number[] }) => {
-            setLastQuestionsReadyEvent({
-                count: data.count,
-                questionIds: data.questionIds,
-                receivedAt: Date.now(),
-            })
-            incrementCompletedJobs()
+        socket.on(
+            'questions:ready',
+            (data: { count: number; questionIds: number[] }) => {
+                setLastQuestionsReadyEvent({
+                    count: data.count,
+                    questionIds: data.questionIds,
+                    receivedAt: Date.now(),
+                })
+                generatedQuestionsCountRef.current += data.count
+                incrementCompletedJobs()
 
-            const state = getSocketConnectionStore.getState()
-            const safeTotalJobs = Math.max(1, state.totalJobs)
-            const nextCompleted = Math.min(safeTotalJobs, state.completedJobs + 1)
-            const committedProgress = Math.floor((nextCompleted / safeTotalJobs) * 100)
-            setGenerationProgress(committedProgress)
+                const state = getSocketConnectionStore.getState()
+                const safeTotalJobs = Math.max(1, state.totalJobs)
+                const committedProgress = Math.floor(
+                    (state.completedJobs / safeTotalJobs) * 100
+                )
+                setGenerationProgress(committedProgress)
 
-            toast.success({
-                title: 'Questions Generated Successfully!',
-                description: `${data.count} MCQ questions have been generated and indexed.`,
-            })
-        })
+                if (
+                    state.completedJobs >= safeTotalJobs &&
+                    !hasShownCompletionToastRef.current
+                ) {
+                    hasShownCompletionToastRef.current = true
+                    toast.success({
+                        title: 'Questions Generated Successfully!',
+                        description: `${generatedQuestionsCountRef.current} MCQ questions have been generated and indexed.`,
+                    })
+                }
+            }
+        )
 
         socket.on('connect_error', (err) => {
             console.error('WebSocket connection error:', err.message)
@@ -121,8 +138,10 @@ export default function RootSocketConnection() {
             return
         }
 
-        const singleJobCompletedByMock = totalJobs === 1 && generationProgress >= 100
-        const multiJobCompletedByServer = totalJobs > 1 && completedJobs >= totalJobs
+        const singleJobCompletedByMock =
+            totalJobs === 1 && generationProgress >= 100
+        const multiJobCompletedByServer =
+            totalJobs > 1 && completedJobs >= totalJobs
 
         if (singleJobCompletedByMock || multiJobCompletedByServer) {
             setGenerationProgress(100)
@@ -147,13 +166,15 @@ export default function RootSocketConnection() {
 
     useEffect(() => {
         if (!isGeneratingQuestions) {
+            generatedQuestionsCountRef.current = 0
+            hasShownCompletionToastRef.current = false
             setStatusLineIndex(0)
             return
         }
 
         const statusTimer = window.setInterval(() => {
-            setStatusLineIndex((current) =>
-                (current + 1) % GENERATION_STATUS_LINES.length
+            setStatusLineIndex(
+                (current) => (current + 1) % GENERATION_STATUS_LINES.length
             )
         }, 2200)
 
@@ -176,9 +197,7 @@ export default function RootSocketConnection() {
             )
 
             const maxMockProgress =
-                safeTotalJobs === 1
-                    ? 100
-                    : Math.min(95, committedProgress + 20)
+                safeTotalJobs === 1 ? 100 : Math.min(95, committedProgress + 20)
 
             if (current >= maxMockProgress) {
                 return
@@ -203,12 +222,7 @@ export default function RootSocketConnection() {
         return () => {
             window.clearInterval(intervalId)
         }
-    }, [
-        isGeneratingQuestions,
-        totalJobs,
-        completedJobs,
-        setGenerationProgress,
-    ])
+    }, [isGeneratingQuestions, totalJobs, completedJobs, setGenerationProgress])
 
     return (
         <div
@@ -219,10 +233,14 @@ export default function RootSocketConnection() {
             {isGeneratingQuestions && (
                 <div className="min-w-[220px] max-w-[260px] rounded-lg border border-border bg-background/90 shadow-lg backdrop-blur px-3 py-2">
                     <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        
+                           <MiniSparkle />
+                        
                         <p className="text-xs font-medium text-foreground">
                             AI generation in progress
                         </p>
+                                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+
                         <span className="ml-auto text-xs tabular-nums text-muted-foreground">
                             {generationProgress}%
                         </span>
@@ -237,6 +255,9 @@ export default function RootSocketConnection() {
                             ]
                         }
                     </p>
+                    {/* <p className="mt-1 text-[10px] leading-4 text-muted-foreground/90 tabular-nums">
+                        {Math.min(completedJobs, totalJobs)} / {Math.max(1, totalJobs)} batches completed
+                    </p> */}
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
                             className="h-full rounded-full bg-primary transition-all duration-700"
