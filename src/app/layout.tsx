@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Karla } from 'next/font/google'
 // import Navbar from "@/app/_components/Navbar";
-import { SessionExpiredModal } from '@/components/SessionExpiredModal'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
@@ -9,6 +8,7 @@ import '@remirror/styles/all.css'
 import '@/app/globals.css'
 import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
 import SessionModalWrapper from '@/components/SessionModalWrapper'
+import NotAuthorizedUserWrapper from '@/components/NotAuthorizedUserWrapper'
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -41,6 +41,7 @@ export default function RootLayout({
                 <Toaster />
                 <AnalyticsScripts />
                 <SessionModalWrapper />
+                <NotAuthorizedUserWrapper />
             </body>
         </html>
     )

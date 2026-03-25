@@ -59,8 +59,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
@@ -142,6 +141,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         setSearchQuestionsInAssessment('')
         filterQuestions(
             setFilteredQuestions,
+            orgId,
             selectedDifficulties,
             selectedTopics,
             selectedLanguage,
@@ -156,6 +156,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
         filterQuestions(
             setFilteredQuestions,
+            orgId,
             selectedDifficulties,
             selectedTopics,
             selectedLanguage,
@@ -170,6 +171,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
         filterQuestions(
             setFilteredQuestions,
+            orgId,
             selectedDifficulties,
             selectedTopics,
             selectedLanguage,
@@ -206,6 +208,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         if (questionType === 'coding') {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,
@@ -215,6 +218,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         } else if (questionType === 'mcq') {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,
@@ -224,6 +228,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         } else {
             filterQuestions(
                 setFilteredQuestions,
+                orgId,
                 selectedDifficulties,
                 selectedTopics,
                 selectedLanguage,

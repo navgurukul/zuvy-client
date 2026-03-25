@@ -23,8 +23,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId;
 
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
@@ -126,7 +125,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                     const batchData = response.data.batch
                     setInstructorInfo(batchData)
                 } catch (error: any) {
-                    router.push('/not-found')
+                    // router.push('/not-found')
                     console.error('Error fetching instructor info:', error.message)
                 }
             }
@@ -156,7 +155,19 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     }
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        const convertedData = { ...values, name: values.name, instructorEmail: values.instructorEmail, capEnrollment: +values.capEnrollment }
+        const previousInstructorEmail = instructorsInfo?.instructorEmail || ''
+        const updatedInstructorEmail = values.instructorEmail || ''
+        const hasInstructorEmailChanged =
+            previousInstructorEmail.trim().toLowerCase() !==
+            updatedInstructorEmail.trim().toLowerCase()
+
+        const convertedData = {
+            ...values,
+            name: values.name,
+            instructorEmail: values.instructorEmail,
+            capEnrollment: +values.capEnrollment,
+            ...(hasInstructorEmailChanged && { previousInstructorEmail }),
+        }
         try {
             await api.patch(`/batch/${params.batchId}`, convertedData).then((res) => {
                 toast.success({ title: res.data.status, description: res.data.message })

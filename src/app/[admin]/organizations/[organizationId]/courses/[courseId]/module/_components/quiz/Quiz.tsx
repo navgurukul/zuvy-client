@@ -12,7 +12,6 @@ import QuizModal from '@/app/[admin]/organizations/[organizationId]/courses/[cou
 import { api } from '@/utils/axios.config'
 import { PageTag } from '../../../../../resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
-import { getAllQuizQuestion } from '@/utils/admin'
 import {
     getAllQuizData,
     getChapterUpdateStatus,
@@ -51,8 +50,7 @@ function Quiz(props: QuizProps) {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
     const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
@@ -87,7 +85,6 @@ function Quiz(props: QuizProps) {
         mediumQuestions: [],
         hardQuestions: [],
     })
-
     const { editChapter } = useEditChapter()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const { chapterData, setChapterData } = getChapterDataState()
@@ -107,7 +104,7 @@ function Quiz(props: QuizProps) {
             selectedDifficulty: any[]
         ) => {
             try {
-                let url = '/Content/allQuizQuestions'
+                let url = `/Content/${orgId}/allQuizQuestions`
 
                 const queryParams = []
 

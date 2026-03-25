@@ -5,6 +5,7 @@ import DeleteConfirmationModal from '../../courses/[courseId]/_components/delete
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizData, getOffset, getPosition } from '@/store/store'
+import { useParams } from 'next/navigation';
 
 type Props = {
     logSelectedRows: () => any[]
@@ -12,9 +13,10 @@ type Props = {
 }
 
 const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setStoreQuizData } = getAllQuizData()
-
     const selectedRows = logSelectedRows()
     const { offset } = getOffset()
     const { position } = getPosition()
@@ -37,7 +39,7 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
             const safeOffset = Math.max(0, offset)
             await api
                 .get(
-                    `/Content/allQuizQuestions?limit=${position}&offset=${safeOffset}`
+                    `/Content/${orgId}/allQuizQuestions?limit=${position}&offset=${safeOffset}`
                 )
                 .then((res) => {
                     setStoreQuizData(res.data.data)
@@ -46,7 +48,7 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
 
         await api({
             method: 'delete',
-            url: 'Content/deleteMainQuizOrVariant',
+            url: `Content/${orgId}/deleteMainQuizOrVariant`,
             data: transformedBody,
         })
             .then((res) => {

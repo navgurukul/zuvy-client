@@ -279,8 +279,8 @@ export interface ChapterDetailsResponse {
 
 // useCodingChallenge
 export interface UseCodingChallengeProps {
-    questionId: string;
-    onChapterComplete?: () => void;
+  questionId: string;
+  onChapterComplete?: () => void;
 }
 
 // useCodingSubmissions
@@ -334,7 +334,7 @@ export interface CompletedClassesData {
 }
 
 export interface CompletedClassesResponse {
-  data:any;
+  data: any;
   message: string;
   isSuccess: boolean;
 }
@@ -404,10 +404,10 @@ export interface UseCourseSyllabusReturn {
 
 // UseFeedbackForm
 export interface UseFeedbackFormProps {
-    moduleId: string
-    chapterId: number
-    bootcampId: number
-    onSuccess?: () => void
+  moduleId: string
+  chapterId: number
+  bootcampId: number
+  onSuccess?: () => void
 }
 
 type QuestionType = 'mcq' | 'checkbox' | 'text' | 'date' | 'time';
@@ -416,7 +416,7 @@ export interface FeedbackQuestion {
   id: string;
   question: string;
   type: QuestionType;
-  options?: { id: string; label: string }[]; 
+  options?: { id: string; label: string }[];
   required: boolean;
 }
 
@@ -603,7 +603,7 @@ export interface InstructorDetails {
 
 export interface UpcomingEvent {
   chapterId: any;
-  hangoutLink?:string;
+  hangoutLink?: string;
   moduleId: any;
   id: number;
   title: string;
@@ -689,9 +689,9 @@ export interface UseBootcampSettingsReturn {
 
 // useBootcampDelete.tsx
 export interface UseBootcampDeleteReturn {
-    deleteBootcamp: (bootcampId: string) => Promise<void>
-    isDeleting: boolean
-    error: string | null
+  deleteBootcamp: (bootcampId: string) => Promise<void>
+  isDeleting: boolean
+  error: string | null
 }
 
 export interface coursePermissions {
@@ -758,7 +758,7 @@ export interface EditCodingQuestionData {
 }
 
 export interface UseEditCodingQuestionReturn {
-  editQuestion: (questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
+  editQuestion: (orgId: number, questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
   loading: boolean;
   error: string | null;
 }
@@ -915,5 +915,40 @@ export interface EnrollCourseResult {
 export interface UseEnrollCourseReturn {
   enrollCourse: (bootcampId: number) => Promise<EnrollCourseResult>;
   isEnrolling: boolean;
+  error: string | null;
+}
+
+// useSwitchOrg
+export interface SwitchOrgPayload {
+  orgId: number;
+  refresh_token: string;
+}
+
+export interface SwitchOrgResponse {
+  isSuccess?: boolean;
+  status?: string;
+  message?: string;
+  access_token: string;
+  refresh_token: string;
+  user: {
+    rolesList: any[];
+    id: string;
+    email: string;
+    name: string;
+    profilePicture?: string;
+    profile_picture?: string;
+    orgId: number;
+    orgName: string;
+  };
+}
+
+export interface SwitchOrgResult {
+  success: boolean;
+  message: string;
+}
+
+export interface UseSwitchOrgReturn {
+  switchOrg: (payload: SwitchOrgPayload) => Promise<SwitchOrgResult>;
+  isSwitching: boolean;
   error: string | null;
 }

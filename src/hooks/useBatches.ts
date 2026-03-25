@@ -26,8 +26,7 @@ export default function useBatches(params: ParamsType) {
     const { user } = getUser()
     const pathname = usePathname()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = Number(organizationId) || user?.orgId; 
 
     const { students } = { students: [] as StudentData[] } // placeholder if needed
 
@@ -262,10 +261,17 @@ export default function useBatches(params: ParamsType) {
     const handleUpdateBatch = async (values: z.infer<typeof formSchema>) => {
         if (!editingBatch) return
         try {
+            const previousInstructorEmail = editingBatch.instructorEmail || ''
+            const updatedInstructorEmail = values.instructorEmail || ''
+            const hasInstructorEmailChanged =
+                previousInstructorEmail.trim().toLowerCase() !==
+                updatedInstructorEmail.trim().toLowerCase()
+
             const convertedData = {
                 name: values.name,
                 instructorEmail: values.instructorEmail,
                 capEnrollment: +values.capEnrollment,
+                ...(hasInstructorEmailChanged && { previousInstructorEmail }),
             }
             await api.put(`/batch/${editingBatch.id}`, convertedData)
             toast.success({

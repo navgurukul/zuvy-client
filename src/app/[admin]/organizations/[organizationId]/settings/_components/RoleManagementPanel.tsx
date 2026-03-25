@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo } from 'react'
 import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, FileText, Settings, List, Code, MessageSquare } from 'lucide-react'
 import useRoleManagement from '@/hooks/useRoleManagement'
+import { useRouter } from 'next/navigation'
 import RoleList from './RoleList'
 import PermissionLegend from './PermissionLegend'
 import PermissionButtons from './PermissionButtons'
@@ -14,6 +15,8 @@ import { Button } from '@/components/ui/button'
 interface RoleManagementPanelProps {
     selectedRole: string | undefined
     onRoleChange: (role: string) => void
+    pendingTab?: string | null
+    onTabSwitch?: (tab: string) => void
 }
 
 const RESOURCE_ICONS: Record<string, React.ReactNode> = {
@@ -28,8 +31,9 @@ const RESOURCE_ICONS: Record<string, React.ReactNode> = {
     'open ended': <MessageSquare className="h-4 w-4" />,
 }
 
-const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole, onRoleChange }) => {
+const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole, onRoleChange, pendingTab, onTabSwitch }) => {
     const hook = useRoleManagement(selectedRole, onRoleChange)
+    const router = useRouter()
 
     const {
         roles,
@@ -78,6 +82,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
     }
 
     const onRoleSelect = (roleName: string, newRoleId: number) => {
+        const isSameRoleById = newRoleId === roleId
+
+        if (isSameRoleById) {
+            return
+        }
+
         const changeRole = () => {
             onRoleChange(roleName)
             setRoleId(newRoleId)
@@ -130,6 +140,34 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
         discardChanges(recalc)
     }
 
+    const onKeepAndContinue = async () => {
+        const actionToRun = pendingAction
+        const routeToGo = pendingRoute
+
+        await handleSaveAllPermissions(resolveRoleId)
+
+        setShowWarningModal(false)
+        setPendingAction(null)
+        setPendingRoute(null)
+
+        if (actionToRun) {
+            actionToRun()
+            return
+        }
+
+        if (!routeToGo) return
+
+        if (routeToGo === 'back') {
+            window.history.back()
+        } else if (routeToGo === 'forward') {
+            window.history.forward()
+        } else if (routeToGo.startsWith('http')) {
+            window.location.href = routeToGo
+        } else {
+            router.push(routeToGo)
+        }
+    }
+
     const getLevelFromPerms = (view: boolean, create: boolean, edit: boolean, del: boolean) => {
         if (!view && !create && !edit && !del) return 'No access'
         if (view && !create && !edit && !del) return 'Viewer'
@@ -139,10 +177,27 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
         return 'No access'
     }
 
+    useEffect(() => {
+        if (pendingTab && pendingTab !== 'roles' && hasUnsavedChanges) {
+            setPendingAction(() => () => {
+                onTabSwitch?.(pendingTab)
+            })
+            setShowWarningModal(true)
+        } else if (pendingTab && pendingTab !== 'roles' && !hasUnsavedChanges) {
+            onTabSwitch?.(pendingTab)
+        }
+    }, [pendingTab, hasUnsavedChanges, onTabSwitch])
+
     return (
         <div className="space-y-6">
-            <UnsavedChangesDialog open={showWarningModal} onOpenChange={setShowWarningModal} selectedRole={selectedRole} onDiscard={onDiscard} onKeep={() => setShowWarningModal(false)} />
-
+            <UnsavedChangesDialog
+                open={showWarningModal}
+                onOpenChange={setShowWarningModal}
+                selectedRole={selectedRole}
+                onDiscard={onDiscard}
+                onKeep={onKeepAndContinue}
+            />
+            
             <div className="flex items-start justify-between gap-10">
                 <div className="space-y-2 flex-1 mt-2">
                     <h2 className="text-2xl text-left font-semibold tracking-tight">Manage Role Functions</h2>
