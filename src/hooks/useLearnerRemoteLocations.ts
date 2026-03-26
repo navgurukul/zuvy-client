@@ -47,7 +47,7 @@ export function useLearnerRemoteLocations(initialFetch = true) {
     const fetchLearnerRemoteLocations = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerRemoteLocationsResponse>('http://localhost:5000/besic/learner-remote-locations')
+            const res = await api.get<LearnerRemoteLocationsResponse>('/besic/learner-remote-locations')
             let locationsData: LearnerRemoteLocation[] | string[] | undefined
 
             if (res.data?.data && typeof res.data.data === 'object' && 'remoteLocations' in res.data.data) {

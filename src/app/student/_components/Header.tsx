@@ -57,7 +57,7 @@ const Header = () => {
     }
 
     const handleProfileClick = () => {
-        router.push('/student/profile')
+        router.push('/student/profile?mode=edit')
     }
 
     const isInProfileSetupFlow =

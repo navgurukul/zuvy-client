@@ -60,57 +60,14 @@ export const useOnboardingStorage = () => {
         const stored = localStorage.getItem(ONBOARDING_STORAGE_KEY);
         if (stored) {
           const parsedData = JSON.parse(stored);
-          // Add step4 mock data if it doesn't exist
-          if (!parsedData.step4) {
-            parsedData.step4 = {
-              targetRoles: ['Frontend Developer', 'Full Stack Developer'],
-              locationPreferences: {
-                remote: true,
-                cities: ['Bangalore', 'Hyderabad', 'Pune'],
-              },
-              salaryExpectations: {
-                internship: '₹20–30k',
-                fullTime: '₹7–10 LPA',
-              },
-              linkedinUrl: 'https://linkedin.com/in/alexjohnson',
-              communicationPreferences: {
-                email: true,
-                whatsapp: true,
-                phone: false,
-              },
-              termsAndCondition: false,
-              allowCompaniesViewProfile: true,
-              consentTimestamp: new Date().toISOString(),
-            };
-          }
           setOnboardingData(parsedData);
         } else {
-          // Initialize empty onboarding data with mock step4
+          // Initialize empty onboarding data
           const initialData: OnboardingData = {
             currentStep: 1,
             isCompleted: false,
             hasSkipped: false,
             lastUpdated: new Date().toISOString(),
-            step4: {
-              targetRoles: ['Frontend Developer', 'Full Stack Developer'],
-              locationPreferences: {
-                remote: true,
-                cities: ['Bangalore', 'Hyderabad', 'Pune'],
-              },
-              salaryExpectations: {
-                internship: '₹20–30k',
-                fullTime: '₹7–10 LPA',
-              },
-              linkedinUrl: 'https://linkedin.com/in/alexjohnson',
-              communicationPreferences: {
-                email: true,
-                whatsapp: true,
-                phone: false,
-              },
-              termsAndCondition: false,
-              allowCompaniesViewProfile: true,
-              consentTimestamp: new Date().toISOString(),
-            },
           };
           setOnboardingData(initialData);
         }

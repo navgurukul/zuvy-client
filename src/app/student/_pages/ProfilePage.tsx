@@ -55,13 +55,42 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const { refetchParsedResume } = useParsedResume(false);
   const { learnerProfile } = useLearnerProfile();
 
-  const formatMonthYearToDate = (value?: { month: string; year: string }) => {
-    if (!value?.year) {
+  const formatMonthYearToDate = (
+    value?: { day?: string; month: string; year: string } | string
+  ) => {
+    if (!value) {
       return undefined;
     }
-    const monthIndex = MONTHS.indexOf(value.month || '');
-    const month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-    return `${value.year}-${month}-01`;
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed || undefined;
+    }
+
+    if (!value.year) {
+      return undefined;
+    }
+
+    const normalizedMonth = String(value.month || '').trim();
+    const numericMonth = Number(normalizedMonth);
+    let month = '01';
+
+    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+      month = String(Math.trunc(numericMonth)).padStart(2, '0');
+    } else {
+      const monthIndex = MONTHS.findIndex(
+        (monthName) => monthName.toLowerCase() === normalizedMonth.toLowerCase()
+      );
+      month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
+    }
+
+    const numericDay = Number(String(value.day || '').trim());
+    const day =
+      Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31
+        ? String(Math.trunc(numericDay)).padStart(2, '0')
+        : '01';
+
+    return `${value.year}-${month}-${day}`;
   };
 
   const toMonthNumber = (month?: string) => {
@@ -104,6 +133,30 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       return emailRegex.test(stringValue) ? stringValue : null;
     };
 
+    const normalizeOptionalUrl = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      if (!stringValue) return null;
+
+      const valueWithProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(stringValue)
+        ? stringValue
+        : `https://${stringValue}`;
+
+      try {
+        return new URL(valueWithProtocol).toString();
+      } catch {
+        return null;
+      }
+    };
+
+    const normalizeGithubUrl = (value?: any) => {
+      const normalizedUrl = normalizeOptionalUrl(value);
+      if (!normalizedUrl) return null;
+
+      const host = new URL(normalizedUrl).hostname.toLowerCase();
+      return host === 'github.com' || host === 'www.github.com' ? normalizedUrl : null;
+    };
+
     const isValidOtherCollege = (value?: any) => {
       if (value === null || value === undefined || value === '') return false;
       const stringValue = String(value).trim();
@@ -130,8 +183,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       projectType: project.projectType,
       startDate: formatMonthYearToDate(project.startDate),
       endDate: formatMonthYearToDate(project.endDate),
-      githubUrl: project.githubUrl,
-      demoUrl: project.demoUrl,
+      githubUrl: normalizeGithubUrl(project.githubUrl),
+      demoUrl: normalizeOptionalUrl(project.demoUrl),
       detailedDescription: project.detailedDescription,
     }));
 
@@ -220,7 +273,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       openToRemote: step4Data?.locationPreferences?.remote,
       internshipStipend: normalizeText(step4Data?.salaryExpectations?.internship),
       fullTimeCtc: normalizeText(step4Data?.salaryExpectations?.fullTime),
-      termsAndCondition: step4Data?.termsAndCondition ?? false,
+      // Always require explicit user agreement in UI (don't use API value)
+      termsAndCondition: step4Data?.termsAndCondition,
+
       preferredContactMethods,
     };
   };
@@ -248,9 +303,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   useEffect(() => {
     if (onboardingData?.currentStep === 4) {
-      setIsTermsAgreed(Boolean(onboardingData.step4?.termsAndCondition));
+      // Always initialize to false so users must explicitly agree
+      setIsTermsAgreed(false);
     }
-  }, [onboardingData?.currentStep, onboardingData?.step4?.termsAndCondition]);
+  }, [onboardingData?.currentStep]);
 
   useEffect(() => {
     if (!learnerProfile || !onboardingData) {
@@ -358,6 +414,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         oneLineDescription: project.description || '',
         detailedDescription: project.description || '',
         techStack: project.techStack || [],
+        githubUrl: project.githubUrl || project.github || '',
+        demoUrl: project.demoUrl || project.liveUrl || '',
+        startDate: project.startDate ? String(project.startDate) : undefined,
+        endDate: project.endDate ? String(project.endDate) : undefined,
         projectType: 'Solo',
       })),
       autoDetectedSkills: learnerProfile.technicalSkills || [],
@@ -449,16 +509,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     };
 
     const mergedStep4: Step4Type = {
-      targetRoles:
-        (onboardingData.step4?.targetRoles?.length || 0) > 0
-          ? onboardingData.step4!.targetRoles
-          : profileStep4.targetRoles,
+      targetRoles: profileStep4.targetRoles,
       locationPreferences: {
-        remote: onboardingData.step4?.locationPreferences?.remote ?? profileStep4.locationPreferences.remote,
-        cities:
-          (onboardingData.step4?.locationPreferences?.cities?.length || 0) > 0
-            ? onboardingData.step4!.locationPreferences.cities
-            : profileStep4.locationPreferences.cities,
+        remote: profileStep4.locationPreferences.remote,
+        cities: profileStep4.locationPreferences.cities,
       },
       salaryExpectations: {
         internship:
@@ -468,9 +522,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       },
       linkedinUrl: onboardingData.step4?.linkedinUrl || profileStep4.linkedinUrl,
       communicationPreferences: {
-        email: onboardingData.step4?.communicationPreferences?.email ?? profileStep4.communicationPreferences.email,
-        whatsapp: onboardingData.step4?.communicationPreferences?.whatsapp ?? profileStep4.communicationPreferences.whatsapp,
-        phone: onboardingData.step4?.communicationPreferences?.phone ?? profileStep4.communicationPreferences.phone,
+        email: profileStep4.communicationPreferences.email,
+        whatsapp: profileStep4.communicationPreferences.whatsapp,
+        phone: profileStep4.communicationPreferences.phone,
       },
       termsAndCondition: onboardingData.step4?.termsAndCondition ?? profileStep4.termsAndCondition,
       allowCompaniesViewProfile:
@@ -490,6 +544,40 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}m ${secs}s`;
+  };
+
+  const extractBackendErrorMessage = (error: any) => {
+    const responseData = error?.response?.data;
+
+    if (typeof responseData === 'string' && responseData.trim()) {
+      return responseData;
+    }
+
+    if (typeof responseData?.message === 'string' && responseData.message.trim()) {
+      return responseData.message;
+    }
+
+    if (Array.isArray(responseData?.message) && responseData.message.length > 0) {
+      return responseData.message.join(', ');
+    }
+
+    if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+      const firstError = responseData.errors[0];
+
+      if (typeof firstError === 'string' && firstError.trim()) {
+        return firstError;
+      }
+
+      if (typeof firstError?.message === 'string' && firstError.message.trim()) {
+        return firstError.message;
+      }
+    }
+
+    if (typeof error?.message === 'string' && error.message.trim()) {
+      return error.message;
+    }
+
+    return 'Could not save complete profile. Please check your details and try again.';
   };
 
   const handleStep1Complete = (data: Step1Type) => {
@@ -545,9 +633,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     const result = await saveLearnerProfile(payload);
 
     if (!result.success) {
+      const backendMessage = extractBackendErrorMessage(result.error);
       toast.error({
         title: 'Save failed',
-        description: 'Could not save complete profile. Please check your details and try again.',
+        description: backendMessage,
       });
       setIsSavingStepData(false);
       return;
@@ -1072,6 +1161,30 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         });
       };
 
+      const normalizeStringList = (value: unknown): string[] => {
+        if (!Array.isArray(value)) {
+          return [];
+        }
+
+        return value
+          .map((item) => {
+            if (typeof item === 'string') {
+              return item.trim();
+            }
+
+            if (item && typeof item === 'object' && 'name' in item) {
+              const maybeName = (item as { name?: unknown }).name;
+              return typeof maybeName === 'string' ? maybeName.trim() : '';
+            }
+
+            return '';
+          })
+          .filter(Boolean);
+      };
+
+      const parsedRoles = normalizeStringList(parsedData?.roles);
+      const parsedLocations = normalizeStringList(parsedData?.locations);
+
       const parsed = {
         fullName: parsedData?.name || '',
         phoneNumber: parsedData?.phone || '',
@@ -1091,7 +1204,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         projects: normalizeProjects(parsedData?.projects || []),
         academicPerformance: undefined,
         hasInternshipExperience: false,
-        targetRoles: [],
+        targetRoles: parsedRoles,
+        locations: parsedLocations,
       };
       
       // Debug logging
@@ -1106,6 +1220,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         hasAcademicPerformance: !!parsed.academicPerformance,
         hasInternshipExperience: parsed.hasInternshipExperience,
         targetRoles: parsed.targetRoles,
+        locations: parsed.locations,
         skillsCount: parsed.skills.length,
       });
       const hasAnyParsedField = Boolean(
@@ -1120,6 +1235,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
             parsed.projects.length ||
             parsed.academicPerformance ||
             parsed.targetRoles.length ||
+            parsed.locations.length ||
           parsed.skills.length
       );
 
@@ -1196,16 +1312,19 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       };
       updateStepData(3, nextStep3);
 
-      if ((parsed.targetRoles?.length || 0) > 0 || parsed.linkedin) {
+      if ((parsed.targetRoles?.length || 0) > 0 || (parsed.locations?.length || 0) > 0 || parsed.linkedin) {
         const existingStep4: Partial<Step4Type> = onboardingData?.step4 ?? {};
         const nextStep4: Step4Type = {
           targetRoles:
             parsed.targetRoles.length > 0
               ? parsed.targetRoles
               : existingStep4.targetRoles || [],
-          locationPreferences: existingStep4.locationPreferences || {
-            remote: true,
-            cities: [],
+          locationPreferences: {
+            remote: existingStep4.locationPreferences?.remote ?? true,
+            cities:
+              parsed.locations.length > 0
+                ? parsed.locations
+                : existingStep4.locationPreferences?.cities || [],
           },
           salaryExpectations: existingStep4.salaryExpectations,
           linkedinUrl: parsed.linkedin || existingStep4.linkedinUrl || '',
@@ -1406,36 +1525,36 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                     id="linkedin-resume-upload"
                     disabled={isParsingResume}
                   />
-                  <label htmlFor="linkedin-resume-upload" className="block h-full">
-                    <div className="border-2 border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
-                      <div className="flex flex-col items-center justify-center text-center h-full space-y-2">
-                        <div className="w-9 h-9 rounded-md flex items-center justify-center bg-[#0A66C2]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
-                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
-                        </div>
-                        <p className="text-sm font-medium text-foreground text-center">Upload LinkedIn Resume</p>
-                        <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <span>Downloaded LinkedIn PDF</span>
-                          <TooltipProvider delayDuration={150}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
+                  <TooltipProvider delayDuration={150}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <label htmlFor="linkedin-resume-upload" className="block h-full">
+                          <div className="border-2 border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
+                            <div className="flex flex-col items-center justify-center text-center h-full space-y-2">
+                              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-[#0A66C2]">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                  </svg>
+                              </div>
+                              <p className="text-sm font-medium text-foreground text-center">Upload LinkedIn Resume</p>
+                              <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                <span>Downloaded LinkedIn PDF</span>
                                 <span
                                   className="inline-flex items-center justify-center"
-                                  aria-label="How to upload LinkedIn PDF"
+                                  aria-hidden="true"
                                 >
                                   <Info className="w-4 h-4" />
                                 </span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
-                                First download your profile details as a PDF from LinkedIn, then upload that PDF here.
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
+                              </div>
+                            </div>
+                          </div>
+                        </label>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                        First download your profile details as a PDF from LinkedIn, then upload that PDF here.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 

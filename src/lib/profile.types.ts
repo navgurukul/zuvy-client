@@ -27,8 +27,8 @@ export interface ExternalProject {
   demoUrl?: string;
   projectType: 'Solo' | 'Team';
   teamSize?: number;
-  startDate?: { month: string; year: string };
-  endDate?: { month: string; year: string };
+  startDate?: { day?: string; month: string; year: string } | string;
+  endDate?: { day?: string; month: string; year: string } | string;
 }
 
 export interface OnboardingStep2 {

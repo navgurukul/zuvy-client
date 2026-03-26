@@ -47,7 +47,7 @@ export function useLearnerBranchDetails(initialFetch = true) {
     const fetchLearnerBranchDetails = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerBranchDetailsResponse>('http://localhost:5000/besic/learner-education-branch-details')
+            const res = await api.get<LearnerBranchDetailsResponse>('/besic/learner-education-branch-details')
             // Access branches array from nested data structure
             let branchesData: LearnerBranchDetail[] | string[] | undefined
             

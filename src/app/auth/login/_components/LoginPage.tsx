@@ -23,9 +23,6 @@ import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
-
-
-
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
@@ -83,6 +80,22 @@ function LoginPage() {
 
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
+
+    type LearnerProfileStrengthResponse = {
+        percentage?: number
+        level?: string
+        message?: string
+    }
+
+    const getStudentStrengthPercentage = async (): Promise<number | null> => {
+        try {
+            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
+            return typeof res.data?.percentage === 'number' ? res.data.percentage : null
+        } catch (error) {
+            console.error('Failed to fetch learner profile strength:', error)
+            return null
+        }
+    }
 
     // Student Card Component
     const StudentCard = ({
@@ -180,43 +193,13 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    let studentDestination = '/student/profile'
-
-                    try {
-                        const strengthRes = await api.get('http://localhost:5000/learner-profile/strength')
-                        const raw = strengthRes.data
-                        let strength: number | null = null
-
-                        if (typeof raw === 'number' && Number.isFinite(raw)) {
-                            strength = raw
-                        } else if (typeof raw === 'string') {
-                            const n = Number(raw)
-                            if (Number.isFinite(n)) strength = n
-                        } else if (raw && typeof raw === 'object') {
-                            const data = (raw as any).data
-                            if (typeof data === 'number' && Number.isFinite(data)) {
-                                strength = data
-                            } else if (typeof data === 'string') {
-                                const n = Number(data)
-                                if (Number.isFinite(n)) strength = n
-                            } else if (data && typeof data === 'object') {
-                                const s = (data as any).strength ?? (data as any).percentage
-                                if (typeof s === 'number' && Number.isFinite(s)) strength = s
-                                else if (typeof s === 'string') {
-                                    const n = Number(s)
-                                    if (Number.isFinite(n)) strength = n
-                                }
-                            }
-                        }
-
-                        if (strength !== null && strength >= 80) {
-                            studentDestination = '/student'
-                        }
-                    } catch {
-                        // fall back to profile setup if strength check fails
+                    const strengthPercentage = await getStudentStrengthPercentage()
+                    if (strengthPercentage !== null && strengthPercentage > 100) {
+                        router.push('/student')
+                    } else {
+                        router.push('/student/profile')
                     }
-
-                    router.push(studentDestination)
+                    
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/organizations/${organizationId}/setting`)

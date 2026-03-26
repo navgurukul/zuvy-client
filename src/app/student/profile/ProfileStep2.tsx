@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Lock, Code, Calendar } from 'lucide-react';
+import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Calendar } from 'lucide-react';
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
@@ -36,6 +36,62 @@ export const ProjectModal: React.FC<{
   techStackOptions?: string[];
   isLoadingTechStack?: boolean;
 }> = ({ isOpen, onOpenChange, onSave, initialProject, techStackOptions, isLoadingTechStack }) => {
+  const parseMonthToIso = (monthValue: string) => {
+    const trimmedMonth = String(monthValue || '').trim();
+    if (!trimmedMonth) {
+      return '01';
+    }
+
+    const numericMonth = Number(trimmedMonth);
+    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+      return String(Math.trunc(numericMonth)).padStart(2, '0');
+    }
+
+    const monthIndex = MONTHS.findIndex(
+      (month) => month.toLowerCase() === trimmedMonth.toLowerCase()
+    );
+    return monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
+  };
+
+  const parseDayToIso = (dayValue?: string) => {
+    const numericDay = Number(String(dayValue || '').trim());
+    if (Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31) {
+      return String(Math.trunc(numericDay)).padStart(2, '0');
+    }
+    return '01';
+  };
+
+  const formatDateForInput = (dateValue?: ExternalProject['startDate']) => {
+    if (!dateValue) {
+      return '';
+    }
+
+    if (typeof dateValue === 'string') {
+      return dateValue;
+    }
+
+    if (!dateValue.year || !dateValue.month) {
+      return '';
+    }
+
+    const month = parseMonthToIso(dateValue.month);
+    const day = parseDayToIso(dateValue.day);
+    return `${dateValue.year}-${month}-${day}`;
+  };
+
+  const parseInputDate = (dateValue: string) => {
+    const [year = '', month = '', day = '01'] = dateValue.split('-');
+    if (!year || !month) {
+      return undefined;
+    }
+
+    return {
+      year,
+      month: String(Number(month)),
+      day: String(Number(day || '1')),
+    };
+  };
+
   const [formData, setFormData] = useState<ExternalProject>(
     initialProject || {
       id: Date.now().toString(),
@@ -378,18 +434,14 @@ export const ProjectModal: React.FC<{
                 <Input
                   id="startDate"
                   type="date"
-                  value={
-                    formData.startDate
-                      ? typeof formData.startDate === 'string'
-                        ? formData.startDate
-                        : `${formData.startDate.year}-${formData.startDate.month.padStart(2, '0')}-01`
-                      : ''
-                  }
+                  value={formatDateForInput(formData.startDate)}
                   onChange={(e) => {
                     const dateValue = e.target.value;
                     if (dateValue) {
-                      const [year, month] = dateValue.split('-');
-                      setFormData((prev) => ({ ...prev, startDate: { year, month: parseInt(month).toString() } }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        startDate: parseInputDate(dateValue),
+                      }));
                     } else {
                       setFormData((prev) => ({ ...prev, startDate: undefined }));
                     }
@@ -407,18 +459,14 @@ export const ProjectModal: React.FC<{
                 <Input
                   id="endDate"
                   type="date"
-                  value={
-                    formData.endDate
-                      ? typeof formData.endDate === 'string'
-                        ? formData.endDate
-                        : `${formData.endDate.year}-${formData.endDate.month.padStart(2, '0')}-01`
-                      : ''
-                  }
+                  value={formatDateForInput(formData.endDate)}
                   onChange={(e) => {
                     const dateValue = e.target.value;
                     if (dateValue) {
-                      const [year, month] = dateValue.split('-');
-                      setFormData((prev) => ({ ...prev, endDate: { year, month: parseInt(month).toString() } }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        endDate: parseInputDate(dateValue),
+                      }));
                     } else {
                       setFormData((prev) => ({ ...prev, endDate: undefined }));
                     }
@@ -543,7 +591,7 @@ const ProjectCard: React.FC<{
         </div>
 
         {/* One-line Description */}
-        <p className="text-sm text-muted-foreground">{project.oneLineDescription}</p>
+        <p className="text-sm text-muted-foreground text-left block">{project.oneLineDescription}</p>
 
         {/* Tech Stack */}
         {project.techStack.length > 0 && (
@@ -594,7 +642,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
 }) => {
   const [projects, setProjects] = useState<ExternalProject[]>(initialData?.externalProjects || []);
   const [skills, setSkills] = useState<string[]>(initialData?.additionalSkills || []);
-  const [autoDetectedSkills] = useState<string[]>(initialData?.autoDetectedSkills || ['React', 'JavaScript', 'TypeScript']);
+  const [autoDetectedSkills, setAutoDetectedSkills] = useState<string[]>(initialData?.autoDetectedSkills || ['React', 'JavaScript', 'TypeScript']);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ExternalProject | undefined>();
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -661,8 +709,8 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     if (totalSkills < 3) {
       newErrors.skills = 'Please select at least 3 skills total (including auto-detected)';
     }
-    if (totalSkills > 20) {
-      newErrors.skills = 'Maximum 20 skills allowed';
+    if (totalSkills > 100) {
+      newErrors.skills = 'Maximum 100 skills allowed';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -693,7 +741,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   };
 
   const handleAddSkill = (skill: string) => {
-    if (!skills.includes(skill) && totalSkills < 20) {
+    if (!skills.includes(skill) && totalSkills < 100) {
       setSkills((prev) => [...prev, skill].sort());
     }
     setCustomSkill('');
@@ -701,7 +749,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   };
 
   const handleAddCustomSkill = () => {
-    if (customSkill.trim() && !skills.includes(customSkill) && totalSkills < 20) {
+    if (customSkill.trim() && !skills.includes(customSkill) && totalSkills < 100) {
       setSkills((prev) => [...prev, customSkill].sort());
       setCustomSkill('');
       setShowSkillDropdown(false);
@@ -710,6 +758,10 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
 
   const handleRemoveSkill = (skill: string) => {
     setSkills((prev) => prev.filter((s) => s !== skill));
+  };
+
+  const handleRemoveAutoDetectedSkill = (skill: string) => {
+    setAutoDetectedSkills((prev) => prev.filter((s) => s !== skill));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -723,7 +775,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     }
   };
 
-  const isMandatoryFieldsFilled = totalSkills >= 3 && totalSkills <= 20;
+  const isMandatoryFieldsFilled = totalSkills >= 3 && totalSkills <= 100;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -735,31 +787,33 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
               <Code className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold uppercase tracking-wide">TECHNICAL SKILLS</h3>
             </div>
-            <p className="text-xs text-muted-foreground">Min 3 · Max 20</p>
+            <p className="text-xs text-muted-foreground">Min 3 · Max 100</p>
           </div>
           <div className="space-y-4">
           
           {/* Display tags outside input field */}
           {(autoDetectedSkills.length > 0 || skills.length > 0) && (
             <div className="flex flex-wrap gap-2">
-              {/* Display auto-detected skills as locked tags */}
+              {/* Display auto-detected skills as removable tags */}
               {autoDetectedSkills.map((skill) => (
-                <Badge key={skill} variant="default" className="bg-primary/10 text-primary cursor-default">
+                <Badge
+                  key={skill}
+                  variant="default"
+                  className="bg-primary/10 text-primary cursor-pointer hover:opacity-80"
+                  onClick={() => handleRemoveAutoDetectedSkill(skill)}
+                >
                   {skill}
-                  <Lock className="w-3 h-3 ml-1" />
                 </Badge>
               ))}
               {/* Display selected skills as tags */}
               {skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer"
+                  onClick={() => handleRemoveSkill(skill)}
+                >
                   {skill}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill)}
-                    className="ml-1 hover:opacity-70"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
                 </Badge>
               ))}
             </div>
@@ -778,7 +832,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                   handleAddCustomSkill();
                 }
               }}
-              disabled={totalSkills >= 20 || isSkillsLoading}
+              disabled={totalSkills >= 100 || isSkillsLoading}
             />
             
             {/* Dropdown with skill suggestions */}
@@ -814,7 +868,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
               </p>
             )}
             <p className="text-xs text-muted-foreground ml-auto">
-              {totalSkills}/20 added
+              {totalSkills}/100 added
             </p>
           </div>
 

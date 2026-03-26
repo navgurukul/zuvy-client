@@ -194,6 +194,12 @@ export const EditProfilePage: React.FC = () => {
     Boolean(rawBranchValue) && rawBranchValue !== 'Other' && !branchOptions.includes(rawBranchValue);
   const selectedBranchValue = isCustomBranchValue ? 'Other' : rawBranchValue;
   const branchCustomValue = editedData?.step1?.customBranch ?? (isCustomBranchValue ? rawBranchValue : '');
+  const currentCollegeName = editedData?.step1?.collegeName ?? onboardingData?.step1?.collegeName ?? '';
+  const currentCustomCollege = editedData?.step1?.customCollege ?? onboardingData?.step1?.customCollege ?? '';
+  const hasSelectedCollege = Boolean(String(currentCollegeName).trim());
+  const hasManualCollege = Boolean(String(currentCustomCollege).trim());
+  const isSearchCollegeDisabled = hasManualCollege;
+  const isManualCollegeDisabled = hasSelectedCollege;
   
   // College search state
   const [collegeSearch, setCollegeSearch] = useState('');
@@ -232,6 +238,7 @@ export const EditProfilePage: React.FC = () => {
     return Array.from(new Set(sourceSkills));
   }, [technicalSkills, mockSkills]);
   const [skills, setSkills] = useState<string[]>([]);
+  const [editableAutoDetectedSkills, setEditableAutoDetectedSkills] = useState<string[]>([]);
   const [filteredSkills, setFilteredSkills] = useState<string[]>(allSkills);
 
   const step1 = onboardingData?.step1;
@@ -257,13 +264,42 @@ export const EditProfilePage: React.FC = () => {
     }));
   };
 
-  const formatMonthYearToDate = (value?: { month: string; year: string }) => {
-    if (!value?.year) {
+  const formatMonthYearToDate = (
+    value?: { day?: string; month: string; year: string } | string
+  ) => {
+    if (!value) {
       return undefined;
     }
-    const monthIndex = MONTHS.indexOf(value.month || '');
-    const month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-    return `${value.year}-${month}-01`;
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed || undefined;
+    }
+
+    if (!value.year) {
+      return undefined;
+    }
+
+    const normalizedMonth = String(value.month || '').trim();
+    const numericMonth = Number(normalizedMonth);
+    let month = '01';
+
+    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+      month = String(Math.trunc(numericMonth)).padStart(2, '0');
+    } else {
+      const monthIndex = MONTHS.findIndex(
+        (monthName) => monthName.toLowerCase() === normalizedMonth.toLowerCase()
+      );
+      month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
+    }
+
+    const numericDay = Number(String(value.day || '').trim());
+    const day =
+      Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31
+        ? String(Math.trunc(numericDay)).padStart(2, '0')
+        : '01';
+
+    return `${value.year}-${month}-${day}`;
   };
 
   const toMonthNumber = (month?: string) => {
@@ -292,6 +328,30 @@ export const EditProfilePage: React.FC = () => {
       return emailRegex.test(stringValue) ? stringValue : null;
     };
 
+    const normalizeOptionalUrl = (value?: any) => {
+      if (value === null || value === undefined || value === '') return null;
+      const stringValue = String(value).trim();
+      if (!stringValue) return null;
+
+      const valueWithProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(stringValue)
+        ? stringValue
+        : `https://${stringValue}`;
+
+      try {
+        return new URL(valueWithProtocol).toString();
+      } catch {
+        return null;
+      }
+    };
+
+    const normalizeGithubUrl = (value?: any) => {
+      const normalizedUrl = normalizeOptionalUrl(value);
+      if (!normalizedUrl) return null;
+
+      const host = new URL(normalizedUrl).hostname.toLowerCase();
+      return host === 'github.com' || host === 'www.github.com' ? normalizedUrl : null;
+    };
+
     const technicalSkills = Array.from(
       new Set([...(step2Data?.autoDetectedSkills || []), ...(step2Data?.additionalSkills || [])].filter(Boolean))
     );
@@ -303,8 +363,8 @@ export const EditProfilePage: React.FC = () => {
       projectType: project.projectType,
       startDate: formatMonthYearToDate(project.startDate),
       endDate: formatMonthYearToDate(project.endDate),
-      githubUrl: project.githubUrl,
-      demoUrl: project.demoUrl,
+      githubUrl: normalizeGithubUrl(project.githubUrl),
+      demoUrl: normalizeOptionalUrl(project.demoUrl),
       detailedDescription: project.detailedDescription,
     }));
 
@@ -475,12 +535,16 @@ export const EditProfilePage: React.FC = () => {
     };
 
     const profileStep2 = {
-      externalProjects: (learnerProfile.projects || []).map((project, index) => ({
+      externalProjects: (learnerProfile.projects || []).map((project: any, index) => ({
         id: `api-project-${learnerProfile.id}-${index}`,
         title: project.title || `Project ${index + 1}`,
         oneLineDescription: project.description || '',
         detailedDescription: project.description || '',
         techStack: project.techStack || [],
+        githubUrl: project.githubUrl || (project as any).github || '',
+        demoUrl: project.demoUrl || (project as any).liveUrl || '',
+        startDate: (project as any).startDate ? String((project as any).startDate) : undefined,
+        endDate: (project as any).endDate ? String((project as any).endDate) : undefined,
         projectType: 'Solo' as const,
       })),
       autoDetectedSkills: learnerProfile.technicalSkills || [],
@@ -756,6 +820,7 @@ export const EditProfilePage: React.FC = () => {
   useEffect(() => {
     if (editingCard === 'skills' && step2) {
       setSkills(step2.additionalSkills || []);
+      setEditableAutoDetectedSkills(step2.autoDetectedSkills || []);
     }
   }, [editingCard, step2]);
   
@@ -764,15 +829,15 @@ export const EditProfilePage: React.FC = () => {
       const filtered = allSkills.filter((skill) =>
         skill.toLowerCase().includes(customSkill.toLowerCase()) &&
         !skills.includes(skill) &&
-        !(step2?.autoDetectedSkills || []).includes(skill)
+        !editableAutoDetectedSkills.includes(skill)
       );
       setFilteredSkills(filtered);
     } else {
       setFilteredSkills(allSkills.filter(
-        (skill) => !skills.includes(skill) && !(step2?.autoDetectedSkills || []).includes(skill)
+        (skill) => !skills.includes(skill) && !editableAutoDetectedSkills.includes(skill)
       ));
     }
-  }, [customSkill, skills, step2, allSkills]);
+  }, [customSkill, skills, editableAutoDetectedSkills, allSkills]);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -854,18 +919,53 @@ export const EditProfilePage: React.FC = () => {
   }, [editingCard, step4, roleOptions, locationOptions]);
   
   const handleCollegeSelect = (collegeName: string) => {
-    setEditedData({...editedData, collegeName, customCollege: ''});
+    setEditedData((prev: any) => ({
+      ...prev,
+      step1: {
+        ...(prev.step1 || {}),
+        collegeName,
+        customCollege: '',
+      },
+    }));
     setShowCollegeDropdown(false);
     setCollegeSearch('');
   };
   
   const handleCustomCollege = () => {
-    setEditedData({...editedData, collegeName: '', customCollege: collegeSearch});
+    setEditedData((prev: any) => ({
+      ...prev,
+      step1: {
+        ...(prev.step1 || {}),
+        collegeName: '',
+        customCollege: collegeSearch,
+      },
+    }));
+    setCollegeSearch('');
     setShowCollegeDropdown(false);
+  };
+
+  const clearSelectedCollege = () => {
+    setEditedData((prev: any) => ({
+      ...prev,
+      step1: {
+        ...(prev.step1 || {}),
+        collegeName: '',
+      },
+    }));
+  };
+
+  const clearManualCollege = () => {
+    setEditedData((prev: any) => ({
+      ...prev,
+      step1: {
+        ...(prev.step1 || {}),
+        customCollege: '',
+      },
+    }));
   };
   
   const handleAddSkill = (skill: string) => {
-    const totalSkills = (step2?.autoDetectedSkills?.length || 0) + skills.length;
+    const totalSkills = editableAutoDetectedSkills.length + skills.length;
     if (totalSkills < 20 && !skills.includes(skill)) {
       setSkills([...skills, skill]);
       setCustomSkill('');
@@ -874,6 +974,10 @@ export const EditProfilePage: React.FC = () => {
   
   const handleRemoveSkill = (skill: string) => {
     setSkills(skills.filter(s => s !== skill));
+  };
+
+  const handleRemoveAutoDetectedSkill = (skill: string) => {
+    setEditableAutoDetectedSkills((prev) => prev.filter((s) => s !== skill));
   };
   
   const handleAddCustomSkill = () => {
@@ -886,6 +990,7 @@ export const EditProfilePage: React.FC = () => {
     if (step2) {
       const updatedStep2 = {
         ...step2,
+        autoDetectedSkills: editableAutoDetectedSkills,
         additionalSkills: skills,
       };
 
@@ -1124,7 +1229,7 @@ export const EditProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-12">
+    <div className="min-h-screen bg-background pb-12 text-left block">
       <div className="w-full pt-6">
         <div className="flex justify-start px-4 md:px-6">
           <Button variant="ghost" asChild className="gap-1 text-muted-foreground hover:text-foreground ml-0">
@@ -1225,7 +1330,7 @@ export const EditProfilePage: React.FC = () => {
                 </Button>
               )}
             </div>
-            <CardContent className="pb-6 pt-6">
+            <CardContent className="pb-6 pt-6 text-left block">
               {editingCard !== 'personal-info' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -1319,7 +1424,7 @@ export const EditProfilePage: React.FC = () => {
                   <Code className="w-5 h-5 text-primary" />
                   <h3 className="text-base font-semibold tracking-wide">Technical Skills</h3>
                 </div>
-                {editingCard !== 'skills' && step2?.autoDetectedSkills && step2.autoDetectedSkills.length > 0 && (
+                {editingCard !== 'skills' && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1334,15 +1439,15 @@ export const EditProfilePage: React.FC = () => {
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'skills' ? (
                   <>
-                    {step2?.autoDetectedSkills && step2.autoDetectedSkills.length > 0 ? (
+                    {(step2?.autoDetectedSkills?.length || 0) > 0 || (step2?.additionalSkills?.length || 0) > 0 ? (
                       /* Skills Display - View Mode - All same color */
                       <div className="flex flex-wrap gap-2">
-                        {step2.autoDetectedSkills?.map((skill) => (
+                        {(step2?.autoDetectedSkills || []).map((skill) => (
                           <Badge key={skill} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black hover:dark:bg-white">
                             {skill}
                           </Badge>
                         ))}
-                        {step2.additionalSkills?.map((skill) => (
+                        {(step2?.additionalSkills || []).map((skill) => (
                           <Badge key={skill} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black hover:dark:bg-white">
                             {skill}
                           </Badge>
@@ -1369,24 +1474,26 @@ export const EditProfilePage: React.FC = () => {
                     {/* Skills Edit Mode - Like Onboarding */}
                     <div className="space-y-4">
                       {/* Display tags */}
-                      {((step2?.autoDetectedSkills?.length ?? 0) > 0 || skills.length > 0) && (
+                      {(editableAutoDetectedSkills.length > 0 || skills.length > 0) && (
                         <div className="flex flex-wrap gap-2">
-                          {step2?.autoDetectedSkills?.map((skill) => (
-                            <Badge key={skill} variant="default" className="bg-primary/10 text-primary cursor-default">
+                          {editableAutoDetectedSkills.map((skill) => (
+                            <Badge
+                              key={skill}
+                              variant="default"
+                              className="bg-primary/10 text-primary cursor-pointer hover:opacity-80"
+                              onClick={() => handleRemoveAutoDetectedSkill(skill)}
+                            >
                               {skill}
-                              <Lock className="w-3 h-3 ml-1" />
                             </Badge>
                           ))}
                           {skills.map((skill) => (
-                            <Badge key={skill} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
+                            <Badge
+                              key={skill}
+                              variant="secondary"
+                              className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer"
+                              onClick={() => handleRemoveSkill(skill)}
+                            >
                               {skill}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSkill(skill)}
-                                className="ml-1 hover:opacity-70"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
                             </Badge>
                           ))}
                         </div>
@@ -1406,7 +1513,7 @@ export const EditProfilePage: React.FC = () => {
                               handleAddCustomSkill();
                             }
                           }}
-                          disabled={((step2?.autoDetectedSkills?.length || 0) + skills.length) >= 20}
+                          disabled={(editableAutoDetectedSkills.length + skills.length) >= 20}
                         />
                         
                         {/* Dropdown with skill suggestions */}
@@ -1431,7 +1538,7 @@ export const EditProfilePage: React.FC = () => {
                       {/* Skills counter */}
                       <div className="flex justify-end mt-2">
                           <p className="text-xs text-muted-foreground">
-                          {((step2?.autoDetectedSkills?.length || 0) + skills.length)}/20 added
+                          {(editableAutoDetectedSkills.length + skills.length)}/20 added
                           </p>
                       </div>
                       
@@ -1507,6 +1614,30 @@ export const EditProfilePage: React.FC = () => {
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground mb-2">{project.oneLineDescription}</p>
+                              {(project.githubUrl || project.demoUrl) && (
+                                <div className="flex flex-wrap items-center gap-3 mb-2">
+                                  {project.githubUrl && (
+                                    <a
+                                      href={project.githubUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-primary hover:underline"
+                                    >
+                                      GitHub URL
+                                    </a>
+                                  )}
+                                  {project.demoUrl && (
+                                    <a
+                                      href={project.demoUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-primary hover:underline"
+                                    >
+                                      Demo URL
+                                    </a>
+                                  )}
+                                </div>
+                              )}
                               {project.techStack.length > 0 && (
                                 <div className="flex flex-wrap gap-1">
                                   {project.techStack.map((tech) => (
@@ -1540,6 +1671,30 @@ export const EditProfilePage: React.FC = () => {
                                   <div className="flex-1">
                                     <h4 className="font-medium text-base">{project.title}</h4>
                                     <p className="text-sm text-muted-foreground">{project.oneLineDescription}</p>
+                                    {(project.githubUrl || project.demoUrl) && (
+                                      <div className="flex flex-wrap items-center gap-3 mt-2">
+                                        {project.githubUrl && (
+                                          <a
+                                            href={project.githubUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-primary hover:underline"
+                                          >
+                                            GitHub URL
+                                          </a>
+                                        )}
+                                        {project.demoUrl && (
+                                          <a
+                                            href={project.demoUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-primary hover:underline"
+                                          >
+                                            Demo URL
+                                          </a>
+                                        )}
+                                      </div>
+                                    )}
                                     <div className="flex flex-wrap gap-1 mt-2">
                                       {project.techStack.map((tech) => (
                                         <Badge key={tech} variant="secondary" className="text-xs">
@@ -1750,17 +1905,30 @@ export const EditProfilePage: React.FC = () => {
                               <div className="relative" ref={collegeDropdownRef}>
                                 <Input
                                   placeholder="Search college name or state..."
-                                  value={editedData.collegeName || editedData.customCollege || collegeSearch || step1.collegeName || step1.customCollege}
+                                  value={currentCollegeName || collegeSearch}
+                                  disabled={isSearchCollegeDisabled}
                                   onChange={(e) => {
+                                    if (isSearchCollegeDisabled) {
+                                      return;
+                                    }
                                     setCollegeSearch(e.target.value);
                                     setShowCollegeDropdown(true);
-                                    if (editedData.collegeName || editedData.customCollege) {
-                                      setEditedData({...editedData, collegeName: '', customCollege: ''});
+                                    if (currentCollegeName) {
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          collegeName: '',
+                                        },
+                                      }));
                                     }
                                   }}
                                   onFocus={() => {
+                                    if (isSearchCollegeDisabled) {
+                                      return;
+                                    }
                                     setShowCollegeDropdown(true);
-                                    if (editedData.collegeName || editedData.customCollege) {
+                                    if (currentCollegeName) {
                                       setCollegeSearch('');
                                     }
                                   }}
@@ -1768,8 +1936,13 @@ export const EditProfilePage: React.FC = () => {
                                 />
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
                                 
-                                {showCollegeDropdown && (
+                                {showCollegeDropdown && !isSearchCollegeDisabled && (
                                   <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                                    {!collegeSearch.trim() && (
+                                      <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                                        Start typing to search colleges
+                                      </div>
+                                    )}
                                     {filteredColleges.map((college) => (
                                       <button
                                         key={college.id}
@@ -1793,6 +1966,55 @@ export const EditProfilePage: React.FC = () => {
                                   </div>
                                 )}
                               </div>
+
+                              {hasSelectedCollege && (
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={clearSelectedCollege}
+                                    className="text-xs text-primary hover:underline"
+                                  >
+                                    Clear selected college
+                                  </button>
+                                </div>
+                              )}
+
+                              <p className="text-xs text-muted-foreground">OR</p>
+
+                              <Input
+                                placeholder="Enter college name manually"
+                                value={currentCustomCollege}
+                                disabled={isManualCollegeDisabled}
+                                onChange={(e) => {
+                                  if (isManualCollegeDisabled) {
+                                    return;
+                                  }
+                                  const value = e.target.value;
+                                  setShowCollegeDropdown(false);
+                                  setCollegeSearch('');
+                                  setEditedData((prev: any) => ({
+                                    ...prev,
+                                    step1: {
+                                      ...(prev.step1 || {}),
+                                      collegeName: '',
+                                      customCollege: value,
+                                    },
+                                  }));
+                                }}
+                                className="bg-muted/30"
+                              />
+
+                              {hasManualCollege && (
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={clearManualCollege}
+                                    className="text-xs text-primary hover:underline"
+                                  >
+                                    Clear manual college
+                                  </button>
+                                </div>
+                              )}
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2708,7 +2930,7 @@ export const EditProfilePage: React.FC = () => {
                     {/* Target Roles */}
                     <div className="space-y-4">
                       <div>
-                        <Label className="font-medium text-sm tracking-wide text-left block">Target roles <span className="text-destructive">*</span></Label>
+                        <Label className="font-medium text-sm tracking-wide">Target roles <span className="text-destructive">*</span></Label>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         {isLoadingRoles ? (

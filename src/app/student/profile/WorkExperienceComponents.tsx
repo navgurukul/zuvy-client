@@ -102,7 +102,7 @@ export const WorkExperienceModal: React.FC<{
           <DialogTitle>{initialExperience ? 'Edit Work Experience' : 'Add Work Experience'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 overflow-y-auto flex-1 px-6">
+        <div className="space-y-6 overflow-y-auto flex-1 px-6 text-left block">
           {/* Company Name and Role */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -209,7 +209,7 @@ export const WorkExperienceModal: React.FC<{
                 }));
               }}
             />
-            <Label htmlFor="currentlyWorking" className="font-medium cursor-pointer">
+            <Label htmlFor="currentlyWorking" className="font-medium cursor-pointer mt-5">
               I am currently working here
             </Label>
           </div>
@@ -224,11 +224,11 @@ export const WorkExperienceModal: React.FC<{
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="Remote" id="remote" />
-                <Label htmlFor="remote" className="font-normal cursor-pointer">Remote</Label>
+                <Label htmlFor="remote" className="font-normal cursor-pointer mt-5">Remote</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="On-site" id="onsite" />
-                <Label htmlFor="onsite" className="font-normal cursor-pointer">On-site</Label>
+                <Label htmlFor="onsite" className="font-normal cursor-pointer mt-5">On-site</Label>
               </div>
             </RadioGroup>
           </div>

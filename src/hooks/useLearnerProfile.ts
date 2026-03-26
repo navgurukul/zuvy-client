@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface LearnerProfileProject {
+    githubUrl: any
+    demoUrl: any
     title: string
     description: string
     techStack?: string[]
@@ -65,6 +67,7 @@ export function useLearnerProfile(initialFetch = true) {
     const [learnerProfile, setLearnerProfile] = useState<LearnerProfileData | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
+    // const localBaseUrl = process.env.NEXT_PUBLIC_LOCAL_URL || 'http://localhost:5000'
 
     const fetchLearnerProfile = useCallback(async () => {
         try {

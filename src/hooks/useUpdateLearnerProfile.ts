@@ -10,12 +10,13 @@ export interface UpdateLearnerProfilePayload {
 export function useUpdateLearnerProfile() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<unknown>(null)
+    // const localBaseUrl = process.env.NEXT_PUBLIC_LOCAL_URL || 'http://localhost:5000'
 
     const updateLearnerProfile = useCallback(
         async (id: number | string, payload: UpdateLearnerProfilePayload) => {
             try {
                 setLoading(true)
-                const res = await api.put(`http://localhost:5000/learner-profile/${id}`, payload)
+                const res = await api.put(`/learner-profile/${id}`, payload)
                 setError(null)
                 return { success: true, data: res.data }
             } catch (err) {

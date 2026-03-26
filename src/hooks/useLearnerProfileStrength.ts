@@ -127,7 +127,7 @@ export function useLearnerProfileStrength(initialFetch = true) {
     const fetchLearnerProfileStrength = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerProfileStrengthResponse>('http://localhost:5000/learner-profile/strength')
+            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
             const parsedStrength = extractStrengthData(res.data)
             setStrengthPercentage(parsedStrength.percentage)
             setStrengthLevel(parsedStrength.level)

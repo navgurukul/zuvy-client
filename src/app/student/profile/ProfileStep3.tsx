@@ -832,17 +832,19 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                     )}
                     
                     {!profile.isVerified && (
-                      <Button
-                        type="button"
-                        variant="default"
-                        onClick={() => handleVerifyProfile(profile.platform)}
-                        disabled={!profile.username || verifyingPlatform === profile.platform}
-                      >
-                        {verifyingPlatform === profile.platform && (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        )}
-                        Verify
-                      </Button>
+                      <div className="flex justify-start">
+                        <Button
+                          type="button"
+                          variant="default"
+                          onClick={() => handleVerifyProfile(profile.platform)}
+                          disabled={!profile.username || verifyingPlatform === profile.platform}
+                        >
+                          {verifyingPlatform === profile.platform && (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          )}
+                          Verify
+                        </Button>
+                      </div>
                     )}
                     
                     {profile.isVerified && hasModified && (profile.problemsSolved || profile.rating || profile.rank !== undefined) && (

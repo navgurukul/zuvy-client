@@ -608,7 +608,7 @@ const StudentDashboard = () => {
                 <button
                   onClick={async () => {
                     await refetchLearnerProfile();
-                    router.push('/student/profile');
+                    router.push('/student/profile?mode=edit');
                   }}
                   className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary-light hover:bg-primary-light/80 transition-all group border border-transparent hover:border-primary"
                 >
