@@ -30,6 +30,7 @@ import {
     NewOpenEndedQuestionFormProps,
     Tags,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 const formSchema = z.object({
     questionDescription: z.string().min(5, {
@@ -53,6 +54,8 @@ function NewOpenEndedQuestionForm({
     // Use the hook
     const { createOpenEndedQuestion, loading, error } =
         useCreateOpenEndedQuestion()
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -91,6 +94,7 @@ function NewOpenEndedQuestionForm({
                 // Fallback: use the old method if callback not provided
                 await filteredOpenEndedQuestions(
                     setOpenEndedQuestions,
+                    orgId,
                     offset || 0,
                     position || 10,
                     difficulty || [],

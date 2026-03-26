@@ -12,7 +12,6 @@ import QuizModal from '@/app/[admin]/organizations/[organizationId]/courses/[cou
 import { api } from '@/utils/axios.config'
 import { PageTag } from '../../../../../resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
-import { getAllQuizQuestion } from '@/utils/admin'
 import {
     getAllQuizData,
     getChapterUpdateStatus,
@@ -86,7 +85,6 @@ function Quiz(props: QuizProps) {
         mediumQuestions: [],
         hardQuestions: [],
     })
-
     const { editChapter } = useEditChapter()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const { chapterData, setChapterData } = getChapterDataState()
@@ -106,7 +104,7 @@ function Quiz(props: QuizProps) {
             selectedDifficulty: any[]
         ) => {
             try {
-                let url = '/Content/allQuizQuestions'
+                let url = `/Content/${orgId}/allQuizQuestions`
 
                 const queryParams = []
 

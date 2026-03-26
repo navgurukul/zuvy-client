@@ -42,6 +42,7 @@ import {
     QuizQuestions,
     EditQuizQuestionProps,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation';
 
 type Props = {}
 
@@ -73,13 +74,15 @@ const EditQuizQuestion = ({
     const { mcqDifficulty } = getmcqdifficulty()
     const { mcqSearch, setmcqSearch } = getMcqSearch()
     const initialQuizId = useRef(quizId)
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     const fetchQuizQuestion = useCallback(async () => {
         setLoadingState('formIsLoading')
         try {
             await api
                 .get(
-                    `/Content/GetQuizQuestionById/${initialQuizId.current}
+                    `/Content/${orgId}/GetQuizQuestionById/${initialQuizId.current}
 `
                 )
                 .then((res) => {
@@ -141,7 +144,7 @@ const EditQuizQuestion = ({
 
     const handleEditQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
-            await api.post('/Content/editquiz', requestBody).then((res) => {
+            await api.post(`/Content/${orgId}/editquiz`, requestBody).then((res) => {
                 toast.success({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
@@ -189,7 +192,7 @@ const EditQuizQuestion = ({
             questions: [formattedData],
         }
         await handleEditQuizQuestion(requestBody)
-        getAllQuizQuestion(setStoreQuizData, mcqDifficulty, mcqSearch)
+        getAllQuizQuestion(setStoreQuizData, orgId, mcqDifficulty, mcqSearch)
     }
 
     return (

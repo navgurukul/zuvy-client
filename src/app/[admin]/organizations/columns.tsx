@@ -17,26 +17,6 @@ import { Org } from '@/utils/data/schema'
 import Link from 'next/link'
 import { getUser } from '@/store/store'
 
-// export interface User {
-//     createdAt: any
-//     id: number
-//     roleId: number
-//     userId: number
-//     name: string
-//     email: string
-//     roleName: string
-//     dateAdded?: string
-// }
-
-// Export a function that creates columns
-// export const createColumns = (
-//     roles: any[],
-//     rolesLoading: boolean,
-//     onRoleChange: (userId: number, roleId: number, roleName: string) => void,
-//     onEdit: (userId: number) => void,
-//     onDelete: (userId: number) => void,
-//     refreshData: () => void
-// ): ColumnDef<User>[] => [
 export const createColumns = (
   management: any[],
   onEdit?: (org: any) => void,

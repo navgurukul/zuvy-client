@@ -278,6 +278,9 @@ export const columns: ColumnDef<quiz>[] = [
 
         cell: ({ row }) => {
             const quizQuestion = row.original
+            const pathname = window.location.pathname
+            const organizationId = pathname.split('/')[3]
+            const orgId = Number(organizationId)
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
@@ -319,6 +322,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 handleQuizDelete,
                                 setDeleteModalOpen,
                                 deleteQuizQuestionId,
+                                orgId,
                                 // getAllQuizQuestion,
                                 filteredQuizQuestions,
                                 setStoreQuizData,

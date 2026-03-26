@@ -45,6 +45,7 @@ import { filteredQuizQuestions } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
+import { useParams } from 'next/navigation';
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
     ssr: false,
@@ -98,6 +99,8 @@ const Mcqs = (props: Props) => {
     ])
     const [loading, setLoading] = useState(true)
     const [isCreateMcqDialogOpen, setIsCreateMcqDialogOpen] = useState(false)
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
@@ -409,6 +412,7 @@ const Mcqs = (props: Props) => {
                     const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
                     await filteredQuizQuestions(
                         setStoreQuizData,
+                        orgId,
                         offset,
                         position,
                         difficulty,
@@ -500,7 +504,7 @@ const Mcqs = (props: Props) => {
                     <BulkUploadMcq
                         closeModal={() => setIsCreateMcqDialogOpen(false)}
                         setStoreQuizData={setStoreQuizData}
-                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData)}
+                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData, orgId)}
                     />
                 )
             case 'oneatatime':

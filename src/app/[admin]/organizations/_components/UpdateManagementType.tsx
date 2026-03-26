@@ -46,28 +46,29 @@ export const UpdateManagementType = ({ org, managementType, management, onUpdate
 
             const isZuvyManaged = selectedRole.id === 2 
 
-            const payload = {
-                isManagedByZuvy: isZuvyManaged,
-            }
+            if (isZuvyManaged) {
+                onEdit?.({
+                    ...org,
+                    managementType: selectedRole.name,
+                })
+            } else {
 
-            const response = await updateOrgById(org.id, payload)
-
-            if (response.status === 200) {
-                // Update original management type after successful save
-                setOriginalRole(newRoleName)
-                onUpdateSuccess?.()
-
-                if (isZuvyManaged) {
-                    onEdit?.({
-                        ...org,
-                        managementType: selectedRole.name,
-                    })
+                const payload = {
+                    isManagedByZuvy: isZuvyManaged,
                 }
 
-                toast.success({
-                    title: 'Management Type Updated',
-                    description: `Organisation management type has been updated to ${selectedRole.name}.`,
-                })
+                const response = await updateOrgById(org.id, payload)
+
+                if (response.status === 200) {
+                    // Update original management type after successful save
+                    setOriginalRole(newRoleName)
+                    onUpdateSuccess?.()
+
+                    toast.success({
+                        title: 'Management Type Updated',
+                        description: `Organisation management type has been updated to ${selectedRole.name}.`,
+                    })
+                }
             }
         } catch (error) {
             console.error('Error updating organisation management type:', error)

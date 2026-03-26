@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast'
 export interface AssignPermissionsPayload {
     resourceId: number
     roleId: number
+    orgId: number
     permissions: Record<string | number, boolean>
 }
 
@@ -23,25 +24,43 @@ export function useAssignPermissions() {
     const [success, setSuccess] = useState<boolean>(false)
 
     const assignPermissions = useCallback(
-        async (payload: AssignPermissionsPayload) => {
+        async (payload: AssignPermissionsPayload | AssignPermissionsPayload[]) => {
             try {
                 setLoading(true)
                 setError(null)
                 setSuccess(false)
 
-                const res = await api.post<AssignPermissionsResponse>(
-                    '/rbac/assign/permissionsToRole',
-                    payload
-                )
+                const payloadList = Array.isArray(payload) ? payload : [payload]
+                if (payloadList.length === 0) {
+                    return undefined
+                }
+
+                let lastResponse: AssignPermissionsResponse | undefined
+
+                for (const item of payloadList) {
+                    const res = await api.post<AssignPermissionsResponse>(
+                        '/rbac/assign/permissionsToRole',
+                        item
+                    )
+                    lastResponse = res.data
+                }
+
                 setSuccess(true)
                 toast.success({
-                    title: res.data.status,
-                    description: res.data.message,
+                    title: lastResponse?.status || 'Success',
+                    description: lastResponse?.message || 'Permissions updated successfully',
                 })
-                return res.data
-            } catch (err) {
+                return lastResponse
+            } catch (err: any) {
                 setError(err)
                 setSuccess(false)
+                const rawMessage = err?.response?.data?.message
+                const parsedMessage = Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage
+
+                toast.error({
+                    title: err?.response?.data?.error || 'Error',
+                    description: parsedMessage || 'Failed to update permissions',
+                })
                 throw err
             } finally {
                 setLoading(false)
@@ -54,4 +73,3 @@ export function useAssignPermissions() {
 }
 
 export default useAssignPermissions
-

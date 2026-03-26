@@ -33,10 +33,10 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const [selected, setSelected] = useState<Organization | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // const { organizations, loading, error } = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm, true);
     // Always call both hooks (Rules of Hooks), pick result based on role
     const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm, true);
     const allOrgs = useOrganizations({ auto: isSuperAdmin, search: searchTerm, all: true });
-
     const { organizations, loading, error } = isSuperAdmin ? allOrgs : byUser;
 
     useEffect(() => {
@@ -104,7 +104,7 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                 </>
                             ) : (
                                 <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
-                                    Switch Organization
+                                    Switch Organisation
                                 </p>
                             )}
                         </div>
@@ -129,7 +129,7 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                         </>
                                     ) : (
                                         <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
-                                            Switch Organization
+                                            Switch Organisation
                                         </p>
                                     )}
                                 </div>
@@ -159,7 +159,7 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                             {/* Organizations List */}
                             <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
                                 <DropdownMenuLabel className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
-                                    Switch Organization
+                                    Switch Organisation
                                 </DropdownMenuLabel>
 
                                 {loading ? (
@@ -197,8 +197,6 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                                     ) : (
                                                         <div
                                                             key={org.id}
-                                                            // href={`/${role}/organizations/${org.id}/courses`}
-                                                            // onClick={() => handleSelect(org)}
                                                             onClick={() => switchOrganization(org)}
                                                             className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
                                                                 }`}

@@ -29,6 +29,7 @@ import {
     OpenEndedQuestion,
     Tag,
 } from './adminResourceComponentType'
+import { useParams } from 'next/navigation'
 
 type Props = {}
 
@@ -50,6 +51,9 @@ function EditOpenEndedQuestionForm({
     openEndedQuestions: OpenEndedQuestion[]
 }) {
     const { tags, setTags } = getCodingQuestionTags()
+    
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     const { editOpenEndedQuestionId } = getEditOpenEndedDialogs()
 
@@ -78,7 +82,7 @@ function EditOpenEndedQuestionForm({
     async function editOpenEndedQuestion(data: any) {
         try {
             const response = await api.patch(
-                `/Content/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
+                `/Content/${orgId}/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
                 data
             )
             setIsOpenEndDialogOpen(false)
@@ -102,7 +106,7 @@ function EditOpenEndedQuestionForm({
             difficulty: values.difficulty,
         }
         editOpenEndedQuestion(formattedData)
-        getAllOpenEndedQuestions(setOpenEndedQuestions)
+        getAllOpenEndedQuestions(setOpenEndedQuestions, orgId)
     }
 
     return (
