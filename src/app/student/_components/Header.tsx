@@ -1,38 +1,22 @@
 'use client'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Moon, Sun, LogOut } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
-import { getUserInitials } from '@/utils/common'
-import ProfileDropDown from '@/components/ProfileDropDown'
+import StudentProfileDropDown from './StudentProfileDropDown'
+import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
+import { useOnboardingStorage } from '@/hooks/use-profile'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
     const { studentData } = useLazyLoadedStudentData()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [isClient, setIsClient] = useState(false)
+    const { strengthPercentage, loading: isStrengthLoading } = useLearnerProfileStrength()
+    const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
 
@@ -71,6 +55,21 @@ const Header = () => {
         setShowLogoutDialog(false)
         await Logout()
     }
+
+    const handleProfileClick = () => {
+        router.push('/student/profile?mode=edit')
+    }
+
+    const isInProfileSetupFlow =
+        pathname === '/student/profile' &&
+        !isOnboardingLoading &&
+        !onboardingData?.isCompleted
+
+    const showProfileOption =
+        !isInProfileSetupFlow &&
+        !isStrengthLoading &&
+        strengthPercentage !== null &&
+        strengthPercentage >= 20
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')
@@ -196,12 +195,14 @@ const Header = () => {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog> */}
-                    <ProfileDropDown
+                    <StudentProfileDropDown
                         studentData={studentData}
                         handleLogoutClick={handleLogoutClick}
-                        showLogoutDialog={showLogoutDialog}   
+                        showLogoutDialog={showLogoutDialog}
                         setShowLogoutDialog={setShowLogoutDialog}
                         handleLogout={handleLogout}
+                        onProfileClick={handleProfileClick}
+                        showProfileOption={showProfileOption}
                     />
                 </div>
             </header>
@@ -266,83 +267,15 @@ const Header = () => {
                     )}
                 </Button>
 
-                {/* Student Avatar with Dropdown */}
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Avatar className="h-7 w-7 sm:h-8 sm:w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                            {studentData?.profile_picture ? (
-                                <AvatarImage
-                                    src={
-                                        (studentData as any)?.profilePicture ||
-                                        '/logo.PNG'
-                                    }
-                                    alt="Student"
-                                />
-                            ) : (
-                                <AvatarFallback className="font-medium text-white">
-                                    {getUserInitials(studentData?.name)}
-                                </AvatarFallback>
-                            )}
-                        </Avatar>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 text-left" align="end">
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium leading-none">
-                                    {studentData?.name}
-                                </p>
-                                <p className="text-xs leading-none text-muted-foreground">
-                                    {studentData?.email}
-                                </p>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-xs text-muted-foreground">
-                                    Role
-                                </p>
-                                <p className="text-sm capitalize">
-                                    {studentData?.rolesList?.join(', ')}
-                                </p>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={handleLogoutClick}
-                            className="text-red-600 hover:bg-primary focus:text-popover cursor-pointer"
-                        >
-                            Logout
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <AlertDialog
-                    open={showLogoutDialog}
-                    onOpenChange={setShowLogoutDialog}
-                >
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                Are you sure you want to logout?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                You will be signed out of your account and
-                                redirected to the login page.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                                onClick={handleLogout}
-                                className="bg-primary hover:bg-primary-dark"
-                            >
-                                Logout
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <StudentProfileDropDown
+                    studentData={studentData}
+                    handleLogoutClick={handleLogoutClick}
+                    showLogoutDialog={showLogoutDialog}
+                    setShowLogoutDialog={setShowLogoutDialog}
+                    handleLogout={handleLogout}
+                    onProfileClick={handleProfileClick}
+                    showProfileOption={showProfileOption}
+                />
             </div>
         </header>
     )

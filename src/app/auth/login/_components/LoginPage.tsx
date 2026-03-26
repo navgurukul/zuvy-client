@@ -6,7 +6,7 @@ declare global {
     }
 }
 import React, { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import {
     GoogleLogin,
@@ -21,8 +21,6 @@ import { toast } from '@/components/ui/use-toast'
 import { getUser, useThemeStore } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
-
-
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -81,6 +79,22 @@ function LoginPage() {
 
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
+
+    type LearnerProfileStrengthResponse = {
+        percentage?: number
+        level?: string
+        message?: string
+    }
+
+    const getStudentStrengthPercentage = async (): Promise<number | null> => {
+        try {
+            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
+            return typeof res.data?.percentage === 'number' ? res.data.percentage : null
+        } catch (error) {
+            console.error('Failed to fetch learner profile strength:', error)
+            return null
+        }
+    }
 
     // Student Card Component
     const StudentCard = ({
@@ -171,6 +185,9 @@ const handleGoogleSuccess = async (
                 const zoeRedirectUrl = localStorage.getItem('zoeRedirectUrl')
 
                 const userRole = response.data.user.rolesList[0]
+                const organizationId = response.data.user.orgId || null
+                const hasFilled = response.data.user.hasfilled
+
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
                 // Check if zoeRedirectUrl exists and handle redirect with token
@@ -198,9 +215,21 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    router.push('/student')
+                    const strengthPercentage = await getStudentStrengthPercentage()
+                    if (strengthPercentage !== null && strengthPercentage > 20) {
+                        router.push('/student')
+                    } else {
+                        router.push('/student/profile')
+                    }
+                    
+                } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
+                    // Redirect admin/poc to settings if hasfilled is false
+                    router.push(`/${userRole}/organizations/${organizationId}/setting`)
+                } else if (userRole === 'super_admin') {
+                     router.push(`/${userRole}/organizations`)
                 } else {
-                    router.push(`/${userRole}/courses`)
+                    // Default redirect for other roles or when hasfilled is true
+                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
                 }
             }
         } catch (err: any) {
@@ -226,24 +255,19 @@ const handleGoogleSuccess = async (
         })
     }
 
+
     useEffect(() => {
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
-        console.log('redirectedUrl:', redirectedUrl)
-
-        // Check for zoeRedirectUrl parameter
-        if (urlParams.has('zoeRedirectUrl')) {
-            const zoeRedirectUrl = urlParams.get('zoeRedirectUrl')
-            if (zoeRedirectUrl) {
-                localStorage.setItem('zoeRedirectUrl', zoeRedirectUrl)
-            }
-        }
-
         if (window.location.href.includes('route')) {
+        // if (window.location.href) {
+            console.log('URL has route param')
             const route = urlParams.get('route')
+            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
+            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }

@@ -16,6 +16,7 @@ type CounterStore = {
         email: string
         id: number
         rolesList: string[]
+        orgId: number | null
     } | null
     studentsInfo: any[]
     setStudentsInfo: (newStudentsInfo: any[]) => void
