@@ -220,9 +220,6 @@ export default function RescheduleBookingPage() {
 						<p>
 							Reschedule status: {responseData.rescheduleStatus || "pending"}
 						</p>
-						<p>
-							Session lifecycle: {responseData.sessionLifecycleState || "RESCHEDULE_PENDING"}
-						</p>
 					</div>
 				)}
 

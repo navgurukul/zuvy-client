@@ -80,7 +80,6 @@ export default function CancelBookingPage() {
 					<div className="text-sm text-left rounded-xl border border-green-100 bg-green-50 text-green-700 p-3">
 						<p className="font-semibold">{message}</p>
 						<p>Status: cancelled</p>
-						<p>Session lifecycle: CANCELLED</p>
 					</div>
 				)}
 

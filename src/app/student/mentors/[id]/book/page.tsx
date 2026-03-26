@@ -111,22 +111,11 @@ export default function BookSessionPage() {
           <p className="text-sm text-gray-500 text-left">
             {mentorProfile?.title || "Mentor"}
           </p>
-
-          {mentorLoading ? (
-            <p className="text-xs text-gray-400 text-left">Loading mentor info...</p>
-          ) : mentorError ? (
-            <p className="text-xs text-red-500 text-left">{mentorError}</p>
-          ) : (
-            <p className="text-xs text-gray-400 text-left">
-              Timezone: {mentorProfile?.timezone || "-"} · Buffer {mentorProfile?.bufferMinutes ?? 0} mins
-            </p>
-          )}
         </div>
       </div>
 
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* Left Side */}
         <div className="lg:col-span-2 space-y-4">
 
@@ -161,7 +150,7 @@ export default function BookSessionPage() {
               <p className="font-medium">No available slots right now</p>
 
               <p className="text-sm text-gray-500 max-w-sm">
-                This mentor hasn't added upcoming availability yet.
+                This mentor hasn&apos;t added upcoming availability yet.
                 Check back soon or explore other mentors.
               </p>
 

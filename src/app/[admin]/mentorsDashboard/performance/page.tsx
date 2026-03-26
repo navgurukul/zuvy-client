@@ -133,6 +133,28 @@ export default function PerformanceMetrics() {
     return (total / ratedSessions.length).toFixed(1)
   }, [completedSessions])
 
+  const sessionMix = useMemo(() => {
+    const cancelled = allSessions.filter(
+      (session) => session.sessionLifecycleState === "CANCELLED"
+    ).length
+
+    const reschedulePending = allSessions.filter(
+      (session) => session.sessionLifecycleState === "RESCHEDULE_PENDING"
+    ).length
+
+    return [
+      { label: "Completed", value: completedSessions.length, barClass: "bg-green-600" },
+      { label: "Upcoming", value: upcomingSlots.length, barClass: "bg-emerald-400" },
+      { label: "Cancelled", value: cancelled, barClass: "bg-gray-400" },
+      { label: "Reschedule", value: reschedulePending, barClass: "bg-orange-400" },
+    ]
+  }, [allSessions, completedSessions.length, upcomingSlots.length])
+
+  const maxSessionMixValue = useMemo(
+    () => Math.max(1, ...sessionMix.map((item) => item.value)),
+    [sessionMix]
+  )
+
   return (
     <div className="p-6 min-h-screen">
       <div className="text-left mb-6">
@@ -203,6 +225,24 @@ export default function PerformanceMetrics() {
               <div className="bg-gray-100 rounded-3xl p-3 text-center">
                 <p className="font-semibold">{averageSessionLength}m</p>
                 <p className="text-xs text-muted-foreground">Avg duration</p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border p-3">
+              <p className="text-xs font-medium text-muted-foreground mb-3">Session Mix</p>
+              <div className="space-y-3">
+                {sessionMix.map((item) => (
+                  <div key={item.label} className="grid grid-cols-[88px_1fr_32px] items-center gap-2">
+                    <p className="text-xs text-muted-foreground text-left">{item.label}</p>
+                    <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${item.barClass}`}
+                        style={{ width: `${(item.value / maxSessionMixValue) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-xs font-medium text-right">{item.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 

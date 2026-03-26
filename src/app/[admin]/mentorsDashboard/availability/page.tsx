@@ -1,6 +1,6 @@
 "use client"
 import { useMemo, useState, useEffect } from "react"
-import { Calendar, Clock, AlertTriangle, Lock, Trash2 } from "lucide-react"
+import { Calendar, Clock, AlertTriangle, Lock, Trash2, Info } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -360,14 +360,6 @@ export default function AvailabilityPage() {
             {openSlotsCount} open slots · {bookedSlotsCount} booked
           </p>
         </div>
-
-        <Button
-          variant="outline"
-          onClick={handleGoogleConnect}
-          disabled={isGoogleConnecting || !token}
-        >
-          {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
-        </Button>
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         <Card className="rounded-2xl">
@@ -476,6 +468,29 @@ export default function AvailabilityPage() {
         </Card>
 
         <div className="space-y-6">
+          <Card className="rounded-2xl text-left">
+            <CardHeader>
+              <CardTitle>Calendar Sync</CardTitle>
+              <div className="border rounded-xl bg-white p-3 flex items-start gap-2">
+                <Info size={16} className="text-gray-500 mt-0.5" />
+                <p className="text-sm text-gray-600 text-left">
+                  Please connect your Google Calendar before creating a slot.
+                </p>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleConnect}
+                disabled={isGoogleConnecting || !token}
+              >
+                {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card className="rounded-2xl text-left">
             <CardHeader>
               <CardTitle>Your Availability</CardTitle>

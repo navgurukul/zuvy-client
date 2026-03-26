@@ -433,7 +433,7 @@ export default function MySessions() {
               </div>
 
               <p className="text-sm text-muted-foreground mt-2 text-left">
-                You're all set. We'll remind you before the session.
+                You&apos;re all set. We&apos;ll remind you before the session.
               </p>
 
             </CardContent>

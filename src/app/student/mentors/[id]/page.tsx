@@ -249,26 +249,6 @@ export default function MentorProfilePage() {
             <CalendarDays size={16} />
             Book a Session
           </Link>
-
-          <div className="border-t pt-4 text-sm text-gray-500 space-y-1 text-left">
-            <p>Timezone: {mentorProfile?.timezone || "-"}</p>
-            <p>Buffer: {mentorProfile?.bufferMinutes ?? 0} mins</p>
-            <p>Status: {mentorProfile?.status || "-"}</p>
-          </div>
-
-          {/* <div className="border-t pt-4  flex justify-between">
-            <span className="text-gray-400 text-sm">Rating</span>
-            <span className="flex items-center gap-1 text-xs">
-              <Star size={14} className="text-yellow-500 fill-yellow-500" />
-              0.0
-            </span>
-          </div> */}
-
-          {/* <div className="text-sm flex justify-between">
-            <span className="text-gray-400 text-sm">Sessions completed</span>
-            <span>0</span>
-          </div> */}
-
         </div>
 
       </div>
