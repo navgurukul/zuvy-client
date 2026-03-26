@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
 
@@ -21,9 +21,12 @@ const getBookingIdFromParam = (
 
 export default function RescheduleBookingPage() {
 	const params = useParams();
+	const searchParams = useSearchParams();
 	const bookingId = getBookingIdFromParam(
 		params["id"] as string | string[] | undefined
 	);
+	const currentSlotIdParam = searchParams.get("currentSlotId");
+	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
 
 	const [newSlotIdInput, setNewSlotIdInput] = useState("");
 	const [reason, setReason] = useState("");
@@ -40,12 +43,17 @@ export default function RescheduleBookingPage() {
 
 		const newSlotId = Number(newSlotIdInput);
 		if (!Number.isFinite(newSlotId) || newSlotId <= 0) {
-			setValidationError("Please enter a valid new slot id.");
+			setValidationError("Please enter a valid slot ID (slotAvailabilityId).");
 			return;
 		}
 
-		if (reason.trim().length === 0) {
-			setValidationError("Reason is required.");
+		if (Number.isFinite(currentSlotId) && currentSlotId !== null && newSlotId === currentSlotId) {
+			setValidationError("Cannot reschedule to the same slot.");
+			return;
+		}
+
+		if (reason.trim().length < 10) {
+			setValidationError("Reschedule reason must be at least 10 characters.");
 			return;
 		}
 
@@ -68,14 +76,22 @@ export default function RescheduleBookingPage() {
 				<p className="text-sm text-gray-500 text-left">Booking ID: {bookingId ?? "-"}</p>
 
 				<div className="space-y-2">
-					<label className="text-sm font-medium block text-left">New Slot ID</label>
+					<label className="text-sm font-medium block text-left">New Slot ID (slotAvailabilityId)</label>
 					<input
 						type="number"
 						value={newSlotIdInput}
 						onChange={(event) => setNewSlotIdInput(event.target.value)}
-						placeholder=""
+						placeholder="Enter target slot id, e.g. 123"
 						className="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-green-200"
 					/>
+					{Number.isFinite(currentSlotId) && currentSlotId !== null && (
+						<p className="text-xs text-muted-foreground text-left">
+							Current slot id: {currentSlotId} (do not use this same id)
+						</p>
+					)}
+					<p className="text-xs text-muted-foreground text-left">
+						Use slot ID, not booking ID.
+					</p>
 				</div>
 
 				<div className="space-y-2">
