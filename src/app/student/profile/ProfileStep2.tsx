@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Calendar } from 'lucide-react';
+import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Calendar, Scissors } from 'lucide-react';
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
@@ -36,6 +36,16 @@ export const ProjectModal: React.FC<{
   techStackOptions?: string[];
   isLoadingTechStack?: boolean;
 }> = ({ isOpen, onOpenChange, onSave, initialProject, techStackOptions, isLoadingTechStack }) => {
+  const createEmptyProject = (): ExternalProject => ({
+    id: Date.now().toString(),
+    title: '',
+    oneLineDescription: '',
+    detailedDescription: '',
+    techStack: [],
+    projectType: 'Solo',
+    teamSize: 2,
+  });
+
   const parseMonthToIso = (monthValue: string) => {
     const trimmedMonth = String(monthValue || '').trim();
     if (!trimmedMonth) {
@@ -92,17 +102,8 @@ export const ProjectModal: React.FC<{
     };
   };
 
-  const [formData, setFormData] = useState<ExternalProject>(
-    initialProject || {
-      id: Date.now().toString(),
-      title: '',
-      oneLineDescription: '',
-      detailedDescription: '',
-      techStack: [],
-      projectType: 'Solo',
-      teamSize: 2,
-    }
-  );
+  const [addProjectDraft, setAddProjectDraft] = useState<ExternalProject>(createEmptyProject);
+  const [formData, setFormData] = useState<ExternalProject>(initialProject || addProjectDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCustomTechInput, setShowCustomTechInput] = useState(false);
   const [customTechStack, setCustomTechStack] = useState('');
@@ -114,33 +115,26 @@ export const ProjectModal: React.FC<{
     return uniqueOptions.includes('Other') ? uniqueOptions : [...uniqueOptions, 'Other'];
   }, [techStackOptions]);
 
-  // Sync formData with initialProject when modal opens/initialProject changes
+  // Keep add-project draft up to date while typing in add mode.
   useEffect(() => {
-    if (isOpen && initialProject) {
-      setFormData(initialProject);
-      setErrors({});
-      setShowCustomTechInput(false);
-      setCustomTechStack('');
+    if (isOpen && !initialProject) {
+      setAddProjectDraft(formData);
     }
-  }, [isOpen, initialProject]);
+  }, [isOpen, initialProject, formData]);
 
-  // Reset form when modal closes
+  // Sync formData with current mode whenever modal opens.
   useEffect(() => {
-    if (!isOpen) {
-      setFormData({
-        id: Date.now().toString(),
-        title: '',
-        oneLineDescription: '',
-        detailedDescription: '',
-        techStack: [],
-        projectType: 'Solo',
-        teamSize: 2,
-      });
+    if (isOpen) {
+      if (initialProject) {
+        setFormData(initialProject);
+      } else {
+        setFormData(addProjectDraft);
+      }
       setErrors({});
       setShowCustomTechInput(false);
       setCustomTechStack('');
     }
-  }, [isOpen]);
+  }, [isOpen, initialProject, addProjectDraft]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -236,22 +230,22 @@ export const ProjectModal: React.FC<{
   const handleSubmit = () => {
     if (validateForm()) {
       onSave(formData);
+      if (!initialProject) {
+        const emptyProject = createEmptyProject();
+        setAddProjectDraft(emptyProject);
+        setFormData(emptyProject);
+      }
       onOpenChange(false);
-      setFormData({
-        id: Date.now().toString(),
-        title: '',
-        oneLineDescription: '',
-        detailedDescription: '',
-        techStack: [],
-        projectType: 'Solo',
-        teamSize: 2,
-      });
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col">
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] p-0 flex flex-col"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>{initialProject ? 'Edit Project' : 'Add New Project'}</DialogTitle>
         </DialogHeader>
@@ -799,10 +793,11 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                 <Badge
                   key={skill}
                   variant="default"
-                  className="bg-primary/10 text-primary cursor-pointer hover:opacity-80"
+                  className="bg-primary/10 text-primary cursor-pointer hover:opacity-80 inline-flex items-center"
                   onClick={() => handleRemoveAutoDetectedSkill(skill)}
                 >
                   {skill}
+                  <X className="w-3 h-3 ml-1" />
                 </Badge>
               ))}
               {/* Display selected skills as tags */}
@@ -810,10 +805,11 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                 <Badge
                   key={skill}
                   variant="secondary"
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer"
+                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer inline-flex items-center"
                   onClick={() => handleRemoveSkill(skill)}
                 >
                   {skill}
+                  <X className="w-3 h-3 ml-1" />
                 </Badge>
               ))}
             </div>

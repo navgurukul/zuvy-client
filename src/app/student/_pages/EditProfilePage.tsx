@@ -1335,7 +1335,7 @@ export const EditProfilePage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Full name</p>
-                    <p className="font-medium">{step1.fullName || 'Not Added'}</p>
+                    <p className="font-medium">{step1.fullName || '-'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Email address</p>
@@ -1343,11 +1343,11 @@ export const EditProfilePage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Phone number</p>
-                    <p className="font-medium">{step1.phoneNumber || 'Not Added'}</p>
+                    <p className="font-medium">{step1.phoneNumber || '-'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">LinkedIn</p>
-                    <p className="font-medium">{step1.linkedin || 'Not Added'}</p>
+                    <p className="font-medium">{step1.linkedin || '-'}</p>
                   </div>
                 </div>
               ) : (
@@ -1825,23 +1825,23 @@ export const EditProfilePage: React.FC = () => {
                         {/* College Details */}
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">College name</p>
-                          <p className="font-medium">{step1?.collegeName || step1?.customCollege || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.collegeName || step1?.customCollege || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Degree</p>
-                          <p className="font-medium">{step1?.degree || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.degree || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Branch</p>
-                          <p className="font-medium">{step1?.branch || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.branch || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Year of study</p>
-                          <p className="font-medium">{step1?.yearOfStudy || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.yearOfStudy || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Expected graduation</p>
-                          <p className="font-medium">{step1?.graduationDate ? `${step1.graduationDate.month} ${step1.graduationDate.year}` : 'Not Added'}</p>
+                          <p className="font-medium">{step1?.graduationDate ? `${step1.graduationDate.month} ${step1.graduationDate.year}` : '-'}</p>
                         </div>
                         
                         {/* Academic Performance */}
@@ -1849,8 +1849,8 @@ export const EditProfilePage: React.FC = () => {
                           <p className="text-xs text-muted-foreground font-medium mb-1">College marks</p>
                           <p className="font-medium">
                             {step3?.academicPerformance?.marksFormat === 'CGPA'
-                              ? `${step3.academicPerformance.cgpa || 'Not Added'} ${step3.academicPerformance.cgpa ? 'CGPA' : ''}`
-                              : step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : 'Not Added'}
+                              ? `${step3.academicPerformance.cgpa || '-'} ${step3.academicPerformance.cgpa ? 'CGPA' : ''}`
+                              : step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : '-'}
                           </p>
                         </div>
                         
@@ -1859,14 +1859,14 @@ export const EditProfilePage: React.FC = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Board</p>
-                              <p className="font-medium">{step3?.academicPerformance?.class12Board || 'Not Added'}</p>
+                              <p className="font-medium">{step3?.academicPerformance?.class12Board || '-'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class12Percentage 
                                   ? `${step3.academicPerformance.class12Percentage}${step3.academicPerformance.class12Format === 'CGPA' ? ' CGPA' : '%'}` 
-                                  : 'Not Added'}
+                                  : '-'}
                               </p>
                             </div>
                           </div>
@@ -1877,14 +1877,14 @@ export const EditProfilePage: React.FC = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Board</p>
-                              <p className="font-medium">{step3?.academicPerformance?.class10Board || 'Not Added'}</p>
+                              <p className="font-medium">{step3?.academicPerformance?.class10Board || '-'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class10Marks 
                                   ? `${step3.academicPerformance.class10Marks}${step3.academicPerformance.class10Format === 'CGPA' ? ' CGPA' : '%'}`
-                                  : 'Not Added'}
+                                  : '-'}
                               </p>
                             </div>
                           </div>
@@ -2614,7 +2614,7 @@ export const EditProfilePage: React.FC = () => {
                       step3.competitiveProfiles.map((profile) => (
                         <div key={profile.platform} className="space-y-1">
                           <p className="text-xs text-muted-foreground font-medium">{profile.platform}</p>
-                          <p className="font-medium">{profile.username || 'Not Added'}</p>
+                          <p className="font-medium">{profile.username || '-'}</p>
                           {profile.rating !== undefined && (
                             <p className="text-xs text-muted-foreground">Rating: {profile.rating}</p>
                           )}

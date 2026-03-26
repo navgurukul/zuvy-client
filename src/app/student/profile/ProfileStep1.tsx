@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap } from 'lucide-react';
 import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
@@ -36,11 +37,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   onFieldChange,
 }) => {
   const { user } = getUser();
+  const loggedInName = user?.name?.trim() || '';
   const loggedInEmail = user?.email?.trim() || '';
+  const resolvedUserFullName = userFullName?.trim() || loggedInName;
   const resolvedUserEmail = userEmail?.trim() || loggedInEmail;
 
   const [formData, setFormData] = useState<Step1Type>({
-    fullName: initialData?.fullName || userFullName || '',
+    fullName: initialData?.fullName || resolvedUserFullName || '',
     email: resolvedUserEmail || initialData?.email || '',
     phoneNumber: initialData?.phoneNumber || '',
     linkedin: initialData?.linkedin || '',
@@ -64,6 +67,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [selectedYear, setSelectedYear] = useState<string>(formData.graduationDate.year || '');
   const [customDegree, setCustomDegree] = useState<string>('');
   const [customBranch, setCustomBranch] = useState<string>('');
+  const fullNameEditedRef = useRef(false);
 
   useEffect(() => {
     const nextEmail = resolvedUserEmail || initialData?.email || '';
@@ -76,6 +80,19 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       return { ...prev, email: nextEmail };
     });
   }, [resolvedUserEmail, initialData?.email]);
+
+  useEffect(() => {
+    const nextFullName = initialData?.fullName?.trim() || resolvedUserFullName;
+    if (!nextFullName) return;
+
+    setFormData((prev) => {
+      // Only autofill name when the field is still empty.
+      if (fullNameEditedRef.current || prev.fullName?.trim()) {
+        return prev;
+      }
+      return { ...prev, fullName: nextFullName };
+    });
+  }, [resolvedUserFullName, initialData?.fullName]);
 
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
   const graduationDateDropdownRef = useRef<HTMLDivElement>(null);
@@ -177,7 +194,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       let changed = false;
       
       // Update if value exists and is different
-      if (initialData.fullName && initialData.fullName !== prev.fullName) {
+      if (!fullNameEditedRef.current && initialData.fullName && initialData.fullName !== prev.fullName) {
         next.fullName = initialData.fullName;
         changed = true;
       }
@@ -349,16 +366,20 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       newErrors.college = 'College selection is required';
     }
 
+    if (!(formData.degree ?? '').trim()) {
+      newErrors.degree = 'Degree selection is required';
+    }
+
     if (!formData.branch) {
       newErrors.branch = 'Branch selection is required';
     }
 
-    if (!formData.graduationDate.month) {
-      newErrors.graduationMonth = 'Graduation month is required';
-    }
-
-    if (!formData.graduationDate.year) {
-      newErrors.graduationYear = 'Graduation year is required';
+    if (!formData.graduationDate.month && !formData.graduationDate.year) {
+      newErrors.graduationDate = 'Graduation month and year are required';
+    } else if (!formData.graduationDate.month) {
+      newErrors.graduationDate = 'Graduation month is required';
+    } else if (!formData.graduationDate.year) {
+      newErrors.graduationDate = 'Graduation year is required';
     }
 
     setErrors(newErrors);
@@ -368,6 +389,10 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let processedValue = value;
+
+    if (name === 'fullName') {
+      fullNameEditedRef.current = true;
+    }
 
     // Format phone number
     if (name === 'phoneNumber') {
@@ -462,7 +487,24 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         // Clear custom degree when switching to a predefined option
         setCustomDegree('');
       }
+      if (errors.degree || errors.branch) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.degree;
+          delete next.branch;
+          return next;
+        });
+      }
     } else if (name === 'branch') {
+      if (!(formData.degree ?? '').trim()) {
+        setErrors((prev) => ({
+          ...prev,
+          degree: 'Please select degree first',
+          branch: 'Please select degree first',
+        }));
+        return;
+      }
+
       if (value === 'Other') {
         // When "Other" is selected for branch, keep the dropdown value as "Other"
         setFormData((prev) => ({
@@ -478,6 +520,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         }));
         // Clear custom branch when switching to a predefined option
         setCustomBranch('');
+      }
+      if (errors.branch) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.branch;
+          return next;
+        });
       }
     } else if (name === 'graduationMonth' || name === 'graduationYear') {
       setFormData((prev) => ({
@@ -521,6 +570,8 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       branch: value.trim() || 'Other', // Use the custom value or fallback to "Other"
     }));
   };
+
+  const hasSelectedDegree = Boolean((formData.degree ?? '').trim());
 
   const handleGraduationDateSave = () => {
     if (selectedMonth && selectedYear) {
@@ -712,36 +763,49 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   College Name <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative" ref={collegeDropdownRef}>
-                  <Input
-                    placeholder="Search college name or state..."
-                    value={formData.collegeName || collegeSearch}
-                    disabled={isSearchCollegeDisabled}
-                    onChange={(e) => {
-                      if (isSearchCollegeDisabled) {
-                        return;
-                      }
-                      setCollegeSearch(e.target.value);
-                      setShowCollegeDropdown(true);
-                      // Clear selected college when user types
-                      if (formData.collegeName) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          collegeName: '',
-                        }));
-                      }
-                    }}
-                    onFocus={() => {
-                      if (isSearchCollegeDisabled) {
-                        return;
-                      }
-                      setShowCollegeDropdown(true);
-                      // If college is already selected, clear search keyword and keep selected value
-                      if (formData.collegeName) {
-                        setCollegeSearch('');
-                      }
-                    }}
-                    className={errors.college ? 'border-destructive' : ''}
-                  />
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-full" tabIndex={isSearchCollegeDisabled ? 0 : -1}>
+                          <Input
+                            placeholder="Search college name or state..."
+                            value={formData.collegeName || collegeSearch}
+                            disabled={isSearchCollegeDisabled}
+                            onChange={(e) => {
+                              if (isSearchCollegeDisabled) {
+                                return;
+                              }
+                              setCollegeSearch(e.target.value);
+                              setShowCollegeDropdown(true);
+                              // Clear selected college when user types
+                              if (formData.collegeName) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  collegeName: '',
+                                }));
+                              }
+                            }}
+                            onFocus={() => {
+                              if (isSearchCollegeDisabled) {
+                                return;
+                              }
+                              setShowCollegeDropdown(true);
+                              // If college is already selected, clear search keyword and keep selected value
+                              if (formData.collegeName) {
+                                setCollegeSearch('');
+                              }
+                            }}
+                            className={errors.college ? 'border-destructive' : ''}
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      {isSearchCollegeDisabled && (
+                        <TooltipContent>
+                          <p>Clear manual college first to search from dropdown.</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
 {showCollegeDropdown && !isSearchCollegeDisabled && (
   <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
@@ -801,31 +865,44 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
                 <p className="text-xs text-muted-foreground">OR</p>
 
-                <Input
-                  placeholder="Enter college name manually"
-                  value={formData.customCollege}
-                  disabled={isManualCollegeDisabled}
-                  onChange={(e) => {
-                    if (isManualCollegeDisabled) {
-                      return;
-                    }
-                    const value = e.target.value;
-                    setShowCollegeDropdown(false);
-                    setCollegeSearch('');
-                    setFormData((prev) => ({
-                      ...prev,
-                      collegeName: '',
-                      customCollege: value,
-                    }));
-                    if (errors.college) {
-                      setErrors((prev) => {
-                        const next = { ...prev };
-                        delete next.college;
-                        return next;
-                      });
-                    }
-                  }}
-                />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full" tabIndex={isManualCollegeDisabled ? 0 : -1}>
+                        <Input
+                          placeholder="Enter college name manually"
+                          value={formData.customCollege}
+                          disabled={isManualCollegeDisabled}
+                          onChange={(e) => {
+                            if (isManualCollegeDisabled) {
+                              return;
+                            }
+                            const value = e.target.value;
+                            setShowCollegeDropdown(false);
+                            setCollegeSearch('');
+                            setFormData((prev) => ({
+                              ...prev,
+                              collegeName: '',
+                              customCollege: value,
+                            }));
+                            if (errors.college) {
+                              setErrors((prev) => {
+                                const next = { ...prev };
+                                delete next.college;
+                                return next;
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    {isManualCollegeDisabled && (
+                      <TooltipContent>
+                        <p>Clear selected college first to enter manually.</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
 
                 {hasManualCollege && (
                   <div className="flex justify-end">
@@ -859,6 +936,8 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                       const degree = formData.degree ?? '';
                       // If it's empty, return empty
                       if (!degree) return '';
+                      // Preserve previously selected degree while options are still loading
+                      if (degreeOptions.length === 0) return degree;
                       // If it's a predefined degree, show it
                       if (degreeOptions.includes(degree)) return degree;
                       // If it's a custom degree, always show 'Other' in dropdown
@@ -870,6 +949,12 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                       <SelectValue placeholder="Select Degree" />
                     </SelectTrigger>
                     <SelectContent>
+                      {formData.degree &&
+                        formData.degree !== 'Other' &&
+                        !isDegreeLoading &&
+                        !degreeOptions.includes(formData.degree) && (
+                          <SelectItem value={formData.degree}>{formData.degree}</SelectItem>
+                        )}
                       {isDegreeLoading ? (
                         <SelectItem value="loading" disabled>
                           Loading degrees...
@@ -885,8 +970,15 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                           No degrees available
                         </SelectItem>
                       )}
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.degree && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.degree}
+                    </p>
+                  )}
                   
                   {/* Custom Degree Input - Show when "Other" is selected */}
                   {(formData.degree === 'Other' || (formData.degree && !degreeOptions.includes(formData.degree))) && (
@@ -906,47 +998,69 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   <Label htmlFor="branch" className="font-medium text-left block">
                     Branch <span className="text-destructive">*</span>
                   </Label>
-                  <Select 
-                    value={(() => {
-                      const branch = formData.branch ?? '';
-                      // If it's empty, return empty
-                      if (!branch) return '';
-                      // If it's a predefined branch (either API or mock data), show it
-                      if (branches.includes(branch)) return branch;
-                      // If it's a custom branch, always show 'Other' in dropdown
-                      return 'Other';
-                    })()} 
-                    onValueChange={(value) => handleSelectChange('branch', value)}
-                  >
-                    <SelectTrigger className={errors.branch ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Select Branch" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isBranchLoading ? (
-                        <SelectItem value="loading" disabled>
-                          Loading branches...
-                        </SelectItem>
-                      ) : branches.length > 0 ? (
-                        <>
-                          {branches.map((branch) => (
-                            <SelectItem key={branch} value={branch}>
-                              {branch}
-                            </SelectItem>
-                          ))}
-                          {/* Only show "Other" option if it's not already in the API data */}
-                          {!branches.includes('Other') && (
-                            <SelectItem value="Other">
-                              Other
-                            </SelectItem>
-                          )}
-                        </>
-                      ) : (
-                        <SelectItem value="none" disabled>
-                          {formData.degree ? 'No branches available' : 'Select a degree first'}
-                        </SelectItem>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-full">
+                          <Select 
+                            value={(() => {
+                              const branch = formData.branch ?? '';
+                              // If it's empty, return empty
+                              if (!branch) return '';
+                              // Preserve previously selected branch while options are still loading
+                              if (branches.length === 0) return branch;
+                              // If it's a predefined branch (either API or mock data), show it
+                              if (branches.includes(branch)) return branch;
+                              // If it's a custom branch, always show 'Other' in dropdown
+                              return 'Other';
+                            })()} 
+                            onValueChange={(value) => handleSelectChange('branch', value)}
+                            disabled={!hasSelectedDegree}
+                          >
+                            <SelectTrigger className={errors.branch ? 'border-destructive' : ''}>
+                              <SelectValue placeholder={hasSelectedDegree ? 'Select Branch' : 'Select degree first'} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {formData.branch &&
+                                formData.branch !== 'Other' &&
+                                !isBranchLoading &&
+                                !branches.includes(formData.branch) && (
+                                  <SelectItem value={formData.branch}>{formData.branch}</SelectItem>
+                                )}
+                              {isBranchLoading ? (
+                                <SelectItem value="loading" disabled>
+                                  Loading branches...
+                                </SelectItem>
+                              ) : branches.length > 0 ? (
+                                <>
+                                  {branches.map((branch) => (
+                                    <SelectItem key={branch} value={branch}>
+                                      {branch}
+                                    </SelectItem>
+                                  ))}
+                                  {/* Only show "Other" option if it's not already in the API data */}
+                                  {!branches.includes('Other') && (
+                                    <SelectItem value="Other">
+                                      Other
+                                    </SelectItem>
+                                  )}
+                                </>
+                              ) : (
+                                <SelectItem value="none" disabled>
+                                  {formData.degree ? 'No branches available' : 'Select a degree first'}
+                                </SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </TooltipTrigger>
+                      {!hasSelectedDegree && (
+                        <TooltipContent>
+                          <p>Please select degree first</p>
+                        </TooltipContent>
                       )}
-                    </SelectContent>
-                  </Select>
+                    </Tooltip>
+                  </TooltipProvider>
                   
                   {/* Custom Branch Input - Show when "Other" is selected or custom branch */}
                   {(formData.branch === 'Other' || (formData.branch && !branches.includes(formData.branch))) && (
@@ -1010,6 +1124,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             month: value,
                           },
                         }));
+                        if (errors.graduationDate) {
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.graduationDate;
+                            return next;
+                          });
+                        }
                       }}
                     >
                       <SelectTrigger className={errors.graduationDate ? 'border-destructive' : ''}>
@@ -1034,6 +1155,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             year: value,
                           },
                         }));
+                        if (errors.graduationDate) {
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.graduationDate;
+                            return next;
+                          });
+                        }
                       }}
                     >
                       <SelectTrigger className={errors.graduationDate ? 'border-destructive' : ''}>
