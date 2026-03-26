@@ -27,19 +27,40 @@ type Tab = "upcoming" | "completed" | "cancelled"
 const formatLifecycleValue = (value: string | null | undefined) =>
   (value || "-").replaceAll("_", " ")
 
-const formatDateTime = (value?: string | null) => {
+const formatDateOnly = (value?: string | null) => {
   if (!value) return "-"
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return "-"
 
-  return date.toLocaleString("en-US", {
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+  })
+}
+
+const formatTimeOnly = (value?: string | null) => {
+  if (!value) return "-"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+
+  return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
   })
+}
+
+const formatTimeRange = (start?: string | null, end?: string | null) => {
+  const startTime = formatTimeOnly(start)
+  const endTime = formatTimeOnly(end)
+
+  if (startTime === "-" && endTime === "-") return "-"
+  if (startTime === "-") return endTime
+  if (endTime === "-") return startTime
+
+  return `${startTime} - ${endTime}`
 }
 
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
@@ -237,18 +258,15 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar size={14} />
-                  Booking #{session.id}
+                  {formatDateOnly(session.slotStart || session.slotEnd)}
                 </div>
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatDateTime(session.slotStart)}
+                  {formatTimeRange(session.slotStart, session.slotEnd)}
                 </div>
 
-                <div className="flex items-center gap-1 text-sm">
-                  <Clock size={14} />
-                  {formatDateTime(session.slotEnd)}
-                </div>
+                <div className="text-sm">Booking #{session.id}</div>
 
                 <div className='text-sm'>{session.status}</div>
 
@@ -340,18 +358,15 @@ export default function MySessions() {
               <div className="flex gap-6 text-sm text-muted-foreground mt-3">
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar size={14} />
-                  Booking #{session.id}
+                  {formatDateOnly(session.slotStart || session.slotEnd)}
                 </div>
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatDateTime(session.slotStart)}
+                  {formatTimeRange(session.slotStart, session.slotEnd)}
                 </div>
 
-                <div className="flex items-center gap-1 text-sm">
-                  <Clock size={14} />
-                  {formatDateTime(session.slotEnd)}
-                </div>
+                <div className="text-sm">Booking #{session.id}</div>
 
                 <div className="text-sm">{session.status}</div>
               </div>
@@ -403,18 +418,15 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar size={14} />
-                  Booking {session.id}
+                  {formatDateOnly(session.slotStart || session.slotEnd)}
                 </div>
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatDateTime(session.slotStart)}
+                  {formatTimeRange(session.slotStart, session.slotEnd)}
                 </div>
 
-                <div className="flex items-center gap-1 text-sm">
-                  <Clock size={14} />
-                  {formatDateTime(session.slotEnd)}
-                </div>
+                <div className="text-sm">Booking #{session.id}</div>
 
                 <div className="text-sm">{session.status}</div>
 
@@ -451,7 +463,7 @@ export default function MySessions() {
 
               <Button variant="outline" asChild>
                 <Link
-                  href={`/student/sessions/${session.id}/reschedule?currentSlotId=${session.slotAvailabilityId}`}
+                  href={`/student/sessions/${session.id}/reschedule?currentSlotId=${session.slotAvailabilityId}&mentorId=${session.mentorUserId}`}
                 >
                   Reschedule
                 </Link>

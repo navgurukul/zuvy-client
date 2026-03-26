@@ -71,7 +71,8 @@ export default function BookSessionPage() {
     [availability, selectedSlotId]
   );
 
-  const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
+  const mentorDisplayName =
+    mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "Mentor");
   const initials = getInitials(mentorDisplayName);
   const acceptsNewMentees = mentorProfile?.acceptsNewMentees ?? true;
 
@@ -106,7 +107,7 @@ export default function BookSessionPage() {
         </div>
 
         <div>
-          <p className="font-semibold text-lg">{mentorDisplayName}</p>
+          <p className="font-semibold text-lg text-left">{mentorDisplayName}</p>
           <p className="text-sm text-gray-500 text-left">
             {mentorProfile?.title || "Mentor"}
           </p>
@@ -186,6 +187,9 @@ export default function BookSessionPage() {
                         <p className="text-sm font-semibold text-gray-800">
                           {slot.topic || "Mentoring Session"}
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Slot ID: {slot.id}
+                        </p>
                         <p className="text-sm text-gray-500 mt-1">
                           {formatSlotDate(slot.slotStartDateTime)}
                         </p>
@@ -227,6 +231,7 @@ export default function BookSessionPage() {
             {selectedSlot ? (
               <div className="text-xs text-gray-500 space-y-1 mt-2">
                 <p>{selectedSlot.topic || "Mentoring Session"}</p>
+                <p>Slot ID: {selectedSlot.id}</p>
                 <p>{formatSlotDate(selectedSlot.slotStartDateTime)}</p>
                 <p>{formatSlotTimeRange(selectedSlot)}</p>
               </div>

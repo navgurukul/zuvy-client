@@ -4,53 +4,134 @@ import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Star } from "lucide-react"
 import { useMyMentorSessions } from "@/hooks/useMyMentorSessions"
-import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString("en-US", {
+const formatDateTime = (value?: string | null) => {
+  if (!value) return "—"
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return "—"
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+const formatCompletedDateTime = (value?: string | null) => {
+  if (!value) return "—"
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return "—"
+
+  return date.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
   })
+}
+
+const getSessionDurationMinutes = (slotStart?: string | null, slotEnd?: string | null) => {
+  if (!slotStart || !slotEnd) return 0
+
+  const start = new Date(slotStart)
+  const end = new Date(slotEnd)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0
+
+  return Math.max(0, Math.round((end.getTime() - start.getTime()) / (1000 * 60)))
+}
+
+const getDisplayStudentName = (
+  studentName?: string | null,
+  studentUserName?: string | null,
+  studentFullName?: string | null,
+  learnerName?: string | null
+) => {
+  return studentName || studentFullName || studentUserName || learnerName || "Unknown Student"
+}
+
+const renderRatingStars = (rating?: number | null) => {
+  const normalizedRating = Math.max(0, Math.min(5, Math.round(rating || 0)))
+
+  return (
+    <div className="flex mt-2 gap-0.5">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Star
+          key={index}
+          size={14}
+          className={index < normalizedRating ? "text-green-500 fill-green-500" : "text-gray-300"}
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function PerformanceMetrics() {
   const {
-    sessions,
-    loading: sessionsLoading,
-    error: sessionsError,
+    sessions: allSessions,
+    loading: allSessionsLoading,
+    error: allSessionsError,
   } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
-  const { slots, loading: slotsLoading, error: slotsError } = useMyMentorSlots()
 
-  const completedSessions = useMemo(
-    () => sessions.filter((session) => session.sessionLifecycleState === "COMPLETED"),
-    [sessions]
-  )
+  const {
+    sessions: completedSessions,
+    loading: completedSessionsLoading,
+    error: completedSessionsError,
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed")
 
-  const upcomingSlots = useMemo(
-    () => slots.filter((slot) => new Date(slot.slotStartDateTime) > new Date()),
-    [slots]
-  )
+  const {
+    sessions: upcomingSlots,
+    loading: upcomingSessionsLoading,
+    error: upcomingSessionsError,
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "upcoming")
 
   const completionRate =
-    sessions.length === 0
+    allSessions.length === 0
       ? 0
-      : Math.round((completedSessions.length / sessions.length) * 100)
+      : Math.round((completedSessions.length / allSessions.length) * 100)
 
   const totalScheduledMinutes = useMemo(
-    () => slots.reduce((sum, slot) => sum + slot.durationMinutes, 0),
-    [slots]
+    () =>
+      allSessions.reduce(
+        (sum, session) =>
+          sum + getSessionDurationMinutes(session.slotStart, session.slotEnd),
+        0
+      ),
+    [allSessions]
   )
 
   const averageSessionLength =
-    slots.length === 0 ? 0 : Math.round(totalScheduledMinutes / slots.length)
+    allSessions.length === 0 ? 0 : Math.round(totalScheduledMinutes / allSessions.length)
 
   const totalScheduledHours = totalScheduledMinutes / 60
 
   const recentCompleted = useMemo(
-    () => completedSessions.slice(0, 5),
+    () =>
+      [...completedSessions]
+        .sort((a, b) => {
+          const aTime = new Date(a.completedAt || a.slotEnd || a.slotStart || 0).getTime()
+          const bTime = new Date(b.completedAt || b.slotEnd || b.slotStart || 0).getTime()
+
+          return bTime - aTime
+        }),
     [completedSessions]
   )
+
+  const averageRating = useMemo(() => {
+    const ratedSessions = completedSessions.filter(
+      (session) => typeof session.mentorRating === "number"
+    )
+
+    if (ratedSessions.length === 0) return null
+
+    const total = ratedSessions.reduce((sum, session) => sum + (session.mentorRating || 0), 0)
+
+    return (total / ratedSessions.length).toFixed(1)
+  }, [completedSessions])
 
   return (
     <div className="p-6 min-h-screen">
@@ -67,16 +148,20 @@ export default function PerformanceMetrics() {
             <p className="text-2xl font-semibold">{completionRate}%</p>
             <p className="text-sm font-medium">Completion Rate</p>
             <p className="text-xs text-muted-foreground">
-              {completedSessions.length} of {sessions.length} sessions completed
+              {completedSessions.length} of {allSessions.length} sessions completed
             </p>
           </CardContent>
         </Card>
 
         <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">—</p>
+            <p className="text-2xl font-semibold">{averageRating ? averageRating : "—"}</p>
             <p className="text-sm font-medium">Average Rating</p>
-            <p className="text-xs text-muted-foreground">Feedback analytics pending API</p>
+            <p className="text-xs text-muted-foreground">
+              {averageRating
+                ? "Across completed sessions with rating"
+                : "No completed session rating available"}
+            </p>
           </CardContent>
         </Card>
 
@@ -84,7 +169,7 @@ export default function PerformanceMetrics() {
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">{totalScheduledHours.toFixed(1)}h</p>
             <p className="text-sm font-medium">Scheduled Hours</p>
-            <p className="text-xs text-muted-foreground">Across {slots.length} slots</p>
+            <p className="text-xs text-muted-foreground">Across {allSessions.length} sessions</p>
           </CardContent>
         </Card>
 
@@ -106,7 +191,7 @@ export default function PerformanceMetrics() {
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{sessions.length}</p>
+                <p className="font-semibold">{allSessions.length}</p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
 
@@ -122,13 +207,19 @@ export default function PerformanceMetrics() {
             </div>
 
             <div className="mt-4 space-y-2 text-left">
-              {sessionsLoading && (
+              {(allSessionsLoading || completedSessionsLoading || upcomingSessionsLoading) && (
                 <p className="text-xs text-muted-foreground">Loading session analytics...</p>
               )}
-              {!sessionsLoading && sessionsError && (
-                <p className="text-xs text-red-500">{sessionsError}</p>
+              {!allSessionsLoading && allSessionsError && (
+                <p className="text-xs text-red-500">{allSessionsError}</p>
               )}
-              {!sessionsLoading && !sessionsError && sessions.length === 0 && (
+              {!completedSessionsLoading && completedSessionsError && (
+                <p className="text-xs text-red-500">{completedSessionsError}</p>
+              )}
+              {!upcomingSessionsLoading && upcomingSessionsError && (
+                <p className="text-xs text-red-500">{upcomingSessionsError}</p>
+              )}
+              {!allSessionsLoading && !allSessionsError && allSessions.length === 0 && (
                 <p className="text-xs text-muted-foreground">No sessions yet.</p>
               )}
             </div>
@@ -137,27 +228,40 @@ export default function PerformanceMetrics() {
 
         <Card className='rounded-3xl'>
           <CardHeader>
-            <CardTitle className="text-base text-left">Recent Completed</CardTitle>
+            <CardTitle className="text-base text-left">Recently Completed</CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-3 text-left">
+          <CardContent
+            className={`space-y-3 text-left ${
+              recentCompleted.length > 4 ? "max-h-[26rem] overflow-y-auto pr-1" : ""
+            }`}
+          >
             {recentCompleted.length === 0 && (
               <p className="text-xs text-muted-foreground">No completed sessions yet.</p>
             )}
 
             {recentCompleted.map((session) => (
               <div key={session.id} className="rounded-lg border p-3">
-                <p className="text-sm font-medium">Booking #{session.id}</p>
-                <p className="text-xs text-muted-foreground">
-                  Completed at: {formatDateTime(session.completedAt || session.joinedAt || "")}
+                <p className="text-sm font-medium">
+                  {getDisplayStudentName(
+                    session.studentName,
+                    session.studentUserName,
+                    session.studentFullName,
+                    session.learnerName
+                  )}
                 </p>
-                <div className="flex text-green-500 mt-2">
-                  <Star size={14} />
-                  <Star size={14} />
-                  <Star size={14} />
-                  <Star size={14} />
-                  <Star size={14} />
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Date: {formatDateTime(session.completedAt || session.slotStart || session.slotEnd)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Completed at: {formatCompletedDateTime(session.completedAt || session.slotEnd)}
+                </p>
+                {session.mentorRating ? (
+                  <p className="text-xs text-muted-foreground mt-1">Rating: {session.mentorRating}/5</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">Rating: Not rated</p>
+                )}
+                {renderRatingStars(session.mentorRating)}
               </div>
             ))}
           </CardContent>
@@ -177,17 +281,21 @@ export default function PerformanceMetrics() {
           <CardContent className="p-5 text-left">
             <p className="text-xl font-semibold">{averageSessionLength}m</p>
             <p className="text-sm font-medium">Avg Slot Length</p>
-            <p className="text-xs text-muted-foreground">Based on created slots</p>
+            <p className="text-xs text-muted-foreground">Based on mentor sessions</p>
           </CardContent>
         </Card>
 
         <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{slots.length}</p>
-            <p className="text-sm font-medium">Total Slots</p>
-            <p className="text-xs text-muted-foreground">{slotsLoading ? "Loading..." : "Fetched from /mentor-slots/my"}</p>
-            {!slotsLoading && slotsError && (
-              <p className="text-xs text-red-500 mt-1">{slotsError}</p>
+            <p className="text-xl font-semibold">{allSessions.length}</p>
+            <p className="text-sm font-medium">Total Sessions</p>
+            <p className="text-xs text-muted-foreground">
+              {(allSessionsLoading || completedSessionsLoading || upcomingSessionsLoading)
+                ? "Loading..."
+                : "Fetched from /mentor-sessions/mentor/my"}
+            </p>
+            {!allSessionsLoading && allSessionsError && (
+              <p className="text-xs text-red-500 mt-1">{allSessionsError}</p>
             )}
           </CardContent>
         </Card>

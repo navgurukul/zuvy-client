@@ -255,6 +255,27 @@ export default function DashboardPage() {
     [slots]
   )
 
+  const ratedCompletedSessions = useMemo(
+    () => completedSessions.filter((session) => typeof session.mentorRating === "number"),
+    [completedSessions]
+  )
+
+  const averageRatingValue = useMemo(() => {
+    if (ratedCompletedSessions.length === 0) {
+      return null
+    }
+
+    const totalRating = ratedCompletedSessions.reduce(
+      (sum, session) => sum + (session.mentorRating || 0),
+      0
+    )
+
+    return totalRating / ratedCompletedSessions.length
+  }, [ratedCompletedSessions])
+
+  const averageRatingDisplay = averageRatingValue === null ? "—" : averageRatingValue.toFixed(1)
+  const averageRatingRounded = averageRatingValue === null ? 0 : Math.round(averageRatingValue)
+
   const slotDurationById = useMemo(() => {
     const durationById = new Map<number, number>()
 
@@ -378,9 +399,13 @@ export default function DashboardPage() {
                   <Star className="w-5 h-5 text-muted-foreground" />
               </div>
             <div className="text-left">
-              <p className="text-2xl font-bold">{completionRate}%</p>
-              <p className="text-sm text-muted-foreground">Completion Rate</p>
-              <p className="text-sm  mt-4">rating data pending</p>
+              <p className="text-2xl font-bold">{averageRatingDisplay}</p>
+              <p className="text-sm text-muted-foreground">Avg Rating</p>
+              <p className="text-sm  mt-4">
+                {ratedCompletedSessions.length > 0
+                  ? `From ${ratedCompletedSessions.length} rated sessions`
+                  : "No ratings yet"}
+              </p>
             </div>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -507,9 +532,19 @@ export default function DashboardPage() {
                    <Star className="w-3.5 h-3.5 text-emerald-600" />
                    <span className="text-xs font-semibold text-slate-600">Avg Rating</span>
                 </div>
-                <p className="text-2xl font-bold mb-2">—</p>
+                <p className="text-2xl font-bold mb-2">{averageRatingDisplay}</p>
                 <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-emerald-500 text-emerald-500" />)}
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        "w-3 h-3",
+                        i < averageRatingRounded
+                          ? "fill-emerald-500 text-emerald-500"
+                          : "fill-transparent text-emerald-200"
+                      )}
+                    />
+                  ))}
                 </div>
               </div>
                <div className="rounded-lg bg-muted/50 p-3">

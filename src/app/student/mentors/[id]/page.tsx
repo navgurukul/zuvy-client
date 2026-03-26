@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, CalendarDays, Star } from "lucide-react";
+import { ArrowLeft, CalendarDays, Info, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/axios.config";
@@ -86,7 +86,8 @@ export default function MentorProfilePage() {
   }, [])
   // const mentorDisplayName = mentorId ? `Mentor ${mentorId}` : "Mentor";
   const mentorDisplayName =
-    mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor"); const initials = getInitials(mentorDisplayName);
+    mentorProfile?.name || (mentorId ? `Mentor ${mentorId}` : "Mentor")
+  const initials = getInitials(mentorDisplayName)
   const expertise = mentorProfile?.expertise || [];
   const acceptsNewMentees = mentorProfile?.acceptsNewMentees ?? true;
 
@@ -220,6 +221,13 @@ export default function MentorProfilePage() {
           <p className="text-sm text-green-700 flex items-center gap-2">
             ● {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
           </p>
+
+          <div className="border rounded-xl bg-white p-3 flex items-start gap-2">
+            <Info size={16} className="text-gray-500 mt-0.5" />
+            <p className="text-sm text-gray-600 text-left">
+              Please connect your google Calendar before booking the session
+            </p>
+          </div>
 
           <Button
             variant="outline"

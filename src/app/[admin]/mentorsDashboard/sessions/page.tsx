@@ -35,6 +35,42 @@ const formatDateTime = (value?: string | null) => {
   })
 }
 
+const formatDateOnly = (value?: string | null) => {
+  if (!value) return "-"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+const formatTimeOnly = (value?: string | null) => {
+  if (!value) return "-"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+const formatTimeRange = (start?: string | null, end?: string | null) => {
+  const startTime = formatTimeOnly(start)
+  const endTime = formatTimeOnly(end)
+
+  if (startTime === "-" && endTime === "-") return "-"
+  if (startTime === "-") return endTime
+  if (endTime === "-") return startTime
+
+  return `${startTime} - ${endTime}`
+}
+
 const getRescheduleStatus = (session: MyMentorSession) => {
   const maybeSession = session as MyMentorSession & {
     rescheduleStatus?: string | null
@@ -120,6 +156,8 @@ export default function SessionsPage() {
         isUpcomingValue(selectedSession.status) ||
         isUpcomingValue(selectedSession.sessionLifecycleState))
   )
+
+  const isRescheduleTab = activeTab === "reschedule"
 
   const selectedSlotId = selectedSession?.slotAvailabilityId
 
@@ -277,6 +315,12 @@ export default function SessionsPage() {
 
     const ok = await acceptReschedule(selectedSession.id)
     if (ok) {
+      toast.success({
+        title: "Reschedule accepted",
+        description:
+          (typeof rescheduleResponse?.message === "string" && rescheduleResponse.message) ||
+          "Reschedule request accepted successfully.",
+      })
       await refetchMySessions()
       await refetchSlotDetails()
     }
@@ -287,6 +331,12 @@ export default function SessionsPage() {
 
     const ok = await declineReschedule(selectedSession.id)
     if (ok) {
+      toast.success({
+        title: "Reschedule declined",
+        description:
+          (typeof rescheduleResponse?.message === "string" && rescheduleResponse.message) ||
+          "Reschedule request declined successfully.",
+      })
       await refetchMySessions()
       await refetchSlotDetails()
     }
@@ -344,6 +394,15 @@ export default function SessionsPage() {
       await refetchSlotDetails()
     }
   }
+
+  useEffect(() => {
+    if (!rescheduleError) return
+
+    toast.error({
+      title: "Reschedule action failed",
+      description: rescheduleError,
+    })
+  }, [rescheduleError])
 
   return (
     <div className="p-6">
@@ -451,11 +510,11 @@ export default function SessionsPage() {
                           <p className="text-xs text-muted-foreground">Booking #{session.id} • Slot #{session.slotAvailabilityId}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Calendar size={11} />
-                            <span className="text-xs">{formatDateTime(session.slotStart)}</span>
+                            <span className="text-xs">{formatDateOnly(session.slotStart || session.slotEnd)}</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock size={11} />
-                            <span className="text-xs">{formatDateTime(session.slotEnd)}</span>
+                            <span className="text-xs">{formatTimeRange(session.slotStart, session.slotEnd)}</span>
                           </div>
                         </div>
 
@@ -503,13 +562,13 @@ export default function SessionsPage() {
                   <p className="text-xs text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <Calendar size={12} />
-                      {formatDateTime(selectedSession.slotStart)}
+                      {formatDateOnly(selectedSession.slotStart || selectedSession.slotEnd)}
                     </span>
                   </p>
                   <p className="text-xs text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <Clock size={12} />
-                      {formatDateTime(selectedSession.slotEnd)}
+                      {formatTimeRange(selectedSession.slotStart, selectedSession.slotEnd)}
                     </span>
                   </p>
                 </div>
@@ -523,7 +582,7 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
-                {selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
+                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                   selectedSession.meetingLink ? (
                     <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
                       <a
@@ -544,6 +603,7 @@ export default function SessionsPage() {
                 )}
               </div>
 
+              {!isRescheduleTab && (
               <div className="rounded-xl border p-4 text-left space-y-2">
                 <p className="text-base font-semibold">Slot & Bookings</p>
                 {slotDetailsLoading && (
@@ -557,13 +617,19 @@ export default function SessionsPage() {
                     <p className="text-xs text-muted-foreground">
                       <span className="flex items-center gap-2">
                         <Calendar size={12} />
-                        {formatDateTime(details.slot.slotStartDateTime as string)}
+                        {formatDateOnly(
+                          (details.slot.slotStartDateTime as string) ||
+                          (details.slot.slotEndDateTime as string)
+                        )}
                       </span>
                     </p>
                     <p className="text-xs text-muted-foreground">
                       <span className="flex items-center gap-2">
                         <Clock size={12} />
-                        {formatDateTime(details.slot.slotEndDateTime as string)}
+                        {formatTimeRange(
+                          details.slot.slotStartDateTime as string,
+                          details.slot.slotEndDateTime as string
+                        )}
                       </span>
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -572,8 +638,9 @@ export default function SessionsPage() {
                   </>
                 )}
               </div>
+              )}
 
-              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
+              {(isRescheduleTab || (!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession)) && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Reschedule Request</p>
                   <div className="flex gap-2">
@@ -594,14 +661,10 @@ export default function SessionsPage() {
                       Decline Reschedule
                     </Button>
                   </div>
-                  {rescheduleError && <p className="text-sm text-red-500">{rescheduleError}</p>}
-                  {rescheduleResponse?.message && (
-                    <p className="text-sm text-green-700">{rescheduleResponse.message}</p>
-                  )}
                 </div>
               )}
 
-              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
+              {!isRescheduleTab && !isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Mark Attendance</p>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -637,7 +700,7 @@ export default function SessionsPage() {
                 </div>
               )}
 
-              {!isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
+              {!isRescheduleTab && !isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Complete Session</p>
                   <Button
@@ -655,7 +718,7 @@ export default function SessionsPage() {
                 </div>
               )}
 
-              {!isUpcomingSession && !isReadOnlySession && (
+              {!isRescheduleTab && !isUpcomingSession && !isReadOnlySession && (
                 <div className="rounded-xl border p-4 text-left space-y-3">
                   <p className="text-base font-semibold">Submit Feedback</p>
                   <div className="grid sm:grid-cols-3 gap-3">

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
+import { useMentorAvailability } from "@/hooks/useMentorAvailability";
+import { useMentorProfile } from "@/hooks/useMentorProfile";
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -25,12 +27,60 @@ export default function RescheduleBookingPage() {
 	const bookingId = getBookingIdFromParam(
 		params["id"] as string | string[] | undefined
 	);
+	const mentorId = searchParams.get("mentorId") || undefined;
 	const currentSlotIdParam = searchParams.get("currentSlotId");
 	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
 
-	const [newSlotIdInput, setNewSlotIdInput] = useState("");
+	const [selectedNewSlotId, setSelectedNewSlotId] = useState<number | null>(null);
 	const [reason, setReason] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
+
+	const {
+		availability,
+		loading: availabilityLoading,
+		error: availabilityError,
+		refetchMentorAvailability,
+	} = useMentorAvailability(mentorId);
+
+	const { mentorProfile } = useMentorProfile(mentorId);
+	const mentorDisplayName =
+		mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "-");
+
+	const formatDateOnly = (value?: string | null) => {
+		if (!value) return "-";
+
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return "-";
+
+		return date.toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		});
+	};
+
+	const formatTimeOnly = (value?: string | null) => {
+		if (!value) return "-";
+
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return "-";
+
+		return date.toLocaleTimeString("en-US", {
+			hour: "numeric",
+			minute: "2-digit",
+		});
+	};
+
+	const formatTimeRange = (start?: string | null, end?: string | null) => {
+		const startTime = formatTimeOnly(start);
+		const endTime = formatTimeOnly(end);
+
+		if (startTime === "-" && endTime === "-") return "-";
+		if (startTime === "-") return endTime;
+		if (endTime === "-") return startTime;
+
+		return `${startTime} - ${endTime}`;
+	};
 
 	const { proposeReschedule, isRescheduling, error, responseData } =
 		useRescheduleMentorSlotBooking();
@@ -41,13 +91,17 @@ export default function RescheduleBookingPage() {
 			return;
 		}
 
-		const newSlotId = Number(newSlotIdInput);
-		if (!Number.isFinite(newSlotId) || newSlotId <= 0) {
-			setValidationError("Please enter a valid slot ID (slotAvailabilityId).");
+		if (!mentorId) {
+			setValidationError("Missing mentor id for slot availability.");
 			return;
 		}
 
-		if (Number.isFinite(currentSlotId) && currentSlotId !== null && newSlotId === currentSlotId) {
+		if (!selectedNewSlotId || selectedNewSlotId <= 0) {
+			setValidationError("Please select a new slot.");
+			return;
+		}
+
+		if (Number.isFinite(currentSlotId) && currentSlotId !== null && selectedNewSlotId === currentSlotId) {
 			setValidationError("Cannot reschedule to the same slot.");
 			return;
 		}
@@ -58,7 +112,7 @@ export default function RescheduleBookingPage() {
 		}
 
 		setValidationError(null);
-		await proposeReschedule(bookingId, newSlotId, reason.trim());
+		await proposeReschedule(bookingId, selectedNewSlotId, reason.trim());
 	};
 
 	return (
@@ -74,24 +128,77 @@ export default function RescheduleBookingPage() {
 			<div className="border rounded-2xl bg-white p-6 space-y-4">
 				<h1 className="text-xl font-semibold text-left">Propose Reschedule</h1>
 				<p className="text-sm text-gray-500 text-left">Booking ID: {bookingId ?? "-"}</p>
+				<p className="text-sm text-gray-500 text-left">Mentor: {mentorDisplayName}</p>
 
 				<div className="space-y-2">
-					<label className="text-sm font-medium block text-left">New Slot ID (slotAvailabilityId)</label>
-					<input
-						type="number"
-						value={newSlotIdInput}
-						onChange={(event) => setNewSlotIdInput(event.target.value)}
-						placeholder="Enter target slot id, e.g. 123"
-						className="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-green-200"
-					/>
+					<label className="text-sm font-medium block text-left">Select New Slot</label>
+
+					{availabilityLoading && (
+						<p className="text-sm text-muted-foreground text-left">Loading available slots...</p>
+					)}
+
+					{!availabilityLoading && availabilityError && (
+						<div className="space-y-2">
+							<p className="text-sm text-red-500 text-left">{availabilityError}</p>
+							<button
+								onClick={refetchMentorAvailability}
+								className="text-xs border px-3 py-1.5 rounded-full"
+							>
+								Retry slots
+							</button>
+						</div>
+					)}
+
+					{!availabilityLoading && !availabilityError && availability.length === 0 && (
+						<p className="text-sm text-muted-foreground text-left">No slots available for reschedule.</p>
+					)}
+
+					{!availabilityLoading && !availabilityError && availability.length > 0 && (
+						<div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+							{availability.map((slot) => {
+								const isCurrent = Number.isFinite(currentSlotId) && currentSlotId !== null && slot.id === currentSlotId;
+								const isSelectable = !isCurrent;
+								const isSelected = selectedNewSlotId === slot.id;
+
+								return (
+									<button
+										key={slot.id}
+										type="button"
+										onClick={() => isSelectable && setSelectedNewSlotId(slot.id)}
+										disabled={!isSelectable}
+										className={`w-full border rounded-xl p-3 text-left ${
+											isSelected
+												? "border-green-700 bg-green-50"
+												: "border-gray-200 bg-white"
+										} ${!isSelectable ? "opacity-60 cursor-not-allowed" : ""}`}
+									>
+										<p className="text-sm font-semibold">Slot ID: {slot.id}</p>
+										<div className="mt-1 space-y-1 text-xs text-muted-foreground">
+											<p className="flex items-center gap-2">
+												<Calendar size={12} />
+												{formatDateOnly(slot.slotStartDateTime || slot.slotEndDateTime)}
+											</p>
+											<p className="flex items-center gap-2">
+												<Clock size={12} />
+												{formatTimeRange(slot.slotStartDateTime, slot.slotEndDateTime)}
+											</p>
+											<p>
+												{isCurrent
+													? "Current booked slot"
+													: `Status: ${slot.status} · Capacity: ${slot.currentBookedCount}/${slot.maxCapacity}`}
+											</p>
+										</div>
+									</button>
+								);
+							})}
+						</div>
+					)}
+
 					{Number.isFinite(currentSlotId) && currentSlotId !== null && (
 						<p className="text-xs text-muted-foreground text-left">
 							Current slot id: {currentSlotId} (do not use this same id)
 						</p>
 					)}
-					<p className="text-xs text-muted-foreground text-left">
-						Use slot ID, not booking ID.
-					</p>
 				</div>
 
 				<div className="space-y-2">

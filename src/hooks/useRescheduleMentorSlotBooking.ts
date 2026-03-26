@@ -53,10 +53,12 @@ export function useRescheduleMentorSlotBooking() {
         newSlotId: number,
         reason: string
     ): Promise<boolean> => {
-        return runRescheduleAction(`/mentor-slots/${bookingId}/reschedule`, {
-            newSlotId,
+        return runRescheduleAction(
+            `/mentor-slots/${bookingId}/reschedule?slotId=${newSlotId}`,
+            {
             reason,
-        })
+            }
+        )
     }
 
     const acceptReschedule = async (bookingId: number): Promise<boolean> => {
