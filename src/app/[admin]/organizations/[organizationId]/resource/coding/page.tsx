@@ -145,6 +145,7 @@ const CodingProblems = () => {
 
             await filteredCodingQuestions(
                 setCodingQuestions,
+                orgId,
                 searchOffset,
                 position,
                 difficulty,
@@ -153,8 +154,7 @@ const CodingProblems = () => {
                 setLastPage,
                 setTotalPages,
                 query,
-                '',
-                orgId
+                ''
             )
         },
     [position, difficulty, selectedOptions, orgId]
@@ -167,6 +167,7 @@ const CodingProblems = () => {
 
         await filteredCodingQuestions(
             setCodingQuestions,
+            orgId,
             offset,
             position,
             difficulty,
@@ -175,8 +176,7 @@ const CodingProblems = () => {
             setLastPage,
             setTotalPages,
             '',
-            '',
-            orgId
+            ''
         )
     }, [offset, position, difficulty, selectedOptions, orgId])
 
@@ -315,6 +315,7 @@ const CodingProblems = () => {
             try {
                 await filteredCodingQuestions(
                     setCodingQuestions,
+                    orgId,
                     offset,
                     position,
                     difficulty,
@@ -323,8 +324,7 @@ const CodingProblems = () => {
                     setLastPage,
                     setTotalPages,
                     '', // Always empty for filter-based fetch
-                    '',
-                    orgId
+                    ''
                 )
             } catch (error) {
                 toast({

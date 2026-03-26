@@ -140,14 +140,14 @@ export default function MentorProfilePage() {
               {mentorProfile?.title || "Mentor"}
             </p>
 
-            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+            {/* <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
               <div className="flex items-center gap-1">
                 <Star size={14} className="text-yellow-500 fill-yellow-500" />
                 <strong>0.0</strong>rating
               </div>
 
               <span>0 sessions completed</span>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -248,18 +248,18 @@ export default function MentorProfilePage() {
             <p>Status: {mentorProfile?.status || "-"}</p>
           </div>
 
-          <div className="border-t pt-4  flex justify-between">
+          {/* <div className="border-t pt-4  flex justify-between">
             <span className="text-gray-400 text-sm">Rating</span>
             <span className="flex items-center gap-1 text-xs">
               <Star size={14} className="text-yellow-500 fill-yellow-500" />
               0.0
             </span>
-          </div>
+          </div> */}
 
-          <div className="text-sm flex justify-between">
+          {/* <div className="text-sm flex justify-between">
             <span className="text-gray-400 text-sm">Sessions completed</span>
             <span>0</span>
-          </div>
+          </div> */}
 
         </div>
 

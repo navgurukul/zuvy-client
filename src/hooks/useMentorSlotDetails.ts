@@ -6,6 +6,7 @@ import { api } from '@/utils/axios.config'
 export interface MentorSlotDetailsSlot {
     id: number
     slotStartDateTime: string
+    slotEndDateTime?: string
     [key: string]: unknown
 }
 

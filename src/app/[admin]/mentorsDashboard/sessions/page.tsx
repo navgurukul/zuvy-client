@@ -438,30 +438,28 @@ export default function SessionsPage() {
                       }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="h-9 w-9 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
+                      <div className="h-9 w-9 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
                         B{session.id}
                       </div>
 
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">Booking #{session.id}</p>
-                        <p className="text-sm text-muted-foreground">Slot #{session.slotAvailabilityId}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Student: {session.studentName || session.studentUserName || `#${session.studentUserId ?? "-"}`}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 mb-2">
+                          {session.studentName || session.studentUserName || `Student #${session.studentUserId ?? "-"}`}
                         </p>
-
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
-                          <span className="flex items-center gap-1">
-                            <Calendar size={12} />
-                            {formatDateTime(session.joinedAt)}
-                          </span>
-
-                          <span className="flex items-center gap-1">
-                            <Clock size={12} />
-                            {session.sessionLifecycleState}
-                          </span>
+                        
+                        <div className="space-y-1 mb-3">
+                          <p className="text-xs text-muted-foreground">Booking #{session.id} • Slot #{session.slotAvailabilityId}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Calendar size={11} />
+                            <span className="text-xs">{formatDateTime(session.slotStart)}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock size={11} />
+                            <span className="text-xs">{formatDateTime(session.slotEnd)}</span>
+                          </div>
                         </div>
 
-                        <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 hover:text-gray-600">{session.status}</Badge>
                           <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 hover:text-blue-700">
                             {session.sessionLifecycleState}
@@ -474,7 +472,7 @@ export default function SessionsPage() {
                         </div>
                       </div>
 
-                      <ChevronRight size={16} className="text-gray-400 mt-1" />
+                      <ChevronRight size={16} className="text-gray-400 mt-1 flex-shrink-0" />
                     </div>
                   </button>
                 )
@@ -497,14 +495,27 @@ export default function SessionsPage() {
             </div>
           ) : (
             <div className="space-y-5">
-              <div className="rounded-xl border p-4 text-left space-y-2">
-                <p className="text-base font-semibold">Session Details</p>
-                <p className="text-sm text-muted-foreground">Booking #{selectedSession.id}</p>
-                <p className="text-sm text-muted-foreground">
-                  Slot ID: {selectedSession.slotAvailabilityId}
+              <div className="rounded-xl border p-4 text-left space-y-3">
+                <p className="text-sm font-semibold text-gray-900">
+                  {selectedSession.studentName || selectedSession.studentUserName || `Student #${selectedSession.studentUserId ?? "-"}`}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Student: {selectedSession.studentName || selectedSession.studentUserName || `#${selectedSession.studentUserId ?? "-"}`}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Calendar size={12} />
+                      {formatDateTime(selectedSession.slotStart)}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Clock size={12} />
+                      {formatDateTime(selectedSession.slotEnd)}
+                    </span>
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">Booking #{selectedSession.id}</p>
+                <p className="text-xs text-muted-foreground">
+                  Slot ID: {selectedSession.slotAvailabilityId}
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 hover:text-gray-600">{selectedSession.status}</Badge>
@@ -543,19 +554,21 @@ export default function SessionsPage() {
                 )}
                 {!slotDetailsLoading && !slotDetailsError && details?.slot && (
                   <>
-                    <p className="text-sm text-muted-foreground">
-                      Start: {formatDateTime(details.slot.slotStartDateTime as string)}
+                    <p className="text-xs text-muted-foreground">
+                      <span className="flex items-center gap-2">
+                        <Calendar size={12} />
+                        {formatDateTime(details.slot.slotStartDateTime as string)}
+                      </span>
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="flex items-center gap-2">
+                        <Clock size={12} />
+                        {formatDateTime(details.slot.slotEndDateTime as string)}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       Total bookings: {details.bookings.length}
                     </p>
-                    <div className="space-y-1">
-                      {details.bookings.map((booking) => (
-                        <div key={booking.id} className="text-sm text-muted-foreground">
-                          Booking #{booking.id} · Student #{booking.studentUserId} · {booking.status}
-                        </div>
-                      ))}
-                    </div>
                   </>
                 )}
               </div>

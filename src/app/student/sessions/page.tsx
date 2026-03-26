@@ -27,6 +27,21 @@ type Tab = "upcoming" | "completed" | "cancelled"
 const formatLifecycleValue = (value: string | null | undefined) =>
   (value || "-").replaceAll("_", " ")
 
+const formatDateTime = (value?: string | null) => {
+  if (!value) return "-"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
   mentorName?.trim() || `Mentor ${mentorUserId}`
 
@@ -227,7 +242,12 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatLifecycleValue(session.sessionLifecycleState)}
+                  {formatDateTime(session.slotStart)}
+                </div>
+
+                <div className="flex items-center gap-1 text-sm">
+                  <Clock size={14} />
+                  {formatDateTime(session.slotEnd)}
                 </div>
 
                 <div className='text-sm'>{session.status}</div>
@@ -325,10 +345,27 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatLifecycleValue(session.sessionLifecycleState)}
+                  {formatDateTime(session.slotStart)}
+                </div>
+
+                <div className="flex items-center gap-1 text-sm">
+                  <Clock size={14} />
+                  {formatDateTime(session.slotEnd)}
                 </div>
 
                 <div className="text-sm">{session.status}</div>
+              </div>
+
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground text-left">
+                <p>
+                  Mentor rating: {typeof session.mentorRating === "number" ? session.mentorRating : "-"}
+                </p>
+                <p>
+                  Feedback notes: {session.mentorFeedback?.notes?.trim() || "-"}
+                </p>
+                <p>
+                  Areas of improvement: {session.mentorFeedback?.areasOfImprovement?.trim() || "-"}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -371,7 +408,12 @@ export default function MySessions() {
 
                 <div className="flex items-center gap-1 text-sm">
                   <Clock size={14} />
-                  {formatLifecycleValue(session.sessionLifecycleState)}
+                  {formatDateTime(session.slotStart)}
+                </div>
+
+                <div className="flex items-center gap-1 text-sm">
+                  <Clock size={14} />
+                  {formatDateTime(session.slotEnd)}
                 </div>
 
                 <div className="text-sm">{session.status}</div>
@@ -408,7 +450,9 @@ export default function MySessions() {
               </Button>
 
               <Button variant="outline" asChild>
-                <Link href={`/student/sessions/${session.id}/reschedule`}>
+                <Link
+                  href={`/student/sessions/${session.id}/reschedule?currentSlotId=${session.slotAvailabilityId}`}
+                >
                   Reschedule
                 </Link>
               </Button>

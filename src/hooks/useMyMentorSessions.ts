@@ -22,12 +22,21 @@ export interface MyMentorSession {
     studentFullName?: string | null
     learnerName?: string | null
     mentorName?: string | null
+    slotStart?: string | null
+    slotEnd?: string | null
+    mentorFeedback?: {
+        notes?: string | null
+        areasOfImprovement?: string | null
+    } | null
+    mentorRating?: number | null
 }
 
 type WrappedMyMentorSession = {
     booking: MyMentorSession
     mentorName?: string | null
     studentName?: string | null
+    slotStart?: string | null
+    slotEnd?: string | null
 }
 
 type MyMentorSessionsPayload = MyMentorSession[] | WrappedMyMentorSession[]
@@ -50,6 +59,8 @@ const normalizeSession = (
             ...value.booking,
             mentorName: value.mentorName ?? value.booking.mentorName ?? null,
             studentName: value.studentName ?? value.booking.studentName ?? null,
+            slotStart: value.slotStart ?? value.booking.slotStart ?? null,
+            slotEnd: value.slotEnd ?? value.booking.slotEnd ?? null,
         }
     }
 
