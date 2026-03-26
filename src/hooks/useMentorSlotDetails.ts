@@ -13,6 +13,13 @@ export interface MentorSlotDetailsBooking {
     id: number
     studentUserId: number
     status: string
+    mentorFeedback?: {
+        notes?: string | null
+        areasOfImprovement?: string | null
+    } | null
+    mentorRating?: number | null
+    mentorFeedbackSubmittedAt?: string | null
+    mentorFeedbackLocked?: boolean | null
     [key: string]: unknown
 }
 
