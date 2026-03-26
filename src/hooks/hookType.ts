@@ -279,8 +279,8 @@ export interface ChapterDetailsResponse {
 
 // useCodingChallenge
 export interface UseCodingChallengeProps {
-    questionId: string;
-    onChapterComplete?: () => void;
+  questionId: string;
+  onChapterComplete?: () => void;
 }
 
 // useCodingSubmissions
@@ -334,7 +334,7 @@ export interface CompletedClassesData {
 }
 
 export interface CompletedClassesResponse {
-  data:any;
+  data: any;
   message: string;
   isSuccess: boolean;
 }
@@ -404,10 +404,10 @@ export interface UseCourseSyllabusReturn {
 
 // UseFeedbackForm
 export interface UseFeedbackFormProps {
-    moduleId: string
-    chapterId: number
-    bootcampId: number
-    onSuccess?: () => void
+  moduleId: string
+  chapterId: number
+  bootcampId: number
+  onSuccess?: () => void
 }
 
 type QuestionType = 'mcq' | 'checkbox' | 'text' | 'date' | 'time';
@@ -416,7 +416,7 @@ export interface FeedbackQuestion {
   id: string;
   question: string;
   type: QuestionType;
-  options?: { id: string; label: string }[]; 
+  options?: { id: string; label: string }[];
   required: boolean;
 }
 
@@ -603,7 +603,7 @@ export interface InstructorDetails {
 
 export interface UpcomingEvent {
   chapterId: any;
-  hangoutLink?:string;
+  hangoutLink?: string;
   moduleId: any;
   id: number;
   title: string;
@@ -630,6 +630,7 @@ export interface Bootcamp {
   progress: number;
   instructorDetails: InstructorDetails;
   upcomingEvents: UpcomingEvent[];
+  courseOrgName?: string;
 }
 
 export interface StudentData {
@@ -688,9 +689,9 @@ export interface UseBootcampSettingsReturn {
 
 // useBootcampDelete.tsx
 export interface UseBootcampDeleteReturn {
-    deleteBootcamp: (bootcampId: string) => Promise<void>
-    isDeleting: boolean
-    error: string | null
+  deleteBootcamp: (bootcampId: string) => Promise<void>
+  isDeleting: boolean
+  error: string | null
 }
 
 export interface coursePermissions {
@@ -769,7 +770,7 @@ export interface EditCodingQuestionData {
 }
 
 export interface UseEditCodingQuestionReturn {
-  editQuestion: (questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
+  editQuestion: (orgId: number, questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
   loading: boolean;
   error: string | null;
 }
@@ -815,13 +816,6 @@ export interface GlobalCourseData {
   instructorDetails: GlobalCourseInstructorDetails;
 }
 
-export interface GlobalCourseResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: GlobalCourseData;
-}
-
 export interface UseFetchGlobalCoursesReturn {
   globalCourses: GlobalCourseData[]; // Changed to array
   loading: boolean;
@@ -833,5 +827,181 @@ export interface UseFetchGlobalCoursesReturn {
 export interface UseEnrollCourseReturn {
   enrollCourse: (courseId: number) => Promise<EnrollCourseResult>;
   isEnrolling: boolean;
+  error: string | null;
+}
+
+// Tracking Log Types
+export interface TrackingLogEntry {
+  id: number
+  orgId: number
+  actorUserId: number
+  actorName: string
+  actorEmail: string
+  permissionId: number
+  resourceId: number
+  action: string
+  resourceType: string
+  description: string
+  createdAt: string
+  status: string
+  actorRoles: string[]
+}
+
+export interface TrackingLogPagination {
+  offset: number
+  limit: number
+  total: number
+}
+
+export interface TrackingLogData {
+  logs: TrackingLogEntry[]
+  pagination: TrackingLogPagination
+}
+
+export interface TrackingLogResponse {
+  success: boolean
+  message: string
+  data: TrackingLogData
+}
+
+export interface UseTrackingLogArgs {
+  orgId?: number
+  actorUserId?: number | string
+  action?: string
+  role?: string
+  status?: string
+  offset?: number
+  limit?: number
+  timeRange?: string
+  search?: string
+  initialFetch?: boolean
+}
+
+export interface UseTrackingLogReturn {
+  trackingLogs: TrackingLogEntry[]
+  loading: boolean
+  error: unknown
+  totalRows: number
+  pagination: TrackingLogPagination
+  refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+}
+
+
+
+// useFetchGlobalCourses
+export interface GlobalCourseInstructorDetails {
+  name: string;
+  profilePicture: string | null;
+}
+
+export interface GlobalCourseBatchInfo {
+  id: number;
+  name: string;
+  bootcampId: number;
+  instructorId: number;
+  startDate: string | null;
+  endDate: string | null;
+  status: string;
+  capEnrollment: number;
+  createdAt: string;
+  updatedAt: string;
+  instructorDetails: GlobalCourseInstructorDetails;
+}
+
+export interface GlobalCourseEnrolledInfo {
+  students_in_bootcamp: number;
+  unassigned_students: number;
+}
+
+export interface GlobalCourseData {
+  id: number;
+  name: string;
+  description: string;
+  collaborator: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: number;
+  language: string;
+  organizationId: number;
+  createdAt: string;
+  updatedAt: string;
+  version: string | null;
+  bootcampId: number;
+  type: string;
+  isModuleLocked: boolean;
+  batchInfo: GlobalCourseBatchInfo;
+  enrolledInfo: GlobalCourseEnrolledInfo;
+  courseOrgName?: string;
+}
+
+export interface GlobalCourseResponse {
+  message?: string;
+  code?: number;
+  isSuccess?: boolean;
+  data?: GlobalCourseData[]; // Array of courses
+}
+
+export interface UseFetchGlobalCoursesReturn {
+  globalCourses: GlobalCourseData[]; // Changed to array
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+// useEnrollCourse
+export interface EnrollCourseResponse {
+  isSuccess?: boolean;
+  status?: 'success' | 'error';
+  message?: string;
+  code?: number;
+}
+
+export interface EnrollCourseResult {
+  success: boolean;
+  message: string;
+  code?: number;
+}
+
+export interface UseEnrollCourseReturn {
+  enrollCourse: (bootcampId: number) => Promise<EnrollCourseResult>;
+  isEnrolling: boolean;
+  error: string | null;
+}
+
+// useSwitchOrg
+export interface SwitchOrgPayload {
+  orgId: number;
+  refresh_token: string;
+}
+
+export interface SwitchOrgResponse {
+  isSuccess?: boolean;
+  status?: string;
+  message?: string;
+  access_token: string;
+  refresh_token: string;
+  user: {
+    rolesList: any[];
+    id: string;
+    email: string;
+    name: string;
+    profilePicture?: string;
+    profile_picture?: string;
+    orgId: number;
+    orgName: string;
+  };
+}
+
+export interface SwitchOrgResult {
+  success: boolean;
+  message: string;
+}
+
+export interface UseSwitchOrgReturn {
+  switchOrg: (payload: SwitchOrgPayload) => Promise<SwitchOrgResult>;
+  isSwitching: boolean;
   error: string | null;
 }

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getUserInitials } from '@/utils/common'
+import { formattedRole } from '@/lib/utils'
 
 interface ProfileDropDownProps {
     studentData: any
@@ -66,14 +67,15 @@ const ProfileDropDown = ({
                                 Role
                             </p>
                             <p className="text-sm capitalize">
-                                {studentData?.rolesList?.join(', ')}
+                                {/* {studentData?.rolesList?.join(', ')} */}
+                                {formattedRole(studentData?.rolesList?.[0] || '')}
                             </p>
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
-                        className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600 cursor-pointer"
+                        className="text-red-600 hover:bg-primary hover:!text-primary-foreground cursor-pointer"
                     >
                         {/* <LogOut className="mr-2 h-4 w-4" /> */}
                         <span>Logout</span>

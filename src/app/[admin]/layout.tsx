@@ -1,7 +1,7 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { usePathname, useRouter} from 'next/navigation'
+import { usePathname, useRouter, useParams} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'

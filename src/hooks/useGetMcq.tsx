@@ -2,8 +2,11 @@ import { useCallback, useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCodingQuestionTags } from '@/store/store'
 import{Props, Tag,QuizApiResponse  } from '@/hooks/hookType'
+import { useParams } from 'next/navigation';
 
 const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [quizData, setQuizData] = useState<any>(null)
     const [noofExistingVariants, setNoofExistingVariants] = useState<number>(0)
     const [difficulty, setDifficulty] = useState<string | null>(null)
@@ -14,7 +17,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
 
     const fetchQuizHandler = useCallback(async () => {
         try {
-            const res = await api.get<QuizApiResponse>(`/Content/quiz/${id}`)
+            const res = await api.get<QuizApiResponse>(`/Content/${orgId}/quiz/${id}`)
             const quiz = res.data.data[0]
 
             setQuizData(quiz)

@@ -27,6 +27,13 @@ export function isPlural(count: number): boolean {
     return count !== 1
 }
 
+export const formattedRole = (role: string) => {
+     return role
+        .toLowerCase()
+        .replace('_', ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 // Text Color as per difficulty:
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {

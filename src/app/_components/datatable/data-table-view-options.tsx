@@ -12,7 +12,7 @@ import {
 import { Table } from "@tanstack/react-table";
 import { View } from "lucide-react";
 import { Cross } from "lucide-react";
-import {DataTableViewOptionsProps} from "@/app/_components/datatable/componentDatatable"
+import { DataTableViewOptionsProps } from "@/app/_components/datatable/componentDatatable"
 
 export function DataTableViewOptions<TData>({
   table,
@@ -28,9 +28,9 @@ export function DataTableViewOptions<TData>({
           <View className="mr-2 h-4 w-4" />
           View
         </Button>
-     
+
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[150px]">
+      <DropdownMenuContent align="end" className="w-fit min-w-[150px]">
         <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table
