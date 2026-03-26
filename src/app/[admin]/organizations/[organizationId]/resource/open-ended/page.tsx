@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -63,6 +63,8 @@ type Props = {}
 const OpenEndedQuestions = (props: Props) => {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     const [selectedTag, setSelectedTag] = useState<OpenPageTag>({
         tagName: "All Topics",
@@ -112,7 +114,7 @@ const OpenEndedQuestions = (props: Props) => {
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         const response = await api.get(
-            `/content/openEndedQuestions?searchTerm=${encodeURIComponent(
+            `/content/${orgId}/openEndedQuestions?searchTerm=${encodeURIComponent(
                 query
             )}&limit=5&offset=0`
         )
@@ -124,7 +126,7 @@ const OpenEndedQuestions = (props: Props) => {
             if (query.trim()) {
                 // For search results, use the same API endpoint
                 const response = await api.get(
-                    `/content/openEndedQuestions?searchTerm=${encodeURIComponent(
+                    `/content/${orgId}/openEndedQuestions?searchTerm=${encodeURIComponent(
                         query
                     )}&limit=${position}&offset=${offset}`
                 )
@@ -140,6 +142,7 @@ const OpenEndedQuestions = (props: Props) => {
     const defaultFetchApi = useCallback(async () => {
         await filteredOpenEndedQuestions(
             setOpenEndedQuestions,
+            orgId,
             offset,
             position,
             difficulty,
@@ -242,7 +245,7 @@ const OpenEndedQuestions = (props: Props) => {
                 .map((option) => option.value)
 
             try {
-                const response = await api.get(`/content/openEndedQuestions`, {
+                const response = await api.get(`/content/${orgId}/openEndedQuestions`, {
                     params: {
                         searchTerm: searchParam,
                         limit: position,
@@ -287,7 +290,7 @@ const OpenEndedQuestions = (props: Props) => {
     useEffect(() => {
         getAllOpenEndedQuestions((data: OpenEndedQuestionType[]) => {
             setAllOpenEndedQuestions(data)
-        })
+        }, orgId)
     }, [])
 
     // Add this refresh function

@@ -2,7 +2,7 @@
 // External imports
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ChevronLeft, Search, ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -132,6 +132,8 @@ const Mcqs = (props: Props) => {
 
     const { isConnected: isSocketConnected, lastQuestionsReadyEvent } =
         getSocketConnectionStore()
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
 
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
@@ -443,6 +445,7 @@ const Mcqs = (props: Props) => {
                     const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
                     await filteredQuizQuestions(
                         setStoreQuizData,
+                        orgId,
                         offset,
                         position,
                         difficulty,
@@ -558,7 +561,7 @@ const Mcqs = (props: Props) => {
                     <BulkUploadMcq
                         closeModal={() => setIsCreateMcqDialogOpen(false)}
                         setStoreQuizData={setStoreQuizData}
-                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData)}
+                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData, orgId)}
                     />
                 )
             case 'oneatatime':
