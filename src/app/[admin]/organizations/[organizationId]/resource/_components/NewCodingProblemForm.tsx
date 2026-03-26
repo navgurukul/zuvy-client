@@ -33,6 +33,7 @@ import test from 'node:test'
 import { NewCodingProblemFormProps } from './adminResourceComponentType'
 import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { useParams } from 'next/navigation';
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -90,7 +91,8 @@ export default function NewCodingProblemForm({
 }: NewCodingProblemFormProps) {
     // Custom hook
     const { createQuestion, loading, error } = useCreateCodingQuestion()
-
+    const { organizationId } = useParams()
+    const orgId = Number(organizationId)
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -718,6 +720,7 @@ export default function NewCodingProblemForm({
             // Refresh data
             await filteredCodingQuestions(
                 setCodingQuestions,
+                orgId,
                 offset,
                 position,
                 difficulty,
