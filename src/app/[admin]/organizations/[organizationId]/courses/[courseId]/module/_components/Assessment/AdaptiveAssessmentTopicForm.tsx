@@ -10,11 +10,12 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import { ChevronDown, ChevronUp, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useCreateTopic } from '@/hooks/useCreateTopic'
 import { useDeleteTopic } from '@/hooks/useDeleteTopic'
 import { useTopics } from '@/hooks/useTopics'
+import { useUpdateTopic } from '@/hooks/useUpdateTopic'
 
 export type AdaptiveAssessmentTopicPayload = {
 	topic: string
@@ -43,6 +44,7 @@ function AdaptiveAssessmentTopicForm({
 	)
 	const { createTopic, creating } = useCreateTopic()
 	const { deleteTopic, deleting } = useDeleteTopic()
+	const { updateTopic, updating } = useUpdateTopic()
 	const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null)
 	const [description, setDescription] = useState('')
 	const [newTopicName, setNewTopicName] = useState('')
@@ -53,6 +55,9 @@ function AdaptiveAssessmentTopicForm({
 		id: number
 		name: string
 	} | null>(null)
+	const [editTopic, setEditTopic] = useState<{ id: number; name: string } | null>(null)
+	const [editTopicName, setEditTopicName] = useState('')
+	const [editTopicDescription, setEditTopicDescription] = useState('')
 
 	const INITIAL_DISPLAY_LIMIT = 15
 
@@ -134,6 +139,9 @@ function AdaptiveAssessmentTopicForm({
 			setShowAddTopicInput(false)
 			setShowAllTopics(false)
 			setDuplicateSuggestions([])
+			setEditTopic(null)
+			setEditTopicName('')
+			setEditTopicDescription('')
 		}
 	}, [open])
 
@@ -236,6 +244,81 @@ function AdaptiveAssessmentTopicForm({
 		}
 	}
 
+	const openEditDialog = (topicId: number) => {
+		const selectedTopic = topics.find((topic) => topic.id === topicId)
+		if (!selectedTopic || !selectedTopic.id) {
+			return
+		}
+
+		setEditTopic({ id: selectedTopic.id, name: selectedTopic.name })
+		setEditTopicName(selectedTopic.name)
+		setEditTopicDescription(selectedTopic.description || '')
+	}
+
+	const confirmEdit = async () => {
+		if (!editTopic) {
+			return
+		}
+
+		const trimmedName = editTopicName.trim()
+		const trimmedDescription = editTopicDescription.trim()
+
+		if (!trimmedName) {
+			toast.error({
+				title: 'Topic name required',
+				description: 'Please enter a topic name.',
+			})
+			return
+		}
+
+		if (!trimmedDescription) {
+			toast.error({
+				title: 'Description required',
+				description: 'Please enter a topic description.',
+			})
+			return
+		}
+
+		const duplicateTopic = topicOptions.find(
+			(topic) =>
+				topic.id !== editTopic.id &&
+				topic.name.trim().toLowerCase() === trimmedName.toLowerCase()
+		)
+
+		if (duplicateTopic) {
+			toast.error({
+				title: 'Duplicate topic',
+				description: 'A topic with this name already exists.',
+			})
+			return
+		}
+
+		try {
+			await updateTopic(editTopic.id, bootcampId, {
+				name: trimmedName,
+				description: trimmedDescription,
+			})
+
+			toast.success({
+				title: 'Success',
+				description: `${trimmedName} topic updated successfully`,
+			})
+
+			setEditTopic(null)
+			setEditTopicName('')
+			setEditTopicDescription('')
+			await refetch()
+		} catch (error: any) {
+			toast.error({
+				title: 'Failed to update topic',
+				description:
+					error?.response?.data?.message ||
+					error?.message ||
+					'Unable to update topic right now.',
+			})
+		}
+	}
+
 	if (!open) {
 		return null
 	}
@@ -279,7 +362,7 @@ function AdaptiveAssessmentTopicForm({
 												type="button"
 												key={topic.id}
 												onClick={() => handleSelectTopic(topic.id)}
-												disabled={hasNewTopicName || creating || deleting}
+												disabled={hasNewTopicName || creating || deleting || updating}
 												className={`group relative inline-flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 disabled:opacity-60 ${
 													isSelected
 														? 'bg-yellow-400 text-white hover:bg-yellow-200 hover:text-pink-800'
@@ -292,9 +375,21 @@ function AdaptiveAssessmentTopicForm({
 													type="button"
 													onClick={(event) => {
 														event.stopPropagation()
+														openEditDialog(topic.id)
+													}}
+													disabled={creating || deleting || updating}
+													className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-500 hover:text-white rounded-full p-1 disabled:opacity-60"
+													aria-label={`Update topic ${topic.name}`}
+												>
+													<Pencil className="h-3 w-3" />
+												</button>
+												<button
+													type="button"
+													onClick={(event) => {
+														event.stopPropagation()
 														handleDeleteTopic(topic.id, topic.name)
 													}}
-													disabled={creating || deleting}
+													disabled={creating || deleting || updating}
 													className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-500 hover:text-white rounded-full p-1 disabled:opacity-60"
 													aria-label={`Delete topic ${topic.name}`}
 												>
@@ -311,7 +406,7 @@ function AdaptiveAssessmentTopicForm({
 											type="button"
 											onClick={() => setShowAllTopics(!showAllTopics)}
 											className="flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium transition-colors"
-											disabled={deleting}
+											disabled={deleting || updating}
 										>
 											{showAllTopics ? (
 												<>
@@ -360,7 +455,7 @@ function AdaptiveAssessmentTopicForm({
 									}
 									className="text-foreground"
 									autoFocus
-									disabled={hasSelectedTopic || creating || deleting}
+									disabled={hasSelectedTopic || creating || deleting || updating}
 								/>
 
 								{duplicateSuggestions.length > 0 && (
@@ -410,7 +505,7 @@ function AdaptiveAssessmentTopicForm({
 						variant="outline"
 						onClick={() => onOpenChange(false)}
 						className="h-10 px-4"
-						disabled={deleting}
+						disabled={deleting || updating}
 					>
 						Cancel
 					</Button>
@@ -420,6 +515,7 @@ function AdaptiveAssessmentTopicForm({
 						disabled={
 							creating ||
 							deleting ||
+							updating ||
 							(!hasSelectedTopic && !hasNewTopicName)
 						}
 						className="h-10 px-4"
@@ -433,9 +529,77 @@ function AdaptiveAssessmentTopicForm({
 			</section>
 
 			<Dialog
+				open={!!editTopic}
+				onOpenChange={(nextOpen) => {
+					if (!nextOpen && !updating) {
+						setEditTopic(null)
+						setEditTopicName('')
+						setEditTopicDescription('')
+					}
+				}}
+			>
+				<DialogContent className="max-w-md">
+					<DialogHeader>
+						<DialogTitle>Update Topic</DialogTitle>
+					</DialogHeader>
+
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="edit-topic-name" className="text-sm font-medium text-foreground">
+								Topic Name
+							</Label>
+							<Input
+								id="edit-topic-name"
+								value={editTopicName}
+								onChange={(event) => setEditTopicName(event.target.value)}
+								placeholder="Enter topic name"
+								disabled={updating}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="edit-topic-description" className="text-sm font-medium text-foreground">
+								Description
+							</Label>
+							<Textarea
+								id="edit-topic-description"
+								value={editTopicDescription}
+								onChange={(event) => setEditTopicDescription(event.target.value)}
+								placeholder="Enter topic description"
+								className="min-h-[120px]"
+								disabled={updating}
+							/>
+						</div>
+					</div>
+
+					<DialogFooter className="flex justify-end gap-3">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => {
+								setEditTopic(null)
+								setEditTopicName('')
+								setEditTopicDescription('')
+							}}
+							disabled={updating}
+						>
+							Cancel
+						</Button>
+						<Button
+							type="button"
+							onClick={confirmEdit}
+							disabled={updating}
+						>
+							{updating ? 'Updating...' : 'Update'}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
 				open={!!deleteConfirmTopic}
 				onOpenChange={() => {
-					if (!deleting) {
+					if (!deleting && !updating) {
 						setDeleteConfirmTopic(null)
 					}
 				}}
