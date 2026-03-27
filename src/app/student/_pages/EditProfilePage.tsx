@@ -1401,10 +1401,9 @@ export const EditProfilePage: React.FC = () => {
                       id="linkedin"
                       defaultValue={step1.linkedin} 
                       onChange={(e) => setEditedData({...editedData, linkedin: e.target.value})}
-                      placeholder="linkedin.com/in/yourname" 
+                      placeholder="https://www.linkedin.com/in/yourname" 
                     />
                   </div>
-                  
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" size="sm" onClick={() => { setEditingCard(null); setEditedData({}); }}>Cancel</Button>
                     <Button size="sm" className="gap-2" onClick={handleSavePersonalInfo}><Save className="w-4 h-4" />Save Changes</Button>
@@ -1414,6 +1413,7 @@ export const EditProfilePage: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
 
         {activeTab === 'skills-projects' && (
           <div className="space-y-6">

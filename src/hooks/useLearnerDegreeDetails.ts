@@ -54,7 +54,7 @@ export function useLearnerDegreeDetails(initialFetch = true) {
     const fetchLearnerDegreeDetails = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerDegreeDetailsResponse>('/besic/learner-degree-details')
+            const res = await api.get<LearnerDegreeDetailsResponse>('http://localhost:5000/besic/learner-degree-details')
             // Access degrees array from nested data structure
             let degreesData: LearnerDegreeDetail[] | string[] | undefined
             
