@@ -138,7 +138,7 @@ export default function AvailabilityPage() {
 
     setIsGoogleConnecting(true)
 
-    // ✅ Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
+    // Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
     const currentPage = encodeURIComponent(window.location.href)
 
     const API_BASE = process.env.NEXT_PUBLIC_MAIN_URL;
@@ -157,7 +157,6 @@ export default function AvailabilityPage() {
     const error = params.get("error")
 
     if (success === "true") {
-      // setSuccessMessage("Google Calendar connected successfully")
       toast.success({
         title: "Success",
         description: "Google Calendar connected successfully.",
@@ -165,7 +164,7 @@ export default function AvailabilityPage() {
     }
 
     if (error) {
-      setFormError("Google connection failed ❌")
+      setFormError("Google connection failed")
     }
   }, [])
 
