@@ -32,7 +32,7 @@ import {AssessmentSkeleton} from '@/app/[admin]/organizations/[organizationId]/c
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/adaptiveAssessment/page'
+import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/adaptiveAssessment/AdaptiveAssessmentConfigurationForm'
 
 const chapterSchema = z.object({
     title: z
@@ -582,11 +582,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     tags={tags}
                                 />
                             )}
-                            {questionType === 'adaptive-assessment' && (
-                                <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-                                    <AdaptiveAssessment />
-                                </div>
-                            )}
+                         
                             {questionType === 'settings' && (
                                 <div className="">
                                     <SettingsAssessment

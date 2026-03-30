@@ -12,10 +12,15 @@ interface ConfigurationFormProps {
   criteria: AssessmentCriteria[];
   onCriteriaChange: (criteria: AssessmentCriteria[]) => void;
   onSubmit: () => void;
+  isSubmitting?: boolean;
   assessmentName?: string;
   assessmentDescription?: string;
+  assessmentAudience?: string;
+  assessmentQuestionCount?: string;
   onNameChange?: (name: string) => void;
   onDescriptionChange?: (description: string) => void;
+  onAudienceChange?: (audience: string) => void;
+  onQuestionCountChange?: (count: string) => void;
   syllabusFile?: File | null;
   onSyllabusChange?: (file: File | null) => void;
 }
@@ -24,14 +29,24 @@ export function ConfigurationForm({
   criteria, 
   onCriteriaChange, 
   onSubmit,
+  isSubmitting = false,
   assessmentName = '',
   assessmentDescription = '',
+  assessmentAudience = '',
+  assessmentQuestionCount = '',
   onNameChange,
   onDescriptionChange,
+  onAudienceChange,
+  onQuestionCountChange,
   syllabusFile,
   onSyllabusChange,
 }: ConfigurationFormProps) {
-  const [touched, setTouched] = useState({ name: false, description: false });
+  const [touched, setTouched] = useState({
+    name: false,
+    description: false,
+    audience: false,
+    questionCount: false,
+  });
   const [internalSyllabus, setInternalSyllabus] = useState<File | null>(null);
   const [syllabusError, setSyllabusError] = useState<string | null>(null);
   const currentSyllabus = syllabusFile !== undefined ? syllabusFile : internalSyllabus;
@@ -58,13 +73,12 @@ export function ConfigurationForm({
   };
 
   // Validation
-  const countWords = (text: string): number => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  };
-
-  const descriptionWordCount = countWords(assessmentDescription);
-  const isDescriptionValid = descriptionWordCount >= 20;
+  const isDescriptionValid = assessmentDescription.trim().length > 0;
   const isNameValid = assessmentName.trim().length > 0;
+  const isAudienceValid = assessmentAudience.trim().length > 0;
+  const parsedQuestionCount = Number.parseInt(assessmentQuestionCount, 10);
+  const isQuestionCountValid =
+    Number.isInteger(parsedQuestionCount) && parsedQuestionCount > 0;
 
   const hasValidTopicConfig = (c: AssessmentCriteria): boolean => {
     const topics = c.topics || [];
@@ -89,7 +103,8 @@ export function ConfigurationForm({
   const isFormValid = 
     isNameValid && 
     isDescriptionValid && 
-    criteria.every(c => c.domainId && hasValidTopicConfig(c));
+    isAudienceValid &&
+    isQuestionCountValid;
 
   const totalQuestions = criteria.reduce((sum, c) => {
     const topics = c.topics || [];
@@ -100,24 +115,24 @@ export function ConfigurationForm({
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/25">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-heading font-bold text-foreground tracking-tight">
-                Assessment Configuration
+        <div className="">
+          <div className="flex items-center gap-2 justify-center">
+            {/* <div className="w-8 h-8  mb-2 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/25">
+              <Sparkles className="h-4 w-4 text-primary-foreground" />
+            </div> */}
+            <div className='flex flex-col '>
+              <h2 className="text-xl flex font-semibold text-foreground">
+               Generate Assessment 
               </h2>
-              <p className="text-text-secondary text-sm">
-                Configure domains, topics with difficulty levels and question counts
+              <p className="text-text-secondary flex text-sm mr-6 text-wrap">
+                Configure  Title , audience  and question counts
               </p>
             </div>
           </div>
         </div>
         
         {/* Question Counter */}
-        <div className="text-right">
+        {/* <div className="text-right">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl" />
             <div className="relative bg-gradient-to-br from-card to-card-elevated border border-border/50 rounded-2xl p-4 min-w-[120px]">
@@ -129,16 +144,13 @@ export function ConfigurationForm({
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Assessment Name & Description */}
-      <div className="space-y-4 p-5 bg-gradient-to-br from-muted/30 to-muted/10 rounded-2xl border border-border/50">
+      <div className="space-y-4  ">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <FileText className="h-4 w-4 text-primary" />
-          </div>
-          <h3 className="font-semibold text-foreground">Assessment Details</h3>
+          <h3 className="text-xl font-semibold text-foreground">Assessment Details</h3>
         </div>
 
         {/* Name Field */}
@@ -168,16 +180,11 @@ export function ConfigurationForm({
 
         {/* Description Field */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-foreground">
-                Description <span className="text-destructive">*</span>
-              </label>
-              <HelpTooltip content="Provide a detailed description of the assessment including its objectives, target audience, and key topics covered. Minimum 20 words required." />
-            </div>
-            <span className={`text-xs ${descriptionWordCount >= 20 ? 'text-success' : 'text-text-secondary'}`}>
-              {descriptionWordCount}/20 words minimum
-            </span>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm font-medium text-foreground">
+              Description <span className="text-destructive">*</span>
+            </label>
+            <HelpTooltip content="Provide a detailed description of the assessment including its objectives, target audience, and key topics covered." />
           </div>
           <Textarea
             value={assessmentDescription}
@@ -191,14 +198,77 @@ export function ConfigurationForm({
           {touched.description && !isDescriptionValid && (
             <div className="flex items-center gap-1.5 mt-2 text-destructive text-sm">
               <AlertCircle className="h-4 w-4" />
-              <span>Description must be at least 20 words ({20 - descriptionWordCount} more needed)</span>
+              <span>Description is required</span>
             </div>
           )}
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm font-medium text-foreground">
+              Audience <span className="text-destructive">*</span>
+            </label>
+            <HelpTooltip content="Specify the intended audience, for example: beginners, intermediate learners, freshers, or backend developers." />
+          </div>
+          <Input
+            value={assessmentAudience}
+            onChange={(e) => onAudienceChange?.(e.target.value)}
+            onBlur={() => setTouched(prev => ({ ...prev, audience: true }))}
+            placeholder="e.g., Intermediate JavaScript learners"
+            className={`bg-background/50 border-border/50 rounded-xl h-11 ${
+              touched.audience && !isAudienceValid ? 'border-destructive' : ''
+            }`}
+          />
+          {touched.audience && !isAudienceValid && (
+            <div className="flex items-center gap-1.5 mt-2 text-destructive text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>Audience is required</span>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm font-medium text-foreground">
+              Number of Questions <span className="text-destructive">*</span>
+            </label>
+            <HelpTooltip content="Enter the total number of questions you want in this assessment." />
+          </div>
+          <Input
+            type="number"
+            min={1}
+            step={1}
+            value={assessmentQuestionCount}
+            onChange={(e) => onQuestionCountChange?.(e.target.value)}
+            onBlur={() => setTouched(prev => ({ ...prev, questionCount: true }))}
+            placeholder="e.g., 20"
+            className={`bg-background/50 border-border/50 rounded-xl h-11 ${
+              touched.questionCount && !isQuestionCountValid ? 'border-destructive' : ''
+            }`}
+          />
+          {touched.questionCount && !isQuestionCountValid && (
+            <div className="flex items-center gap-1.5 mt-2 text-destructive text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>Please enter a valid number greater than 0</span>
+            </div>
+          )}
+        </div>
+
+        <div className='w-full flex' >
+          <Button
+            type="button"
+            onClick={onSubmit}
+            disabled={!isFormValid || isSubmitting}
+            className="h-11 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 disabled:opacity-50 disabled:shadow-none"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            {isSubmitting ? 'Generating...' : 'Generate Assessment'}
+          </Button>
         </div>
       </div>
 
       {/* Criteria Rows */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-foreground">Domain & Topic Configuration</h3>
           <HelpTooltip content="Add one or more domain configurations. Each domain can have multiple topics with individual difficulty and question count settings." />
@@ -214,10 +284,10 @@ export function ConfigurationForm({
             canRemove={criteria.length > 1}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Syllabus PDF Upload */}
-      <div className="space-y-3 p-5 bg-gradient-to-br from-muted/30 to-muted/10 rounded-2xl border border-border/50">
+      {/* <div className="space-y-3 p-5 bg-gradient-to-br from-muted/30 to-muted/10 rounded-2xl border border-border/50">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-foreground">Syllabus PDF (optional)</h3>
           <HelpTooltip content="Upload a syllabus PDF to guide question generation or keep as a reference with the assessment." />
@@ -278,10 +348,10 @@ export function ConfigurationForm({
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-4">
+      {/* <div className="flex items-center gap-4 pt-4">
         <Button
           variant="outline"
           onClick={handleAddRow}
@@ -301,7 +371,7 @@ export function ConfigurationForm({
           <Sparkles className="h-4 w-4 mr-2" />
           Submit Configuration
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

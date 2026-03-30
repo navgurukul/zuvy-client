@@ -1,4 +1,3 @@
-import { FileText, BarChart3, Layers, Eye, Sparkles } from 'lucide-react';
 import { GeneratedQuestionSet } from '@/types/assessment';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -16,96 +15,67 @@ export function GeneratedSetCard({ set, onClick }: GeneratedSetCardProps) {
     <div
       onClick={onClick}
       className={cn(
-        'group relative p-6 rounded-2xl border-2 border-border/50 bg-gradient-to-br from-card via-card to-card-elevated',
-        'hover:border-accent/50 hover:shadow-2xl hover:shadow-accent/10 hover:scale-[1.02]',
-        'transition-all duration-500 cursor-pointer overflow-hidden'
+        'group relative p-5 rounded-lg border border-border/50 bg-card',
+        'hover:border-border/80 hover:shadow-sm transition-all duration-300 cursor-pointer'
       )}
     >
-      {/* Hover gradient orb */}
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-      
-      {/* Sparkle decoration */}
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <Sparkles className="h-5 w-5 text-accent animate-pulse" />
-      </div>
-      
-      <div className="relative">
-        <div className="flex items-start justify-between mb-5">
-          <div className={cn(
-            'w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg',
-            'bg-gradient-to-br from-accent/20 to-accent/10 group-hover:from-accent group-hover:to-accent-dark'
-          )}>
-            <FileText className="h-8 w-8 text-accent group-hover:text-accent-foreground transition-colors duration-300" />
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+              {set.name}
+            </h4>
           </div>
-          <Badge 
-            variant="outline" 
-            className="bg-card/80 backdrop-blur-sm font-bold px-3 py-1.5 text-sm border-border/50"
-          >
-            {set.totalQuestions} Qs
-          </Badge>
+          <div className="text-xs font-medium text-text-secondary bg-muted px-2 py-1 rounded">
+            {set.totalQuestions} Q
+          </div>
         </div>
 
-        <h4 className="text-xl font-bold text-foreground mb-5 group-hover:text-accent transition-colors duration-300">
-          {set.name}
-        </h4>
-
-        {/* Difficulty Breakdown Bar */}
-        <div className="mb-5 p-4 bg-muted/30 backdrop-blur-sm rounded-xl border border-border/30">
-          <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="h-4 w-4 text-text-secondary" />
-            <span className="text-xs text-text-secondary font-semibold uppercase tracking-wider">Difficulty Breakdown</span>
-          </div>
-          <div className="flex h-3.5 rounded-full overflow-hidden bg-muted/50 shadow-inner">
+        {/* Difficulty Bar */}
+        <div className="space-y-2">
+          <div className="text-xs text-text-tertiary font-medium">Difficulty</div>
+          <div className="flex h-2 rounded overflow-hidden bg-muted/50 gap-0.5">
             <div
-              className="bg-gradient-to-r from-success to-success-dark transition-all duration-500 group-hover:brightness-110"
+              className="bg-success transition-all duration-300"
               style={{ width: `${(difficultyBreakdown.easy / total) * 100}%` }}
+              title={`Easy: ${difficultyBreakdown.easy}`}
             />
             <div
-              className="bg-gradient-to-r from-warning to-warning-dark transition-all duration-500 group-hover:brightness-110"
+              className="bg-warning transition-all duration-300"
               style={{ width: `${(difficultyBreakdown.medium / total) * 100}%` }}
+              title={`Medium: ${difficultyBreakdown.medium}`}
             />
             <div
-              className="bg-gradient-to-r from-destructive to-destructive-dark transition-all duration-500 group-hover:brightness-110"
+              className="bg-destructive transition-all duration-300"
               style={{ width: `${(difficultyBreakdown.hard / total) * 100}%` }}
+              title={`Hard: ${difficultyBreakdown.hard}`}
             />
-          </div>
-          <div className="flex justify-between mt-3 text-xs font-semibold">
-            <span className="text-success flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-success shadow-sm shadow-success/50" /> 
-              Easy: {difficultyBreakdown.easy}
-            </span>
-            <span className="text-warning flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-warning shadow-sm shadow-warning/50" /> 
-              Medium: {difficultyBreakdown.medium}
-            </span>
-            <span className="text-destructive flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-destructive shadow-sm shadow-destructive/50" /> 
-              Hard: {difficultyBreakdown.hard}
-            </span>
           </div>
         </div>
 
         {/* Domains */}
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-text-secondary flex-shrink-0" />
-          <div className="flex flex-wrap gap-1.5">
-            {set.domainsCovered.map(domain => (
+        {set.domainsCovered && set.domainsCovered.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {set.domainsCovered.slice(0, 2).map(domain => (
               <Badge 
                 key={domain} 
                 variant="secondary" 
-                className="text-xs bg-primary/10 text-primary border border-primary/20 font-medium"
+                className="text-xs bg-muted hover:text-white text-text-secondary border-0 font-normal"
               >
                 {domain}
               </Badge>
             ))}
+            {set.domainsCovered.length > 2 && (
+              <Badge 
+                variant="secondary" 
+                className="text-xs bg-muted hover:text-white text-text-tertiary border-0 font-normal"
+              >
+                +{set.domainsCovered.length - 2}
+              </Badge>
+            )}
           </div>
-        </div>
-        
-        {/* View prompt */}
-        <div className="mt-5 flex items-center justify-center gap-2 text-sm text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Eye className="h-4 w-4" />
-          <span>Click to review questions</span>
-        </div>
+        )}
       </div>
     </div>
   );

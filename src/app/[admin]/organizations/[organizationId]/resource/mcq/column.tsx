@@ -425,7 +425,7 @@ export const zuvyEvalColumns: ColumnDef<any>[] = [
 
             return (
                 <p
-                    className={`flex text-[12px] items-center capitalize w-1/2 p-1 rounded-full border justify-center  ${difficultyColor(
+                    className={`flex text-[12px] items-center capitalize w-2/3 p-1 rounded-full border justify-center  ${difficultyColor(
                         difficulty
                     )}`}
                 >

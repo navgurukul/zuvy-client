@@ -16,6 +16,7 @@ import { useCreateTopic } from '@/hooks/useCreateTopic'
 import { useDeleteTopic } from '@/hooks/useDeleteTopic'
 import { useTopics } from '@/hooks/useTopics'
 import { useUpdateTopic } from '@/hooks/useUpdateTopic'
+import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/adaptiveAssessment/AdaptiveAssessmentConfigurationForm'
 
 export type AdaptiveAssessmentTopicPayload = {
 	topic: string
@@ -45,7 +46,6 @@ function AdaptiveAssessmentTopicForm({
 	const { createTopic, creating } = useCreateTopic()
 	const { deleteTopic, deleting } = useDeleteTopic()
 	const { updateTopic, updating } = useUpdateTopic()
-	const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null)
 	const [description, setDescription] = useState('')
 	const [newTopicName, setNewTopicName] = useState('')
 	const [showAddTopicInput, setShowAddTopicInput] = useState(false)
@@ -72,12 +72,6 @@ function AdaptiveAssessmentTopicForm({
 		[topics]
 	)
 
-	// Get selected topic name from ID
-	const selectedTopicName = topicOptions.find(
-		(t) => t.id === selectedTopicId
-	)?.name
-
-	const hasSelectedTopic = !!selectedTopicName
 	const hasNewTopicName = newTopicName.trim().length > 0
 	const displayedTopics = showAllTopics
 		? topicOptions
@@ -111,9 +105,6 @@ function AdaptiveAssessmentTopicForm({
 
 	const handleInputChange = (value: string) => {
 		setNewTopicName(value)
-		if (selectedTopicId) {
-			setSelectedTopicId(null)
-		}
 
 		if (value.trim()) {
 			checkDuplicates(value)
@@ -123,17 +114,8 @@ function AdaptiveAssessmentTopicForm({
 		setDuplicateSuggestions([])
 	}
 
-	const handleSelectTopic = (topicId: number) => {
-		setSelectedTopicId((current) => (current === topicId ? null : topicId))
-		if (newTopicName) {
-			setNewTopicName('')
-			setDuplicateSuggestions([])
-		}
-	}
-
 	useEffect(() => {
 		if (!open) {
-			setSelectedTopicId(null)
 			setDescription('')
 			setNewTopicName('')
 			setShowAddTopicInput(false)
@@ -149,11 +131,10 @@ function AdaptiveAssessmentTopicForm({
 		const trimmedName = newTopicName.trim()
 		const trimmedDescription = description.trim()
 
-		if (trimmedName && hasSelectedTopic) {
+		if (!trimmedName) {
 			toast.error({
-				title: 'Choose one topic source',
-				description:
-					'Use either Select Topic or Create New Topic, not both.',
+				title: 'Topic name required',
+				description: 'Please enter a topic name.',
 			})
 			return
 		}
@@ -175,26 +156,16 @@ function AdaptiveAssessmentTopicForm({
 			return
 		}
 
-		const finalTopic = trimmedName || selectedTopicName
-
-		if (!finalTopic) {
-			toast.error({
-				title: 'Topic required',
-				description:
-					'Select a topic from dropdown or enter a new topic name.',
-			})
-			return
-		}
 
 		try {
 			await createTopic(bootcampId, {
 				moduleId,
-				name: finalTopic,
+				name: trimmedName,
 				description: trimmedDescription,
 			})
 
-			setSelectedTopicId(null)
 			setNewTopicName('')
+			setDescription('')
 			setDuplicateSuggestions([])
 			refetch()
 		} catch (error: any) {
@@ -208,7 +179,7 @@ function AdaptiveAssessmentTopicForm({
 		}
 
 		onSave({
-			topic: finalTopic,
+			topic: trimmedName,
 			description: trimmedDescription,
 		})
 	}
@@ -224,10 +195,6 @@ function AdaptiveAssessmentTopicForm({
 
 		try {
 			await deleteTopic(deleteConfirmTopic.id, bootcampId)
-
-			if (selectedTopicId === deleteConfirmTopic.id) {
-				setSelectedTopicId(null)
-			}
 
 			toast.success({
 				title: 'Success',
@@ -325,7 +292,8 @@ function AdaptiveAssessmentTopicForm({
 
 	return (
 		<>
-			<section className="w-full lg:w-1/2 max-h-[85vh] overflow-y-auto border border-border/60 rounded-xl bg-background">
+			<div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+			<section className="w-full lg:col-span-5 max-h-[85vh] overflow-y-auto border border-border/60 rounded-xl bg-background">
 				<div className="px-6 pt-6 pb-4 border-b bg-muted/20">
 				<h2 className="text-xl font-semibold text-left">
 					Manage Topics
@@ -341,7 +309,7 @@ function AdaptiveAssessmentTopicForm({
 				<div className="space-y-6 px-6 py-5">
 				<div className="space-y-2.5">
 					<Label className="text-sm flex font-medium text-foreground">
-						Select Topic
+						Topics
 					</Label>
 					<div className="border-2 border-dashed border-gray-200 rounded-lg p-4 h-[200px] overflow-y-auto">
 						{loadingTopics ? (
@@ -356,21 +324,12 @@ function AdaptiveAssessmentTopicForm({
 							<div className="space-y-3">
 								<div className="flex flex-wrap gap-2">
 									{displayedTopics.map((topic) => {
-										const isSelected = selectedTopicId === topic.id
 										return (
-											<button
-												type="button"
+											<div
 												key={topic.id}
-												onClick={() => handleSelectTopic(topic.id)}
-												disabled={hasNewTopicName || creating || deleting || updating}
-												className={`group relative inline-flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 disabled:opacity-60 ${
-													isSelected
-														? 'bg-yellow-400 text-white hover:bg-yellow-200 hover:text-pink-800'
-														: 'bg-orange-400 text-white hover:bg-pink-200 hover:text-pink-800'
-												}`}
+												className="group relative inline-flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-orange-400 text-white hover:bg-pink-200 hover:text-pink-800"
 											>
 												<span>{topic.name}</span>
-												{/* {isSelected && <X className="ml-2 h-3 w-3" />} */}
 												<button
 													type="button"
 													onClick={(event) => {
@@ -395,7 +354,7 @@ function AdaptiveAssessmentTopicForm({
 												>
 													<X className="h-3 w-3" />
 												</button>
-											</button>
+											</div>
 										)
 									})}
 								</div>
@@ -433,19 +392,20 @@ function AdaptiveAssessmentTopicForm({
 							type="button"
 							onClick={() => setShowAddTopicInput(true)}
 							className="flex items-center gap-2 text-muted-dark hover:text-foreground transition-colors"
-							disabled={deleting}
+							disabled={deleting || updating}
 						>
 							<Plus className="h-4 w-4" />
 							<span className="text-sm font-medium">Add New Topic</span>
 						</button>
 					) : (
-						<div className="space-y-3">
-							<div className="flex items-center gap-2 text-foreground">
-								<Plus className="h-4 w-4" />
-								<span className="text-sm font-medium">Add New Topic</span>
-							</div>
-
+						<div className="space-y-4 border border-border/70 rounded-lg p-4 bg-muted/30">
 							<div className="space-y-2">
+								<Label
+									htmlFor="new-topic-name"
+									className="text-sm font-medium  flex text-foreground"
+								>
+									Topic Name
+								</Label>
 								<Input
 									id="new-topic-name"
 									placeholder="Enter topic name..."
@@ -455,7 +415,7 @@ function AdaptiveAssessmentTopicForm({
 									}
 									className="text-foreground"
 									autoFocus
-									disabled={hasSelectedTopic || creating || deleting || updating}
+									disabled={creating || deleting || updating}
 								/>
 
 								{duplicateSuggestions.length > 0 && (
@@ -466,67 +426,62 @@ function AdaptiveAssessmentTopicForm({
 								)}
 							</div>
 
-							<div className="flex justify-end gap-2">
+							<div className="space-y-2">
+								<Label
+									htmlFor="new-topic-description"
+									className="text-sm flex font-medium text-foreground"
+								>
+									Topic Description
+								</Label>
+								<Textarea
+									id="new-topic-description"
+									value={description}
+									onChange={(event) => setDescription(event.target.value)}
+									placeholder="Write topic description"
+									className="min-h-[120px] border-border/70"
+									disabled={creating || deleting || updating}
+								/>
+							</div>
+
+							<div className="flex justify-end gap-2 pt-2">
 								<Button
 									type="button"
 									variant="outline"
 									onClick={() => {
 										setNewTopicName('')
+										setDescription('')
 										setDuplicateSuggestions([])
 										setShowAddTopicInput(false)
 									}}
+									disabled={creating || deleting || updating}
 								>
 									Cancel
+								</Button>
+								<Button
+									type="button"
+									onClick={handleSave}
+									disabled={
+										creating ||
+										deleting ||
+										updating ||
+										!hasNewTopicName
+									}
+								>
+									{creating
+										? 'Saving...'
+										: 'Save'}
 								</Button>
 							</div>
 						</div>
 					)}
 				</div>
-
-				<div className="space-y-2.5">
-					<Label
-						htmlFor="adaptive-topic-description"
-						className="text-sm flex font-medium text-foreground"
-					>
-						Topic Description
-					</Label>
-					<Textarea
-						id="adaptive-topic-description"
-						value={description}
-						onChange={(event) => setDescription(event.target.value)}
-						placeholder="Write topic description"
-						className="min-h-[120px] border-border/70"
-					/>
-				</div>
-
-				<div className="flex justify-end gap-2 pt-1">
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => onOpenChange(false)}
-						className="h-10 px-4"
-						disabled={deleting || updating}
-					>
-						Cancel
-					</Button>
-					<Button
-						type="button"
-						onClick={handleSave}
-						disabled={
-							creating ||
-							deleting ||
-							updating ||
-							(!hasSelectedTopic && !hasNewTopicName)
-						}
-						className="h-10 px-4"
-					>
-						{creating
-							? 'Saving...'
-							: 'Save'}
-					</Button>
-				</div>
 			</div>
 			</section>
+
+			<section className="w-full lg:col-span-7 max-h-[85vh] overflow-y-auto border border-border/60 rounded-xl bg-background">
+				<AdaptiveAssessment />
+			</section>
+			</div>
 
 			<Dialog
 				open={!!editTopic}
@@ -545,7 +500,7 @@ function AdaptiveAssessmentTopicForm({
 
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="edit-topic-name" className="text-sm font-medium text-foreground">
+							<Label htmlFor="edit-topic-name" className="text-sm flex font-medium text-foreground">
 								Topic Name
 							</Label>
 							<Input
@@ -558,7 +513,7 @@ function AdaptiveAssessmentTopicForm({
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="edit-topic-description" className="text-sm font-medium text-foreground">
+							<Label htmlFor="edit-topic-description" className="text-sm flex font-medium text-foreground">
 								Description
 							</Label>
 							<Textarea

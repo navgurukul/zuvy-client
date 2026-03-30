@@ -52,7 +52,7 @@ export function useUpdateTopic() {
                 setError(null)
 
                 try {
-                    const response = await api.put<UpdateTopicResponse>(endpoint, {
+                    const response = await api.patch<UpdateTopicResponse>(endpoint, {
                         name: trimmedName,
                         description: trimmedDescription,
                     })
