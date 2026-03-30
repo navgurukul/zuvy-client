@@ -57,7 +57,7 @@ export function useGetQuestionSets() {
         setQuestionSets(null)
 
         const response = await api.get<GetQuestionSetsResponse>(
-          `http://localhost:5000/ai-assessment/${aiAssessmentId}/question-sets`
+          `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${aiAssessmentId}/question-sets`
         )
 
         const data = response.data
