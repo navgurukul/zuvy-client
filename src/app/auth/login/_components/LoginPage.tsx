@@ -23,8 +23,6 @@ import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
-
-
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
@@ -82,6 +80,22 @@ function LoginPage() {
 
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
+
+    type LearnerProfileStrengthResponse = {
+        percentage?: number
+        level?: string
+        message?: string
+    }
+
+    const getStudentStrengthPercentage = async (): Promise<number | null> => {
+        try {
+            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
+            return typeof res.data?.percentage === 'number' ? res.data.percentage : null
+        } catch (error) {
+            console.error('Failed to fetch learner profile strength:', error)
+            return null
+        }
+    }
 
     // Student Card Component
     const StudentCard = ({
@@ -179,7 +193,13 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    router.push('/student')
+                    const strengthPercentage = await getStudentStrengthPercentage()
+                    if (strengthPercentage !== null && strengthPercentage > 20) {
+                        router.push('/student')
+                    } else {
+                        router.push('/student/profile')
+                    }
+                    
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/organizations/${organizationId}/setting`)
