@@ -13,7 +13,7 @@ export function useDeleteTopic() {
             setError(null)
 
             await api.delete(
-                `http://localhost:5000/topic/${topicId}?bootcampId=${bootcampId}`
+                `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/${topicId}?bootcampId=${bootcampId}`
             )
         } catch (err: any) {
             const errorMessage =

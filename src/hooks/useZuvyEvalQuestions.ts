@@ -56,7 +56,7 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
             }
 
             const baseUrl =
-                process.env.NEXT_PUBLIC_LOCAL_URL?.trim() || 'http://localhost:5000'
+                process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000'
             const requestUrl = `${baseUrl.replace(/\/$/, '')}/questions?${params.toString()}`
 
             const accessToken =

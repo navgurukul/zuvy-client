@@ -45,7 +45,7 @@ export function useUpdateTopic() {
                 throw new Error('Topic description is required')
             }
 
-            const endpoint = `http://localhost:5000/topic/${topicId}?bootcampId=${bootcampId}`
+            const endpoint = `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/${topicId}?bootcampId=${bootcampId}`
 
             try {
                 setUpdating(true)

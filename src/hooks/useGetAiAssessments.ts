@@ -33,7 +33,7 @@ export function useGetAiAssessments() {
         setError(null)
 
         const response = await api.get<AiAssessmentSummary[]>(
-          'http://localhost:5000/ai-assessment',
+          `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment`,
           {
             params: {
               bootcampId,

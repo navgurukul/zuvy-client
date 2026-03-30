@@ -86,7 +86,7 @@ export function useGenerateAiAssessment() {
                 setMappedQuestionsResponse(null)
 
                 const createResponse = await api.post<GenerateAiAssessmentResponse>(
-                    'http://localhost:5000/ai-assessment',
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment`,
                     payload
                 )
 

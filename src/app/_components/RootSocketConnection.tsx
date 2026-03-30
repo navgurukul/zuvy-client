@@ -11,7 +11,7 @@ import { getSocketConnectionStore, getUser } from '@/store/store'
 import SparkleLoader from './isGeneratingCard'
 import MiniSparkle from './isGeneratingCard'
 
-const API_URL = process.env.NEXT_PUBLIC_LOCAL_URL
+const API_URL = process.env.NEXT_PUBLIC_EVAL_URL
 
 const GENERATION_STATUS_LINES = [
     'Analyzing topic coverage and intent',

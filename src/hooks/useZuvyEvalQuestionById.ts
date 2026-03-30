@@ -40,7 +40,7 @@ export function useZuvyEvalQuestionById({
                     ? localStorage.getItem('access_token')
                     : null
 
-            const response = await fetch(`http://localhost:5000/questions/${questionId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_EVAL_URL}/questions/${questionId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

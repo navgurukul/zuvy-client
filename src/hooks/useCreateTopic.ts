@@ -31,7 +31,7 @@ export function useCreateTopic() {
                 setError(null)
 
                 const response = await api.post<CreateTopicResponse>(
-                    `http://localhost:5000/topic?bootcampId=${bootcampId}`,
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/topic?bootcampId=${bootcampId}`,
                     payload
                 )
 

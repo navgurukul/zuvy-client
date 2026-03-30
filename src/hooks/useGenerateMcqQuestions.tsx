@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getSocketConnectionStore } from '@/store/store';
+import { api } from '@/utils/axios.config';
 
 type GenerateMcqResponse = {
   message?: string;
@@ -59,7 +60,6 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { startGeneratingQuestions, stopGeneratingQuestions } = getSocketConnectionStore();
-  const accessToken = localStorage.getItem('access_token') || '';
 
   /**
    * Note: WebSocket connection and global generation loader are handled
@@ -71,22 +71,16 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
     setError(null);
 
     try {
-      const accessToken = localStorage.getItem('access_token') || '';
-      const response = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/questions/generate?orgId=${organizationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data: GenerateMcqResponse = await response.json();
+      const response = await api.post<GenerateMcqResponse>(
+        `${process.env.NEXT_PUBLIC_EVAL_URL}/questions/generate`,
+        payload,
+        {
+          params: {
+            orgId: organizationId,
+          },
+        }
+      );
+      const data = response.data;
 
       startGeneratingQuestions({
         message: data?.message || '',
@@ -98,8 +92,11 @@ export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQ
       console.log('Response:', data);
       
       return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate questions';
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to generate questions';
       setError(errorMessage);
       stopGeneratingQuestions();
       console.error('❌ Failed to generate questions:', errorMessage);
