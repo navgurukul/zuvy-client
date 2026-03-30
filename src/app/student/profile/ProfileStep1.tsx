@@ -364,7 +364,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       // LinkedIn URL validation
       const linkedinRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+\/?$/;
       if (!linkedinRegex.test(formData.linkedin.trim())) {
-        newErrors.linkedin = 'Enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/username)';
+        newErrors.linkedin = 'Enter a valid LinkedIn profile URL';
       }
     }
 
@@ -976,7 +976,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                           No degrees available
                         </SelectItem>
                       )}
-                      <SelectItem value="Other">Other</SelectItem>
+                      {/* <SelectItem value="Other">Other</SelectItem> */}
                     </SelectContent>
                   </Select>
                   {errors.degree && (
