@@ -23,6 +23,7 @@ import { Spinner } from '@/components/ui/spinner'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
 import { formattedRole } from '@/lib/utils'
+import MentorsDropdown from './MentorsDropdown'
 
 //Test
 const Navbar = () => {
@@ -77,6 +78,13 @@ const Navbar = () => {
             href: `/${role}/organizations/${orgId}/settings`,
             icon: Settings,
             active: `/${role}/organizations/${orgId}/settings`,
+        },
+        {
+            name: 'Mentors',
+            href: `/${role}/mentorsDashboard/dashboard`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/mentorsDashboard/dashboard` || pathname.startsWith(`/${role}/mentorsDashboard/`),
         },
         {
             name: 'All Organizations',
@@ -148,7 +156,7 @@ const Navbar = () => {
 
                             return (
                                 <>
-                                    {(!isSuperAdmin  && item.name === 'All Organizations' ) || item.name !== 'Question Bank' && (
+                                    {(!isSuperAdmin  && item.name === 'All Organizations' ) || (item.name !== 'Question Bank' && item.name !== 'Mentors') && (
                                         <Link
                                             key={item.name}
                                             href={item.href}
@@ -165,6 +173,9 @@ const Navbar = () => {
                                     )}
                                     {item.name === 'Question Bank' && permissions.viewQuestion && (
                                         loading ? <Spinner /> : <QuestionBankDropdown/>
+                                    )}
+                                    {item.name === 'Mentors' && (
+                                        <MentorsDropdown role={role} />
                                     )}
                                 </>
                             )
