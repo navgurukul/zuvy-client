@@ -139,7 +139,6 @@ export const ProjectModal: React.FC<{
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = 'Project title is required';
-    if (!formData.oneLineDescription.trim()) newErrors.oneLineDescription = 'One-line description is required';
     if (formData.detailedDescription && formData.detailedDescription.length > 500) {
       newErrors.detailedDescription = 'Description cannot exceed 500 characters';
     }
@@ -276,7 +275,7 @@ export const ProjectModal: React.FC<{
           {/* One-line Description */}
           <div className="space-y-2">
             <Label htmlFor="oneLineDescription" className="font-medium text-left block">
-              One-line Description <span className="text-destructive">*</span>
+              One-line Description (Optional)
             </Label>
             <Input
               id="oneLineDescription"

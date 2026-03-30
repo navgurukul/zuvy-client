@@ -360,6 +360,12 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
     if (!(formData.linkedin ?? '').trim()) {
       newErrors.linkedin = 'LinkedIn Profile is required';
+    } else {
+      // LinkedIn URL validation
+      const linkedinRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+\/?$/;
+      if (!linkedinRegex.test(formData.linkedin.trim())) {
+        newErrors.linkedin = 'Enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/username)';
+      }
     }
 
     if (!formData.collegeName && !formData.customCollege) {

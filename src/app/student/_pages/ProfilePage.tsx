@@ -3,6 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import ProfileStep1Component from '@/app/student/profile/ProfileStep1';
 import ProfileStep2Component from '@/app/student/profile/ProfileStep2';
 import ProfileStep3Component from '@/app/student/profile/ProfileStep3';
@@ -10,7 +20,7 @@ import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
 import { useOnboardingStorage } from '@/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Info, Sparkles } from 'lucide-react';
+import { AlertCircle, Info, Sparkles, X } from 'lucide-react';
 import { MONTHS } from '@/lib/profile.mockData';
 import { toast } from '@/components/ui/use-toast';
 import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
@@ -43,6 +53,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const [isParsingResume, setIsParsingResume] = useState(false);
   const [resumeError, setResumeError] = useState('');
   const [resumeFileName, setResumeFileName] = useState('');
+  const [resumeUploadSource, setResumeUploadSource] = useState<'resume' | 'linkedin-pdf' | null>(null);
+  const [isRemoveResumeDialogOpen, setIsRemoveResumeDialogOpen] = useState(false);
   const [resumeSkills, setResumeSkills] = useState<string[]>([]);
   const [isSavingStepData, setIsSavingStepData] = useState(false);
   const [isTermsAgreed, setIsTermsAgreed] = useState(false);
@@ -50,6 +62,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   // Track current step data to auto-save
   const [currentStepData, setCurrentStepData] = useState<any>(null);
   const hydratedProfileIdRef = useRef<number | null>(null);
+  const resumeUploadInputRef = useRef<HTMLInputElement>(null);
+  const linkedinUploadInputRef = useRef<HTMLInputElement>(null);
   const { saveLearnerProfile, loading: isLearnerProfileSaving } = useSaveLearnerProfile();
   const { parseResume } = useResumeParse();
   const { refetchParsedResume } = useParsedResume(false);
@@ -1243,6 +1257,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         throw new Error('Could not extract details from this resume. Please try another PDF/DOCX format.');
       }
 
+      setResumeUploadSource(source);
       setResumeSkills(parsed.skills);
 
       const existing: Partial<Step1Type> = onboardingData?.step1 ?? {};
@@ -1342,6 +1357,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       const message = error instanceof Error ? error.message : 'Failed to parse resume.';
       setResumeError(message);
       setResumeSkills([]);
+      setResumeFileName('');
+      setResumeUploadSource(null);
     } finally {
       setIsParsingResume(false);
     }
@@ -1365,6 +1382,33 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
     await processResumeFile(file, 'linkedin-pdf');
     event.target.value = '';
+  };
+
+  const handleClearUploadedResume = () => {
+    setResumeFileName('');
+    setResumeUploadSource(null);
+    setResumeSkills([]);
+    setResumeError('');
+
+    if (resumeUploadInputRef.current) {
+      resumeUploadInputRef.current.value = '';
+    }
+    if (linkedinUploadInputRef.current) {
+      linkedinUploadInputRef.current.value = '';
+    }
+
+    toast.success({
+      title: 'Success',
+      description: 'Uploaded file has been delete successfully.',
+    });
+  };
+
+  const handleConfirmResumeRemoval = () => {
+    if (!resumeFileName) {
+      return;
+    }
+
+    setIsRemoveResumeDialogOpen(true);
   };
 
   const handleBackClick = () => {
@@ -1391,6 +1435,11 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const currentStep = onboardingData.currentStep;
   const progressPercentage = (currentStep / 4) * 100;
+  const hasUploadedResume = Boolean(resumeFileName);
+  const isResumeUploadDisabled =
+    isParsingResume || (hasUploadedResume && resumeUploadSource === 'linkedin-pdf');
+  const isLinkedinUploadDisabled =
+    isParsingResume || (hasUploadedResume && resumeUploadSource === 'resume');
 
   return (
     <div className="min-h-full flex flex-col bg-gradient-to-br from-background via-background to-muted">
@@ -1488,10 +1537,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                     onChange={handleResumeUpload}
                     className="hidden"
                     id="resume-upload"
-                    disabled={isParsingResume}
+                    disabled={isResumeUploadDisabled}
+                    ref={resumeUploadInputRef}
                   />
-                  <label htmlFor="resume-upload" className="block h-full">
-                    <div className="border-2 border-dashed border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
+                  <label
+                    htmlFor={isResumeUploadDisabled ? undefined : 'resume-upload'}
+                    className={`block h-full ${isResumeUploadDisabled ? 'cursor-not-allowed' : ''}`}
+                  >
+                    <div className={`border-2 border-dashed border-border rounded-lg p-4 bg-background transition-all h-full ${isResumeUploadDisabled ? 'opacity-50' : 'hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}>
                       <div className="flex flex-col items-center justify-center text-center space-y-2 h-full">
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
@@ -1523,13 +1576,17 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                     onChange={handleLinkedinResumeUpload}
                     className="hidden"
                     id="linkedin-resume-upload"
-                    disabled={isParsingResume}
+                    disabled={isLinkedinUploadDisabled}
+                    ref={linkedinUploadInputRef}
                   />
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <label htmlFor="linkedin-resume-upload" className="block h-full">
-                          <div className="border-2 border-border rounded-lg p-4 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer h-full">
+                        <label
+                          htmlFor={isLinkedinUploadDisabled ? undefined : 'linkedin-resume-upload'}
+                          className={`block h-full ${isLinkedinUploadDisabled ? 'cursor-not-allowed' : ''}`}
+                        >
+                          <div className={`border-2 border-border rounded-lg p-4 bg-background transition-all h-full ${isLinkedinUploadDisabled ? 'opacity-50' : 'hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}>
                             <div className="flex flex-col items-center justify-center text-center h-full space-y-2">
                               <div className="w-9 h-9 rounded-md flex items-center justify-center bg-[#0A66C2]">
                                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
@@ -1563,7 +1620,19 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                   <p className="text-xs text-muted-foreground">Reading resume...</p>
                 )}
                 {!isParsingResume && resumeFileName && (
-                  <p className="text-xs text-muted-foreground">Selected: {resumeFileName}</p>
+                  <div className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                    <p className="text-xs text-muted-foreground">
+                      Selected ({resumeUploadSource === 'linkedin-pdf' ? 'LinkedIn PDF' : 'Resume'}): {resumeFileName}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleConfirmResumeRemoval}
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                      aria-label="Remove uploaded file"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
                 {resumeError && (
                   <Alert variant="destructive">
@@ -1585,6 +1654,25 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
             </div>
           </>
         )}
+        <AlertDialog open={isRemoveResumeDialogOpen} onOpenChange={setIsRemoveResumeDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the PDF.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleClearUploadedResume}
+                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {currentStep === 2 && (
           <div className="flex items-center gap-2 mb-6">
             <div>
