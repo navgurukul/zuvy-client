@@ -968,6 +968,78 @@ export const useSessionModalStore = create<SessionStore>((set) => ({
     setShowModal: (value) => set({ showModal: value }),
 }))
 
+type QuestionsReadyEvent = {
+    count: number
+    questionIds: number[]
+    receivedAt: number
+}
+
+type GenerationJobMeta = {
+    message: string
+    totalJobs: number
+    jobIds: string[]
+}
+
+type SocketConnectionStore = {
+    isConnected: boolean
+    lastQuestionsReadyEvent: QuestionsReadyEvent | null
+    isGeneratingQuestions: boolean
+    generationProgress: number
+    totalJobs: number
+    completedJobs: number
+    generationJobMeta: GenerationJobMeta | null
+    setIsConnected: (value: boolean) => void
+    setLastQuestionsReadyEvent: (value: QuestionsReadyEvent | null) => void
+    startGeneratingQuestions: (payload?: Partial<GenerationJobMeta>) => void
+    stopGeneratingQuestions: () => void
+    setGenerationProgress: (value: number) => void
+    incrementCompletedJobs: () => void
+}
+
+export const getSocketConnectionStore = create<SocketConnectionStore>((set) => ({
+    isConnected: false,
+    lastQuestionsReadyEvent: null,
+    isGeneratingQuestions: false,
+    generationProgress: 0,
+    totalJobs: 1,
+    completedJobs: 0,
+    generationJobMeta: null,
+    setIsConnected: (value) => set({ isConnected: value }),
+    setLastQuestionsReadyEvent: (value) => set({ lastQuestionsReadyEvent: value }),
+    startGeneratingQuestions: (payload) =>
+        set(() => {
+            const totalJobs = Math.max(1, Number(payload?.totalJobs || 1))
+            const jobIds = Array.isArray(payload?.jobIds) ? payload.jobIds : []
+            const message = payload?.message || ''
+
+            return {
+                isGeneratingQuestions: true,
+                generationProgress: 1,
+                totalJobs,
+                completedJobs: 0,
+                generationJobMeta: {
+                    message,
+                    totalJobs,
+                    jobIds,
+                },
+            }
+        }),
+    stopGeneratingQuestions: () =>
+        set({
+            isGeneratingQuestions: false,
+            generationProgress: 0,
+            totalJobs: 1,
+            completedJobs: 0,
+            generationJobMeta: null,
+        }),
+    setGenerationProgress: (value) =>
+        set({ generationProgress: Math.max(0, Math.min(100, value)) }),
+    incrementCompletedJobs: () =>
+        set((state) => ({
+            completedJobs: Math.min(state.totalJobs, state.completedJobs + 1),
+        })),
+}))
+
 // ------------------------- User ------------------------
 interface User {
     rolesList: any[]
