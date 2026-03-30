@@ -15,7 +15,7 @@ export function NoTopicsMessage({ domainName, onNavigateToLibrary }: NoTopicsMes
       <div className="flex-1">
         <h4 className="font-semibold text-foreground mb-1">No Topics Available</h4>
         <p className="text-sm text-text-secondary mb-4">
-          The domain "{domainName}" doesn't have any topics configured yet. You need to create topics and questions in the Question Library before creating an assessment.
+          The domain &quot;{domainName}&quot; doesn&apos;t have any topics configured yet. You need to create topics and questions in the Question Library before creating an assessment.
         </p>
         <Button 
           variant="outline"

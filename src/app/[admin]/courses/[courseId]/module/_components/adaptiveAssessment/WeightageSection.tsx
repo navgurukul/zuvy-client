@@ -58,7 +58,7 @@ export function WeightageSection({
           <h4 className="font-semibold text-foreground mb-1">What does weightage mean here?</h4>
           <p className="text-sm text-text-secondary leading-relaxed">
             Weightage is a numerical value that indicates how much influence a previous assessment should have on generating new questions. 
-            <strong> Higher weightage</strong> means the AI will generate more questions similar to that assessment's patterns. 
+            <strong> Higher weightage</strong> means the AI will generate more questions similar to that assessment&apos;s patterns. 
             <strong> A weightage of 0</strong> means the assessment will be considered but with minimal influence. 
             Use this to fine-tune the question generation based on successful past assessments.
           </p>

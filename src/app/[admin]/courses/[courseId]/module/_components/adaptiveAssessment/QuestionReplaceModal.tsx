@@ -1,5 +1,5 @@
 import { X, Check, RefreshCw, Sparkles, Search } from 'lucide-react';
-import { MCQQuestion, Difficulty } from '@/types/assessment';
+import { MCQQuestion } from '@/types/assessment';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -25,11 +25,13 @@ export function QuestionReplaceModal({
   onClose 
 }: QuestionReplaceModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const diffStyle = difficultyConfig[currentQuestion.difficulty] || difficultyConfig.Medium;
+  const currentDifficultyLabel =
+    currentQuestion.difficulty.charAt(0).toUpperCase() + currentQuestion.difficulty.slice(1);
+  const diffStyle = difficultyConfig[currentDifficultyLabel] || difficultyConfig.Medium;
 
   // Filter questions based on search query
   const filteredQuestions = similarQuestions.filter(question => 
-    question.questionText.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    question.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     question.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
     question.difficulty.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -67,13 +69,12 @@ export function QuestionReplaceModal({
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Current Question</p>
           <div className="p-4 bg-card rounded-xl border border-border/50">
             <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="outline" className="text-xs bg-muted/50">{currentQuestion.domain}</Badge>
               <Badge variant="outline" className="text-xs bg-muted/50">{currentQuestion.topic}</Badge>
               <Badge className={`${diffStyle.bg} ${diffStyle.text} ${diffStyle.border} border text-xs font-semibold`}>
-                {currentQuestion.difficulty}
+                {currentDifficultyLabel}
               </Badge>
             </div>
-            <p className="text-foreground font-medium">{currentQuestion.questionText}</p>
+            <p className="text-foreground font-medium">{currentQuestion.question}</p>
           </div>
         </div>
 
@@ -121,7 +122,9 @@ export function QuestionReplaceModal({
           ) : (
             <div className="space-y-4">
               {filteredQuestions.map((question, index) => {
-                const qDiffStyle = difficultyConfig[question.difficulty] || difficultyConfig.Medium;
+                const questionDifficultyLabel =
+                  question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
+                const qDiffStyle = difficultyConfig[questionDifficultyLabel] || difficultyConfig.Medium;
                 
                 return (
                   <div
@@ -137,27 +140,32 @@ export function QuestionReplaceModal({
                             {question.topic}
                           </Badge>
                           <Badge className={`${qDiffStyle.bg} ${qDiffStyle.text} ${qDiffStyle.border} border text-xs font-semibold`}>
-                            {question.difficulty}
+                            {questionDifficultyLabel}
                           </Badge>
                         </div>
-                        <p className="text-foreground font-medium mb-3">{question.questionText}</p>
+                        <p className="text-foreground font-medium mb-3">{question.question}</p>
                         
                         {/* Preview Options */}
                         <div className="grid grid-cols-2 gap-2 text-sm">
-                          {(Object.entries(question.options) as [string, string][]).map(([key, value]) => (
+                          {question.options.map((value, optionIndex) => {
+                            const optionLabel = String.fromCharCode(65 + optionIndex);
+                            const isCorrect = optionIndex === question.correctOption;
+
+                            return (
                             <div 
-                              key={key}
+                              key={`${question.id}-opt-${optionIndex}`}
                               className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                                key === question.correctAnswer 
+                                isCorrect 
                                   ? 'bg-success/10 text-success border border-success/30' 
                                   : 'bg-muted/30 text-text-secondary'
                               }`}
                             >
-                              <span className="font-semibold">{key}.</span>
+                              <span className="font-semibold">{optionLabel}.</span>
                               <span className="truncate">{value}</span>
-                              {key === question.correctAnswer && <Check className="h-3.5 w-3.5 ml-auto flex-shrink-0" />}
+                              {isCorrect && <Check className="h-3.5 w-3.5 ml-auto flex-shrink-0" />}
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                       

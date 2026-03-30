@@ -221,7 +221,7 @@ export function CriteriaRow({ criteria, domains, onUpdate, onRemove, canRemove }
             <div className="flex-1">
               <h4 className="font-semibold text-foreground mb-1">No Topics Available</h4>
               <p className="text-sm text-text-secondary mb-3">
-                The domain "{selectedDomain?.name}" doesn't have any topics configured yet. Create questions to get started.
+                The domain {selectedDomain?.name} does not have any topics configured yet. Create questions to get started.
               </p>
               <div className="flex items-center gap-2">
                 <Button 
@@ -288,7 +288,7 @@ export function CriteriaRow({ criteria, domains, onUpdate, onRemove, canRemove }
                         </div>
                         <h4 className="font-semibold text-foreground mb-2">Topic Not Found</h4>
                         <p className="text-sm text-text-secondary mb-4 max-w-sm">
-                          The topic you're looking for doesn't exist yet. Create it in the Question Library first.
+                          The topic youre looking for doesnt exist yet. Create it in the Question Library first.
                         </p>
                         <Button 
                           variant="outline"

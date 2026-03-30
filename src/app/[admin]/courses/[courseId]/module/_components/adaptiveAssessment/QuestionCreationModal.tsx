@@ -206,20 +206,15 @@ export function QuestionCreationModal({
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Mock generated questions
+      const normalizedDifficulty = difficulty.toLowerCase() as MCQQuestion['difficulty'];
       const generatedQuestions: Omit<MCQQuestion, 'id'>[] = Array.from(
         { length: values.numberOfQuestions },
         (_, i) => ({
-          questionText: `AI-Generated Question ${i + 1} for ${values.topicName || topicName}`,
-          options: {
-            A: 'Option A',
-            B: 'Option B',
-            C: 'Option C',
-            D: 'Option D',
-          },
-          correctAnswer: 'A' as const,
-          domain: domainName,
+          question: `AI-Generated Question ${i + 1} for ${values.topicName || topicName}`,
+          options: ['Option A', 'Option B', 'Option C', 'Option D'],
+          correctOption: 0,
           topic: values.topicName || topicName,
-          difficulty,
+          difficulty: normalizedDifficulty,
         })
       );
 
@@ -579,7 +574,7 @@ export function QuestionCreationModal({
             name="bloomsLevel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cognitive Level (Bloom's Taxonomy)</FormLabel>
+                <FormLabel>Cognitive Level (Bloom&apos;s Taxonomy)</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">

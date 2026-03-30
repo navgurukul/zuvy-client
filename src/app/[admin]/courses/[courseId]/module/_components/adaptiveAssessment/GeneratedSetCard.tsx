@@ -8,8 +8,9 @@ interface GeneratedSetCardProps {
 }
 
 export function GeneratedSetCard({ set, onClick }: GeneratedSetCardProps) {
-  const { difficultyBreakdown } = set;
+  const difficultyBreakdown = set.difficultyBreakdown ?? { easy: 0, medium: 0, hard: 0 };
   const total = difficultyBreakdown.easy + difficultyBreakdown.medium + difficultyBreakdown.hard;
+  const safeTotal = total || 1;
 
   return (
     <div
@@ -38,17 +39,17 @@ export function GeneratedSetCard({ set, onClick }: GeneratedSetCardProps) {
           <div className="flex h-2 rounded overflow-hidden bg-muted/50 gap-0.5">
             <div
               className="bg-success transition-all duration-300"
-              style={{ width: `${(difficultyBreakdown.easy / total) * 100}%` }}
+              style={{ width: `${(difficultyBreakdown.easy / safeTotal) * 100}%` }}
               title={`Easy: ${difficultyBreakdown.easy}`}
             />
             <div
               className="bg-warning transition-all duration-300"
-              style={{ width: `${(difficultyBreakdown.medium / total) * 100}%` }}
+              style={{ width: `${(difficultyBreakdown.medium / safeTotal) * 100}%` }}
               title={`Medium: ${difficultyBreakdown.medium}`}
             />
             <div
               className="bg-destructive transition-all duration-300"
-              style={{ width: `${(difficultyBreakdown.hard / total) * 100}%` }}
+              style={{ width: `${(difficultyBreakdown.hard / safeTotal) * 100}%` }}
               title={`Hard: ${difficultyBreakdown.hard}`}
             />
           </div>
