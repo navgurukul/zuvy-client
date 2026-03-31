@@ -363,7 +363,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     } else {
       // LinkedIn URL validation
       const linkedinRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+\/?$/;
-      if (!linkedinRegex.test(formData.linkedin.trim())) {
+      if (!linkedinRegex.test((formData.linkedin || '').trim())) {
         newErrors.linkedin = 'Enter a valid LinkedIn profile URL';
       }
     }
