@@ -41,6 +41,7 @@ const normalizeCompetitiveProfiles = (profiles?: CompetitiveProfile[]): Competit
 
 interface ProfileStep3Props {
   initialData?: Partial<Step3Type>;
+  step1Data?: any;
   onNext: (data: Step3Type) => void;
   onSkip: () => void;
   onBack?: () => void;
@@ -89,6 +90,7 @@ const CGPAPercentageConverter: React.FC<{
 
 export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   initialData,
+  step1Data,
   onNext,
   onSkip,
   onBack,
@@ -324,7 +326,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                     <Label htmlFor="stream" className="font-medium text-left block">Stream</Label>
                     <Input
                       id="stream"
-                      value=""
+                      value={step1Data?.branch || ''}
                       disabled
                       className="bg-muted"
                       placeholder="Auto-filled from Step 1"

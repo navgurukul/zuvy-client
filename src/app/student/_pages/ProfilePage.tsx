@@ -594,26 +594,115 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     return 'Could not save complete profile. Please check your details and try again.';
   };
 
-  const handleStep1Complete = (data: Step1Type) => {
+  const handleStep1Complete = async (data: Step1Type) => {
     updateStepData(1, data);
+    setIsSavingStepData(true);
+
+    const payload = buildLearnerProfilePayload(data, undefined, undefined, undefined);
+    const result = await saveLearnerProfile(payload);
+
+    if (!result.success) {
+      const backendMessage = extractBackendErrorMessage(result.error);
+      toast.error({
+        title: 'Failed to save Step 1',
+        description: backendMessage,
+      });
+      setIsSavingStepData(false);
+      return;
+    }
+
+    toast.success({
+      title: 'Step 1 saved',
+      description: 'Your basic details have been saved.',
+    });
+
+    setIsSavingStepData(false);
     goToNextStep();
   };
 
-  const handleStep2Complete = (data: Step2Type) => {
+  const handleStep2Complete = async (data: Step2Type) => {
+    if (!onboardingData?.step1) {
+      toast.error({
+        title: 'Missing basic details',
+        description: 'Please complete Step 1 before proceeding.',
+      });
+      return;
+    }
+
     updateStepData(2, data);
+    setIsSavingStepData(true);
+
+    const payload = buildLearnerProfilePayload(
+      onboardingData.step1 as Step1Type,
+      data,
+      undefined,
+      undefined
+    );
+    const result = await saveLearnerProfile(payload);
+
+    if (!result.success) {
+      const backendMessage = extractBackendErrorMessage(result.error);
+      toast.error({
+        title: 'Failed to save Step 2',
+        description: backendMessage,
+      });
+      setIsSavingStepData(false);
+      return;
+    }
+
+    toast.success({
+      title: 'Step 2 saved',
+      description: 'Your projects and skills have been saved.',
+    });
+
+    setIsSavingStepData(false);
     goToNextStep();
   };
 
-  const handleStep3Complete = (data: Step3Type) => {
+  const handleStep3Complete = async (data: Step3Type) => {
+    if (!onboardingData?.step1 || !onboardingData?.step2) {
+      toast.error({
+        title: 'Missing previous steps',
+        description: 'Please complete Steps 1 and 2 before proceeding.',
+      });
+      return;
+    }
+
     updateStepData(3, data);
+    setIsSavingStepData(true);
+
+    const payload = buildLearnerProfilePayload(
+      onboardingData.step1 as Step1Type,
+      onboardingData.step2 as Step2Type,
+      data,
+      undefined
+    );
+    const result = await saveLearnerProfile(payload);
+
+    if (!result.success) {
+      const backendMessage = extractBackendErrorMessage(result.error);
+      toast.error({
+        title: 'Failed to save Step 3',
+        description: backendMessage,
+      });
+      setIsSavingStepData(false);
+      return;
+    }
+
+    toast.success({
+      title: 'Step 3 saved',
+      description: 'Your experience and academics have been saved.',
+    });
+
+    setIsSavingStepData(false);
     goToNextStep();
   };
 
   const handleStep4Complete = async (data: Step4Type) => {
-    if (!onboardingData?.step1) {
+    if (!onboardingData?.step1 || !onboardingData?.step2 || !onboardingData?.step3) {
       toast.error({
-        title: 'Missing basic details',
-        description: 'Please complete Step 1 before finishing setup.',
+        title: 'Missing previous steps',
+        description: 'Please complete all previous steps before finishing setup.',
       });
       return;
     }
@@ -1705,6 +1794,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
             {currentStep === 3 && (
               <ProfileStep3Component
                 initialData={onboardingData.step3}
+                step1Data={onboardingData.step1}
                 onNext={handleStep3Complete}
                 onSkip={handleSkip}
                 onBack={handleBackClick}
