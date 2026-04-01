@@ -151,7 +151,7 @@ const Page = ({ params }: { params: PageProps }) => {
 
                 <div className="space-y-3">
                     <h2 className="text-base font-medium text-foreground">
-                        Course Type
+                        Course Type - <span className='font-light'>{localSettings.type}</span>
                     </h2>
                     <RadioGroup
                         value={localSettings.type.toLowerCase()}
@@ -160,7 +160,7 @@ const Page = ({ params }: { params: PageProps }) => {
                                 value === 'public' ? 'Public' : 'Private'
                             )
                         }
-                        className="flex flex-col gap-0"
+                        className="flex flex-col gap-0 hidden"
                     >
                         <div className="flex items-start space-x-3 !pb-0 !mb-0">
                             <RadioGroupItem
