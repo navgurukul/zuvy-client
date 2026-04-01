@@ -36,19 +36,10 @@ export function SuccessMessage({ action, setName, onReset }: SuccessMessageProps
       <div className="space-y-2">
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
         <p className="text-sm text-text-secondary">{description}</p>
-        <p className="text-sm text-text-tertiary">
+        {/* <p className="text-sm text-text-tertiary">
           Assessment: <span className="font-medium text-foreground">{setName}</span>
-        </p>
+        </p> */}
       </div>
-
-      <Button 
-        onClick={onReset} 
-        variant="outline"
-        className="mx-auto"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Create Another
-      </Button>
     </div>
   );
 }

@@ -500,6 +500,7 @@ const AdaptiveAssessment = (props: any) => {
               <FinalActionsSection
                 setName={currentGeneratedSets[0]?.name || 'Assessment'}
                 onAction={handleFinalAction}
+                assessmentId={+state.aiAssessmentId}
               />
             </section>
           )}

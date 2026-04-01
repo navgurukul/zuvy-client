@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
+import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, Sparkle, SparkleIcon } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
@@ -81,6 +81,7 @@ useEffect(() => {
         case 6: return 'assessment';
         case 7: return 'feedback-form';
         case 8: return 'live-class';
+        case 9: return 'adaptive-assessment';
         default: return 'video';
       }
     };
@@ -95,6 +96,8 @@ useEffect(() => {
         case 6: return 'Assessment';
         case 7: return 'Feedback Form';
         case 8: return 'Live Class';
+        case 9: return 'adaptive-assessment';
+
         default: return 'Video';
       }
     };
@@ -219,63 +222,6 @@ useEffect(() => {
     );
   }
 
-  // const getAssessmentData = (itemId: string) => {
-  //   const assessmentMap: { [key: string]: any } = {
-  //     'dom-concepts-assessment': {
-  //       id: 'dom-concepts-assessment',
-  //       title: 'DOM Concepts Assessment',
-  //       description: 'This assessment covers DOM manipulation, event handling, and interactive web development concepts. Complete coding problems, MCQ quiz, and open-ended questions.',
-  //       startDate: new Date(),
-  //       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  //       duration: '2 hours',
-  //       totalMarks: 100,
-  //       passScore: 60,
-  //       state: 'scheduled',
-  //       attemptStatus: 'Not Attempted'
-  //     },
-  //     'high-score-assessment': {
-  //       id: 'high-score-assessment',
-  //       title: 'JavaScript Fundamentals Assessment',
-  //       description: 'Comprehensive assessment covering JavaScript basics, data types, functions, and control structures.',
-  //       startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-  //       endDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  //       duration: '90 minutes',
-  //       totalMarks: 100,
-  //       passScore: 60,
-  //       state: 'completed',
-  //       score: 70,
-  //       attemptStatus: 'Attempted'
-  //     },
-  //     'low-score-assessment': {
-  //       id: 'low-score-assessment',
-  //       title: 'Event Handling Assessment',
-  //       description: 'Assessment focusing on event handling, user interactions, and dynamic content updates.',
-  //       startDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  //       endDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  //       duration: '75 minutes',
-  //       totalMarks: 100,
-  //       passScore: 60,
-  //       state: 'completed',
-  //       score: 30,
-  //       attemptStatus: 'Attempted'
-  //     },
-  //     'expired-assessment': {
-  //       id: 'expired-assessment',
-  //       title: 'DOM Manipulation Final Test',
-  //       description: 'Final comprehensive assessment covering all DOM manipulation concepts and techniques.',
-  //       startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-  //       endDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  //       duration: '3 hours',
-  //       totalMarks: 150,
-  //       passScore: 60,
-  //       state: 'expired',
-  //       attemptStatus: 'Not Attempted'
-  //     }
-  //   };
-
-  //   return assessmentMap[itemId];
-  // };
-
   const getSelectedItem = () => {
     if (!enhancedModule || !chapterId) return null;
     for (const topic of enhancedModule.topics) {
@@ -321,6 +267,8 @@ useEffect(() => {
           return <User className="w-4 h-4" />;
         case 'coding-challenge':
           return <BookOpen className="w-4 h-4" />;
+        case 'adaptive-assessment':
+          return <SparkleIcon className="w-4 h-4" />;  
         default:
           return <Circle className="w-4 h-4" />;
       }
@@ -377,6 +325,9 @@ useEffect(() => {
     }
     if (item.type === 'feedback-form') {
       return 'Share your feedback';
+    }
+    if (item.type === 'adaptive-assessment') {
+      return 'Adaptive Assessment';
     }
     return '';
   };
@@ -451,13 +402,14 @@ useEffect(() => {
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-sm break-words whitespace-normal text-left mb-1">
                                   {item.type === 'live-class' ? `Live Class: ${item.title}` :
-                                    item.type === 'video' ? `Video: ${item.title}` :
+                                    item.type === 'video' ? `Video ${item.title}` :
                                       item.type === 'article' ? `Article: ${item.title}` :
                                         item.type === 'assignment' ? `Assignment: ${item.title}` :
                                           item.type === 'assessment' ? `Assessment: ${item.title}` :
                                             item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
                                               item.type === 'quiz' ? `Quiz: ${item.title}` :
                                                 item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
+                                                  item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
                                                   item.title}
                                 </div>
                                 <div className="text-xs font-md text-muted-foreground">
@@ -525,7 +477,7 @@ useEffect(() => {
               <SheetTrigger asChild>
                 <Button variant="outline" className="border-primary text-primary">
                   <List className="w-4 h-4 mr-2" />
-                  Module Content
+                  Module Content 
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">

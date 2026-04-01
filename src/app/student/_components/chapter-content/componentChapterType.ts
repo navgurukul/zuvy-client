@@ -213,3 +213,20 @@ export interface VideoContentProps {
     onChapterComplete: () => void
     refetch: () => void
 }
+
+export interface AdaptiveAssessementStudentViewProps {
+  chapterDetails: {
+    id: number;
+    title: string;
+    description: string | null;
+    status: string;
+    assessmentId: number | null;
+    moduleId: number;
+  };
+  onChapterComplete?: () => void;
+  details?: {
+    chapterId: number | null;
+    moduleId: number | null;
+    courseId: number | null;
+  }
+}
