@@ -60,14 +60,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     ).length || 0;
 
   const QUICK_ACTIONS = [
-    { label: "Find a Mentor", sub: "Browse available mentors", href: "/student/mentors", icon: Search, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Find a Mentor", sub: "Browse available mentors", href: `/student/mentors?courseId=${courseId}`, icon: Search, color: "text-primary", bg: "bg-primary/10" },
     {
       label: "My One to One Sessions",
       sub:
         upcomingLiveClassesCount > 0
           ? `${upcomingLiveClassesCount} upcoming live class${upcomingLiveClassesCount > 1 ? 'es' : ''}`
           : "No upcoming live classes",
-      href: "/student/sessions",
+      href: `/student/sessions?courseId=${courseId}`,
       icon: CalendarDays,
       color: "text-accent",
       bg: "bg-accent/10"
