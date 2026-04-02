@@ -649,38 +649,47 @@ export default function DashboardPage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-2 space-y-1">
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/availability`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><Calendar className="w-4 h-4 text-emerald-700" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/availability`} className="text-xs font-bold text-slate-800">Manage Availability</Link>
+                    <p className="text-xs font-bold text-slate-800">Manage Availability</p>
                     <p className="text-[10px] text-slate-400">Set your open slots</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/sessions`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-orange-50 rounded-full"><BookOpen className="w-4 h-4 text-orange-600" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/sessions`} className="text-xs font-bold text-slate-800">View All Sessions</Link>
+                    <p className="text-xs font-bold text-slate-800">View All Sessions</p>
                     <p className="text-[10px] text-slate-400">Upcoming & past sessions</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/performance`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><BarChart3 className="w-4 h-4 text-emerald-500" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/performance`} className="text-xs font-bold text-slate-800">Performance Metrics</Link>
+                    <p className="text-xs font-bold text-slate-800">Performance Metrics</p>
                     <p className="text-[10px] text-slate-400">Ratings & session stats</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
