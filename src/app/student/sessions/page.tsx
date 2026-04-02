@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -77,6 +78,8 @@ const getMentorAvatarFallback = (mentorName: string | null | undefined, mentorUs
 }
 
 export default function MySessions() {
+  const searchParams = useSearchParams()
+  const courseId = searchParams.get("courseId") || ""
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
 
   const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
@@ -136,11 +139,11 @@ export default function MySessions() {
 
       {/* HEADER */}
       <Link
-                href="/student"
+                href={courseId ? `/student/course/${courseId}` : "/student"}
                 className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
             >
                 <ArrowLeft size={16} />
-                Back to dashboard
+                Back to {courseId ? "course" : "dashboard"}
             </Link>
 
       <div className="flex items-center justify-between">
