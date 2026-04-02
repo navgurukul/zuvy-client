@@ -629,6 +629,19 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       return;
     }
 
+    const totalSkills = new Set([
+      ...(data.autoDetectedSkills || []),
+      ...(data.additionalSkills || []),
+    ].map((skill) => String(skill).trim()).filter(Boolean)).size;
+
+    if (totalSkills < 3) {
+      toast.error({
+        title: 'Please fill all required details before going to the next page',
+        description: 'Please select at least 3 skills total (including auto-detected)',
+      });
+      return;
+    }
+
     updateStepData(2, data);
     setIsSavingStepData(true);
 
@@ -1837,6 +1850,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           )}
           <Button
             onClick={() => {
+              if (currentStep === 4 && !isTermsAgreed) {
+                toast.error({
+                  title: 'Please agree to continue',
+                  description: 'Accept terms and conditions to complete setup.',
+                });
+                return;
+              }
+
               const form = document.querySelector('form');
               if (form) {
                 form.requestSubmit();

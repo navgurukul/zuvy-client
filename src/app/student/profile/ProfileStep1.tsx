@@ -16,6 +16,7 @@ import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockDa
 import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
 import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
 import { getUser } from '@/store/store';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -133,12 +134,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   // Handle custom branch initialization
   useEffect(() => {
-    // Prevent infinite loops by checking if branchOptions is loaded and branch exists
-    if (branchDetails.length > 0 && formData.branch && formData.branch !== 'Other') {
-      const isCustomBranch = !branchOptions.includes(formData.branch);
-      if (isCustomBranch && customBranch !== formData.branch) {
-        setCustomBranch(formData.branch);
-      }
+    if (!formData.branch || formData.branch === 'Other') {
+      return;
+    }
+
+    const isCustomBranch = !branchOptions.includes(formData.branch);
+    if (isCustomBranch && customBranch !== formData.branch) {
+      setCustomBranch(formData.branch);
     }
   }, [branchDetails, formData.branch, branchOptions, customBranch]);
   
@@ -345,7 +347,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   };
 
   // Validate form
-  const validateForm = (): boolean => {
+  const validateForm = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
@@ -389,7 +391,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -493,6 +495,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         // Clear custom degree when switching to a predefined option
         setCustomDegree('');
       }
+      setCustomBranch('');
       if (errors.degree || errors.branch) {
         setErrors((prev) => {
           const next = { ...prev };
@@ -620,9 +623,16 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length === 0) {
       onNext(formData);
+      return;
     }
+
+    toast.error({
+      title: 'Please fill all required details before going to the next page',
+      description: ` ${Object.values(validationErrors).join('; ')}`,
+    });
   };
 
   // Check if mandatory fields are filled (for Skip button)
@@ -1017,8 +1027,8 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                               if (branches.length === 0) return branch;
                               // If it's a predefined branch (either API or mock data), show it
                               if (branches.includes(branch)) return branch;
-                              // If it's a custom branch, always show 'Other' in dropdown
-                              return 'Other';
+                              // Keep the saved custom branch selected instead of collapsing it to Other
+                              return branch;
                             })()} 
                             onValueChange={(value) => handleSelectChange('branch', value)}
                             disabled={!hasSelectedDegree}
@@ -1029,7 +1039,6 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             <SelectContent>
                               {formData.branch &&
                                 formData.branch !== 'Other' &&
-                                !isBranchLoading &&
                                 !branches.includes(formData.branch) && (
                                   <SelectItem value={formData.branch}>{formData.branch}</SelectItem>
                                 )}
@@ -1073,7 +1082,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                     <div className="mt-2">
                       <Input
                         placeholder="Enter your branch name"
-                        value={customBranch}
+                        value={customBranch || (formData.branch && formData.branch !== 'Other' ? formData.branch : '')}
                         onChange={(e) => handleCustomBranchChange(e.target.value)}
                         className="w-full"
                       />

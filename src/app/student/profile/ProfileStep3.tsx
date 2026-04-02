@@ -22,6 +22,7 @@ import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STA
 import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceComponents';
 import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 import { useLearnerBoards } from '@/hooks/useLearnerBoards';
+import { toast } from '@/components/ui/use-toast';
 
 const DEFAULT_COMPETITIVE_PROFILES: CompetitiveProfile[] = COMPETITIVE_PLATFORMS.slice(0, 3).map((platform) => ({
   platform: platform.name as CompetitiveProfile['platform'],
@@ -177,7 +178,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
     }));
   };
 
-  const validateAcademic = (): boolean => {
+  const validateAcademic = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
     if (academicData.marksFormat === 'CGPA' && (!academicData.cgpa || academicData.cgpa < 0 || academicData.cgpa > 10)) {
       newErrors.cgpa = 'Enter a valid CGPA between 0.0 and 10.0';
@@ -192,7 +193,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
       newErrors.class10Marks = 'Enter valid marks';
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleAddExperience = (experience: WorkExperience) => {
@@ -296,14 +297,21 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateAcademic()) {
+    const validationErrors = validateAcademic();
+    if (Object.keys(validationErrors).length === 0) {
       onNext({
         academicPerformance: academicData,
         workExperiences,
         competitiveProfiles,
         hasInternshipExperience: hasInternship,
       });
+      return;
     }
+
+    toast.error({
+      title: 'Please fill all required details before going to the next page',
+      description: ` ${Object.values(validationErrors).join('; ')}`,
+    });
   };
 
   return (

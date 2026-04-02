@@ -19,6 +19,7 @@ import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Ca
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProfileStep2Props {
   initialData?: Partial<Step2Type>;
@@ -136,7 +137,7 @@ export const ProjectModal: React.FC<{
     }
   }, [isOpen, initialProject, addProjectDraft]);
 
-  const validateForm = () => {
+  const validateForm = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = 'Project title is required';
     if (formData.detailedDescription && formData.detailedDescription.length > 500) {
@@ -149,7 +150,7 @@ export const ProjectModal: React.FC<{
       newErrors.demoUrl = 'Demo URL must be valid';
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const isValidUrl = (url: string) => {
@@ -227,7 +228,8 @@ export const ProjectModal: React.FC<{
   };
 
   const handleSubmit = () => {
-    if (validateForm()) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length === 0) {
       onSave(formData);
       if (!initialProject) {
         const emptyProject = createEmptyProject();
@@ -635,7 +637,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
 }) => {
   const [projects, setProjects] = useState<ExternalProject[]>(initialData?.externalProjects || []);
   const [skills, setSkills] = useState<string[]>(initialData?.additionalSkills || []);
-  const [autoDetectedSkills, setAutoDetectedSkills] = useState<string[]>(initialData?.autoDetectedSkills || ['React', 'JavaScript', 'TypeScript']);
+  const [autoDetectedSkills, setAutoDetectedSkills] = useState<string[]>(initialData?.autoDetectedSkills || []);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ExternalProject | undefined>();
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -695,7 +697,18 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
         additionalSkills: skills,
       });
     }
-  }, [projects, skills]);
+  }, [projects, skills, autoDetectedSkills]);
+
+  useEffect(() => {
+    const isSkillsCountValid = totalSkills >= 3 && totalSkills <= 100;
+    if (isSkillsCountValid && errors.skills) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.skills;
+        return next;
+      });
+    }
+  }, [totalSkills, errors.skills]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -759,13 +772,20 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length === 0) {
       onNext({
         externalProjects: projects,
         autoDetectedSkills,
         additionalSkills: skills,
       });
+      return;
     }
+
+    toast.error({
+      title: 'Please fill all required details before going to the next page',
+      description: ` ${Object.values(validationErrors).join('; ')}`,
+    });
   };
 
   const isMandatoryFieldsFilled = totalSkills >= 3 && totalSkills <= 100;

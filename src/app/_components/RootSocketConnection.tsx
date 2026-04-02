@@ -3,12 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
-import Lottie from 'lottie-react'
-import animationData from '../../../../zuvy-client/public/animations/sparkle.json'
 
 import { toast } from '@/components/ui/use-toast'
 import { getSocketConnectionStore, getUser } from '@/store/store'
-import SparkleLoader from './isGeneratingCard'
 import MiniSparkle from './isGeneratingCard'
 
 const API_URL = process.env.NEXT_PUBLIC_EVAL_URL
