@@ -199,9 +199,8 @@ const Navbar = () => {
                         {formattedRole(role)}
                     </Badge>
 
-                    {/* Setting Tab - Only for Admin and POC */}
-                    {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
-                    {inOrg && (studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
+                    {/* Setting Tab - Only for Admin who is POC too */}
+                    {inOrg && (userRole === 'admin' && user?.isPoc) && (
                         <Link
                             href={`/${role}/organizations/${orgId}/setting`}
                             className={cn(
