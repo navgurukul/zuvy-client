@@ -49,7 +49,7 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
   const handleStartAssessment = (assessmentId: number) => {
     if (!bootcampId) return
 
-    const assessmentRoute = `/student/course/${bootcampId}/aiAssessment/${assessmentId}`
+    const assessmentRoute = `/student/course/${bootcampId}/aiAssessment/${assessmentId}?domainId=${domainId}&chapterId=${chapterId}`
     window.open(assessmentRoute, '_blank')?.focus()
   }
 

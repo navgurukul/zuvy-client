@@ -6,14 +6,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useGetStudentAiAssessmentQuestions } from '@/hooks/useGetStudentAiAssessmentQuestions'
-import { Flag, Bookmark, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Flag, Bookmark, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 const AssessmentQuestionsPage = () => {
   const router = useRouter()
   const params = useParams()
+  const searchParams = new URLSearchParams(window.location.search)
+  const domainId = searchParams.get('domainId')
+  const chapterId = searchParams.get('chapterId')
+  
 
   const assessmentIdParam = params?.assessmentId
   const assessmentId = Number(assessmentIdParam)
+  
 
   const {
     questions,
@@ -27,6 +34,7 @@ const AssessmentQuestionsPage = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set())
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<Set<number>>(new Set())
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (!Number.isNaN(assessmentId) && assessmentId > 0) {
@@ -87,6 +95,40 @@ const AssessmentQuestionsPage = () => {
       }
       return newSet
     })
+  }
+
+  const handleSubmitAssessment = async () => {
+    try {
+      setIsSubmitting(true)
+
+      const payload = {
+        assessmentId: assessmentId,
+        courseId: +params?.courseId || null,
+        domainId: domainId ? +domainId : null,
+        chapterId: chapterId ? +chapterId : null,   
+        questions: questions.map((question) => ({
+          ...question,
+          correctOptionSelectedByStudents: +selectedAnswers[question.questionId] || null,
+        })),
+      }
+
+      const response = await api.post(`${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/submit-score`, payload)
+
+      toast({
+        title: 'Success',
+        description: 'Assessment submitted successfully!',
+      })
+
+      router.back()
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to submit assessment. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const getQuestionButtonClass = (index: number) => {
@@ -183,8 +225,19 @@ const AssessmentQuestionsPage = () => {
           </ScrollArea>
 
           <div className="pt-4 space-y-2 border-t border-border">
-            <button className="w-full flex items-center justify-center py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors shadow-soft">
-              Submit
+            <button 
+              onClick={handleSubmitAssessment}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit'
+              )}
             </button>
           </div>
         </aside>
@@ -246,7 +299,7 @@ const AssessmentQuestionsPage = () => {
                     </div>
                   </div>
 
-                  <h2 className="text-lg font-bold text-foreground leading-relaxed">
+                  <h2 className="text-lg font-bold flex text-foreground leading-relaxed">
                     {currentQuestion.question}
                   </h2>
                 </div>
@@ -263,7 +316,7 @@ const AssessmentQuestionsPage = () => {
                           key={`${currentQuestion.questionId}-${optionKey}`}
                           type="button"
                           onClick={() => handleSelectAnswer(currentQuestion.questionId, optionKey)}
-                          className={`group relative flex items-start p-4 rounded-lg text-left border transition-all duration-200 ${
+                          className={`group relative flex items-center p-4 rounded-lg text-left border transition-all duration-200 ${
                             isSelected
                               ? 'bg-success-light border-success shadow-soft'
                               : 'bg-card border-border hover:border-primary/30 hover:shadow-soft'
