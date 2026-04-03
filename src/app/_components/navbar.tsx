@@ -29,11 +29,22 @@ import MentorsDropdown from './MentorsDropdown'
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
+    const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
     const role = pathname.split('/')[1]
-    const orgId = pathname.split('/')[3]
+    const pathSegments = pathname.split('/')
+    const orgIdFromPath =
+        pathSegments[2] === 'organizations' && pathSegments[3]
+            ? pathSegments[3]
+            : undefined
+    const orgIdFromQuery = searchParams.get('orgId') || undefined
+    const orgIdFromUser =
+        typeof user?.orgId === 'number' && Number.isFinite(user.orgId)
+            ? String(user.orgId)
+            : undefined
+    const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
     const inOrg = pathname.split('/').length > 3
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -175,7 +186,7 @@ const Navbar = () => {
                                         loading ? <Spinner /> : <QuestionBankDropdown/>
                                     )}
                                     {item.name === 'Mentors' && (
-                                        <MentorsDropdown role={role} />
+                                        <MentorsDropdown role={role} orgId={orgId || undefined} />
                                     )}
                                 </>
                             )

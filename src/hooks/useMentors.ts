@@ -11,6 +11,8 @@ export interface Mentor {
     bio: string | null
     expertise: string[] | null
     title: string | null
+    availabilityStatus:string | null
+    availableSlots:number
 }
 
 interface MentorsPaginatedResponse {
