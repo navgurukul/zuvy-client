@@ -130,6 +130,12 @@ export default function MentorsPage() {
                         const expertise = Array.isArray(mentor.expertise)
                             ? mentor.expertise
                             : [];
+                        const availabilityStatus = mentor.availabilityStatus?.trim() || "Unavailable";
+                        const normalizedAvailabilityStatus = availabilityStatus.toLowerCase();
+                        const availabilityStatusClassName =
+                            normalizedAvailabilityStatus === "available"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700";
 
                         const initials = mentor.name
                             .split(" ")
@@ -158,9 +164,12 @@ export default function MentorsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                        {mentor.availabilityStatus || "Not available"}
+                                    <span
+                                        className={`inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium ${availabilityStatusClassName}`}
+                                    >
+                                        {mentor.availabilityStatus}
                                     </span>
+                                    
                                 </div>
                                 {/* Skills */}
                                 <div className="mt-4 min-h-[30px]">
