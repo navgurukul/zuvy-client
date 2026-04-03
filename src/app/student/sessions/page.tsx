@@ -88,28 +88,28 @@ export default function MySessions() {
     activeTab as SessionFilter
   )
 
-  const { sessions: upcomingSessionsForCount } = useMyMentorSessions(
+  const { counts: upcomingCounts } = useMyMentorSessions(
     true,
     "/mentor-sessions/my",
     "upcoming"
   )
 
-  const { sessions: completedSessionsForCount } = useMyMentorSessions(
+  const { counts: completedCounts } = useMyMentorSessions(
     true,
     "/mentor-sessions/my",
     "completed"
   )
 
-  const { sessions: cancelledSessionsForCount } = useMyMentorSessions(
+  const { counts: cancelledCounts } = useMyMentorSessions(
     true,
     "/mentor-sessions/my",
     "cancelled"
   )
 
   const counts = {
-    upcoming: upcomingSessionsForCount.length,
-    completed: completedSessionsForCount.length,
-    cancelled: cancelledSessionsForCount.length,
+    upcoming: Number(upcomingCounts.upcoming) || 0,
+    completed: Number(completedCounts.completed) || 0,
+    cancelled: Number(cancelledCounts.cancelled) || 0,
   }
 
   const totalSessions = counts.upcoming + counts.completed + counts.cancelled
