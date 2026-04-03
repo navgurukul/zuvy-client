@@ -159,10 +159,9 @@ export default function MentorsPage() {
                                         </div>
                                     </div>
                                     <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                        • Accepting
+                                        {mentor.availabilityStatus || "Not available"}
                                     </span>
                                 </div>
-
                                 {/* Skills */}
                                 <div className="mt-4 min-h-[30px]">
 
@@ -194,9 +193,9 @@ export default function MentorsPage() {
                                         <Star size={14} className="text-yellow-500 fill-yellow-500" />
                                         {"0.0"}
                                     </div>
-
                                     <p className="text-sm text-gray-400">
-                                        0 sessions
+                                       {mentor.availableSlots}
+                                       <span className="ml-2">Available Slots</span>
                                     </p>
 
                                 </div>
