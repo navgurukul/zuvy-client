@@ -148,13 +148,13 @@ function ChapterModal({
                         <Play className="mr-2 h-6 w-6" />
                         <span>Live Classes</span>
                     </div>
-                    <div
+                    {/* <div
                         className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(9)}
                     >
                         <Sparkle className="mr-2 h-6 w-6" />
                         <span>Adaptive Assessment</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Dialog for users WITH CREATE access */}
