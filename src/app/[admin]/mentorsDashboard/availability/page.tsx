@@ -23,7 +23,16 @@ const minimumDeleteLeadTimeMs = 12 * 60 * 60 * 1000
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
 
-const getDefaultSlotDate = () => new Date().toISOString().slice(0, 10)
+// const getDefaultSlotDate = () => new Date().toISOString().slice(0, 10)
+const getLocalDateString = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const getDefaultSlotDate = () => getLocalDateString()
 
 const startTimeOptions = Array.from({ length: 32 }, (_, index) => {
   const totalMinutes = 6 * 60 + index * 30

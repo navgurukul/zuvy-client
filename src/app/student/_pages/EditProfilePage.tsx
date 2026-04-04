@@ -411,7 +411,7 @@ export const EditProfilePage: React.FC = () => {
       fullName: normalizeText(step1Data.fullName),
       phoneNumber: normalizeText(step1Data.phoneNumber),
       email: normalizeEmail(step1Data.email),
-      linkedinProfile: normalizeText(step1Data.linkedin),
+      linkedinProfile: normalizeOptionalUrl(step1Data.linkedin),
       collegeName: normalizeText(step1Data.collegeName),
       otherCollegeName: normalizeText(step1Data.customCollege),
       degree: normalizeText(step1Data.degree),
@@ -476,9 +476,18 @@ export const EditProfilePage: React.FC = () => {
     const result = await updateLearnerProfile(profileId, payload);
 
     if (!result.success) {
+      const responseData = (result as any)?.error?.response?.data;
+      const backendMessage =
+        (typeof responseData === 'string' && responseData.trim())
+        || (typeof responseData?.message === 'string' && responseData.message.trim())
+        || (Array.isArray(responseData?.message) && responseData.message.length > 0 && responseData.message.join(', '))
+        || (Array.isArray(responseData?.errors) && responseData.errors.length > 0 && (responseData.errors[0]?.message || responseData.errors[0]))
+        || ((result as any)?.error?.message)
+        || 'Could not save profile changes. Please try again.';
+
       toast.error({
         title: 'Save failed',
-        description: 'Could not save profile changes. Please try again.',
+        description: backendMessage,
       });
       return false;
     }
@@ -679,19 +688,89 @@ export const EditProfilePage: React.FC = () => {
   }, [learnerProfile, onboardingData, updateStepData]);
   
   // Save handlers
+  const showRequiredFieldErrors = (fieldErrors: string[]) => {
+    toast.error({
+      title: 'Please fill all required details',
+      description: fieldErrors.join('; '),
+    });
+  };
+
+  const showSaveSuccess = () => {
+    toast.success({
+      title: 'Saved successfully',
+      description: 'Your profile changes have been saved.',
+    });
+  };
+
+  const normalizeAndValidateLinkedInUrl = (value: string) => {
+    const trimmed = String(value || '').trim();
+    if (!trimmed) {
+      return { isValid: false, normalized: '', error: 'LinkedIn Profile is required' };
+    }
+
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+    try {
+      const parsed = new URL(withProtocol);
+      const host = parsed.hostname.toLowerCase();
+      if (host !== 'linkedin.com' && host !== 'www.linkedin.com') {
+        return { isValid: false, normalized: '', error: 'Enter a valid LinkedIn profile URL' };
+      }
+
+      const pathname = parsed.pathname.replace(/\/+$/, '');
+      if (!/^\/in\/[A-Za-z0-9._-]+$/i.test(pathname)) {
+        return { isValid: false, normalized: '', error: 'Enter a valid LinkedIn profile URL' };
+      }
+
+      return { isValid: true, normalized: parsed.toString(), error: '' };
+    } catch {
+      return { isValid: false, normalized: '', error: 'Enter a valid LinkedIn profile URL' };
+    }
+  };
+
   const handleSavePersonalInfo = async () => {
     if (step1) {
+      const hasEditedFullName = Object.prototype.hasOwnProperty.call(editedData, 'fullName');
+      const hasEditedPhoneNumber = Object.prototype.hasOwnProperty.call(editedData, 'phoneNumber');
+      const hasEditedLinkedin = Object.prototype.hasOwnProperty.call(editedData, 'linkedin');
+
       const updatedStep1 = {
         ...step1,
-        fullName: editedData.fullName || step1.fullName,
-        phoneNumber: editedData.phoneNumber || step1.phoneNumber,
-        linkedin: editedData.linkedin || step1.linkedin,
+        fullName: hasEditedFullName ? editedData.fullName : step1.fullName,
+        phoneNumber: hasEditedPhoneNumber ? editedData.phoneNumber : step1.phoneNumber,
+        linkedin: hasEditedLinkedin ? editedData.linkedin : step1.linkedin,
       };
+
+      const fieldErrors: string[] = [];
+      if (!String(updatedStep1.fullName || '').trim()) {
+        fieldErrors.push('Full name is required');
+      }
+
+      const phoneNumber = String(updatedStep1.phoneNumber || '').trim();
+      const phoneRegex = /^(\+91)?[6-9]\d{9}$/;
+      if (!phoneNumber) {
+        fieldErrors.push('Phone number is required');
+      } else if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+        fieldErrors.push('Enter a valid 10-digit Indian mobile number');
+      }
+
+      const linkedInValidation = normalizeAndValidateLinkedInUrl(String(updatedStep1.linkedin || ''));
+      if (!linkedInValidation.isValid) {
+        fieldErrors.push(linkedInValidation.error);
+      }
+
+      if (fieldErrors.length > 0) {
+        showRequiredFieldErrors(fieldErrors);
+        return;
+      }
+
+      updatedStep1.linkedin = linkedInValidation.normalized;
 
       updateStepData(1, updatedStep1);
       const isSaved = await persistProfileChanges(updatedStep1, step2, step3, step4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setEditedData({});
     }
@@ -699,6 +778,19 @@ export const EditProfilePage: React.FC = () => {
   
   const handleSaveSkills = async () => {
     if (step2) {
+      const totalSkills = (step2.autoDetectedSkills?.length || 0) + (editedData.skills?.length || step2.additionalSkills?.length || 0);
+      const fieldErrors: string[] = [];
+      if (totalSkills < 3) {
+        fieldErrors.push('Select at least 3 skills total (including auto-detected)');
+      }
+      if (totalSkills > 100) {
+        fieldErrors.push('Maximum 100 skills allowed');
+      }
+      if (fieldErrors.length > 0) {
+        showRequiredFieldErrors(fieldErrors);
+        return;
+      }
+
       const updatedStep2 = {
         ...step2,
         additionalSkills: editedData.skills || step2.additionalSkills,
@@ -708,6 +800,7 @@ export const EditProfilePage: React.FC = () => {
       const isSaved = await persistProfileChanges(step1, updatedStep2, step3, step4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setEditedData({});
     }
@@ -736,6 +829,39 @@ export const EditProfilePage: React.FC = () => {
       const updatedStep1 = editedData.step1 ? { ...step1, ...normalizedStep1Edits } : step1;
       const updatedStep3 = editedData.step3 ? { ...step3, ...editedData.step3 } : step3;
 
+      const fieldErrors: string[] = [];
+      if (!String(updatedStep1.collegeName || '').trim() && !String(updatedStep1.customCollege || '').trim()) {
+        fieldErrors.push('College selection is required');
+      }
+      if (!String(updatedStep1.degree || '').trim()) {
+        fieldErrors.push('Degree selection is required');
+      }
+      if (!String(updatedStep1.branch || '').trim()) {
+        fieldErrors.push('Branch selection is required');
+      }
+      if (!String(updatedStep1.graduationDate?.month || '').trim() || !String(updatedStep1.graduationDate?.year || '').trim()) {
+        fieldErrors.push('Graduation month and year are required');
+      }
+
+      const academic = updatedStep3?.academicPerformance;
+      if (academic?.marksFormat === 'CGPA') {
+        const cgpa = Number(academic?.cgpa);
+        if (!Number.isFinite(cgpa) || cgpa <= 0 || cgpa > 10) {
+          fieldErrors.push('Enter a valid CGPA between 0.0 and 10.0');
+        }
+      }
+      if (academic?.marksFormat === 'Percentage') {
+        const percentage = Number(academic?.percentage);
+        if (!Number.isFinite(percentage) || percentage <= 0 || percentage > 100) {
+          fieldErrors.push('Enter a valid percentage between 0 and 100');
+        }
+      }
+
+      if (fieldErrors.length > 0) {
+        showRequiredFieldErrors(fieldErrors);
+        return;
+      }
+
       if (editedData.step1) {
         updateStepData(1, updatedStep1);
       }
@@ -746,6 +872,7 @@ export const EditProfilePage: React.FC = () => {
       const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setEditedData({});
     }
@@ -769,6 +896,7 @@ export const EditProfilePage: React.FC = () => {
       const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setEditedData({});
     }
@@ -786,6 +914,31 @@ export const EditProfilePage: React.FC = () => {
       const trimmedCustomLocation = customLocation.trim();
       if (selectedCities.includes('Other') && trimmedCustomLocation && !normalizedLocations.includes(trimmedCustomLocation)) {
         normalizedLocations.push(trimmedCustomLocation);
+      }
+
+      const fieldErrors: string[] = [];
+      if (normalizedTargetRoles.length === 0) {
+        fieldErrors.push('Select at least 1 role');
+      }
+      if (normalizedTargetRoles.length > 5) {
+        fieldErrors.push('Select maximum 5 roles');
+      }
+
+      const totalLocations = (remotePreference ? 1 : 0) + normalizedLocations.length;
+      if (totalLocations === 0) {
+        fieldErrors.push('Select at least 1 location');
+      }
+      if (totalLocations > 6) {
+        fieldErrors.push('Select maximum 5 cities + Remote');
+      }
+
+      if (!emailPref && !whatsappPref && !phonePref) {
+        fieldErrors.push('Select at least 1 contact method');
+      }
+
+      if (fieldErrors.length > 0) {
+        showRequiredFieldErrors(fieldErrors);
+        return;
       }
 
       const updatedStep4 = {
@@ -812,6 +965,7 @@ export const EditProfilePage: React.FC = () => {
       const isSaved = await persistProfileChanges(step1, step2, step3, updatedStep4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setEditedData({});
     }
@@ -988,6 +1142,20 @@ export const EditProfilePage: React.FC = () => {
   
   const handleSaveSkillsUpdated = async () => {
     if (step2) {
+      const totalSkills = editableAutoDetectedSkills.length + skills.length;
+      const fieldErrors: string[] = [];
+      if (totalSkills < 3) {
+        fieldErrors.push('Please select at least 3 skills total (including auto-detected)');
+      }
+      if (totalSkills > 100) {
+        fieldErrors.push('Maximum 100 skills allowed');
+      }
+
+      if (fieldErrors.length > 0) {
+        showRequiredFieldErrors(fieldErrors);
+        return;
+      }
+
       const updatedStep2 = {
         ...step2,
         autoDetectedSkills: editableAutoDetectedSkills,
@@ -998,6 +1166,7 @@ export const EditProfilePage: React.FC = () => {
       const isSaved = await persistProfileChanges(step1, updatedStep2, step3, step4);
       if (!isSaved) return;
 
+      showSaveSuccess();
       setEditingCard(null);
       setCustomSkill('');
     }
@@ -1335,7 +1504,7 @@ export const EditProfilePage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Full name</p>
-                    <p className="font-medium">{step1.fullName || 'Not Added'}</p>
+                    <p className="font-medium">{step1.fullName || '-'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Email address</p>
@@ -1343,11 +1512,11 @@ export const EditProfilePage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">Phone number</p>
-                    <p className="font-medium">{step1.phoneNumber || 'Not Added'}</p>
+                    <p className="font-medium">{step1.phoneNumber || '-'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-1">LinkedIn</p>
-                    <p className="font-medium">{step1.linkedin || 'Not Added'}</p>
+                    <p className="font-medium">{step1.linkedin || '-'}</p>
                   </div>
                 </div>
               ) : (
@@ -1401,10 +1570,9 @@ export const EditProfilePage: React.FC = () => {
                       id="linkedin"
                       defaultValue={step1.linkedin} 
                       onChange={(e) => setEditedData({...editedData, linkedin: e.target.value})}
-                      placeholder="linkedin.com/in/yourname" 
+                      placeholder="https://www.linkedin.com/in/yourname" 
                     />
                   </div>
-                  
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" size="sm" onClick={() => { setEditingCard(null); setEditedData({}); }}>Cancel</Button>
                     <Button size="sm" className="gap-2" onClick={handleSavePersonalInfo}><Save className="w-4 h-4" />Save Changes</Button>
@@ -1414,6 +1582,7 @@ export const EditProfilePage: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
 
         {activeTab === 'skills-projects' && (
           <div className="space-y-6">
@@ -1480,20 +1649,22 @@ export const EditProfilePage: React.FC = () => {
                             <Badge
                               key={skill}
                               variant="default"
-                              className="bg-primary/10 text-primary cursor-pointer hover:opacity-80"
+                              className="bg-primary/10 text-primary cursor-pointer hover:opacity-80 inline-flex items-center"
                               onClick={() => handleRemoveAutoDetectedSkill(skill)}
                             >
                               {skill}
+                              <X className="w-3 h-3 ml-1" />
                             </Badge>
                           ))}
                           {skills.map((skill) => (
                             <Badge
                               key={skill}
                               variant="secondary"
-                              className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer"
+                              className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 cursor-pointer inline-flex items-center"
                               onClick={() => handleRemoveSkill(skill)}
                             >
                               {skill}
+                              <X className="w-3 h-3 ml-1" />
                             </Badge>
                           ))}
                         </div>
@@ -1780,6 +1951,7 @@ export const EditProfilePage: React.FC = () => {
                           onClick={async () => {
                             const isSaved = await persistProfileChanges(step1, step2, step3, step4);
                             if (isSaved) {
+                              showSaveSuccess();
                               setEditingCard(null);
                             }
                           }}
@@ -1825,23 +1997,23 @@ export const EditProfilePage: React.FC = () => {
                         {/* College Details */}
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">College name</p>
-                          <p className="font-medium">{step1?.collegeName || step1?.customCollege || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.collegeName || step1?.customCollege || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Degree</p>
-                          <p className="font-medium">{step1?.degree || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.degree || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Branch</p>
-                          <p className="font-medium">{step1?.branch || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.branch || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Year of study</p>
-                          <p className="font-medium">{step1?.yearOfStudy || 'Not Added'}</p>
+                          <p className="font-medium">{step1?.yearOfStudy || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Expected graduation</p>
-                          <p className="font-medium">{step1?.graduationDate ? `${step1.graduationDate.month} ${step1.graduationDate.year}` : 'Not Added'}</p>
+                          <p className="font-medium">{step1?.graduationDate ? `${step1.graduationDate.month} ${step1.graduationDate.year}` : '-'}</p>
                         </div>
                         
                         {/* Academic Performance */}
@@ -1849,8 +2021,8 @@ export const EditProfilePage: React.FC = () => {
                           <p className="text-xs text-muted-foreground font-medium mb-1">College marks</p>
                           <p className="font-medium">
                             {step3?.academicPerformance?.marksFormat === 'CGPA'
-                              ? `${step3.academicPerformance.cgpa || 'Not Added'} ${step3.academicPerformance.cgpa ? 'CGPA' : ''}`
-                              : step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : 'Not Added'}
+                              ? `${step3.academicPerformance.cgpa || '-'} ${step3.academicPerformance.cgpa ? 'CGPA' : ''}`
+                              : step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : '-'}
                           </p>
                         </div>
                         
@@ -1859,14 +2031,14 @@ export const EditProfilePage: React.FC = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Board</p>
-                              <p className="font-medium">{step3?.academicPerformance?.class12Board || 'Not Added'}</p>
+                              <p className="font-medium">{step3?.academicPerformance?.class12Board || '-'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class12Percentage 
                                   ? `${step3.academicPerformance.class12Percentage}${step3.academicPerformance.class12Format === 'CGPA' ? ' CGPA' : '%'}` 
-                                  : 'Not Added'}
+                                  : '-'}
                               </p>
                             </div>
                           </div>
@@ -1877,14 +2049,14 @@ export const EditProfilePage: React.FC = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Board</p>
-                              <p className="font-medium">{step3?.academicPerformance?.class10Board || 'Not Added'}</p>
+                              <p className="font-medium">{step3?.academicPerformance?.class10Board || '-'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class10Marks 
                                   ? `${step3.academicPerformance.class10Marks}${step3.academicPerformance.class10Format === 'CGPA' ? ' CGPA' : '%'}`
-                                  : 'Not Added'}
+                                  : '-'}
                               </p>
                             </div>
                           </div>
@@ -2614,7 +2786,7 @@ export const EditProfilePage: React.FC = () => {
                       step3.competitiveProfiles.map((profile) => (
                         <div key={profile.platform} className="space-y-1">
                           <p className="text-xs text-muted-foreground font-medium">{profile.platform}</p>
-                          <p className="font-medium">{profile.username || 'Not Added'}</p>
+                          <p className="font-medium">{profile.username || '-'}</p>
                           {profile.rating !== undefined && (
                             <p className="text-xs text-muted-foreground">Rating: {profile.rating}</p>
                           )}

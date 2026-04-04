@@ -12,6 +12,7 @@ import type { OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
 import { useLearnerRoles } from '@/hooks/useLearnerRoles';
 import { useLearnerRemoteLocations } from '@/hooks/useLearnerRemoteLocations';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProfileStep4Props {
   initialData?: Partial<Step4Type>;
@@ -123,7 +124,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
     return linkedInRegex.test(url);
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     if (totalRoles === 0) {
@@ -145,7 +146,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleToggleRole = (role: string) => {
@@ -226,7 +227,8 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length === 0) {
       const allRoles = [...selectedRoles.filter((role) => role !== 'Other'), customRole.trim()].filter(Boolean);
       const allLocations = [
         ...selectedCities.filter((city) => city !== 'Other'),
@@ -253,7 +255,13 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
         allowCompaniesViewProfile: allowCompanies,
         consentTimestamp: new Date().toISOString(),
       });
+      return;
     }
+
+    toast.error({
+      title: 'Please fill all required details before going to the next page',
+      description: `${Object.values(validationErrors).join('; ')}`,
+    });
   };
 
   const isMandatoryFieldsFilled =

@@ -248,7 +248,6 @@ export default function BookSessionPage() {
               <div className="mt-3 text-left text-xs p-3 rounded-lg bg-green-50 text-green-700 border border-green-100">
                 <p className="font-semibold">Booking confirmed</p>
                 <p>Status: {booking.status}</p>
-                <p>Session state: {booking.sessionLifecycleState}</p>
               </div>
             )}
 

@@ -1,5 +1,5 @@
 'use client'
-import { EditIcon, Eye, Pencil, Settings, ArrowRight } from 'lucide-react'
+import { EditIcon, Eye, Pencil, Settings, ArrowRight, Sparkle } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import {
@@ -32,6 +32,7 @@ import {AssessmentSkeleton} from '@/app/[admin]/organizations/[organizationId]/c
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/adaptiveAssessment/AdaptiveAssessmentConfigurationForm'
 
 const chapterSchema = z.object({
     title: z
@@ -184,6 +185,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         router.push(
             `/${userRole}/organizations/${orgId}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
         )
+    }
+
+    const handleAdaptiveAssessmentButtonClick = () => {
+      setQuestionType('adaptive-assessment')
     }
 
     function previewAssessment() {
@@ -473,12 +478,23 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             Open-Ended Questions (
                             {selectedOpenEndedQuestions.length})
                         </Button>
+                            {/* <Button
+                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
+                                questionType === 'adaptive-assessment'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                            }`}
+                            onClick={handleAdaptiveAssessmentButtonClick}
+                        >
+                            <Sparkle size={18} className='text-primary' />
+                       Create Adaptive Assessment
+                        </Button> */}
                     </div>
                 )}
             </div>
             <div className="px-5 pt-4 bg-card">
                 {/* DropDown Filters for questions:- */}
-                {questionType !== 'settings' && (
+                {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
                     <>
                         <div className="flex mb-3">
                             <CodingTopics
@@ -501,11 +517,13 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <div className="flex justify-between w-2/3">
                             <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
                                 {questionType === 'coding'
-                                    ? 'Coding Problem Library'
+                                    ? 'Coding Problem Library' 
                                     : questionType === 'mcq'
                                     ? 'MCQ Library'
                                     : questionType === 'open-ended'
                                     ? 'Open-Ended Question Library'
+                                    : questionType === 'adaptive-assessment'
+                                    ? 'Adaptive Assessment'
                                     : ''}
                             </h3>
                             <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
@@ -519,7 +537,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
                     <div
                         className={`${
-                            questionType == 'settings'
+                            questionType == 'settings' || questionType == 'adaptive-assessment'
                                 ? 'grid grid-cols-1'
                                 : 'grid grid-cols-[1fr_2px_1fr]'
                         } h-screen `}
@@ -564,6 +582,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     tags={tags}
                                 />
                             )}
+                         
                             {questionType === 'settings' && (
                                 <div className="">
                                     <SettingsAssessment
@@ -605,6 +624,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     />
                                 </div>
                             )}
+                          
                         </div>
 
                         <Separator
@@ -612,7 +632,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             className="mx-4 w-[2px] h-96 ml-8 rounded bg-card"
                         />
 
-                        {questionType !== 'settings' && (
+                        {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
                             <div className="h-screen border-l border-muted-light pl-4">
                                 <ScrollArea className="h-96 px-2 pb-4">
                                     <ScrollBar
@@ -657,7 +677,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             </div>
                         )}
                     </div>
+                 
                 </div>
+                
             </div>
             </div>
         </div>
