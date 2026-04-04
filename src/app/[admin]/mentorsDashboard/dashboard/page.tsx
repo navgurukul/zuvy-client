@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useMyMentorSessions, type MyMentorSession } from "@/hooks/useMyMentorSessions"
+import { useMentorMetrics } from "@/hooks/useMentorMetrics"
 import { useNotifications } from "@/hooks/useNotifications"
 import { Progress } from "@nextui-org/react"
 import { cn } from "@/lib/utils"
@@ -184,7 +185,12 @@ export default function DashboardPage() {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed")
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed", "desc")
+  const {
+    metrics,
+    loading: metricsLoading,
+    error: metricsError,
+  } = useMentorMetrics(true)
   const {
     notifications: apiNotifications,
     loading: notificationsLoading,
@@ -213,8 +219,8 @@ export default function DashboardPage() {
     [slots]
   )
 
-  const sessionsDataLoading = sessionsLoading || completedSessionsLoading
-  const sessionsDataError = sessionsError || completedSessionsError
+  const sessionsDataLoading = sessionsLoading || completedSessionsLoading || metricsLoading
+  const sessionsDataError = sessionsError || completedSessionsError || metricsError
 
   const recentCompletedSessions = useMemo(
     () =>
@@ -230,12 +236,6 @@ export default function DashboardPage() {
             "createdAt",
           ]),
         }))
-        .sort((left, right) => {
-          const leftTime = getDateValue(left.eventTime)?.getTime() || 0
-          const rightTime = getDateValue(right.eventTime)?.getTime() || 0
-
-          return rightTime - leftTime
-        })
         .slice(0, 4),
     [completedSessions]
   )
@@ -245,36 +245,16 @@ export default function DashboardPage() {
     [slots]
   )
 
-  const completionRate =
-    sessions.length === 0
-      ? 0
-      : Math.round((completedSessions.length / sessions.length) * 100)
+  const completionRate = (() => {
+    const totalCount = Number(metrics?.sessions.total) || 0
+    const completedCount = Number(metrics?.sessions.completed) || 0
+    return totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
+  })()
 
   const totalHoursScheduled = useMemo(
     () => slots.reduce((sum, slot) => sum + slot.durationMinutes, 0) / 60,
     [slots]
   )
-
-  const ratedCompletedSessions = useMemo(
-    () => completedSessions.filter((session) => typeof session.mentorRating === "number"),
-    [completedSessions]
-  )
-
-  const averageRatingValue = useMemo(() => {
-    if (ratedCompletedSessions.length === 0) {
-      return null
-    }
-
-    const totalRating = ratedCompletedSessions.reduce(
-      (sum, session) => sum + (session.mentorRating || 0),
-      0
-    )
-
-    return totalRating / ratedCompletedSessions.length
-  }, [ratedCompletedSessions])
-
-  const averageRatingDisplay = averageRatingValue === null ? "—" : averageRatingValue.toFixed(1)
-  const averageRatingRounded = averageRatingValue === null ? 0 : Math.round(averageRatingValue)
 
   const slotDurationById = useMemo(() => {
     const durationById = new Map<number, number>()
@@ -363,9 +343,9 @@ export default function DashboardPage() {
                   <CheckCircle className="w-5 h-5 text-muted-foreground" />
               </div>
             <div className="text-left">
-              <p className="text-2xl font-bold">{completedSessions.length}</p>
+              <p className="text-2xl font-bold">{Number(metrics?.sessions.completed) || 0}</p>
               <p className="text-sm text-muted-foreground">Completed Sessions</p>
-              <p className="text-sm  mt-4">of {sessions.length} total bookings</p>
+              <p className="text-sm  mt-4">of {Number(metrics?.sessions.total) || 0} total bookings</p>
             </div>
               </div>
               <div className="flex flex-col items-end gap-2">
@@ -381,7 +361,7 @@ export default function DashboardPage() {
               </div>
 
             <div className="text-left">
-              <p className="text-2xl font-bold">{sessions.length}</p>
+              <p className="text-2xl font-bold">{Number(metrics?.sessions.total) || 0}</p>
               <p className="text-sm text-muted-foreground">Bookings Managed</p>
               <p className="text-sm  mt-4">all lifecycle states</p>
             </div>
@@ -399,11 +379,11 @@ export default function DashboardPage() {
                   <Star className="w-5 h-5 text-muted-foreground" />
               </div>
             <div className="text-left">
-              <p className="text-2xl font-bold">{averageRatingDisplay}</p>
+              <p className="text-2xl font-bold">{metrics?.ratings.averageRating ? Number(metrics.ratings.averageRating).toFixed(1) : "—"}</p>
               <p className="text-sm text-muted-foreground">Avg Rating</p>
               <p className="text-sm  mt-4">
-                {ratedCompletedSessions.length > 0
-                  ? `From ${ratedCompletedSessions.length} rated sessions`
+                {metrics?.ratings.totalRatings && Number(metrics.ratings.totalRatings) > 0
+                  ? `From ${metrics.ratings.totalRatings} rated sessions`
                   : "No ratings yet"}
               </p>
             </div>
@@ -457,7 +437,7 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div className="space-y-0.5 text-left">
                 <CardTitle className="text-sm font-bold text-text-primary">Recent Sessions</CardTitle>
-                <p className="text-xs text-text-muted">{completedSessions.length} completed</p>
+                <p className="text-xs text-text-muted">{Number(metrics?.sessions.completed) || 0} completed</p>
               </div>
               <Button asChild variant="link" size="sm" className="text-emerald-700 text-xs font-semibold p-0 h-autod">
                 <Link href={`/${role}/mentorsDashboard/sessions`}>
@@ -532,14 +512,14 @@ export default function DashboardPage() {
                    <Star className="w-3.5 h-3.5 text-emerald-600" />
                    <span className="text-xs font-semibold text-slate-600">Avg Rating</span>
                 </div>
-                <p className="text-2xl font-bold mb-2">{averageRatingDisplay}</p>
+                <p className="text-2xl font-bold mb-2">{metrics?.ratings.averageRating ? Number(metrics.ratings.averageRating).toFixed(1) : "—"}</p>
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={cn(
                         "w-3 h-3",
-                        i < averageRatingRounded
+                        metrics?.ratings.averageRating && i < Math.round(Number(metrics.ratings.averageRating))
                           ? "fill-emerald-500 text-emerald-500"
                           : "fill-transparent text-emerald-200"
                       )}
@@ -553,7 +533,7 @@ export default function DashboardPage() {
                       <p className="text-xs font-medium text-text-secondary">Hours Delivered</p>
                     </div>
                     <p className="text-2xl font-bold text-text-primary tabular-nums">{hoursDelivered}h</p>
-                    <p className="text-[10px] text-text-muted mt-1">Across {completedSessions.length} sessions</p>
+                    <p className="text-[10px] text-text-muted mt-1">Across {Number(metrics?.sessions.completed) || 0} sessions</p>
                 </div>
                <div className="bg-slate-50/50 rounded-xl p-4 border">
                 <div className="flex items-center gap-1.5 mb-2">
@@ -649,38 +629,47 @@ export default function DashboardPage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-2 space-y-1">
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/availability`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><Calendar className="w-4 h-4 text-emerald-700" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/availability`} className="text-xs font-bold text-slate-800">Manage Availability</Link>
+                    <p className="text-xs font-bold text-slate-800">Manage Availability</p>
                     <p className="text-[10px] text-slate-400">Set your open slots</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/sessions`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-orange-50 rounded-full"><BookOpen className="w-4 h-4 text-orange-600" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/sessions`} className="text-xs font-bold text-slate-800">View All Sessions</Link>
+                    <p className="text-xs font-bold text-slate-800">View All Sessions</p>
                     <p className="text-[10px] text-slate-400">Upcoming & past sessions</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/performance`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><BarChart3 className="w-4 h-4 text-emerald-500" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/performance`} className="text-xs font-bold text-slate-800">Performance Metrics</Link>
+                    <p className="text-xs font-bold text-slate-800">Performance Metrics</p>
                     <p className="text-[10px] text-slate-400">Ratings & session stats</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>

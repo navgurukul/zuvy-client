@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Star } from "lucide-react"
 import { useMyMentorSessions } from "@/hooks/useMyMentorSessions"
+import { useMentorMetrics } from "@/hooks/useMentorMetrics"
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "—"
@@ -81,7 +82,7 @@ export default function PerformanceMetrics() {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed")
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed", "desc")
 
   const {
     sessions: upcomingSlots,
@@ -89,10 +90,17 @@ export default function PerformanceMetrics() {
     error: upcomingSessionsError,
   } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "upcoming")
 
-  const completionRate =
-    allSessions.length === 0
-      ? 0
-      : Math.round((completedSessions.length / allSessions.length) * 100)
+  const {
+    metrics,
+    loading: metricsLoading,
+    error: metricsError,
+  } = useMentorMetrics(true)
+
+  const completionRate = (() => {
+    const totalCount = Number(metrics?.sessions.total) || 0
+    const completedCount = Number(metrics?.sessions.completed) || 0
+    return totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
+  })()
 
   const totalScheduledMinutes = useMemo(
     () =>
@@ -104,51 +112,37 @@ export default function PerformanceMetrics() {
     [allSessions]
   )
 
-  const averageSessionLength =
-    allSessions.length === 0 ? 0 : Math.round(totalScheduledMinutes / allSessions.length)
+  const averageSessionLength = (() => {
+    const totalCount = Number(metrics?.sessions.total) || 0
+    return totalCount === 0 ? 0 : Math.round(totalScheduledMinutes / totalCount)
+  })()
 
   const totalScheduledHours = totalScheduledMinutes / 60
 
-  const recentCompleted = useMemo(
-    () =>
-      [...completedSessions]
-        .sort((a, b) => {
-          const aTime = new Date(a.completedAt || a.slotEnd || a.slotStart || 0).getTime()
-          const bTime = new Date(b.completedAt || b.slotEnd || b.slotStart || 0).getTime()
-
-          return bTime - aTime
-        }),
-    [completedSessions]
-  )
+  const recentCompleted = completedSessions
 
   const averageRating = useMemo(() => {
-    const ratedSessions = completedSessions.filter(
-      (session) => typeof session.mentorRating === "number"
-    )
-
-    if (ratedSessions.length === 0) return null
-
-    const total = ratedSessions.reduce((sum, session) => sum + (session.mentorRating || 0), 0)
-
-    return (total / ratedSessions.length).toFixed(1)
-  }, [completedSessions])
+    if (!metrics?.ratings.averageRating) return null
+    return Number(metrics.ratings.averageRating).toFixed(1)
+  }, [metrics?.ratings.averageRating])
 
   const sessionMix = useMemo(() => {
-    const cancelled = allSessions.filter(
-      (session) => session.sessionLifecycleState === "CANCELLED"
-    ).length
-
-    const reschedulePending = allSessions.filter(
-      (session) => session.sessionLifecycleState === "RESCHEDULE_PENDING"
+    const completedCount = Number(metrics?.sessions.completed) || 0
+    const cancelledCount = Number(metrics?.sessions.cancelled) || 0
+    const upcomingCount = Number(metrics?.upcomingSessions) || 0
+    
+    // Calculate reschedule count from all sessions by filtering for status
+    const rescheduleCount = allSessions.filter(
+      session => session.status?.toLowerCase() === "rescheduled"
     ).length
 
     return [
-      { label: "Completed", value: completedSessions.length, barClass: "bg-green-600" },
-      { label: "Upcoming", value: upcomingSlots.length, barClass: "bg-emerald-400" },
-      { label: "Cancelled", value: cancelled, barClass: "bg-gray-400" },
-      { label: "Reschedule", value: reschedulePending, barClass: "bg-orange-400" },
+      { label: "Completed", value: completedCount, barClass: "bg-green-600" },
+      { label: "Upcoming", value: upcomingCount, barClass: "bg-emerald-400" },
+      { label: "Cancelled", value: cancelledCount, barClass: "bg-gray-400" },
+      { label: "Reschedule", value: rescheduleCount, barClass: "bg-orange-400" },
     ]
-  }, [allSessions, completedSessions.length, upcomingSlots.length])
+  }, [metrics?.sessions.cancelled, metrics?.sessions.completed, metrics?.upcomingSessions, allSessions])
 
   const maxSessionMixValue = useMemo(
     () => Math.max(1, ...sessionMix.map((item) => item.value)),
@@ -170,7 +164,7 @@ export default function PerformanceMetrics() {
             <p className="text-2xl font-semibold">{completionRate}%</p>
             <p className="text-sm font-medium">Completion Rate</p>
             <p className="text-xs text-muted-foreground">
-              {completedSessions.length} of {allSessions.length} sessions completed
+              {Number(metrics?.sessions.completed) || 0} of {Number(metrics?.sessions.total) || 0} sessions completed
             </p>
           </CardContent>
         </Card>
@@ -191,13 +185,13 @@ export default function PerformanceMetrics() {
           <CardContent className="p-5 text-left">
             <p className="text-2xl font-semibold">{totalScheduledHours.toFixed(1)}h</p>
             <p className="text-sm font-medium">Scheduled Hours</p>
-            <p className="text-xs text-muted-foreground">Across {allSessions.length} sessions</p>
+            <p className="text-xs text-muted-foreground">Across {Number(metrics?.sessions.total) || 0} sessions</p>
           </CardContent>
         </Card>
 
         <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">{upcomingSlots.length}</p>
+            <p className="text-2xl font-semibold">{Number(metrics?.upcomingSessions) || 0}</p>
             <p className="text-sm font-medium">Upcoming Slots</p>
             <p className="text-xs text-muted-foreground">Booked + open upcoming schedule</p>
           </CardContent>
@@ -213,12 +207,12 @@ export default function PerformanceMetrics() {
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{allSessions.length}</p>
+                <p className="font-semibold">{Number(metrics?.sessions.total) || 0}</p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
 
               <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{completedSessions.length}</p>
+                <p className="font-semibold">{Number(metrics?.sessions.completed) || 0}</p>
                 <p className="text-xs text-muted-foreground">Completed</p>
               </div>
 
@@ -259,7 +253,7 @@ export default function PerformanceMetrics() {
               {!upcomingSessionsLoading && upcomingSessionsError && (
                 <p className="text-xs text-red-500">{upcomingSessionsError}</p>
               )}
-              {!allSessionsLoading && !allSessionsError && allSessions.length === 0 && (
+              {!allSessionsLoading && !allSessionsError && (Number(metrics?.sessions.total) || 0) === 0 && (
                 <p className="text-xs text-muted-foreground">No sessions yet.</p>
               )}
             </div>
@@ -311,7 +305,7 @@ export default function PerformanceMetrics() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{upcomingSlots.length}</p>
+            <p className="text-xl font-semibold">{Number(metrics?.upcomingSessions) || 0}</p>
             <p className="text-sm font-medium">Upcoming Slots</p>
             <p className="text-xs text-muted-foreground">Current future availability</p>
           </CardContent>
@@ -327,15 +321,18 @@ export default function PerformanceMetrics() {
 
         <Card className='rounded-3xl'>
           <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{allSessions.length}</p>
+            <p className="text-xl font-semibold">{Number(metrics?.sessions.total) || 0}</p>
             <p className="text-sm font-medium">Total Sessions</p>
             <p className="text-xs text-muted-foreground">
-              {(allSessionsLoading || completedSessionsLoading || upcomingSessionsLoading)
+              {(allSessionsLoading || completedSessionsLoading || upcomingSessionsLoading || metricsLoading)
                 ? "Loading..."
-                : "Fetched from /mentor-sessions/mentor/my"}
+                : "Fetched from /mentor-slots/metrics/me"}
             </p>
             {!allSessionsLoading && allSessionsError && (
               <p className="text-xs text-red-500 mt-1">{allSessionsError}</p>
+            )}
+            {!metricsLoading && metricsError && (
+              <p className="text-xs text-red-500 mt-1">{metricsError}</p>
             )}
           </CardContent>
         </Card>

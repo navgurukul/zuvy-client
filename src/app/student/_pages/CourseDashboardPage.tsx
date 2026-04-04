@@ -60,14 +60,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     ).length || 0;
 
   const QUICK_ACTIONS = [
-    { label: "Find a Mentor", sub: "Browse available mentors", href: "/student/mentors", icon: Search, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Find a Mentor", sub: "Browse available mentors", href: `/student/mentors?courseId=${courseId}`, icon: Search, color: "text-primary", bg: "bg-primary/10" },
     {
       label: "My One to One Sessions",
       sub:
         upcomingLiveClassesCount > 0
           ? `${upcomingLiveClassesCount} upcoming live class${upcomingLiveClassesCount > 1 ? 'es' : ''}`
           : "No upcoming live classes",
-      href: "/student/sessions",
+      href: `/student/sessions?courseId=${courseId}`,
       icon: CalendarDays,
       color: "text-accent",
       bg: "bg-accent/10"
@@ -777,7 +777,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
         <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
           <div className="max-w-7xl mx-auto p-6 md:p-8">
             {/* Desktop Layout */}
-            <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-6 rounded-3xl bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-6 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
 
               <div className="flex-shrink-0">
                 <Image
@@ -850,7 +850,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             </div>
 
             {/* Progress Bar - Updated with primary-light background */}
-            <div className="mb-6  rounded-3xl bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="mb-6  rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <div className=" mb-6">
                 {/* <div className="relative bg-primary-light rounded-full h-2 w-full"> */}
                 {/* <div
@@ -931,7 +931,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     const upcomingChapterId = latestCourseData?.newChapter?.id || 1;
 
                     return (
-                      <Card key={module.id} className={`rounded-3xl border p-0 transition-all duration-300 my-4   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
+                      <Card key={module.id} className={`rounded-lg border p-0 transition-all duration-300 my-4   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
                         <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
                           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                             <div className="flex-1 text-left">
@@ -1088,7 +1088,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             {/* Right Column - What's Next & Attendance */}
             <div className="space-y-8">
               {/* What's Next Section */}
-              <Card className="shadow-4dp text-left rounded-3xl bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <Card className="shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
                   {/* <p className="text-sm text-muted-foreground">
@@ -1196,7 +1196,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </Card>
 
               {/* Attendance */}
-              <Card className=" text-left rounded-3xl border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <Card className=" text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl">Attendance</CardTitle>
                 </CardHeader>
@@ -1425,7 +1425,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
-              <div className="rounded-3xl border border-border bg-card p-5 space-y-1 text-left">
+              <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
                 <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
                 {QUICK_ACTIONS.map((a) => (
                   <Link

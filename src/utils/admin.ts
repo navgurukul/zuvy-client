@@ -386,12 +386,12 @@ export async function filteredCodingQuestions(
         const queryParams = []
 
         if (selectedTagIds?.length > 0) {
-            if (selectedOptions[0].value !== '-1') {
+            if (selectedOptions[0].value !== 'None' && selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
         }
         if (difficulty?.length > 0) {
-            if (difficulty[0].value !== 'None') {
+            if (difficulty[0].value !== 'None' && difficulty[0].value !== '-1') {
                 queryParams.push(selectedDiff.substring(1))
             }
         }
@@ -552,12 +552,12 @@ export async function filteredOpenEndedQuestions(
         const queryParams = []
 
         if (selectedTagIds.length > 0) {
-            if (selectedOptions[0].value !== '-1') {
+            if (selectedOptions[0].value !== 'None' && selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
         }
         if (difficulty.length > 0) {
-            if (difficulty[0].value !== 'None') {
+            if (difficulty[0].value !== 'None' && difficulty[0].value !== '-1') {
                 queryParams.push(selectedDiff.substring(1))
             }
         }
