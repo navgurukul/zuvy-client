@@ -285,7 +285,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     setIsLoadingColleges(true);
     try {
       const res = await fetch(
-        `http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(collegeSearch)}`
+        `https://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(collegeSearch)}`
       );
       const data = await res.json();
       const mapped = data.map((u: any) => ({
