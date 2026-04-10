@@ -14,15 +14,38 @@ export interface MentorCreatedSlot {
     status: string
 }
 
+export interface MentorSlotMetrics {
+    totalSlots: number
+    available: number
+    full: number
+    completed: number
+    closed: number
+    hours: number
+}
+
 type UpsertMySlotPayload = Omit<MentorCreatedSlot, 'mentorSlotManagementId'> & {
     mentorSlotManagementId?: number
 }
 
-type MyMentorSlotsApiResponse = MentorCreatedSlot[] | { data: MentorCreatedSlot[] }
+type MyMentorSlotsApiResponse =
+    | MentorCreatedSlot[]
+    | {
+          data?: MentorCreatedSlot[]
+          slots?: MentorCreatedSlot[]
+          weekStart?: string
+          weekEnd?: string
+          metrics?: MentorSlotMetrics
+      }
 
 export interface MyMentorSlotsFilters {
-    startDateTime?: string
-    endDateTime?: string
+    weekOffset?: number
+}
+
+export interface MyMentorSlotsResponse {
+    slots: MentorCreatedSlot[]
+    metrics: MentorSlotMetrics | null
+    weekStart: string | null
+    weekEnd: string | null
 }
 
 const parseMySlotsResponse = (
@@ -32,11 +55,35 @@ const parseMySlotsResponse = (
         return response
     }
 
+    if (response && Array.isArray(response.slots)) {
+        return response.slots
+    }
+
     if (response && Array.isArray(response.data)) {
         return response.data
     }
 
     return []
+}
+
+const parseMyMentorSlotsPayload = (
+    response: MyMentorSlotsApiResponse
+): MyMentorSlotsResponse => {
+    if (Array.isArray(response)) {
+        return {
+            slots: response,
+            metrics: null,
+            weekStart: null,
+            weekEnd: null,
+        }
+    }
+
+    return {
+        slots: parseMySlotsResponse(response),
+        metrics: response?.metrics ?? null,
+        weekStart: response?.weekStart ?? null,
+        weekEnd: response?.weekEnd ?? null,
+    }
 }
 
 const getErrorMessage = (error: unknown): string => {
@@ -51,6 +98,9 @@ export function useMyMentorSlots(
     filters?: MyMentorSlotsFilters
 ) {
     const [slots, setSlots] = useState<MentorCreatedSlot[]>([])
+    const [metrics, setMetrics] = useState<MentorSlotMetrics | null>(null)
+    const [weekStart, setWeekStart] = useState<string | null>(null)
+    const [weekEnd, setWeekEnd] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
@@ -63,25 +113,30 @@ export function useMyMentorSlots(
                 '/mentor-slots/my',
                 {
                     params: {
-                        ...(filters?.startDateTime
-                            ? { startDateTime: filters.startDateTime }
-                            : {}),
-                        ...(filters?.endDateTime
-                            ? { endDateTime: filters.endDateTime }
+                        ...(typeof filters?.weekOffset === 'number'
+                            ? { weekOffset: filters.weekOffset }
                             : {}),
                     },
                 }
             )
 
-            setSlots(parseMySlotsResponse(response.data))
+            const payload = parseMyMentorSlotsPayload(response.data)
+
+            setSlots(payload.slots)
+            setMetrics(payload.metrics)
+            setWeekStart(payload.weekStart)
+            setWeekEnd(payload.weekEnd)
         } catch (error) {
             console.error('Error fetching my mentor slots:', error)
             setSlots([])
+            setMetrics(null)
+            setWeekStart(null)
+            setWeekEnd(null)
             setError(getErrorMessage(error))
         } finally {
             setLoading(false)
         }
-    }, [filters?.endDateTime, filters?.startDateTime])
+    }, [filters?.weekOffset])
 
     const upsertMySlot = useCallback((slot: UpsertMySlotPayload) => {
         const normalizedSlot: MentorCreatedSlot = {
@@ -110,6 +165,9 @@ export function useMyMentorSlots(
 
     return {
         slots,
+        metrics,
+        weekStart,
+        weekEnd,
         loading,
         error,
         refetchMySlots: getMySlots,

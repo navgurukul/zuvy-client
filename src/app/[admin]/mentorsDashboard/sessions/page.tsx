@@ -16,6 +16,7 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback"
+import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
 
 type SessionTab = "all" | "upcoming" | "reschedule" | "completed"
@@ -409,7 +410,11 @@ export default function SessionsPage() {
     })
   }, [rescheduleError])
 
-  return (
+  const isInitialLoading = loading && sessions.length === 0
+
+  return isInitialLoading ? (
+    <SessionsSkeleton />
+  ) : (
     <div className="p-6">
       <div className="mb-6 text-left">
         <h1 className="text-xl font-semibold">Sessions</h1>

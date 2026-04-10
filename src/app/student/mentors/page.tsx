@@ -146,7 +146,7 @@ export default function MentorsPage() {
                         return (
                             <Link
                                 key={mentor.userId}
-                                href={`/student/mentors/${mentor.userId}`}
+                                href={courseId ? `/student/mentors/${mentor.userId}?courseId=${courseId}` : `/student/mentors/${mentor.userId}`}
                                 className="group relative block overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                             >
                                 {/* Top */}

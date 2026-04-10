@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useCreateMentorSlot } from "@/hooks/useCreateMentorSlot"
 import { useDeleteMentorSlot } from "@/hooks/useDeleteMentorSlot"
+import { AvailabilitySkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { api } from '@/utils/axios.config'
 
 const durationOptions = [30, 45, 60, 90]
@@ -359,7 +360,11 @@ export default function AvailabilityPage() {
     }
   }
 
-  return (
+  const isInitialLoading = loading && slots.length === 0
+
+  return isInitialLoading ? (
+    <AvailabilitySkeleton />
+  ) : (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="text-left">

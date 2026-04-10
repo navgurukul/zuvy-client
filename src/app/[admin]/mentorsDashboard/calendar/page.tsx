@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useDeleteMentorSlot } from "@/hooks/useDeleteMentorSlot"
 import { useMyMentorSlots, type MentorCreatedSlot } from "@/hooks/useMyMentorSlots"
+import { CalendarSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { cn } from "@/lib/utils"
 
 const START_HOUR = 7
@@ -136,8 +137,7 @@ const slotTop = (slot: MentorCreatedSlot) => {
 const slotHeight = (slot: MentorCreatedSlot) =>
   Math.max((slot.durationMinutes / 60) * HOUR_HEIGHT, 22)
 
-const formatHoursLabel = (slots: MentorCreatedSlot[]) => {
-  const hours = slots.reduce((total, slot) => total + slot.durationMinutes, 0) / 60
+const formatHoursLabel = (hours: number) => {
   return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`
 }
 
@@ -418,24 +418,28 @@ export default function CalendarPage() {
   const role = pathname.split("/")[1]
   const today = toDateStr(new Date())
 
-  const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()))
+  const [weekOffset, setWeekOffset] = useState(0)
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedMobileDay, setSelectedMobileDay] = useState(0)
 
-  const weekEndExclusive = useMemo(() => addDays(weekStart, 7), [weekStart])
-  const slotFilters = useMemo(
-    () => ({
-      startDateTime: weekStart.toISOString(),
-      endDateTime: weekEndExclusive.toISOString(),
-    }),
-    [weekEndExclusive, weekStart]
-  )
+  const baseWeekStart = useMemo(() => getMonday(new Date()), [])
 
-  const { slots, loading, error, refetchMySlots } = useMyMentorSlots(true, slotFilters)
+  const { slots, metrics, weekStart: apiWeekStart, weekEnd: apiWeekEnd, loading, error, refetchMySlots } = useMyMentorSlots(true, {
+    weekOffset,
+  })
   const { isDeleting, deletingSlotId, error: deleteError, deleteSlot } = useDeleteMentorSlot()
 
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const weekStart = useMemo(
+    () => (apiWeekStart ? new Date(apiWeekStart) : addDays(baseWeekStart, weekOffset * 7)),
+    [apiWeekStart, baseWeekStart, weekOffset]
+  )
+  const weekEnd = useMemo(
+    () => (apiWeekEnd ? new Date(apiWeekEnd) : addDays(weekStart, 6)),
+    [apiWeekEnd, weekStart]
+  )
 
   const weekDays = useMemo(
     () =>
@@ -446,8 +450,6 @@ export default function CalendarPage() {
       }),
     [weekStart]
   )
-
-  const weekEnd = weekDays[6]
 
   const weekSlots = useMemo(
     () =>
@@ -479,9 +481,15 @@ export default function CalendarPage() {
     [slots, selectedSlotId]
   )
 
-  const isCurrentWeek = useMemo(
-    () => toDateStr(weekStart) <= today && today <= toDateStr(weekEnd),
-    [today, weekEnd, weekStart]
+  const isCurrentWeek = weekOffset === 0
+
+  const displayWeekStart = useMemo(
+    () => (apiWeekStart ? new Date(apiWeekStart) : weekStart),
+    [apiWeekStart, weekStart]
+  )
+  const displayWeekEnd = useMemo(
+    () => (apiWeekEnd ? new Date(apiWeekEnd) : weekEnd),
+    [apiWeekEnd, weekEnd]
   )
 
   const currentTimePx = useMemo(() => {
@@ -489,15 +497,10 @@ export default function CalendarPage() {
     return ((minutes - START_HOUR * 60) / 60) * HOUR_HEIGHT
   }, [currentTime])
 
-  const totalSlots = weekSlots.length
-  const openSlots = weekSlots.filter((slot) => isOpenSlot(slot) && !isBookedSlot(slot)).length
-  const bookedSlots = weekSlots.filter(isBookedSlot).length
-  const totalHours = formatHoursLabel(weekSlots)
-
-  const weekLabel = `${weekStart.toLocaleDateString("en-US", {
+  const weekLabel = `${displayWeekStart.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-  })} – ${weekEnd.toLocaleDateString("en-US", {
+  })} – ${displayWeekEnd.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -527,15 +530,15 @@ export default function CalendarPage() {
   }, [selectedSlot, selectedSlotId])
 
   const prevWeek = () => {
-    setWeekStart((currentWeekStart) => addDays(currentWeekStart, -7))
+    setWeekOffset((currentOffset) => currentOffset - 1)
   }
 
   const nextWeek = () => {
-    setWeekStart((currentWeekStart) => addDays(currentWeekStart, 7))
+    setWeekOffset((currentOffset) => currentOffset + 1)
   }
 
   const goToToday = () => {
-    setWeekStart(getMonday(new Date()))
+    setWeekOffset(0)
   }
 
   const handleDelete = async (slotId: number) => {
@@ -549,13 +552,17 @@ export default function CalendarPage() {
     return removed
   }
 
-  return (
+  const isInitialLoading = loading && slots.length === 0
+
+  return isInitialLoading ? (
+    <CalendarSkeleton />
+  ) : (
     <div className="min-h-screen space-y-4 p-6">
       <div className="text-left">
         <h1 className="text-2xl font-semibold">Calendar</h1>
         <p className="text-sm text-muted-foreground">
           {!loading
-            ? `${totalSlots} slot${totalSlots !== 1 ? "s" : ""} this week`
+            ? `${metrics?.totalSlots ?? 0} slot${(metrics?.totalSlots ?? 0) !== 1 ? "s" : ""} this week`
             : "Your availability at a glance."}
         </p>
       </div>
@@ -841,12 +848,20 @@ export default function CalendarPage() {
                 <CardContent className="space-y-2 p-4 text-left">
                   <p className="text-xs font-bold text-text-primary">This Week</p>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {[
-                      { label: "Total slots", value: totalSlots },
-                      { label: "Open", value: openSlots },
-                      { label: "Booked", value: bookedSlots },
-                      { label: "Hours", value: totalHours },
+                      { label: "Total slots", value: metrics?.totalSlots ?? "-" },
+                      { label: "Available", value: metrics?.available ?? "-" },
+                      { label: "Full", value: metrics?.full ?? "-" },
+                      { label: "Completed", value: metrics?.completed ?? "-" },
+                      { label: "Closed", value: metrics?.closed ?? "-" },
+                      {
+                        label: "Hours",
+                        value:
+                          typeof metrics?.hours === "number"
+                            ? formatHoursLabel(metrics.hours)
+                            : "-",
+                      },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-lg bg-muted p-2 text-center">
                         <p className="text-base font-bold tabular-nums text-text-primary">{value}</p>
@@ -858,30 +873,6 @@ export default function CalendarPage() {
               </Card>
             </div>
           </div>
-        )}
-
-        {!loading && !error && slots.length === 0 && (
-          <Card className="rounded-xl border border-dashed border-border bg-card shadow-sm">
-            <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                <CalendarX className="h-7 w-7 text-text-muted" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-text-primary">No availability slots yet</p>
-                <p className="mt-1 text-xs text-text-muted">
-                  Create slots so learners can book sessions with you
-                </p>
-              </div>
-
-              <Button asChild className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary-dark">
-                <Link href={`/${role}/mentorsDashboard/availability`}>
-                  <Plus className="h-4 w-4" />
-                  Create Availability
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>

@@ -227,7 +227,7 @@ export default function MySessions() {
 
             <CardContent className="p-6 space-y-4">
 
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start">
 
                 <div className="flex gap-3">
 
@@ -353,7 +353,7 @@ export default function MySessions() {
                   </div>
                 </div>
 
-                <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
                   Completed
                 </span>
               </div>
@@ -411,7 +411,7 @@ export default function MySessions() {
 
                 </div>
 
-                <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
                   Upcoming
                 </span>
 
