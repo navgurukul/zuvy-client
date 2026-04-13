@@ -20,6 +20,7 @@ import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
+import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
@@ -93,6 +94,41 @@ function LoginPage() {
             return typeof res.data?.percentage === 'number' ? res.data.percentage : null
         } catch (error) {
             console.error('Failed to fetch learner profile strength:', error)
+            return null
+        }
+    }
+
+    const isMentorProfileComplete = (profile: MentorProfileResponse | null) => {
+        if (!profile) return false
+
+        const bio = typeof profile.bio === 'string' ? profile.bio.trim() : ''
+        const pastExperiences =
+            typeof profile.pastExperiences === 'string'
+                ? profile.pastExperiences.trim()
+                : ''
+
+        const expertiseValue = profile.expertise as string[] | string | null | undefined
+
+        const expertise = Array.isArray(expertiseValue)
+            ? expertiseValue
+            : typeof expertiseValue === 'string'
+                ? expertiseValue
+                    .split(',')
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                : []
+
+        return Boolean(bio) && Boolean(pastExperiences) && expertise.length > 0
+    }
+
+    const getMentorProfileCompletion = async (): Promise<boolean | null> => {
+        try {
+            const res = await api.get<MentorProfileResponse>(
+                '/mentor-slots/mentor/profile'
+            )
+            return isMentorProfileComplete(res.data)
+        } catch (error) {
+            console.error('Failed to fetch mentor profile for redirect:', error)
             return null
         }
     }
@@ -187,10 +223,23 @@ const handleGoogleSuccess = async (
                 const userRole = response.data.user.rolesList[0]
                 const organizationId = response.data.user.orgId || null
                 const hasFilled = response.data.user.hasfilled
+                const shouldCheckMentorProfile = Boolean(userRole)
+
+                let mentorProfileCompleted: boolean | null = null
+                if (shouldCheckMentorProfile) {
+                    mentorProfileCompleted = await getMentorProfileCompletion()
+                }
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
-                if (redirectedUrl) {
+                const shouldForceProfilePage =
+                    shouldCheckMentorProfile &&
+                    ((mentorProfileCompleted === false) ||
+                        (mentorProfileCompleted === null && hasFilled === false))
+
+                if (shouldForceProfilePage && organizationId) {
+                    router.push(`/${userRole}/organizations/${organizationId}/profile`)
+                } else if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     const strengthPercentage = await getStudentStrengthPercentage()
@@ -201,8 +250,8 @@ const handleGoogleSuccess = async (
                     }
                     
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
-                    // Redirect admin/poc to settings if hasfilled is false
-                    router.push(`/${userRole}/organizations/${organizationId}/setting`)
+                    // Redirect admin/poc to mentor profile setup if profile is incomplete
+                    router.push(`/${userRole}/organizations/${organizationId}/profile`)
                 } else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
