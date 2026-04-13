@@ -45,6 +45,9 @@ const Navbar = () => {
             ? String(user.orgId)
             : undefined
     const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
+    const profileHref = orgId
+        ? `/${role}/organizations/${orgId}/profile`
+        : `/${role}`
     const inOrg = pathname.split('/').length > 3
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -258,6 +261,7 @@ const Navbar = () => {
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown
                         studentData={studentData}
+                        profileHref={profileHref}
                         handleLogoutClick={handleLogoutClick}
                         showLogoutDialog={showLogoutDialog}
                         setShowLogoutDialog={setShowLogoutDialog}

@@ -6,6 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import Link from 'next/link'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,6 +23,7 @@ import { formattedRole } from '@/lib/utils'
 
 interface ProfileDropDownProps {
     studentData: any
+    profileHref: string
     handleLogoutClick: () => void
     showLogoutDialog: boolean
     setShowLogoutDialog: (value: boolean) => void
@@ -30,6 +32,7 @@ interface ProfileDropDownProps {
 
 const ProfileDropDown = ({
     studentData,
+    profileHref,
     handleLogoutClick,
     showLogoutDialog,
     setShowLogoutDialog,
@@ -72,6 +75,12 @@ const ProfileDropDown = ({
                             </p>
                         </div>
                     </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href={profileHref} className="cursor-pointer">
+                            <span className='text-sm font-medium leading-none'>View Profile</span>
+                        </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={handleLogoutClick}

@@ -52,21 +52,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const isMobile = width < 768;
 
 
-  const upcomingLiveClassesCount =
-    upcomingEventsData?.events?.filter(
-      (event) =>
-        typeof event.type === 'string' &&
-        event.type.toLowerCase().includes('class')
-    ).length || 0;
-
   const QUICK_ACTIONS = [
     { label: "Find a Mentor", sub: "Browse available mentors", href: `/student/mentors?courseId=${courseId}`, icon: Search, color: "text-primary", bg: "bg-primary/10" },
     {
       label: "My One to One Sessions",
-      sub:
-        upcomingLiveClassesCount > 0
-          ? `${upcomingLiveClassesCount} upcoming live class${upcomingLiveClassesCount > 1 ? 'es' : ''}`
-          : "No upcoming live classes",
+      sub: "View and manage your sessions",
       href: `/student/sessions?courseId=${courseId}`,
       icon: CalendarDays,
       color: "text-accent",
