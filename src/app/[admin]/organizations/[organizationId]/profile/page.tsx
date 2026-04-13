@@ -36,17 +36,17 @@ const SUGGESTED_EXPERTISE = [
   'Backend Architecture',
 ]
 
-type Props = {
+type MentorProfileCreateUIProps = {
   initial?: ProfileData
   onBack?: () => void
   onValidSubmit?: (data: ProfileData) => Promise<void> | void
 }
 
-export default function MentorProfileCreateUI({
+function MentorProfileCreateUI({
   initial = { title: '', bio: '', pastExperiences: '', expertise: [] },
   onBack,
   onValidSubmit,
-}: Props) {
+}: MentorProfileCreateUIProps) {
   const router = useRouter()
   const { organizationId } = useParams()
   const { courseData } = getCourseData()
@@ -448,5 +448,9 @@ export default function MentorProfileCreateUI({
       </div>
     </MaxWidthWrapper>
   )
+}
+
+export default function Page() {
+  return <MentorProfileCreateUI />
 }
 
