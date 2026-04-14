@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Loader2, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Button } from '@/components/ui/button'
@@ -48,7 +48,9 @@ function MentorProfileCreateUI({
   onValidSubmit,
 }: MentorProfileCreateUIProps) {
   const router = useRouter()
-  const { organizationId } = useParams()
+  const pathname = usePathname()
+  const params = useParams()
+  const { organizationId } = params
   const { courseData } = getCourseData()
   const { courses, loading: bootcampsLoading } = useBootcamps({
     limit: 1,
@@ -85,7 +87,10 @@ function MentorProfileCreateUI({
 
   const tagRef = useRef<HTMLInputElement>(null)
   const orgId = Array.isArray(organizationId) ? organizationId[0] : organizationId
-  const coursesHref = orgId ? `/admin/organizations/${orgId}/courses` : '/admin/organizations'
+  const roleSegment = pathname.split('/')[1] || 'admin'
+  const coursesHref = orgId
+    ? `/${roleSegment}/organizations/${orgId}/courses`
+    : `/${roleSegment}/organizations`
 
   // Initialize form with mentor profile data
   useEffect(() => {
