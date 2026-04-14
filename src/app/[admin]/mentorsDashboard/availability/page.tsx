@@ -125,6 +125,7 @@ export default function AvailabilityPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
   const [isGoogleConnecting, setIsGoogleConnecting] = useState(false)
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false)
 
   const token =
     typeof window !== "undefined"
@@ -161,12 +162,19 @@ export default function AvailabilityPage() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
+    const persistedConnectionStatus = localStorage.getItem("google_calendar_connected")
+    if (persistedConnectionStatus === "true") {
+      setIsGoogleConnected(true)
+    }
+
     const params = new URLSearchParams(window.location.search)
 
     const success = params.get("success")
     const error = params.get("error")
 
     if (success === "true") {
+      setIsGoogleConnected(true)
+      localStorage.setItem("google_calendar_connected", "true")
       toast.success({
         title: "Success",
         description: "Google Calendar connected successfully.",
@@ -495,11 +503,17 @@ export default function AvailabilityPage() {
             <CardContent className="pt-0">
               <Button
                 variant="outline"
-                className="w-full"
+                // className="w-full"
+                  className="w-full disabled:cursor-not-allowed disabled:pointer-events-auto disabled:hover:bg-transparent"
+
                 onClick={handleGoogleConnect}
-                disabled={isGoogleConnecting || !token}
+                disabled={isGoogleConnecting || isGoogleConnected || !token}
               >
-                {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
+                {isGoogleConnected
+                  ? "Google Calendar Connected"
+                  : isGoogleConnecting
+                    ? "Connecting..."
+                    : "Connect Google Calendar"}
               </Button>
             </CardContent>
           </Card>

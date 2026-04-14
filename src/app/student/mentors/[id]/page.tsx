@@ -31,6 +31,7 @@ export default function MentorProfilePage() {
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
   const [isGoogleConnecting, setIsGoogleConnecting] = useState(false);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [formError, setFormError] = useState<string | null>(null)
 
   const token =
@@ -56,6 +57,7 @@ export default function MentorProfilePage() {
     }
 
     setIsGoogleConnecting(true)
+    localStorage.setItem("google_calendar_connect_pending", "true")
 
     // ✅ Direct redirect wi/mentor-sessions/myth token (THIS IS THE FIX)
     const currentPage = encodeURIComponent(window.location.href)
@@ -70,19 +72,35 @@ export default function MentorProfilePage() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
+    const persistedConnectionStatus = localStorage.getItem("google_calendar_connected")
+    const pendingConnectionStatus = localStorage.getItem("google_calendar_connect_pending")
+    if (persistedConnectionStatus === "true") {
+      setIsGoogleConnected(true)
+    }
+
     const params = new URLSearchParams(window.location.search)
 
     const success = params.get("success")
     const error = params.get("error")
 
     if (success === "true") {
+      setIsGoogleConnected(true)
+      localStorage.removeItem("google_calendar_connect_pending")
+      localStorage.setItem("google_calendar_connected", "true")
       toast.success({
         title: "Success",
         description: "Google Calendar connected successfully.",
       })
     }
 
+    if (pendingConnectionStatus === "true" && success !== "true" && !error) {
+      setIsGoogleConnected(true)
+      localStorage.removeItem("google_calendar_connect_pending")
+      localStorage.setItem("google_calendar_connected", "true")
+    }
+
     if (error) {
+      localStorage.removeItem("google_calendar_connect_pending")
       setFormError("Google connection failed")
     }
   }, [])
@@ -234,10 +252,14 @@ export default function MentorProfilePage() {
           <Button
             variant="outline"
             onClick={handleGoogleConnect}
-            className="w-full py-3 rounded-xl flex items-center justify-center"
-            disabled={isGoogleConnecting || !token}
+          className="w-full py-3 rounded-xl flex items-center justify-center disabled:cursor-not-allowed disabled:pointer-events-auto disabled:hover:bg-transparent"
+            disabled={isGoogleConnecting || isGoogleConnected || !token}
           >
-            {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
+            {isGoogleConnected
+              ? "Google Calendar Connected"
+              : isGoogleConnecting
+                ? "Connecting..."
+                : "Connect Google Calendar"}
           </Button>
 
           <Link
