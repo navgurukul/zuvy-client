@@ -24,6 +24,7 @@ import { formattedRole } from '@/lib/utils'
 interface ProfileDropDownProps {
     studentData: any
     profileHref: string
+    showViewProfile?: boolean
     handleLogoutClick: () => void
     showLogoutDialog: boolean
     setShowLogoutDialog: (value: boolean) => void
@@ -33,6 +34,7 @@ interface ProfileDropDownProps {
 const ProfileDropDown = ({
     studentData,
     profileHref,
+    showViewProfile = true,
     handleLogoutClick,
     showLogoutDialog,
     setShowLogoutDialog,
@@ -76,12 +78,16 @@ const ProfileDropDown = ({
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                        <Link href={profileHref} className="cursor-pointer">
-                            <span className='text-sm font-medium leading-none'>View Profile</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    {showViewProfile && (
+                        <>
+                            <DropdownMenuItem asChild>
+                                <Link href={profileHref} className="cursor-pointer">
+                                    <span className='text-sm font-medium leading-none'>View Profile</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                        </>
+                    )}
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
                         className="text-red-600 hover:bg-primary hover:!text-primary-foreground cursor-pointer"

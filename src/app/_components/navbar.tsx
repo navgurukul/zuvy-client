@@ -295,6 +295,7 @@ const Navbar = () => {
                     <ProfileDropDown
                         studentData={studentData}
                         profileHref={profileHref}
+                        showViewProfile={isInstructorUser}
                         handleLogoutClick={handleLogoutClick}
                         showLogoutDialog={showLogoutDialog}
                         setShowLogoutDialog={setShowLogoutDialog}

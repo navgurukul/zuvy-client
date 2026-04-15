@@ -237,6 +237,62 @@ function MentorProfileCreateUI({
             </p>
           </div>
 
+          <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-5 py-5 text-left">
+            <h4 className="text-body1 font-semibold text-emerald-900 mb-3">
+              Mentor onboarding checklist
+            </h4>
+
+            <div className="space-y-4 text-sm text-emerald-950">
+              <div className="flex gap-3">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
+                  1
+                </div>
+                <div>
+                  <p className="font-semibold">Complete Your Profile</p>
+                  <p className="text-emerald-900/80">
+                    Add your mentoring title, bio, past experience, and skills so learners can understand your background before booking.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
+                  2
+                </div>
+                <div>
+                  <p className="font-semibold">Set Your Availability</p>
+                  <p className="text-emerald-900/80">
+                    Go to Mentors → Availability and create your first open slots with a date, start ime, and duration.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
+                  4
+                </div>
+                <div>
+                  <p className="font-semibold">Understand the Session Lifecycle</p>
+                  <p className="text-emerald-900/80">
+                    Track Confirmed, Completed, Missed, and Cancelled sessions from Mentors → Sessions, and mark them promptly.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
+                  5
+                </div>
+                <div>
+                  <p className="font-semibold">Review Your Performance Dashboard</p>
+                  <p className="text-emerald-900/80">
+                    Check Mentors → Performance for Completion Rate, Utilisation Rate, Average Rating, and Session Mix to improve weekly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Profile Completeness Gate */}
           {completenessGate && !completenessGate.isComplete && (
             <div className="mb-8 rounded-lg border border-warning bg-warning-light px-5 py-4">
