@@ -424,14 +424,14 @@ export default function SessionsPage() {
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden flex h-[720px]">
-        <div className="w-[380px] border-r flex flex-col">
+        <div className="w-[410px] border-r flex flex-col">
           <div className="flex gap-2 px-3 pt-3 overflow-x-auto whitespace-nowrap border-b-4 [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => {
                 setActiveTab("all")
                 setSelectedBookingId(null)
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
+              className={`flex items-center gap-1 px-1 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
                   ? "border-green-600 bg-green-50"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -447,7 +447,7 @@ export default function SessionsPage() {
                 setActiveTab("upcoming")
                 setSelectedBookingId(null)
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -463,7 +463,7 @@ export default function SessionsPage() {
                 setActiveTab("reschedule")
                 setSelectedBookingId(null)
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
@@ -479,7 +479,7 @@ export default function SessionsPage() {
                 setActiveTab("completed")
                 setSelectedBookingId(null)
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}

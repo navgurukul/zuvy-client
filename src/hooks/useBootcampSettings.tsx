@@ -31,7 +31,8 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       
       setBootcampSettings({
         type: settings.type,
-        isModuleLocked: settings.isModuleLocked || false
+        isModuleLocked: settings.isModuleLocked ?? false,
+        mentorshipEnabled: settings.mentorshipEnabled ?? false
       });
       setError(null);
     } catch (err: any) {
