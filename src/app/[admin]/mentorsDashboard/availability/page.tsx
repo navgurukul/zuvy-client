@@ -1,5 +1,6 @@
 "use client"
 import { useMemo, useState, useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Calendar, Clock, AlertTriangle, Lock, Trash2, Info } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -106,6 +107,8 @@ const combineDateAndTime = (date: string, time: string): Date | null => {
 }
 
 export default function AvailabilityPage() {
+  const router = useRouter()
+  const pathname = usePathname()
   const { slots, loading, error, refetchMySlots, upsertMySlot } = useMyMentorSlots()
   const { isCreating, error: createError, createSlot } = useCreateMentorSlot()
   const {
@@ -279,9 +282,41 @@ export default function AvailabilityPage() {
       setDurationMinutes(defaultDurationMinutes)
       void refetchMySlots()
     } else {
+      if (creationResult.statusCode === 403) {
+        const profileMessage =
+          creationResult.errorMessage ||
+          "Complete your mentor profile (bio, expertise, past experiences) before creating slots."
+
+        toast.error({
+          title: "Profile incomplete",
+          description: profileMessage,
+        })
+
+        const roleFromPath = pathname.split("/").filter(Boolean)[0]
+        const authRaw = localStorage.getItem("AUTH")
+        let authUser: { orgId?: string | number } | null = null
+
+        if (authRaw) {
+          try {
+            authUser = JSON.parse(authRaw)
+          } catch {
+            authUser = null
+          }
+        }
+
+        const organizationId = authUser?.orgId
+
+        if (roleFromPath && organizationId) {
+          router.push(`/${roleFromPath}/organizations/${organizationId}/profile`)
+        } else {
+          router.push("/profile")
+        }
+        return
+      }
+
       toast.error({
         title: "Failed",
-        description: createError || "Failed to create slot.",
+        description: creationResult.errorMessage || createError || "Failed to create slot.",
       })
     }
   }
@@ -481,7 +516,7 @@ export default function AvailabilityPage() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="rounded-2xl text-left">
+          {/* <Card className="rounded-2xl text-left">
             <CardHeader>
               <CardTitle>Calendar Sync</CardTitle>
               <div className="border rounded-xl bg-white p-3 flex items-start gap-2">
@@ -502,7 +537,7 @@ export default function AvailabilityPage() {
                 {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card className="rounded-2xl text-left">
             <CardHeader>

@@ -28,6 +28,7 @@ import { getPermissions } from '@/lib/GetPermissions'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
 import { formattedRole } from '@/lib/utils'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 //Test
 const Navbar = () => {
@@ -60,6 +61,7 @@ const Navbar = () => {
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [loading, setLoading] = useState(true);
+    const [activeMentorTooltip, setActiveMentorTooltip] = useState<string | null>(null)
 
     const handleLogoutClick = () => {
         setShowLogoutDialog(true)
@@ -123,11 +125,36 @@ const Navbar = () => {
 
     const routes = inOrg && !isStudentRoute ? adminRoutes : [];
     const mentorsTabs = [
-        { label: 'Dashboard', path: 'dashboard', icon: LayoutGrid },
-        { label: 'Availability', path: 'availability', icon: CalendarClock },
-        { label: 'Calendar', path: 'calendar', icon: CalendarDays },
-        { label: 'Sessions', path: 'sessions', icon: ClipboardList },
-        { label: 'Performance', path: 'performance', icon: TrendingUp },
+        {
+            label: 'Dashboard',
+            path: 'dashboard',
+            icon: LayoutGrid,
+            tooltip: 'Overview of your mentoring activity and key highlights.',
+        },
+        {
+            label: 'Availability',
+            path: 'availability',
+            icon: CalendarClock,
+            tooltip: 'Create and manage your open mentoring slots.',
+        },
+        {
+            label: 'Calendar',
+            path: 'calendar',
+            icon: CalendarDays,
+            tooltip: 'See your mentor schedule in calendar view.',
+        },
+        {
+            label: 'Sessions',
+            path: 'sessions',
+            icon: ClipboardList,
+            tooltip: 'Track upcoming, completed, missed, and cancelled sessions.',
+        },
+        {
+            label: 'Performance',
+            path: 'performance',
+            icon: TrendingUp,
+            tooltip: 'Review completion rate, utilization, ratings, and trends.',
+        },
     ]
 
     useEffect(() => {
@@ -195,7 +222,16 @@ const Navbar = () => {
                             if (item.name === 'Question Bank' && !loading && !permissions.viewQuestion) {
                                 return null;
                             }
-                            if (item.name === 'Roles and Permissions' && !loading && !permissions.viewRolesAndPermission) {
+                            if (item.name === 'Roles and Permissions') {
+                                if (isInstructorUser) {
+                                    return null;
+                                }
+
+                                if (!loading && !permissions.viewRolesAndPermission) {
+                                    return null;
+                                }
+                            }
+                            if (item.name === 'All Organizations' && isInstructorUser) {
                                 return null;
                             }
 
@@ -305,30 +341,51 @@ const Navbar = () => {
             </div>
 
             {isInstructorUser && isMentorsDashboardRoute && (
-                <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
-                    {mentorsTabs.map((tab) => {
-                        const basePath = `/${role}/mentorsDashboard/${tab.path}`
-                        const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
-                        const isTabActive = pathname === basePath
-                        const Icon = tab.icon
+                <TooltipProvider delayDuration={120}>
+                    <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
+                        {mentorsTabs.map((tab) => {
+                            const basePath = `/${role}/mentorsDashboard/${tab.path}`
+                            const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
+                            const isTabActive = pathname === basePath
+                            const Icon = tab.icon
 
-                        return (
-                            <Link
-                                key={tab.path}
-                                href={href}
-                                className={cn(
-                                    'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
-                                    isTabActive
-                                        ? 'border-green-600 text-foreground'
-                                        : 'border-transparent text-muted-foreground hover:text-foreground'
-                                )}
-                            >
-                                <Icon className="h-4 w-4" />
-                                {tab.label}
-                            </Link>
-                        )
-                    })}
-                </div>
+                            return (
+                                <Tooltip
+                                    key={tab.path}
+                                    onOpenChange={(open) => {
+                                        setActiveMentorTooltip(open ? tab.path : null)
+                                    }}
+                                >
+                                    <TooltipTrigger asChild>
+                                        <Link
+                                            href={href}
+                                            className={cn(
+                                                'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
+                                                isTabActive
+                                                    ? 'border-green-600 text-foreground'
+                                                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {tab.label}
+                                        </Link>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        side="bottom"
+                                        sideOffset={8}
+                                        className="max-w-[260px] px-3.5 py-2 text-[13px] font-medium leading-relaxed bg-white text-foreground border-border shadow-md [&>svg]:fill-white"
+                                    >
+                                        {tab.tooltip}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )
+                        })}
+                    </div>
+                </TooltipProvider>
+            )}
+
+            {isInstructorUser && isMentorsDashboardRoute && activeMentorTooltip && (
+                <div className="fixed left-0 right-0 bottom-0 top-28 z-30 pointer-events-none backdrop-blur-[2px] bg-black/25 transition-opacity duration-150" />
             )}
         </nav>
     )
