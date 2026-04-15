@@ -16,6 +16,7 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback"
+import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
 import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
 
@@ -146,6 +147,11 @@ export default function SessionsPage() {
   const selectedSession = useMemo(
     () => sessions.find((session) => session.id === selectedBookingId) || null,
     [sessions, selectedBookingId]
+  )
+
+  const { recordingUrl: completedRecordingUrl } = useMentorSlotRecording(
+    selectedSession?.id,
+    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED")
   )
 
   const isReadOnlySession = Boolean(
@@ -602,10 +608,10 @@ export default function SessionsPage() {
                   </Badge>
                 </div>
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  selectedSession.meetingLink ? (
+                  selectedSession.zoomStartUrl ? (
                     <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
                       <a
-                        href={selectedSession.meetingLink}
+                        href={selectedSession.zoomStartUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -619,6 +625,16 @@ export default function SessionsPage() {
                       Join unavailable
                     </Button>
                   )
+                )}
+                {selectedSession.sessionLifecycleState === "COMPLETED" && completedRecordingUrl && (
+                  <a
+                    href={completedRecordingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+                  >
+                    View Recording
+                  </a>
                 )}
               </div>
 

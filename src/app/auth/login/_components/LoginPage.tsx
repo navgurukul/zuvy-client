@@ -220,10 +220,10 @@ const handleGoogleSuccess = async (
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
-                const userRole = response.data.user.rolesList[0]
+                const userRole = response.data.user.rolesList[0]?.toLowerCase() || ''
                 const organizationId = response.data.user.orgId || null
                 const hasFilled = response.data.user.hasfilled
-                const shouldCheckMentorProfile = Boolean(userRole)
+                const shouldCheckMentorProfile = userRole === 'instructor'
 
                 let mentorProfileCompleted: boolean | null = null
                 if (shouldCheckMentorProfile) {
@@ -249,9 +249,6 @@ const handleGoogleSuccess = async (
                         router.push('/student/profile')
                     }
                     
-                } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
-                    // Redirect admin/poc to mentor profile setup if profile is incomplete
-                    router.push(`/${userRole}/organizations/${organizationId}/profile`)
                 } else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
