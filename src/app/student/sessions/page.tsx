@@ -231,8 +231,8 @@ export default function MySessions() {
 
                 <div className="flex gap-3">
 
-                  <Avatar className="bg-green-700 text-white">
-                    <AvatarFallback>
+                  <Avatar>
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold">
                       {getMentorAvatarFallback(session.mentorName, session.mentorUserId)}
                     </AvatarFallback>
                   </Avatar>
@@ -251,7 +251,7 @@ export default function MySessions() {
 
                 </div>
 
-                <Badge variant="outline">
+                <Badge className="bg-destructive-light text-destructive">
                   Cancelled
                 </Badge>
 
@@ -342,7 +342,7 @@ export default function MySessions() {
               <div className="flex justify-between">
                 <div className="flex gap-3">
                   <Avatar>
-                    <AvatarFallback>{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
                   <div>
@@ -399,7 +399,7 @@ export default function MySessions() {
                 <div className="flex gap-3">
 
                   <Avatar>
-                    <AvatarFallback>{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
                   <div>
