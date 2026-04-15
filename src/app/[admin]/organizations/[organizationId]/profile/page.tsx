@@ -32,7 +32,6 @@ const SUGGESTED_EXPERTISE = [
   'Node.js',
   'NestJS',
   'PostgreSQL',
-  'System Design',
   'Backend Architecture',
 ]
 
@@ -83,7 +82,6 @@ function MentorProfileCreateUI({
   const [pastExperiences, setPastExperiences] = useState(initial.pastExperiences)
   const [expertise, setExpertise] = useState<string[]>(initial.expertise)
   const [tagInput, setTagInput] = useState('')
-  const [error, setError] = useState<string | null>(null)
 
   const tagRef = useRef<HTMLInputElement>(null)
   const orgId = Array.isArray(organizationId) ? organizationId[0] : organizationId
@@ -126,30 +124,20 @@ function MentorProfileCreateUI({
   }
 
   const handleSubmit = async () => {
-    setError(null)
+    const validationErrors: string[] = []
 
-    if (!title.trim()) {
-      setError('Title is required.')
-      return
-    }
-    if (!bio.trim()) {
-      setError('Bio is required.')
-      return
-    }
-    if (!pastExperiences.trim()) {
-      setError('Past experiences are required.')
-      return
-    }
-    if (bio.trim().length < 80) {
-      setError('Bio should be at least 80 characters.')
-      return
-    }
-    if (expertise.length === 0) {
-      setError('Please add at least one skill.')
-      return
-    }
-    if (!hasResolvedBootcamp) {
-      setError('No bootcamp is available for this organization yet.')
+    if (!title.trim()) validationErrors.push('Title is required.')
+    if (!bio.trim()) validationErrors.push('Bio is required.')
+    if (!pastExperiences.trim()) validationErrors.push('Past experiences are required.')
+    if (bio.trim().length < 80) validationErrors.push('Bio should be at least 80 characters.')
+    if (expertise.length === 0) validationErrors.push('Please add at least one skill.')
+    if (!hasResolvedBootcamp) validationErrors.push('No bootcamp is available for this organization yet.')
+
+    if (validationErrors.length > 0) {
+      toast.error({
+        title: 'Please complete the required fields',
+        description: validationErrors.join(' '),
+      })
       return
     }
 
@@ -173,8 +161,15 @@ function MentorProfileCreateUI({
         description: 'Your profile has been saved successfully.',
       })
       router.push(coursesHref)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Something went wrong. Please try again.'
+
+      toast.error({
+        title: 'Save failed',
+        description: message,
+      })
     }
   }
 
@@ -207,8 +202,6 @@ function MentorProfileCreateUI({
     )
   }
 
-  const formError = error || updateError
-
   return (
     <MaxWidthWrapper>
       <div className="py-12">
@@ -235,62 +228,6 @@ function MentorProfileCreateUI({
             <p className="text-body1 text-text-secondary">
               Share your expertise to help learners grow. Complete your mentor profile to unlock slots.
             </p>
-          </div>
-
-          <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-5 py-5 text-left">
-            <h4 className="text-body1 font-semibold text-emerald-900 mb-3">
-              Mentor onboarding checklist
-            </h4>
-
-            <div className="space-y-4 text-sm text-emerald-950">
-              <div className="flex gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
-                  1
-                </div>
-                <div>
-                  <p className="font-semibold">Complete Your Profile</p>
-                  <p className="text-emerald-900/80">
-                    Add your mentoring title, bio, past experience, and skills so learners can understand your background before booking.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
-                  2
-                </div>
-                <div>
-                  <p className="font-semibold">Set Your Availability</p>
-                  <p className="text-emerald-900/80">
-                    Go to Mentors → Availability and create your first open slots with a date, start ime, and duration.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
-                  4
-                </div>
-                <div>
-                  <p className="font-semibold">Understand the Session Lifecycle</p>
-                  <p className="text-emerald-900/80">
-                    Track Confirmed, Completed, Missed, and Cancelled sessions from Mentors → Sessions, and mark them promptly.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
-                  5
-                </div>
-                <div>
-                  <p className="font-semibold">Review Your Performance Dashboard</p>
-                  <p className="text-emerald-900/80">
-                    Check Mentors → Performance for Completion Rate, Utilisation Rate, Average Rating, and Session Mix to improve weekly.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Profile Completeness Gate */}
@@ -339,7 +276,7 @@ function MentorProfileCreateUI({
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="text-body2 font-semibold text-success">
+                  <h4 className="text-body2 font-semibold text-success text-left">
                     Profile Complete ✓
                   </h4>
                   <p className="text-body2 text-text-secondary mt-1">
@@ -347,13 +284,6 @@ function MentorProfileCreateUI({
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Error Alert */}
-          {formError && (
-            <div className="mb-8 rounded-lg border border-destructive bg-destructive-light px-5 py-4">
-              <p className="text-body2 font-semibold text-destructive">{formError}</p>
             </div>
           )}
 
@@ -514,4 +444,3 @@ function MentorProfileCreateUI({
 export default function Page() {
   return <MentorProfileCreateUI />
 }
-
