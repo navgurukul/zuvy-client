@@ -13,6 +13,12 @@ const NotAuthorizedUser = () => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = user?.orgId;
+    const dashboardPath =
+        userRole === 'student'
+            ? '/student/courses'
+            : orgId
+            ? `/${userRole}/organizations/${orgId}/courses`
+            : `/${userRole}`
 
     return (
         <div className="flex flex-col items-center pt-24 w-full h-full">
@@ -34,7 +40,7 @@ const NotAuthorizedUser = () => {
                     </p>
                     <Button onClick={() => {
                         setShowModal(false);
-                        router.push(`/${userRole}/organizations/${orgId}/courses`);
+                        router.push(dashboardPath);
                     }}>
                         Return to my Organisation
                     </Button>

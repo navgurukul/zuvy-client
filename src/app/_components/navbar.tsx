@@ -42,6 +42,14 @@ const Navbar = () => {
     const isStudentRoute = role === 'student'
     const isMentorsDashboardRoute = pathname.includes('/mentorsDashboard')
     const pathSegments = pathname.split('/')
+    const sanitizeOrgId = (value?: string | null) => {
+        if (!value) return undefined
+        const normalized = value.trim().toLowerCase()
+        if (normalized === 'null' || normalized === 'undefined') {
+            return undefined
+        }
+        return value
+    }
     const orgIdFromPath =
         pathSegments[2] === 'organizations' && pathSegments[3]
             ? pathSegments[3]
@@ -51,8 +59,20 @@ const Navbar = () => {
         typeof user?.orgId === 'number' && Number.isFinite(user.orgId)
             ? String(user.orgId)
             : undefined
-    const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
-    const profileHref = orgId
+    const orgId =
+        sanitizeOrgId(orgIdFromPath) ||
+        sanitizeOrgId(orgIdFromQuery) ||
+        sanitizeOrgId(orgIdFromUser) ||
+        ''
+    const hasOrgContext = Boolean(orgId)
+    const coursesHref = isStudentRoute
+        ? '/student/courses'
+        : hasOrgContext
+        ? `/${role}/organizations/${orgId}/courses`
+        : `/${role}`
+    const profileHref = isStudentRoute
+        ? '/student/profile'
+        : hasOrgContext
         ? `/${role}/organizations/${orgId}/profile`
         : `/${role}`
     const inOrg = pathname.split('/').length > 3
@@ -175,7 +195,8 @@ const Navbar = () => {
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
-                    <Link href={isSuperAdmin ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
+
+                      <Link href={isSuperAdmin ? `/${role}/organizations` : coursesHref} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
 

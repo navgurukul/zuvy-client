@@ -29,6 +29,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
     const userId = user?.id ? parseInt(user.id) : null;
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
+    const isStudentRoute = role === 'student';
 
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState<Organization | null>(null);
@@ -82,7 +83,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
 
         if (result.success) {
             setIsOpen(false);
-            router.push(`/${role}/organizations/${org.id}/courses`);
+            router.push(isStudentRoute ? `/${role}/courses` : `/${role}/organizations/${org.id}/courses`);
         }
     }
 

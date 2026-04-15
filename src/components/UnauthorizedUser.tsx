@@ -10,6 +10,12 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
     const { organizationId } = useParams()
     const { user } = getUser()
     const orgId = Number(organizationId) || user?.orgId; 
+    const dashboardPath =
+        userRole === 'student'
+            ? '/student/courses'
+            : orgId
+            ? `/${userRole}/organizations/${orgId}/courses`
+            : `/${userRole}`
 
     return (
         <div className="flex flex-col items-center pt-24">
@@ -30,7 +36,7 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
                         {`The page is meant to be viewed by Zuvy ${roleFromPath}. You do
                         not have ${roleFromPath} access to access this page`}
                     </p>
-                    <Button onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}>
+                    <Button onClick={() => router.push(dashboardPath)}>
                         Return to Dashboard
                     </Button>
                 </div>

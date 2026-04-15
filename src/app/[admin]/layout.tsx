@@ -25,6 +25,8 @@ export default function RootLayout({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
     const isMentorsRoute = pathname.includes('/mentorsDashboard')
+    const isInvalidStudentOrgPath =
+        roleFromPath === 'student' && pathname.includes('/organizations/')
 
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const isFullWidthRoute =
@@ -40,6 +42,15 @@ export default function RootLayout({
          return (
             <Notfound
                 error={new Error('Unauthorized access')}
+                reset={() => console.error('URL Not Found')}
+            />
+        )
+    }
+
+    if (isInvalidStudentOrgPath) {
+        return (
+            <Notfound
+                error={new Error('Invalid student route')}
                 reset={() => console.error('URL Not Found')}
             />
         )
