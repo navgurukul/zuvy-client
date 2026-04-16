@@ -45,7 +45,7 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStorage } from '@/hooks/use-profile';
-import { SKILLS_BY_CATEGORY, COLLEGES, MONTHS } from '@/lib/profile.mockData';
+import { SKILLS_BY_CATEGORY, MONTHS } from '@/lib/profile.mockData';
 import type {
   CompetitiveProfile,
   WorkExperience,
@@ -62,6 +62,7 @@ import useLearnerBranchDetails from '@/hooks/useLearnerBranchDetails';
 import useLearnerBoards from '@/hooks/useLearnerBoards';
 import useLearnerRoles from '@/hooks/useLearnerRoles';
 import useLearnerRemoteLocations from '@/hooks/useLearnerRemoteLocations';
+import useCollegeSearch from '@/hooks/useCollegeSearch';
 import { toast } from '@/components/ui/use-toast';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
 import { WorkExperienceModal, WorkExperienceCard } from '@/app/student/profile/WorkExperienceComponents';
@@ -204,7 +205,7 @@ export const EditProfilePage: React.FC = () => {
   // College search state
   const [collegeSearch, setCollegeSearch] = useState('');
   const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
-  const [filteredColleges, setFilteredColleges] = useState(COLLEGES);
+  const { colleges: filteredColleges } = useCollegeSearch(collegeSearch);
   
   // Work experience state
   const [hasInternship, setHasInternship] = useState(false);
@@ -1010,20 +1011,6 @@ export const EditProfilePage: React.FC = () => {
       Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
     };
   }, []);
-  
-  // College search filtering
-  useEffect(() => {
-    if (collegeSearch.trim()) {
-      const filtered = COLLEGES.filter(
-        (college) =>
-          college.name.toLowerCase().includes(collegeSearch.toLowerCase()) ||
-          college.state.toLowerCase().includes(collegeSearch.toLowerCase())
-      );
-      setFilteredColleges(filtered);
-    } else {
-      setFilteredColleges(COLLEGES);
-    }
-  }, [collegeSearch]);
   
   // College dropdown click-outside
   useEffect(() => {
@@ -2117,7 +2104,7 @@ export const EditProfilePage: React.FC = () => {
                                     )}
                                     {filteredColleges.map((college) => (
                                       <button
-                                        key={college.id}
+                                        key={college.name}
                                         type="button"
                                         onClick={() => handleCollegeSelect(college.name)}
                                         className="w-full text-left px-3 py-2 hover:bg-accent text-sm hover:text-accent-foreground transition-colors"

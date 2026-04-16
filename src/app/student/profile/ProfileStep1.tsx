@@ -15,6 +15,7 @@ import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
 import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
 import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
+import { useCollegeSearch } from '@/hooks/useCollegeSearch';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
 
@@ -59,8 +60,6 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [collegeSearch, setCollegeSearch] = useState('');
-  const [filteredColleges, setFilteredColleges] = useState<{ name: string; state: string }[]>([]);
-  const [isLoadingColleges, setIsLoadingColleges] = useState(false);
   const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
   const [validations, setValidations] = useState<Record<string, boolean>>({});
   const [showGraduationDatePicker, setShowGraduationDatePicker] = useState(false);
@@ -69,6 +68,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [customDegree, setCustomDegree] = useState<string>('');
   const [customBranch, setCustomBranch] = useState<string>('');
   const fullNameEditedRef = useRef(false);
+  const { colleges: filteredColleges, isLoading: isLoadingColleges } = useCollegeSearch(collegeSearch);
 
   useEffect(() => {
     const nextEmail = resolvedUserEmail || initialData?.email || '';
@@ -273,38 +273,6 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
     lastAutofillRef.current = signature;
   }, [initialData]);
-
-  // Filter colleges based on search
- useEffect(() => {
-  const fetchColleges = async () => {
-    if (!collegeSearch.trim()) {
-      setFilteredColleges([]);
-      return;
-    }
-
-    setIsLoadingColleges(true);
-    try {
-      const res = await fetch(
-        `http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(collegeSearch)}`
-      );
-      const data = await res.json();
-      const mapped = data.map((u: any) => ({
-        name: u.name,
-        state: u['state-province'] || 'India',
-      }));
-      setFilteredColleges(mapped);
-    } catch (err) {
-      console.error('Failed to fetch colleges:', err);
-      setFilteredColleges([]);
-    } finally {
-      setIsLoadingColleges(false);
-    }
-  };
-
-  // Debounce to avoid hammering the API
-  const debounce = setTimeout(fetchColleges, 400);
-  return () => clearTimeout(debounce);
-}, [collegeSearch]);
 
   // Close college dropdown when clicking outside
   useEffect(() => {

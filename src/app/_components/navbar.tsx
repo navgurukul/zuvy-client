@@ -6,6 +6,12 @@ import {
     Settings,
     Database,
     Bell,
+    Users,
+    LayoutGrid,
+    CalendarClock,
+    CalendarDays,
+    ClipboardList,
+    TrendingUp,
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -19,11 +25,10 @@ import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
-import { Spinner } from '@/components/ui/spinner'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
 import { formattedRole } from '@/lib/utils'
-import MentorsDropdown from './MentorsDropdown'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 //Test
 const Navbar = () => {
@@ -32,8 +37,11 @@ const Navbar = () => {
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isInstructorUser = userRole === 'instructor'
     const isSuperAdmin = userRole === 'super_admin';
     const role = pathname.split('/')[1]
+    const isStudentRoute = role === 'student'
+    const isMentorsDashboardRoute = pathname.includes('/mentorsDashboard')
     const pathSegments = pathname.split('/')
     const orgIdFromPath =
         pathSegments[2] === 'organizations' && pathSegments[3]
@@ -45,11 +53,15 @@ const Navbar = () => {
             ? String(user.orgId)
             : undefined
     const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
+    const profileHref = orgId
+        ? `/${role}/organizations/${orgId}/profile`
+        : `/${role}`
     const inOrg = pathname.split('/').length > 3
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [loading, setLoading] = useState(true);
+    const [activeMentorTooltip, setActiveMentorTooltip] = useState<string | null>(null)
 
     const handleLogoutClick = () => {
         setShowLogoutDialog(true)
@@ -90,13 +102,18 @@ const Navbar = () => {
             icon: Settings,
             active: `/${role}/organizations/${orgId}/settings`,
         },
-        {
-            name: 'Mentors',
-            href: `/${role}/mentorsDashboard/dashboard`,
-            icon: Layers,
-            active: (pathname: string) =>
-                pathname === `/${role}/mentorsDashboard/dashboard` || pathname.startsWith(`/${role}/mentorsDashboard/`),
-        },
+        ...(isInstructorUser
+            ? [
+                  {
+                      name: 'Mentors',
+                      href: `/${role}/mentorsDashboard/dashboard`,
+                      icon: Users,
+                      active: (pathname: string) =>
+                          pathname === `/${role}/mentorsDashboard/dashboard` ||
+                          pathname.startsWith(`/${role}/mentorsDashboard/`),
+                  },
+              ]
+            : []),
         {
             name: 'All Organizations',
             href: `/${role}/organizations`,
@@ -106,21 +123,62 @@ const Navbar = () => {
         },
     ]
 
-    const routes = inOrg ? adminRoutes : [];
+    const routes = inOrg && !isStudentRoute ? adminRoutes : [];
+    const mentorsTabs = [
+        {
+            label: 'Dashboard',
+            path: 'dashboard',
+            icon: LayoutGrid,
+            tooltip: 'Overview of your mentoring activity and key highlights.',
+        },
+        {
+            label: 'Availability',
+            path: 'availability',
+            icon: CalendarClock,
+            tooltip: 'Create and manage your open mentoring slots.',
+        },
+        {
+            label: 'Calendar',
+            path: 'calendar',
+            icon: CalendarDays,
+            tooltip: 'See your mentor schedule in calendar view.',
+        },
+        {
+            label: 'Sessions',
+            path: 'sessions',
+            icon: ClipboardList,
+            tooltip: 'Track upcoming, completed, missed, and cancelled sessions.',
+        },
+        {
+            label: 'Performance',
+            path: 'performance',
+            icon: TrendingUp,
+            tooltip: 'Review completion rate, utilization, ratings, and trends.',
+        },
+    ]
 
     useEffect(() => {
         let isMounted = true;
+        let retryTimeout: ReturnType<typeof setTimeout> | null = null
+        let retryCount = 0
+        const maxRetries = 10
         
         const loadPermissions = async () => {
             try {
                 const perms = await getPermissions();
-                if (isMounted && Object.keys(perms).length > 0) {
-                    setPermissions(perms);
-                    setLoading(false);
-                } else if (isMounted && Object.keys(perms).length === 0) {
-                    // Retry after a short delay if permissions are not yet available
-                    setTimeout(loadPermissions, 100);
+                if (!isMounted) return
+
+                const nextPermissions = perms || {}
+                const hasPermissions = Object.keys(nextPermissions).length > 0
+
+                if (hasPermissions || retryCount >= maxRetries) {
+                    setPermissions(nextPermissions)
+                    setLoading(false)
+                    return
                 }
+
+                retryCount += 1
+                retryTimeout = setTimeout(loadPermissions, 120)
             } catch (error) {
                 console.error('Error loading permissions:', error);
                 if (isMounted) {
@@ -133,6 +191,9 @@ const Navbar = () => {
         
         return () => {
             isMounted = false;
+            if (retryTimeout) {
+                clearTimeout(retryTimeout)
+            }
         };
     }, []);
 
@@ -158,19 +219,33 @@ const Navbar = () => {
                                     : item.active === pathname
 
                             // Check permissions for Question Bank and Roles and Permissions
-                            if (item.name === 'Question Bank' && !permissions.viewQuestion) {
+                            if (item.name === 'Question Bank' && !loading && !permissions.viewQuestion) {
                                 return null;
                             }
-                            if (item.name === 'Roles and Permissions' && !permissions.viewRolesAndPermission) {
+                            if (item.name === 'Roles and Permissions') {
+                                if (isInstructorUser) {
+                                    return null;
+                                }
+
+                                if (!loading && !permissions.viewRolesAndPermission) {
+                                    return null;
+                                }
+                            }
+                            if (item.name === 'All Organizations' && isInstructorUser) {
                                 return null;
                             }
 
                             return (
                                 <>
-                                    {(!isSuperAdmin  && item.name === 'All Organizations' ) || (item.name !== 'Question Bank' && item.name !== 'Mentors') && (
+                                    {((!isSuperAdmin && item.name === 'All Organizations') ||
+                                        item.name !== 'Question Bank') && (
                                         <Link
                                             key={item.name}
-                                            href={item.href}
+                                            href={
+                                                item.name === 'Mentors' && orgId
+                                                    ? `${item.href}?orgId=${orgId}`
+                                                    : item.href
+                                            }
                                             className={cn(
                                                 'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
                                                 isActive
@@ -179,14 +254,11 @@ const Navbar = () => {
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
-                                            {loading? <Spinner />: <span className='' >{item.name}</span>}
+                                            <span>{item.name}</span>
                                         </Link>
                                     )}
-                                    {item.name === 'Question Bank' && permissions.viewQuestion && (
-                                        loading ? <Spinner /> : <QuestionBankDropdown/>
-                                    )}
-                                    {item.name === 'Mentors' && (
-                                        <MentorsDropdown role={role} orgId={orgId || undefined} />
+                                    {item.name === 'Question Bank' && !loading && permissions.viewQuestion && (
+                                        <QuestionBankDropdown/>
                                     )}
                                 </>
                             )
@@ -258,6 +330,8 @@ const Navbar = () => {
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown
                         studentData={studentData}
+                        profileHref={profileHref}
+                        showViewProfile={isInstructorUser}
                         handleLogoutClick={handleLogoutClick}
                         showLogoutDialog={showLogoutDialog}
                         setShowLogoutDialog={setShowLogoutDialog}
@@ -265,6 +339,54 @@ const Navbar = () => {
                     />
                 </div>
             </div>
+
+            {isInstructorUser && isMentorsDashboardRoute && (
+                <TooltipProvider delayDuration={120}>
+                    <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
+                        {mentorsTabs.map((tab) => {
+                            const basePath = `/${role}/mentorsDashboard/${tab.path}`
+                            const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
+                            const isTabActive = pathname === basePath
+                            const Icon = tab.icon
+
+                            return (
+                                <Tooltip
+                                    key={tab.path}
+                                    onOpenChange={(open) => {
+                                        setActiveMentorTooltip(open ? tab.path : null)
+                                    }}
+                                >
+                                    <TooltipTrigger asChild>
+                                        <Link
+                                            href={href}
+                                            className={cn(
+                                                'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
+                                                isTabActive
+                                                    ? 'border-green-600 text-foreground'
+                                                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {tab.label}
+                                        </Link>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        side="bottom"
+                                        sideOffset={8}
+                                        className="max-w-[260px] px-3.5 py-2 text-[13px] font-medium leading-relaxed bg-white text-foreground border-border shadow-md [&>svg]:fill-white"
+                                    >
+                                        {tab.tooltip}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )
+                        })}
+                    </div>
+                </TooltipProvider>
+            )}
+
+            {isInstructorUser && isMentorsDashboardRoute && activeMentorTooltip && (
+                <div className="fixed left-0 right-0 bottom-0 top-28 z-30 pointer-events-none backdrop-blur-[2px] bg-black/25 transition-opacity duration-150" />
+            )}
         </nav>
     )
 }

@@ -27,6 +27,7 @@ const Page = ({ params }: { params: PageProps }) => {
     const { courseData } = getCourseData()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin'
     const orgId = Number(organizationId) || user?.orgId; 
 
     // Use the custom hooks
@@ -43,6 +44,7 @@ const Page = ({ params }: { params: PageProps }) => {
     const [localSettings, setLocalSettings] = useState({
         type: '',
         isModuleLocked: false,
+        mentorshipEnabled: false,
     })
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
@@ -54,6 +56,7 @@ const Page = ({ params }: { params: PageProps }) => {
             setLocalSettings({
                 type: bootcampSettings.type,
                 isModuleLocked: bootcampSettings.isModuleLocked,
+                mentorshipEnabled: bootcampSettings.mentorshipEnabled,
             })
         }
     }, [bootcampSettings])
@@ -69,6 +72,13 @@ const Page = ({ params }: { params: PageProps }) => {
         setLocalSettings((prev) => ({
             ...prev,
             isModuleLocked: !prev.isModuleLocked,
+        }))
+    }
+
+    const handleMentorshipToggle = () => {
+        setLocalSettings((prev) => ({
+            ...prev,
+            mentorshipEnabled: !prev.mentorshipEnabled,
         }))
     }
 
@@ -153,6 +163,16 @@ const Page = ({ params }: { params: PageProps }) => {
                     <h2 className="text-base font-medium text-foreground">
                         Course Type - <span className='font-light'>{localSettings.type}</span>
                     </h2>
+                    {!isSuperAdmin && (
+                        <h2 className="text-base font-medium text-foreground">
+                            One-on-One Sessions -{' '}
+                            <span className="font-light">
+                                {localSettings.mentorshipEnabled
+                                    ? 'Enabled'
+                                    : 'Disabled'}
+                            </span>
+                        </h2>
+                    )}
                     <RadioGroup
                         value={localSettings.type.toLowerCase()}
                         onValueChange={(value) =>
@@ -225,6 +245,40 @@ const Page = ({ params }: { params: PageProps }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* One-on-One Sessions Toggle Switch */}
+                {isSuperAdmin && (
+                    <div className="mt-4 pt-2 border-t border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-base font-medium text-foreground mb-1">
+                                    One-on-One Sessions
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Enable this to allow students to book individual sessions with mentors for personalized guidance
+                                </p>
+                            </div>
+                            <div className="flex flex-col justify-left items-start">
+                                <div
+                                    className={`relative w-11 h-6 rounded-full bg-gray-300 p-0.5 cursor-pointer ${
+                                        localSettings.mentorshipEnabled
+                                            ? 'bg-primary'
+                                            : ''
+                                    }`}
+                                    onClick={handleMentorshipToggle}
+                                >
+                                    <div
+                                        className={`absolute ml-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                                            localSettings.mentorshipEnabled
+                                                ? 'translate-x-full'
+                                                : ''
+                                        }`}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="mt-4 pt-8 border-t border-border">
                     {/* Error Banner */}

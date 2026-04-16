@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 import {
   useMentorAvailability,
@@ -50,7 +50,9 @@ const formatSlotTimeRange = (slot: MentorAvailabilitySlot) => {
 
 export default function BookSessionPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
+  const courseId = searchParams.get("courseId") || "";
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
   const {
@@ -93,7 +95,7 @@ export default function BookSessionPage() {
 
       {/* Back */}
       <Link
-        href={mentorId ? `/student/mentors/${mentorId}` : "/student/mentors"}
+        href={mentorId ? `/student/mentors/${mentorId}${courseId ? `?courseId=${courseId}` : ""}` : (courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors")}
         className="flex items-center text-sm text-gray-500 hover:text-gray-700"
       >
         <ArrowLeft size={16} className="mr-1" />

@@ -52,21 +52,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const isMobile = width < 768;
 
 
-  const upcomingLiveClassesCount =
-    upcomingEventsData?.events?.filter(
-      (event) =>
-        typeof event.type === 'string' &&
-        event.type.toLowerCase().includes('class')
-    ).length || 0;
-
   const QUICK_ACTIONS = [
     { label: "Find a Mentor", sub: "Browse available mentors", href: `/student/mentors?courseId=${courseId}`, icon: Search, color: "text-primary", bg: "bg-primary/10" },
     {
       label: "My One to One Sessions",
-      sub:
-        upcomingLiveClassesCount > 0
-          ? `${upcomingLiveClassesCount} upcoming live class${upcomingLiveClassesCount > 1 ? 'es' : ''}`
-          : "No upcoming live classes",
+      sub: "View and manage your sessions",
       href: `/student/sessions?courseId=${courseId}`,
       icon: CalendarDays,
       color: "text-accent",
@@ -1425,25 +1415,27 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
-              <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
-                <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
-                {QUICK_ACTIONS.map((a) => (
-                  <Link
-                    key={a.href}
-                    href={a.href}
-                    className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted transition-colors group"
-                  >
-                    <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", a.bg)}>
-                      <a.icon className={cn("h-4 w-4", a.color)} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-text-primary">{a.label}</p>
-                      <p className="text-xs text-text-muted">{a.sub}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
-                  </Link>
-                ))} 
-              </div>
+              {latestCourseData?.mentorshipEnabled && (
+                <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
+                  <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
+                  {QUICK_ACTIONS.map((a) => (
+                    <Link
+                      key={a.href}
+                      href={a.href}
+                      className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted transition-colors group"
+                    >
+                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", a.bg)}>
+                        <a.icon className={cn("h-4 w-4", a.color)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-text-primary">{a.label}</p>
+                        <p className="text-xs text-text-muted">{a.sub}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

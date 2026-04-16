@@ -42,7 +42,10 @@ const MentorsDropdown = ({ role, orgId }: MentorsDropdownProps) => {
                 </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuContent
+                align="start"
+                className="w-[var(--radix-dropdown-menu-trigger-width)]"
+            >
                 {mentorOptions.map((item) => {
                     const basePath = `/${role}/mentorsDashboard/${item.path}`
                     const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
@@ -52,7 +55,7 @@ const MentorsDropdown = ({ role, orgId }: MentorsDropdownProps) => {
                             <Link
                                 href={href}
                                 className={cn(
-                                    'w-full cursor-pointer',
+                                    'flex w-full justify-center text-center cursor-pointer',
                                     pathname === basePath ? 'bg-gray-100' : ''
                                 )}
                             >
