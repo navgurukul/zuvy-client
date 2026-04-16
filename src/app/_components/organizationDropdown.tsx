@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, Check, Search } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,9 +19,10 @@ import { useOrganizations, Organization } from '@/hooks/useOrganizations';
 import { getUser } from '@/store/store';
 import useSwitchOrg from '@/hooks/useSwitchOrg';
 
-export default function OrganizationDropdown({ orgId }: { orgId: string }) {
+export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const role = pathname.split('/')[1]; // Extract role from pathname
     const inOrg = pathname.split('/').length > 3
     const { user } = getUser();
@@ -38,15 +39,28 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm, true);
     const allOrgs = useOrganizations({ auto: isSuperAdmin, search: searchTerm, all: true });
     const { organizations, loading, error } = isSuperAdmin ? allOrgs : byUser;
+    const orgIdFromQuery = searchParams.get('orgId');
+    const fallbackOrgId =
+        typeof user?.orgId === 'number' && Number.isFinite(user.orgId)
+            ? String(user.orgId)
+            : null;
+    const effectiveOrgId = orgId || orgIdFromQuery || fallbackOrgId || '';
 
     useEffect(() => {
-        const found = organizations.find(org => org.id === parseInt(orgId));
-        if (!inOrg) {
-            setSelected(null);
-        } else if (found) {
+        const selectedOrgId = parseInt(effectiveOrgId, 10);
+        const found = Number.isNaN(selectedOrgId)
+            ? null
+            : organizations.find((org) => org.id === selectedOrgId);
+
+        if (found) {
             setSelected(found);
+            return;
         }
-    }, [loading, organizations, orgId]);
+
+        if (!inOrg && selected) {
+            setSelected(null);
+        }
+    }, [inOrg, organizations, effectiveOrgId, selected]);
 
     const { switchOrg, isSwitching } = useSwitchOrg();
 

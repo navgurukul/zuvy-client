@@ -22,7 +22,9 @@ import {
 } from "lucide-react"
 import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useMyMentorSessions, type MyMentorSession } from "@/hooks/useMyMentorSessions"
+import { useMentorMetrics } from "@/hooks/useMentorMetrics"
 import { useNotifications } from "@/hooks/useNotifications"
+import { MentorDashboardSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { Progress } from "@nextui-org/react"
 import { cn } from "@/lib/utils"
 
@@ -168,32 +170,36 @@ const getLearnerLabel = (session: MyMentorSession) => {
 export default function DashboardPage() {
   const pathname = usePathname()
   const role = pathname.split("/")[1]
-  const initialNowIso = useMemo(() => new Date().toISOString(), [])
 
   const {
     slots,
     loading: slotsLoading,
     error: slotsError,
-  } = useMyMentorSlots(true, { startDateTime: initialNowIso })
-  const {
-    sessions,
-    loading: sessionsLoading,
-    error: sessionsError,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my")
+  } = useMyMentorSlots(true)
   const {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed")
+  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed", "desc")
+  const {
+    metrics,
+    loading: metricsLoading,
+    error: metricsError,
+  } = useMentorMetrics(true)
   const {
     notifications: apiNotifications,
     loading: notificationsLoading,
     error: notificationsError,
-    unreadCount,
     markAsRead,
     markAllAsRead,
     markingRead,
   } = useNotifications()
+
+  const isInitialLoading =
+    slotsLoading ||
+    completedSessionsLoading ||
+    metricsLoading ||
+    notificationsLoading
 
   const upcomingSlots = useMemo(
     () => {
@@ -213,8 +219,8 @@ export default function DashboardPage() {
     [slots]
   )
 
-  const sessionsDataLoading = sessionsLoading || completedSessionsLoading
-  const sessionsDataError = sessionsError || completedSessionsError
+  const sessionsDataLoading = completedSessionsLoading || metricsLoading
+  const sessionsDataError = completedSessionsError || metricsError
 
   const recentCompletedSessions = useMemo(
     () =>
@@ -230,110 +236,23 @@ export default function DashboardPage() {
             "createdAt",
           ]),
         }))
-        .sort((left, right) => {
-          const leftTime = getDateValue(left.eventTime)?.getTime() || 0
-          const rightTime = getDateValue(right.eventTime)?.getTime() || 0
-
-          return rightTime - leftTime
-        })
         .slice(0, 4),
     [completedSessions]
   )
 
-  const openSlots = useMemo(
-    () => slots.filter((slot) => slot.status.toLowerCase() === "available").length,
-    [slots]
-  )
+  const upcomingSessionsCount = Number(metrics?.upcomingSessions) || 0
+  const completionRate = Number(metrics?.sessions.completionRate) || 0
+  const cancellationRate = Number(metrics?.sessions.cancellationRate) || 0
+  const utilizationRate = Number(metrics?.utilization.utilizationRate) || 0
 
-  const completionRate =
-    sessions.length === 0
-      ? 0
-      : Math.round((completedSessions.length / sessions.length) * 100)
-
-  const totalHoursScheduled = useMemo(
-    () => slots.reduce((sum, slot) => sum + slot.durationMinutes, 0) / 60,
-    [slots]
-  )
-
-  const ratedCompletedSessions = useMemo(
-    () => completedSessions.filter((session) => typeof session.mentorRating === "number"),
-    [completedSessions]
-  )
-
-  const averageRatingValue = useMemo(() => {
-    if (ratedCompletedSessions.length === 0) {
-      return null
-    }
-
-    const totalRating = ratedCompletedSessions.reduce(
-      (sum, session) => sum + (session.mentorRating || 0),
-      0
-    )
-
-    return totalRating / ratedCompletedSessions.length
-  }, [ratedCompletedSessions])
-
-  const averageRatingDisplay = averageRatingValue === null ? "—" : averageRatingValue.toFixed(1)
-  const averageRatingRounded = averageRatingValue === null ? 0 : Math.round(averageRatingValue)
-
-  const slotDurationById = useMemo(() => {
-    const durationById = new Map<number, number>()
-
-    for (const slot of slots) {
-      durationById.set(slot.id, slot.durationMinutes)
-    }
-
-    return durationById
-  }, [slots])
-
-  const hoursDelivered = useMemo(() => {
-    const deliveredMinutes = completedSessions.reduce((sum, session) => {
-      const slotDuration = slotDurationById.get(session.slotAvailabilityId) || 0
-      if (slotDuration > 0) {
-        return sum + slotDuration
-      }
-
-      const joinedAt = getDateValue(session.joinedAt)
-      const completedAt = getDateValue(session.completedAt)
-
-      if (!joinedAt || !completedAt) {
-        return sum
-      }
-
-      const sessionDurationMinutes = Math.round(
-        (completedAt.getTime() - joinedAt.getTime()) / (60 * 1000)
-      )
-
-      return sessionDurationMinutes > 0 ? sum + sessionDurationMinutes : sum
-    }, 0)
-
-    return deliveredMinutes / 60
-  }, [completedSessions, slotDurationById])
-
-  const uniqueLearners = useMemo(() => {
-    const learnerKeys = new Set<string>()
-
-    for (const session of sessions) {
-      if (typeof session.studentUserId === "number") {
-        learnerKeys.add(`id:${session.studentUserId}`)
-        continue
-      }
-
-      const learnerLabel = getLearnerLabel(session)
-      if (learnerLabel !== "A learner") {
-        learnerKeys.add(`name:${learnerLabel.toLowerCase()}`)
-      }
-    }
-
-    return learnerKeys.size
-  }, [sessions])
-
-  return (
+  return isInitialLoading ? (
+    <MentorDashboardSkeleton />
+  ) : (
     <div className="space-y-6">
       <div className="text-left">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          {upcomingSlots.length} upcoming slots scheduled
+          {upcomingSessionsCount} Upcoming Sessions Scheduled
         </p>
       </div>
 
@@ -345,9 +264,9 @@ export default function DashboardPage() {
                 <Calendar className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div className="text-left">
-                    <p className="text-2xl font-bold">{upcomingSlots.length}</p>
-                    <p className="text-sm text-muted-foreground">Upcoming Slots</p>
-                    <p className="text-sm  mt-4">{openSlots} still open</p>
+                  <p className="text-2xl font-bold">{upcomingSessionsCount}</p>
+                  <p className="text-sm text-muted-foreground">Upcoming Sessions</p>
+                  <p className="text-sm  mt-4">Next on your schedule</p>
                 </div>
             </div>
 
@@ -363,9 +282,9 @@ export default function DashboardPage() {
                   <CheckCircle className="w-5 h-5 text-muted-foreground" />
               </div>
             <div className="text-left">
-              <p className="text-2xl font-bold">{completedSessions.length}</p>
+              <p className="text-2xl font-bold">{Number(metrics?.sessions.completed) || 0}</p>
               <p className="text-sm text-muted-foreground">Completed Sessions</p>
-              <p className="text-sm  mt-4">of {sessions.length} total bookings</p>
+              <p className="text-sm  mt-4">of {Number(metrics?.sessions.total) || 0} total bookings</p>
             </div>
               </div>
               <div className="flex flex-col items-end gap-2">
@@ -381,9 +300,9 @@ export default function DashboardPage() {
               </div>
 
             <div className="text-left">
-              <p className="text-2xl font-bold">{sessions.length}</p>
+              <p className="text-2xl font-bold">{Number(metrics?.sessions.total) || 0}</p>
               <p className="text-sm text-muted-foreground">Bookings Managed</p>
-              <p className="text-sm  mt-4">all lifecycle states</p>
+              <p className="text-sm  mt-4">All session states</p>
             </div>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -399,11 +318,11 @@ export default function DashboardPage() {
                   <Star className="w-5 h-5 text-muted-foreground" />
               </div>
             <div className="text-left">
-              <p className="text-2xl font-bold">{averageRatingDisplay}</p>
+              <p className="text-2xl font-bold">{metrics?.ratings.averageRating ? Number(metrics.ratings.averageRating).toFixed(1) : "—"}</p>
               <p className="text-sm text-muted-foreground">Avg Rating</p>
               <p className="text-sm  mt-4">
-                {ratedCompletedSessions.length > 0
-                  ? `From ${ratedCompletedSessions.length} rated sessions`
+                {metrics?.ratings.totalRatings && Number(metrics.ratings.totalRatings) > 0
+                  ? `From ${metrics.ratings.totalRatings} rated sessions`
                   : "No ratings yet"}
               </p>
             </div>
@@ -457,7 +376,7 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div className="space-y-0.5 text-left">
                 <CardTitle className="text-sm font-bold text-text-primary">Recent Sessions</CardTitle>
-                <p className="text-xs text-text-muted">{completedSessions.length} completed</p>
+                <p className="text-xs text-text-muted">{Number(metrics?.sessions.completed) || 0} completed</p>
               </div>
               <Button asChild variant="link" size="sm" className="text-emerald-700 text-xs font-semibold p-0 h-autod">
                 <Link href={`/${role}/mentorsDashboard/sessions`}>
@@ -529,39 +448,29 @@ export default function DashboardPage() {
               </div>
               <div className="bg-slate-50/50 rounded-xl p-4 border ">
                 <div className="flex items-center gap-2 mb-2">
-                   <Star className="w-3.5 h-3.5 text-emerald-600" />
-                   <span className="text-xs font-semibold text-slate-600">Avg Rating</span>
+                   <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                   <span className="text-xs font-semibold text-slate-600">Upcoming Sessions</span>
                 </div>
-                <p className="text-2xl font-bold mb-2">{averageRatingDisplay}</p>
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        "w-3 h-3",
-                        i < averageRatingRounded
-                          ? "fill-emerald-500 text-emerald-500"
-                          : "fill-transparent text-emerald-200"
-                      )}
-                    />
-                  ))}
-                </div>
+                <p className="text-2xl font-bold mb-2">{upcomingSessionsCount}</p>
+                <p className="text-xs text-slate-500">Next scheduled sessions</p>
               </div>
-               <div className="rounded-lg bg-muted/50 p-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <Clock className="h-3.5 w-3.5 text-info" />
-                      <p className="text-xs font-medium text-text-secondary">Hours Delivered</p>
+               <div className="bg-slate-50/50 rounded-xl p-4 border">
+                <div className="flex items-center gap-1.5 mb-2">
+                      <Clock className="h-3.5 w-3.5 text-secondary" />
+                      <p className="text-xs font-medium text-text-secondary">Cancellation Rate</p>
                     </div>
-                    <p className="text-2xl font-bold text-text-primary tabular-nums">{hoursDelivered}h</p>
-                    <p className="text-[10px] text-text-muted mt-1">Across {completedSessions.length} sessions</p>
-                </div>
+                    <p className="text-2xl font-bold text-text-primary tabular-nums">{cancellationRate}%</p>
+                    <p className="text-[10px] text-text-muted mt-1">Based on session history</p>
+              </div>
                <div className="bg-slate-50/50 rounded-xl p-4 border">
                 <div className="flex items-center gap-1.5 mb-2">
                       <Users className="h-3.5 w-3.5 text-secondary" />
-                      <p className="text-xs font-medium text-text-secondary">Learners Helped</p>
+                      <p className="text-xs font-medium text-text-secondary">Utilization Rate</p>
                     </div>
-                    <p className="text-2xl font-bold text-text-primary tabular-nums">{uniqueLearners}</p>
-                    <p className="text-[10px] text-text-muted mt-1">Unique learners</p>
+                    <p className="text-2xl font-bold text-text-primary tabular-nums">{utilizationRate}%</p>
+                    <p className="text-[10px] text-text-muted mt-1">
+                      {Number(metrics?.utilization.usedSlots) || 0}/{Number(metrics?.utilization.totalSlots) || 0} slots booked
+                    </p>
               </div>
             </CardContent>
           </Card>
@@ -572,13 +481,8 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-left">Notifications</CardTitle>
-                {unreadCount > 0 && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
               </div>
-              {unreadCount > 0 && (
+              {apiNotifications.some((notification) => !notification.isRead) && (
                 <button
                   onClick={markAllAsRead}
                   className="flex items-center gap-1 text-xs text-emerald-700 font-semibold hover:underline"
@@ -649,38 +553,47 @@ export default function DashboardPage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-2 space-y-1">
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/availability`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><Calendar className="w-4 h-4 text-emerald-700" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/availability`} className="text-xs font-bold text-slate-800">Manage Availability</Link>
+                    <p className="text-xs font-bold text-slate-800">Manage Availability</p>
                     <p className="text-[10px] text-slate-400">Set your open slots</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/sessions`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-orange-50 rounded-full"><BookOpen className="w-4 h-4 text-orange-600" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/sessions`} className="text-xs font-bold text-slate-800">View All Sessions</Link>
+                    <p className="text-xs font-bold text-slate-800">View All Sessions</p>
                     <p className="text-[10px] text-slate-400">Upcoming & past sessions</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
 
-              <button className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors">
+              <Link
+                href={`/${role}/mentorsDashboard/performance`}
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 rounded-full"><BarChart3 className="w-4 h-4 text-emerald-500" /></div>
                   <div className="text-left">
-                    <Link href={`/${role}/mentorsDashboard/performance`} className="text-xs font-bold text-slate-800">Performance Metrics</Link>
+                    <p className="text-xs font-bold text-slate-800">Performance Metrics</p>
                     <p className="text-[10px] text-slate-400">Ratings & session stats</p>
                   </div>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>

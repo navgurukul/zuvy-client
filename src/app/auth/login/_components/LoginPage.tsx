@@ -18,9 +18,11 @@ import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { getUser, useThemeStore } from '@/store/store'
+import { getUser } from '@/store/store'
 import Image from 'next/image'
+import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
+import { useThemeStore } from '@/store/store'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -92,6 +94,41 @@ function LoginPage() {
             return typeof res.data?.percentage === 'number' ? res.data.percentage : null
         } catch (error) {
             console.error('Failed to fetch learner profile strength:', error)
+            return null
+        }
+    }
+
+    const isMentorProfileComplete = (profile: MentorProfileResponse | null) => {
+        if (!profile) return false
+
+        const bio = typeof profile.bio === 'string' ? profile.bio.trim() : ''
+        const pastExperiences =
+            typeof profile.pastExperiences === 'string'
+                ? profile.pastExperiences.trim()
+                : ''
+
+        const expertiseValue = profile.expertise as string[] | string | null | undefined
+
+        const expertise = Array.isArray(expertiseValue)
+            ? expertiseValue
+            : typeof expertiseValue === 'string'
+                ? expertiseValue
+                    .split(',')
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                : []
+
+        return Boolean(bio) && Boolean(pastExperiences) && expertise.length > 0
+    }
+
+    const getMentorProfileCompletion = async (): Promise<boolean | null> => {
+        try {
+            const res = await api.get<MentorProfileResponse>(
+                '/mentor-slots/mentor/profile'
+            )
+            return isMentorProfileComplete(res.data)
+        } catch (error) {
+            console.error('Failed to fetch mentor profile for redirect:', error)
             return null
         }
     }
@@ -182,37 +219,27 @@ const handleGoogleSuccess = async (
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
-                const zoeRedirectUrl = localStorage.getItem('zoeRedirectUrl')
 
-                const userRole = response.data.user.rolesList[0]
+                const userRole = response.data.user.rolesList[0]?.toLowerCase() || ''
                 const organizationId = response.data.user.orgId || null
                 const hasFilled = response.data.user.hasfilled
+                const shouldCheckMentorProfile = userRole === 'instructor'
+
+                let mentorProfileCompleted: boolean | null = null
+                if (shouldCheckMentorProfile) {
+                    mentorProfileCompleted = await getMentorProfileCompletion()
+                }
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
-                // Check if zoeRedirectUrl exists and handle redirect with token
-                if (zoeRedirectUrl) {
-                    // Decode the URL-encoded zoeRedirectUrl
-                    const decodedUrl = decodeURIComponent(zoeRedirectUrl)
-                    
-                    // Ensure URL has protocol prefix
-                    const fullUrl = decodedUrl.startsWith('http://') || decodedUrl.startsWith('https://') 
-                        ? decodedUrl 
-                        : `https://${decodedUrl}`
-                    
-                    // Append the access token to the URL
-                    const separator = fullUrl.includes('?') ? '&' : '?'
-                    const redirectUrl = `${fullUrl}${separator}token=${response.data.access_token}`
-                    
-                    // Clear the stored zoeRedirectUrl
-                    localStorage.removeItem('zoeRedirectUrl')
-                    
-                    // Redirect to external URL
-                    window.location.href = redirectUrl
-                    return
-                }
+                const shouldForceProfilePage =
+                    shouldCheckMentorProfile &&
+                    ((mentorProfileCompleted === false) ||
+                        (mentorProfileCompleted === null && hasFilled === false))
 
-                if (redirectedUrl) {
+                if (shouldForceProfilePage && organizationId) {
+                    router.push(`/${userRole}/organizations/${organizationId}/profile`)
+                } else if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     const strengthPercentage = await getStudentStrengthPercentage()
@@ -222,9 +249,6 @@ const handleGoogleSuccess = async (
                         router.push('/student/profile')
                     }
                     
-                } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
-                    // Redirect admin/poc to settings if hasfilled is false
-                    router.push(`/${userRole}/organizations/${organizationId}/setting`)
                 } else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
@@ -260,7 +284,6 @@ const handleGoogleSuccess = async (
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
-
         if (window.location.href.includes('route')) {
         // if (window.location.href) {
             console.log('URL has route param')

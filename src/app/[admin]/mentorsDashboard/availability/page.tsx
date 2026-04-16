@@ -1,5 +1,6 @@
 "use client"
 import { useMemo, useState, useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Calendar, Clock, AlertTriangle, Lock, Trash2, Info } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useCreateMentorSlot } from "@/hooks/useCreateMentorSlot"
 import { useDeleteMentorSlot } from "@/hooks/useDeleteMentorSlot"
+import { AvailabilitySkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { api } from '@/utils/axios.config'
 
 const durationOptions = [30, 45, 60, 90]
@@ -23,7 +25,16 @@ const minimumDeleteLeadTimeMs = 12 * 60 * 60 * 1000
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
 
-const getDefaultSlotDate = () => new Date().toISOString().slice(0, 10)
+// const getDefaultSlotDate = () => new Date().toISOString().slice(0, 10)
+const getLocalDateString = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const getDefaultSlotDate = () => getLocalDateString()
 
 const startTimeOptions = Array.from({ length: 32 }, (_, index) => {
   const totalMinutes = 6 * 60 + index * 30
@@ -96,6 +107,8 @@ const combineDateAndTime = (date: string, time: string): Date | null => {
 }
 
 export default function AvailabilityPage() {
+  const router = useRouter()
+  const pathname = usePathname()
   const { slots, loading, error, refetchMySlots, upsertMySlot } = useMyMentorSlots()
   const { isCreating, error: createError, createSlot } = useCreateMentorSlot()
   const {
@@ -269,9 +282,41 @@ export default function AvailabilityPage() {
       setDurationMinutes(defaultDurationMinutes)
       void refetchMySlots()
     } else {
+      if (creationResult.statusCode === 403) {
+        const profileMessage =
+          creationResult.errorMessage ||
+          "Complete your mentor profile (bio, expertise, past experiences) before creating slots."
+
+        toast.error({
+          title: "Profile incomplete",
+          description: profileMessage,
+        })
+
+        const roleFromPath = pathname.split("/").filter(Boolean)[0]
+        const authRaw = localStorage.getItem("AUTH")
+        let authUser: { orgId?: string | number } | null = null
+
+        if (authRaw) {
+          try {
+            authUser = JSON.parse(authRaw)
+          } catch {
+            authUser = null
+          }
+        }
+
+        const organizationId = authUser?.orgId
+
+        if (roleFromPath && organizationId) {
+          router.push(`/${roleFromPath}/organizations/${organizationId}/profile`)
+        } else {
+          router.push("/profile")
+        }
+        return
+      }
+
       toast.error({
         title: "Failed",
-        description: createError || "Failed to create slot.",
+        description: creationResult.errorMessage || createError || "Failed to create slot.",
       })
     }
   }
@@ -350,7 +395,11 @@ export default function AvailabilityPage() {
     }
   }
 
-  return (
+  const isInitialLoading = loading && slots.length === 0
+
+  return isInitialLoading ? (
+    <AvailabilitySkeleton />
+  ) : (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="text-left">
@@ -467,7 +516,7 @@ export default function AvailabilityPage() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="rounded-2xl text-left">
+          {/* <Card className="rounded-2xl text-left">
             <CardHeader>
               <CardTitle>Calendar Sync</CardTitle>
               <div className="border rounded-xl bg-white p-3 flex items-start gap-2">
@@ -488,7 +537,7 @@ export default function AvailabilityPage() {
                 {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card className="rounded-2xl text-left">
             <CardHeader>

@@ -11,6 +11,7 @@ import {
     GripVertical,
     BookOpenCheck,
     Play,
+    LibraryBig,
 } from 'lucide-react'
 import { getUser, getTopicId } from '@/store/store'
 import DeleteConfirmationModal from '../../_components/deleteModal'
@@ -31,6 +32,7 @@ const TOPIC_ICONS: Record<number, LucideIcon> = {
     5: PencilLine,
     6: BookOpenCheck,
     8: Play,
+    9: LibraryBig,
 }
 
 const getTopicIcon = (topicId: number) => {

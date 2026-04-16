@@ -8,8 +8,22 @@ import { Mentor, useMentors } from "@/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
 import { ArrowLeft } from "lucide-react"
+import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
+import { AlertCircle, Calendar } from "lucide-react";
+
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
+
+const formatEligibleDate = (dateString: string | null): string => {
+    if (!dateString) return "Soon";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+};
 
 const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
     if (Array.isArray(response)) {
@@ -34,6 +48,7 @@ export default function MentorsPage() {
     const limit = parseInt(searchParams.get("limit") || "10")
     const offset = (page - 1) * limit
     const searchQuery = searchParams.get("search")?.trim() || ""
+    const courseId = searchParams.get("courseId") || ""
 
     const { mentors, total, loading, error, refetchMentors } = useMentors(
         searchQuery,
@@ -41,6 +56,8 @@ export default function MentorsPage() {
         limit,
         offset
     )
+
+    const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 
     const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -82,12 +99,44 @@ export default function MentorsPage() {
         <div className="w-full max-w-full min-w-0 px-6 py-8 font-manrope">
 
             <Link
-                href="/student"
+                 href={courseId ? `/student/course/${courseId}` : "/student"}
                 className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
             >
                 <ArrowLeft size={16} />
-                Back to dashboard
+                Back to {courseId ? "course" : "dashboard"}
             </Link>
+
+            {/* Booking Metrics Banner */}
+            {!metricsLoading && metrics && (
+                <div className={`mb-6 rounded-2xl border px-4 py-3 ${
+                    metrics.canBook
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                }`}>
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex min-w-0 items-center gap-3 text-left">
+                            <Calendar className={`w-5 h-5 flex-shrink-0 ${
+                                metrics.canBook ? 'text-green-700' : 'text-yellow-700'
+                            }`} />
+                            <p className={`truncate text-sm font-medium ${
+                                metrics.canBook ? 'text-green-900' : 'text-yellow-900'
+                            }`}>
+                                {metrics.canBook
+                                    ? 'You can book a session now!'
+                                    : `You can book your next session from ${formatEligibleDate(metrics.nextEligible)}`}
+                            </p>
+                        </div>
+                        <span className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                            metrics.canBook
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                            Remaining Credits: {metrics.remainingCredits}
+                        </span>
+                    </div>
+                </div>
+            )}
+
             {/* Filter buttons */}
             <div className="mb-6 flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
 
@@ -129,6 +178,12 @@ export default function MentorsPage() {
                         const expertise = Array.isArray(mentor.expertise)
                             ? mentor.expertise
                             : [];
+                        const availabilityStatus = mentor.availabilityStatus?.trim() || "Unavailable";
+                        const normalizedAvailabilityStatus = availabilityStatus.toLowerCase();
+                        const availabilityStatusClassName =
+                            normalizedAvailabilityStatus === "available"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700";
 
                         const initials = mentor.name
                             .split(" ")
@@ -137,9 +192,10 @@ export default function MentorsPage() {
                             .toUpperCase();
 
                         return (
-                            <div
+                            <Link
                                 key={mentor.userId}
-                                className="group relative overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                                href={courseId ? `/student/mentors/${mentor.userId}?courseId=${courseId}` : `/student/mentors/${mentor.userId}`}
+                                className="group relative block overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                             >
                                 {/* Top */}
                                 <div className="flex min-w-0 justify-between gap-2">
@@ -156,11 +212,13 @@ export default function MentorsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                        • Accepting
+                                    <span
+                                        className={`inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium ${availabilityStatusClassName}`}
+                                    >
+                                        {mentor.availabilityStatus}
                                     </span>
+                                    
                                 </div>
-
                                 {/* Skills */}
                                 <div className="mt-4 min-h-[30px]">
 
@@ -192,22 +250,19 @@ export default function MentorsPage() {
                                         <Star size={14} className="text-yellow-500 fill-yellow-500" />
                                         {"0.0"}
                                     </div>
-
                                     <p className="text-sm text-gray-400">
-                                        0 sessions
+                                       {mentor.availableSlots}
+                                       <span className="ml-2">Available Slots</span>
                                     </p>
 
                                 </div>
                                 {/* View Profile Button */}
                                 <div className="absolute bottom-0 left-0 w-full opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <Link
-                                        href={`/student/mentors/${mentor.userId}`}
-                                        className="block text-center bg-green-800 text-white py-2 rounded-b-3xl text-xs font-semibold"
-                                    >
+                                    <div className="block text-center bg-green-800 text-white py-2 rounded-b-3xl text-xs font-semibold">
                                         View Profile →
-                                    </Link>
+                                    </div>
                                 </div>
-                            </div>
+                            </Link>
                         );
                     })}
 

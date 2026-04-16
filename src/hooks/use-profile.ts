@@ -135,42 +135,88 @@ export const useOnboardingStorage = () => {
 
   // Move to next step
   const goToNextStep = useCallback(() => {
-    if (!onboardingData) return false;
-    if (onboardingData.currentStep >= 4) return false;
+    let didUpdate = false;
 
-    const updatedData = {
-      ...onboardingData,
-      currentStep: onboardingData.currentStep + 1,
-    };
-    return saveOnboardingData(updatedData);
-  }, [onboardingData, saveOnboardingData]);
+    setOnboardingData((prev) => {
+      if (!prev || prev.currentStep >= 4) {
+        return prev;
+      }
+
+      const updatedData = {
+        ...prev,
+        currentStep: prev.currentStep + 1,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      try {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(updatedData));
+        didUpdate = true;
+      } catch (error) {
+        console.error('Error saving onboarding data:', error);
+      }
+
+      return updatedData;
+    });
+
+    return didUpdate;
+  }, []);
 
   // Move to previous step
   const goToPreviousStep = useCallback(() => {
-    if (!onboardingData) return false;
-    if (onboardingData.currentStep <= 1) return false;
+    let didUpdate = false;
 
-    const updatedData = {
-      ...onboardingData,
-      currentStep: onboardingData.currentStep - 1,
-    };
-    return saveOnboardingData(updatedData);
-  }, [onboardingData, saveOnboardingData]);
-
-  // Go to specific step
-  const goToStep = useCallback(
-    (stepNumber: number) => {
-      if (!onboardingData) return false;
-      if (stepNumber < 1 || stepNumber > 4) return false;
+    setOnboardingData((prev) => {
+      if (!prev || prev.currentStep <= 1) {
+        return prev;
+      }
 
       const updatedData = {
-        ...onboardingData,
-        currentStep: stepNumber,
+        ...prev,
+        currentStep: prev.currentStep - 1,
+        lastUpdated: new Date().toISOString(),
       };
-      return saveOnboardingData(updatedData);
-    },
-    [onboardingData, saveOnboardingData]
-  );
+
+      try {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(updatedData));
+        didUpdate = true;
+      } catch (error) {
+        console.error('Error saving onboarding data:', error);
+      }
+
+      return updatedData;
+    });
+
+    return didUpdate;
+  }, []);
+
+  // Go to specific step
+  const goToStep = useCallback((stepNumber: number) => {
+    if (stepNumber < 1 || stepNumber > 4) return false;
+    let didUpdate = false;
+
+    setOnboardingData((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      const updatedData = {
+        ...prev,
+        currentStep: stepNumber,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      try {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(updatedData));
+        didUpdate = true;
+      } catch (error) {
+        console.error('Error saving onboarding data:', error);
+      }
+
+      return updatedData;
+    });
+
+    return didUpdate;
+  }, []);
 
   // Mark onboarding as completed
   const completeOnboarding = useCallback(() => {

@@ -16,6 +16,8 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback"
+import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
+import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
 
 type SessionTab = "all" | "upcoming" | "reschedule" | "completed"
@@ -109,6 +111,11 @@ export default function SessionsPage() {
     Record<number, true>
   >({})
 
+  const { counts: summaryCounts } = useMyMentorSessions(
+    true,
+    "/mentor-sessions/mentor/my"
+  )
+
   const {
     sessions: apiSessions,
     loading,
@@ -140,6 +147,11 @@ export default function SessionsPage() {
   const selectedSession = useMemo(
     () => sessions.find((session) => session.id === selectedBookingId) || null,
     [sessions, selectedBookingId]
+  )
+
+  const { recordingUrl: completedRecordingUrl } = useMentorSlotRecording(
+    selectedSession?.id,
+    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED")
   )
 
   const isReadOnlySession = Boolean(
@@ -404,7 +416,11 @@ export default function SessionsPage() {
     })
   }, [rescheduleError])
 
-  return (
+  const isInitialLoading = loading && sessions.length === 0
+
+  return isInitialLoading ? (
+    <SessionsSkeleton />
+  ) : (
     <div className="p-6">
       <div className="mb-6 text-left">
         <h1 className="text-xl font-semibold">Sessions</h1>
@@ -414,21 +430,21 @@ export default function SessionsPage() {
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden flex h-[720px]">
-        <div className="w-[380px] border-r flex flex-col">
+        <div className="w-[410px] border-r flex flex-col">
           <div className="flex gap-2 px-3 pt-3 overflow-x-auto whitespace-nowrap border-b-4 [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => {
                 setActiveTab("all")
                 setSelectedBookingId(null)
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
+              className={`flex items-center gap-1 px-1 py-2 text-sm font-semibold border-b-2 rounded-t-lg ${activeTab === "all"
                   ? "border-green-600 bg-green-50"
                   : "border-transparent text-muted-foreground"
                 }`}
             >
               All
               <span className="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {apiSessions.length}
+                {Number(summaryCounts.total) || 0}
               </span>
             </button>
 
@@ -437,12 +453,15 @@ export default function SessionsPage() {
                 setActiveTab("upcoming")
                 setSelectedBookingId(null)
               }}
-              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "upcoming"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
             >
               Upcoming
+              <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {Number(summaryCounts.upcoming) || 0}
+              </span>
             </button>
 
             <button
@@ -450,12 +469,15 @@ export default function SessionsPage() {
                 setActiveTab("reschedule")
                 setSelectedBookingId(null)
               }}
-              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "reschedule"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
             >
               Reschedule Requests
+              <span className="bg-orange-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {Number(summaryCounts.reschedule) || 0}
+              </span>
             </button>
 
             <button
@@ -463,12 +485,15 @@ export default function SessionsPage() {
                 setActiveTab("completed")
                 setSelectedBookingId(null)
               }}
-              className={`px-3 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
+              className={`flex items-center gap-1 px-1 py-2 text-sm border-b-2 rounded-t-lg ${activeTab === "completed"
                   ? "border-green-600 bg-green-50 font-semibold"
                   : "border-transparent text-muted-foreground"
                 }`}
             >
               Completed
+              <span className="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {Number(summaryCounts.completed) || 0}
+              </span>
             </button>
           </div>
 
@@ -583,10 +608,10 @@ export default function SessionsPage() {
                   </Badge>
                 </div>
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  selectedSession.meetingLink ? (
+                  selectedSession.zoomStartUrl ? (
                     <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
                       <a
-                        href={selectedSession.meetingLink}
+                        href={selectedSession.zoomStartUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -600,6 +625,16 @@ export default function SessionsPage() {
                       Join unavailable
                     </Button>
                   )
+                )}
+                {selectedSession.sessionLifecycleState === "COMPLETED" && completedRecordingUrl && (
+                  <a
+                    href={completedRecordingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+                  >
+                    View Recording
+                  </a>
                 )}
               </div>
 

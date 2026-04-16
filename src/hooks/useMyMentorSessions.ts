@@ -11,6 +11,8 @@ export interface MyMentorSession {
     status: string
     sessionLifecycleState: string
     meetingLink?: string | null
+    zoomStartUrl?: string | null
+    isZoomMeet?: boolean | null
     joinedAt: string | null
     completedAt: string | null
     cancelledAt?: string | null
@@ -41,9 +43,17 @@ type WrappedMyMentorSession = {
 
 type MyMentorSessionsPayload = MyMentorSession[] | WrappedMyMentorSession[]
 
+export interface SessionCounts {
+    total?: string | number
+    upcoming?: string | number
+    completed?: string | number
+    cancelled?: string | number
+    reschedule?: string | number
+}
+
 type MyMentorSessionsResponse =
     | MyMentorSessionsPayload
-    | { data: MyMentorSessionsPayload }
+    | { data: MyMentorSessionsPayload; counts?: SessionCounts }
 
 const isWrappedSession = (
     value: MyMentorSession | WrappedMyMentorSession
@@ -81,6 +91,17 @@ const parseSessionsResponse = (
     return []
 }
 
+const parseCountsResponse = (
+    response: MyMentorSessionsResponse
+): SessionCounts => {
+    if (!response || typeof response !== 'object') {
+        return {}
+    }
+
+    const responseWithCounts = response as { counts?: SessionCounts }
+    return responseWithCounts.counts || {}
+}
+
 const getErrorMessage = (error: unknown): string => {
     const message = (error as { response?: { data?: { message?: string } } })
         ?.response?.data?.message
@@ -99,12 +120,16 @@ export type SessionFilter =
     | 'cancelled'
     | 'reschedule'
 
+export type SessionSortOrder = 'asc' | 'desc'
+
 export function useMyMentorSessions(
     initialFetch: boolean,
     endpoint: MyMentorSessionsEndpoint,
-    filter?: SessionFilter
+    filter?: SessionFilter,
+    sort?: SessionSortOrder
 ) {
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
+    const [counts, setCounts] = useState<SessionCounts>({})
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
@@ -113,18 +138,29 @@ export function useMyMentorSessions(
             setLoading(true)
             setError(null)
 
-            const query = filter ? `?filter=${encodeURIComponent(filter)}` : ''
-            const response = await api.get<MyMentorSessionsResponse>(`${endpoint}${query}`)
+            const queryParams = new URLSearchParams()
+            if (filter) {
+                queryParams.set('filter', filter)
+            }
+            if (sort) {
+                queryParams.set('sort', sort)
+            }
+
+            const query = queryParams.toString()
+            const url = query ? `${endpoint}?${query}` : endpoint
+            const response = await api.get<MyMentorSessionsResponse>(url)
 
             setSessions(parseSessionsResponse(response.data))
+            setCounts(parseCountsResponse(response.data))
         } catch (error) {
             console.error('Error fetching my mentor sessions:', error)
             setSessions([])
+            setCounts({})
             setError(getErrorMessage(error))
         } finally {
             setLoading(false)
         }
-    }, [endpoint, filter])
+    }, [endpoint, filter, sort])
 
     useEffect(() => {
         if (initialFetch) getMySessions()
@@ -132,6 +168,7 @@ export function useMyMentorSessions(
 
     return {
         sessions,
+        counts,
         loading,
         error,
         refetchMySessions: getMySessions,
