@@ -280,10 +280,10 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
             fetchingChapters()
             form.reset()
             onClose()
-        } catch (error) {
+        } catch (error:any) {
             toast.error({
                 title: 'Error',
-                description: 'Class not created',
+                description: error.response?.data?.message || 'Class not created',
             })
         } finally {
             setIsLoading(false)

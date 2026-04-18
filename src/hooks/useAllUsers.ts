@@ -11,6 +11,8 @@ export interface User {
     name: string
     email: string
     roleName: string
+    isPoc?: boolean
+    isZuvyPoc?: boolean
 }
 
 export interface UsersResponse {

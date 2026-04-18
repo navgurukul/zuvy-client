@@ -220,10 +220,20 @@ const handleGoogleSuccess = async (
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
-                const userRole = response.data.user.rolesList[0]?.toLowerCase() || ''
+                const normalizedRoles = Array.isArray(response.data.user.rolesList)
+                    ? response.data.user.rolesList.map((role) =>
+                          String(role).toLowerCase()
+                      )
+                    : []
+                const userRole = normalizedRoles[0] || ''
                 const organizationId = response.data.user.orgId || null
                 const hasFilled = response.data.user.hasfilled
-                const shouldCheckMentorProfile = userRole === 'instructor'
+                const shouldCheckMentorProfile = normalizedRoles.includes('instructor')
+
+                localStorage.setItem(
+                    'AUTH_PERMISSIONS',
+                    JSON.stringify(response.data.user.permissions || {})
+                )
 
                 let mentorProfileCompleted: boolean | null = null
                 if (shouldCheckMentorProfile) {

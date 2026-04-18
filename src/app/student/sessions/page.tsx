@@ -86,7 +86,7 @@ function RecordingLink({ bookingId }: { bookingId: number }) {
   }
 
   return (
-    <Button variant="outline" size="sm" asChild>
+    <Button  size="sm" asChild>
       <a
         href={recordingUrl}
         target="_blank"
