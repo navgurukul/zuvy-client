@@ -299,7 +299,7 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                                 Quiz Questions
                             </h3>
                             <div className="flex items-center gap-2">
-                                <span className="bg-warning-light text-warning-dark px-2 py-1 text-xs rounded-full font-medium">
+                                <span className="bg-warning-light text-warning-dark px-2 py-1 text-xs rounded-full font-medium dark:text-white">
                                     {totalMcqQuestions} questions
                                 </span>
                                 <span className="bg-muted px-2 py-1 text-xs rounded-full font-medium">
@@ -463,8 +463,8 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                                             : percentage.toFixed(2)
                                         : 0}/100
                                 </h2>
-                                <p className={cn(
-                                    'text-lg',
+                                <p className={  cn(
+                                    'text-lg dark:text-gray-300',
                                     isPassed ? 'text-success-dark' : 'text-destructive-dark'
                                 )}>
                                     {isPassed

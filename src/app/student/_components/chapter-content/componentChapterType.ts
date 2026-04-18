@@ -132,15 +132,13 @@ export interface FeedbackQuestion {
 
 
 export type QuestionItem = {
-    answer: string;
     id: number;
     question: string;
-    typeId: number; 
     options: Record<string, string>;
-    formTrackingData?: {
-        answer?: string;
-        chosenOptions: number[];
-    }[];
+    typeId: number;
+    answer?: string | string[];
+    formTrackingData?: any;
+    isRequired: boolean;
 };
 
 

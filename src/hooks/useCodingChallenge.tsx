@@ -18,6 +18,7 @@ const editorLanguages: CodingLanguage[] = [
     { lang: 'java', id: 96 },
     { lang: 'python', id: 100 },
     { lang: 'javascript', id: 102 },
+    { lang: 'cpp', id: 105 },
 ];
 
 const initialState: CodingChallengeState = {

@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useState } from 'react'
 import { api } from '@/utils/axios.config'
-import type { CourseData } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import type { CourseData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 type CreateResponse = {
     status: string
@@ -17,7 +17,7 @@ export function useCreateBootcamp() {
         setCreating(true)
         setError(null)
         try {
-            const res = await api.post<CreateResponse>('/bootcamp', courseData)
+            const res = await api.post<CreateResponse>(`/bootcamp`, courseData)
             return res.data
         } catch (err) {
             setError(err)

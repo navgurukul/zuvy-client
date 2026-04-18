@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useSearchWithSuggestions } from "@/utils/useUniversalSearchDynamic";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Suggestion,SearchBoxProps } from "@/utils/searchType";
 
@@ -29,6 +29,7 @@ export function SearchBox(props: SearchBoxProps) {
     selectedIndex,
     inputRef,
     suggestionsRef,
+    hasFetchedSuggestions,
     handleInputChange,
     handleKeyDown,
     handleSuggestionClick,
@@ -40,6 +41,7 @@ export function SearchBox(props: SearchBoxProps) {
     fetchSearchResultsApi,
     defaultFetchApi,
     getSuggestionValue,
+    maxSuggestions: 50, // Increased to show more suggestions
   });
 
   //  Sync the parent value with the local searchQuery
@@ -49,6 +51,7 @@ export function SearchBox(props: SearchBoxProps) {
     }
   }, [value, searchQuery, setSearchQuery]);
 
+  
   return (
     <form
       onSubmit={(e) => 
@@ -59,6 +62,7 @@ export function SearchBox(props: SearchBoxProps) {
       <Popover open={showSuggestions && filteredSuggestions.length > 0}>
         <PopoverTrigger asChild>
           <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"/>                 
             <Input
               ref={inputRef}
               placeholder={placeholder}
@@ -73,7 +77,7 @@ export function SearchBox(props: SearchBoxProps) {
                   setShowSuggestions(true);
                 }
               }}
-              className={cn(inputWidth)}
+              className={cn(inputWidth, "bg-background-secondary pl-9")}
               autoComplete="off"
             />
             {searchQuery && (
@@ -100,22 +104,39 @@ export function SearchBox(props: SearchBoxProps) {
         >
           <div
             ref={suggestionsRef}
-            className="bg-white border border-border rounded-md shadow-lg overflow-hidden"
+            className="bg-white border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
           >
             {filteredSuggestions.map((suggestion, index) => (
               <div
                 key={suggestion.id || index}
                 className={cn(
-                  "px-3 py-2.5 cursor-pointer text-sm transition-colors text-left",
-                  "hover:bg-muted/50",
-                  index === selectedIndex && "bg-muted"
+                  "px-3 py-2.5 text-sm text-left",
+                  suggestion.id === "__not_found__"
+                    ? "text-gray-400 cursor-default"
+                    : "cursor-pointer hover:bg-muted/50",
+                  index === selectedIndex &&
+                    suggestion.id !== "__not_found__" &&
+                    "bg-muted"
                 )}
-                onClick={() => handleSuggestionClick(suggestion)}
-                onMouseEnter={() => setSelectedIndex(index)}
+                onClick={() =>
+                  suggestion.id !== "__not_found__" &&
+                  handleSuggestionClick(suggestion)
+                }
+                onMouseEnter={() =>
+                  suggestion.id !== "__not_found__" && setSelectedIndex(index)
+                }
               >
                 {getSuggestionLabel(suggestion)}
               </div>
             ))}
+
+            {/* Optional: empty fallback (safety) */}
+            {hasFetchedSuggestions &&
+              filteredSuggestions.length === 0 && (
+                <div className="px-3 py-2.5 text-sm text-gray-400 text-center cursor-default">
+                  No results found
+                </div>
+              )}
           </div>
         </PopoverContent>
       </Popover>

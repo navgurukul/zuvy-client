@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -11,16 +11,19 @@ import { getUser, getDeleteStudentStore, getStoreStudentData } from '@/store/sto
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { POSITION } from '@/utils/constant'
-import { useStudentData } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
-import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
-import type { StudentDataPage } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
+import { useStudentData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
+import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
+import type { StudentDataPage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
+import { PermissionsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/columns'
 
 export default function useBatchDetail(params: { courseId: string; batchId: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const location = usePathname()
+    const orgId = Number(organizationId) || user?.orgId;
 
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
@@ -44,6 +47,12 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const [loading, setLoading] = useState(true)
     const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<StudentDataState | any>({})
+    const [permissions, setPermissions] = useState<PermissionsType>({
+        createBatch: false,
+        deleteBatch: false,
+        editBatch: false,
+        viewBatch: false,
+    })
 
     const formSchema = z.object({
         name: z.string().min(2, { message: 'Batch name must be at least 2 characters.' }),
@@ -87,20 +96,21 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const fetchBatches = useCallback(
         async (courseId: string) => {
             try {
-                const response = await api.get<{ data: any[] }>(`/bootcamp/batches/${courseId}`)
+                const response = await api.get(`/bootcamp/batches/${courseId}`)
                 const batchData: BatchOption[] = response.data.data?.map((data: any) => ({ value: data.id, label: data.name }))
                 setAllBatches(batchData)
+                setPermissions(response.data?.permissions)
             } catch (error: any) {
                 if (axios.isAxiosError(error)) {
                     if (error?.response?.data.message === 'Bootcamp not found!') {
-                        router.push(`/${userRole}/courses`)
+                        router.push(`/${userRole}/organizations/${orgId}/courses`)
                         toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
                     }
                 }
                 console.error('Error fetching batches', error)
             }
         },
-        [router, userRole]
+        [router, userRole, orgId]
     )
 
     useEffect(() => {
@@ -115,7 +125,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                     const batchData = response.data.batch
                     setInstructorInfo(batchData)
                 } catch (error: any) {
-                    router.push('/not-found')
+                    // router.push('/not-found')
                     console.error('Error fetching instructor info:', error.message)
                 }
             }
@@ -138,14 +148,26 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
             await api.delete(`/batch/${params.batchId}`)
             toast.success({ title: 'Batch Deleted Successfully' })
             setDeleteModalOpen(false)
-            router.push(`/${userRole}/courses/${params.courseId}/batches`)
+            router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/batches`)
         } catch (error) {
             toast.error({ title: 'Batch not Deleted' })
         }
     }
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        const convertedData = { ...values, name: values.name, instructorEmail: values.instructorEmail, capEnrollment: +values.capEnrollment }
+        const previousInstructorEmail = instructorsInfo?.instructorEmail || ''
+        const updatedInstructorEmail = values.instructorEmail || ''
+        const hasInstructorEmailChanged =
+            previousInstructorEmail.trim().toLowerCase() !==
+            updatedInstructorEmail.trim().toLowerCase()
+
+        const convertedData = {
+            ...values,
+            name: values.name,
+            instructorEmail: values.instructorEmail,
+            capEnrollment: +values.capEnrollment,
+            ...(hasInstructorEmailChanged && { previousInstructorEmail }),
+        }
         try {
             await api.patch(`/batch/${params.batchId}`, convertedData).then((res) => {
                 toast.success({ title: res.data.status, description: res.data.message })
@@ -219,12 +241,15 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     }, [fetchStudentData])
 
     const userIds = selectedRows.map((item: SelecteItem) => item.userId)
+    const columns = useMemo(() => createColumns(permissions), [permissions])
 
     return {
         router,
         userRole,
         students,
         setStudents,
+        permissions,
+        columns,
         studentsData,
         setStoreStudentData,
         allBatches,
