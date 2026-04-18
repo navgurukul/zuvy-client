@@ -36,8 +36,11 @@ const Navbar = () => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const { user } = getUser()
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isInstructorUser = userRole === 'instructor'
+    const normalizedRoles = Array.isArray(user?.rolesList)
+        ? user.rolesList.map((roleItem: string) => String(roleItem).toLowerCase())
+        : []
+    const userRole = normalizedRoles[0] || ''
+    const isInstructorUser = normalizedRoles.includes('instructor')
     const isSuperAdmin = userRole === 'super_admin';
     const role = pathname.split('/')[1]
     const isStudentRoute = role === 'student'
@@ -114,13 +117,17 @@ const Navbar = () => {
                   },
               ]
             : []),
-        {
-            name: 'All Organizations',
-            href: `/${role}/organizations`,
-            icon: Layers,
-            active: (pathname: string) =>
-                pathname === `/${role}/organizations`,
-        },
+        ...(isSuperAdmin
+            ? [
+                  {
+                      name: 'All Organizations',
+                      href: `/${role}/organizations`,
+                      icon: Layers,
+                      active: (pathname: string) =>
+                          pathname === `/${role}/organizations`,
+                  },
+              ]
+            : []),
     ]
 
     const routes = inOrg && !isStudentRoute ? adminRoutes : [];
@@ -223,22 +230,18 @@ const Navbar = () => {
                                 return null;
                             }
                             if (item.name === 'Roles and Permissions') {
-                                if (isInstructorUser) {
+                                if (
+                                    !loading &&
+                                    !permissions.viewRolesAndPermission &&
+                                    !permissions.viewRolesAndPermissions
+                                ) {
                                     return null;
                                 }
-
-                                if (!loading && !permissions.viewRolesAndPermission) {
-                                    return null;
-                                }
-                            }
-                            if (item.name === 'All Organizations' && isInstructorUser) {
-                                return null;
                             }
 
                             return (
                                 <>
-                                    {((!isSuperAdmin && item.name === 'All Organizations') ||
-                                        item.name !== 'Question Bank') && (
+                                    {item.name !== 'Question Bank' && (
                                         <Link
                                             key={item.name}
                                             href={

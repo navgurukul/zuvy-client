@@ -588,7 +588,7 @@ export const formatUpcomingItem = (item: any) => {
 
   // Get the appropriate date field based on event type
   const getStartDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
+        if (item.type?.toLowerCase() === 'live class' || item.type?.toLowerCase() === 'mentor session') {
       return parseDate(item.startTime);
     } else {
       return parseDate(item.startDatetime);
@@ -596,7 +596,7 @@ export const formatUpcomingItem = (item: any) => {
   };
 
   const getEndDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
+        if (item.type?.toLowerCase() === 'live class' || item.type?.toLowerCase() === 'mentor session') {
       return parseDate(item.endTime);
     } else if (item.type?.toLowerCase() === 'assignment') {
       return parseDate(item.completionDate);
