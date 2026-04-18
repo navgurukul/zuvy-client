@@ -32,7 +32,6 @@ const SUGGESTED_EXPERTISE = [
   'Node.js',
   'NestJS',
   'PostgreSQL',
-  'System Design',
   'Backend Architecture',
 ]
 
@@ -83,7 +82,6 @@ function MentorProfileCreateUI({
   const [pastExperiences, setPastExperiences] = useState(initial.pastExperiences)
   const [expertise, setExpertise] = useState<string[]>(initial.expertise)
   const [tagInput, setTagInput] = useState('')
-  const [error, setError] = useState<string | null>(null)
 
   const tagRef = useRef<HTMLInputElement>(null)
   const orgId = Array.isArray(organizationId) ? organizationId[0] : organizationId
@@ -126,30 +124,20 @@ function MentorProfileCreateUI({
   }
 
   const handleSubmit = async () => {
-    setError(null)
+    const validationErrors: string[] = []
 
-    if (!title.trim()) {
-      setError('Title is required.')
-      return
-    }
-    if (!bio.trim()) {
-      setError('Bio is required.')
-      return
-    }
-    if (!pastExperiences.trim()) {
-      setError('Past experiences are required.')
-      return
-    }
-    if (bio.trim().length < 80) {
-      setError('Bio should be at least 80 characters.')
-      return
-    }
-    if (expertise.length === 0) {
-      setError('Please add at least one skill.')
-      return
-    }
-    if (!hasResolvedBootcamp) {
-      setError('No bootcamp is available for this organization yet.')
+    if (!title.trim()) validationErrors.push('Title is required.')
+    if (!bio.trim()) validationErrors.push('Bio is required.')
+    if (!pastExperiences.trim()) validationErrors.push('Past experiences are required.')
+    if (bio.trim().length < 80) validationErrors.push('Bio should be at least 80 characters.')
+    if (expertise.length === 0) validationErrors.push('Please add at least one skill.')
+    if (!hasResolvedBootcamp) validationErrors.push('No bootcamp is available for this organization yet.')
+
+    if (validationErrors.length > 0) {
+      toast.error({
+        title: 'Please complete the required fields',
+        description: validationErrors.join(' '),
+      })
       return
     }
 
@@ -173,8 +161,15 @@ function MentorProfileCreateUI({
         description: 'Your profile has been saved successfully.',
       })
       router.push(coursesHref)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Something went wrong. Please try again.'
+
+      toast.error({
+        title: 'Save failed',
+        description: message,
+      })
     }
   }
 
@@ -206,8 +201,6 @@ function MentorProfileCreateUI({
       </MaxWidthWrapper>
     )
   }
-
-  const formError = error || updateError
 
   return (
     <MaxWidthWrapper>
@@ -283,7 +276,7 @@ function MentorProfileCreateUI({
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="text-body2 font-semibold text-success">
+                  <h4 className="text-body2 font-semibold text-success text-left">
                     Profile Complete ✓
                   </h4>
                   <p className="text-body2 text-text-secondary mt-1">
@@ -291,13 +284,6 @@ function MentorProfileCreateUI({
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Error Alert */}
-          {formError && (
-            <div className="mb-8 rounded-lg border border-destructive bg-destructive-light px-5 py-4">
-              <p className="text-body2 font-semibold text-destructive">{formError}</p>
             </div>
           )}
 
@@ -458,4 +444,3 @@ function MentorProfileCreateUI({
 export default function Page() {
   return <MentorProfileCreateUI />
 }
-

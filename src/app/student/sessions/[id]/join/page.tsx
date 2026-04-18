@@ -6,18 +6,24 @@ import { useRouter, useSearchParams } from "next/navigation"
 export default function JoinSessionPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const meetingLink = searchParams.get("meetingLink")?.trim() || ""
+  const joinUrl = searchParams.get("joinUrl")?.trim() || ""
+
+  const isAllowedMeetingHost = (hostname: string) => {
+    const normalizedHost = hostname.toLowerCase()
+
+    return normalizedHost === "zoom.us" || normalizedHost.endsWith(".zoom.us")
+  }
 
   useEffect(() => {
-    if (!meetingLink) {
+    if (!joinUrl) {
       router.replace("/student/sessions")
       return
     }
 
     try {
-      const parsedMeetingUrl = new URL(meetingLink)
+      const parsedMeetingUrl = new URL(joinUrl)
       const isHttps = parsedMeetingUrl.protocol === "https:"
-      const isAllowedHost = parsedMeetingUrl.hostname === "meet.google.com"
+      const isAllowedHost = isAllowedMeetingHost(parsedMeetingUrl.hostname)
 
       if (!isHttps || !isAllowedHost) {
         router.replace("/student/sessions")
@@ -28,7 +34,7 @@ export default function JoinSessionPage() {
     } catch {
       router.replace("/student/sessions")
     }
-  }, [meetingLink, router])
+  }, [joinUrl, router])
 
   return null
 }

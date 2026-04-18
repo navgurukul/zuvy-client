@@ -21,6 +21,8 @@ type CreateMentorSlotApiResponse =
 interface CreateMentorSlotResult {
     success: boolean
     slot: MentorAvailabilitySlot | null
+    errorMessage?: string
+    statusCode?: number
 }
 
 const hasSlotId = (value: unknown): value is MentorAvailabilitySlot => {
@@ -64,6 +66,11 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to create slot'
 }
 
+const getErrorStatusCode = (error: unknown): number | undefined => {
+    const status = (error as { response?: { status?: number } })?.response?.status
+    return typeof status === 'number' ? status : undefined
+}
+
 export function useCreateMentorSlot() {
     const [createdSlot, setCreatedSlot] = useState<MentorAvailabilitySlot | null>(
         null
@@ -80,21 +87,45 @@ export function useCreateMentorSlot() {
 
             const response = await api.post<CreateMentorSlotApiResponse>(
                 '/mentor-slots/create',
-                payload
+                payload,
+                {
+                    validateStatus: (status) => status < 500,
+                }
             )
+
+            if (response.status >= 400) {
+                const errorMessage =
+                    (response.data as { message?: string })?.message ||
+                    'Failed to create slot'
+
+                setError(errorMessage)
+                return {
+                    success: false,
+                    slot: null,
+                    errorMessage,
+                    statusCode: response.status,
+                }
+            }
 
             const slot = parseCreateSlotResponse(response.data)
             setCreatedSlot(slot)
             return {
                 success: true,
                 slot,
+                errorMessage: undefined,
+                statusCode: undefined,
             }
         } catch (error) {
             console.error('Error creating mentor slot:', error)
-            setError(getErrorMessage(error))
+            const errorMessage = getErrorMessage(error)
+            const statusCode = getErrorStatusCode(error)
+
+            setError(errorMessage)
             return {
                 success: false,
                 slot: null,
+                errorMessage,
+                statusCode,
             }
         } finally {
             setIsCreating(false)
