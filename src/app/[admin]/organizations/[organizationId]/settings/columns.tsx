@@ -129,7 +129,7 @@ export const createColumns = (
         const deleteTooltipMessage = isPocUser
           ? 'You can not delete POC'
           : isZuvyPocUser
-            ? 'You can nt delete Zuvy POC'
+            ? 'You can not delete Zuvy POC'
             : ''
             return (
                 <div className="flex gap-1 text-left">
