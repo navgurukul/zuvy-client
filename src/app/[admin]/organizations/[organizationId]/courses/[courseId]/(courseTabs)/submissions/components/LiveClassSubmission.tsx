@@ -178,12 +178,12 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                             </div>
                         )}
                         </div>
-                        <div className="flex flex-col w-full">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col w-full pr-24">
+                            <div className="flex items-start gap-2 min-w-0">
                                 <div className="p-2 rounded-md">
                                     <Play className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base">
+                                <h3 className="font-medium text-base min-w-0 whitespace-normal break-all">
                                     {liveClass.title || 'Untitled Live Class'}
                                 </h3>
                             </div>
