@@ -16,7 +16,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
-import{formatValue} from "@/utils/students"
+import { formatValue } from "@/utils/students"
 import {
     Select,
     SelectContent,
@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
 
-import {IDEProps,questionDetails,TestCases,Input,TestCasesSubmission}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -73,7 +73,7 @@ const IDE: React.FC<IDEProps> = ({
     const [codeResult, setCodeResult] = useState<any>([])
     const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
-    const {codingSubmissionAction, setCodingSubmissionAction} = useCodingSubmissionStore()
+    const { codingSubmissionAction, setCodingSubmissionAction } = useCodingSubmissionStore()
 
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
@@ -86,14 +86,14 @@ const IDE: React.FC<IDEProps> = ({
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-        const { isDark, toggleTheme } = useThemeStore();
+    const { isDark, toggleTheme } = useThemeStore();
 
 
     const editorLanguages = [
         { lang: 'java', id: 96 },
         { lang: 'python', id: 100 },
         { lang: 'javascript', id: 102 },
-        // { lang: 'cpp', id: 105 },
+        { lang: 'cpp', id: 105 },
         // { lang: 'c', id: 104 },
     ]
 
@@ -251,12 +251,12 @@ const IDE: React.FC<IDEProps> = ({
     }, [language])
 
     useEffect(() => {
-        if (templates?.[language]?.template){
+        if (templates?.[language]?.template) {
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
 
-    
+
     useEffect(() => {
         if (runCodeLanguageId && runSourceCode) {
             const selectedLanguage = editorLanguages.find(
@@ -280,6 +280,7 @@ const IDE: React.FC<IDEProps> = ({
         }
         getActions()
     }, [])
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -289,13 +290,13 @@ const IDE: React.FC<IDEProps> = ({
                         {/* Left: Back Button and Question Title */}
                         <div className="flex items-center space-x-4">
                             {isSubmitted ? <button onClick={onBack} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                   <X className="w-5 h-5" />
+                                <X className="w-5 h-5" />
                             </button> :
 
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                               <X className="w-5 h-5" />
+                                            <X className="w-5 h-5" />
                                         </button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="bg-card border-border shadow-32dp">
@@ -338,18 +339,18 @@ const IDE: React.FC<IDEProps> = ({
                         <div className="flex items-center space-x-4">
                             <TimerDisplay remainingTime={remainingTime} />
                             <div className="flex items-center space-x-2">
-                            <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={toggleTheme}
-                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                        >
-                            {isDark ? (
-                                <Sun className="h-4 w-4" />
-                            ) : (
-                                <Moon className="h-4 w-4" />
-                            )}
-                        </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={toggleTheme}
+                                    className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                >
+                                    {isDark ? (
+                                        <Sun className="h-4 w-4" />
+                                    ) : (
+                                        <Moon className="h-4 w-4" />
+                                    )}
+                                </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'run')}
                                     size="sm"
@@ -358,7 +359,7 @@ const IDE: React.FC<IDEProps> = ({
                                     disabled={(loading || isSubmitted) || codingSubmissionAction === 'submit'}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium font-semibold">Run Code</span>
+                                    <span className="ml-2 font-medium">Run Code</span>
                                 </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'submit')}
@@ -367,7 +368,7 @@ const IDE: React.FC<IDEProps> = ({
                                     disabled={(loading || isSubmitted) || codingSubmissionAction === 'submit'}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium font-semibold">Submit Solution</span>
+                                    <span className="ml-2 font-medium">Submit Solution</span>
                                 </Button>
                             </div>
                         </div>
@@ -538,8 +539,8 @@ const IDE: React.FC<IDEProps> = ({
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
                                                     {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                                        <Code className="w-4 h-4 text-primary" />
-                                                    </div> */}
+<Code className="w-4 h-4 text-primary" />
+</div> */}
                                                     <h6 className="font-bold text-foreground">Code Editor </h6>
                                                 </div>
 
@@ -558,7 +559,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                 value={lang.lang}
                                                                 className={`hover:bg-primary ${language === lang.lang ? 'text-white' : ''} focus:bg-primary cursor-pointer data-[highlighted]:bg-primary data-[state=checked]:bg-primary`}
                                                             >
-                                                                {lang.lang}
+                                                                {lang.lang === "cpp" ? "c++" : lang.lang}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -622,26 +623,26 @@ const IDE: React.FC<IDEProps> = ({
                                             )}
 
                                             {/* Error Results (Compile/Runtime) */}
-                                            {!loading && codeError && codeResult?.map((testCase:TestCasesSubmission, index:number) => (
+                                            {!loading && codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     <div className="flex items-center space-x-2 text-red-500 font-bold">
                                                         <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
                                                     </div>
                                                     <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
-                                                       {index < 3 && <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
-                                                            {testCase?.stdIn && (
+                                                        {index < 3 && <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                            {testCase?.stdIn && index < 2 && (
                                                                 <>
                                                                     <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
                                                                     <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
                                                                 </>
                                                             )}
-                                                            {testCase?.expectedOutput && (
+                                                            {testCase?.expectedOutput && index < 2 && (
                                                                 <>
                                                                     <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
                                                                     <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
                                                                 </>
                                                             )}
-                                                            {(testCase?.stdOut || testCase?.stdout) && (
+                                                            {(testCase?.stdOut || testCase?.stdout) && index < 2 && (
                                                                 <>
                                                                     <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Output:</span>
                                                                     <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
@@ -665,7 +666,7 @@ const IDE: React.FC<IDEProps> = ({
                                             ))}
 
                                             {/* Success/Run Results */}
-                                            {!loading && !codeError && codeResult?.map((testCase:TestCasesSubmission , index: number) => (
+                                            {!loading && !codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     {testCase.status === 'Accepted' ? (
                                                         <div className="flex items-center space-x-2 text-green-600 font-bold">
@@ -674,23 +675,23 @@ const IDE: React.FC<IDEProps> = ({
                                                     ) : (
                                                         <div>
                                                             <div className="flex items-center space-x-2 text-red-500 font-bold">
-                                                                <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
+                                                                <span>[✗] Test Case #{index + 1}: {testCase.status} </span>
                                                             </div>
                                                             <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
                                                                 <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
-                                                                    {testCase?.stdIn && (
+                                                                    {testCase?.stdIn && index < 2 &&  (
                                                                         <>
                                                                             <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
                                                                         </>
                                                                     )}
-                                                                    {testCase?.expectedOutput && (
+                                                                    {testCase?.expectedOutput  && index < 2 && (
                                                                         <>
                                                                             <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
                                                                         </>
                                                                     )}
-                                                                    {(testCase?.stdOut || testCase?.stdout) && (
+                                                                    {(testCase?.stdOut || testCase?.stdout) && index < 2 && (
                                                                         <>
                                                                             <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Your Output:</span>
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>

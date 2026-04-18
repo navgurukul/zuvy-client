@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -10,7 +10,7 @@ import { getBatchData, getCourseData, getStoreStudentData, getDeleteStudentStore
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
-import { createColumns } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/columns'
+import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/columns'
 import {
     StudentData,
     BatchSuggestion,
@@ -18,12 +18,15 @@ import {
     ParamsType,
     EnhancedBatch,
     PermissionsType,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
 
 export default function useBatches(params: ParamsType) {
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
+    const pathname = usePathname()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const orgId = Number(organizationId) || user?.orgId; 
 
     const { students } = { students: [] as StudentData[] } // placeholder if needed
 
@@ -55,6 +58,8 @@ export default function useBatches(params: ParamsType) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
     const [currentStep, setCurrentStep] = useState(1)
+    const [totalBatches, setTotalBatches] = useState(0);
+    const [batchesPerPage, setBatchesPerPage] = useState(10); // default value
 
     const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
@@ -127,26 +132,70 @@ export default function useBatches(params: ParamsType) {
         [params.courseId, setBatchData]
     )
 
-    const defaultFetchApi = useCallback(async () => {
-        setSearchQuery('')
-        const response = await api.get(`/bootcamp/batches/${params.courseId}`)
-        setBatchData(response.data?.data || [])
-        setPermissions(response.data?.permissions)
-        return response.data?.data || []
-    }, [params.courseId, setBatchData])
+    // const defaultFetchApi = useCallback(async () => {
+    //     setSearchQuery('')
+    //     const response = await api.get(`/bootcamp/batches/${params.courseId}`)
+    //     setBatchData(response.data?.data || [])
+    //     setPermissions(response.data?.permissions)
+    //     return response.data?.data || []
+    // }, [params.courseId, setBatchData])
 
-    const formSchema = z.object({
-        name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
-        instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
-        bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z.string().refine((capEnrollment) => {
-            const parsedValue = parseInt(capEnrollment)
-            return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
-        }, { message: 'Cap Enrollment must be a positive number between 1 and 100,000' }),
-        assignLearners: z.string(),
-    })
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const defaultFetchApi = useCallback(
+        async (offset: number = 0, limit: number = batchesPerPage) => {
+            setLoading(true);
+            try {
+                const response = await api.get(
+                    `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
+                );
+
+                setBatchData(response.data?.data || []);
+                setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
+                setPermissions(response.data?.permissions);
+
+                return response.data?.data || [];
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [params.courseId, batchesPerPage, setBatchData]
+    );
+
+
+    // Create dynamic form schema function that includes current students check
+    const createFormSchema = (editingBatch: EnhancedBatch | null) => {
+        return z.object({
+            name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
+            instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
+            bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
+            capEnrollment: z.string()
+                .refine((capEnrollment) => {
+                    const parsedValue = parseInt(capEnrollment)
+                    return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
+                }, { message: 'Cap Enrollment must be a positive number from 1 to 100000' })
+                .superRefine((capEnrollment, ctx) => {
+                    // Additional validation for edit mode
+                    if (editingBatch) {
+                        const parsedValue = parseInt(capEnrollment)
+                        const currentStudents = editingBatch.students_enrolled || 0
+                        
+                        if (parsedValue < currentStudents) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: `Cap enrollment cannot be less than the number of current students (${currentStudents}).`
+                            })
+                        }
+                    }
+                }),
+            assignLearners: z.string(),
+        })
+    }
+
+    const formSchema = useMemo(() => createFormSchema(editingBatch), [editingBatch])
+
+    const form = useForm<z.infer<ReturnType<typeof createFormSchema>>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
@@ -157,6 +206,14 @@ export default function useBatches(params: ParamsType) {
         },
         mode: 'onChange',
     })
+
+    // Update form validation when editingBatch changes
+    useEffect(() => {
+        if (editingBatch) {
+            // Re-validate the form with new schema
+            form.trigger('capEnrollment')
+        }
+    }, [editingBatch, form])
 
     const handleEditBatch = (batch: EnhancedBatch) => {
         setEditingBatch(batch)
@@ -169,6 +226,11 @@ export default function useBatches(params: ParamsType) {
         })
         setIsEditModalOpen(true)
         setCurrentStep(1)
+        
+        // Trigger validation after setting the batch
+        setTimeout(() => {
+            form.trigger('capEnrollment')
+        }, 0)
     }
 
     const handleDeleteBatch = (batch: EnhancedBatch) => {
@@ -199,10 +261,17 @@ export default function useBatches(params: ParamsType) {
     const handleUpdateBatch = async (values: z.infer<typeof formSchema>) => {
         if (!editingBatch) return
         try {
+            const previousInstructorEmail = editingBatch.instructorEmail || ''
+            const updatedInstructorEmail = values.instructorEmail || ''
+            const hasInstructorEmailChanged =
+                previousInstructorEmail.trim().toLowerCase() !==
+                updatedInstructorEmail.trim().toLowerCase()
+
             const convertedData = {
                 name: values.name,
                 instructorEmail: values.instructorEmail,
                 capEnrollment: +values.capEnrollment,
+                ...(hasInstructorEmailChanged && { previousInstructorEmail }),
             }
             await api.put(`/batch/${editingBatch.id}`, convertedData)
             toast.success({
@@ -222,7 +291,7 @@ export default function useBatches(params: ParamsType) {
     }
 
     const handleViewStudents = (batchId: string | number, batchName: string) => {
-        router.push(`/${userRole}/courses/${params.courseId}/batch/${batchId}`)
+        router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/batch/${batchId}`)
     }
 
     const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,15 +429,17 @@ export default function useBatches(params: ParamsType) {
             return false
         }
     }
-
     useEffect(() => {
         if (params.courseId) fetchCourseDetails(params.courseId)
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
+        if (courseData?.id) {
+            defaultFetchApi();
+        }
+    }, [courseData?.id]);
+
+
 
     const getUnAssignedStudents = useCallback(async () => {
         try {
@@ -421,8 +492,8 @@ export default function useBatches(params: ParamsType) {
         searchQuery,
         csvFile,
         setCsvFile,
-    singleStudentData,
-    setSingleStudentData,
+        singleStudentData,
+        setSingleStudentData,
         handleSingleStudentChange,
         fetchSuggestionsApi,
         fetchSearchResultsApi,
@@ -442,5 +513,9 @@ export default function useBatches(params: ParamsType) {
         getUnAssignedStudents,
         isDeleteModalOpen,
         setDeleteModalOpen,
+        totalBatches,
+        batchesPerPage,
+        setBatchesPerPage,
     }
 }
+

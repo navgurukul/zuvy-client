@@ -228,7 +228,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
     onSubmit,
   }: {
     disabled: boolean;
-    onSubmit: () => void;
+    onSubmit: (typeOfsubmission?: "studentSubmit" | "auto-submit") => void | Promise<void>;
   }) {
     return (
       <div className="flex justify-center">
@@ -238,7 +238,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
               disabled={disabled}
               className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp ${
                 disabled
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  ? "bg-primary hover:bg-primary-dark text-primary-foreground cursor-not-allowed opacity-50"
                   : "bg-primary hover:bg-primary-dark text-primary-foreground"
               }`}
             >
@@ -260,7 +260,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
-                onClick={onSubmit}
+                onClick={() => onSubmit("studentSubmit")}
               >
                 Submit
               </AlertDialogAction>

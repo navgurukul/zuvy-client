@@ -260,6 +260,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       if (event.data === 'assessment_tab_closed') {
         console.warn('Assessment tab was closed before submission');
         refetch();
+        window.location.reload();
         toast({
           title: 'Assessment Tab Closed',
           description: 'You closed the assessment before submitting.',
@@ -327,7 +328,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <h5 className=" font-bold text-foreground break-words">
                   {assessmentDetails.ModuleAssessment?.title}
                 </h5>
-                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
+                <span className={`text-xs dark:text-white font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
               </div>
               {/* Meta Info Row */}
               <div className="flex flex-wrap gap-x-12 gap-y-2 mb-8">
@@ -460,7 +461,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                     <div className="md:text-lg text-sm space-y-2">
 
 
-                      <p className={`${isPassed ? 'text-success' : 'text-destructive'} font-semibold flex items-center gap-3`}>
+                      <p className={`${isPassed ? 'text-success' : 'text-destructive'} font-semibold flex items-center gap-3 dark:text-white`}>
                         {isPassed ? (
                           <>
                             <CheckCircle size={20} className="text-success" />
@@ -468,7 +469,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                           </>
                         ) : (
                           <>
-                            <X size={20} className="text-destructive" />
+                            <X size={20} className="text-destructive dark:text-white" />
                             You needed at least {passPercentage}% to pass
                           </>
                         )}
@@ -495,19 +496,19 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {/* Active assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'ACTIVE' &&
             (!isAssessmentStarted || (reattemptRequested && reattemptApproved)) && (<div
-              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light border border-success p-5 text-center transition-all duration-[1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light border border-success p-5 text-center transition-all [transition-duration:1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`}
             >
               <div className="text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
-                    <p className="font-bold text-accent text-center mb-4">
+                    <p className="font-bold text-accent text-center mb-4 dark:text-white">
                       Assessment is open. Please attempt it before end date
                     </p>
                     {/* <p className="font-semibold">{formatToIST(assessmentDetails.endDatetime)}</p> */}
                   </>
                 ) : (
-                  <p className='text-center text-accent font-semibold ' >The assessment is available now</p>
+                  <p className='text-center text-accent font-semibold dark:text-white ' >The assessment is available now</p>
                 )}
                 <div className='text-center' >
                   <Button
@@ -529,7 +530,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             </div>
             )}                     {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all [transition-duration:1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
               
@@ -542,7 +543,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 
           {/* Published assessment countdown */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'PUBLISHED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col text-center justify-center items-center gap-y-3 sm:gap-y-4 rounded-lg bg-card-elevated border border-border p-4 sm:p-6 shadow-8dp transition-all duration-[1500ms] ease-in-out ${showPublishedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col text-center justify-center items-center gap-y-3 sm:gap-y-4 rounded-lg bg-card-elevated border border-border p-4 sm:p-6 shadow-8dp transition-all [transition-duration:1500ms] ease-in-out ${showPublishedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
               <div className="flex flex-col sm:flex-row w-full items-center gap-2 sm:gap-x-3 text-foreground">

@@ -7,31 +7,6 @@ export interface SubmissionData {
   startedAt: string;
 }
 
-
-// export interface AssessmentData {
-//   hardCodingMark: number;
-//   mediumCodingMark: number;
-//   easyCodingMark: number;
-//   tabChange?: boolean;
-//   screenRecord?: boolean;
-//   copyPaste?: boolean;
-//   IsQuizzSubmission?:boolean
-//   hardMcqQuestions?:number
-//   easyMcqQuestions?:number
-//   mediumMcqQuestions?:number
-//   bootcampId:string
-//   totalMcqQuestions:number
-//   moduleId:string
-//   chapterId:string
-//   title:string
-//   canTabChange: boolean;
-//   canScreenExit: boolean;
-//   canCopyPaste: boolean;
-//   ModuleAssessment:string
-//   canEyeTrack: boolean;
-//   submission?:SubmissionData 
-// }
-
 // AssessmentProvider
 export interface SubmittedAssessment {
   submitedAt?: string

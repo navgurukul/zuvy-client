@@ -255,7 +255,7 @@ function Page({ params }: PageParams) {
     updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
   }, [assessmentSubmitId, isCopyPasteProctorOn]);
 
-  const submitAssessment = useCallback(async () => {
+  const submitAssessment = useCallback(async (typeOfsubmission: "studentSubmit" | "auto-submit" = "studentSubmit") => {
     setDisableSubmit(true);
     if (!assessmentSubmitId) return;
     try {
@@ -265,7 +265,7 @@ function Page({ params }: PageParams) {
         copyPaste,
         fullScreenExit,
         eyeMomentCount,
-        typeOfsubmission: "studentSubmit",
+        typeOfsubmission,
       });
       toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
       completeChapter();

@@ -436,7 +436,7 @@ useEffect(() => {
                             variant="ghost"
                             size="sm"
                             className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
-                              ? "bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
+                              ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
                               : "hover:bg-primary-light hover:text-charcoal"
                               }`}
                             onClick={() => handleItemSelect(item.id)}

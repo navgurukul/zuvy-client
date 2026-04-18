@@ -7,7 +7,7 @@ export const useEditCodingQuestion = (): UseEditCodingQuestionReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const editQuestion = async (questionId: number | null, data: EditCodingQuestionData): Promise<boolean> => {
+  const editQuestion = async (orgId: number, questionId: number | null, data: EditCodingQuestionData): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
@@ -17,7 +17,7 @@ export const useEditCodingQuestion = (): UseEditCodingQuestionReturn => {
         throw new Error('Question ID is required for editing');
       }
 
-      const response = await api.put(`codingPlatform/update-question/${questionId}`, data);
+      const response = await api.put(`codingPlatform/${orgId}/update-question/${questionId}`, data);
 
       toast.success({
         title: 'Success',

@@ -16,6 +16,7 @@ type CounterStore = {
         email: string
         id: number
         rolesList: string[]
+        orgId: number | null
     } | null
     studentsInfo: any[]
     setStudentsInfo: (newStudentsInfo: any[]) => void
@@ -219,18 +220,6 @@ export const getArticlePreviewStore = create<articlePreviewStore>((set) => ({
     },
 }))
 
-type codingPreviewStore = {
-    codingPreviewContent: any
-    setCodingPreviewContent: (newValue: any) => void
-}
-
-export const getCodingPreviewStore = create<codingPreviewStore>((set) => ({
-    codingPreviewContent: null,
-    setCodingPreviewContent: (newValue: any) => {
-        set({ codingPreviewContent: newValue })
-    },
-}))
-
 type quizPreviewStore = {
     quizPreviewContent: any
     setQuizPreviewContent: (newValue: any) => void
@@ -394,12 +383,19 @@ type Chapter = {
     order: number
 }
 
-type chapterData = {
-    chapterData: Chapter[]
-    setChapterData: (newValue: Chapter[]) => void
+export type ChapterPermissions = {
+    viewChapter?: boolean
+    createChapter?: boolean
+    editChapter?: boolean
+    deleteChapter?: boolean
 }
 
-export const getChapterDataState = create<chapterData>((set) => ({
+type ChapterData = {
+    chapterData: Chapter[];
+    setChapterData: (newValue: Chapter[]) => void;
+};
+
+export const getChapterDataState = create<ChapterData>((set) => ({
     chapterData: [],
     setChapterData: (newValue: Chapter[]) => {
         set({ chapterData: newValue })
@@ -972,6 +968,78 @@ export const useSessionModalStore = create<SessionStore>((set) => ({
     setShowModal: (value) => set({ showModal: value }),
 }))
 
+type QuestionsReadyEvent = {
+    count: number
+    questionIds: number[]
+    receivedAt: number
+}
+
+type GenerationJobMeta = {
+    message: string
+    totalJobs: number
+    jobIds: string[]
+}
+
+type SocketConnectionStore = {
+    isConnected: boolean
+    lastQuestionsReadyEvent: QuestionsReadyEvent | null
+    isGeneratingQuestions: boolean
+    generationProgress: number
+    totalJobs: number
+    completedJobs: number
+    generationJobMeta: GenerationJobMeta | null
+    setIsConnected: (value: boolean) => void
+    setLastQuestionsReadyEvent: (value: QuestionsReadyEvent | null) => void
+    startGeneratingQuestions: (payload?: Partial<GenerationJobMeta>) => void
+    stopGeneratingQuestions: () => void
+    setGenerationProgress: (value: number) => void
+    incrementCompletedJobs: () => void
+}
+
+export const getSocketConnectionStore = create<SocketConnectionStore>((set) => ({
+    isConnected: false,
+    lastQuestionsReadyEvent: null,
+    isGeneratingQuestions: false,
+    generationProgress: 0,
+    totalJobs: 1,
+    completedJobs: 0,
+    generationJobMeta: null,
+    setIsConnected: (value) => set({ isConnected: value }),
+    setLastQuestionsReadyEvent: (value) => set({ lastQuestionsReadyEvent: value }),
+    startGeneratingQuestions: (payload) =>
+        set(() => {
+            const totalJobs = Math.max(1, Number(payload?.totalJobs || 1))
+            const jobIds = Array.isArray(payload?.jobIds) ? payload.jobIds : []
+            const message = payload?.message || ''
+
+            return {
+                isGeneratingQuestions: true,
+                generationProgress: 1,
+                totalJobs,
+                completedJobs: 0,
+                generationJobMeta: {
+                    message,
+                    totalJobs,
+                    jobIds,
+                },
+            }
+        }),
+    stopGeneratingQuestions: () =>
+        set({
+            isGeneratingQuestions: false,
+            generationProgress: 0,
+            totalJobs: 1,
+            completedJobs: 0,
+            generationJobMeta: null,
+        }),
+    setGenerationProgress: (value) =>
+        set({ generationProgress: Math.max(0, Math.min(100, value)) }),
+    incrementCompletedJobs: () =>
+        set((state) => ({
+            completedJobs: Math.min(state.totalJobs, state.completedJobs + 1),
+        })),
+}))
+
 // ------------------------- User ------------------------
 interface User {
     rolesList: any[]
@@ -1202,3 +1270,40 @@ export const useVideoStore = create<VideoProgressState>()(
         }
     )
 )
+
+export interface ClassData {
+    id: number
+    title: string
+    startTime: string
+    endTime: string
+    s3Link: string | null
+    moduleId: number | null
+    chapterId: number | null
+    attendanceStatus: string
+    duration: number
+}
+
+type classCompleted = {
+    completedClasses: ClassData[]
+    setCompletedClasses: (newValue: ClassData[]) => void
+}
+
+export const getCompletedClasses = create<classCompleted>((set) => ({
+    completedClasses: [],
+    setCompletedClasses: (newValue: ClassData[]) => {
+        set({ completedClasses: newValue })
+    },
+}))
+
+
+type attendancePercentage = {
+    attendancePercentage: number
+    setAttendancePercentage: (newValue: number) => void
+}
+
+export const getAttendancePercentage = create<attendancePercentage>((set) => ({
+    attendancePercentage: 0,
+    setAttendancePercentage: (newValue: number) => {
+        set({ attendancePercentage: newValue })
+    },
+}))
