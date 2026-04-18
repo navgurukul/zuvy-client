@@ -34,7 +34,6 @@ export default function RootLayout({
         const adminRoutes = /admin.*courses.*module.*chapters/
         return adminRoutes.test(route || '') ? 'overflow-hidden' : ''
     }
-     
     if ((pathname === '/' || pathname.trim() === '') && userRole !== 'false') {
         // return  router.push(`/${userRole}/courses`)
          return (
