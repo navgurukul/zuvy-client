@@ -662,8 +662,24 @@ export interface Event {
   chapterId: number;
 }
 
+export interface MentorSessionEvent {
+  type: "Mentor Session";
+  id: number;
+  mentorName: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  sessionStatus: string;
+  bookingStatus: string;
+  meetingLink: string | null;
+  meetingType: string;
+  slotType: string;
+  eventDate: string;
+}
+
 export interface UpcomingEventsData {
   events: Event[];
+  mentorSessions?: MentorSessionEvent[];
   totalEvents: number;
   totalPages: number;
 }

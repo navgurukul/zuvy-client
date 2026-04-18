@@ -1,19 +1,47 @@
-// lib/permissionsStorage.ts
-import { db } from "./indexDb"; 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
 
-export interface PermissionRow {
-  key: string;
-  value: boolean;
+const normalizePermissionMap = (
+  value: unknown
+): Record<string, boolean> => {
+  if (!isRecord(value)) return {}
+
+  const normalized: Record<string, boolean> = {}
+  Object.entries(value).forEach(([key, permissionValue]) => {
+    normalized[key] = Boolean(permissionValue)
+  })
+
+  return normalized
 }
 
-/**
- * Returns permissions as a merged object:
- * { createCourse: true, viewCourse: false, ... }
- */
-// add dummy data for the below function to work:
 export async function getPermissions(): Promise<Record<string, boolean>> {
-  const allPermissions: PermissionRow[] = await db.permissions.toArray();
-  const permObjects = allPermissions.map((perm) => ({ [perm.key]: perm.value }));
-  const mergedPermissions = Object.assign({}, ...permObjects);
-  return mergedPermissions;
+  if (typeof window === 'undefined') {
+    return {}
+  }
+
+  const rawStoredPermissions = localStorage.getItem('AUTH_PERMISSIONS')
+  if (rawStoredPermissions) {
+    try {
+      const parsedPermissions = JSON.parse(rawStoredPermissions)
+      const normalizedPermissions = normalizePermissionMap(parsedPermissions)
+      if (Object.keys(normalizedPermissions).length > 0) {
+        return normalizedPermissions
+      }
+    } catch (error) {
+      console.error('Failed to parse AUTH_PERMISSIONS:', error)
+    }
+  }
+
+  const rawAuth = localStorage.getItem('AUTH')
+  if (!rawAuth) {
+    return {}
+  }
+
+  try {
+    const parsedAuth = JSON.parse(rawAuth)
+    return normalizePermissionMap(parsedAuth?.permissions)
+  } catch (error) {
+    console.error('Failed to parse AUTH user:', error)
+    return {}
+  }
 }

@@ -16,7 +16,7 @@ import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
 import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
-import { UpcomingEvent } from '@/hooks/hookType';
+import { MentorSessionEvent, UpcomingEvent } from '@/hooks/hookType';
 import { useCompletedClasses } from '@/hooks/useCompletedClasses';
 import { CompletedClass, Module } from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
@@ -37,6 +37,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+type WhatsNextItem = UpcomingEvent | MentorSessionEvent;
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
@@ -138,7 +140,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return `From ${today.toLocaleDateString('en-US', formatOptions)} to ${seventhDay.toLocaleDateString('en-US', formatOptions)}`;
   };
 
-  const getEventType = (type: string): 'Live Class' | 'Assessment' | 'Assignment' | 'unknown' => {
+  const getEventType = (type: string): 'Live Class' | 'Assessment' | 'Assignment' | 'Mentor Session' | 'unknown' => {
+    if (type.toLowerCase().includes('mentor session')) return 'Mentor Session';
     if (type.toLowerCase().includes('class')) return 'Live Class';
     if (type.toLowerCase().includes('assessment')) return 'Assessment';
     if (type.toLowerCase().includes('assignment')) return 'Assignment';
@@ -150,6 +153,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       case 'Live Class': return <Video className="w-5 h-5 text-primary" />;
       case 'Assessment': return <BookOpen className="w-5 h-5 text-warning" />;
       case 'Assignment': return <FileText className="w-5 h-5 text-info" />;
+      case 'Mentor Session': return <Video className="w-5 h-5 text-primary" />;
       default: return <Clock className="w-5 h-5 text-muted-foreground" />;
     }
   };
@@ -172,6 +176,12 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
         return (
           <div className="w-5 h-5 rounded-full bg-info-light flex items-center justify-center">
             <FileText className="w-5 h-5 text-info" />
+          </div>
+        );
+      case 'Mentor Session':
+        return (
+          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+            <Video className="w-5 h-5 text-primary" />
           </div>
         );
       default:
@@ -223,9 +233,23 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       case 'Live Class': return 'Join Class';
       case 'Assessment': return 'Start Assessment';
       case 'Assignment': return 'View Assignment';
+      case 'Mentor Session': return 'View Session';
       default: return 'View Event';
     }
   }
+
+  const isMentorSession = (item: WhatsNextItem): item is MentorSessionEvent => {
+    return item.type === 'Mentor Session';
+  };
+
+  const isRegularUpcomingEvent = (item: WhatsNextItem): item is UpcomingEvent => {
+    return !isMentorSession(item);
+  };
+
+  const mergedUpcomingItems: WhatsNextItem[] = [
+    ...(upcomingEventsData?.events || []),
+    ...(upcomingEventsData?.mentorSessions || []),
+  ].sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
 
   const getModuleCTA = (module:Module , progress: number) => {
     if (module.isLock) {
@@ -585,7 +609,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     </>
   )
 
-  const EventsModal = ({ events }: { events: UpcomingEvent[] }) => (
+  const EventsModal = ({ events }: { events: WhatsNextItem[] }) => (
     <>
       {/* Desktop Dialog */}
       <div className="hidden lg:block">
@@ -611,7 +635,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   item.eventDate
                 )
                 return (
-                  <div key={item.id}>
+                  <div key={`${item.type}-${item.id}`}>
                     <div className="flex items-start gap-4 py-4">
                       <div className="flex-shrink-0 mt-1">
                         {getItemIconWithBackground(
@@ -624,6 +648,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             {item.title}
                           </h4>
                         </div>
+                        {eventType === 'Mentor Session' && isMentorSession(item) && (
+                          <p className="text-sm text-muted-foreground mb-2 text-left">Mentor: {item.mentorName}</p>
+                        )}
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-medium">
                             {/* {eventType ===
@@ -645,13 +672,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           </p>
                         </div>
                         <div className="flex justify-end">
-                          {eventType === 'Live Class' ? (
+                          {eventType === 'Live Class' && isRegularUpcomingEvent(item) ? (
                             <Button
                               size="sm"
                               variant="link"
                               disabled={!isEventReady}
                               className="text-primary p-0 h-auto"
-                              onClick={() => window.open(item.hangoutLink, '_blank')}
+                              onClick={() => window.open(item.hangoutLink || '', '_blank')}
                             >
                               {isEventReady
                                 ? getEventActionText(
@@ -661,7 +688,16 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   item.eventDate
                                 )}
                             </Button>
-                          ) : (
+                          ) : eventType === 'Mentor Session' ? (
+                            <Link
+                              href={`/student/sessions?courseId=${courseId}`}
+                              className="text-primary text-sm font-medium hover:underline"
+                            >
+                              {isEventReady
+                                ? getEventActionText(item.type)
+                                : getTimeRemaining(item.eventDate)}
+                            </Link>
+                          ) : isRegularUpcomingEvent(item) ? (
                             <Link
                               href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                               className="text-primary text-sm font-medium hover:underline"
@@ -674,7 +710,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   item.eventDate
                                 )}
                             </Link>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -706,7 +742,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 const eventType = getEventType(item.type);
                 const isEventReady = canStartEvent(item.eventDate);
                 return (
-                  <div key={item.id}>
+                  <div key={`${item.type}-${item.id}`}>
                     <div className="flex items-start gap-4 py-4">
                       <div className="flex-shrink-0 mt-1">
                         {getItemIconWithBackground(item.type)}
@@ -715,32 +751,43 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         <div className="flex items-start justify-between gap-4 mb-2">
                           <h4 className="font-medium text-base">{item.title}</h4>
                         </div>
+                        {eventType === 'Mentor Session' && isMentorSession(item) && (
+                          <p className="text-sm text-muted-foreground mb-2">Mentor: {item.mentorName}</p>
+                        )}
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-medium">
                             {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
                             {eventType === 'Assessment' && `Starts on ${formatDate(item.eventDate)}`}
                             {eventType === 'Assignment' && `Due on ${formatDate(item.eventDate)}`}
+                            {eventType === 'Mentor Session' && `Scheduled on ${formatDate(item.eventDate)}`}
                           </p>
                         </div>
                         <div className="flex justify-end">
-                          {eventType === 'Live Class' ? (
+                          {eventType === 'Live Class' && isRegularUpcomingEvent(item) ? (
                             <Button
                               size="sm"
                               variant="link"
                               disabled={!isEventReady}
                               className="text-primary p-0 h-auto"
-                              onClick={() => window.open(item.hangoutLink, '_blank')}
+                              onClick={() => window.open(item.hangoutLink || '', '_blank')}
                             >
                               {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
                             </Button>
-                          ) : (
+                          ) : eventType === 'Mentor Session' ? (
+                            <Link
+                              href={`/student/sessions?courseId=${courseId}`}
+                              className="text-primary text-sm font-medium hover:underline"
+                            >
+                              {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                            </Link>
+                          ) : isRegularUpcomingEvent(item) ? (
                             <Link
                               href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                               className="text-primary text-sm font-medium hover:underline"
                             >
                               {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
                             </Link>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -1088,14 +1135,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 <CardContent className="pt-0">
                   {eventsLoading ? (
                     <CourseDashboardEventsSkeleton/>
-                  ) : upcomingEventsData && upcomingEventsData.events.length > 0 ? (
+                  ) : mergedUpcomingItems.length > 0 ? (
                     <div className="space-y-4">
-                      {upcomingEventsData.events.slice(0, 3).map((item: UpcomingEvent, index: number) => {
+                      {mergedUpcomingItems.slice(0, 3).map((item: WhatsNextItem, index: number) => {
                         const eventType = getEventType(item.type);
                         const isEventReady = canStartEvent(item.eventDate);
 
                         return (
-                          <div key={item.id}>
+                          <div key={`${item.type}-${item.id}`}>
                             <div className="flex items-start gap-4">
                               <div className="flex-shrink-0 mt-1">
                                 {getItemIconWithBackground(item.type)}
@@ -1103,30 +1150,43 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                               <div className="flex-1">
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                   <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
-                                    <Link
-                                      href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
-                                      target="_self"
-                                      className="hover:text-primary hover:underline underline-offset-[4px]"
-                                    >
-                                      {item.title}
-                                    </Link>
+                                    {eventType === 'Mentor Session' ? (
+                                      <Link
+                                        href={`/student/sessions?courseId=${courseId}`}
+                                        target="_self"
+                                        className="hover:text-primary hover:underline underline-offset-[4px]"
+                                      >
+                                        {item.title}
+                                      </Link>
+                                    ) : isRegularUpcomingEvent(item) ? (
+                                      <Link
+                                        href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                                        target="_self"
+                                        className="hover:text-primary hover:underline underline-offset-[4px]"
+                                      >
+                                        {item.title}
+                                      </Link>
+                                    ) : null}
                                   </h4>
                                 </div>
-                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                {eventType === 'Mentor Session' && isMentorSession(item) && (
+                                  <p className="text-sm text-muted-foreground mb-2">Mentor: {item.mentorName}</p>
+                                )}
+                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
                                 <div className="flex items-center justify-between mb-3">
                                   <p className="text-sm font-medium">
                                     {formatUpcomingItem(item)}
                                   </p>
                                 </div>
                                 {/* CTA - Bottom right */}
-                                {eventType === 'Live Class' && (
+                                {eventType === 'Live Class' && isRegularUpcomingEvent(item) && (
                                   <div className="flex justify-end">
                                     <Button
                                       size="sm"
                                       variant="link"
                                       disabled={!isEventReady}
                                       className="text-primary p-0 h-auto"
-                                      onClick={() => window.open(item.hangoutLink, '_blank')}
+                                      onClick={() => window.open(item.hangoutLink || '', '_blank')}
                                     >
                                       {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
 
@@ -1134,9 +1194,19 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     </Button>
                                   </div>
                                 )}
+                                {eventType === 'Mentor Session' && (
+                                  <div className="flex justify-end">
+                                    <Link
+                                      href={`/student/sessions?courseId=${courseId}`}
+                                      className="text-primary text-sm font-medium hover:underline"
+                                    >
+                                      {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                                    </Link>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            {index < upcomingEventsData.events.slice(0, 3).length - 1 && (
+                            {index < mergedUpcomingItems.slice(0, 3).length - 1 && (
                               <div className="border-t border-border mt-4"></div>
                             )}
                           </div>
@@ -1144,9 +1214,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       })}
 
                       {/* View All Events Button - Only show if there are more than 3 events */}
-                      {upcomingEventsData.events.length > 3 && (
+                      {mergedUpcomingItems.length > 3 && (
                         <div className="flex justify-center pt-4">
-                          <EventsModal events={upcomingEventsData.events} />
+                          <EventsModal events={mergedUpcomingItems} />
                         </div>
                       )}
                     </div>

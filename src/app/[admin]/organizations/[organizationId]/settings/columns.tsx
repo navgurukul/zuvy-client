@@ -22,6 +22,8 @@ export interface User {
     name: string
     email: string
     roleName: string
+  isPoc?: boolean
+  isZuvyPoc?: boolean
     dateAdded?: string
 }
 
@@ -121,6 +123,14 @@ export const createColumns = (
         header: 'Actions',
         cell: ({ row }) => {
             const selectedUser = row.original
+        const isPocUser = Boolean(selectedUser.isPoc)
+        const isZuvyPocUser = Boolean(selectedUser.isZuvyPoc)
+        const isProtectedUser = isPocUser || isZuvyPocUser
+        const deleteTooltipMessage = isPocUser
+          ? 'You can not delete POC'
+          : isZuvyPocUser
+            ? 'You can not delete Zuvy POC'
+            : ''
             return (
                 <div className="flex gap-1 text-left">
                     <Button
@@ -131,21 +141,35 @@ export const createColumns = (
                     >
                         <Edit className="w-4 h-4" />
                     </Button>
-
-                    {/* <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1 h-7 w-7 hover:bg-red-50"
-                        onClick={() => onDelete(selectedUser.userId)}
-                    >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button> */}
-                    <DeleteUser 
+                    {!isProtectedUser ? (
+                      <DeleteUser 
                         userId={selectedUser.userId}
                         title="Delete user?"
                         description="This action cannot be undone. This will permanently delete this user."
                         onDeleteSuccess={(userId) => onDelete(userId)}
-                    />
+                      />
+                    ) : (
+                      <TooltipProvider delayDuration={150}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 mt-1 h-7 w-7 text-red-300 cursor-not-allowed opacity-60 hover:bg-transparent hover:text-red-300"
+                                disabled
+                                aria-disabled="true"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" align="center">
+                            <p className="text-sm">{deleteTooltipMessage}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                 </div>
             )
         },
