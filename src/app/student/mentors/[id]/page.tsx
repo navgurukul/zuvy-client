@@ -179,7 +179,9 @@ export default function MentorProfilePage() {
             </p>
 
             {mentorProfile?.bio ? (
-              <p className="text-sm text-gray-700">{mentorProfile.bio}</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                {mentorProfile.bio}
+              </p>
             ) : (
               <p className="text-sm text-gray-400 italic">
                 This mentor has not added a bio yet.
