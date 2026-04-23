@@ -152,17 +152,15 @@ export const createColumns = (
                       <TooltipProvider delayDuration={150}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="inline-flex">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 mt-1 h-7 w-7 text-red-300 cursor-not-allowed opacity-60 hover:bg-transparent hover:text-red-300"
-                                disabled
-                                aria-disabled="true"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:bg-red-200 hover:text-red-600"
+                              disabled
+                              aria-disabled="true"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center">
                             <p className="text-sm">{deleteTooltipMessage}</p>
