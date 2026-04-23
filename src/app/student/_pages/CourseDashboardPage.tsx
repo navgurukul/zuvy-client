@@ -248,7 +248,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const mergedUpcomingItems: WhatsNextItem[] = [
     ...(upcomingEventsData?.events || []),
-    ...(upcomingEventsData?.mentorSessions || []),
+    ...(latestCourseData?.mentorshipEnabled ? (upcomingEventsData?.mentorSessions || []) : []),
   ].sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
 
   const getModuleCTA = (module:Module , progress: number) => {
@@ -1122,8 +1122,30 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>
             </div>
 
-            {/* Right Column - What's Next & Attendance */}
+            {/* Right Column - Browse all */}
             <div className="space-y-8">
+              {latestCourseData?.mentorshipEnabled && (
+                <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
+                  <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
+                  {QUICK_ACTIONS.map((a) => (
+                    <Link
+                      key={a.href}
+                      href={a.href}
+                      className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted transition-colors group"
+                    >
+                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", a.bg)}>
+                        <a.icon className={cn("h-4 w-4", a.color)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-text-primary">{a.label}</p>
+                        <p className="text-xs text-text-muted">{a.sub}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+
               {/* What's Next Section */}
               <Card className="shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-4">
@@ -1485,27 +1507,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
-              {latestCourseData?.mentorshipEnabled && (
-                <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
-                  <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
-                  {QUICK_ACTIONS.map((a) => (
-                    <Link
-                      key={a.href}
-                      href={a.href}
-                      className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted transition-colors group"
-                    >
-                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", a.bg)}>
-                        <a.icon className={cn("h-4 w-4", a.color)} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-text-primary">{a.label}</p>
-                        <p className="text-xs text-text-muted">{a.sub}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
