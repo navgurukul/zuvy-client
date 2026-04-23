@@ -21,6 +21,12 @@ const Header = () => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
+    const courseIdFromPath = courseIdMatch?.[1]
+    const courseIdFromQuery = searchParams.get('courseId')
+    const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
+    const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
+    const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
 
     // Ensure client-side rendering for hydration
     useEffect(() => {
@@ -41,9 +47,6 @@ const Header = () => {
     }
 
     const getCurrentCourseId = () => {
-        const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
-        const courseIdFromPath = courseIdMatch?.[1]
-        const courseIdFromQuery = searchParams.get('courseId')
         return courseIdFromPath || courseIdFromQuery
     }
 
@@ -94,15 +97,11 @@ const Header = () => {
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')
-    const courseIdFromQuery = searchParams.get('courseId')
     const isMentorOrSessionFlow =
         pathname.startsWith('/student/mentors') ||
         pathname.startsWith('/student/sessions')
     const showCourseNavLinks =
         isOnCoursePage || (isMentorOrSessionFlow && Boolean(courseIdFromQuery))
-    const currentCourseId = getCurrentCourseId() || ''
-    const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
-    const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
 
     // Check active page states
 
