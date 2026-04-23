@@ -8,6 +8,13 @@ export const useLatestUpdatedCourse = (courseId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!courseId) {
+      setLatestCourseData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchLatestUpdatedCourse = async () => {
       try {
         setLoading(true);
@@ -29,7 +36,7 @@ export const useLatestUpdatedCourse = (courseId: string) => {
     };
 
     fetchLatestUpdatedCourse();
-  }, []);
+  }, [courseId]);
 
   return {
     latestCourseData,

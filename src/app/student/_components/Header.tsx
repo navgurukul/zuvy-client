@@ -3,12 +3,13 @@ import { Button } from '@/components/ui/button'
 
 import { Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
 import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
 import { useOnboardingStorage } from '@/hooks/use-profile'
+import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -19,6 +20,13 @@ const Header = () => {
     const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
+    const courseIdFromPath = courseIdMatch?.[1]
+    const courseIdFromQuery = searchParams.get('courseId')
+    const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
+    const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
+    const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
 
     // Ensure client-side rendering for hydration
     useEffect(() => {
@@ -38,12 +46,28 @@ const Header = () => {
         router.push(`/student`)
     }
 
+    const getCurrentCourseId = () => {
+        return courseIdFromPath || courseIdFromQuery
+    }
+
     const handleSyllabusClick = () => {
-        // Extract courseId from pathname
-        const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
-        if (courseIdMatch) {
-            const courseId = courseIdMatch[1]
+        const courseId = getCurrentCourseId()
+        if (courseId) {
             router.push(`/student/course/${courseId}/courseSyllabus`)
+        }
+    }
+
+    const handleFindMentorClick = () => {
+        const courseId = getCurrentCourseId()
+        if (courseId) {
+            router.push(`/student/mentors?courseId=${courseId}`)
+        }
+    }
+
+    const handleMySessionsClick = () => {
+        const courseId = getCurrentCourseId()
+        if (courseId) {
+            router.push(`/student/sessions?courseId=${courseId}`)
         }
     }
 
@@ -73,6 +97,11 @@ const Header = () => {
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')
+    const isMentorOrSessionFlow =
+        pathname.startsWith('/student/mentors') ||
+        pathname.startsWith('/student/sessions')
+    const showCourseNavLinks =
+        isOnCoursePage || (isMentorOrSessionFlow && Boolean(courseIdFromQuery))
 
     // Check active page states
 
@@ -95,7 +124,7 @@ const Header = () => {
                     </div>
 
                     {/* Course Navigation Buttons */}
-                    {isOnCoursePage && (
+                    {showCourseNavLinks && (
                         <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                                 variant="link"
@@ -117,6 +146,26 @@ const Header = () => {
                             >
                                 Course Syllabus
                             </Button>
+                            {shouldShowMentorshipLinks && (
+                                <>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={handleFindMentorClick}
+                                        className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
+                                    >
+                                        Find a Mentor
+                                    </Button>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={handleMySessionsClick}
+                                        className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
+                                    >
+                                        1:1 Sessions
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -226,7 +275,7 @@ const Header = () => {
                 </div>
 
                 {/* Course Navigation Buttons */}
-                {isOnCoursePage && (
+                {showCourseNavLinks && (
                     <div className="flex items-center gap-1 sm:gap-2">
                         <Button
                             variant="link"
@@ -248,6 +297,26 @@ const Header = () => {
                         >
                             Course Syllabus
                         </Button>
+                        {shouldShowMentorshipLinks && (
+                            <>
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    onClick={handleFindMentorClick}
+                                    className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
+                                >
+                                    Find a Mentor
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    onClick={handleMySessionsClick}
+                                    className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
+                                >
+                                    1:1 Sessions
+                                </Button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
