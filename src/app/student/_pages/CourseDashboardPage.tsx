@@ -228,18 +228,51 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return new Date(eventDate).getTime() <= new Date().getTime();
   };
 
+  const parseDateValue = (value?: string | null) => {
+    if (!value) return null;
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return date;
+  };
+
+  const isMentorSessionJoinWindowOpen = (
+    startTime?: string | null,
+    endTime?: string | null,
+    nowTimestamp: number = Date.now()
+  ) => {
+    const startDate = parseDateValue(startTime);
+    if (!startDate) return false;
+
+    const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000;
+    const endDate = parseDateValue(endTime);
+
+    if (!endDate) {
+      return nowTimestamp >= tenMinutesBeforeStart;
+    }
+
+    return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime();
+  };
+
+  const getMentorSessionJoinHref = (item: MentorSessionEvent) => {
+    if (!item.meetingLink) return null;
+
+    return `/student/sessions/${item.id}/join?joinUrl=${encodeURIComponent(item.meetingLink)}`;
+  };
+
   const getEventActionText = (type: string) => {
     switch (getEventType(type)) {
       case 'Live Class': return 'Join Class';
       case 'Assessment': return 'Start Assessment';
       case 'Assignment': return 'View Assignment';
-      case 'Mentor Session': return 'View Session';
+      case 'Mentor Session': return 'Join Session';
       default: return 'View Event';
     }
   }
 
   const isMentorSession = (item: WhatsNextItem): item is MentorSessionEvent => {
-    return item.type === 'Mentor Session';
+    return getEventType(item.type) === 'Mentor Session';
   };
 
   const isRegularUpcomingEvent = (item: WhatsNextItem): item is UpcomingEvent => {
@@ -688,15 +721,32 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   item.eventDate
                                 )}
                             </Button>
-                          ) : eventType === 'Mentor Session' ? (
-                            <Link
-                              href={`/student/sessions?courseId=${courseId}`}
-                              className="text-primary text-sm font-medium hover:underline"
-                            >
-                              {isEventReady
-                                ? getEventActionText(item.type)
-                                : getTimeRemaining(item.eventDate)}
-                            </Link>
+                          ) : eventType === 'Mentor Session' && isMentorSession(item) ? (
+                            (() => {
+                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                              const joinHref = getMentorSessionJoinHref(item)
+
+                              if (canJoinNow && joinHref) {
+                                return (
+                                  <Button asChild size="sm" variant="link" className="text-primary p-0 h-auto">
+                                    <Link href={joinHref} target="_blank" rel="noopener noreferrer">
+                                      {getEventActionText(item.type)}
+                                    </Link>
+                                  </Button>
+                                )
+                              }
+
+                              return (
+                                <div className="flex flex-col items-end gap-1">
+                                  <Button size="sm" variant="link" disabled className="text-primary p-0 h-auto">
+                                    Join Session
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground text-right">
+                                    Join opens 10 minutes before start.
+                                  </p>
+                                </div>
+                              )
+                            })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
                               href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
@@ -773,13 +823,32 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             >
                               {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
                             </Button>
-                          ) : eventType === 'Mentor Session' ? (
-                            <Link
-                              href={`/student/sessions?courseId=${courseId}`}
-                              className="text-primary text-sm font-medium hover:underline"
-                            >
-                              {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-                            </Link>
+                          ) : eventType === 'Mentor Session' && isMentorSession(item) ? (
+                            (() => {
+                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                              const joinHref = getMentorSessionJoinHref(item)
+
+                              if (canJoinNow && joinHref) {
+                                return (
+                                  <Button asChild size="sm" variant="link" className="text-primary p-0 h-auto">
+                                    <Link href={joinHref} target="_blank" rel="noopener noreferrer">
+                                      {getEventActionText(item.type)}
+                                    </Link>
+                                  </Button>
+                                )
+                              }
+
+                              return (
+                                <div className="flex flex-col items-end gap-1">
+                                  <Button size="sm" variant="link" disabled className="text-primary p-0 h-auto">
+                                    Join Session
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground text-right">
+                                    Join opens 10 minutes before start.
+                                  </p>
+                                </div>
+                              )
+                            })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
                               href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
@@ -1197,7 +1266,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
                                 <div className="flex items-center justify-between mb-3">
                                   <p className="text-sm font-medium">
-                                    {formatUpcomingItem(item)}
+                                    {eventType === 'Mentor Session' && isMentorSession(item)
+                                      ? 'Join Session'
+                                      : formatUpcomingItem(item)}
                                   </p>
                                 </div>
                                 {/* CTA - Bottom right */}
@@ -1216,16 +1287,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     </Button>
                                   </div>
                                 )}
-                                {eventType === 'Mentor Session' && (
-                                  <div className="flex justify-end">
-                                    <Link
-                                      href={`/student/sessions?courseId=${courseId}`}
-                                      className="text-primary text-sm font-medium hover:underline"
-                                    >
-                                      {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-                                    </Link>
-                                  </div>
-                                )}
+                                {eventType === 'Mentor Session' && isMentorSession(item) && (() => {
+                                  const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                                  const joinHref = getMentorSessionJoinHref(item)
+
+                                  return (
+                                    <div className="flex flex-col items-end gap-1">
+                                      {canJoinNow && joinHref ? (
+                                        <Button asChild size="sm" variant="link" className="text-primary p-0 h-auto">
+                                          <Link href={joinHref} target="_blank" rel="noopener noreferrer">
+                                            {getEventActionText(item.type)}
+                                          </Link>
+                                        </Button>
+                                      ) : (
+                                        <Button size="sm" variant="link" disabled className="text-primary p-0 h-auto">
+                                          Join Session
+                                        </Button>
+                                      )}
+                                      {!canJoinNow && (
+                                        <p className="text-xs text-muted-foreground text-right">
+                                          Join opens 10 minutes before start.
+                                        </p>
+                                      )}
+                                    </div>
+                                  )
+                                })()}
                               </div>
                             </div>
                             {index < mergedUpcomingItems.slice(0, 3).length - 1 && (

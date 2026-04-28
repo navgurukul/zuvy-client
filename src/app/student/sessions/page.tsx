@@ -503,7 +503,12 @@ export default function MySessions() {
 
             </CardContent>
 
-            <CardFooter className="flex gap-3">
+            <CardFooter className="flex gap-3 flex-wrap">
+              {!canJoinNow && !!joinUrl && (
+                <p className="basis-full text-xs text-muted-foreground text-left">
+                  Join opens 10 min before start
+                </p>
+              )}
               <Button
                 className="flex gap-2"
                 asChild={canJoinNow}
@@ -521,7 +526,7 @@ export default function MySessions() {
                 ) : joinUrl ? (
                   <>
                     <Video size={14} />
-                    Join opens 10 min before
+                    Join Session
                   </>
                 ) : (
                   <>

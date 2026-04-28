@@ -648,6 +648,11 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
+                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.zoomStartUrl && !canJoinSelectedSession && (
+                  <p className="text-xs text-muted-foreground">
+                    Join opens 10 min before start
+                  </p>
+                )}
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                   selectedSession.zoomStartUrl ? (
                     <Button
@@ -668,7 +673,7 @@ export default function SessionsPage() {
                       ) : (
                         <>
                           <Video size={16} className="mr-2" />
-                          Join opens 10 min before
+                          Join the Session
                         </>
                       )}
                     </Button>
@@ -690,7 +695,7 @@ export default function SessionsPage() {
                   </a>
                 )}
               </div>
-
+              
               {!isRescheduleTab && (
               <div className="rounded-xl border p-4 text-left space-y-2">
                 <p className="text-base font-semibold">Slot & Bookings</p>
