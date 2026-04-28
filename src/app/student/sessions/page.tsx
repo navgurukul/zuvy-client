@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -65,6 +65,33 @@ const formatTimeRange = (start?: string | null, end?: string | null) => {
   return `${startTime} - ${endTime}`
 }
 
+const parseDateValue = (value?: string | null) => {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+
+  return date
+}
+
+const isJoinWindowOpen = (
+  slotStart?: string | null,
+  slotEnd?: string | null,
+  nowTimestamp: number = Date.now()
+) => {
+  const startDate = parseDateValue(slotStart)
+  if (!startDate) return false
+
+  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
+  const endDate = parseDateValue(slotEnd)
+
+  if (!endDate) {
+    return nowTimestamp >= tenMinutesBeforeStart
+  }
+
+  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
+}
+
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
   mentorName?.trim() || `Mentor ${mentorUserId}`
 
@@ -102,6 +129,15 @@ export default function MySessions() {
   const searchParams = useSearchParams()
   const courseId = searchParams.get("courseId") || ""
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowTimestamp(Date.now())
+    }, 30 * 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
     true,
@@ -414,6 +450,7 @@ export default function MySessions() {
       {activeTab === "upcoming" && counts.upcoming > 0 &&
         sessions.map((session) => {
           const joinUrl = session.zoomStartUrl?.trim() || ""
+          const canJoinNow = !!joinUrl && isJoinWindowOpen(session.slotStart, session.slotEnd, nowTimestamp)
 
           return (
           <Card key={session.id} className="rounded-3xl">
@@ -466,13 +503,18 @@ export default function MySessions() {
 
             </CardContent>
 
-            <CardFooter className="flex gap-3">
+            <CardFooter className="flex gap-3 flex-wrap">
+              {!canJoinNow && !!joinUrl && (
+                <p className="basis-full text-xs text-muted-foreground text-left">
+                  Join opens 10 min before start
+                </p>
+              )}
               <Button
                 className="flex gap-2"
-                asChild={!!joinUrl}
-                disabled={!joinUrl}
+                asChild={canJoinNow}
+                disabled={!canJoinNow}
               >
-                {joinUrl ? (
+                {canJoinNow ? (
                   <Link
                     href={`/student/sessions/${session.id}/join?joinUrl=${encodeURIComponent(joinUrl)}`}
                     target="_blank"
@@ -481,6 +523,11 @@ export default function MySessions() {
                     <Video size={14} />
                     Join Session
                   </Link>
+                ) : joinUrl ? (
+                  <>
+                    <Video size={14} />
+                    Join Session
+                  </>
                 ) : (
                   <>
                     <Video size={14} />
