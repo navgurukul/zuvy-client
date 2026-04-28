@@ -245,14 +245,9 @@ export default function MentorsPage() {
 
                                 {/* Divider */}
                                 <div className="border-t mt-4 pt-3 flex justify-between">
-
-                                    <div className="flex items-center gap-1 text-sm">
-                                        <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                                        {"0.0"}
-                                    </div>
                                     <p className="text-sm text-gray-400">
                                        {mentor.availableSlots}
-                                       <span className="ml-2">Available Slots</span>
+                                       <span className="ml-2 text-sm">Available Slots</span>
                                     </p>
 
                                 </div>
