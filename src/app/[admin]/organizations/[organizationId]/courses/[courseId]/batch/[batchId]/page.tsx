@@ -5,8 +5,7 @@ import useBatchDetail from '@/hooks/useBatchDetail'
 import ErrorPage from 'next/error'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { Plus, Trash2, ArrowLeft } from 'lucide-react'
-import { Pencil } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Download, Pencil } from 'lucide-react'
 
 import {
     Form,
@@ -45,6 +44,7 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 // student data hook and constants are used inside the logic hook
 import { SearchBox } from '@/utils/searchBox'
 import { getUser } from '@/store/store'
+import { api } from '@/utils/axios.config'
 
 const BatchesInfo = ({
     params,
@@ -112,6 +112,340 @@ const BatchesInfo = ({
     const orgId = Number(organizationId) || user?.orgId; 
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const [isDownloadingReport, setIsDownloadingReport] = React.useState(false)
+
+    const handleDownloadReport = async () => {
+        try {
+            setIsDownloadingReport(true)
+            const queryParams = new URLSearchParams()
+            queryParams.set('batchId', params.batchId)
+            queryParams.set('batch_id', params.batchId)
+
+            const response = await api.get(
+                `/admin/overall-analysis?${queryParams.toString()}`,
+                { responseType: 'text' }
+            )
+
+            const responseData = response?.data
+
+            const escapeCsvValue = (value: unknown) =>
+                `"${String(value ?? '').replace(/"/g, '""')}"`
+
+            const stringifyCsvValue = (value: unknown): string => {
+                if (value == null) {
+                    return ''
+                }
+
+                if (Array.isArray(value)) {
+                    if (!value.length) {
+                        return ''
+                    }
+
+                    return value
+                        .map((item) =>
+                            item && typeof item === 'object'
+                                ? JSON.stringify(item)
+                                : String(item ?? '')
+                        )
+                        .join('; ')
+                }
+
+                if (typeof value === 'object') {
+                    return JSON.stringify(value)
+                }
+
+                return String(value)
+            }
+
+            type CsvRow = Record<string, string>
+
+            const normalizeJoinedValue = (value: unknown): string => {
+                if (Array.isArray(value)) {
+                    return value
+                        .map((item) => stringifyCsvValue(item))
+                        .filter((item) => item.length > 0)
+                        .join('; ')
+                }
+
+                return stringifyCsvValue(value)
+            }
+
+            const attachProjectsToRow = (
+                studentRow: CsvRow,
+                projects: unknown[]
+            ): CsvRow => {
+                const projectObjects = projects
+                    .filter((project) => project && typeof project === 'object' && !Array.isArray(project))
+                    .map((project) => project as Record<string, unknown>)
+
+                const titles = projectObjects
+                    .map((project) => stringifyCsvValue(project.title ?? project.name ?? ''))
+                    .filter((title) => title.length > 0)
+                    .join(' | ')
+
+                const stacks = projectObjects
+                    .map((project) =>
+                        normalizeJoinedValue(project.techStack ?? project.technologies ?? [])
+                    )
+                    .filter((stack) => stack.length > 0)
+                    .join(' | ')
+
+                const descriptions = projectObjects
+                    .map((project) => stringifyCsvValue(project.description ?? ''))
+                    .filter((description) => description.length > 0)
+                    .join(' | ')
+
+                return {
+                    ...studentRow,
+                    'Project Title': titles,
+                    'Tech Stack': stacks,
+                    'Project Description': descriptions,
+                }
+            }
+
+            const buildStudentCsvRow = (
+                student: Record<string, unknown>,
+                reportData: Record<string, unknown>
+            ): CsvRow => {
+                const profile =
+                    student.profile &&
+                    typeof student.profile === 'object' &&
+                    !Array.isArray(student.profile)
+                        ? (student.profile as Record<string, unknown>)
+                        : null
+
+                const studentRow: CsvRow = {
+                    'Course Name': stringifyCsvValue(reportData.courseName ?? ''),
+                    'Batch Name': stringifyCsvValue(reportData.batchName ?? ''),
+                    'Student Name': stringifyCsvValue(student.name ?? ''),
+                    Email: stringifyCsvValue(student.email ?? ''),
+                    'Overall Attendance': stringifyCsvValue(student.overAllAttendance ?? ''),
+                    'Assessments Attempted': stringifyCsvValue(
+                        student.numberOfAssessmentsAttempted ?? ''
+                    ),
+                    'Average Assessment %': stringifyCsvValue(
+                        student.averageAssessmentPercentage ?? ''
+                    ),
+                    'One-on-One Sessions Completed': stringifyCsvValue(
+                        student.oneOnOneSessionsCompleted ?? ''
+                    ),
+                }
+
+                if (!profile) {
+                    return attachProjectsToRow(studentRow, [])
+                }
+
+                Object.assign(studentRow, {
+                    'Phone Number': stringifyCsvValue(profile.phoneNumber ?? ''),
+                    'LinkedIn Profile': stringifyCsvValue(profile.linkedinProfile ?? ''),
+                    'College Name': stringifyCsvValue(
+                        profile.collegeName ?? profile.otherCollegeName ?? ''
+                    ),
+                    Degree: stringifyCsvValue(profile.degree ?? ''),
+                    Branch: stringifyCsvValue(profile.branch ?? profile.collegeStream ?? ''),
+                    'Year of Study': stringifyCsvValue(profile.yearOfStudy ?? ''),
+                    'Graduation Month': stringifyCsvValue(profile.graduationMonth ?? ''),
+                    'Graduation Year': stringifyCsvValue(profile.graduationYear ?? ''),
+                    'Current Status': stringifyCsvValue(profile.currentStatus ?? ''),
+                    'Technical Skills': normalizeJoinedValue(profile.technicalSkills ?? []),
+                    'College Score': stringifyCsvValue(profile.collegeScore ?? ''),
+                    'College Score Type': stringifyCsvValue(profile.collegeScoreType ?? ''),
+                    'Class 12 Board': stringifyCsvValue(profile.class12Board ?? ''),
+                    'Class 12 Score': stringifyCsvValue(profile.class12Score ?? ''),
+                    'Class 12 Score Type': stringifyCsvValue(profile.class12ScoreType ?? ''),
+                    'Class 10 Board': stringifyCsvValue(profile.class10Board ?? ''),
+                    'Class 10 Score': stringifyCsvValue(profile.class10Score ?? ''),
+                    'Class 10 Score Type': stringifyCsvValue(profile.class10ScoreType ?? ''),
+                    'Has Work Experience': profile.hasWorkExperience ? 'Yes' : 'No',
+                    'LeetCode Profiles': normalizeJoinedValue(profile.leetcodeProfiles ?? []),
+                    'CodeChef Profiles': normalizeJoinedValue(profile.codechefProfiles ?? []),
+                    'CodeForces Profiles': normalizeJoinedValue(profile.codeforcesProfiles ?? []),
+                    'Target Roles': normalizeJoinedValue(profile.targetRoles ?? []),
+                    'Preferred Locations': normalizeJoinedValue(profile.preferredLocations ?? []),
+                    'Open to Remote': profile.openToRemote ? 'Yes' : 'No',
+                    'Internship Stipend': stringifyCsvValue(profile.internshipStipend ?? ''),
+                    'Full Time CTC': stringifyCsvValue(profile.fullTimeCtc ?? ''),
+                    'Preferred Contact Methods': normalizeJoinedValue(
+                        profile.preferredContactMethods ?? []
+                    ),
+                    'Resume URL': stringifyCsvValue(profile.resumeUrl ?? ''),
+                    'Profile Created At': stringifyCsvValue(profile.createdAt ?? ''),
+                    'Profile Updated At': stringifyCsvValue(profile.updatedAt ?? ''),
+                })
+
+                const projects = Array.isArray(profile.projects) ? profile.projects : []
+                return attachProjectsToRow(studentRow, projects)
+            }
+
+            const buildRowsFromOverallAnalysis = (payload: unknown) => {
+                const reportData =
+                    payload &&
+                    typeof payload === 'object' &&
+                    !Array.isArray(payload) &&
+                    'data' in payload &&
+                    payload.data &&
+                    typeof payload.data === 'object' &&
+                    !Array.isArray(payload.data)
+                        ? (payload.data as Record<string, unknown>)
+                        : (payload as Record<string, unknown>)
+
+                const students = Array.isArray(reportData?.students)
+                    ? reportData.students
+                    : []
+
+                if (!Object.prototype.hasOwnProperty.call(reportData, 'students')) {
+                    return [reportData]
+                }
+
+                if (!students.length) {
+                    return []
+                }
+
+                return students.reduce<CsvRow[]>((accumulator, student) => {
+                    if (student && typeof student === 'object' && !Array.isArray(student)) {
+                        accumulator.push(
+                            buildStudentCsvRow(student as Record<string, unknown>, reportData)
+                        )
+                        return accumulator
+                    }
+
+                    accumulator.push({
+                        'Course Name': stringifyCsvValue(reportData?.courseName ?? ''),
+                        'Batch Name': stringifyCsvValue(reportData?.batchName ?? ''),
+                        'Student Name': stringifyCsvValue(student),
+                        Email: '',
+                        'Overall Attendance': '',
+                        'Assessments Attempted': '',
+                        'Average Assessment %': '',
+                        'One-on-One Sessions Completed': '',
+                        'Phone Number': '',
+                        'LinkedIn Profile': '',
+                        'College Name': '',
+                        Degree: '',
+                        Branch: '',
+                        'Year of Study': '',
+                        'Graduation Month': '',
+                        'Graduation Year': '',
+                        'Current Status': '',
+                        'Technical Skills': '',
+                        'College Score': '',
+                        'College Score Type': '',
+                        'Class 12 Board': '',
+                        'Class 12 Score': '',
+                        'Class 12 Score Type': '',
+                        'Class 10 Board': '',
+                        'Class 10 Score': '',
+                        'Class 10 Score Type': '',
+                        'Has Work Experience': '',
+                        'LeetCode Profiles': '',
+                        'CodeChef Profiles': '',
+                        'CodeForces Profiles': '',
+                        'Target Roles': '',
+                        'Preferred Locations': '',
+                        'Open to Remote': '',
+                        'Internship Stipend': '',
+                        'Full Time CTC': '',
+                        'Preferred Contact Methods': '',
+                        'Resume URL': '',
+                        'Profile Created At': '',
+                        'Profile Updated At': '',
+                        'Project Title': '',
+                        'Tech Stack': '',
+                        'Project Description': '',
+                    })
+
+                    return accumulator
+                }, [])
+            }
+
+            const buildCsvFromRows = (rows: Record<string, unknown>[]) => {
+                if (!rows.length) return ''
+
+                const columns = Array.from(
+                    new Set(rows.flatMap((row) => Object.keys(row)))
+                )
+
+                if (!columns.length) return ''
+
+                return [
+                    columns.join(','),
+                    ...rows.map((row) =>
+                        columns
+                            .map((column) => escapeCsvValue(row?.[column]))
+                            .join(',')
+                    ),
+                ].join('\n')
+            }
+
+            let csvContent = ''
+
+            if (typeof responseData === 'string') {
+                const trimmedData = responseData.trim()
+
+                if (trimmedData.startsWith('{') || trimmedData.startsWith('[')) {
+                    try {
+                        const parsedData = JSON.parse(trimmedData)
+                        const rows = Array.isArray(parsedData)
+                            ? parsedData
+                            : Array.isArray(parsedData?.data)
+                                ? parsedData.data
+                                : Array.isArray(parsedData?.report)
+                                    ? parsedData.report
+                                    : Array.isArray(parsedData?.analysis)
+                                        ? parsedData.analysis
+                                        : Array.isArray(parsedData?.results)
+                                            ? parsedData.results
+                                            : buildRowsFromOverallAnalysis(parsedData)
+
+                        csvContent = buildCsvFromRows(rows)
+                    } catch {
+                        csvContent = trimmedData
+                    }
+                } else {
+                    csvContent = responseData
+                }
+            } else {
+                const reportRows =
+                    responseData?.data ??
+                    responseData?.report ??
+                    responseData?.analysis ??
+                    responseData?.results ??
+                    responseData
+
+                const rows = Array.isArray(reportRows)
+                    ? reportRows
+                    : reportRows && typeof reportRows === 'object'
+                      ? buildRowsFromOverallAnalysis(reportRows)
+                      : []
+
+                csvContent = buildCsvFromRows(rows)
+            }
+
+            if (!csvContent) {
+                return
+            }
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            const batchName =
+                studentData?.[0]?.batchName?.toString().trim().replace(/\s+/g, '_') ||
+                `batch_${params.batchId}`
+
+            link.href = url
+            link.download = `${batchName}_report_${new Date()
+                .toISOString()
+                .split('T')[0]}.csv`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
+        } catch (error) {
+            console.error('Error downloading batch report:', error)
+        } finally {
+            setIsDownloadingReport(false)
+        }
+    }
 
     return (
         <>
@@ -347,6 +681,18 @@ const BatchesInfo = ({
                                 />
                             </div>
                             <div className="flex items-center gap-x-4 text-sm">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="flex items-center gap-2"
+                                    onClick={handleDownloadReport}
+                                    disabled={isDownloadingReport}
+                                >
+                                    <Download size={16} />
+                                    {isDownloadingReport
+                                        ? 'Downloading...'
+                                        : 'Download Report'}
+                                </Button>
                                 {permissions.editBatch && (
                                     <Dialog>
                                         <DialogTrigger asChild>
