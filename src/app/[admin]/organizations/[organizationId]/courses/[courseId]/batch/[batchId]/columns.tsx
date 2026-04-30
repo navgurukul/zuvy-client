@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { Trash2 } from 'lucide-react'
 import { ColumnDef } from '@tanstack/react-table'
@@ -20,7 +21,19 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 import EditModal from '../../(courseTabs)/students/components/editModal'
 import { Input } from '@/components/ui/input'
 
-export const createColumns = (permissions:any): ColumnDef<Task>[] => [
+type CreateColumnsOptions = {
+    userRole: string
+    orgId: number
+    courseId: string
+    batchId: string
+    courseName?: string
+    batchName?: string
+}
+
+export const createColumns = (
+    permissions: any,
+    options: CreateColumnsOptions
+): ColumnDef<Task>[] => [
     {
         id: 'select',
         header: ({ table }) => (
@@ -52,7 +65,11 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader
+                column={column}
+                title="Profile Pitcure"
+                className="w-full"
+            />
         ),
         cell: ({ row }) => {
             const student = row.original
@@ -78,7 +95,7 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
                     />
                 )
             }
-            return <div className="flex items-center">{ImageContainer()}</div>
+            return <div className="flex w-full items-center justify-start">{ImageContainer()}</div>
         },
         enableSorting: false,
         enableHiding: false,
@@ -86,7 +103,11 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         accessorKey: 'name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+            <DataTableColumnHeader
+                column={column}
+                title="Students Name"
+                className="w-full"
+            />
         ),
         cell: ({ row }) => {
             const { userId } = row.original
@@ -101,14 +122,17 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
             return (
                 <>
                     {isStudent === userId ? (
-                        <Input
-                            id="name"
-                            name="name"
-                            value={studentData.name}
-                            onChange={handleSingleStudent}
-                        />
+                        <div className="w-full min-w-0">
+                            <Input
+                                id="name"
+                                name="name"
+                                value={studentData.name}
+                                onChange={handleSingleStudent}
+                                className="w-full"
+                            />
+                        </div>
                     ) : (
-                        <div className="w-[150px]">{row.getValue('name')}</div>
+                        <div className="w-full min-w-0 text-left">{row.getValue('name')}</div>
                     )}
                 </>
             )
@@ -119,7 +143,7 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         accessorKey: 'email',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
+            <DataTableColumnHeader column={column} title="Email" className="w-full" />
         ),
         cell: ({ row }) => {
             const { userId } = row.original
@@ -134,15 +158,18 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
             return (
                 <>
                     {isStudent === userId ? (
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email}
-                            onChange={handleSingleStudent}
-                        />
+                        <div className="w-full min-w-0">
+                            <Input
+                                id="email"
+                                name="email"
+                                value={studentData.email}
+                                onChange={handleSingleStudent}
+                                className="w-full"
+                            />
+                        </div>
                     ) : (
-                        <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium">
+                        <div className="flex w-full min-w-0 space-x-2">
+                            <span className="block max-w-[500px] truncate text-left font-medium">
                                 {row.getValue('email')}
                             </span>
                         </div>
@@ -154,7 +181,11 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         accessorKey: 'progress',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Progress" />
+            <DataTableColumnHeader
+                column={column}
+                title="Progress"
+                className="w-full justify-center"
+            />
         ),
         cell: ({ row }) => {
             const progress = row.original.progress
@@ -168,7 +199,7 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
             // }
 
             return (
-                <div className="relative size-9">
+                <div className="relative mx-auto size-9">
                     <svg
                         className="size-full"
                         width="24"
@@ -212,7 +243,11 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendance" />
+            <DataTableColumnHeader
+                column={column}
+                title="Attendance"
+                className="w-full justify-center"
+            />
         ),
         cell: ({ row }) => {
             const attendance =
@@ -222,7 +257,7 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
             const circleColorClass = getAttendanceColorClass(attendance)
 
             return (
-                <div className="relative size-9">
+                <div className="relative mx-auto size-9">
                     <svg
                         className="size-full"
                         width="24"
@@ -301,6 +336,25 @@ export const createColumns = (permissions:any): ColumnDef<Task>[] => [
                         />
                     </div>
                 </>
+            )
+        },
+    },
+    {
+        id: 'actions3',
+        header: () => <div className="w-full min-w-[120px] text-left">Report</div>,
+        cell: ({ row }) => {
+            const student = row.original as Record<string, any>
+            const { userId } = student
+
+            return (
+                <div className="flex w-full items-center justify-start">
+                    <Link
+                        href={`/${options.userRole}/organizations/${options.orgId}/courses/${options.courseId}/batch/${options.batchId}/individualreport/${userId}`}
+                        className="text-primary hover:underline font-medium"
+                    >
+                        View Report
+                    </Link>
+                </div>
             )
         },
     },
