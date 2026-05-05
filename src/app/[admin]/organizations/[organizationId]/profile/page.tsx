@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Loader2, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { useGetMentorProfile } from '@/hooks/useGetMentorProfile'
 import { useUpdateMentorProfile } from '@/hooks/useUpdateMentorProfile'
 import { useBootcamps } from '@/hooks/useBootcamps'
-import { getCourseData } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
 
 type ProfileData = {
@@ -50,20 +49,19 @@ function MentorProfileCreateUI({
   const pathname = usePathname()
   const params = useParams()
   const { organizationId } = params
-  const { courseData } = getCourseData()
   const { courses, loading: bootcampsLoading } = useBootcamps({
-    limit: 1,
+    limit: 1000,
     searchTerm: '',
     offset: 0,
     auto: true,
   })
-  const primaryCourseId = Number(courseData?.id)
-  const fallbackCourseId = Number(courses?.[0]?.id)
-  const bootcampId =
-    Number.isFinite(primaryCourseId) && primaryCourseId > 0
-      ? primaryCourseId
-      : fallbackCourseId
-  const hasResolvedBootcamp = Number.isFinite(bootcampId) && bootcampId > 0
+  const mentorshipEnabledBootcamp = useMemo(
+    () => courses.find((course) => course.mentorshipEnabled),
+    [courses]
+  )
+  const bootcampId = mentorshipEnabledBootcamp?.id ?? null
+  const hasResolvedBootcamp =
+    typeof bootcampId === 'number' && Number.isFinite(bootcampId) && bootcampId > 0
 
   const {
     mentorProfile,
@@ -141,14 +139,20 @@ function MentorProfileCreateUI({
       return
     }
 
+    const resolvedBootcampId = bootcampId as number
+
     try {
-      await updateMentorProfile({
+      // Use POST only when there is no existing mentor profile (first-time)
+      // Use PATCH for any subsequent updates to an existing profile
+      const isFirstTime = !mentorProfile?.mentorProfileId
+
+      const result = await updateMentorProfile({
         title: title.trim(),
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
         expertise,
-        bootcampId,
-      })
+        bootcampId: resolvedBootcampId,
+      }, isFirstTime)
       await refetchMentorProfile()
       await onValidSubmit?.({
         title: title.trim(),
@@ -156,9 +160,12 @@ function MentorProfileCreateUI({
         pastExperiences: pastExperiences.trim(),
         expertise,
       })
+      // Show API-provided status/message 
+      const toastTitle = result.data?.status || 'Success'
+      const toastDescription = result.message || result.data?.message
       toast.success({
-        title: 'Profile completed',
-        description: 'Your profile has been saved successfully.',
+        title: toastTitle,
+        ...(toastDescription ? { description: toastDescription } : {}),
       })
       router.push(coursesHref)
     } catch (err) {
@@ -174,7 +181,7 @@ function MentorProfileCreateUI({
   }
 
   // Loading state
-  if (loading) {
+  if (loading || bootcampsLoading) {
     return (
       <MaxWidthWrapper>
         <div className="py-12 flex items-center justify-center">

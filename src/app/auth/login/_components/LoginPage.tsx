@@ -128,6 +128,10 @@ function LoginPage() {
             )
             return isMentorProfileComplete(res.data)
         } catch (error) {
+            const status = (error as { response?: { status?: number } })?.response?.status
+            if (status === 404) {
+                return false
+            }
             console.error('Failed to fetch mentor profile for redirect:', error)
             return null
         }
@@ -243,9 +247,7 @@ const handleGoogleSuccess = async (
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
                 const shouldForceProfilePage =
-                    shouldCheckMentorProfile &&
-                    ((mentorProfileCompleted === false) ||
-                        (mentorProfileCompleted === null && hasFilled === false))
+                    shouldCheckMentorProfile && mentorProfileCompleted !== true
 
                 if (shouldForceProfilePage && organizationId) {
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)

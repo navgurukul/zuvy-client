@@ -43,6 +43,7 @@ export interface Course {
     coverImage: string 
     id: number
     students_in_bootcamp: number
+  mentorshipEnabled?: boolean
 }
 export interface CourseData {
     name: string

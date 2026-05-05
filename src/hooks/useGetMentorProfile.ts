@@ -100,7 +100,12 @@ export function useGetMentorProfile() {
       console.error('Error fetching mentor profile:', error)
       setMentorProfile(null)
       setCompletenessGate(validateProfileCompleteness(null))
-      setError(getErrorMessage(error))
+      const status = (error as { response?: { status?: number } })?.response?.status
+      if (status && status !== 404) {
+        setError(getErrorMessage(error))
+      } else {
+        setError(null)
+      }
     } finally {
       setLoading(false)
     }
