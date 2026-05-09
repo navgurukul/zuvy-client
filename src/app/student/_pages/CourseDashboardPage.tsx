@@ -20,6 +20,7 @@ import { MentorSessionEvent, UpcomingEvent } from '@/hooks/hookType';
 import { useCompletedClasses } from '@/hooks/useCompletedClasses';
 import { CompletedClass, Module } from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/hooks/useMentors';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -50,19 +51,32 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
+  const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0);
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
 
+  const mentorshipSessionCount = upcomingEventsData?.mentorSessions?.length ?? 0;
+  const availableMentorCount = mentorshipMentors.filter(
+    (mentor) => mentor.availabilityStatus?.toLowerCase() === 'available'
+  ).length;
+
   const QUICK_ACTIONS = [
-    { label: "Find a Mentor", sub: "Browse available mentors", href: `/student/mentors?courseId=${courseId}`, icon: Search, color: "text-primary", bg: "bg-primary/10" },
     {
-      label: "My One to One Sessions",
-      sub: "View and manage your sessions",
+      label: "Find a Mentor",
+      sub: availableMentorCount > 0 ? `${availableMentorCount} mentor available now` : "No mentors available now",
+      href: `/student/mentors?courseId=${courseId}`,
+      icon: Search,
+      color: "text-primary",
+      bg: "bg-primary/10",
+    },
+    {
+      label: "My Sessions",
+      sub: `${mentorshipSessionCount} upcoming`,
       href: `/student/sessions?courseId=${courseId}`,
       icon: CalendarDays,
       color: "text-accent",
-      bg: "bg-accent/10"
+      bg: "bg-accent/10",
     },
   ];
   
@@ -1191,11 +1205,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>
             </div>
 
-            {/* Right Column - Browse all */}
+            {/* Right Column - Mentorship */}
             <div className="space-y-8">
               {latestCourseData?.mentorshipEnabled && (
-                <div className="rounded-lg border border-border bg-card p-5 space-y-1 text-left">
-                  <p className="text-sm font-bold text-text-primary mb-3">Browse all</p>
+                <div className="rounded-lg border border-border bg-card p-5 space-y-4 text-left">
+                  <div>
+                    <p className="text-sm font-bold text-text-primary">Mentorship</p>
+                    <p className="text-xs text-text-muted mt-1">Find mentors or manage your sessions in one place.</p>
+                  </div>
                   {QUICK_ACTIONS.map((a) => (
                     <Link
                       key={a.href}

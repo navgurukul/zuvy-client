@@ -9,6 +9,7 @@ export interface Mentor {
     email: string
     role: string | null
     bio: string | null
+    pastExperiences?: string | null
     expertise: string[] | null
     title: string | null
     availabilityStatus:string | null

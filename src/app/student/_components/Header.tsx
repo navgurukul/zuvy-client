@@ -57,17 +57,10 @@ const Header = () => {
         }
     }
 
-    const handleFindMentorClick = () => {
+    const handleMentorshipClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
             router.push(`/student/mentors?courseId=${courseId}`)
-        }
-    }
-
-    const handleMySessionsClick = () => {
-        const courseId = getCurrentCourseId()
-        if (courseId) {
-            router.push(`/student/sessions?courseId=${courseId}`)
         }
     }
 
@@ -147,24 +140,14 @@ const Header = () => {
                                 Course Syllabus
                             </Button>
                             {shouldShowMentorshipLinks && (
-                                <>
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        onClick={handleFindMentorClick}
-                                        className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
-                                    >
-                                        Find a Mentor
-                                    </Button>
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        onClick={handleMySessionsClick}
-                                        className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
-                                    >
-                                        1:1 Sessions
-                                    </Button>
-                                </>
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    onClick={handleMentorshipClick}
+                                    className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
+                                >
+                                    Mentorship
+                                </Button>
                             )}
                         </div>
                     )}
@@ -298,24 +281,14 @@ const Header = () => {
                             Course Syllabus
                         </Button>
                         {shouldShowMentorshipLinks && (
-                            <>
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    onClick={handleFindMentorClick}
-                                    className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
-                                >
-                                    Find a Mentor
-                                </Button>
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    onClick={handleMySessionsClick}
-                                    className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
-                                >
-                                    1:1 Sessions
-                                </Button>
-                            </>
+                            <Button
+                                variant="link"
+                                size="sm"
+                                onClick={handleMentorshipClick}
+                                className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
+                            >
+                                Mentorship
+                            </Button>
                         )}
                     </div>
                 )}

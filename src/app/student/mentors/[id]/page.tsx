@@ -19,7 +19,7 @@ const getMentorId = (idParam: string | string[] | undefined) => {
 
 const getInitials = (label: string) =>
   label
-    .split(" ")
+    .split(" ") 
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
