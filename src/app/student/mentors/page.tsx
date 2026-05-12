@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback } from "react";
-import Link from "next/link";
-import { Star } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Mentor, useMentors } from "@/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
-import { ArrowLeft } from "lucide-react"
 import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
-import { AlertCircle, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Toggle } from "@/components/ui/toggle";
+import MentorshipTabs from "../_components/MentorshipTabs";
+import MentorBookingDrawer from "@/app/student/_components/MentorBookingDrawer";
+
 
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
@@ -49,6 +51,9 @@ export default function MentorsPage() {
     const offset = (page - 1) * limit
     const searchQuery = searchParams.get("search")?.trim() || ""
     const courseId = searchParams.get("courseId") || ""
+    const [showAllMentors, setShowAllMentors] = useState(false)
+    const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null)
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
     const { mentors, total, loading, error, refetchMentors } = useMentors(
         searchQuery,
@@ -60,6 +65,13 @@ export default function MentorsPage() {
     const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 
     const totalPages = Math.max(1, Math.ceil(total / limit))
+    const visibleMentors = useMemo(() => {
+        const availableMentors = mentors.filter((mentor) => {
+            return mentor.availabilityStatus?.trim().toLowerCase() === "available"
+        })
+
+        return showAllMentors ? mentors : availableMentors
+    }, [mentors, showAllMentors])
 
     const fetchMentorsData = useCallback((nextOffset: number) => {
         refetchMentors({
@@ -94,17 +106,20 @@ export default function MentorsPage() {
         return [];
     }, []);
 
+    const handleMentorClick = (mentor: Mentor) => {
+        setSelectedMentor(mentor)
+        setIsDrawerOpen(true)
+    }
+
     return (
         // <div className="w-full max-w-full min-w-0 overflow-x-hidden px-6 py-8 font-manrope">
-        <div className="w-full max-w-full min-w-0 px-6 py-8 font-manrope">
+        <div className="mx-auto w-full max-w-[90rem] min-w-0 px-6 py-8 font-manrope space-y-6">
+            <div>
+                <h1 className="text-2xl font-semibold text-left text-gray-900">Mentorship</h1>
+                {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or review your booked sessions.</p> */}
+            </div>
 
-            <Link
-                 href={courseId ? `/student/course/${courseId}` : "/student"}
-                className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
-            >
-                <ArrowLeft size={16} />
-                Back to {courseId ? "course" : "dashboard"}
-            </Link>
+            <MentorshipTabs courseId={courseId} />
 
             {/* Booking Metrics Banner */}
             {!metricsLoading && metrics && (
@@ -138,13 +153,10 @@ export default function MentorsPage() {
             )}
 
             {/* Filter buttons */}
-            <div className="mb-6 flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="mb-6 flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
 
-                <div className="flex min-w-0 flex-col gap-3">
-                    <div className="flex gap-2 flex-wrap">
-                           <h1 className="text-xl font-semibold text-left">All Mentors</h1>
-                    </div>
-
+                <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+                    
                     <SearchBox
                         placeholder="Search mentors..."
                         fetchSuggestionsApi={fetchSuggestionsApi}
@@ -158,32 +170,84 @@ export default function MentorsPage() {
                         )}
                         inputWidth="w-full sm:w-[400px]"
                     />
+                    <Toggle
+                        pressed={showAllMentors}
+                        onPressedChange={setShowAllMentors}
+                        className="
+                            h-10
+                            rounded-xl
+                            border
+                            px-4
+                            shadow-none
+                            flex
+                            items-center
+                            gap-2
+                            bg-white
+                            mt-2
+                            border-gray-300
+                            text-gray-700
+                            hover:bg-white
+                            hover:text-gray-700
+                            hover:border-gray-300
+                            data-[state=on]:bg-[#eef7ee]
+                            data-[state=on]:text-[#2f6b3d]
+                            data-[state=on]:border-[#cfe3cf]
+                            data-[state=on]:hover:bg-[#eef7ee]
+                            data-[state=on]:hover:text-[#2f6b3d]
+                        "
+                        >
+                        <div
+                            className={`
+                            relative flex h-5 w-9 items-center rounded-full transition-all
+                            ${showAllMentors ? "bg-[#2f6b3d]" : "bg-gray-300"}
+                            `}
+                        >
+                            <div
+                            className={`
+                                h-4 w-4 rounded-full bg-white shadow-sm transition-all
+                                ${showAllMentors ? "translate-x-4" : "translate-x-0.5"}
+                            `}
+                            />
+                        </div>
+
+                        <span className="text-sm font-medium whitespace-nowrap">
+                            Show all mentors
+                        </span>
+                    </Toggle>
                 </div>
 
-                <p className="text-xs text-gray-400">
-                    {mentors.length} results
+                <p className="text-xs text-gray-500">
+                    {showAllMentors
+                        ? `${visibleMentors.length} mentors shown`
+                        : `${visibleMentors.length} available`}
                 </p>
 
             </div>
 
             {loading ? (
-                <p className="text-sm text-gray-500">Loading mentors...</p>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <Skeleton className="h-64 rounded-3xl" />
+                        <Skeleton className="h-64 rounded-3xl" />
+                        <Skeleton className="h-64 rounded-3xl" />
+                    </div>
+                    <div className="flex justify-center">
+                        <Skeleton className="h-10 w-56 rounded-lg" />
+                    </div>
+                </div>
             ) : error ? (
                 <p className="text-sm text-red-500">{error}</p>
-            ) : mentors.length === 0 ? (
+            ) : visibleMentors.length === 0 ? (
                 <p className="text-sm text-gray-500">No mentors available right now.</p>
             ) : (
-                <div className="grid w-full grid-cols-1 gap-5 bg-white md:grid-cols-2 lg:grid-cols-3">
-                    {mentors.map((mentor) => {
+                <div className="grid w-full grid-cols-1 gap-5  md:grid-cols-2 lg:grid-cols-3">
+                    {visibleMentors.map((mentor) => {
                         const expertise = Array.isArray(mentor.expertise)
                             ? mentor.expertise
                             : [];
                         const availabilityStatus = mentor.availabilityStatus?.trim() || "Unavailable";
-                        const normalizedAvailabilityStatus = availabilityStatus.toLowerCase();
-                        const availabilityStatusClassName =
-                            normalizedAvailabilityStatus === "available"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700";
+                        const isAvailable = availabilityStatus.toLowerCase() === "available";
+                        const showUnavailableState = showAllMentors && !isAvailable;
 
                         const initials = mentor.name
                             .split(" ")
@@ -191,12 +255,8 @@ export default function MentorsPage() {
                             .join("")
                             .toUpperCase();
 
-                        return (
-                            <Link
-                                key={mentor.userId}
-                                href={courseId ? `/student/mentors/${mentor.userId}?courseId=${courseId}` : `/student/mentors/${mentor.userId}`}
-                                className="group relative block overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                            >
+                        const mentorCardBody = (
+                            <>
                                 {/* Top */}
                                 <div className="flex min-w-0 justify-between gap-2">
                                     <div className="flex min-w-0 gap-3">
@@ -212,13 +272,13 @@ export default function MentorsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <span
-                                        className={`inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium ${availabilityStatusClassName}`}
-                                    >
-                                        {mentor.availabilityStatus}
-                                    </span>
-                                    
+                                    {showAllMentors && !isAvailable && (
+                                        <span className="inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium bg-gray-100 text-gray-500">
+                                            Unavailable
+                                        </span>
+                                    )}
                                 </div>
+
                                 {/* Skills */}
                                 <div className="mt-4 min-h-[30px]">
 
@@ -251,13 +311,30 @@ export default function MentorsPage() {
                                     </p>
 
                                 </div>
-                                {/* View Profile Button */}
-                                <div className="absolute bottom-0 left-0 w-full opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <div className="block text-center bg-green-800 text-white py-2 rounded-b-3xl text-xs font-semibold">
-                                        View Profile →
-                                    </div>
+
+                            </>
+                        );
+
+                        if (showUnavailableState) {
+                            return (
+                                <div
+                                    key={mentor.userId}
+                                    className="relative block overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm opacity-50 cursor-not-allowed pointer-events-none"
+                                >
+                                    {mentorCardBody}
                                 </div>
-                            </Link>
+                            );
+                        }
+
+                        return (
+                            <button
+                                key={mentor.userId}
+                                type="button"
+                                onClick={() => handleMentorClick(mentor)}
+                                className="group relative block w-full overflow-hidden rounded-3xl border border-gray-200 p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                            >
+                                {mentorCardBody}
+                            </button>
                         );
                     })}
 
@@ -268,6 +345,13 @@ export default function MentorsPage() {
                 lastPage={totalPages}
                 pages={totalPages}
                 fetchStudentData={fetchMentorsData}
+            />
+
+            <MentorBookingDrawer
+                mentor={selectedMentor}
+                open={isDrawerOpen}
+                onOpenChange={setIsDrawerOpen}
+                courseId={courseId}
             />
         </div>
     );
