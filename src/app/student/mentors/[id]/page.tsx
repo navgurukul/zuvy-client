@@ -19,7 +19,7 @@ const getMentorId = (idParam: string | string[] | undefined) => {
 
 const getInitials = (label: string) =>
   label
-    .split(" ")
+    .split(" ") 
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
@@ -213,44 +213,50 @@ export default function MentorProfilePage() {
             )}
           </div>
 
+          {/* Past Experiences */}
+          <div className="border rounded-2xl p-6 bg-white text-left">
+            <p className="text-sm font-semibold text-gray-500 mb-2">
+              PAST EXPERIENCES
+            </p>
+
+            {mentorProfile?.pastExperiences ? (
+              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                {mentorProfile.pastExperiences}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400 italic">
+                This mentor has not added past experiences yet.
+              </p>
+            )}
+          </div>
+
         </div>
 
         {/* Right */}
-        <div className="border rounded-2xl p-6 bg-white space-y-4">
-
-          <p className="text-sm font-semibold text-gray-400 text-left">
-            BOOK A SESSION
-          </p>
-
-          <p className="text-sm text-green-700 flex items-center gap-2">
-            ● {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
-          </p>
-
-           {/* <div className="border rounded-xl bg-white p-3 flex items-start gap-2">
-            <Info size={16} className="text-gray-500 mt-0.5" />
-            <p className="text-sm text-gray-600 text-left">
-              Please connect your google Calendar before booking the session
+        <div className="border rounded-2xl p-6 bg-white space-y-6 h-fit self-start sticky top-6">
+          <div className="text-left">
+            <p className="text-sm font-semibold text-gray-500 mb-3">
+              BOOK A SESSION
             </p>
-          </div>
 
-          <Button
-            variant="outline"
-            onClick={handleGoogleConnect}
-            className="w-full py-3 rounded-xl flex items-center justify-center"
-            disabled={isGoogleConnecting || !token}
-          >
-            {isGoogleConnecting ? "Connecting..." : "Connect Google Calendar"}
-          </Button>  */}
+            <div className="mb-4 flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${acceptsNewMentees ? "bg-green-500" : "bg-gray-400"}`}></span>
+              <p className={`text-sm ${acceptsNewMentees ? "text-green-700 font-medium" : "text-gray-600"}`}>
+                {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
+              </p>
+            </div>
+          </div>
 
           <Link
             href={mentorId ? `/student/mentors/${mentorId}/book${courseId ? `?courseId=${courseId}` : ""}` : (courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors")}
-            className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 ${
+            className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all ${
               acceptsNewMentees
-                ? "bg-green-800 text-white"
-                : "bg-gray-300 text-gray-600 pointer-events-none"
+                ? "bg-green-800 text-white hover:bg-green-900"
+                : "bg-gray-200 text-gray-600 cursor-not-allowed"
             }`}
+            onClick={(e) => !acceptsNewMentees && e.preventDefault()}
           >
-            <CalendarDays size={16} />
+            <CalendarDays size={18} />
             Book a Session
           </Link>
         </div>

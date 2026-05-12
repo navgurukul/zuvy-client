@@ -21,7 +21,6 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
         try {
             const response = await api.post<SwitchOrgResponse>('/org/switch-org', payload);
             const data = response.data;
-            console.log('Switch Org Response:', data);
 
             if (data.access_token) {
                 // Update tokens in localStorage
@@ -41,6 +40,7 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
                 return {
                     success: true,
                     message: data.message || 'Switched organization successfully.',
+                    user: data.user,
                 };
             }
 

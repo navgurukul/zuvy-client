@@ -73,6 +73,33 @@ const formatTimeRange = (start?: string | null, end?: string | null) => {
   return `${startTime} - ${endTime}`
 }
 
+const parseDateValue = (value?: string | null) => {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+
+  return date
+}
+
+const isJoinWindowOpen = (
+  slotStart?: string | null,
+  slotEnd?: string | null,
+  nowTimestamp: number = Date.now()
+) => {
+  const startDate = parseDateValue(slotStart)
+  if (!startDate) return false
+
+  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
+  const endDate = parseDateValue(slotEnd)
+
+  if (!endDate) {
+    return nowTimestamp >= tenMinutesBeforeStart
+  }
+
+  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
+}
+
 const getRescheduleStatus = (session: MyMentorSession) => {
   const maybeSession = session as MyMentorSession & {
     rescheduleStatus?: string | null
@@ -103,6 +130,7 @@ export default function SessionsPage() {
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
   const [joinedAt, setJoinedAt] = useState("")
   const [leftAt, setLeftAt] = useState("")
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
 
   const [feedbackDrafts, setFeedbackDrafts] = useState<
     Record<number, { rating: string; notes: string; areasOfImprovement: string }>
@@ -124,6 +152,14 @@ export default function SessionsPage() {
   } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", activeTab as SessionFilter)
 
   const sessions = apiSessions
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowTimestamp(Date.now())
+    }, 30 * 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     if (sessions.length === 0) {
@@ -170,6 +206,11 @@ export default function SessionsPage() {
   )
 
   const isRescheduleTab = activeTab === "reschedule"
+
+  const canJoinSelectedSession = Boolean(
+    selectedSession?.zoomStartUrl?.trim() &&
+    isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
+  )
 
   const selectedSlotId = selectedSession?.slotAvailabilityId
 
@@ -607,17 +648,34 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
+                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.zoomStartUrl && !canJoinSelectedSession && (
+                  <p className="text-xs text-muted-foreground">
+                    Join opens 10 min before start
+                  </p>
+                )}
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                   selectedSession.zoomStartUrl ? (
-                    <Button type="button" className="bg-green-700 hover:bg-green-800" asChild>
-                      <a
-                        href={selectedSession.zoomStartUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Video size={16} className="mr-2" />
-                        Join the Session
-                      </a>
+                    <Button
+                      type="button"
+                      className="bg-green-700 hover:bg-green-800"
+                      asChild={canJoinSelectedSession}
+                      disabled={!canJoinSelectedSession}
+                    >
+                      {canJoinSelectedSession ? (
+                        <a
+                          href={selectedSession.zoomStartUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Video size={16} className="mr-2" />
+                          Join the Session
+                        </a>
+                      ) : (
+                        <>
+                          <Video size={16} className="mr-2" />
+                          Join the Session
+                        </>
+                      )}
                     </Button>
                   ) : (
                     <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
@@ -637,7 +695,7 @@ export default function SessionsPage() {
                   </a>
                 )}
               </div>
-
+              
               {!isRescheduleTab && (
               <div className="rounded-xl border p-4 text-left space-y-2">
                 <p className="text-base font-semibold">Slot & Bookings</p>
