@@ -963,6 +963,16 @@ export interface SwitchOrgResponse {
 export interface SwitchOrgResult {
   success: boolean;
   message: string;
+  user?: {
+    rolesList: any[];
+    id: string;
+    email: string;
+    name: string;
+    profilePicture?: string;
+    profile_picture?: string;
+    orgId: number;
+    orgName: string;
+  };
 }
 
 export interface UseSwitchOrgReturn {
