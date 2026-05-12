@@ -895,9 +895,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       <div className="w-full">
         {/* Course Information Banner - Full Width */}
         <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
-          <div className="max-w-7xl mx-auto p-6 md:p-8">
+          <div className="max-w-[89rem] mx-auto p-6 md:p-8">
             {/* Desktop Layout */}
-            <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-6 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
 
               <div className="flex-shrink-0">
                 <Image
@@ -940,7 +940,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             </div>
 
             {/* Mobile Layout */}
-            <div className="md:hidden mb-6">
+            <div className="md:hidden mb-3">
               <Image
                 src={validCourseCoverImage}
                 alt={courseName}
@@ -969,80 +969,65 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>}
             </div>
 
-            {/* Progress Bar - Updated with primary-light background */}
-            <div className="mb-6  rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className=" mb-6">
-                {/* <div className="relative bg-primary-light rounded-full h-2 w-full"> */}
-                {/* <div
-                    className="bg-primary h-2 rounded-full transition-all duration-300 relative"
-                    style={{ width: `${currentProgress}%` }}
-                  >
-                    <div
-                      className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
-                      style={{
-                        right: currentProgress === 100 ? '0' : currentProgress === 0 ? 'auto' : '-12px',
-                        left: currentProgress === 0 ? '0' : 'auto'
-                      }}
-                    >
-                      {currentProgress}%
-                    </div>
-                  </div> */}
-                <div className="flex items-center gap-3 w-full">
-                  <div className="relative bg-primary-light rounded-full h-2 flex-1">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${currentProgress}%` }}
-                    />
-                  </div>
-
-                  <span className="text-sm font-semibold text-foreground/80 w-10 text-right">
-                    {currentProgress}%
-                  </span>
-                </div>
-                {/* </div> */}
-              </div>
-              <div className="flex gap-10 text-sm">
-                <div className="flex items-center gap-2 text-foreground/80">
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                    <BookOpen size={18} className="text-foreground/60" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground text-left">Batch</div>
-                    <div className="text-sm font-semibold">{batchName}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-foreground/80">
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                    <Users size={18} className="text-foreground/60" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground text-left">Students</div>
-                    <div className="text-sm font-semibold">{totalStudents} enrolled</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-foreground/80">
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                    <Clock size={18} className="text-foreground/60" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground text-left">Duration</div>
-                    <div className="text-sm font-semibold">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Course Modules */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Course Modules Section */}
-              <div>
-                <h2 className="text-xl font-heading font-semibold mb-6 text-left">Course Content</h2>
+        <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-4 pb-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)] lg:items-start">
+            {/* Left Column - Stats and Course Modules */}
+            <div className="space-y-6 min-w-0">
+              <div className="w-full rounded-lg bg-white p-4 md:p-5 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="relative bg-primary-light rounded-full h-1.5 flex-1">
+                      <div
+                        className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                        style={{ width: `${currentProgress}%` }}
+                      />
+                    </div>
 
-                <div className="space-y-6">
+                    <span className="w-10 text-right text-xs font-semibold text-foreground/70">
+                      {currentProgress}%
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                    <div className="flex items-center gap-2.5 text-foreground/80">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                        <BookOpen size={16} className="text-foreground/60" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] leading-4 text-muted-foreground text-left">Batch</div>
+                        <div className="text-sm font-semibold leading-5">{batchName}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-foreground/80">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                        <Users size={16} className="text-foreground/60" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] leading-4 text-muted-foreground text-left">Students</div>
+                        <div className="text-sm font-semibold leading-5">{totalStudents} enrolled</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-foreground/80">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                        <Clock size={16} className="text-foreground/60" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] leading-4 text-muted-foreground text-left">Duration</div>
+                        <div className="text-sm font-semibold leading-5">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Course Modules Section */}
+              <div className="w-full">
+                <h2 className="text-xl font-heading font-semibold mb-4 text-left">Course Content</h2>
+
+                <div className="space-y-4">
                   {modulesToShow.length > 0 ? modulesToShow.map((module: Module) => {
                     const moduleProgress = getModuleProgress(module);
                     const isCurrentModule = latestCourseData?.moduleId === module.id;
@@ -1051,15 +1036,15 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     const upcomingChapterId = latestCourseData?.newChapter?.id || 1;
 
                     return (
-                      <Card key={module.id} className={`rounded-lg border p-0 transition-all duration-300 my-4   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
-                        <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
-                          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-                            <div className="flex-1 text-left">
+                      <Card key={module.id} className={`w-full rounded-lg border p-0 transition-all duration-300 my-3 ${isCurrentModule ? 'border-2 border-primary' : ''} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'} min-h-[166px]`}>
+                        <CardContent className={`flex h-full flex-col p-4 md:p-4 ${isLocked ? ' cursor-not-allowed' : ''}`}>
+                          <div className="flex flex-1 flex-col lg:flex-row lg:justify-between lg:items-start gap-3 min-w-0">
+                            <div className="flex-1 min-w-0 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 bg-primary-light dark:text-white text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary dark:text-white border-primary/20 hover:bg-primary-light/80">Current Module</Badge>
                               )}
                               {isCompleted && (
-                                <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-success-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success-light/80">Completed</Badge>
                               )}
                               {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
@@ -1067,10 +1052,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     Locked
                                   </Badge>
                                 )} */}
-                              <h3 className="text-base font-heading font-semibold mb-2 text-left">
+                              <h3 className="text-sm md:text-[1rem] font-heading font-semibold mb-2 leading-tight text-left">
                                 {module.typeId === 2 ? 'Project' : 'Module'}  {module.order}: {module.name}
                               </h3>
-                              <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="text-muted-foreground mb-3 text-sm text-left " />
+                              <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="mb-2 text-sm leading-6 text-muted-foreground text-left" />
                               {/* <div className="flex flex-wrap gap-2 mb-3">
                                 <Badge variant="outline" className="text-xs">
                                   {formatTimeAlloted(module.timeAlloted)}
@@ -1089,10 +1074,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div>
+                                    <div className="lg:self-start lg:pt-1">
 
                                       <Button
-                                        className={`px-6 font-semibold bg- hover:text-white  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline  ' : ''} `}`}
+                                        className={`h-9 px-4 text-sm font-semibold bg- hover:text-white  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline  ' : ''} `}`}
                                         disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
                                         onClick={(e) => {
                                           if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
@@ -1117,14 +1102,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           </div>
 
                           {/* Module Progress - Updated with primary-light background */}
-                          {module.typeId !== 2 && <div className="mb-4 lg:mb-0">
-                            <div className="relative bg-primary-light rounded-full h-2 w-full">
+                          {module.typeId !== 2 && <div className="mt-auto pt-3 mb-0">
+                            <div className="relative bg-primary-light rounded-full h-1.5 w-full">
                               <div
-                                className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
+                                className={`h-1.5 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
                                 style={{ width: `${moduleProgress}%` }}
                               >
                                 <div
-                                  className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
+                                  className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-1.5 py-0.5 rounded shadow-sm border text-[10px] font-medium whitespace-nowrap"
                                   style={{
                                     right: moduleProgress === 100 ? '0' : moduleProgress === 0 ? 'auto' : '-12px',
                                     left: moduleProgress === 0 ? '0' : 'auto'
@@ -1143,10 +1128,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div>
+                                  <div className="mt-2">
 
                                     <Button
-                                      className={`px-6 mb-2 font-semibold bg- ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline w-full' : ''} `}`}
+                                      className={`h-9 px-4 mb-0 font-semibold bg- ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline w-full' : ''} `}`}
                                       disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
                                       onClick={(e) => {
                                         if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
@@ -1206,35 +1191,74 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             </div>
 
             {/* Right Column - Mentorship */}
-            <div className="space-y-8">
+            <div className="space-y-4 min-w-0 w-full lg:max-w-[300px] lg:justify-self-end">
               {latestCourseData?.mentorshipEnabled && (
-                <div className="rounded-lg border border-border bg-card p-5 space-y-4 text-left">
-                  <div>
-                    <p className="text-sm font-bold text-text-primary">Mentorship</p>
-                    <p className="text-xs text-text-muted mt-1">Find mentors or manage your sessions in one place.</p>
+                // <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
+                //   <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                //     <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">Mentorship</p>
+                //   </div>
+                //   <div>
+                //   </div>
+                //   {QUICK_ACTIONS.map((a) => (
+                //     <Link
+                //       key={a.href}
+                //       href={a.href}
+                //       className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted transition-colors group"
+                //     >
+                //       <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", a.bg)}>
+                //         <a.icon className={cn("h-3.5 w-3.5", a.color)} />
+                //       </div>
+                //       <div className="flex-1 min-w-0">
+                //         <p className="text-sm font-semibold leading-5 text-text-primary">{a.label}</p>
+                //         <p className="text-xs leading-4 text-text-muted">{a.sub}</p>
+                //       </div>
+                //       <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-colors group-hover:text-text-secondary" />
+                //     </Link>
+                //   ))}
+                // </div>
+                <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
+                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
+                        Mentorship
+                      </p>
+                    </div>
+
+                    {QUICK_ACTIONS.map((a) => (
+                      <Link
+                        key={a.href}
+                        href={a.href}
+                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                      >
+                        {/* Icon */}
+                        <div
+                          className={cn(
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] transition-colors duration-200 group-hover:bg-[#DDF3E2]"
+                          )}
+                        >
+                          <a.icon className="h-4 w-4 text-[#2F6F3E]" />
+                        </div>
+
+                        {/* Text */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold leading-5 text-[#1F2937]">
+                            {a.label}
+                          </p>
+
+                          <p className="text-xs leading-4 text-[#6B7280]">
+                            {a.sub}
+                          </p>
+                        </div>
+
+                        {/* Arrow */}
+                        <ChevronRight className="h-4 w-4 shrink-0 text-[#9CA3AF] transition-all duration-200 group-hover:text-[#2F6F3E]" />
+                      </Link>
+                    ))}
                   </div>
-                  {QUICK_ACTIONS.map((a) => (
-                    <Link
-                      key={a.href}
-                      href={a.href}
-                      className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted transition-colors group"
-                    >
-                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", a.bg)}>
-                        <a.icon className={cn("h-4 w-4", a.color)} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-text-primary">{a.label}</p>
-                        <p className="text-xs text-text-muted">{a.sub}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
-                    </Link>
-                  ))}
-                </div>
               )}
 
               {/* What's Next Section */}
-              <Card className="shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <CardHeader className="pb-4">
+              <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
                   {/* <p className="text-sm text-muted-foreground">
                     {formatDateRange()}
@@ -1359,7 +1383,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       </div>
 
                       {/* Content */}
-                      <div className="text-left w-6/7 space-y-3 ">
+                      <div className="text-left w-full max-w-[220px] space-y-2.5 ">
                         <h3 className="text-lg font-semibold text-muted-foreground">
                           No Upcoming Events
                         </h3>
@@ -1381,8 +1405,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </Card>
 
               {/* Attendance */}
-              <Card className=" text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <CardHeader className="pb-4">
+              <Card className="w-full text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <CardHeader className="pb-3">
                   <CardTitle className="text-xl">Attendance</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">

@@ -183,6 +183,7 @@ export default function MentorsPage() {
                             items-center
                             gap-2
                             bg-white
+                            mt-2
                             border-gray-300
                             text-gray-700
                             hover:bg-white

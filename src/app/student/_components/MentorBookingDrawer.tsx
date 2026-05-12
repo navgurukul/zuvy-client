@@ -10,7 +10,7 @@ import { useBookMentorSlot } from "@/hooks/useBookMentorSlot"
 import { useMentorProfile } from "@/hooks/useMentorProfile"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
 
 type MentorBookingDrawerProps = {
   mentor: Mentor | null
@@ -110,7 +110,9 @@ export default function MentorBookingDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full !max-w-[550px] overflow-y-auto p-0">
+      <SheetContent side="right" 
+      className="w-full !max-w-[500px] overflow-y-auto p-0"
+      >
         {!mentor ? null : (
           <div className="relative flex h-full flex-col">
             {/* Header with mentor info - Hidden when booking success */}
