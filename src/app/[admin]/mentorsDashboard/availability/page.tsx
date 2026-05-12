@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Calendar, Clock, AlertTriangle, Lock, Trash2, Info } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,14 +36,6 @@ const getLocalDateString = () => {
 
 const getDefaultSlotDate = () => getLocalDateString()
 
-const startTimeOptions = Array.from({ length: 32 }, (_, index) => {
-  const totalMinutes = 6 * 60 + index * 30
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-})
-
 const formatLocalDate = (dateTime: string) =>
   new Date(dateTime).toLocaleDateString("en-US", {
     weekday: "long",
@@ -71,17 +63,6 @@ const formatDuration = (durationMinutes: number) => {
   }
 
   return `${durationMinutes} min`
-}
-
-const getTimeLabel = (time: string) => {
-  const [hours, minutes] = time.split(":").map(Number)
-  const date = new Date()
-  date.setHours(hours, minutes, 0, 0)
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
 }
 
 const getStatusLabel = (status: string) => {
@@ -128,6 +109,7 @@ export default function AvailabilityPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
   const [isGoogleConnecting, setIsGoogleConnecting] = useState(false)
+  const startTimeInputRef = useRef<HTMLInputElement | null>(null)
 
   const token =
     typeof window !== "undefined"
@@ -432,18 +414,20 @@ export default function AvailabilityPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-left">
                 <label className="text-sm font-medium">Start Time *</label>
-                <Select value={startTime} onValueChange={setStartTime}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {startTimeOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {getTimeLabel(option)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div
+                  className="mt-1"
+                  onClick={() => {
+                    startTimeInputRef.current?.focus()
+                    startTimeInputRef.current?.showPicker?.()
+                  }}
+                >
+                  <Input
+                    ref={startTimeInputRef}
+                    type="time"
+                    value={startTime}
+                    onChange={(event) => setStartTime(event.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="text-left">

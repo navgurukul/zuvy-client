@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Loader2, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { useGetMentorProfile } from '@/hooks/useGetMentorProfile'
 import { useUpdateMentorProfile } from '@/hooks/useUpdateMentorProfile'
 import { useBootcamps } from '@/hooks/useBootcamps'
-import { getCourseData } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
 
 type ProfileData = {
@@ -50,20 +49,19 @@ function MentorProfileCreateUI({
   const pathname = usePathname()
   const params = useParams()
   const { organizationId } = params
-  const { courseData } = getCourseData()
   const { courses, loading: bootcampsLoading } = useBootcamps({
-    limit: 1,
+    limit: 1000,
     searchTerm: '',
     offset: 0,
     auto: true,
   })
-  const primaryCourseId = Number(courseData?.id)
-  const fallbackCourseId = Number(courses?.[0]?.id)
-  const bootcampId =
-    Number.isFinite(primaryCourseId) && primaryCourseId > 0
-      ? primaryCourseId
-      : fallbackCourseId
-  const hasResolvedBootcamp = Number.isFinite(bootcampId) && bootcampId > 0
+  const mentorshipEnabledBootcamp = useMemo(
+    () => courses.find((course) => course.mentorshipEnabled),
+    [courses]
+  )
+  const bootcampId = mentorshipEnabledBootcamp?.id ?? null
+  const hasResolvedBootcamp =
+    typeof bootcampId === 'number' && Number.isFinite(bootcampId) && bootcampId > 0
 
   const {
     mentorProfile,
@@ -82,6 +80,7 @@ function MentorProfileCreateUI({
   const [pastExperiences, setPastExperiences] = useState(initial.pastExperiences)
   const [expertise, setExpertise] = useState<string[]>(initial.expertise)
   const [tagInput, setTagInput] = useState('')
+  const [isDirty, setIsDirty] = useState(false)
 
   const tagRef = useRef<HTMLInputElement>(null)
   const orgId = Array.isArray(organizationId) ? organizationId[0] : organizationId
@@ -97,6 +96,7 @@ function MentorProfileCreateUI({
       setBio(mentorProfile.bio || '')
       setPastExperiences(mentorProfile.pastExperiences || '')
       setExpertise(mentorProfile.expertise || [])
+      setIsDirty(false)
     }
   }, [mentorProfile])
 
@@ -141,14 +141,20 @@ function MentorProfileCreateUI({
       return
     }
 
+    const resolvedBootcampId = bootcampId as number
+
     try {
-      await updateMentorProfile({
+      // Use POST only when there is no existing mentor profile (first-time)
+      // Use PATCH for any subsequent updates to an existing profile
+      const isFirstTime = !mentorProfile?.mentorProfileId
+
+      const result = await updateMentorProfile({
         title: title.trim(),
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
         expertise,
-        bootcampId,
-      })
+        bootcampId: resolvedBootcampId,
+      }, isFirstTime)
       await refetchMentorProfile()
       await onValidSubmit?.({
         title: title.trim(),
@@ -156,9 +162,12 @@ function MentorProfileCreateUI({
         pastExperiences: pastExperiences.trim(),
         expertise,
       })
+      // Show success toast: title varies by isFirstTime, API message as description
+      const apiMessage = result.message || result.data?.message
+      const toastTitle = isFirstTime ? 'Profile Created' : 'Profile Updated'
       toast.success({
-        title: 'Profile completed',
-        description: 'Your profile has been saved successfully.',
+        title: toastTitle,
+        ...(apiMessage ? { description: apiMessage } : {}),
       })
       router.push(coursesHref)
     } catch (err) {
@@ -174,7 +183,7 @@ function MentorProfileCreateUI({
   }
 
   // Loading state
-  if (loading) {
+  if (loading || bootcampsLoading) {
     return (
       <MaxWidthWrapper>
         <div className="py-12 flex items-center justify-center">
@@ -300,7 +309,10 @@ function MentorProfileCreateUI({
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value)
+                  setIsDirty(true)
+                }}
                 placeholder="e.g. Senior Backend Mentor"
                 className="w-full rounded-md border border-input bg-background px-4 py-3 text-body1 text-text-primary placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
               />
@@ -316,7 +328,10 @@ function MentorProfileCreateUI({
               </p>
               <textarea
                 value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                onChange={(e) => {
+                  setBio(e.target.value)
+                  setIsDirty(true)
+                }}
                 placeholder="Write 2–3 sentences about your background, expertise, and how you help learners grow..."
                 rows={5}
                 className="w-full resize-none rounded-md border border-input bg-background px-4 py-3 text-body1 text-text-primary placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
@@ -336,7 +351,10 @@ function MentorProfileCreateUI({
               </p>
               <textarea
                 value={pastExperiences}
-                onChange={(e) => setPastExperiences(e.target.value)}
+                onChange={(e) => {
+                  setPastExperiences(e.target.value)
+                  setIsDirty(true)
+                }}
                 placeholder="Describe your roles, responsibilities, and key accomplishments. Include companies, timeframes, and impact..."
                 rows={5}
                 className="w-full resize-none rounded-md border border-input bg-background px-4 py-3 text-body1 text-text-primary placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
@@ -368,6 +386,7 @@ function MentorProfileCreateUI({
                       onClick={(e) => {
                         e.stopPropagation()
                         removeTag(tag)
+                        setIsDirty(true)
                       }}
                       className="rounded-full hover:bg-primary/20 transition-colors"
                     >
@@ -379,7 +398,10 @@ function MentorProfileCreateUI({
                   ref={tagRef}
                   type="text"
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={(e) => {
+                    setTagInput(e.target.value)
+                    setIsDirty(true)
+                  }}
                   onKeyDown={handleTagKeyDown}
                   onBlur={() => {
                     if (tagInput.trim()) addTag(tagInput)
@@ -400,7 +422,10 @@ function MentorProfileCreateUI({
                       <button
                         key={skill}
                         type="button"
-                        onClick={() => (active ? removeTag(skill) : addTag(skill))}
+                        onClick={() => {
+                          active ? removeTag(skill) : addTag(skill)
+                          setIsDirty(true)
+                        }}
                         className={cn(
                           'rounded-md border px-3.5 py-2 text-caption font-medium transition-all',
                           active
@@ -422,7 +447,7 @@ function MentorProfileCreateUI({
               <Button
                 type="button"
                 onClick={handleSubmit}
-                disabled={updating || bootcampsLoading}
+                disabled={!isDirty || updating || bootcampsLoading}
                 className="flex-1 gap-2 bg-primary hover:bg-primary-dark text-primary-foreground h-11"
               >
                 {(updating || bootcampsLoading) && <Loader2 className="h-4 w-4 animate-spin" />}

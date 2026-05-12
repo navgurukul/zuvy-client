@@ -241,7 +241,26 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     }, [fetchStudentData])
 
     const userIds = selectedRows.map((item: SelecteItem) => item.userId)
-    const columns = useMemo(() => createColumns(permissions), [permissions])
+    const columns = useMemo(
+        () =>
+            createColumns(permissions, {
+                userRole,
+                orgId: Number(orgId || 0),
+                courseId: params.courseId,
+                batchId: params.batchId,
+                courseName: bootcamp?.name || '',
+                batchName: studentData?.[0]?.batchName || '',
+            }),
+        [
+            permissions,
+            userRole,
+            orgId,
+            params.courseId,
+            params.batchId,
+            bootcamp?.name,
+            studentData,
+        ]
+    )
 
     return {
         router,

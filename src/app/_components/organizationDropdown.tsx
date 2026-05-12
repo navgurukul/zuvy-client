@@ -71,7 +71,6 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
     };
 
     const switchOrganization = async (org: Organization) => {
-        console.log('Switching to org:', org);
         const refresh_token = localStorage.getItem('refresh_token');
         if (!refresh_token) return;
 
@@ -80,9 +79,10 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
             refresh_token: refresh_token
         });
 
-        if (result.success) {
+        if (result.success && result.user?.rolesList?.[0]) {
             setIsOpen(false);
-            router.push(`/${role}/organizations/${org.id}/courses`);
+            const newRole = result.user.rolesList[0].toLowerCase();
+            router.push(`/${newRole}/organizations/${org.id}/courses`);
         }
     }
 

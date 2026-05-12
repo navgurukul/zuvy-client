@@ -13,6 +13,7 @@ export interface MentorProfile {
     timezone: string
     acceptsNewMentees: boolean
     status: string
+    pastExperiences?: string 
 }
 
 const PROFILE_KEYS = [
@@ -183,6 +184,7 @@ const parseMentorProfileResponse = (
         timezone: parseString(profile.timezone ?? profile.timeZone),
         acceptsNewMentees,
         status: parseString(profile.status),
+        pastExperiences: parseString(profile.pastExperiences ),
     }
 }
 

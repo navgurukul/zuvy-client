@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
+import { Skeleton } from "@/components/ui/skeleton"
+import MentorshipTabs from "@/app/student/_components/MentorshipTabs"
 import { cn } from "@/lib/utils"
 import {
   useMyMentorSessions,
@@ -65,6 +67,33 @@ const formatTimeRange = (start?: string | null, end?: string | null) => {
   return `${startTime} - ${endTime}`
 }
 
+const parseDateValue = (value?: string | null) => {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+
+  return date
+}
+
+const isJoinWindowOpen = (
+  slotStart?: string | null,
+  slotEnd?: string | null,
+  nowTimestamp: number = Date.now()
+) => {
+  const startDate = parseDateValue(slotStart)
+  if (!startDate) return false
+
+  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
+  const endDate = parseDateValue(slotEnd)
+
+  if (!endDate) {
+    return nowTimestamp >= tenMinutesBeforeStart
+  }
+
+  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
+}
+
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
   mentorName?.trim() || `Mentor ${mentorUserId}`
 
@@ -100,8 +129,22 @@ function RecordingLink({ bookingId }: { bookingId: number }) {
 
 export default function MySessions() {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const courseId = searchParams.get("courseId") || ""
+  const mentorsHref = courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors"
+  const sessionsHref = courseId ? `/student/sessions?courseId=${courseId}` : "/student/sessions"
+  const isMentorsTabActive = pathname.startsWith("/student/mentors")
+  const isSessionsTabActive = pathname.startsWith("/student/sessions")
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowTimestamp(Date.now())
+    }, 30 * 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
     true,
@@ -135,84 +178,19 @@ export default function MySessions() {
 
   const totalSessions = counts.upcoming + counts.completed + counts.cancelled
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <p className="text-sm text-muted-foreground">Loading sessions...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 space-y-3">
-        <p className="text-sm text-red-500">{error}</p>
-        <Button variant="outline" onClick={refetchMySessions}>
-          Retry
-        </Button>
-      </div>
-    )
-  }
-
   return (
 
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-[90rem] mx-auto p-6 space-y-6">
 
-      {/* HEADER */}
-      <Link
-                href={courseId ? `/student/course/${courseId}` : "/student"}
-                className="flex items-center mb-6 gap-2 text-sm text-gray-500 hover:text-gray-700"
-            >
-                <ArrowLeft size={16} />
-                Back to {courseId ? "course" : "dashboard"}
-            </Link>
-
-      <div className="flex items-center justify-between">
-
-        <div>
-          <h1 className="text-xl font-semibold">
-            My Sessions
-          </h1>
-
-          <p className="text-sm text-muted-foreground">
-            {counts.upcoming} upcoming · {totalSessions} total
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold text-left text-gray-900">Mentorship</h1>
+        {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or manage your sessions.</p> */}
       </div>
 
-      {/* STATS CARDS */}
-
-      <div className="grid grid-cols-3 gap-4">
-
-        <StatCard
-          label="Upcoming"
-          count={counts.upcoming}
-          color="text-blue-600"
-          active={activeTab === "upcoming"}
-          onClick={() => setActiveTab("upcoming")}
-        />
-
-        <StatCard
-          label="Completed"
-          count={counts.completed}
-          color="text-green-600"
-          active={activeTab === "completed"}
-          onClick={() => setActiveTab("completed")}
-        />
-
-        <StatCard
-          label="Cancelled"
-          count={counts.cancelled}
-          color="text-muted-foreground"
-          active={activeTab === "cancelled"}
-          onClick={() => setActiveTab("cancelled")}
-        />
-
-      </div>
-
+      <MentorshipTabs courseId={courseId} />
       {/* TABS */}
 
-      <div className="flex items-center bg-muted rounded-full p-1 w-fit gap-1">
+      <div className="flex items-center  rounded-full p-1 w-fit gap-3">
 
         <TabButton
           active={activeTab === "upcoming"}
@@ -242,7 +220,29 @@ export default function MySessions() {
 
       {/* SESSION CARD */}
 
-      {activeTab === "cancelled" && counts.cancelled > 0 &&
+      {loading ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <Skeleton className="h-24 rounded-2xl" />
+            <Skeleton className="h-24 rounded-2xl" />
+            <Skeleton className="h-24 rounded-2xl" />
+          </div>
+
+          <Skeleton className="h-11 w-fit rounded-full px-24" />
+
+          <div className="space-y-4">
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
+          </div>
+        </div>
+      ) : error ? (
+        <div className="space-y-3 rounded-2xl border bg-card p-6">
+          <p className="text-sm text-red-500">{error}</p>
+          <Button variant="outline" onClick={refetchMySessions}>
+            Retry
+          </Button>
+        </div>
+      ) : activeTab === "cancelled" && counts.cancelled > 0 ? (
         sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
 
@@ -312,18 +312,15 @@ export default function MySessions() {
             </CardContent>
 
           </Card>
-        ))}
-
-      {activeTab === "cancelled" && counts.cancelled === 0 && (
+        ))
+      ) : activeTab === "cancelled" && counts.cancelled === 0 ? (
         <Card className="rounded-3xl border">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center space-y-3">
             <XCircle className="h-6 w-6 text-muted-foreground" size={36} />
             <h1 className="font-semibold text-sm">No cancelled sessions</h1>
           </CardContent>
         </Card>
-      )}
-
-      {activeTab === "completed" && counts.completed === 0 && (
+      ) : activeTab === "completed" && counts.completed === 0 ? (
 
         <Card className="rounded-3xl border">
 
@@ -354,9 +351,7 @@ export default function MySessions() {
 
         </Card>
 
-      )}
-
-      {activeTab === "completed" && counts.completed > 0 &&
+      ) : activeTab === "completed" && counts.completed > 0 ?
         sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
             <CardContent className="p-6 rounded-3xl">
@@ -409,11 +404,11 @@ export default function MySessions() {
               </div>
             </CardContent>
           </Card>
-        ))}
-
-      {activeTab === "upcoming" && counts.upcoming > 0 &&
+        ))
+      : activeTab === "upcoming" && counts.upcoming > 0 ?
         sessions.map((session) => {
           const joinUrl = session.zoomStartUrl?.trim() || ""
+          const canJoinNow = !!joinUrl && isJoinWindowOpen(session.slotStart, session.slotEnd, nowTimestamp)
 
           return (
           <Card key={session.id} className="rounded-3xl">
@@ -466,13 +461,18 @@ export default function MySessions() {
 
             </CardContent>
 
-            <CardFooter className="flex gap-3">
+            <CardFooter className="flex gap-3 flex-wrap">
+              {!canJoinNow && !!joinUrl && (
+                <p className="basis-full text-xs text-muted-foreground text-left">
+                  Join opens 10 min before start
+                </p>
+              )}
               <Button
                 className="flex gap-2"
-                asChild={!!joinUrl}
-                disabled={!joinUrl}
+                asChild={canJoinNow}
+                disabled={!canJoinNow}
               >
-                {joinUrl ? (
+                {canJoinNow ? (
                   <Link
                     href={`/student/sessions/${session.id}/join?joinUrl=${encodeURIComponent(joinUrl)}`}
                     target="_blank"
@@ -481,6 +481,11 @@ export default function MySessions() {
                     <Video size={14} />
                     Join Session
                   </Link>
+                ) : joinUrl ? (
+                  <>
+                    <Video size={14} />
+                    Join Session
+                  </>
                 ) : (
                   <>
                     <Video size={14} />
@@ -506,16 +511,15 @@ export default function MySessions() {
             </CardFooter>
           </Card>
           )
-        })}
-
-      {activeTab === "upcoming" && counts.upcoming === 0 && (
+        })
+      : activeTab === "upcoming" && counts.upcoming === 0 ? (
         <Card className="rounded-3xl border">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center space-y-3">
             <CalendarDays className="h-6 w-6 text-muted-foreground" size={36} />
             <h1 className="font-semibold text-sm">No upcoming sessions</h1>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
 
     </div>
@@ -563,6 +567,50 @@ function StatCard({
 
 /* TAB BUTTON */
 
+// function TabButton({
+//   icon: Icon,
+//   label,
+//   count,
+//   active,
+//   onClick,
+// }: any) {
+
+//   return (
+
+//     <button
+//       onClick={onClick}
+//       className={cn(
+//         "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition",
+//         active
+//           ? " shadow-sm"
+//           : "text-muted-foreground"
+//       )}
+//     >
+
+//       <Icon size={14} />
+
+//       {label}
+
+//       {count > 0 && (
+
+//         <span
+//           className={cn(
+//             "text-xs px-2 rounded-full",
+//             active
+//               ? "bg-green-700 text-white"
+//               : "bg-gray-200 text-gray-700"
+//           )}
+//         >
+//           {count}
+//         </span>
+
+//       )}
+
+//     </button>
+
+//   )
+// }
+
 function TabButton({
   icon: Icon,
   label,
@@ -570,39 +618,32 @@ function TabButton({
   active,
   onClick,
 }: any) {
-
   return (
-
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition",
+        "flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
         active
-          ? "bg-white shadow-sm"
-          : "text-muted-foreground"
+          ? "bg-[#2F6B2F] text-white border-[#2F6B2F]"
+          : "bg-white text-[#5F6D5F] border-[#D9DED9] hover:bg-[#F8F9F8]"
       )}
     >
+      <Icon size={14} strokeWidth={2.2} />
 
-      <Icon size={14} />
-
-      {label}
+      <span className="leading-none">{label}</span>
 
       {count > 0 && (
-
         <span
           className={cn(
-            "text-xs px-2 rounded-full",
+            "flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none",
             active
-              ? "bg-green-700 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-white/20 text-white"
+              : "bg-[#EEF1EE] text-[#5F6D5F]"
           )}
         >
           {count}
         </span>
-
       )}
-
     </button>
-
   )
 }
