@@ -269,7 +269,7 @@ export default function MentorBookingDrawer({
                     {/* TEXT */}
                     <div className="mt-8 text-center">
                       <h6 className="text-1xl font-semibold tracking-[-0.02em] text-gray-900">
-                        You're booked!
+                        You&apos;re booked!
                       </h6>
 
                       <p className="mt-4 text-sm leading-8 text-gray-600">
@@ -277,7 +277,7 @@ export default function MentorBookingDrawer({
                         <span className="font-semibold text-gray-900">
                           {mentor.name}
                         </span>{" "}
-                        is confirmed. You'll get a reminder
+                        is confirmed. You&apos;ll get a reminder
                         before the session.
                       </p>
                     </div>
