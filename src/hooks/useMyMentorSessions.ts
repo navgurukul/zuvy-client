@@ -110,8 +110,8 @@ const getErrorMessage = (error: unknown): string => {
 }
 
 export type MyMentorSessionsEndpoint =
-    | '/mentor-sessions/my'
-    | '/mentor-sessions/mentor/my'
+    | '/student/mentor-sessions/my'
+    | '/instructor/mentor-sessions/my'
 
 export type SessionFilter =
     | 'all'

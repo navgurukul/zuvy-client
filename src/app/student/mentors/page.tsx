@@ -83,7 +83,7 @@ export default function MentorsPage() {
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get<MentorsSearchResponse>(
-                `/mentors?search=${encodeURIComponent(query)}`
+                `/student/mentors?search=${encodeURIComponent(query)}`
             );
 
             const mentorList = parseMentors(response.data);

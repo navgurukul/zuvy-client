@@ -49,7 +49,7 @@ export function useBookMentorSlot() {
             setError(null)
 
             const response = await api.post<BookMentorSlotApiResponse>(
-                '/mentor-slots/book',
+                '/student/mentor-slots/book',
                 { slotId }
             )
 

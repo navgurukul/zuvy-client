@@ -34,7 +34,25 @@ const NotAuthorizedUser = () => {
                     </p>
                     <Button onClick={() => {
                         setShowModal(false);
-                        router.push(`/${userRole}/organizations/${orgId}/courses`);
+
+                        // If orgId is present, go to the organisation courses page.
+                        if (userRole && orgId) {
+                            router.push(`/${userRole}/organizations/${orgId}/courses`);
+                            return
+                        }
+
+                        // Special-case: if this is the student side and orgId is missing,
+                        // keep the user on the same page instead of navigating away.
+                        if (userRole === 'student' && !orgId) {
+                            return
+                        }
+
+                        // Fallback: go to the organizations list for the role, or root
+                        if (userRole) {
+                            router.push(`/${userRole}/organizations`);
+                        } else {
+                            router.push(`/`);
+                        }
                     }}>
                         Return to my Organisation
                     </Button>

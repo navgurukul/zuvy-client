@@ -66,7 +66,7 @@ export default function PerformanceMetrics() {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", "completed", "desc")
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "completed", "desc")
 
   const {
     metrics,

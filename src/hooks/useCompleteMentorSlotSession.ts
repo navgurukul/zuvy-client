@@ -30,7 +30,7 @@ export function useCompleteMentorSlotSession() {
             setCompletionData(null)
 
             const response = await api.post<CompleteSessionResponse>(
-                `/mentor-slots/${bookingId}/complete`
+                `/instructor/mentor-slots/bookings/${bookingId}/complete`
             )
 
             setCompletionData(response.data || null)

@@ -148,25 +148,25 @@ export default function MySessions() {
 
   const { sessions, loading, error, refetchMySessions } = useMyMentorSessions(
     true,
-    "/mentor-sessions/my",
+    "/student/mentor-sessions/my",
     activeTab as SessionFilter
   )
 
   const { counts: upcomingCounts } = useMyMentorSessions(
     true,
-    "/mentor-sessions/my",
+    "/student/mentor-sessions/my",
     "upcoming"
   )
 
   const { counts: completedCounts } = useMyMentorSessions(
     true,
-    "/mentor-sessions/my",
+    "/student/mentor-sessions/my",
     "completed"
   )
 
   const { counts: cancelledCounts } = useMyMentorSessions(
     true,
-    "/mentor-sessions/my",
+    "/student/mentor-sessions/my",
     "cancelled"
   )
 

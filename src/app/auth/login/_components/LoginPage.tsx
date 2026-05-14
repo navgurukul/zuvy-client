@@ -124,7 +124,7 @@ function LoginPage() {
     const getMentorProfileCompletion = async (): Promise<boolean | null> => {
         try {
             const res = await api.get<MentorProfileResponse>(
-                '/mentor-slots/mentor/profile'
+                '/instructor/mentor-slots/profile'
             )
             return isMentorProfileComplete(res.data)
         } catch (error) {
