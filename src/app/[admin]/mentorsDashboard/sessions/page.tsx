@@ -139,10 +139,18 @@ export default function SessionsPage() {
     Record<number, true>
   >({})
 
-  const { counts: summaryCounts } = useMyMentorSessions(
+  const { counts } = useMyMentorSessions(
     true,
-    "/instructor/mentor-sessions/my"
+    "/instructor/mentor-sessions/my",
+    "all"
   )
+
+  const summaryCounts = {
+    total: Number(counts.total) || 0,
+    upcoming: Number(counts.upcoming) || 0,
+    reschedule: Number(counts.reschedule) || 0,
+    completed: Number(counts.completed) || 0,
+  }
 
   const {
     sessions: apiSessions,
