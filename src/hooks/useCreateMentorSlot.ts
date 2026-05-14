@@ -86,7 +86,7 @@ export function useCreateMentorSlot() {
             setError(null)
 
             const response = await api.post<CreateMentorSlotApiResponse>(
-                '/mentor-slots/create',
+                '/instructor/mentor-slots/create',
                 payload,
                 {
                     validateStatus: (status) => status < 500,

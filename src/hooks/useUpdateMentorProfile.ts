@@ -39,7 +39,7 @@ export function useUpdateMentorProfile() {
       // Use POST for first-time profile creation, PATCH for updates
       const method = isFirstTime ? 'post' : 'patch'
       const response = await api[method]<MentorProfileMutationResponse>(
-        '/mentor-slots/mentor/profile',
+        '/instructor/mentor-slots/profile',
         payload
       )
 

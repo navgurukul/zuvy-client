@@ -90,7 +90,7 @@ export function useGetMentorProfile() {
       setError(null)
 
       const response = await api.get<MentorProfileResponse>(
-        '/mentor-slots/mentor/profile'
+        '/instructor/mentor-slots/profile'
       )
       
       const profile = response.data

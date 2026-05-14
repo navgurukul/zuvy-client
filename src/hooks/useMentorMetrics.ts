@@ -47,7 +47,7 @@ export function useMentorMetrics(initialFetch = true) {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MentorMetrics>('/mentor-slots/metrics/me')
+            const response = await api.get<MentorMetrics>('/instructor/mentor-slots/metrics')
             setMetrics(response.data)
         } catch (error) {
             console.error('Error fetching mentor metrics:', error)

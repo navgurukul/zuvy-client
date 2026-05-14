@@ -106,7 +106,7 @@ export function useMentors(search?: string, initialFetch = true, limit = 10, off
                 queryParams.append('offset', String(params.offset))
             }
 
-            const url = `/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+            const url = `/student/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
             const response = await api.get<MentorsApiResponse>(url)
             const parsedResponse = parseMentorsResponse(response.data)
 

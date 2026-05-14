@@ -110,7 +110,7 @@ export function useMyMentorSlots(
             setError(null)
 
             const response = await api.get<MyMentorSlotsApiResponse>(
-                '/mentor-slots/my',
+                '/instructor/mentor-slots/my',
                 {
                     params: {
                         ...(typeof filters?.weekOffset === 'number'

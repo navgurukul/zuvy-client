@@ -214,7 +214,7 @@ export function useMentorProfile(mentorId?: string, initialFetch = true) {
             setError(null)
 
             const response = await api.get<unknown>(
-                `/mentors/${mentorId}`
+                `/student/mentors/${mentorId}`
             )
             setMentorProfile(parseMentorProfileResponse(response.data))
         } catch (error) {

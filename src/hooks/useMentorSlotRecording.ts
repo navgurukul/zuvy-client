@@ -12,6 +12,8 @@ type MentorSlotRecordingResponse = {
   recordings?: MentorSlotRecordingItem[]
 }
 
+type MentorSlotRecordingScope = "student" | "instructor"
+
 const getErrorMessage = (error: unknown): string => {
   const message = (error as { response?: { data?: { message?: string } } })
     ?.response?.data?.message
@@ -27,7 +29,11 @@ const extractRecordingUrl = (data: MentorSlotRecordingResponse): string | null =
   return firstRecording.youtubeUrl || firstRecording.driveLink || null
 }
 
-export function useMentorSlotRecording(bookingId?: number, initialFetch = true) {
+export function useMentorSlotRecording(
+  bookingId?: number,
+  initialFetch = true,
+  scope: MentorSlotRecordingScope = "student"
+) {
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(Boolean(initialFetch && bookingId))
   const [error, setError] = useState<string | null>(null)
@@ -43,9 +49,12 @@ export function useMentorSlotRecording(bookingId?: number, initialFetch = true) 
       setLoading(true)
       setError(null)
 
-      const response = await api.get<MentorSlotRecordingResponse>(
-        `/mentor-slots/${bookingId}/recordings`
-      )
+      const endpoint =
+        scope === "instructor"
+          ? `/instructor/mentor-slots/bookings/${bookingId}/recordings`
+          : `/student/mentor-slots/bookings/${bookingId}/recordings`
+
+      const response = await api.get<MentorSlotRecordingResponse>(endpoint)
 
       setRecordingUrl(extractRecordingUrl(response.data))
     } catch (error) {
@@ -54,7 +63,7 @@ export function useMentorSlotRecording(bookingId?: number, initialFetch = true) 
     } finally {
       setLoading(false)
     }
-  }, [bookingId])
+  }, [bookingId, scope])
 
   useEffect(() => {
     if (!initialFetch) return

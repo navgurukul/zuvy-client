@@ -141,7 +141,7 @@ export default function SessionsPage() {
 
   const { counts: summaryCounts } = useMyMentorSessions(
     true,
-    "/mentor-sessions/mentor/my"
+    "/instructor/mentor-sessions/my"
   )
 
   const {
@@ -149,7 +149,7 @@ export default function SessionsPage() {
     loading,
     error,
     refetchMySessions,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", activeTab as SessionFilter)
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const sessions = apiSessions
 
@@ -187,7 +187,8 @@ export default function SessionsPage() {
 
   const { recordingUrl: completedRecordingUrl } = useMentorSlotRecording(
     selectedSession?.id,
-    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED")
+    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED"),
+    "instructor"
   )
 
   const isReadOnlySession = Boolean(

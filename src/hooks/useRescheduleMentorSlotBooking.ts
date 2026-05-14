@@ -54,7 +54,7 @@ export function useRescheduleMentorSlotBooking() {
         reason: string
     ): Promise<boolean> => {
         return runRescheduleAction(
-            `/mentor-slots/${bookingId}/reschedule?slotId=${newSlotId}`,
+            `/student/mentor-slots/bookings/${bookingId}/reschedule?slotId=${newSlotId}`,
             {
             reason,
             }
@@ -63,13 +63,13 @@ export function useRescheduleMentorSlotBooking() {
 
     const acceptReschedule = async (bookingId: number): Promise<boolean> => {
         return runRescheduleAction(
-            `/mentor-slots/${bookingId}/reschedule/accept`
+            `/instructor/mentor-slots/bookings/${bookingId}/reschedule/accept`
         )
     }
 
     const declineReschedule = async (bookingId: number): Promise<boolean> => {
         return runRescheduleAction(
-            `/mentor-slots/${bookingId}/reschedule/decline`
+            `/instructor/mentor-slots/bookings/${bookingId}/reschedule/decline`
         )
     }
 

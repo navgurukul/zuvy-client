@@ -58,7 +58,7 @@ export function useMentorAvailability(mentorId?: string, initialFetch = true) {
             setError(null)
 
             const response = await api.get<MentorAvailabilityApiResponse>(
-                `/mentors/${mentorId}/availability`
+                `/student/mentors/${mentorId}/availability`
             )
             setAvailability(parseMentorAvailabilityResponse(response.data))
         } catch (error) {

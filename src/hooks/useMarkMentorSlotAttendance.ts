@@ -54,7 +54,7 @@ export function useMarkMentorSlotAttendance() {
             setAttendanceData(null)
 
             const response = await api.post<MarkAttendanceResponse>(
-                `/mentor-slots/${bookingId}/attendance`,
+                `/instructor/mentor-slots/bookings/${bookingId}/attendance`,
                 payload
             )
 
