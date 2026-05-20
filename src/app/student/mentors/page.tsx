@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Mentor, useMentors } from "@/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
@@ -40,10 +40,7 @@ const parseMentors = (response: MentorsSearchResponse): Mentor[] => {
 };
 
 export default function MentorsPage() {
-    // const searchParams = useSearchParams();
-    // const searchQuery = searchParams.get("search")?.trim() || "";
-    // const { mentors, loading, error } = useMentors(searchQuery);
-
+    const router = useRouter()
     const searchParams = useSearchParams()
 
     const page = parseInt(searchParams.get("page") || "1")
@@ -57,29 +54,53 @@ export default function MentorsPage() {
 
     const { mentors, total, loading, error, refetchMentors } = useMentors(
         searchQuery,
-        true,
+        showAllMentors,
         limit,
         offset
     )
 
+    const {
+        mentors: availableMentorPool,
+        loading: availableMentorPoolLoading,
+        error: availableMentorPoolError,
+    } = useMentors(searchQuery, !showAllMentors, 1000, 0)
+
     const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 
-    const totalPages = Math.max(1, Math.ceil(total / limit))
-    const visibleMentors = useMemo(() => {
-        const availableMentors = mentors.filter((mentor) => {
+    const availableMentors = useMemo(() => {
+        return availableMentorPool.filter((mentor) => {
             return mentor.availabilityStatus?.trim().toLowerCase() === "available"
         })
+    }, [availableMentorPool])
 
-        return showAllMentors ? mentors : availableMentors
-    }, [mentors, showAllMentors])
+    const totalForPagination = showAllMentors ? total : availableMentors.length
+    const totalPages = Math.max(1, Math.ceil(totalForPagination / limit))
+    const visibleMentors = useMemo(() => {
+        if (showAllMentors) return mentors
+
+        return availableMentors.slice(offset, offset + limit)
+    }, [showAllMentors, mentors, availableMentors, offset, limit])
+
+    const pageLoading = showAllMentors ? loading : availableMentorPoolLoading
+    const pageError = showAllMentors ? error : availableMentorPoolError
+
+    const handleShowAllMentorsToggle = useCallback((pressed: boolean) => {
+        setShowAllMentors(pressed)
+
+        const params = new URLSearchParams(searchParams.toString())
+        params.set("page", "1")
+        router.replace(`?${params.toString()}`)
+    }, [router, searchParams])
 
     const fetchMentorsData = useCallback((nextOffset: number) => {
+        if (!showAllMentors) return
+
         refetchMentors({
             searchTerm: searchQuery,
             limit,
             offset: nextOffset,
         })
-    }, [limit, refetchMentors, searchQuery])
+    }, [showAllMentors, refetchMentors, searchQuery, limit])
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get<MentorsSearchResponse>(
@@ -172,7 +193,7 @@ export default function MentorsPage() {
                     />
                     <Toggle
                         pressed={showAllMentors}
-                        onPressedChange={setShowAllMentors}
+                        onPressedChange={handleShowAllMentorsToggle}
                         className="
                             h-10
                             rounded-xl
@@ -218,13 +239,13 @@ export default function MentorsPage() {
 
                 <p className="text-xs text-gray-500">
                     {showAllMentors
-                        ? `${visibleMentors.length} mentors shown`
-                        : `${visibleMentors.length} available`}
+                        ? `${totalForPagination} mentors shown`
+                        : `${totalForPagination} available`}
                 </p>
 
             </div>
 
-            {loading ? (
+            {pageLoading ? (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <Skeleton className="h-64 rounded-3xl" />
@@ -235,8 +256,8 @@ export default function MentorsPage() {
                         <Skeleton className="h-10 w-56 rounded-lg" />
                     </div>
                 </div>
-            ) : error ? (
-                <p className="text-sm text-red-500">{error}</p>
+            ) : pageError ? (
+                <p className="text-sm text-red-500">{pageError}</p>
             ) : visibleMentors.length === 0 ? (
                 <p className="text-sm text-gray-500">No mentors available right now.</p>
             ) : (
@@ -341,7 +362,7 @@ export default function MentorsPage() {
                 </div>
             )}
             <DataTablePagination
-                totalStudents={total}
+                totalStudents={totalForPagination}
                 lastPage={totalPages}
                 pages={totalPages}
                 fetchStudentData={fetchMentorsData}

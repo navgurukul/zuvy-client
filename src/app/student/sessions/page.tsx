@@ -250,7 +250,7 @@ export default function MySessions() {
 
               <div className="flex justify-between items-start">
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
 
                   <Avatar>
                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">
@@ -258,16 +258,10 @@ export default function MySessions() {
                     </AvatarFallback>
                   </Avatar>
 
-                  <div>
-
-                    <p className="font-semibold">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">
                       {getMentorDisplayName(session.mentorName, session.mentorUserId)}
                     </p>
-
-                    <p className="text-sm text-muted-foreground text-left">
-                      Slot {session.slotAvailabilityId}
-                    </p>
-
                   </div>
 
                 </div>
@@ -416,17 +410,14 @@ export default function MySessions() {
 
               <div className="flex justify-between">
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
 
                   <Avatar>
                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
-                  <div>
-                    <p className="font-semibold">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
-                    <p className="text-sm text-muted-foreground text-left">
-                      Slot {session.slotAvailabilityId}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
                   </div>
 
                 </div>
@@ -563,53 +554,6 @@ function StatCard({
 
   )
 }
-
-
-/* TAB BUTTON */
-
-// function TabButton({
-//   icon: Icon,
-//   label,
-//   count,
-//   active,
-//   onClick,
-// }: any) {
-
-//   return (
-
-//     <button
-//       onClick={onClick}
-//       className={cn(
-//         "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition",
-//         active
-//           ? " shadow-sm"
-//           : "text-muted-foreground"
-//       )}
-//     >
-
-//       <Icon size={14} />
-
-//       {label}
-
-//       {count > 0 && (
-
-//         <span
-//           className={cn(
-//             "text-xs px-2 rounded-full",
-//             active
-//               ? "bg-green-700 text-white"
-//               : "bg-gray-200 text-gray-700"
-//           )}
-//         >
-//           {count}
-//         </span>
-
-//       )}
-
-//     </button>
-
-//   )
-// }
 
 function TabButton({
   icon: Icon,

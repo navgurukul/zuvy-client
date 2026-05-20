@@ -47,21 +47,28 @@ const Header = () => {
     }
 
     const getCurrentCourseId = () => {
-        return courseIdFromPath || courseIdFromQuery
+        const fallbackCourseId = latestCourseData?.bootcampId
+        return courseIdFromPath || courseIdFromQuery || (fallbackCourseId ? String(fallbackCourseId) : null)
     }
 
     const handleSyllabusClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
             router.push(`/student/course/${courseId}/courseSyllabus`)
+            return
         }
+
+        router.push('/student')
     }
 
     const handleMentorshipClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
             router.push(`/student/mentors?courseId=${courseId}`)
+            return
         }
+
+        router.push('/student/mentors')
     }
 
     const handleLogoutClick = () => {
@@ -94,7 +101,8 @@ const Header = () => {
         pathname.startsWith('/student/mentors') ||
         pathname.startsWith('/student/sessions')
     const showCourseNavLinks =
-        isOnCoursePage || (isMentorOrSessionFlow && Boolean(courseIdFromQuery))
+        isOnCoursePage || isMentorOrSessionFlow
+    const showMentorshipNavLink = shouldShowMentorshipLinks || isMentorOrSessionFlow
 
     // Check active page states
 
@@ -139,7 +147,7 @@ const Header = () => {
                             >
                                 Course Syllabus
                             </Button>
-                            {shouldShowMentorshipLinks && (
+                            {showMentorshipNavLink && (
                                 <Button
                                     variant="link"
                                     size="sm"
@@ -280,7 +288,7 @@ const Header = () => {
                         >
                             Course Syllabus
                         </Button>
-                        {shouldShowMentorshipLinks && (
+                        {showMentorshipNavLink && (
                             <Button
                                 variant="link"
                                 size="sm"
