@@ -172,7 +172,7 @@ export default function RescheduleBookingPage() {
 												: "border-gray-200 bg-white"
 										} ${!isSelectable ? "opacity-60 cursor-not-allowed" : ""}`}
 									>
-										<p className="text-sm font-semibold">Slot ID: {slot.id}</p>
+										{/* Slot id removed from UI for students */}
 										<div className="mt-1 space-y-1 text-xs text-muted-foreground">
 											<p className="flex items-center gap-2">
 												<Calendar size={12} />
@@ -194,11 +194,7 @@ export default function RescheduleBookingPage() {
 						</div>
 					)}
 
-					{Number.isFinite(currentSlotId) && currentSlotId !== null && (
-						<p className="text-xs text-muted-foreground text-left">
-							Current slot id: {currentSlotId} (do not use this same id)
-						</p>
-					)}
+					{/* Current slot id hidden from UI — retained only in URL params for logic */}
 				</div>
 
 				<div className="space-y-2">
