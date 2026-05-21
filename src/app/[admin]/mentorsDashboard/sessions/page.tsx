@@ -217,7 +217,7 @@ export default function SessionsPage() {
   const isRescheduleTab = activeTab === "reschedule"
 
   const canJoinSelectedSession = Boolean(
-    selectedSession?.zoomStartUrl?.trim() &&
+    selectedSession?.meetingLink?.trim() &&
     isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
   )
 
@@ -657,13 +657,13 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
-                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.zoomStartUrl && !canJoinSelectedSession && (
+                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
                   <p className="text-xs text-muted-foreground">
                     Join opens 10 min before start
                   </p>
                 )}
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  selectedSession.zoomStartUrl ? (
+                  selectedSession.meetingLink ? (
                     <Button
                       type="button"
                       className="bg-green-700 hover:bg-green-800"
@@ -672,7 +672,7 @@ export default function SessionsPage() {
                     >
                       {canJoinSelectedSession ? (
                         <a
-                          href={selectedSession.zoomStartUrl}
+                          href={selectedSession.meetingLink}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

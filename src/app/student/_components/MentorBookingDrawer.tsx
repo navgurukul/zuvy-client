@@ -8,6 +8,7 @@ import type { MentorAvailabilitySlot } from "@/hooks/useMentorAvailability"
 import { useMentorAvailability } from "@/hooks/useMentorAvailability"
 import { useBookMentorSlot } from "@/hooks/useBookMentorSlot"
 import { useMentorProfile } from "@/hooks/useMentorProfile"
+import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
@@ -66,6 +67,8 @@ export default function MentorBookingDrawer({
   )
   const { isBooking, error: bookingError, bookSlot } = useBookMentorSlot()
 
+  const { metrics, loading: metricsLoading } = useStudentMentorMetrics(Boolean(open && mentor?.userId))
+
   useEffect(() => {
     if (!open) {
       setSelectedSlotId(null)
@@ -97,7 +100,10 @@ export default function MentorBookingDrawer({
   const pastExperiences = (mentorProfile?.pastExperiences || listPastExperiences || "").trim()
   const aboutText = (mentorProfile?.bio || mentor?.bio || "").trim()
   const initials = mentor ? getInitials(mentor.name) : "M"
-  const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking
+  const bookingEligibilityBlocked = Boolean(metrics && metrics.canBook === false)
+  const bookingNotYetEligible = Boolean(metrics && metrics.nextEligible && new Date(metrics.nextEligible).getTime() > Date.now())
+
+  const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !bookingEligibilityBlocked && !bookingNotYetEligible
 
   const handleBook = async () => {
     if (selectedSlotId === null) return
@@ -111,6 +117,14 @@ export default function MentorBookingDrawer({
     setSelectedSlotId(null)
     refetchMentorAvailability()
     setBookingSuccess(true)
+  }
+
+  const formatEligibleDate = (dateString?: string | null) => {
+    if (!dateString) return ""
+    const d = new Date(dateString)
+    if (Number.isNaN(d.getTime())) return ""
+
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   return (
@@ -371,10 +385,24 @@ export default function MentorBookingDrawer({
               <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
                 <div className="space-y-2">
                   {bookingError ? <p className="text-xs text-red-500">{bookingError}</p> : null}
+
+                  {/* Validation message when user cannot book */}
+                  {selectedSlotId !== null && (bookingEligibilityBlocked || bookingNotYetEligible) && (
+                    <div className="rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
+                      {bookingEligibilityBlocked ? (
+                        <>
+                          You have already booked a session. {metrics?.nextEligible ? `Your next booking will be available on ${formatEligibleDate(metrics.nextEligible)}.` : null}
+                        </>
+                      ) : bookingNotYetEligible ? (
+                        <>You can book your next session from {formatEligibleDate(metrics?.nextEligible || null)}.</>
+                      ) : null}
+                    </div>
+                  )}
+
                   <Button
                     onClick={handleBook}
                     disabled={!canBook}
-                    className="h-10 w-full bg-green-800 text-white hover:bg-green-900 text-sm font-medium"
+                    className="h-10 w-full bg-green-800 text-white hover:bg-green-900 text-sm font-medium cursor-not-allowed"
                   >
                     {isBooking ? "Booking..." : "Book this Session"}
                   </Button>

@@ -11,7 +11,6 @@ export interface MyMentorSession {
     status: string
     sessionLifecycleState: string
     meetingLink?: string | null
-    zoomStartUrl?: string | null
     isZoomMeet?: boolean | null
     joinedAt: string | null
     completedAt: string | null
