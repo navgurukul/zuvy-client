@@ -134,6 +134,17 @@ export default function MentorBookingDrawer({
                     <SheetTitle className="text-left text-base font-semibold text-gray-900 leading-tight">
                       {mentor.name}
                     </SheetTitle>
+                    <div className="mt-2 flex flex-col gap-1">
+                      {mentor.email ? (
+                        <p className="text-left text-xs text-gray-600">
+                          {mentor.email}
+                        </p>
+                      ) : null}
+                      {mentor.orgName ? (
+                        <p className="text-left text-xs text-gray-500">{mentor.orgName}</p>
+                      ) : null}
+                    </div>
+
                     <p className="text-left text-xs text-gray-600 mt-0.5">
                       {mentor.title || mentor.role || "Mentor"}
                     </p>

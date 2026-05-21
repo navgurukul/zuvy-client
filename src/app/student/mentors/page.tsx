@@ -279,18 +279,34 @@ export default function MentorsPage() {
                         const mentorCardBody = (
                             <>
                                 {/* Top */}
-                                <div className="flex min-w-0 justify-between gap-2">
+                                <div className="flex min-w-0 justify-between gap-3">
                                     <div className="flex min-w-0 gap-3">
                                         <div className="h-10 w-10 rounded-full bg-green-800 flex items-center justify-center text-white text-sm font-bold">
                                             {initials}
                                         </div>
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 space-y-1">
                                             <p className="truncate text-left text-base font-semibold">
                                                 {mentor.name}
                                             </p>
+                                            <p className="truncate text-left text-xs text-gray-500">
+                                                {mentor.email}
+                                            </p>
+                                            <div className="flex min-w-0 flex-wrap gap-2 pt-1">
+                                                <span className="inline-flex max-w-full items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600">
+                                                    {mentor.orgName || 'Unknown org'}
+                                                </span>
+                                            </div>
                                             <p className="truncate text-left text-sm text-gray-500">
                                                 {mentor.title || mentor.role}
                                             </p>
+                                            {/* <p className="truncate text-left text-xs text-gray-500">
+                                                {mentor.email}
+                                            </p>
+                                            <div className="flex min-w-0 flex-wrap gap-2 pt-1">
+                                                <span className="inline-flex max-w-full items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600">
+                                                    {mentor.orgName || 'Unknown org'}
+                                                </span>
+                                            </div> */}
                                         </div>
                                     </div>
                                     {showAllMentors && !isAvailable && (
@@ -339,7 +355,7 @@ export default function MentorsPage() {
                         if (showUnavailableState) {
                             return (
                                 <div
-                                    key={mentor.userId}
+                                    key={`${mentor.userId}-${mentor.organizationId}`}
                                     className="relative block overflow-hidden rounded-3xl border border-gray-200 p-5 shadow-sm opacity-50 cursor-not-allowed pointer-events-none"
                                 >
                                     {mentorCardBody}
@@ -349,7 +365,7 @@ export default function MentorsPage() {
 
                         return (
                             <button
-                                key={mentor.userId}
+                                key={`${mentor.userId}-${mentor.organizationId}`}
                                 type="button"
                                 onClick={() => handleMentorClick(mentor)}
                                 className="group relative block w-full overflow-hidden rounded-3xl border border-gray-200 p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
