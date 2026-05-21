@@ -20,7 +20,6 @@ export type UpdateMentorProfilePayload = {
   bio: string
   expertise: string[]
   title: string
-  bootcampId: number
   pastExperiences?: string
 }
 

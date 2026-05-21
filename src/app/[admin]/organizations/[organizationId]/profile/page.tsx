@@ -153,7 +153,6 @@ function MentorProfileCreateUI({
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
         expertise,
-        bootcampId: resolvedBootcampId,
       }, isFirstTime)
       await refetchMentorProfile()
       await onValidSubmit?.({
@@ -169,7 +168,7 @@ function MentorProfileCreateUI({
         title: toastTitle,
         ...(apiMessage ? { description: apiMessage } : {}),
       })
-      router.push(coursesHref)
+      // router.push(coursesHref)
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
@@ -216,21 +215,6 @@ function MentorProfileCreateUI({
       <div className="py-12">
         <div className="mx-auto max-w-3xl">
           {/* Top Actions */}
-          <div className="mb-6 flex w-full items-center">
-            <Link
-              href={coursesHref}
-              onClick={(e) => {
-                if (!onBack) return
-                e.preventDefault()
-                onBack()
-              }}
-              className="inline-flex items-center shrink-0 text-sm font-medium text-text-secondary transition-colors hover:text-primary"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back course
-            </Link>
-          </div>
-
           {/* Header */}
           <div className="mb-10 text-left">
             <h5 className="font-heading text-text-primary mb-3">Setup Your Profile</h5>

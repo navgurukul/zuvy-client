@@ -30,6 +30,7 @@ export default function MentorProfilePage() {
   const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
+  const organizationId = searchParams.get("organizationId") || undefined;
   const [isGoogleConnecting, setIsGoogleConnecting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -38,7 +39,7 @@ export default function MentorProfilePage() {
       ? localStorage.getItem("access_token") || localStorage.getItem("token")
       : null
 
-  const { mentorProfile, loading, error } = useMentorProfile(mentorId);
+  const { mentorProfile, loading, error } = useMentorProfile(mentorId, true, organizationId);
 
 
   const handleGoogleConnect = () => {

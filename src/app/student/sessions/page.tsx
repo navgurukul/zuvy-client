@@ -349,17 +349,14 @@ export default function MySessions() {
         sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
             <CardContent className="p-6 rounded-3xl">
-              <div className="flex justify-between">
-                <div className="flex gap-3">
+              <div className="flex justify-between items-start">
+                <div className="flex gap-3 items-center">
                   <Avatar>
                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
                   </Avatar>
 
-                  <div>
-                    <p className="font-semibold">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Slot #{session.slotAvailabilityId}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
                   </div>
                 </div>
 
