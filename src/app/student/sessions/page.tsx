@@ -398,7 +398,7 @@ export default function MySessions() {
         ))
       : activeTab === "upcoming" && counts.upcoming > 0 ?
         sessions.map((session) => {
-          const joinUrl = session.zoomStartUrl?.trim() || ""
+          const joinUrl = session.meetingLink?.trim() || ""
           const canJoinNow = !!joinUrl && isJoinWindowOpen(session.slotStart, session.slotEnd, nowTimestamp)
 
           return (
