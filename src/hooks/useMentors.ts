@@ -14,6 +14,8 @@ export interface Mentor {
     title: string | null
     availabilityStatus:string | null
     availableSlots:number
+    organizationId?: number
+    orgName?: string | null
 }
 
 interface MentorsPaginatedResponse {

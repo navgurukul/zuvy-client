@@ -8,7 +8,6 @@ import type { MentorAvailabilitySlot } from "@/hooks/useMentorAvailability"
 import { useMentorAvailability } from "@/hooks/useMentorAvailability"
 import { useBookMentorSlot } from "@/hooks/useBookMentorSlot"
 import { useMentorProfile } from "@/hooks/useMentorProfile"
-import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
@@ -44,17 +43,6 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase()
 
-const formatEligibleDate = (dateString: string | null): string => {
-  if (!dateString) return "Soon"
-  const date = new Date(dateString)
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
 export default function MentorBookingDrawer({
   mentor,
   open,
@@ -65,14 +53,18 @@ export default function MentorBookingDrawer({
   const [bookedSlotDetails, setBookedSlotDetails] = useState<MentorAvailabilitySlot | null>(null)
   const [bookingSuccess, setBookingSuccess] = useState<boolean>(false)
 
-  const { mentorProfile } = useMentorProfile(mentor?.userId, open && !!mentor?.userId)
+  const { mentorProfile } = useMentorProfile(
+    mentor?.userId,
+    open && !!mentor?.userId,
+    mentor?.organizationId
+  )
 
   const { availability, loading, error, refetchMentorAvailability } = useMentorAvailability(
     mentor?.userId,
-    open && !!mentor?.userId
+    open && !!mentor?.userId,
+    mentor?.organizationId
   )
   const { isBooking, error: bookingError, bookSlot } = useBookMentorSlot()
-  const { metrics, loading: metricsLoading, refetchStudentMentorMetrics } = useStudentMentorMetrics(false)
 
   useEffect(() => {
     if (!open) {
@@ -82,11 +74,9 @@ export default function MentorBookingDrawer({
       return
     }
 
-    // Refetch metrics when drawer opens to get latest quota status
-    refetchStudentMentorMetrics()
     setSelectedSlotId(null)
     setBookedSlotDetails(null)
-  }, [open, mentor?.userId, refetchStudentMentorMetrics])
+  }, [open, mentor?.userId])
 
   const availableSlots = useMemo(
     () => availability.filter((slot) => slot.status?.toUpperCase() === "AVAILABLE"),
@@ -107,19 +97,10 @@ export default function MentorBookingDrawer({
   const pastExperiences = (mentorProfile?.pastExperiences || listPastExperiences || "").trim()
   const aboutText = (mentorProfile?.bio || mentor?.bio || "").trim()
   const initials = mentor ? getInitials(mentor.name) : "M"
-  const cannotBook = metrics
-    ? (
-        metrics.canBook === false ||
-        (typeof metrics.remainingCredits === 'number' && metrics.remainingCredits <= 0) ||
-        (metrics.nextEligible && new Date(metrics.nextEligible) > new Date())
-      )
-    : false
-
-  const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !cannotBook
+  const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking
 
   const handleBook = async () => {
     if (selectedSlotId === null) return
-    if (cannotBook) return
 
     const slotDetails = availability.find((slot) => slot.id === selectedSlotId) || null
 
@@ -129,7 +110,6 @@ export default function MentorBookingDrawer({
     setBookedSlotDetails(slotDetails)
     setSelectedSlotId(null)
     refetchMentorAvailability()
-    refetchStudentMentorMetrics()
     setBookingSuccess(true)
   }
 
@@ -380,15 +360,10 @@ export default function MentorBookingDrawer({
               <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
                 <div className="space-y-2">
                   {bookingError ? <p className="text-xs text-red-500">{bookingError}</p> : null}
-                  {selectedSlotId !== null && cannotBook && (
-                    <div className="px-3 py-2 text-xs text-red-700">
-                      <p className="font-medium">Next booking available on {formatEligibleDate(metrics?.nextEligible || null)}</p>
-                    </div>
-                  )}
                   <Button
                     onClick={handleBook}
                     disabled={!canBook}
-                    className="h-10 w-full bg-green-800 text-white hover:bg-green-900 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-10 w-full bg-green-800 text-white hover:bg-green-900 text-sm font-medium"
                   >
                     {isBooking ? "Booking..." : "Book this Session"}
                   </Button>

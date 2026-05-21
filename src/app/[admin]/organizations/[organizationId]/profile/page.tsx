@@ -153,7 +153,6 @@ function MentorProfileCreateUI({
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
         expertise,
-        bootcampId: resolvedBootcampId,
       }, isFirstTime)
       await refetchMentorProfile()
       await onValidSubmit?.({
@@ -169,7 +168,7 @@ function MentorProfileCreateUI({
         title: toastTitle,
         ...(apiMessage ? { description: apiMessage } : {}),
       })
-      router.push(coursesHref)
+      // router.push(coursesHref)
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||

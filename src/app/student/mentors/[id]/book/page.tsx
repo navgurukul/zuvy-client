@@ -65,19 +65,20 @@ export default function BookSessionPage() {
   const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
+  const organizationId = searchParams.get("organizationId") || undefined;
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
   const {
     mentorProfile,
     loading: mentorLoading,
     error: mentorError,
-  } = useMentorProfile(mentorId);
+  } = useMentorProfile(mentorId, true, organizationId);
   const {
     availability,
     loading: slotsLoading,
     error: slotsError,
     refetchMentorAvailability,
-  } = useMentorAvailability(mentorId);
+  } = useMentorAvailability(mentorId, true, organizationId);
   const { booking, isBooking, error: bookingError, bookSlot } = useBookMentorSlot();
   const { metrics, refetchStudentMentorMetrics } = useStudentMentorMetrics(true);
 

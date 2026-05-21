@@ -28,6 +28,7 @@ export default function RescheduleBookingPage() {
 		params["id"] as string | string[] | undefined
 	);
 	const mentorId = searchParams.get("mentorId") || undefined;
+	const organizationId = searchParams.get("organizationId") || undefined;
 	const currentSlotIdParam = searchParams.get("currentSlotId");
 	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
 
@@ -40,9 +41,9 @@ export default function RescheduleBookingPage() {
 		loading: availabilityLoading,
 		error: availabilityError,
 		refetchMentorAvailability,
-	} = useMentorAvailability(mentorId);
+	} = useMentorAvailability(mentorId, true, organizationId);
 
-	const { mentorProfile } = useMentorProfile(mentorId);
+	const { mentorProfile } = useMentorProfile(mentorId, true, organizationId);
 	const mentorDisplayName =
 		mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "-");
 

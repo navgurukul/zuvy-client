@@ -39,7 +39,11 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch mentor availability'
 }
 
-export function useMentorAvailability(mentorId?: string, initialFetch = true) {
+export function useMentorAvailability(
+    mentorId?: string,
+    initialFetch = true,
+    organizationId?: string | number
+) {
     const [availability, setAvailability] = useState<MentorAvailabilitySlot[]>(
         []
     )
@@ -57,9 +61,8 @@ export function useMentorAvailability(mentorId?: string, initialFetch = true) {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MentorAvailabilityApiResponse>(
-                `/student/mentors/${mentorId}/availability`
-            )
+            const url = `/student/mentors/${mentorId}/availability${organizationId ? `?organizationId=${encodeURIComponent(String(organizationId))}` : ''}`
+            const response = await api.get<MentorAvailabilityApiResponse>(url)
             setAvailability(parseMentorAvailabilityResponse(response.data))
         } catch (error) {
             console.error('Error fetching mentor availability:', error)
@@ -68,7 +71,7 @@ export function useMentorAvailability(mentorId?: string, initialFetch = true) {
         } finally {
             setLoading(false)
         }
-    }, [mentorId])
+    }, [mentorId, organizationId])
 
     useEffect(() => {
         if (initialFetch) getMentorAvailability()
