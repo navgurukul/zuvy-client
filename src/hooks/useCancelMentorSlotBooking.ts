@@ -22,15 +22,21 @@ export function useCancelMentorSlotBooking() {
     const cancelBooking = async (
         bookingId: number,
         reason: string,
-        cancelledBy: 'student' | 'mentor' | 'admin' = 'student'
+        cancelledBy: 'student' | 'mentor' = 'student',
+        scope: 'student' | 'instructor' = 'student'
     ): Promise<boolean> => {
         try {
             setIsCancelling(true)
             setError(null)
             setMessage(null)
 
+            const endpoint =
+                scope === 'instructor'
+                    ? `/instructor/mentor-slots/bookings/${bookingId}/cancel`
+                    : `/student/mentor-slots/bookings/${bookingId}/cancel`
+
             const response = await api.post<CancelBookingResponse>(
-                `/mentor-slots/${bookingId}/cancel`,
+                endpoint,
                 {
                     reason,
                     cancelledBy,

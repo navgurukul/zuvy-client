@@ -491,6 +491,7 @@ export interface LatestUpdatedCourseResponse {
   message: string;
   code: number;
   isSuccess: boolean;
+  mentorshipEnabled: boolean;
   data: LatestUpdatedCourseData;
 }
 

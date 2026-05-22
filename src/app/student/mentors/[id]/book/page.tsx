@@ -10,6 +10,7 @@ import {
   type MentorAvailabilitySlot,
 } from "@/hooks/useMentorAvailability";
 import { useBookMentorSlot } from "@/hooks/useBookMentorSlot";
+import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
 
 const getMentorId = (idParam: string | string[] | undefined) => {
   if (Array.isArray(idParam)) {
@@ -48,25 +49,38 @@ const formatSlotTimeRange = (slot: MentorAvailabilitySlot) => {
   return `${start} — ${end}`;
 };
 
+const formatEligibleDate = (dateString: string | null): string => {
+  if (!dateString) return "Soon";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export default function BookSessionPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
+  const organizationId = searchParams.get("organizationId") || undefined;
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
   const {
     mentorProfile,
     loading: mentorLoading,
     error: mentorError,
-  } = useMentorProfile(mentorId);
+  } = useMentorProfile(mentorId, true, organizationId);
   const {
     availability,
     loading: slotsLoading,
     error: slotsError,
     refetchMentorAvailability,
-  } = useMentorAvailability(mentorId);
+  } = useMentorAvailability(mentorId, true, organizationId);
   const { booking, isBooking, error: bookingError, bookSlot } = useBookMentorSlot();
+  const { metrics, refetchStudentMentorMetrics } = useStudentMentorMetrics(true);
 
   const selectedSlot = useMemo(
     () => availability.find((slot) => slot.id === selectedSlotId) || null,
@@ -77,16 +91,27 @@ export default function BookSessionPage() {
     mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "Mentor");
   const initials = getInitials(mentorDisplayName);
   const acceptsNewMentees = mentorProfile?.acceptsNewMentees ?? true;
+  const isQuotaExhausted = metrics?.isQuotaExhausted ?? false;
+  const cannotBook = metrics
+    ? (
+        metrics.canBook === false ||
+        (typeof metrics.remainingCredits === 'number' && metrics.remainingCredits <= 0) ||
+        (metrics.nextEligible && new Date(metrics.nextEligible) > new Date())
+      )
+    : false;
 
   const handleBookSlot = async () => {
     if (selectedSlotId === null) {
       return;
     }
 
+    if (cannotBook) return;
+
     const bookedSlot = await bookSlot(selectedSlotId);
     if (bookedSlot) {
       setSelectedSlotId(null);
       await refetchMentorAvailability();
+      await refetchStudentMentorMetrics();
     }
   };
 
@@ -141,15 +166,8 @@ export default function BookSessionPage() {
               >
                 Retry
               </button>
-            </div>
-          ) : availability.length === 0 ? (
-            <div className="border rounded-3xl h-[260px] flex flex-col items-center justify-center text-center bg-white">
 
-              <div className="bg-green-100 p-3 rounded-full mb-3">
-                <CalendarDays className="text-green-700" />
-              </div>
-
-              <p className="font-medium">No available slots right now</p>
+              <p className="font-medium mt-3">No available slots right now</p>
 
               <p className="text-sm text-gray-500 max-w-sm">
                 This mentor hasn&apos;t added upcoming availability yet.
@@ -237,14 +255,22 @@ export default function BookSessionPage() {
                 This mentor is not accepting new mentees.
               </p>
             )}
+            <div className="mt-4 space-y-2">
+              {isQuotaExhausted && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+                  <p className="font-medium">Limit reached</p>
+                  <p className="mt-0.5">Book from {formatEligibleDate(metrics?.nextEligible || null)}</p>
+                </div>
+              )}
 
-            <button
-              onClick={handleBookSlot}
-              disabled={!selectedSlot || isBooking || !acceptsNewMentees}
-              className="w-full mt-4 bg-green-800 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isBooking ? "Booking..." : "Book Selected Slot"}
-            </button>
+              <button
+                onClick={handleBookSlot}
+                disabled={!selectedSlot || isBooking || !acceptsNewMentees || isQuotaExhausted}
+                className="w-full bg-green-800 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isBooking ? "Booking..." : "Book Selected Slot"}
+              </button>
+            </div>
 
             {booking && (
               <div className="mt-3 text-left text-xs p-3 rounded-lg bg-green-50 text-green-700 border border-green-100">

@@ -28,7 +28,7 @@ export function useDeleteMentorSlot() {
             setMessage(null)
 
             const response = await api.delete<DeleteMentorSlotResponse>(
-                `/mentor-slots/${slotId}`
+                `/instructor/mentor-slots/${slotId}`
             )
 
             setMessage(response.data?.message || 'Slot removed successfully.')

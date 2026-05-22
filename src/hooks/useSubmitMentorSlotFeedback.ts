@@ -47,7 +47,7 @@ export function useSubmitMentorSlotFeedback() {
             setFeedbackData(null)
 
             const response = await api.post<SubmitFeedbackResponse>(
-                `/mentor-slots/${bookingId}/feedback`,
+                `/instructor/mentor-slots/bookings/${bookingId}/feedback`,
                 payload
             )
 

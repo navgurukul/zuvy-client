@@ -37,7 +37,7 @@ export function useStudentMentorMetrics(initialFetch = true) {
             setError(null)
 
             const response = await api.get<StudentMentorMetrics>(
-                '/mentor-slots/student/metrics'
+                '/student/mentor-slots/metrics'
             )
 
             setMetrics(response.data)
