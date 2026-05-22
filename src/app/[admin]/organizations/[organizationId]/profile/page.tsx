@@ -60,8 +60,6 @@ function MentorProfileCreateUI({
     [courses]
   )
   const bootcampId = mentorshipEnabledBootcamp?.id ?? null
-  const hasResolvedBootcamp =
-    typeof bootcampId === 'number' && Number.isFinite(bootcampId) && bootcampId > 0
 
   const {
     mentorProfile,
@@ -131,7 +129,6 @@ function MentorProfileCreateUI({
     if (!pastExperiences.trim()) validationErrors.push('Past experiences are required.')
     if (bio.trim().length < 80) validationErrors.push('Bio should be at least 80 characters.')
     if (expertise.length === 0) validationErrors.push('Please add at least one skill.')
-    if (!hasResolvedBootcamp) validationErrors.push('No bootcamp is available for this organization yet.')
 
     if (validationErrors.length > 0) {
       toast.error({
@@ -140,8 +137,6 @@ function MentorProfileCreateUI({
       })
       return
     }
-
-    const resolvedBootcampId = bootcampId as number
 
     try {
       // Use POST only when there is no existing mentor profile (first-time)
