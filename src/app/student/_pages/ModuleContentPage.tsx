@@ -11,6 +11,7 @@ import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
+import { useBootcampProgress } from "@/hooks/useBootcampProgress";
 import Header from "../_components/Header";
 import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
 
@@ -18,8 +19,10 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const router = useRouter();
   const searchParams = useSearchParams();
   const chapterId = searchParams.get('chapterId');
+  const orgIdFromQuery = searchParams.get('orgId');
 
   // Move hooks before conditional return
+  const { orgId } = useBootcampProgress(courseId);
   const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -140,10 +143,22 @@ useEffect(() => {
     if (!loading && !error && enhancedModule && !chapterId) {
       const firstChapterId = enhancedModule.topics?.[0]?.items?.[0]?.id;
       if (firstChapterId) {
-        router.replace(`?chapterId=${firstChapterId}`);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('chapterId', firstChapterId);
+        if (orgId) {
+          params.set('orgId', orgId);
+        }
+        router.replace(`?${params.toString()}`);
       }
     }
-  }, [loading, error, enhancedModule, chapterId, router]);
+  }, [loading, error, enhancedModule, chapterId, orgId, router, searchParams]);
+
+  useEffect(() => {
+    if (!orgId || orgIdFromQuery) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('orgId', orgId);
+    router.replace(`?${params.toString()}`);
+  }, [orgId, orgIdFromQuery, router, searchParams]);
 
   // Auto-expand the topic that contains the selected item
   useEffect(() => {
@@ -288,7 +303,12 @@ useEffect(() => {
   const selectedItemData = getSelectedItem();
 
   const handleItemSelect = (itemId: string) => {
-    router.push(`?chapterId=${itemId}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('chapterId', itemId);
+    if (orgId) {
+      params.set('orgId', orgId);
+    }
+    router.push(`?${params.toString()}`);
     if (isMobile) {
       setIsMobileSidebarOpen(false);
     }

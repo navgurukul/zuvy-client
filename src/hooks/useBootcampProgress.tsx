@@ -25,6 +25,8 @@ export const useBootcampProgress = (courseId: string) => {
     fetchBootcampProgress();
   };
 
+  const orgId = progressData?.data?.bootcampTracking?.organizationId?.toString() || null;
+
   useEffect(() => {
     if (courseId) {
       fetchBootcampProgress();
@@ -33,6 +35,7 @@ export const useBootcampProgress = (courseId: string) => {
 
   return {
     progressData,
+    orgId,
     loading,
     error,
     refetch

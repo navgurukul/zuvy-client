@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
 import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
@@ -14,6 +14,8 @@ import {CodingContentChapterSkeleton} from "@/app/student/_components/Skeletons"
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
   const [codingQuestions, setCodingQuestions] = useState<CodingQuestions[]>([]);
   const [submissionResults, setSubmissionResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,15 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
   }, [chapterDetails.status]);
 
   const handleSolveChallenge = (question: CodingQuestions) => {
-    router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}`);
+    const query = new URLSearchParams({
+      questionId: String(question.id),
+      chapterId: String(chapterDetails.id),
+      moduleId: String(params.moduleId),
+    });
+    if (orgId) {
+      query.set('orgId', orgId);
+    }
+    router.push(`/student/course/${params.courseId}/codingChallenge?${query.toString()}`);
   };
 
   const CodingQuestionCard = ({ question }: { question: CodingQuestions }) => (

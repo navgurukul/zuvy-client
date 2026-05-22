@@ -190,6 +190,7 @@ export interface BootcampTracking {
   startTime: string;
   duration: string;
   language: string;
+  organizationId?: number;
   createdAt: string;
   updatedAt: string;
   version: string | null;
@@ -281,6 +282,7 @@ export interface ChapterDetailsResponse {
 export interface UseCodingChallengeProps {
   questionId: string;
   onChapterComplete?: () => void;
+  orgId?: string | null;
 }
 
 // useCodingSubmissions

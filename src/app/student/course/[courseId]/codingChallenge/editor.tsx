@@ -22,6 +22,7 @@ const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps)
     const searchParams = useSearchParams();
     const chapterId = searchParams.get('chapterId');
     const moduleId = searchParams.get('moduleId');
+    const orgId = searchParams.get('orgId');
 
     // Chapter completion hook
     const { isCompleting, completeChapter } = useChapterCompletion({
@@ -38,6 +39,7 @@ const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps)
     // Main coding challenge hook
     const { state, actions, constants ,  } = useCodingChallenge({
         questionId,
+        orgId,
         onChapterComplete: completeChapter,
         
     });
@@ -57,7 +59,15 @@ const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps)
 
     const onViewSolution = () => {
         actions.closeSolutionModal();
-        router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}&moduleId=${moduleId}&chapterId=${chapterId}`);
+        const query = new URLSearchParams({
+            questionId,
+            moduleId: moduleId || '',
+            chapterId: chapterId || '',
+        });
+        if (orgId) {
+            query.set('orgId', orgId);
+        }
+        router.push(`/student/course/${params.courseId}/codingChallengeResult?${query.toString()}`);
     };
 
     const onReturnToCourse = () => {
