@@ -21,7 +21,6 @@ import { AvailabilitySkeleton } from "@/app/[admin]/organizations/[organizationI
 import { api } from '@/utils/axios.config'
 
 const durationOptions = [30, 45, 60, 90]
-const minimumDeleteLeadTimeMs = 12 * 60 * 60 * 1000
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
 
@@ -303,40 +302,6 @@ export default function AvailabilityPage() {
     }
   }
 
-  const hasBookings = (status: string, currentBookedCount: number) => {
-    const normalizedStatus = status.toLowerCase()
-    return currentBookedCount > 0 || normalizedStatus === "booked"
-  }
-
-  const canDeleteSlot = (
-    slotStartDateTime: string,
-    status: string,
-    currentBookedCount: number
-  ) => {
-    if (hasBookings(status, currentBookedCount)) {
-      return false
-    }
-
-    const slotStartMs = new Date(slotStartDateTime).getTime()
-    return slotStartMs - Date.now() >= minimumDeleteLeadTimeMs
-  }
-
-  const getDeleteBlockReason = (
-    slotStartDateTime: string,
-    status: string,
-    currentBookedCount: number
-  ) => {
-    if (hasBookings(status, currentBookedCount)) {
-      return "Booked slots cannot be removed."
-    }
-
-    if (!canDeleteSlot(slotStartDateTime, status, currentBookedCount)) {
-      return "Slot can be removed only if start time is at least 12 hours away."
-    }
-
-    return null
-  }
-
   const handleRemoveSlot = async (
     slotId: number,
     slotStartDateTime: string,
@@ -346,21 +311,6 @@ export default function AvailabilityPage() {
     setFormError(null)
     setSuccessMessage(null)
     setRemoveError(null)
-
-    const blockReason = getDeleteBlockReason(
-      slotStartDateTime,
-      status,
-      currentBookedCount
-    )
-
-    if (blockReason) {
-      setRemoveError(blockReason)
-      toast.warning({
-        title: "Cannot remove slot",
-        description: blockReason,
-      })
-      return
-    }
 
     const removed = await deleteSlot(slotId)
     if (removed) {
@@ -591,14 +541,7 @@ export default function AvailabilityPage() {
                             slot.currentBookedCount
                           )
                         }
-                        disabled={
-                          isDeleting ||
-                          !canDeleteSlot(
-                            slot.slotStartDateTime,
-                            slot.status,
-                            slot.currentBookedCount
-                          )
-                        }
+                        disabled={isDeleting}
                       >
                         {isDeleting && deletingSlotId === slot.id ? (
                           <span className="text-xs">...</span>

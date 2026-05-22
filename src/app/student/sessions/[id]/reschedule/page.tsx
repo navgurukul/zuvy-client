@@ -5,20 +5,20 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
-import { useMentorAvailability } from "@/hooks/useMentorAvailability";
+import { useGetRescheduleSlots } from "@/hooks/useGetRescheduleSlots";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
-): number | null => {
+): number | undefined => {
 	const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
 	if (!id) {
-		return null;
+		return undefined;
 	}
 
 	const parsedId = Number(id);
-	return Number.isFinite(parsedId) ? parsedId : null;
+	return Number.isFinite(parsedId) ? parsedId : undefined;
 };
 
 export default function RescheduleBookingPage() {
@@ -28,6 +28,7 @@ export default function RescheduleBookingPage() {
 		params["id"] as string | string[] | undefined
 	);
 	const mentorId = searchParams.get("mentorId") || undefined;
+	const organizationId = searchParams.get("organizationId") || undefined;
 	const currentSlotIdParam = searchParams.get("currentSlotId");
 	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
 
@@ -36,13 +37,13 @@ export default function RescheduleBookingPage() {
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const {
-		availability,
-		loading: availabilityLoading,
-		error: availabilityError,
-		refetchMentorAvailability,
-	} = useMentorAvailability(mentorId);
+		slots,
+		loading: slotsLoading,
+		error: slotsError,
+		refetchSlots,
+	} = useGetRescheduleSlots(bookingId, true);
 
-	const { mentorProfile } = useMentorProfile(mentorId);
+	const { mentorProfile } = useMentorProfile(mentorId, true, organizationId);
 	const mentorDisplayName =
 		mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "-");
 
@@ -133,15 +134,15 @@ export default function RescheduleBookingPage() {
 				<div className="space-y-2">
 					<label className="text-sm font-medium block text-left">Select New Slot</label>
 
-					{availabilityLoading && (
+					{slotsLoading && (
 						<p className="text-sm text-muted-foreground text-left">Loading available slots...</p>
 					)}
 
-					{!availabilityLoading && availabilityError && (
+					{!slotsLoading && slotsError && (
 						<div className="space-y-2">
-							<p className="text-sm text-red-500 text-left">{availabilityError}</p>
+							<p className="text-sm text-red-500 text-left">{slotsError}</p>
 							<button
-								onClick={refetchMentorAvailability}
+								onClick={refetchSlots}
 								className="text-xs border px-3 py-1.5 rounded-full"
 							>
 								Retry slots
@@ -149,13 +150,13 @@ export default function RescheduleBookingPage() {
 						</div>
 					)}
 
-					{!availabilityLoading && !availabilityError && availability.length === 0 && (
+					{!slotsLoading && !slotsError && slots.length === 0 && (
 						<p className="text-sm text-muted-foreground text-left">No slots available for reschedule.</p>
 					)}
 
-					{!availabilityLoading && !availabilityError && availability.length > 0 && (
+					{!slotsLoading && !slotsError && slots.length > 0 && (
 						<div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-							{availability.map((slot) => {
+							{slots.map((slot) => {
 								const isCurrent = Number.isFinite(currentSlotId) && currentSlotId !== null && slot.id === currentSlotId;
 								const isSelectable = !isCurrent;
 								const isSelected = selectedNewSlotId === slot.id;
@@ -172,7 +173,7 @@ export default function RescheduleBookingPage() {
 												: "border-gray-200 bg-white"
 										} ${!isSelectable ? "opacity-60 cursor-not-allowed" : ""}`}
 									>
-										<p className="text-sm font-semibold">Slot ID: {slot.id}</p>
+										{/* Slot id removed from UI for students */}
 										<div className="mt-1 space-y-1 text-xs text-muted-foreground">
 											<p className="flex items-center gap-2">
 												<Calendar size={12} />
@@ -194,11 +195,7 @@ export default function RescheduleBookingPage() {
 						</div>
 					)}
 
-					{Number.isFinite(currentSlotId) && currentSlotId !== null && (
-						<p className="text-xs text-muted-foreground text-left">
-							Current slot id: {currentSlotId} (do not use this same id)
-						</p>
-					)}
+					{/* Current slot id hidden from UI — retained only in URL params for logic */}
 				</div>
 
 				<div className="space-y-2">

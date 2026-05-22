@@ -96,7 +96,7 @@ export function useMentorSlotDetails(
                 setError(null)
 
                 const response = await api.get<MentorSlotDetailsApiResponse>(
-                    `/mentor-slots/${id}/details`
+                    `/instructor/mentor-slots/${id}/details`
                 )
 
                 const parsedData = parseSlotDetailsResponse(response.data)

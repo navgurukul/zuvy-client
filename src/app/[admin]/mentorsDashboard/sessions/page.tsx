@@ -139,17 +139,25 @@ export default function SessionsPage() {
     Record<number, true>
   >({})
 
-  const { counts: summaryCounts } = useMyMentorSessions(
+  const { counts } = useMyMentorSessions(
     true,
-    "/mentor-sessions/mentor/my"
+    "/instructor/mentor-sessions/my",
+    "all"
   )
+
+  const summaryCounts = {
+    total: Number(counts.total) || 0,
+    upcoming: Number(counts.upcoming) || 0,
+    reschedule: Number(counts.reschedule) || 0,
+    completed: Number(counts.completed) || 0,
+  }
 
   const {
     sessions: apiSessions,
     loading,
     error,
     refetchMySessions,
-  } = useMyMentorSessions(true, "/mentor-sessions/mentor/my", activeTab as SessionFilter)
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const sessions = apiSessions
 
@@ -187,7 +195,8 @@ export default function SessionsPage() {
 
   const { recordingUrl: completedRecordingUrl } = useMentorSlotRecording(
     selectedSession?.id,
-    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED")
+    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED"),
+    "instructor"
   )
 
   const isReadOnlySession = Boolean(
@@ -208,7 +217,7 @@ export default function SessionsPage() {
   const isRescheduleTab = activeTab === "reschedule"
 
   const canJoinSelectedSession = Boolean(
-    selectedSession?.zoomStartUrl?.trim() &&
+    selectedSession?.meetingLink?.trim() &&
     isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
   )
 
@@ -648,13 +657,13 @@ export default function SessionsPage() {
                     {selectedSession.sessionLifecycleState}
                   </Badge>
                 </div>
-                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.zoomStartUrl && !canJoinSelectedSession && (
+                {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
                   <p className="text-xs text-muted-foreground">
                     Join opens 10 min before start
                   </p>
                 )}
                 {!isRescheduleTab && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  selectedSession.zoomStartUrl ? (
+                  selectedSession.meetingLink ? (
                     <Button
                       type="button"
                       className="bg-green-700 hover:bg-green-800"
@@ -663,7 +672,7 @@ export default function SessionsPage() {
                     >
                       {canJoinSelectedSession ? (
                         <a
-                          href={selectedSession.zoomStartUrl}
+                          href={selectedSession.meetingLink}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

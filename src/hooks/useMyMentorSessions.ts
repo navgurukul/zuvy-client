@@ -11,7 +11,6 @@ export interface MyMentorSession {
     status: string
     sessionLifecycleState: string
     meetingLink?: string | null
-    zoomStartUrl?: string | null
     isZoomMeet?: boolean | null
     joinedAt: string | null
     completedAt: string | null
@@ -110,8 +109,8 @@ const getErrorMessage = (error: unknown): string => {
 }
 
 export type MyMentorSessionsEndpoint =
-    | '/mentor-sessions/my'
-    | '/mentor-sessions/mentor/my'
+    | '/student/mentor-sessions/my'
+    | '/instructor/mentor-sessions/my'
 
 export type SessionFilter =
     | 'all'
