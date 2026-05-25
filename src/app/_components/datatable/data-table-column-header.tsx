@@ -20,7 +20,7 @@ export function DataTableColumnHeader<TData, TValue>({
     const [hasClicked, setHasClicked] = useState(false)
 
     if (!column.getCanSort() || !onSort) {
-        return <div className={cn(className)}>{title}</div>
+        return <div className={cn('w-full', className)}>{title}</div>
     }
 
     const handleSort = () => {
@@ -34,11 +34,11 @@ export function DataTableColumnHeader<TData, TValue>({
     }
 
     return (
-        <div className={cn('flex items-center space-x-2', className)}>
+        <div className={cn('flex w-full items-center space-x-2', className)}>
             <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-muted-foreground hover:bg-transparent focus-visible:ring-0 p-0 m-0 h-8"
+                className="justify-start text-muted-foreground hover:text-muted-foreground hover:bg-transparent focus-visible:ring-0 p-0 m-0 h-8"
                 onClick={handleSort}
             >
                 <div className="flex items-center space-x-2">

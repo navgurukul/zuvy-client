@@ -8,6 +8,13 @@ export const useLatestUpdatedCourse = (courseId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!courseId) {
+      setLatestCourseData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchLatestUpdatedCourse = async () => {
       try {
         setLoading(true);
@@ -16,7 +23,10 @@ export const useLatestUpdatedCourse = (courseId: string) => {
         const response = await api.get<LatestUpdatedCourseResponse>(`/tracking/latestUpdatedCourse?bootcampId=${courseId}`);
         
         if (response.data.isSuccess) {
-          setLatestCourseData(response.data.data);
+          setLatestCourseData({
+            ...response.data.data,
+            mentorshipEnabled: response.data.mentorshipEnabled,
+          });
         } else {
           setError(response.data.message || 'Failed to fetch latest updated course');
         }
@@ -29,7 +39,7 @@ export const useLatestUpdatedCourse = (courseId: string) => {
     };
 
     fetchLatestUpdatedCourse();
-  }, []);
+  }, [courseId]);
 
   return {
     latestCourseData,

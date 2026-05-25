@@ -1,7 +1,7 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { usePathname, useRouter} from 'next/navigation'
+import { usePathname, useRouter, useParams} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
@@ -24,6 +24,7 @@ export default function RootLayout({
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
+    const isMentorsRoute = pathname.includes('/mentorsDashboard')
 
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const isFullWidthRoute =
@@ -33,7 +34,6 @@ export default function RootLayout({
         const adminRoutes = /admin.*courses.*module.*chapters/
         return adminRoutes.test(route || '') ? 'overflow-hidden' : ''
     }
-     
     if ((pathname === '/' || pathname.trim() === '') && userRole !== 'false') {
         // return  router.push(`/${userRole}/courses`)
          return (
@@ -51,7 +51,9 @@ export default function RootLayout({
         <div className='font-body'>
             <div className={isAssessmentRouteClasses(pathname)}>
                 {!adminAssessmentPreviewRoute && <StudentNavbar />}
-                <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen flex-1`}>
+                <div
+                    className={`${adminAssessmentPreviewRoute ? '' : isMentorsRoute ? 'pt-28' : 'pt-16'} h-screen flex-1`}
+                >
                     {children}
                 </div>
             </div>

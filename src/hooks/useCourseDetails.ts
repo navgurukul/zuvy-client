@@ -6,9 +6,14 @@ import {
     CourseDetailsFormData,
     UpdateCourseResponse,
     ImageUploadResponse,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 export const useCourseDetails = () => {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const orgId = Number(organizationId) || user?.orgId; 
     const [isLoading, setIsLoading] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const { Permissions, courseData, setCourseData } = getCourseData()
@@ -93,7 +98,7 @@ export const useCourseDetails = () => {
             }
 
             const response = await api.patch<UpdateCourseResponse>(
-                `/bootcamp/${courseData?.id}`,
+                `/bootcamp/${courseData?.id}/${orgId}`,
                 {
                     ...data,
                     coverImage,
