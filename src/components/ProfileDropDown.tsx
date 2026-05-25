@@ -6,6 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import Link from 'next/link'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,9 +19,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getUserInitials } from '@/utils/common'
+import { formattedRole } from '@/lib/utils'
 
 interface ProfileDropDownProps {
     studentData: any
+    profileHref: string
+    showViewProfile?: boolean
     handleLogoutClick: () => void
     showLogoutDialog: boolean
     setShowLogoutDialog: (value: boolean) => void
@@ -29,6 +33,8 @@ interface ProfileDropDownProps {
 
 const ProfileDropDown = ({
     studentData,
+    profileHref,
+    showViewProfile = true,
     handleLogoutClick,
     showLogoutDialog,
     setShowLogoutDialog,
@@ -66,14 +72,25 @@ const ProfileDropDown = ({
                                 Role
                             </p>
                             <p className="text-sm capitalize">
-                                {studentData?.rolesList?.join(', ')}
+                                {/* {studentData?.rolesList?.join(', ')} */}
+                                {formattedRole(studentData?.rolesList?.[0] || '')}
                             </p>
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {showViewProfile && (
+                        <>
+                            <DropdownMenuItem asChild>
+                                <Link href={profileHref} className="cursor-pointer">
+                                    <span className='text-sm font-medium leading-none'>View Profile</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                        </>
+                    )}
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
-                        className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600 cursor-pointer"
+                        className="text-red-600 hover:bg-primary hover:!text-primary-foreground cursor-pointer"
                     >
                         {/* <LogOut className="mr-2 h-4 w-4" /> */}
                         <span>Logout</span>

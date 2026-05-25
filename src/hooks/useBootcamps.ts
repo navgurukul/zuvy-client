@@ -5,7 +5,7 @@
 // import type {
 //     Course,
 //     CoursesResponse,
-// } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+// } from '@/app/[admin]/[organization]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 // type UseBootcampsArgs = {
 //     limit: number | string
@@ -75,7 +75,9 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 type UseBootcampsArgs = {
     limit: number | string
@@ -90,6 +92,9 @@ export function useBootcamps({
     offset,
     auto = true,
 }: UseBootcampsArgs) {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const orgId = Number(organizationId) || user?.orgId;
     const stableLimit = useMemo(() => {
         const n = typeof limit === 'string' ? Number(limit) : limit
         return Number.isFinite(n) ? n : 10
@@ -127,7 +132,11 @@ export function useBootcamps({
             const ctrl = (abortRef.current = new AbortController())
 
             try {
-                const base = `/bootcamp?limit=${stableLimit}&offset=${off}`
+                if (!orgId || isNaN(orgId)) {
+                    setCourses([])
+                    return
+                }
+                const base = `/bootcamp/all/${orgId}?limit=${stableLimit}&offset=${off}`
                 const url = searchTerm
                     ? `${base}&searchTerm=${encodeURIComponent(searchTerm)}`
                     : base
@@ -138,14 +147,19 @@ export function useBootcamps({
 
                 lastKeyRef.current = key
             } catch (err: any) {
-                if (!ctrl.signal.aborted) setError(err)
+                if (!ctrl.signal.aborted) {
+                    setError(err)
+                    // On error, we should also update lastKeyRef to avoid immediate loop if effect triggers again
+                    // But we want to allow manual refetch, so we only block if it's the exact same automated trigger
+                    lastKeyRef.current = key
+                }
             } finally {
                 if (inFlightKeyRef.current === key) inFlightKeyRef.current = ''
                 if (abortRef.current === ctrl) abortRef.current = null
                 setLoading(false)
             }
         },
-        [stableLimit, searchTerm]
+        [stableLimit, searchTerm, orgId]
     )
 
     // auto fetch on primitive inputs change

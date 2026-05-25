@@ -8,14 +8,19 @@ import { Database } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import { useRef, useState } from 'react'
 
 const QuestionBankDropdown = () => {
   const pathname = usePathname()
   const role = pathname.split('/')[1]
+  const { organizationId } = useParams()
   const [open, setOpen] = useState(false)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const isActive =
+      pathname === `/${role}/organizations/${organizationId}/resource/` ||
+      pathname.startsWith(`/${role}/organizations/${organizationId}/resource/`)
 
   const clearCloseTimeout = () => {
     if (closeTimeoutRef.current) {
@@ -35,10 +40,6 @@ const QuestionBankDropdown = () => {
       setOpen(false)
     }, 120)
   }
-
-  const isActive =
-    pathname === `/${role}/resource/` ||
-    pathname.startsWith(`/${role}/resource/`)
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
@@ -71,10 +72,10 @@ const QuestionBankDropdown = () => {
         >
           {/* Coding */}
           <Link
-            href={`/${role}/resource/coding`}
+            href={`/${role}/organizations/${organizationId}/resource/coding`}
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
-              pathname === `/${role}/resource/coding`
+              pathname === `/${role}/organizations/${organizationId}/resource/coding`
                 ? 'bg-gray-300 text-black'
                 : 'text-black hover:bg-gray-100'
             )}
@@ -84,10 +85,10 @@ const QuestionBankDropdown = () => {
 
           {/* MCQ */}
           <Link
-            href={`/${role}/resource/mcq`}
+            href={`/${role}/organizations/${organizationId}/resource/mcq`}
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
-              pathname === `/${role}/resource/mcq`
+              pathname === `/${role}/organizations/${organizationId}/resource/mcq`
                 ? 'bg-gray-300 text-black'
                 : 'text-black hover:bg-gray-100'
             )}
@@ -97,10 +98,10 @@ const QuestionBankDropdown = () => {
 
           {/* Open Ended */}
           <Link
-            href={`/${role}/resource/open-ended`}
+            href={`/${role}/organizations/${organizationId}/resource/open-ended`}
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
-              pathname === `/${role}/resource/open-ended`
+              pathname === `/${role}/organizations/${organizationId}/resource/open-ended`
                 ? 'bg-gray-300 text-black'
                 : 'text-black hover:bg-gray-100'
             )}

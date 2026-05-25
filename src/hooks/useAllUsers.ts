@@ -1,7 +1,8 @@
 'use client'
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { api } from '@/utils/axios.config'
-
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 export interface User {
     createdAt: any
     id: number
@@ -10,6 +11,8 @@ export interface User {
     name: string
     email: string
     roleName: string
+    isPoc?: boolean
+    isZuvyPoc?: boolean
 }
 
 export interface UsersResponse {
@@ -41,6 +44,9 @@ export function useAllUsers({
     searchTerm,
     offset,
     roleId}: UseAllUsersArgs) {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const orgId = Number(organizationId) || user?.orgId; 
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -66,7 +72,7 @@ export function useAllUsers({
                 setError(null)
                 const roleIdParam = filterRoleId || roleId
                 const roleQuery = roleIdParam ? `&roleId=${roleIdParam}` : ''
-                const res = await api.get<UsersResponse>(`/users/get/all/users?limit=${stableLimit}&offset=${offset}${roleQuery}`)
+                const res = await api.get<UsersResponse>(`/users/get/all/users/${orgId}?limit=${stableLimit}&offset=${offset}${roleQuery}`)
                 const allUsers = res.data || []
 
                 setUsers(allUsers.data)

@@ -19,6 +19,10 @@ export interface User {
   name: string;
   email: string;
   rolesList: string[]; 
+  permissions?: Record<string, boolean>;
+  hasfilled: boolean;
+  orgName: string;
+  orgId: number;
 }
 
 export interface AuthResponse {
