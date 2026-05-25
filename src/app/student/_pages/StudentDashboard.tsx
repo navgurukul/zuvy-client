@@ -55,7 +55,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
-      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
+      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}?orgId=${studentData?.inProgressBootcamps[0].organizationId}`);
     }
   }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
 
@@ -88,15 +88,15 @@ const StudentDashboard = () => {
         <div className="flex items-center gap-3 w-full">
           <div className="hidden md:flex items-center gap-3 w-full">
             <Button variant="outline" className="flex-1 bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}`}>
+              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
-                View Course
+                View Course 
               </Link>
             </Button>
           </div>
           <div className="md:hidden flex flex-col gap-3 w-full">
             <Button variant="outline" className="w-full bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}`}>
+              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course
               </Link>
@@ -109,7 +109,7 @@ const StudentDashboard = () => {
     if (bootcamp.progress === 0) {
       return (
         <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark  " asChild>
-          <Link href={`/student/course/${bootcamp.id}`}>
+          <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
             <Play className="w-4 h-4 mr-2" />
             Start Learning
           </Link>
@@ -119,7 +119,7 @@ const StudentDashboard = () => {
 
     return (
       <Button className="w-full md:w-auto bg-primary font-semibold text-primary-foreground hover:bg-primary-dark" asChild>
-        <Link href={`/student/course/${bootcamp.id}`}>
+        <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
           <RotateCcw className="w-4 h-4 mr-2" />
           Resume Learning
         </Link>

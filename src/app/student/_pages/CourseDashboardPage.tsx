@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,8 @@ type WhatsNextItem = UpcomingEvent | MentorSessionEvent;
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
 
   const [showAllModules, setShowAllModules] = useState(false);
   const { setIsStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore()
@@ -318,6 +321,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return module.description || "Learn essential concepts and build practical skills.";
   };
 
+  const getModuleHref = (module: Module, isCurrentModule: boolean, upcomingChapterId: number | null) => {
+    const chapterId = isCurrentModule ? upcomingChapterId : module.ChapterId;
+    return `/student/course/${courseId}/modules/${module.id}?chapterId=${chapterId}${orgId ? `&orgId=${orgId}` : ''}`;
+  };
+
   const formatTimeAlloted = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const days = Math.floor(hours / 24);
@@ -393,7 +401,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       ) : (
                         <Link
                           className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                         >
                           {classItem.title}
                         </Link>
@@ -548,7 +556,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       ) : (
                         <Link
                           className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                         >
                           {classItem.title}
                         </Link>
@@ -763,7 +771,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
-                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                               className="text-primary text-sm font-medium hover:underline"
                             >
                               {isEventReady
@@ -865,7 +873,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
-                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                               className="text-primary text-sm font-medium hover:underline"
                             >
                               {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
@@ -1085,9 +1093,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                           }
                                         }}
                                       >
-                                        {module.typeId !== 2 ? <Link key={module.id} className="" href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                        {module.typeId !== 2 ? <Link key={module.id} className="" href={getModuleHref(module, isCurrentModule, upcomingChapterId)}>
                                           {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm  hover:underline`} >View Project</Link>}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}&orgId=${orgId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm  hover:underline`} >View Project</Link>}
                                       </Button>
                                     </div>
                                   </TooltipTrigger>
@@ -1139,9 +1147,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                         }
                                       }}
                                     >
-                                      {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                      {module.typeId !== 2 ? <Link key={module.id} href={getModuleHref(module, isCurrentModule, upcomingChapterId)}>
                                         {getModuleCTA(module, moduleProgress)}
-                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={` text-sm  text-primary hover:underline`} >View Project</Link>}
+                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}&orgId=${orgId}`} className={` text-sm  text-primary hover:underline`} >View Project</Link>}
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
@@ -1292,7 +1300,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       </Link>
                                     ) : isRegularUpcomingEvent(item) ? (
                                       <Link
-                                        href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                                        href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                                         target="_self"
                                         className="hover:text-primary hover:underline underline-offset-[4px]"
                                       >
@@ -1490,7 +1498,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   ) : (
                                     <Link
                                       className="w-fit font-manrope text-sm  hover:text-primary hover:underline underline-offset-[5px]"
-                                      href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                                      href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
                                     >
                                       {ellipsis(
                                         classItem.title,
