@@ -18,7 +18,7 @@ import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
 import { handleSaveChapter } from '@/utils/admin'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
     CodingChallangesQuestion,
@@ -40,6 +40,8 @@ function CodingChallenge({
     canEdit = true,
 }: ChallangesProps) {
     const router = useRouter()
+    const params = useParams();
+    const orgId = params.organizationId;
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [alertOpen, setAlertOpen] = useState(!canEdit)
@@ -199,7 +201,7 @@ useEffect(() => {
     async function getAllCodingQuestions() {
         try {
 
-            let url = '/Content/allCodingQuestions'
+            let url = `/Content/${orgId}/allCodingQuestions`
             const queryParams = []
 
             let selectedTagIds = ''

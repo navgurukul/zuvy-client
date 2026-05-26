@@ -37,8 +37,9 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
   const params = useParams();
   const searchParams = useSearchParams();
   const chapterId = searchParams.get('chapterId');
+  const orgId = searchParams.get('orgId');
   const handleViewSolution = (questionId: number) => {
-    router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}&moduleId=${params.moduleId}&chapterId=${chapterId}`);
+    router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}&moduleId=${params.moduleId}&chapterId=${chapterId}&orgId=${orgId}`);
   };
 
 
