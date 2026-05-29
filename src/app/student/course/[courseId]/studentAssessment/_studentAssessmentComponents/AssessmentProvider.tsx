@@ -158,7 +158,7 @@ function Page({ params }: PageParams) {
   }, [decodedAssessmentId]);
 
   const getAssessmentSubmissionsData = useCallback(async () => {
-    const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}&orgId=${orgId}`;
+    const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}?orgId=${orgId}`;
     try {
       const res = await api.get<AssessmentSubmissionResponse>(
         `Content/students/assessmentId=${decodedAssessmentId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`

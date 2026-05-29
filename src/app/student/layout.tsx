@@ -6,7 +6,7 @@ import { getUser, useThemeStore } from '@/store/store';
 // import { useRoles } from '@/hooks/useRoles'
 import { Spinner } from '@/components/ui/spinner';
 import Notfound from '../not-found';
-import UnauthorizedUser from '@/components/UnauthorizedUser';
+import UnauthorizedStudent from '@/components/UnauthorizedStudent';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import ZoeBanner from '../_components/ZoeBanner';
@@ -146,8 +146,8 @@ export default function StudentLayout({
                 <Spinner className="text-[rgb(81,134,114)]" />
             </div>
         )
-    } if (userRole !== roleFromPath || roleFromPath === 'student') {
-        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
+    } if (userRole !== roleFromPath) {
+        return <UnauthorizedStudent userRole={userRole} roleFromPath={roleFromPath} />
     }
     // if (!isRoleInSystem) {
     //     return (
