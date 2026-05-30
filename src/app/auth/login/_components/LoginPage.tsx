@@ -18,10 +18,11 @@ import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { getUser, useThemeStore } from '@/store/store'
+import { getUser } from '@/store/store'
 import Image from 'next/image'
 import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
+import { useThemeStore } from '@/store/store'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -295,9 +296,6 @@ const handleGoogleSuccess = async (
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
-
-        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
-        console.log('Current URL:', window.location.href)
         if (window.location.href.includes('route')) {
         // if (window.location.href) {
             console.log('URL has route param')

@@ -12,7 +12,7 @@ import { useCodingSubmissionStore, useLazyLoadedStudentData, useThemeStore } fro
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
-import { useRouter, usePathname, useParams } from 'next/navigation'
+import { useRouter, usePathname, useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
@@ -55,6 +55,8 @@ const IDE: React.FC<IDEProps> = ({
 }) => {
     const pathname = usePathname()
     const router = useRouter()
+    const searchParams = useSearchParams();
+    const orgId = searchParams.get('orgId');
     const { toast } = useToast()
     const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
@@ -231,7 +233,7 @@ const IDE: React.FC<IDEProps> = ({
     const getQuestionDetails = async () => {
         try {
             await api
-                .get(`codingPlatform/get-coding-question/${params.editor}`)
+                .get(`codingPlatform/${orgId}/get-coding-question/${params.editor}`)
                 .then((response) => {
                     setQuestionDetails(response?.data.data)
 
@@ -248,7 +250,7 @@ const IDE: React.FC<IDEProps> = ({
 
     useEffect(() => {
         getQuestionDetails()
-    }, [language])
+    }, [language, orgId])
 
     useEffect(() => {
         if (templates?.[language]?.template) {

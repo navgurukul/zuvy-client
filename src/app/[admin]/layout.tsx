@@ -4,7 +4,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname, useRouter, useParams} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
-// import { Spinner } from '@/components/ui/spinner'
+// import { Spinner } from '@/components/ui/spinner' removed
 import '../globals.css'
 import StudentNavbar from '../_components/navbar'
 import { useRoles } from '@/hooks/useRoles'

@@ -3,10 +3,10 @@ import Header from './_components/Header'
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense, useState } from 'react';
 import { getUser, useThemeStore } from '@/store/store';
-import { useRoles } from '@/hooks/useRoles'
+// import { useRoles } from '@/hooks/useRoles'
 import { Spinner } from '@/components/ui/spinner';
 import Notfound from '../not-found';
-import UnauthorizedUser from '@/components/UnauthorizedUser';
+import UnauthorizedStudent from '@/components/UnauthorizedStudent';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import ZoeBanner from '../_components/ZoeBanner';
@@ -41,11 +41,11 @@ function StudentLayoutContent({
     const chapterId = searchParams.get('chapterId');
     const hideHeader = pathname.includes('/assessmentResult/') || pathname.includes('/codingChallenge') || pathname.includes('/projects');
     const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
-    const { roles, loading } = useRoles()
+    // const { roles, loading } = useRoles()
     const { user } = getUser()
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
+    // const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
     const [showZoeBanner, setShowZoeBanner] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -115,11 +115,11 @@ export default function StudentLayout({
     children: React.ReactNode
 }) {
     const pathname = usePathname();
-    const { roles, loading } = useRoles()
+    // const { roles, loading } = useRoles()
     const { user } = getUser()
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
+    // const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
 
     if (roleFromPath === userRole) {
         return (
@@ -140,23 +140,23 @@ export default function StudentLayout({
                 </StudentLayoutContent>
             </Suspense>
         )
-    } if (user.email.length === 0 || loading) {
+    } if (user.email.length === 0) {
         return (
             <div className="flex items-center justify-center h-[680px]">
                 <Spinner className="text-[rgb(81,134,114)]" />
             </div>
         )
-    } if (userRole !== roleFromPath || roleFromPath === 'student') {
-        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
+    } if (userRole !== roleFromPath) {
+        return <UnauthorizedStudent userRole={userRole} roleFromPath={roleFromPath} />
     }
-    if (!isRoleInSystem) {
-        return (
-            <Notfound
-                error={new Error('Unauthorized access')}
-                reset={() => console.error('URL Not Found')}
-            />
-        )
-    } 
+    // if (!isRoleInSystem) {
+    //     return (
+    //         <Notfound
+    //             error={new Error('Unauthorized access')}
+    //             reset={() => console.error('URL Not Found')}
+    //         />
+    //     )
+    // } 
     return (
         <html lang="en">
             <body className={`${inter.className} font-body`}>
