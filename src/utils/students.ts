@@ -47,7 +47,6 @@ export const fetchStudentData = async (
 //         }
 
 //         const res = await api.patch(url)
-
 //         fetchStudentData(bootcampId, setStoreStudentData)
 //         toast({
 //             title: res.data.status,

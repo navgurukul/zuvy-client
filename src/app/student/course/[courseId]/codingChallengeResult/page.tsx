@@ -40,6 +40,7 @@ const CodingResultContent = () => {
     const params = useParams();
     const chapterId = searchParams.get('chapterId');
     const { isDark, toggleTheme } = useThemeStore();
+    const orgId = searchParams.get('orgId');
 
     useEffect(() => {
         if (questionId) {
@@ -182,7 +183,7 @@ const CodingResultContent = () => {
     );
   };
   const handleBacktoChapters = () => {
-    router.push(`/student/course/${params.courseId}/modules/${moduleId}?chapterId=${chapterId}`);
+    router.push(`/student/course/${params.courseId}/modules/${moduleId}?chapterId=${chapterId}&orgId=${orgId}`);
   }
 
   return (

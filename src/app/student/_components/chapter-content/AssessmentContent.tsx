@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +44,8 @@ function formatToIST(dateString: string | undefined) {
 const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams();
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // State management
@@ -171,7 +173,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       const currentModuleId = moduleIdParam?.toString() || moduleId;
       const chapterId = chapterDetails.id;
       const assessmentId = assessmentDetails?.assessmentId;
-      const assessmentUrl = `/student/course/${courseId}/studentAssessment?assessmentId=${assessmentId}&chapterId=${chapterId}&moduleId=${currentModuleId}`;
+      const assessmentUrl = `/student/course/${courseId}/studentAssessment?assessmentId=${assessmentId}&chapterId=${chapterId}&moduleId=${currentModuleId}&orgId=${orgId}`;
       window.open(assessmentUrl, '_blank')?.focus();
     } catch (error) {
       console.error('Failed to start assessment:', error);

@@ -281,6 +281,7 @@ export interface ChapterDetailsResponse {
 export interface UseCodingChallengeProps {
   questionId: string;
   onChapterComplete?: () => void;
+  orgId?: string | null;
 }
 
 // useCodingSubmissions
@@ -626,6 +627,7 @@ export interface Bootcamp {
   duration: string;
   language: string;
   bootcampTopic: string;
+  organizationId: number;
   description: string | null;
   batchId: number;
   batchName: string;
@@ -805,6 +807,47 @@ export interface CreateOpenEndedQuestionData {
 export interface UseCreateOpenEndedQuestionReturn {
   createOpenEndedQuestion: (data: CreateOpenEndedQuestionData) => Promise<boolean>;
   loading: boolean;
+  error: string | null;
+}
+
+
+// useFetchGlobalCourses
+export interface GlobalCourseInstructorDetails {
+  id: number;
+  name: string;
+  profilePicture: string | null;
+}
+
+export interface GlobalCourseData {
+  id: number;
+  name: string;
+  description: string;
+  collaborator: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: number;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+  version: string | null;
+  batchId: number;
+  batchName: string;
+  progress: number;
+  instructorDetails: GlobalCourseInstructorDetails;
+}
+
+export interface UseFetchGlobalCoursesReturn {
+  globalCourses: GlobalCourseData[]; // Changed to array
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+export interface UseEnrollCourseReturn {
+  enrollCourse: (courseId: number) => Promise<EnrollCourseResult>;
+  isEnrolling: boolean;
   error: string | null;
 }
 

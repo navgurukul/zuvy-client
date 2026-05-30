@@ -85,7 +85,7 @@ function codingChallengeReducer(
             return state;
     }
 }
-export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingChallengeProps) {
+export function useCodingChallenge({ questionId, onChapterComplete, orgId }: UseCodingChallengeProps) {
     const [state, dispatch] = useReducer(codingChallengeReducer, initialState);
     const { toast } = useToast();
 
@@ -133,11 +133,11 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
     }, [questionId]);
 
     const fetchQuestionDetails = useCallback(async () => {
-        if (!questionId) return;
+        if (!questionId || !orgId) return;
         
         try {
             const response = await api.get<ApiResponse<QuestionDetails>>(
-                `/codingPlatform/get-coding-question/${questionId}`
+                `/codingPlatform/${orgId}/get-coding-question/${questionId}`
             );
             
             dispatch({ type: 'SET_QUESTION_DETAILS', payload: response.data.data });
@@ -153,7 +153,7 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
                 variant: 'destructive',
             });
         }
-    }, [questionId, state.language, state.isAlreadySubmitted, toast]);
+    }, [questionId, orgId, state.language, state.isAlreadySubmitted, toast]);
 
     const handleLanguageChange = useCallback((lang: string) => {
         const selectedLang = editorLanguages.find(l => l.lang === lang);

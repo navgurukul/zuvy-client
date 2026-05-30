@@ -18,6 +18,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const router = useRouter();
   const searchParams = useSearchParams();
   const chapterId = searchParams.get('chapterId');
+  const rawOrgId = searchParams.get('orgId');
+  const orgId = rawOrgId && rawOrgId !== 'null' && rawOrgId !== 'undefined' ? rawOrgId : null;
 
   // Move hooks before conditional return
   const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
@@ -140,10 +142,13 @@ useEffect(() => {
     if (!loading && !error && enhancedModule && !chapterId) {
       const firstChapterId = enhancedModule.topics?.[0]?.items?.[0]?.id;
       if (firstChapterId) {
-        router.replace(`?chapterId=${firstChapterId}`);
+        const queryParams = new URLSearchParams();
+        queryParams.set('chapterId', firstChapterId);
+        if (orgId) queryParams.set('orgId', orgId);
+        router.replace(`?${queryParams.toString()}`);
       }
     }
-  }, [loading, error, enhancedModule, chapterId, router]);
+  }, [loading, error, enhancedModule, chapterId, router, orgId]);
 
   // Auto-expand the topic that contains the selected item
   useEffect(() => {
@@ -165,7 +170,7 @@ useEffect(() => {
           <h1 className="text-2xl font-heading font-bold mb-2">Invalid Module</h1>
           <p className="text-muted-foreground mb-4">Module ID is missing</p>
           <Button asChild>
-            <Link href={`/student/course/${courseId}`}>Back to Course</Link>
+            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -199,7 +204,7 @@ useEffect(() => {
           <h1 className="text-2xl font-heading font-bold mb-2">Error Loading Module</h1>
           <p className="text-muted-foreground mb-4">{error}</p>
           <Button asChild>
-            <Link href={`/student/course/${courseId}`}>Back to Course</Link>
+            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -212,7 +217,7 @@ useEffect(() => {
         <div className="text-center">
           <h1 className="text-2xl text-primary font-heading font-bold mb-2">Module Not Found</h1>
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"  asChild>
-            <Link href={`/student/course/${courseId}`}>Back to Course</Link>
+            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -288,7 +293,10 @@ useEffect(() => {
   const selectedItemData = getSelectedItem();
 
   const handleItemSelect = (itemId: string) => {
-    router.push(`?chapterId=${itemId}`);
+    const queryParams = new URLSearchParams();
+    queryParams.set('chapterId', itemId);
+    if (orgId) queryParams.set('orgId', orgId);
+    router.push(`?${queryParams.toString()}`);
     if (isMobile) {
       setIsMobileSidebarOpen(false);
     }
@@ -392,7 +400,7 @@ useEffect(() => {
             <Header />
             <div className="p-4 border-b text-left border-border flex-shrink-0">
               <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}`}>
+                <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Course
                 </Link>
@@ -489,7 +497,7 @@ useEffect(() => {
         <div className="flex w-full flex-start" >
 
               <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}`}>
+                <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Course 
                 </Link>

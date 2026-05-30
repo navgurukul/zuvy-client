@@ -77,6 +77,7 @@ export interface Bootcamp {
   duration: string;
   language: string;
   bootcampTopic: string;
+  organizationId: number;
   description: string | null;
   batchId: number;
   batchName: string;
