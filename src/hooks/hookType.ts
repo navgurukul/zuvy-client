@@ -281,6 +281,7 @@ export interface ChapterDetailsResponse {
 export interface UseCodingChallengeProps {
   questionId: string;
   onChapterComplete?: () => void;
+  orgId?: string | null;
 }
 
 // useCodingSubmissions
@@ -626,6 +627,7 @@ export interface Bootcamp {
   duration: string;
   language: string;
   bootcampTopic: string;
+  organizationId: number;
   description: string | null;
   batchId: number;
   batchName: string;

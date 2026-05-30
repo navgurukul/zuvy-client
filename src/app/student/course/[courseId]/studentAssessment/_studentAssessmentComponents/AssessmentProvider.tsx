@@ -14,7 +14,7 @@ import IDE from "./IDE";
 import { api } from "@/utils/axios.config";
 
 import { toast } from "@/components/ui/use-toast";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getAssessmentStore,  } from "@/store/store";
 import { AlertProvider } from "./ProctoringAlerts";
 
@@ -30,6 +30,7 @@ import {
 } from "@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType";
 
 import { TopBar, FullscreenPrompt, AssessmentHeader, CodingSection, McqSection, OpenEndedSection, SubmitAssessmentDialog } from "@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/utils/assessmentUtils";
+import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 
 
 function Page({ params }: PageParams) {
@@ -72,6 +73,8 @@ function Page({ params }: PageParams) {
   const [disableSubmit, setDisableSubmit] = useState(false);
   const intervalIdRef = useRef<number | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
 
   // -------- helpers --------
   const isCurrentPageSubmitAssessment = useCallback(() => {
@@ -105,9 +108,9 @@ function Page({ params }: PageParams) {
 
   const navigateToChapter = useCallback(
     (bootcampId: any, moduleId: any, chId: any) => {
-      router.push(`/student/course/${bootcampId}/modules/${moduleId}?chapterId=${chId}`);
+      router.push(`/student/course/${bootcampId}/modules/${moduleId}?chapterId=${chId}&orgId=${orgId}`);
     },
-    [router]
+    [router, orgId]
   );
 
   const completeChapter = useCallback(() => {
@@ -155,7 +158,7 @@ function Page({ params }: PageParams) {
   }, [decodedAssessmentId]);
 
   const getAssessmentSubmissionsData = useCallback(async () => {
-    const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`;
+    const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}?orgId=${orgId}`;
     try {
       const res = await api.get<AssessmentSubmissionResponse>(
         `Content/students/assessmentId=${decodedAssessmentId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`

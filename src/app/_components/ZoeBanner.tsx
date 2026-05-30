@@ -59,9 +59,9 @@ const ZoeBanner = ({ isVisible, onDismiss, onGiveFeedback, onStartInterview }: Z
                   <p className="text-sm md:text-base font-medium truncate">
                     {canClose ? (
                       <>
-                        <span className="font-bold">Zoe Beta is live!</span>{" "}
+                        <span className="font-bold"></span>{" "}
                         <span className="hidden sm:inline">
-                          Try an AI-powered 1:1 interview & share your feedback.
+                          Practice interviews, build your resume, and learn with an AI mentor. Your career journey starts here at Zoe.
                         </span>
                         <span className="sm:hidden">Try AI interviews now!</span>
                       </>
