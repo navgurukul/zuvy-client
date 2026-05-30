@@ -55,7 +55,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
-      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
+      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}?orgId=${studentData?.inProgressBootcamps[0].organizationId}`);
     }
   }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
 
@@ -88,15 +88,15 @@ const StudentDashboard = () => {
         <div className="flex items-center gap-3 w-full">
           <div className="hidden md:flex items-center gap-3 w-full">
             <Button variant="outline" className="flex-1 bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}`}>
+              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
-                View Course
+                View Course 
               </Link>
             </Button>
           </div>
           <div className="md:hidden flex flex-col gap-3 w-full">
             <Button variant="outline" className="w-full bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}`}>
+              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course
               </Link>
@@ -109,7 +109,7 @@ const StudentDashboard = () => {
     if (bootcamp.progress === 0) {
       return (
         <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark  " asChild>
-          <Link href={`/student/course/${bootcamp.id}`}>
+          <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
             <Play className="w-4 h-4 mr-2" />
             Start Learning
           </Link>
@@ -119,7 +119,7 @@ const StudentDashboard = () => {
 
     return (
       <Button className="w-full md:w-auto bg-primary font-semibold text-primary-foreground hover:bg-primary-dark" asChild>
-        <Link href={`/student/course/${bootcamp.id}`}>
+        <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
           <RotateCcw className="w-4 h-4 mr-2" />
           Resume Learning
         </Link>
@@ -249,7 +249,7 @@ const StudentDashboard = () => {
                       <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center">New</button>
                     </h3>
                     <p className="text-sm sm:text-base text-gray-700 mb-4 md:mb-0">
-                      I will help you get job ready by practicing interviews and learning activities
+                      I will help you get job-ready with mock interviews, resume building, and a mentor who actually gets you.
                     </p>
                   </div>
 
@@ -262,97 +262,6 @@ const StudentDashboard = () => {
               </CardContent>
             </Card>
 
-        {/* ✅ Fixed Global Courses Section */}
-        {globalCourses && globalCourses.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
-            
-            {globalLoading ? (
-              <CarouselSkeleton />
-            ) : globalError ? (
-              <Card className="w-full shadow-4dp">
-                <CardContent className="p-6 text-center">
-                  <p className="text-destructive mb-4">{globalError}</p>
-                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                {/* ✅ Map over globalCourses array */}
-                {globalCourses.map((course) => (
-                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        {/* Course Image */}
-                        <div className="mt-2">
-                          <Image
-                            src={course.coverImage || '/logo.PNG'}
-                            alt={course.name}
-                            width={128}
-                            height={128}
-                            className="rounded-lg object-cover"
-                          />
-                        </div>
-
-                        {/* Course Info */}
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div className="flex-1 text-left">
-                              <h3 className="text-xl font-heading font-semibold mb-2">
-                                {course.name}
-                              </h3>
-                              <div className="mb-3">
-                                <Badge variant="outline" className="capitalize">
-                                  {course.courseOrgName || "N/A"}
-                                </Badge>
-                              </div>
-                              <TruncatedDescription 
-                                text={course.description || ''}
-                                maxLength={150}
-                                className="text-muted-foreground mb-3"
-                              />
-                              
-                              {/* ✅ Fixed instructor path */}
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className="text-sm text-muted-foreground capitalize">
-                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action Button - Desktop */}
-                            <div className="hidden md:flex flex-shrink-0">
-                              <Button 
-                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                                onClick={() => handleEnrollCourse(course.bootcampId)}
-                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                              >
-                                <Play className="w-4 h-4 mr-2" />
-                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Action Button - Mobile */}
-                          <div className="md:hidden mt-4">
-                            <Button 
-                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                              onClick={() => handleEnrollCourse(course.bootcampId)}
-                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                            >
-                              <Play className="w-4 h-4 mr-2" />
-                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
             <div className="mb-6">
               <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
@@ -537,6 +446,98 @@ const StudentDashboard = () => {
               ))}
             </div>
 
+            {/* ✅ Fixed Global Courses Section */}
+        {globalCourses && globalCourses.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
+            
+            {globalLoading ? (
+              <CarouselSkeleton />
+            ) : globalError ? (
+              <Card className="w-full shadow-4dp">
+                <CardContent className="p-6 text-center">
+                  <p className="text-destructive mb-4">{globalError}</p>
+                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {/* ✅ Map over globalCourses array */}
+                {globalCourses.map((course) => (
+                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Course Image */}
+                        <div className="mt-2">
+                          <Image
+                            src={course.coverImage || '/logo.PNG'}
+                            alt={course.name}
+                            width={128}
+                            height={128}
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="flex-1">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                            <div className="flex-1 text-left">
+                              <h3 className="text-xl font-heading font-semibold mb-2">
+                                {course.name}
+                              </h3>
+                              <div className="mb-3">
+                                <Badge variant="outline" className="capitalize">
+                                  {course.courseOrgName || "N/A"}
+                                </Badge>
+                              </div>
+                              <TruncatedDescription 
+                                text={course.description || ''}
+                                maxLength={150}
+                                className="text-muted-foreground mb-3"
+                              />
+                              
+                              {/* ✅ Fixed instructor path */}
+                              <div className="flex items-center gap-2 mb-4">
+                                <span className="text-sm text-muted-foreground capitalize">
+                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Action Button - Desktop */}
+                            <div className="hidden md:flex flex-shrink-0">
+                              <Button 
+                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                                onClick={() => handleEnrollCourse(course.bootcampId)}
+                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Action Button - Mobile */}
+                          <div className="md:hidden mt-4">
+                            <Button 
+                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                              onClick={() => handleEnrollCourse(course.bootcampId)}
+                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
             {filteredBootcamps.length === 0 && (
               <Card className="text-center py-12 shadow-4dp">
                 <CardContent>
@@ -553,7 +554,7 @@ const StudentDashboard = () => {
                 </CardContent>
               </Card>
             )}
-          </div>
+          </div>  
 
           <div className="lg:col-span-1 space-y-4">
             <Card className="shadow-sm">
