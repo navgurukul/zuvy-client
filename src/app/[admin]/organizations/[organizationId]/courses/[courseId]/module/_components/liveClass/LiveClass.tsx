@@ -284,7 +284,7 @@ const LiveClass = ({
                     }
 
         try {
-            // Use the same date formatting logic as createLiveClass
+            // Use the same date formatting logic as createLiveClass 
             const combineDateTime = (date: Date, time: string) => {
                 const year = date.getFullYear()
                 const month = String(date.getMonth() + 1).padStart(2, '0')
