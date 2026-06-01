@@ -289,7 +289,7 @@ const LiveClass = ({
                 const year = date.getFullYear()
                 const month = String(date.getMonth() + 1).padStart(2, '0')
                 const day = String(date.getDate()).padStart(2, '0')
-                return `${year}-${month}-${day}T${time}:00`
+                return `${year}-${month}-${day}T${time}:00+05:30`
             }
 
             // Convert string date to Date object
