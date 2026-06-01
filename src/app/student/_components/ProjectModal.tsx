@@ -28,7 +28,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     initialProject || {
       id: Date.now().toString(),
       title: '',
-      oneLineDescription: '',
       detailedDescription: '',
       techStack: [],
       projectType: 'Solo',
@@ -40,7 +39,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = 'Project title is required';
-    if (!formData.oneLineDescription.trim()) newErrors.oneLineDescription = 'One-line description is required';
     if (formData.detailedDescription && formData.detailedDescription.length > 500) {
       newErrors.detailedDescription = 'Description cannot exceed 500 characters';
     }
@@ -79,7 +77,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       setFormData({
         id: Date.now().toString(),
         title: '',
-        oneLineDescription: '',
         detailedDescription: '',
         techStack: [],
         projectType: 'Solo',
@@ -95,7 +92,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           <DialogTitle>{initialProject ? 'Edit Project' : 'Add New Project'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 overflow-y-auto flex-1 px-6">
+        <div className="space-y-6 overflow-y-auto flex-1 px-6 pb-8">
           {/* Project Title */}
           <div className="space-y-2">
             <Label htmlFor="title" className="font-medium">
@@ -118,25 +115,32 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             )}
           </div>
 
-          {/* One-line Description */}
+          {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
-            <Label htmlFor="oneLineDescription" className="font-medium">
-              One-line Description <span className="text-destructive">*</span>
+            <Label htmlFor="detailedDescription" className="font-medium">
+              Detailed Description (Optional)
             </Label>
-            <Input
-              id="oneLineDescription"
-              placeholder="A short summary of what it does..."
-              value={formData.oneLineDescription}
+            <Textarea
+              id="detailedDescription"
+              placeholder="Provide more details about the project..."
+              value={formData.detailedDescription || ''}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, oneLineDescription: e.target.value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  detailedDescription: e.target.value,
+                }))
               }
-              maxLength={100}
-              className={errors.oneLineDescription ? 'border-destructive' : ''}
+              maxLength={500}
+              rows={4}
+              className={errors.detailedDescription ? 'border-destructive' : ''}
             />
-            {errors.oneLineDescription && (
+            <p className="text-xs text-muted-foreground">
+              {formData.detailedDescription?.length || 0}/500 characters
+            </p>
+            {errors.detailedDescription && (
               <p className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.oneLineDescription}
+                {errors.detailedDescription}
               </p>
             )}
           </div>
@@ -161,8 +165,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                       <input
                         type="checkbox"
                         checked={formData.techStack.includes(tech)}
+                        onClick={(e) => e.stopPropagation()}
                         onChange={() => handleTechStackSelect(tech)}
-                        className="rounded"
+                        className="rounded cursor-pointer"
                       />
                       <span className="text-sm">{tech}</span>
                     </div>
@@ -230,32 +235,25 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
           )}
 
-          {/* Detailed Description (Optional) */}
+          {/* GitHub URL (Optional) */}
           <div className="space-y-2">
-            <Label htmlFor="detailedDescription" className="font-medium">
-              Detailed Description (Optional)
+            <Label htmlFor="githubUrl" className="font-medium">
+              GitHub URL (Optional)
             </Label>
-            <Textarea
-              id="detailedDescription"
-              placeholder="Provide more details about the project..."
-              value={formData.detailedDescription || ''}
+            <Input
+              id="githubUrl"
+              type="url"
+              placeholder="https://github.com/username/repo"
+              value={formData.githubUrl || ''}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  detailedDescription: e.target.value,
-                }))
+                setFormData((prev) => ({ ...prev, githubUrl: e.target.value }))
               }
-              maxLength={500}
-              rows={4}
-              className={errors.detailedDescription ? 'border-destructive' : ''}
+              className={errors.githubUrl ? 'border-destructive' : ''}
             />
-            <p className="text-xs text-muted-foreground">
-              {formData.detailedDescription?.length || 0}/500 characters
-            </p>
-            {errors.detailedDescription && (
+            {errors.githubUrl && (
               <p className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.detailedDescription}
+                {errors.githubUrl}
               </p>
             )}
           </div>

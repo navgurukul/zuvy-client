@@ -47,7 +47,7 @@ export function useLearnerRoles(initialFetch = true) {
     const fetchLearnerRoles = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<LearnerRolesResponse>('/besic/learner-roles')
+            const res = await api.get<LearnerRolesResponse>('/basic/learner-roles')
             // Access roles array from nested data structure
             let rolesData: LearnerRole[] | string[] | undefined
             
