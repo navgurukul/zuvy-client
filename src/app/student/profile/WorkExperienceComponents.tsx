@@ -295,7 +295,11 @@ export const WorkExperienceModal: React.FC<{
                       <input
                         type="checkbox"
                         checked={formData.technologiesUsed?.includes(tech)}
-                        onChange={() => handleTechSelect(tech)}
+                            readOnly
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTechSelect(tech);
+                            }}
                         className="rounded"
                       />
                       <span className="text-sm">{tech}</span>
@@ -341,11 +345,10 @@ export const WorkExperienceCard: React.FC<{
   onEdit: (experience: WorkExperience) => void;
   onDelete: (experienceId: string) => void;
 }> = ({ experience, onEdit, onDelete }) => (
-  <div className="py-4">
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex-1 space-y-2">
-        {/* Company and Role */}
-        <div className="flex items-center gap-3">
+  <div className="rounded-xl border border-border/70 bg-background/70 p-4 shadow-sm">
+    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+      <div className="min-w-0 space-y-3 text-left">
+        <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-bold text-base text-foreground">{experience.companyName}</h3>
           <Badge variant="secondary" className="text-xs uppercase">
             {experience.workMode}
@@ -357,7 +360,6 @@ export const WorkExperienceCard: React.FC<{
           )}
         </div>
 
-        {/* Role and Duration */}
         <p className="text-sm font-medium text-foreground">{experience.role}</p>
         <p className="text-sm text-muted-foreground">
           {MONTHS[parseInt(experience.startDate.month) - 1]} {experience.startDate.year} -{' '}
@@ -367,7 +369,6 @@ export const WorkExperienceCard: React.FC<{
           {experience.workMode === 'On-site' && experience.city && ` • ${experience.city}`}
         </p>
 
-        {/* Technologies */}
         {experience.technologiesUsed && experience.technologiesUsed.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {experience.technologiesUsed.map((tech) => (
@@ -378,14 +379,12 @@ export const WorkExperienceCard: React.FC<{
           </div>
         )}
 
-        {/* Responsibilities */}
         {experience.responsibilities && (
           <p className="text-sm text-muted-foreground whitespace-pre-line">{experience.responsibilities}</p>
         )}
       </div>
 
-      {/* Edit and Delete Icons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-2 md:justify-end">
         <button
           type="button"
           onClick={() => onEdit(experience)}
