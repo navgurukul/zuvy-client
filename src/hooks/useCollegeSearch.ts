@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/utils/axios.config';
 
-const COLLEGES_API_URL = '/besic/colleges-name';
+const COLLEGES_API_URL = '/basic/colleges-name';
 
 export interface CollegeOption {
   name: string;

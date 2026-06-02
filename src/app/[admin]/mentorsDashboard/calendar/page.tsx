@@ -39,6 +39,12 @@ const toDateStr = (date: Date) => {
   return `${year}-${month}-${day}`
 }
 
+const getDateFromISO = (isoString: string): Date => {
+  const datePart = isoString.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 const addDays = (date: Date, days: number) => {
   const result = new Date(date)
   result.setDate(result.getDate() + days)
@@ -120,7 +126,7 @@ const getDeleteBlockReason = (slot: MentorCreatedSlot) => {
   }
 
   if (!canDeleteSlot(slot)) {
-    // Slot deletion restriction message temporarily commented out per request.
+    // Slot deletion restriction message temporarily commented out per requests.
     // return "Slot can be removed only if start time is at least 12 hours away."
     return null
   }
@@ -435,11 +441,11 @@ export default function CalendarPage() {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const weekStart = useMemo(
-    () => (apiWeekStart ? new Date(apiWeekStart) : addDays(baseWeekStart, weekOffset * 7)),
+    () => (apiWeekStart ? getDateFromISO(apiWeekStart) : addDays(baseWeekStart, weekOffset * 7)),
     [apiWeekStart, baseWeekStart, weekOffset]
   )
   const weekEnd = useMemo(
-    () => (apiWeekEnd ? new Date(apiWeekEnd) : addDays(weekStart, 6)),
+    () => (apiWeekEnd ? getDateFromISO(apiWeekEnd) : addDays(weekStart, 6)),
     [apiWeekEnd, weekStart]
   )
 
@@ -486,11 +492,11 @@ export default function CalendarPage() {
   const isCurrentWeek = weekOffset === 0
 
   const displayWeekStart = useMemo(
-    () => (apiWeekStart ? new Date(apiWeekStart) : weekStart),
+    () => (apiWeekStart ? getDateFromISO(apiWeekStart) : weekStart),
     [apiWeekStart, weekStart]
   )
   const displayWeekEnd = useMemo(
-    () => (apiWeekEnd ? new Date(apiWeekEnd) : weekEnd),
+    () => (apiWeekEnd ? getDateFromISO(apiWeekEnd) : weekEnd),
     [apiWeekEnd, weekEnd]
   )
 

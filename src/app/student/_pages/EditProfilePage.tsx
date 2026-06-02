@@ -79,7 +79,7 @@ export const EditProfilePage: React.FC = () => {
   const { updateLearnerProfile } = useUpdateLearnerProfile();
   const { technicalSkills, loading: isLoadingTechnicalSkills } = useLearnerTechnicalSkills();
   const { degreeDetails } = useLearnerDegreeDetails();
-  const { branchDetails } = useLearnerBranchDetails();
+  const { branchDetails, getBranchesForDegree } = useLearnerBranchDetails();
   const { boards } = useLearnerBoards();
   const { roles, loading: isLoadingRoles } = useLearnerRoles();
   const { remoteLocations, loading: isLoadingRemoteLocations } = useLearnerRemoteLocations();
@@ -173,23 +173,30 @@ export const EditProfilePage: React.FC = () => {
   const selectedDegreeValue = isCustomDegreeValue ? 'Other' : rawDegreeValue;
   const degreeCustomValue = editedData?.step1?.customDegree ?? (isCustomDegreeValue ? rawDegreeValue : '');
   const selectedDegreeForBranch = selectedDegreeValue === 'Other' ? '' : rawDegreeValue;
+  const selectedDegreeDetails = useMemo(
+    () =>
+      (degreeDetails || []).find(
+        (item) => String(item?.id ?? '').trim() === String(selectedDegreeForBranch).trim() || String(item?.name || '').trim() === String(selectedDegreeForBranch).trim()
+      ),
+    [degreeDetails, selectedDegreeForBranch]
+  );
   const branchOptions = useMemo(() => {
-    const matchedDegree = (degreeDetails || []).find(
-      (item) => String(item?.name || '').trim() === selectedDegreeForBranch
-    );
-    const degreeBranches = Array.isArray(matchedDegree?.branches)
-      ? matchedDegree.branches
+    const degreeBranches = Array.isArray(selectedDegreeDetails?.branches)
+      ? selectedDegreeDetails.branches
           .map((item) => (item ? String(item).trim() : ''))
           .filter(Boolean)
       : [];
+    const apiBranches = getBranchesForDegree(selectedDegreeDetails?.id ?? selectedDegreeDetails?.name ?? selectedDegreeForBranch)
+      .map((item) => (item?.name ? String(item.name).trim() : ''))
+      .filter(Boolean);
     const fallbackBranches = (branchDetails || [])
       .map((item) => (item?.name ? String(item.name).trim() : ''))
       .filter(Boolean);
 
-    const source = degreeBranches.length > 0 ? degreeBranches : fallbackBranches;
+    const source = degreeBranches.length > 0 ? degreeBranches : apiBranches.length > 0 ? apiBranches : fallbackBranches;
     const unique = Array.from(new Set(source));
     return unique.includes('Other') ? unique : [...unique, 'Other'];
-  }, [degreeDetails, branchDetails, selectedDegreeForBranch]);
+  }, [branchDetails, getBranchesForDegree, selectedDegreeDetails, selectedDegreeForBranch]);
   const rawBranchValue = editedData?.step1?.branch ?? onboardingData?.step1?.branch ?? '';
   const isCustomBranchValue =
     Boolean(rawBranchValue) && rawBranchValue !== 'Other' && !branchOptions.includes(rawBranchValue);
@@ -359,7 +366,7 @@ export const EditProfilePage: React.FC = () => {
 
     const projects = (step2Data?.externalProjects || []).map((project) => ({
       title: project.title,
-      description: project.oneLineDescription || project.detailedDescription || '',
+      description: project.detailedDescription || '',
       techStack: project.techStack || [],
       projectType: project.projectType,
       startDate: formatMonthYearToDate(project.startDate),
@@ -413,8 +420,7 @@ export const EditProfilePage: React.FC = () => {
       phoneNumber: normalizeText(step1Data.phoneNumber),
       email: normalizeEmail(step1Data.email),
       linkedinProfile: normalizeOptionalUrl(step1Data.linkedin),
-      collegeName: normalizeText(step1Data.collegeName),
-      otherCollegeName: normalizeText(step1Data.customCollege),
+      collegeName: normalizeText(step1Data.collegeName) || normalizeText(step1Data.customCollege),
       degree: normalizeText(step1Data.degree),
       branch: normalizeText(step1Data.branch),
       yearOfStudy: normalizeText(step1Data.yearOfStudy),
@@ -548,7 +554,6 @@ export const EditProfilePage: React.FC = () => {
       externalProjects: (learnerProfile.projects || []).map((project: any, index) => ({
         id: `api-project-${learnerProfile.id}-${index}`,
         title: project.title || `Project ${index + 1}`,
-        oneLineDescription: project.description || '',
         detailedDescription: project.description || '',
         techStack: project.techStack || [],
         githubUrl: project.githubUrl || (project as any).github || '',
@@ -1031,6 +1036,22 @@ export const EditProfilePage: React.FC = () => {
       setHasInternship((step3?.workExperiences?.length ?? 0) > 0);
     }
   }, [editingCard, step3?.workExperiences]);
+
+  // Persist hasInternship selection into editedData so Save will include it
+  useEffect(() => {
+    if (editingCard === 'work-experience') {
+      setEditedData((prev: any) => ({
+        ...prev,
+        step3: {
+          ...(prev?.step3 || {}),
+          ...(step3 || {}),
+          hasInternshipExperience: hasInternship,
+          // keep existing workExperiences if present
+          workExperiences: prev?.step3?.workExperiences ?? step3?.workExperiences ?? [],
+        },
+      }));
+    }
+  }, [hasInternship, editingCard, step3]);
   
   // Initialize career goals edit state
   useEffect(() => {
@@ -1763,17 +1784,23 @@ export const EditProfilePage: React.FC = () => {
                     ) : (
                       <div className="space-y-6">
                         {step2.externalProjects.map((project) => (
-                          <div key={project.id} className="flex items-start gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-base">{project.title}</h4>
-                                <Badge variant="outline" className="text-xs">
+                          <div key={project.id} className="flex items-start gap-4 rounded-xl border border-border/50 bg-card/60 p-4 shadow-sm">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <h4 className="font-semibold text-base tracking-tight">{project.title}</h4>
+                                <Badge variant="outline" className="text-xs rounded-full px-2.5 py-0.5">
                                   {project.projectType}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-muted-foreground mb-2">{project.oneLineDescription}</p>
+                              <div
+                                tabIndex={0}
+                                aria-label="Project detailed description"
+                                className="mb-3 w-full max-h-20 overflow-y-hidden rounded-lg border border-border/50 bg-muted/20 px-5 py-3 text-left text-sm leading-6 text-muted-foreground whitespace-pre-wrap break-words transition-all duration-150 focus:overflow-y-auto focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-text"
+                              >
+                                {project.detailedDescription || 'No description added'}
+                              </div>
                               {(project.githubUrl || project.demoUrl) && (
-                                <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <div className="flex flex-wrap items-center gap-3 mb-3">
                                   {project.githubUrl && (
                                     <a
                                       href={project.githubUrl}
@@ -1797,9 +1824,9 @@ export const EditProfilePage: React.FC = () => {
                                 </div>
                               )}
                               {project.techStack.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-2">
                                   {project.techStack.map((tech) => (
-                                    <Badge key={tech} variant="secondary" className="text-xs bg-black dark:bg-white text-white dark:text-black">
+                                    <Badge key={tech} variant="secondary" className="text-xs rounded-full bg-black dark:bg-white text-white dark:text-black px-2.5 py-0.5">
                                       {tech}
                                     </Badge>
                                   ))}
@@ -1823,14 +1850,20 @@ export const EditProfilePage: React.FC = () => {
                       {step2?.externalProjects && step2.externalProjects.length > 0 && (
                         <div className="space-y-3">
                           {step2?.externalProjects?.map((project) => (
-                            <Card key={project.id} className="bg-muted/30 border-border/30">
+                            <Card key={project.id} className="rounded-xl border-border/30 bg-muted/30 shadow-sm">
                               <CardContent className="p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-base">{project.title}</h4>
-                                    <p className="text-sm text-muted-foreground">{project.oneLineDescription}</p>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-base tracking-tight">{project.title}</h4>
+                                    <div
+                                      tabIndex={0}
+                                      aria-label="Project detailed description"
+                                      className="mt-2 mb-3 w-full max-h-20 overflow-y-hidden rounded-lg border border-border/50 bg-muted/20 px-5 py-3 text-left text-sm leading-6 text-muted-foreground whitespace-pre-wrap break-words transition-all duration-150 focus:overflow-y-auto focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-text"
+                                    >
+                                      {project.detailedDescription || 'No description added'}
+                                    </div>
                                     {(project.githubUrl || project.demoUrl) && (
-                                      <div className="flex flex-wrap items-center gap-3 mt-2">
+                                      <div className="flex flex-wrap items-center gap-3 mt-3">
                                         {project.githubUrl && (
                                           <a
                                             href={project.githubUrl}
@@ -1853,9 +1886,9 @@ export const EditProfilePage: React.FC = () => {
                                         )}
                                       </div>
                                     )}
-                                    <div className="flex flex-wrap gap-1 mt-2">
+                                    <div className="flex flex-wrap gap-2 mt-2">
                                       {project.techStack.map((tech) => (
-                                        <Badge key={tech} variant="secondary" className="text-xs">
+                                        <Badge key={tech} variant="secondary" className="text-xs rounded-full px-2.5 py-0.5">
                                           {tech}
                                         </Badge>
                                       ))}
@@ -2584,7 +2617,7 @@ export const EditProfilePage: React.FC = () => {
             <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <h3 className="text-base font-semibold tracking-wide">Work Experience</h3>
-                {editingCard !== 'work-experience' && step3?.workExperiences && step3.workExperiences.length > 0 && (
+                {editingCard !== 'work-experience' && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -2599,45 +2632,43 @@ export const EditProfilePage: React.FC = () => {
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'work-experience' ? (
                   <>
-                    {step3?.workExperiences && step3.workExperiences.length > 0 ? (
-                      /* View Mode - Display Work Experiences */
-                      <div className="space-y-3">
-                        {step3.workExperiences.map((exp) => (
-                          <Card key={exp.id} className="bg-muted/30 border-border/30">
-                            <CardContent className="p-4">
-                              <h4 className="font-medium">{exp.role}</h4>
-                              <p className="text-sm text-muted-foreground">{exp.companyName}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {exp.startDate.month} {exp.startDate.year} →{' '}
-                                {exp.isCurrentlyWorking ? 'Present' : `${exp.endDate?.month} ${exp.endDate?.year}`}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {exp.workMode}
-                                </Badge>
-                                {exp.city && (
+                    {step3?.hasInternshipExperience ? (
+                      (step3?.workExperiences && step3.workExperiences.length > 0) ? (
+                        <div className="space-y-3">
+                          {step3.workExperiences.map((exp) => (
+                            <Card key={exp.id} className="bg-muted/30 border-border/30">
+                              <CardContent className="p-4">
+                                <h4 className="font-medium">{exp.role}</h4>
+                                <p className="text-sm text-muted-foreground">{exp.companyName}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {exp.startDate.month} {exp.startDate.year} →{' '}
+                                  {exp.isCurrentlyWorking ? 'Present' : `${exp.endDate?.month} ${exp.endDate?.year}`}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
                                   <Badge variant="outline" className="text-xs">
-                                    {exp.city}
+                                    {exp.workMode}
                                   </Badge>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                                  {exp.city && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {exp.city}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-muted-foreground">You have indicated work experience but not added details</p>
+                          <p className="text-sm text-muted-foreground mt-3">Click the Edit icon to add details.</p>
+                        </div>
+                      )
                     ) : (
-                      /* Empty State */
                       <div className="text-center py-8">
-                        <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">No work experience added yet</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-4"
-                          onClick={() => setEditingCard('work-experience')}
-                        >
-                          Add Work Experience
-                        </Button>
+                        <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground">I am a Fresher</p>
                       </div>
                     )}
                   </>
