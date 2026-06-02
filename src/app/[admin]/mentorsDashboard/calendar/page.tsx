@@ -126,7 +126,7 @@ const getDeleteBlockReason = (slot: MentorCreatedSlot) => {
   }
 
   if (!canDeleteSlot(slot)) {
-    // Slot deletion restriction message temporarily commented out per request.
+    // Slot deletion restriction message temporarily commented out per requests.
     // return "Slot can be removed only if start time is at least 12 hours away."
     return null
   }
