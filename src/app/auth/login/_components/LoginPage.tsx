@@ -84,6 +84,8 @@ function LoginPage() {
 
     type LearnerProfileStrengthResponse = {
         percentage?: number
+        profileCompletion?: number
+        isProfileComplete?: boolean
         level?: string
         message?: string
     }
@@ -91,7 +93,14 @@ function LoginPage() {
     const getStudentStrengthPercentage = async (): Promise<number | null> => {
         try {
             const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
-            return typeof res.data?.percentage === 'number' ? res.data.percentage : null
+            const completionValue =
+                typeof res.data?.profileCompletion === 'number'
+                    ? res.data.profileCompletion
+                    : typeof res.data?.percentage === 'number'
+                        ? res.data.percentage
+                        : null
+
+            return completionValue
         } catch (error) {
             console.error('Failed to fetch learner profile strength:', error)
             return null

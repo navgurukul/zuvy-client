@@ -20,7 +20,6 @@ export interface OnboardingStep1 {
 export interface ExternalProject {
   id: string;
   title: string;
-  oneLineDescription: string;
   detailedDescription?: string;
   techStack: string[];
   githubUrl?: string;

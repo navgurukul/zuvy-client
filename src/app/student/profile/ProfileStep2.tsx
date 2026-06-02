@@ -20,6 +20,33 @@ import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profil
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
 import { toast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
+
+const formatProjectDate = (dateValue?: ExternalProject['startDate']) => {
+  if (!dateValue) {
+    return 'Not specified';
+  }
+
+  if (typeof dateValue === 'string') {
+    const parsedDate = new Date(dateValue);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return parsedDate.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      });
+    }
+
+    return dateValue;
+  }
+
+  if (!dateValue.year || !dateValue.month) {
+    return 'Not specified';
+  }
+
+  const monthIndex = Number(dateValue.month) - 1;
+  const monthLabel = MONTHS[monthIndex] || dateValue.month;
+  return `${monthLabel} ${dateValue.year}`;
+};
 
 interface ProfileStep2Props {
   initialData?: Partial<Step2Type>;
@@ -40,7 +67,6 @@ export const ProjectModal: React.FC<{
   const createEmptyProject = (): ExternalProject => ({
     id: Date.now().toString(),
     title: '',
-    oneLineDescription: '',
     detailedDescription: '',
     techStack: [],
     projectType: 'Solo',
@@ -103,11 +129,38 @@ export const ProjectModal: React.FC<{
     };
   };
 
+  const getTodayInputValue = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const isEarlierThan = (leftDate?: string, rightDate?: string) => {
+    if (!leftDate || !rightDate) {
+      return false;
+    }
+
+    return leftDate < rightDate;
+  };
+
+  const isLaterThan = (leftDate?: string, rightDate?: string) => {
+    if (!leftDate || !rightDate) {
+      return false;
+    }
+
+    return leftDate > rightDate;
+  };
+
   const [addProjectDraft, setAddProjectDraft] = useState<ExternalProject>(createEmptyProject);
   const [formData, setFormData] = useState<ExternalProject>(initialProject || addProjectDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCustomTechInput, setShowCustomTechInput] = useState(false);
   const [customTechStack, setCustomTechStack] = useState('');
+  const startDateInputRef = useRef<HTMLInputElement>(null);
+  const endDateInputRef = useRef<HTMLInputElement>(null);
   const resolvedTechStackOptions = useMemo(() => {
     const baseOptions = (techStackOptions ?? TECH_STACK)
       .map((item) => (item ? String(item).trim() : ''))
@@ -135,7 +188,7 @@ export const ProjectModal: React.FC<{
       setShowCustomTechInput(false);
       setCustomTechStack('');
     }
-  }, [isOpen, initialProject, addProjectDraft]);
+  }, [isOpen, initialProject]);
 
   const validateForm = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
@@ -143,6 +196,22 @@ export const ProjectModal: React.FC<{
     if (formData.detailedDescription && formData.detailedDescription.length > 500) {
       newErrors.detailedDescription = 'Description cannot exceed 500 characters';
     }
+    const todayValue = getTodayInputValue();
+    const startDateValue = formatDateForInput(formData.startDate);
+    const endDateValue = formatDateForInput(formData.endDate);
+
+    if (startDateValue && isLaterThan(startDateValue, todayValue)) {
+      newErrors.startDate = 'Start date cannot be in the future';
+    }
+
+    if (endDateValue && isLaterThan(endDateValue, todayValue)) {
+      newErrors.endDate = 'End date cannot be in the future';
+    }
+
+    if (startDateValue && endDateValue && isEarlierThan(endDateValue, startDateValue)) {
+      newErrors.endDate = 'End date must be the same as or later than the start date';
+    }
+
     if (formData.githubUrl && !isValidGithubUrl(formData.githubUrl)) {
       newErrors.githubUrl = 'GitHub URL must be a valid github.com link';
     }
@@ -251,7 +320,7 @@ export const ProjectModal: React.FC<{
           <DialogTitle>{initialProject ? 'Edit Project' : 'Add New Project'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 overflow-y-auto flex-1 px-6">
+        <div className="space-y-6 overflow-y-auto flex-1 px-6 pb-8">
           {/* Project Title */}
           <div className="space-y-2">
             <Label htmlFor="title" className="font-medium text-left block">
@@ -274,25 +343,29 @@ export const ProjectModal: React.FC<{
             )}
           </div>
 
-          {/* One-line Description */}
+          {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
-            <Label htmlFor="oneLineDescription" className="font-medium text-left block">
-              One-line Description (Optional)
+            <Label htmlFor="detailedDescription" className="font-medium text-left block">
+              Detailed Description (Optional)
             </Label>
-            <Input
-              id="oneLineDescription"
-              placeholder="A short summary of what it does..."
-              value={formData.oneLineDescription}
+            <Textarea
+              id="detailedDescription"
+              placeholder="Explain key features, challenges faced, and architecture..."
+              value={formData.detailedDescription}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, oneLineDescription: e.target.value }))
+                setFormData((prev) => ({ ...prev, detailedDescription: e.target.value }))
               }
-              maxLength={100}
-              className={errors.oneLineDescription ? 'border-destructive' : ''}
+              maxLength={500}
+              rows={4}
+              className={errors.detailedDescription ? 'border-destructive' : ''}
             />
-            {errors.oneLineDescription && (
+            <p className="text-xs text-muted-foreground text-right">
+              {formData.detailedDescription?.length || 0}/500
+            </p>
+            {errors.detailedDescription && (
               <p className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.oneLineDescription}
+                {errors.detailedDescription}
               </p>
             )}
           </div>
@@ -323,8 +396,9 @@ export const ProjectModal: React.FC<{
                         <input
                           type="checkbox"
                           checked={tech === 'Other' ? showCustomTechInput : formData.techStack.includes(tech)}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={() => handleTechStackSelect(tech)}
-                          className="rounded"
+                          className="rounded cursor-pointer"
                         />
                         <span className="text-sm">{tech}</span>
                       </div>
@@ -425,50 +499,134 @@ export const ProjectModal: React.FC<{
                 Start Date
               </Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  ref={startDateInputRef}
                   id="startDate"
                   type="date"
                   value={formatDateForInput(formData.startDate)}
+                  max={getTodayInputValue()}
+                  onClick={() => startDateInputRef.current?.showPicker?.()}
                   onChange={(e) => {
                     const dateValue = e.target.value;
                     if (dateValue) {
+                      const todayValue = getTodayInputValue();
+                      if (isLaterThan(dateValue, todayValue)) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          startDate: 'Start date cannot be in the future',
+                        }));
+                        return;
+                      }
+
+                      const nextStartDate = parseInputDate(dateValue);
+                      const currentEndDate = formatDateForInput(formData.endDate);
+                      if (currentEndDate && isEarlierThan(currentEndDate, dateValue)) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          startDate: nextStartDate,
+                          endDate: undefined,
+                        }));
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.endDate;
+                          return next;
+                        });
+                        return;
+                      }
+
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.startDate;
+                        return next;
+                      });
+
                       setFormData((prev) => ({
                         ...prev,
-                        startDate: parseInputDate(dateValue),
+                        startDate: nextStartDate,
                       }));
                     } else {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.startDate;
+                        return next;
+                      });
                       setFormData((prev) => ({ ...prev, startDate: undefined }));
                     }
                   }}
-                  className="pl-10 [&::-webkit-calendar-picker-indicator]:hidden"
+                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <Calendar className="h-4 w-4" />
+                </div>
               </div>
+              {errors.startDate && (
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.startDate}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="endDate" className="font-medium text-left block">
                 End Date
               </Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  ref={endDateInputRef}
                   id="endDate"
                   type="date"
                   value={formatDateForInput(formData.endDate)}
+                  max={getTodayInputValue()}
+                  min={formatDateForInput(formData.startDate) || undefined}
+                  onClick={() => endDateInputRef.current?.showPicker?.()}
                   onChange={(e) => {
                     const dateValue = e.target.value;
+                    const startDateValue = formatDateForInput(formData.startDate);
+                    const todayValue = getTodayInputValue();
+
+                    if (dateValue && isLaterThan(dateValue, todayValue)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        endDate: 'End date cannot be in the future',
+                      }));
+                      return;
+                    }
+
+                    if (startDateValue && isEarlierThan(dateValue, startDateValue)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        endDate: 'End date must be the same as or later than the start date',
+                      }));
+                      return;
+                    }
+
                     if (dateValue) {
                       setFormData((prev) => ({
                         ...prev,
                         endDate: parseInputDate(dateValue),
                       }));
+
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.endDate;
+                        return next;
+                      });
                     } else {
                       setFormData((prev) => ({ ...prev, endDate: undefined }));
                     }
                   }}
-                  className="pl-10 [&::-webkit-calendar-picker-indicator]:hidden"
+                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <Calendar className="h-4 w-4" />
+                </div>
               </div>
+              {errors.endDate && (
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.endDate}
+                </p>
+              )}
             </div>
           </div>
 
@@ -528,32 +686,7 @@ export const ProjectModal: React.FC<{
             </div>
           </div>
 
-          {/* Detailed Description */}
-          <div className="space-y-2">
-            <Label htmlFor="detailedDescription" className="font-medium text-left block">
-              Detailed Description (Optional)
-            </Label>
-            <Textarea
-              id="detailedDescription"
-              placeholder="Explain key features, challenges faced, and architecture..."
-              value={formData.detailedDescription}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, detailedDescription: e.target.value }))
-              }
-              maxLength={500}
-              rows={4}
-              className={errors.detailedDescription ? 'border-destructive' : ''}
-            />
-            <p className="text-xs text-muted-foreground text-right">
-              {formData.detailedDescription?.length || 0}/500
-            </p>
-            {errors.detailedDescription && (
-              <p className="text-sm text-destructive flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                {errors.detailedDescription}
-              </p>
-            )}
-          </div>
+          
         </div>
 
         <div className="border-t p-4 flex gap-3 bg-background">
@@ -575,22 +708,50 @@ const ProjectCard: React.FC<{
   onDelete: (projectId: string) => void;
 }> = ({ project, onEdit, onDelete }) => (
   <div className="py-4">
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex-1 space-y-2">
+    <div className="relative rounded-xl border border-border/50 bg-card/60 p-4 pr-16 shadow-sm">
+      <div className="w-full min-w-0 space-y-3">
         {/* Title and Project Type Badge */}
-        <div className="flex items-center gap-3">
-          <h3 className="font-bold text-base text-foreground">{project.title}</h3>
-          <Badge variant="secondary" className="text-xs uppercase">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h3 className="font-semibold text-base text-foreground tracking-tight">{project.title}</h3>
+          <Badge variant="secondary" className="text-xs uppercase rounded-full px-2.5 py-0.5">
             {project.projectType}
           </Badge>
         </div>
 
-        {/* One-line Description */}
-        <p className="text-sm text-muted-foreground text-left block">{project.oneLineDescription}</p>
+        {/* Project Dates */}
+        {(project.startDate || project.endDate || (project.projectType === 'Team' && project.teamSize)) && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            {project.startDate && (
+              <p>
+                <span className="font-medium text-foreground/80">Start:</span>{' '}
+                {formatProjectDate(project.startDate)}
+              </p>
+            )}
+            {project.endDate && (
+              <p>
+                <span className="font-medium text-foreground/80">End:</span>{' '}
+                {formatProjectDate(project.endDate)}
+              </p>
+            )}
+            {project.projectType === 'Team' && project.teamSize ? (
+              <p>
+                <span className="font-medium text-foreground/80">Team size:</span> {project.teamSize}
+              </p>
+            ) : null}
+          </div>
+        )}
+
+        <div
+          tabIndex={0}
+          aria-label="Project detailed description"
+          className="mt-1 w-full max-h-24 overflow-y-hidden rounded-lg border border-border/50 bg-muted/20 px-5 py-3 text-left text-sm leading-6 text-muted-foreground whitespace-pre-wrap break-words transition-all duration-150 focus:overflow-y-auto focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-text"
+        >
+          {project.detailedDescription || 'No description added'}
+        </div>
 
         {/* Tech Stack */}
         {project.techStack.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-0.5">
             {project.techStack.map((tech) => (
               <Badge key={tech} variant="default" className="text-xs bg-primary/10 text-primary hover:bg-primary/20">
                 {tech}
@@ -598,10 +759,38 @@ const ProjectCard: React.FC<{
             ))}
           </div>
         )}
+
+        {/* External Links: GitHub & Demo */}
+        {(project.githubUrl || project.demoUrl) && (
+          <div className="flex flex-wrap items-center gap-4 pt-1">
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+              >
+                <Github className="w-4 h-4" />
+                <span>View Repo</span>
+              </a>
+            )}
+            {project.demoUrl && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+              >
+                <Globe className="w-4 h-4" />
+                <span>View Demo</span>
+              </a>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Edit and Delete Icons */}
-      <div className="flex items-center gap-2">
+      <div className="absolute right-4 top-4 flex items-center gap-2">
         <button
           type="button"
           onClick={() => onEdit(project)}
@@ -915,19 +1104,24 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
         />
 
         {projects.length > 0 && (
-          <div className="divide-y divide-border">
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onEdit={(p) => {
-                  setEditingProject(p);
-                  setIsProjectModalOpen(true);
-                }}
-                onDelete={handleDeleteProject}
-              />
-            ))}
-          </div>
+          <>
+            <div className="divide-y divide-border">
+              {projects.map((project, index) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onEdit={(p) => {
+                    setEditingProject(p);
+                    setIsProjectModalOpen(true);
+                  }}
+                  onDelete={handleDeleteProject}
+                />
+              ))}
+            </div>
+
+            {/* Bottom separator to visually separate projects list from empty-state/add box */}
+            <div className="mt-4 border-t border-border" />
+          </>
         )}
 
         <div className="border-2 border-dashed border-border rounded-lg p-12">
