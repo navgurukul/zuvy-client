@@ -256,7 +256,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       title: experience.role,
       company: experience.companyName,
       startDate: formatMonthYearToDate(experience.startDate),
-      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+     isCurrentlyWorking: experience.isCurrentlyWorking,
+      endDate: experience.isCurrentlyWorking
+      ? null
+      : formatMonthYearToDate(experience.endDate),
       description: experience.responsibilities,
     }));
 
@@ -462,7 +465,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? String(onboardingData.step1?.graduationDate?.year)
           : profileStep1.graduationDate.year,
       },
-      currentStatus: onboardingData.step1?.currentStatus || profileStep1.currentStatus,
+      currentStatus: profileStep1.currentStatus || onboardingData.step1?.currentStatus || 'Learning',
     };
 
     const profileStep2: Step2Type = {
@@ -512,9 +515,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         id: `api-work-${learnerProfile.id}-${index}`,
         companyName: experience?.company || experience?.companyName || '',
         role: experience?.title || experience?.role || '',
-        startDate: { month: '', year: '' },
-        endDate: { month: '', year: '' },
-        isCurrentlyWorking: false,
+        startDate: experience?.startDate || experience?.start_date || '',
+        endDate: experience?.endDate || experience?.end_date || '',
+        isCurrentlyWorking: Boolean(experience?.isCurrentlyWorking || experience?.is_currently_working),
         workMode: 'Remote',
         responsibilities: experience?.description || '',
       })),
@@ -523,8 +526,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles as any[]),
         buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles as any[]),
       ],
-      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+      hasInternshipExperience:
+        (learnerProfile.hasWorkExperience || false) || (learnerProfile.workExperiences?.length || 0) > 0,
     };
+
+    const hasSavedWorkExperience =
+      (onboardingData.step3?.workExperiences?.length || 0) > 0 ||
+      (profileStep3.workExperiences?.length || 0) > 0 ||
+      onboardingData.step3?.hasInternshipExperience ||
+      profileStep3.hasInternshipExperience;
 
     const mergedStep3: Step3Type = {
       academicPerformance: onboardingData.step3?.academicPerformance || profileStep3.academicPerformance,
@@ -537,7 +547,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? onboardingData.step3!.competitiveProfiles
           : profileStep3.competitiveProfiles,
       hasInternshipExperience:
-        onboardingData.step3?.hasInternshipExperience ?? profileStep3.hasInternshipExperience,
+        hasSavedWorkExperience,
     };
 
     const preferredMethods = new Set(

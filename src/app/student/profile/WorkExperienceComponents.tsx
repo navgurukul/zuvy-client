@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,53 @@ import { AlertCircle, Calendar, X, Briefcase } from 'lucide-react';
 import type { WorkExperience } from '@/lib/profile.types';
 import { MONTHS, TECH_STACK, SKILLS_BY_CATEGORY } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
+import { format } from 'date-fns';
+
+const formatDateForInput = (dateValue?: WorkExperience['startDate']) => {
+  if (!dateValue) {
+    return '';
+  }
+
+  if (typeof dateValue === 'string') {
+    return dateValue;
+  }
+
+  const year = String(dateValue.year);
+  const month = String(Number(dateValue.month)).padStart(2, '0');
+  return `${year}-${month}-01`;
+};
+
+const getTodayInputValue = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+const isEarlierThan = (leftDate?: string, rightDate?: string) => {
+  if (!leftDate || !rightDate) {
+    return false;
+  }
+
+  return leftDate < rightDate;
+};
+
+const formatExperienceDate = (dateValue?: WorkExperience['startDate']) => {
+  if (!dateValue) {
+    return 'Select date';
+  }
+
+  if (typeof dateValue === 'string') {
+    const parsedDate = new Date(dateValue);
+    return Number.isNaN(parsedDate.getTime()) ? dateValue : format(parsedDate, 'dd-MM-yyyy');
+  }
+
+  if (!dateValue.year || !dateValue.month) {
+    return 'Select date';
+  }
+
+  const monthIndex = Number(dateValue.month) - 1;
+  const normalizedDate = new Date(Number(dateValue.year), monthIndex, 1);
+  return format(normalizedDate, 'dd-MM-yyyy');
+};
 
 export const WorkExperienceModal: React.FC<{
   isOpen: boolean;
@@ -30,7 +77,7 @@ export const WorkExperienceModal: React.FC<{
       id: Date.now().toString(),
       companyName: '',
       role: '',
-      startDate: { month: '', year: '' },
+      startDate: '',
       endDate: undefined,
       isCurrentlyWorking: false,
       workMode: 'Remote',
@@ -41,6 +88,10 @@ export const WorkExperienceModal: React.FC<{
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { technicalSkills, loading: isLoadingTechStack } = useLearnerTechnicalSkills();
+  const [startDateInputValue, setStartDateInputValue] = useState(formatDateForInput(initialExperience?.startDate) || '');
+  const [endDateInputValue, setEndDateInputValue] = useState(formatDateForInput(initialExperience?.endDate) || '');
+  const startDateInputRef = useRef<HTMLInputElement>(null);
+  const endDateInputRef = useRef<HTMLInputElement>(null);
 
   const allTechOptions = technicalSkills.length > 0
     ? technicalSkills.map((s) => s.name)
@@ -49,15 +100,43 @@ export const WorkExperienceModal: React.FC<{
   useEffect(() => {
     if (initialExperience) {
       setFormData(initialExperience);
+      setStartDateInputValue(formatDateForInput(initialExperience.startDate) || '');
+      setEndDateInputValue(formatDateForInput(initialExperience.endDate) || '');
     }
   }, [initialExperience]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialExperience) {
+        setFormData(initialExperience);
+        setStartDateInputValue(formatDateForInput(initialExperience.startDate) || '');
+        setEndDateInputValue(formatDateForInput(initialExperience.endDate) || '');
+      } else {
+        setFormData({
+          id: Date.now().toString(),
+          companyName: '',
+          role: '',
+          startDate: '',
+          endDate: undefined,
+          isCurrentlyWorking: false,
+          workMode: 'Remote',
+          city: '',
+          responsibilities: '',
+          technologiesUsed: [],
+        });
+        setStartDateInputValue('');
+        setEndDateInputValue('');
+      }
+      setErrors({});
+    }
+  }, [isOpen, initialExperience]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required';
     if (!formData.role.trim()) newErrors.role = 'Role/Title is required';
-    if (!formData.startDate.month || !formData.startDate.year) newErrors.startDate = 'Start date is required';
-    if (!formData.isCurrentlyWorking && (!formData.endDate?.month || !formData.endDate?.year)) {
+    if (!formData.startDate) newErrors.startDate = 'Start date is required';
+    if (!formData.isCurrentlyWorking && !formData.endDate) {
       newErrors.endDate = 'End date is required';
     }
     if (formData.workMode === 'On-site' && !formData.city?.trim()) {
@@ -78,13 +157,18 @@ export const WorkExperienceModal: React.FC<{
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSave(formData);
+      const normalizedExperience: WorkExperience = {
+        ...formData,
+        endDate: formData.isCurrentlyWorking ? undefined : formData.endDate,
+      };
+
+      onSave(normalizedExperience);
       onOpenChange(false);
       setFormData({
         id: Date.now().toString(),
         companyName: '',
         role: '',
-        startDate: { month: '', year: '' },
+        startDate: '',
         endDate: undefined,
         isCurrentlyWorking: false,
         workMode: 'Remote',
@@ -92,6 +176,8 @@ export const WorkExperienceModal: React.FC<{
         responsibilities: '',
         technologiesUsed: [],
       });
+      setStartDateInputValue('');
+      setEndDateInputValue('');
     }
   };
 
@@ -152,14 +238,61 @@ export const WorkExperienceModal: React.FC<{
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  ref={startDateInputRef}
                   id="startDate"
-                  type="month"
-                  value={formData.startDate.year && formData.startDate.month ? `${formData.startDate.year}-${formData.startDate.month.padStart(2, '0')}` : ''}
+                  type="date"
+                  value={startDateInputValue}
+                  max={getTodayInputValue()}
+                  onClick={() => startDateInputRef.current?.showPicker?.()}
                   onChange={(e) => {
-                    const [year, month] = e.target.value.split('-');
-                    setFormData((prev) => ({ ...prev, startDate: { year, month: parseInt(month).toString() } }));
+                    const dateValue = e.target.value;
+                    setStartDateInputValue(dateValue);
+
+                    if (dateValue && isEarlierThan(getTodayInputValue(), dateValue)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        startDate: 'Start date cannot be in the future',
+                      }));
+                      return;
+                    }
+
+                    if (dateValue) {
+                      const currentEndDate = endDateInputValue;
+                      if (currentEndDate && isEarlierThan(currentEndDate, dateValue)) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          startDate: dateValue,
+                          endDate: undefined,
+                        }));
+                        setEndDateInputValue('');
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.endDate;
+                          delete next.startDate;
+                          return next;
+                        });
+                        return;
+                      }
+
+                      setFormData((prev) => ({
+                        ...prev,
+                        startDate: dateValue,
+                      }));
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.startDate;
+                        return next;
+                      });
+                    } else {
+                      setFormData((prev) => ({ ...prev, startDate: '' }));
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.startDate;
+                        return next;
+                      });
+                    }
                   }}
-                  className={`pl-10 [&::-webkit-calendar-picker-indicator]:hidden ${errors.startDate ? 'border-destructive' : ''}`}
+                  className={`pl-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0 ${errors.startDate ? 'border-destructive' : ''}`}
                 />
               </div>
               {errors.startDate && (
@@ -176,15 +309,56 @@ export const WorkExperienceModal: React.FC<{
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  ref={endDateInputRef}
                   id="endDate"
-                  type="month"
+                  type="date"
                   disabled={formData.isCurrentlyWorking}
-                  value={formData.endDate?.year && formData.endDate?.month ? `${formData.endDate.year}-${formData.endDate.month.padStart(2, '0')}` : ''}
+                  value={endDateInputValue}
+                  max={getTodayInputValue()}
+                  min={startDateInputValue || undefined}
+                  onClick={() => endDateInputRef.current?.showPicker?.()}
                   onChange={(e) => {
-                    const [year, month] = e.target.value.split('-');
-                    setFormData((prev) => ({ ...prev, endDate: { year, month: parseInt(month).toString() } }));
+                    const dateValue = e.target.value;
+                    setEndDateInputValue(dateValue);
+                    const startDateValue = startDateInputValue;
+
+                    if (dateValue && isEarlierThan(getTodayInputValue(), dateValue)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        endDate: 'End date cannot be in the future',
+                      }));
+                      return;
+                    }
+
+                    if (startDateValue && isEarlierThan(dateValue, startDateValue)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        endDate: 'End date must be the same as or later than the start date',
+                      }));
+                      return;
+                    }
+
+                    if (dateValue) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        endDate: dateValue,
+                      }));
+
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.endDate;
+                        return next;
+                      });
+                    } else {
+                      setFormData((prev) => ({ ...prev, endDate: undefined }));
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.endDate;
+                        return next;
+                      });
+                    }
                   }}
-                  className={`pl-10 [&::-webkit-calendar-picker-indicator]:hidden ${errors.endDate ? 'border-destructive' : ''}`}
+                  className={`pl-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0 ${errors.endDate ? 'border-destructive' : ''}`}
                 />
               </div>
               {errors.endDate && (
@@ -202,11 +376,22 @@ export const WorkExperienceModal: React.FC<{
               id="currentlyWorking"
               checked={formData.isCurrentlyWorking}
               onCheckedChange={(checked) => {
+                const isCurrentlyWorking = checked as boolean;
+
+               console.log("Checkbox changed:", isCurrentlyWorking);
                 setFormData((prev) => ({
                   ...prev,
-                  isCurrentlyWorking: checked as boolean,
-                  endDate: checked ? undefined : prev.endDate,
+                  isCurrentlyWorking,
+                  endDate: isCurrentlyWorking ? undefined : prev.endDate,
                 }));
+                if (isCurrentlyWorking) {
+                  setEndDateInputValue('');
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.endDate;
+                    return next;
+                  });
+                }
               }}
             />
             <Label htmlFor="currentlyWorking" className="font-medium cursor-pointer mt-5">
@@ -362,10 +547,10 @@ export const WorkExperienceCard: React.FC<{
 
         <p className="text-sm font-medium text-foreground">{experience.role}</p>
         <p className="text-sm text-muted-foreground">
-          {MONTHS[parseInt(experience.startDate.month) - 1]} {experience.startDate.year} -{' '}
+          {formatExperienceDate(experience.startDate)} -{' '}
           {experience.isCurrentlyWorking
             ? 'Present'
-            : `${MONTHS[parseInt(experience.endDate!.month) - 1]} ${experience.endDate!.year}`}
+            : formatExperienceDate(experience.endDate)}
           {experience.workMode === 'On-site' && experience.city && ` • ${experience.city}`}
         </p>
 

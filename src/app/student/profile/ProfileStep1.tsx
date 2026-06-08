@@ -196,7 +196,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     phoneNumber: data.phoneNumber?.trim() || '',
     linkedin: data.linkedin?.trim() || '',
     collegeName: data.collegeName?.trim() || '',
-    customCollege: data.customCollege?.trim() || '',
+    customCollege: data.customCollege ?? '',
     degree: data.degree?.trim() || '',
     branch: data.branch?.trim() || '',
     yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || '1st',

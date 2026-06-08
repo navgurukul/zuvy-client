@@ -130,7 +130,8 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   onBack,
   onFieldChange,
 }) => {
-  const [hasInternship, setHasInternship] = useState(initialData?.hasInternshipExperience ?? false);
+  const hasInitialWorkExperience = (initialData?.workExperiences?.length ?? 0) > 0 || initialData?.hasInternshipExperience || false;
+  const [hasInternship, setHasInternship] = useState(hasInitialWorkExperience);
   const hasInternshipEditedRef = useRef<boolean>(false);
   const [academicData, setAcademicData] = useState<AcademicPerformance>(
     initialData?.academicPerformance || { marksFormat: 'CGPA' }
@@ -193,13 +194,14 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
     if (hasInternshipEditedRef.current) return;
 
     const status = step1Data.currentStatus;
-    // Consider 'Working' as having work experience; other statuses treated as fresher by default
-    if (status === 'Working') {
+    const hasExistingWorkExperience = hasInitialWorkExperience || workExperiences.length > 0;
+
+    if (hasExistingWorkExperience || status === 'Working') {
       setHasInternship(true);
     } else {
       setHasInternship(false);
     }
-  }, [step1Data?.currentStatus]);
+  }, [step1Data?.currentStatus, workExperiences.length, hasInitialWorkExperience]);
   
   // Auto-save form data on change
   useEffect(() => {
@@ -459,7 +461,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }}
                         className={`flex-1 mt-0 ${errors.cgpa || errors.percentage ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
                           const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
@@ -484,7 +486,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
@@ -621,7 +623,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }}
                         className={`flex-1 mt-0 ${errors.class12Percentage ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
                           const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
@@ -644,7 +646,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
@@ -779,7 +781,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }}
                         className={`flex-1 mt-0 ${errors.class10Marks ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
                           const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
@@ -802,7 +804,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
