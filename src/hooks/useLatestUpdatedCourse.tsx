@@ -26,6 +26,7 @@ export const useLatestUpdatedCourse = (courseId: string) => {
           setLatestCourseData({
             ...response.data.data,
             mentorshipEnabled: response.data.mentorshipEnabled,
+            leaderboardEnabled: response.data.leaderboardEnabled,
           });
         } else {
           setError(response.data.message || 'Failed to fetch latest updated course');
