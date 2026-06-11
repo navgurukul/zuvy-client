@@ -31,6 +31,8 @@ import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudent
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
 import { cn } from "@/lib/utils";
+import Leaderboard from '@/components/Leaderboard';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 
 import {
   Select,
@@ -55,6 +57,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
   const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0);
+  const { topEntries: leaderboardEntries, selfEntry: leaderboardSelfEntry, isSelfInTopFive, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard(courseId);
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
@@ -900,90 +903,82 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full">
-        {/* Course Information Banner - Full Width */}
-        <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
-          <div className="max-w-[89rem] mx-auto p-6 md:p-8">
-            {/* Desktop Layout */}
-            <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-
-              <div className="flex-shrink-0">
-                <Image
-                  src={validCourseCoverImage}
-                  alt={courseName}
-                  width={128}
-                  height={128}
-                  className="rounded-lg object-contain"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                    <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
-                    <div className="flex items-center gap-2 mb-4">
-                      {/* <Avatar className="w-8 h-8">
-                          <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
-                          <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                        </Avatar> */}
-                      <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
-                    </div>
-                  </div>
-                  {validCollaborator ? <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                    <Image
-                      src={validCollaborator}
-                      alt="Collaborator Brand"
-                      width={75}
-                      height={56}
-                      className="h-12"
-                    />
-                  </div> : collaborator ?
-                    <div className="flex  items-center gap-2">
-                      <p className="text-sm font-bold text-muted-foreground ">In Collaboration With</p>
-                      <p className="text-sm font-bold text-primary">{collaborator}</p>
-                    </div> : ''}
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Layout */}
-            <div className="md:hidden mb-3">
-              <Image
-                src={validCourseCoverImage}
-                alt={courseName}
-                width={400}
-                height={160}
-                className="w-full h-40 rounded-lg object-cover mb-4"
-              />
-              <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-              <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
-              <div className="flex items-center gap-2 mb-4">
-                {/* <Avatar className="w-8 h-8">
-                  <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
-                  <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                </Avatar> */}
-                <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
-              </div>
-              {validCollaborator && <div className="flex items-center gap-2 mb-4">
-                <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                <Image
-                  src={validCollaborator}
-                  alt="Collaborator Brand"
-                  width={48}
-                  height={48}
-                  className="h-12"
-                />
-              </div>}
-            </div>
-
-          </div>
-        </div>
-
-        <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-4 pb-8">
+      <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-4 pb-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)] lg:items-start">
             {/* Left Column - Stats and Course Modules */}
             <div className="space-y-6 min-w-0">
+              <div className="w-full rounded-lg border bg-white p-4 md:p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-0">
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={validCourseCoverImage}
+                      alt={courseName}
+                      width={128}
+                      height={128}
+                      className="rounded-lg object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                        <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
+                        <div className="flex items-center gap-2 mb-4">
+                          {/* <Avatar className="w-8 h-8">
+                          <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
+                          <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
+                        </Avatar> */}
+                          <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
+                        </div>
+                      </div>
+                      {validCollaborator ? <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
+                          <Image
+                            src={validCollaborator}
+                            alt="Collaborator Brand"
+                            width={75}
+                            height={56}
+                            className="h-12"
+                          />
+                        </div> : collaborator ?
+                        <div className="flex  items-center gap-2">
+                          <p className="text-sm font-bold text-muted-foreground ">In Collaboration With</p>
+                          <p className="text-sm font-bold text-primary">{collaborator}</p>
+                        </div> : ''}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:hidden mb-0">
+                  <Image
+                    src={validCourseCoverImage}
+                    alt={courseName}
+                    width={400}
+                    height={160}
+                    className="w-full h-40 rounded-lg object-cover mb-4"
+                  />
+                  <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                  <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
+                  <div className="flex items-center gap-2 mb-4">
+                    {/* <Avatar className="w-8 h-8">
+                      <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
+                      <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
+                    </Avatar> */}
+                    <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
+                  </div>
+                  {validCollaborator && <div className="flex items-center gap-2 mb-4">
+                      <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
+                      <Image
+                        src={validCollaborator}
+                        alt="Collaborator Brand"
+                        width={48}
+                        height={48}
+                        className="h-12"
+                      />
+                    </div>}
+                </div>
+              </div>
+
               <div className="w-full rounded-lg bg-white p-4 md:p-5 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 w-full">
@@ -1412,6 +1407,25 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 </CardContent>
               </Card>
 
+              {latestCourseData?.leaderboardEnabled && (
+                <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl">Leaderboard</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      <Leaderboard
+                        entries={leaderboardEntries}
+                        loading={leaderboardLoading}
+                        error={leaderboardError}
+                        selfEntry={leaderboardSelfEntry}
+                        showSelfEntry={!isSelfInTopFive}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Attendance */}
               <Card className="w-full text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
@@ -1645,7 +1659,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
