@@ -1,11 +1,13 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Star } from "lucide-react"
 import { useMyMentorSessions } from "@/hooks/useMyMentorSessions"
 import { useMentorMetrics } from "@/hooks/useMentorMetrics"
+import { useStudentMentorFeedbacks } from "@/hooks/useStudentMentorFeedbacks"
 import { PerformanceSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
+import { Button } from "@/components/ui/button"
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "—"
@@ -21,30 +23,6 @@ const formatDateTime = (value?: string | null) => {
   })
 }
 
-const formatCompletedDateTime = (value?: string | null) => {
-  if (!value) return "—"
-
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) return "—"
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-const getDisplayStudentName = (
-  studentName?: string | null,
-  studentUserName?: string | null,
-  studentFullName?: string | null,
-  learnerName?: string | null
-) => {
-  return studentName || studentFullName || studentUserName || learnerName || "Unknown Student"
-}
-
 const renderRatingStars = (rating?: number | null) => {
   const normalizedRating = Math.max(0, Math.min(5, Math.round(rating || 0)))
 
@@ -54,7 +32,7 @@ const renderRatingStars = (rating?: number | null) => {
         <Star
           key={index}
           size={14}
-          className={index < normalizedRating ? "text-green-500 fill-green-500" : "text-gray-300"}
+          className={index < normalizedRating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
         />
       ))}
     </div>
@@ -73,6 +51,13 @@ export default function PerformanceMetrics() {
     loading: metricsLoading,
     error: metricsError,
   } = useMentorMetrics(true)
+
+  const [feedbackFilter, setFeedbackFilter] = useState<"30days" | "3months" | "all">("30days")
+  const {
+    feedbacks,
+    loading: feedbacksLoading,
+    error: feedbacksError,
+  } = useStudentMentorFeedbacks(feedbackFilter, true)
 
   const completionRate = Number(metrics?.sessions.completionRate) || 0
   const cancellationRate = Number(metrics?.sessions.cancellationRate) || 0
@@ -112,29 +97,69 @@ export default function PerformanceMetrics() {
   return isInitialLoading ? (
     <PerformanceSkeleton />
   ) : (
-    <div className="p-6 min-h-screen">
+    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
       <div className="text-left mb-6">
-        <h1 className="text-xl font-semibold">Performance Metrics</h1>
+        <h1 className="text-lg font-semibold">Performance Metrics</h1>
         <p className="text-sm text-muted-foreground">
           Your mentoring performance from live slot and session data
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">{completionRate}%</p>
-            <p className="text-sm font-medium">Completion Rate</p>
-            <p className="text-xs text-muted-foreground">
+      <div className="flex items-center gap-3">
+        {[
+          { value: "30days", label: "Last 30 days" },
+          { value: "3months", label: "Last 3 months" },
+          { value: "all", label: "All time" },
+        ].map((item) => (
+          <Button
+            key={item.value}
+            variant="outline"
+            onClick={() =>
+              setFeedbackFilter(item.value as "30days" | "3months" | "all")
+            }
+            //       className={`
+            //   h-10 rounded-full px-5 text-sm
+            //   ${feedbackFilter === item.value
+            //           ? "border-slate-900 bg-white text-slate-900 font-semibold"
+            //           : "border-slate-200 text-slate-500 hover:text-slate-900"
+            //         }
+            // `}
+            className={`
+  h-10 rounded-full px-5 text-sm
+  ${feedbackFilter === item.value
+                ? "border-slate-900 bg-white text-slate-900 font-semibold hover:bg-white hover:text-slate-900"
+                : "border-slate-200 bg-white text-slate-500 hover:bg-white hover:text-slate-500"
+              }
+`}
+          >
+            {item.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"> */}
+      <div className="grid gap-5 md:grid-cols-3 mb-8">
+        <Card className='rounded-lg'>
+          <CardContent className="p-6 text-left">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Completion Rate
+            </p>
+
+            <p className="text-3xl leading-none font-bold">{completionRate}%</p>
+            <p className="text-xs text-muted-foreground mt-3">
               {Number(metrics?.sessions.completed) || 0} of {Number(metrics?.sessions.total) || 0} sessions completed
             </p>
           </CardContent>
         </Card>
 
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">{averageRating ? averageRating : "—"}</p>
-            <p className="text-sm font-medium">Average Rating</p>
+        <Card className='rounded-lg'>
+          <CardContent className="p-6 text-left">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Average Rating
+            </p>
+
+            <p className="text-3xl font-semibold">{averageRating ? averageRating : "—"}</p>
+            {/* <p className="text-sm font-medium">Average Rating</p> */}
             <p className="text-xs text-muted-foreground">
               {averageRating
                 ? "Across completed sessions with rating"
@@ -143,154 +168,73 @@ export default function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">{utilizationRate}%</p>
-            <p className="text-sm font-medium">Utilization Rate</p>
-            <p className="text-xs text-muted-foreground">
-              {Number(metrics?.utilization.usedSlots) || 0} of {Number(metrics?.utilization.totalSlots) || 0} slots booked
+        <Card className='rounded-lg'>
+          <CardContent className="p-6 text-left">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Utilization Rate
+            </p>
+            <p className="text-3xl leading-none font-bold">
+              {utilizationRate}%
+            </p>
+            <div className="mt-5 h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-green-800"
+                style={{ width: `${utilizationRate}%` }}
+              />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              {Number(metrics?.utilization.usedSlots) || 0} of{" "}
+              {Number(metrics?.utilization.totalSlots) || 0} slots booked
             </p>
           </CardContent>
         </Card>
-
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-2xl font-semibold">{Number(metrics?.upcomingSessions) || 0}</p>
-            <p className="text-sm font-medium">Upcoming Sessions</p>
-            <p className="text-xs text-muted-foreground">Sessions scheduled next</p>
-          </CardContent>
-        </Card>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card className='rounded-3xl'>
-          <CardHeader>
-            <CardTitle className="text-base text-left">Session Summary</CardTitle>
+      <div className="grid gap-6 md:grid-cols-1">
+        <Card className="rounded-lg shadow-sm border-slate-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base text-left">Student Feedback</CardTitle>
           </CardHeader>
-
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{Number(metrics?.sessions.total) || 0}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
-              </div>
-
-              <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{Number(metrics?.sessions.completed) || 0}</p>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </div>
-
-              <div className="bg-gray-100 rounded-3xl p-3 text-center">
-                <p className="font-semibold">{cancellationRate}%</p>
-                <p className="text-xs text-muted-foreground">Cancelled rate</p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-2xl border p-3">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Session Mix</p>
-              <div className="space-y-3">
-                {sessionMix.map((item) => (
-                  <div key={item.label} className="grid grid-cols-[88px_1fr_32px] items-center gap-2">
-                    <p className="text-xs text-muted-foreground text-left">{item.label}</p>
-                    <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${item.barClass}`}
-                        style={{ width: `${(item.value / maxSessionMixValue) * 100}%` }}
-                      />
-                    </div>
-                    <p className="text-xs font-medium text-right">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2 text-left">
-              {(completedSessionsLoading || metricsLoading) && (
-                <p className="text-xs text-muted-foreground">Loading session analytics...</p>
-              )}
-              {!completedSessionsLoading && completedSessionsError && (
-                <p className="text-xs text-red-500">{completedSessionsError}</p>
-              )}
-              {!metricsLoading && metricsError && (
-                <p className="text-xs text-red-500">{metricsError}</p>
-              )}
-              {!metricsLoading && !metricsError && (Number(metrics?.sessions.total) || 0) === 0 && (
-                <p className="text-xs text-muted-foreground">No sessions yet.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className='rounded-3xl'>
-          <CardHeader>
-            <CardTitle className="text-base text-left">Recently Completed</CardTitle>
-          </CardHeader>
-
           <CardContent
-            className={`space-y-3 text-left ${
-              recentCompleted.length > 4 ? "max-h-[26rem] overflow-y-auto pr-1" : ""
-            }`}
+            className={`space-y-3 text-left ${feedbacks.length > 4 ? "max-h-[26rem] overflow-y-auto pr-1" : ""
+              }`}
           >
-            {recentCompleted.length === 0 && (
-              <p className="text-xs text-muted-foreground">No completed sessions yet.</p>
-            )}
+            {feedbacksLoading ? (
+              <p className="text-xs text-muted-foreground">Loading feedback...</p>
+            ) : feedbacksError ? (
+              <p className="text-xs text-red-500">{feedbacksError}</p>
+            ) : feedbacks.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No feedback received for this period.</p>
+            ) : (
+              feedbacks.map((entry) => {
+                const nameLabel =
+                  entry.studentName ||
+                  entry.studentFullName ||
+                  entry.studentUserName ||
+                  entry.learnerName ||
+                  "Student"
 
-            {recentCompleted.map((session) => (
-              <div key={session.id} className="rounded-lg border p-3">
-                <p className="text-sm font-medium">
-                  {getDisplayStudentName(
-                    session.studentName,
-                    session.studentUserName,
-                    session.studentFullName,
-                    session.learnerName
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Date: {formatDateTime(session.completedAt || session.slotStart || session.slotEnd)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Completed at: {formatCompletedDateTime(session.completedAt || session.slotEnd)}
-                </p>
-                {session.mentorRating ? (
-                  <p className="text-xs text-muted-foreground mt-1">Rating: {session.mentorRating}/5</p>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">Rating: Not rated</p>
-                )}
-                {renderRatingStars(session.mentorRating)}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+                const dateVal = entry.createdAt || entry.submittedAt || entry.date
+                const feedbackText = entry.feedback || entry.notes || ""
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{Number(metrics?.upcomingSessions) || 0}</p>
-            <p className="text-sm font-medium">Upcoming Sessions</p>
-            <p className="text-xs text-muted-foreground">Scheduled for upcoming dates</p>
-          </CardContent>
-        </Card>
-
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{Number(metrics?.sessions.missed) || 0}</p>
-            <p className="text-sm font-medium">Missed Sessions</p>
-            <p className="text-xs text-muted-foreground">Sessions marked as missed</p>
-          </CardContent>
-        </Card>
-
-        <Card className='rounded-3xl'>
-          <CardContent className="p-5 text-left">
-            <p className="text-xl font-semibold">{Number(metrics?.sessions.total) || 0}</p>
-            <p className="text-sm font-medium">Total Sessions</p>
-            <p className="text-xs text-muted-foreground">
-              {(completedSessionsLoading || metricsLoading)
-                ? "Loading..."
-                : "All tracked mentor sessions"}
-            </p>
-            {!metricsLoading && metricsError && (
-              <p className="text-xs text-red-500 mt-1">{metricsError}</p>
+                return (
+                  <div key={entry.id || entry.bookingId} className="rounded-lg border p-3 bg-white space-y-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-semibold text-gray-900">{nameLabel}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Date: {formatDateTime(dateVal)}
+                        </p>
+                      </div>
+                      {renderRatingStars(entry.studentRating)}
+                    </div>
+                    {feedbackText && (
+                      <p className="text-xs text-slate-600 bg-slate-50/50 p-2 rounded italic mt-1 font-normal leading-normal">
+                        &ldquo;{feedbackText}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                )
+              })
             )}
           </CardContent>
         </Card>
