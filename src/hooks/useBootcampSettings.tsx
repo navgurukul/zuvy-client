@@ -32,7 +32,8 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       setBootcampSettings({
         type: settings.type,
         isModuleLocked: settings.isModuleLocked ?? false,
-        mentorshipEnabled: settings.mentorshipEnabled ?? false
+        mentorshipEnabled: settings.mentorshipEnabled ?? false,
+        leaderboardEnabled: settings.leaderboardEnabled ?? false
       });
       setError(null);
     } catch (err: any) {

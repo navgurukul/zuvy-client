@@ -9,8 +9,11 @@ type LearnerProfileStrengthResponse =
         | Array<{
                 strength?: number | string
                 percentage?: number | string
+                profileCompletion?: number | string
                 level?: string
                 message?: string
+                isProfileComplete?: boolean
+                missingFields?: Record<string, unknown> | string[]
             }>
     | {
         success?: boolean
@@ -18,20 +21,29 @@ type LearnerProfileStrengthResponse =
         message?: string
         code?: number
                 level?: string
+                profileCompletion?: number | string
+                isProfileComplete?: boolean
+                missingFields?: Record<string, unknown> | string[]
                 data?:
                         | number
                         | string
                         | {
                                 strength?: number | string
                                 percentage?: number | string
+                                profileCompletion?: number | string
                                 level?: string
                                 message?: string
+                                isProfileComplete?: boolean
+                                missingFields?: Record<string, unknown> | string[]
                             }
                         | Array<{
                                 strength?: number | string
                                 percentage?: number | string
+                                profileCompletion?: number | string
                                 level?: string
                                 message?: string
+                                isProfileComplete?: boolean
+                                missingFields?: Record<string, unknown> | string[]
                             }>
       }
 
@@ -50,12 +62,34 @@ const toText = (value: unknown): string | null => {
     return trimmed.length > 0 ? trimmed : null
 }
 
+type LearnerProfileStrengthState = {
+    percentage: number | null
+    level: string | null
+    message: string | null
+    isProfileComplete: boolean | null
+    missingFields: string[]
+}
+
+const normalizeMissingFields = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+        return value.map((item) => String(item).trim()).filter(Boolean)
+    }
+
+    if (!value || typeof value !== 'object') return []
+
+    return Object.entries(value as Record<string, unknown>)
+        .filter(([, fieldValue]) => fieldValue === null || fieldValue === undefined || fieldValue === '' || fieldValue === false)
+        .map(([fieldName]) => fieldName)
+}
+
 const extractStrengthData = (
     payload: LearnerProfileStrengthResponse
-): { percentage: number | null; level: string | null; message: string | null } => {
+): LearnerProfileStrengthState => {
     let percentage: number | null = null
     let level: string | null = null
     let message: string | null = null
+    let isProfileComplete: boolean | null = null
+    let missingFields: string[] = []
 
     const inspect = (value: unknown) => {
         const directNumber = toNumber(value)
@@ -75,8 +109,11 @@ const extractStrengthData = (
             data?: unknown
             strength?: unknown
             percentage?: unknown
+            profileCompletion?: unknown
             level?: unknown
             message?: unknown
+            isProfileComplete?: unknown
+            missingFields?: unknown
         }
 
         if ('data' in objectValue) {
@@ -97,12 +134,27 @@ const extractStrengthData = (
             }
         }
 
+        if (percentage === null) {
+            const profileCompletionNumber = toNumber(objectValue.profileCompletion)
+            if (profileCompletionNumber !== null) {
+                percentage = profileCompletionNumber
+            }
+        }
+
         if (level === null) {
             level = toText(objectValue.level)
         }
 
         if (message === null) {
             message = toText(objectValue.message)
+        }
+
+        if (isProfileComplete === null && typeof objectValue.isProfileComplete === 'boolean') {
+            isProfileComplete = objectValue.isProfileComplete
+        }
+
+        if (missingFields.length === 0) {
+            missingFields = normalizeMissingFields(objectValue.missingFields)
         }
     }
 
@@ -112,6 +164,8 @@ const extractStrengthData = (
         percentage: percentage === null ? null : clampPercentage(percentage),
         level,
         message,
+        isProfileComplete,
+        missingFields,
     }
 }
 
@@ -121,6 +175,8 @@ export function useLearnerProfileStrength(initialFetch = true) {
     const [strengthPercentage, setStrengthPercentage] = useState<number | null>(null)
     const [strengthLevel, setStrengthLevel] = useState<string | null>(null)
     const [strengthMessage, setStrengthMessage] = useState<string | null>(null)
+    const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null)
+    const [missingFields, setMissingFields] = useState<string[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
 
@@ -132,6 +188,8 @@ export function useLearnerProfileStrength(initialFetch = true) {
             setStrengthPercentage(parsedStrength.percentage)
             setStrengthLevel(parsedStrength.level)
             setStrengthMessage(parsedStrength.message)
+            setIsProfileComplete(parsedStrength.isProfileComplete)
+            setMissingFields(parsedStrength.missingFields)
             setError(null)
             return res.data
         } catch (err) {
@@ -139,6 +197,8 @@ export function useLearnerProfileStrength(initialFetch = true) {
             setStrengthPercentage(null)
             setStrengthLevel(null)
             setStrengthMessage(null)
+            setIsProfileComplete(null)
+            setMissingFields([])
             console.error('Error fetching learner profile strength:', err)
             return null
         } finally {
@@ -154,6 +214,8 @@ export function useLearnerProfileStrength(initialFetch = true) {
         strengthPercentage,
         strengthLevel,
         strengthMessage,
+        isProfileComplete,
+        missingFields,
         loading,
         error,
         refetchLearnerProfileStrength: fetchLearnerProfileStrength,

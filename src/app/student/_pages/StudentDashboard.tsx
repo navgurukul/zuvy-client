@@ -37,7 +37,7 @@ const StudentDashboard = () => {
   
   const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
-  const { strengthPercentage, strengthLevel, strengthMessage } = useLearnerProfileStrength();
+  const { strengthPercentage, strengthLevel, strengthMessage, isProfileComplete, missingFields } = useLearnerProfileStrength();
   const { refetchLearnerProfile } = useLearnerProfile(false);
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
@@ -167,22 +167,29 @@ const StudentDashboard = () => {
     return "Let's get started! Your dream job is just a few clicks away.";
   };
 
-  const getNextAction = (prog: number) => {
-    if (prog < 20) return { text: 'Add Basic Info', score: '+20%' };
-    if (prog < 40) return { text: 'Add Skills', score: '+20%' };
-    if (prog < 60) return { text: 'Add Project', score: '+20%' };
-    if (prog < 80) return { text: 'Add Career Goals', score: '+20%' };
-    if (prog < 90) return { text: 'Add LinkedIn', score: '+10%' };
-    if (prog < 95) return { text: 'Add Experience', score: '+5%' };
-    if (prog < 100) return { text: 'Add Competitive Profile', score: '+5%' };
-    return { text: 'Profile Complete', score: '100%' };
+  const formatMissingField = (fieldName: string) => {
+    const normalizedName = fieldName.trim();
+
+    return normalizedName
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
 
   const profileStatus = getProfileStatus(displayProgress);
   const profileLevel = strengthLevel ?? profileStatus.label;
   const profileMessage = strengthMessage ?? getSubtext(displayProgress);
   const profileLevelColor = getProfileStatusColor(strengthLevel, displayProgress);
-  const nextAction = getNextAction(displayProgress);
+  const remainingProfileItems = missingFields.map(formatMissingField);
+  const remainingProfileCount = remainingProfileItems.length;
+  const remainingProfilePercentage = Math.max(0, 100 - Math.round(displayProgress));
+  const remainingProfileMessage = isProfileComplete
+    ? 'Your profile is complete.'
+    : remainingProfileCount > 1
+      ? `${remainingProfileCount} fields remain to complete your profile.`
+      : remainingProfileCount === 1
+        ? `${remainingProfileItems[0]} is missing to complete your profile.`
+        : 'Complete the highlighted fields to unlock opportunities.';
 
   if (loading) {
     return <StudentDashboardSkeleton />;
@@ -249,7 +256,7 @@ const StudentDashboard = () => {
                       <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center">New</button>
                     </h3>
                     <p className="text-sm sm:text-base text-gray-700 mb-4 md:mb-0">
-                      I will help you get job ready by practicing interviews and learning activities
+                      I will help you get job-ready with mock interviews, resume building, and a mentor who actually gets you.
                     </p>
                   </div>
 
@@ -262,97 +269,6 @@ const StudentDashboard = () => {
               </CardContent>
             </Card>
 
-        {/* ✅ Fixed Global Courses Section */}
-        {globalCourses && globalCourses.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
-            
-            {globalLoading ? (
-              <CarouselSkeleton />
-            ) : globalError ? (
-              <Card className="w-full shadow-4dp">
-                <CardContent className="p-6 text-center">
-                  <p className="text-destructive mb-4">{globalError}</p>
-                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                {/* ✅ Map over globalCourses array */}
-                {globalCourses.map((course) => (
-                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        {/* Course Image */}
-                        <div className="mt-2">
-                          <Image
-                            src={course.coverImage || '/logo.PNG'}
-                            alt={course.name}
-                            width={128}
-                            height={128}
-                            className="rounded-lg object-cover"
-                          />
-                        </div>
-
-                        {/* Course Info */}
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div className="flex-1 text-left">
-                              <h3 className="text-xl font-heading font-semibold mb-2">
-                                {course.name}
-                              </h3>
-                              <div className="mb-3">
-                                <Badge variant="outline" className="capitalize">
-                                  {course.courseOrgName || "N/A"}
-                                </Badge>
-                              </div>
-                              <TruncatedDescription 
-                                text={course.description || ''}
-                                maxLength={150}
-                                className="text-muted-foreground mb-3"
-                              />
-                              
-                              {/* ✅ Fixed instructor path */}
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className="text-sm text-muted-foreground capitalize">
-                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action Button - Desktop */}
-                            <div className="hidden md:flex flex-shrink-0">
-                              <Button 
-                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                                onClick={() => handleEnrollCourse(course.bootcampId)}
-                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                              >
-                                <Play className="w-4 h-4 mr-2" />
-                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Action Button - Mobile */}
-                          <div className="md:hidden mt-4">
-                            <Button 
-                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                              onClick={() => handleEnrollCourse(course.bootcampId)}
-                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                            >
-                              <Play className="w-4 h-4 mr-2" />
-                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
             <div className="mb-6">
               <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
@@ -537,6 +453,98 @@ const StudentDashboard = () => {
               ))}
             </div>
 
+            {/* ✅ Fixed Global Courses Section */}
+        {globalCourses && globalCourses.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
+            
+            {globalLoading ? (
+              <CarouselSkeleton />
+            ) : globalError ? (
+              <Card className="w-full shadow-4dp">
+                <CardContent className="p-6 text-center">
+                  <p className="text-destructive mb-4">{globalError}</p>
+                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {/* ✅ Map over globalCourses array */}
+                {globalCourses.map((course) => (
+                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Course Image */}
+                        <div className="mt-2">
+                          <Image
+                            src={course.coverImage || '/logo.PNG'}
+                            alt={course.name}
+                            width={128}
+                            height={128}
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="flex-1">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                            <div className="flex-1 text-left">
+                              <h3 className="text-xl font-heading font-semibold mb-2">
+                                {course.name}
+                              </h3>
+                              <div className="mb-3">
+                                <Badge variant="outline" className="capitalize">
+                                  {course.courseOrgName || "N/A"}
+                                </Badge>
+                              </div>
+                              <TruncatedDescription 
+                                text={course.description || ''}
+                                maxLength={150}
+                                className="text-muted-foreground mb-3"
+                              />
+                              
+                              {/* ✅ Fixed instructor path */}
+                              <div className="flex items-center gap-2 mb-4">
+                                <span className="text-sm text-muted-foreground capitalize">
+                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Action Button - Desktop */}
+                            <div className="hidden md:flex flex-shrink-0">
+                              <Button 
+                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                                onClick={() => handleEnrollCourse(course.bootcampId)}
+                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Action Button - Mobile */}
+                          <div className="md:hidden mt-4">
+                            <Button 
+                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                              onClick={() => handleEnrollCourse(course.bootcampId)}
+                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
             {filteredBootcamps.length === 0 && (
               <Card className="text-center py-12 shadow-4dp">
                 <CardContent>
@@ -553,7 +561,7 @@ const StudentDashboard = () => {
                 </CardContent>
               </Card>
             )}
-          </div>
+          </div>  
 
           <div className="lg:col-span-1 space-y-4">
             <Card className="shadow-sm">
@@ -616,8 +624,15 @@ const StudentDashboard = () => {
                     <Plus className="w-5 h-5 text-primary" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{nextAction.text}</p>
-                    <p className="text-xs text-primary font-medium">{nextAction.score} Score</p>
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {isProfileComplete ? 'Review profile' : 'Complete profile'}
+                    </p>
+                    <p className="text-xs text-primary font-medium">
+                      {isProfileComplete ? 'All key details are filled out' : `${remainingProfilePercentage}% remaining`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {isProfileComplete ? 'Your profile is complete.' : remainingProfileMessage}
+                    </p>
                   </div>
                 </button>
               </CardContent>

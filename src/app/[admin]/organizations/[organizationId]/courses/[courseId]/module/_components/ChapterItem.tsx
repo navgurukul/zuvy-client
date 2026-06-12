@@ -145,7 +145,7 @@ function ChapterItem({
                     : chapterData[0].chapterId
                     
                 router.push(
-                    `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
+                    `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
                 )
             }
         } catch (error: any) {
@@ -236,7 +236,6 @@ function ChapterItem({
                     onClose={() => setDeleteModalOpen(false)}
                     onConfirm={() => {
                         handleDeleteChapter()
-                       
                         setDeleteModalOpen(false)
                     }}
                     onDeleteChapterWithSession={() => {

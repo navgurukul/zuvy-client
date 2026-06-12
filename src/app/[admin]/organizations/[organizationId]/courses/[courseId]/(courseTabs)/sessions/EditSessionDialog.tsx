@@ -99,7 +99,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             const minutesIST = String(dateTime.getMinutes()).padStart(2, '0')
             const secondsIST = String(dateTime.getSeconds()).padStart(2, '0')
 
-            return `${year}-${month}-${day}T${hoursIST}:${minutesIST}:${secondsIST}`
+            return `${year}-${month}-${day}T${hoursIST}:${minutesIST}:${secondsIST}+05:30`
         }
 
         const startDateTime = combineDateTime(
@@ -112,6 +112,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             title: values.sessionTitle,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
+            timeZone: 'Asia/Kolkata',
         }
 
         try {

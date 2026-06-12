@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Check, Plus, Trash2, Loader2, Code, Briefcase, GraduationCap, Calendar, X } from 'lucide-react';
 import type { OnboardingStep3 as Step3Type, AcademicPerformance, WorkExperience, CompetitiveProfile } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STACK } from '@/lib/profile.mockData';
@@ -38,6 +39,38 @@ const normalizeCompetitiveProfiles = (profiles?: CompetitiveProfile[]): Competit
     const existingProfile = profiles.find((profile) => profile.platform === defaultProfile.platform);
     return existingProfile ? { ...defaultProfile, ...existingProfile } : { ...defaultProfile };
   });
+};
+
+const hasAtMostTwoDecimalPlaces = (value: number) => {
+  const decimalPart = value.toString().split('.')[1];
+  return !decimalPart || decimalPart.length <= 2;
+};
+
+const convertScoreValue = (value: number, fromFormat: 'CGPA' | 'Percentage', toFormat: 'CGPA' | 'Percentage') => {
+  if (fromFormat === toFormat) {
+    return value;
+  }
+
+  return fromFormat === 'CGPA' ? parseFloat((value * 9.5).toFixed(2)) : parseFloat((value / 9.5).toFixed(2));
+};
+
+const getScoreError = (format: 'CGPA' | 'Percentage', value?: number) => {
+  if (value === undefined || value === null || Number.isNaN(value)) {
+    return '';
+  }
+
+  if (format === 'CGPA') {
+    if (value < 0 || value > 10 || !hasAtMostTwoDecimalPlaces(value)) {
+      return 'Enter a valid CGPA between 0.0 and 10.0 with up to 2 decimal places';
+    }
+    return '';
+  }
+
+  if (value < 0 || value > 100 || !hasAtMostTwoDecimalPlaces(value)) {
+    return 'Enter a valid percentage between 0 and 100 with up to 2 decimal places';
+  }
+
+  return '';
 };
 
 interface ProfileStep3Props {
@@ -97,7 +130,9 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   onBack,
   onFieldChange,
 }) => {
-  const [hasInternship, setHasInternship] = useState(initialData?.hasInternshipExperience ?? false);
+  const hasInitialWorkExperience = (initialData?.workExperiences?.length ?? 0) > 0 || initialData?.hasInternshipExperience || false;
+  const [hasInternship, setHasInternship] = useState(hasInitialWorkExperience);
+  const hasInternshipEditedRef = useRef<boolean>(false);
   const [academicData, setAcademicData] = useState<AcademicPerformance>(
     initialData?.academicPerformance || { marksFormat: 'CGPA' }
   );
@@ -119,6 +154,21 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   const [customClass10Board, setCustomClass10Board] = useState<string>('');
   const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const { boards, loading: isBoardsLoading } = useLearnerBoards();
+  const isWorkingStatus = step1Data?.currentStatus === 'Working';
+
+  const updateScoreError = (key: 'cgpa' | 'percentage' | 'class12Percentage' | 'class10Marks', errorMessage?: string) => {
+    setErrors((prev) => {
+      const nextErrors = { ...prev };
+
+      if (errorMessage) {
+        nextErrors[key] = errorMessage;
+      } else {
+        delete nextErrors[key];
+      }
+
+      return nextErrors;
+    });
+  };
 
   const years = getYearsArray(1990);
   
@@ -137,6 +187,21 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
       Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
     };
   }, []);
+
+  // Sync work-experience toggle with Step 1 status unless user edited manually
+  useEffect(() => {
+    if (!step1Data || typeof step1Data.currentStatus === 'undefined') return;
+    if (hasInternshipEditedRef.current) return;
+
+    const status = step1Data.currentStatus;
+    const hasExistingWorkExperience = hasInitialWorkExperience || workExperiences.length > 0;
+
+    if (hasExistingWorkExperience || status === 'Working') {
+      setHasInternship(true);
+    } else {
+      setHasInternship(false);
+    }
+  }, [step1Data?.currentStatus, workExperiences.length, hasInitialWorkExperience]);
   
   // Auto-save form data on change
   useEffect(() => {
@@ -180,17 +245,39 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
   const validateAcademic = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
-    if (academicData.marksFormat === 'CGPA' && (!academicData.cgpa || academicData.cgpa < 0 || academicData.cgpa > 10)) {
-      newErrors.cgpa = 'Enter a valid CGPA between 0.0 and 10.0';
+    if (academicData.marksFormat === 'CGPA') {
+      if (academicData.cgpa === undefined || academicData.cgpa === null) {
+        newErrors.cgpa = 'Enter a valid CGPA between 0.0 and 10.0 with up to 2 decimal places';
+      } else {
+        const cgpaError = getScoreError('CGPA', academicData.cgpa);
+        if (cgpaError) {
+          newErrors.cgpa = cgpaError;
+        }
+      }
     }
-    if (academicData.marksFormat === 'Percentage' && (!academicData.percentage || academicData.percentage < 0 || academicData.percentage > 100)) {
-      newErrors.percentage = 'Enter a valid percentage between 0 and 100';
+    if (academicData.marksFormat === 'Percentage') {
+      if (academicData.percentage === undefined || academicData.percentage === null) {
+        newErrors.percentage = 'Enter a valid percentage between 0 and 100 with up to 2 decimal places';
+      } else {
+        const percentageError = getScoreError('Percentage', academicData.percentage);
+        if (percentageError) {
+          newErrors.percentage = percentageError;
+        }
+      }
     }
-    if (academicData.class12Percentage !== undefined && (academicData.class12Percentage < 0 || academicData.class12Percentage > 100)) {
-      newErrors.class12Percentage = 'Enter a valid percentage between 0 and 100';
+    if (academicData.class12Percentage !== undefined) {
+      const class12Format = academicData.class12Format || 'Percentage';
+      const class12Error = getScoreError(class12Format, academicData.class12Percentage);
+      if (class12Error) {
+        newErrors.class12Percentage = class12Error;
+      }
     }
-    if (academicData.class10Marks !== undefined && (academicData.class10Marks < 0 || academicData.class10Marks > 100)) {
-      newErrors.class10Marks = 'Enter valid marks';
+    if (academicData.class10Marks !== undefined) {
+      const class10Format = academicData.class10Format || 'Percentage';
+      const class10Error = getScoreError(class10Format, academicData.class10Marks);
+      if (class10Error) {
+        newErrors.class10Marks = class10Error;
+      }
     }
     setErrors(newErrors);
     return newErrors;
@@ -347,15 +434,21 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                       <Input
                         id="collegeScore"
                         type="number"
-                        step={academicData.marksFormat === 'CGPA' ? '0.01' : '1'}
+                        step="0.01"
+                        inputMode="decimal"
                         min="0"
                         max={academicData.marksFormat === 'CGPA' ? '10' : '100'}
-                        placeholder={academicData.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85'}
-                        value={academicData.marksFormat === 'CGPA' ? (academicData.cgpa || '') : (academicData.percentage || '')}
+                        placeholder={academicData.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85.25'}
+                        value={academicData.marksFormat === 'CGPA' ? (academicData.cgpa ?? '') : (academicData.percentage ?? '')}
                         onChange={(e) => {
-                          const value = academicData.marksFormat === 'CGPA' 
-                            ? parseFloat(e.target.value) || undefined 
-                            : parseInt(e.target.value) || undefined;
+                          const rawValue = e.target.value;
+                          if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
+                            return;
+                          }
+
+                          const value = rawValue ? parseFloat(rawValue) : undefined;
+                          const scoreFormat = academicData.marksFormat;
+                          const scoreErrorKey = scoreFormat === 'CGPA' ? 'cgpa' : 'percentage';
                           
                           setAcademicData((prev) => ({
                             ...prev,
@@ -363,16 +456,28 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                               ? { cgpa: value as number | undefined }
                               : { percentage: value as number | undefined })
                           }));
+
+                          updateScoreError(scoreErrorKey, getScoreError(scoreFormat, value));
                         }}
                         className={`flex-1 mt-0 ${errors.cgpa || errors.percentage ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
+                          const currentFormat = academicData.marksFormat;
+                          const currentValue = currentFormat === 'CGPA' ? academicData.cgpa : academicData.percentage;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            marksFormat: 'CGPA',
+                            marksFormat: nextFormat,
+                            cgpa: convertedValue,
+                            percentage: undefined,
                           }));
+
+                          updateScoreError('cgpa', getScoreError(nextFormat, convertedValue));
+                          updateScoreError('percentage');
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           academicData.marksFormat === 'CGPA'
@@ -381,14 +486,24 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
+                          const currentFormat = academicData.marksFormat;
+                          const currentValue = currentFormat === 'CGPA' ? academicData.cgpa : academicData.percentage;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            marksFormat: 'Percentage',
+                            marksFormat: nextFormat,
+                            percentage: convertedValue,
+                            cgpa: undefined,
                           }));
+
+                          updateScoreError('percentage', getScoreError(nextFormat, convertedValue));
+                          updateScoreError('cgpa');
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           academicData.marksFormat === 'Percentage'
@@ -485,26 +600,44 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                       <Input
                         id="class12Score"
                         type="number"
-                        step={(academicData.class12Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                        step="0.01"
+                        inputMode="decimal"
                         min="0"
                         max={(academicData.class12Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                        placeholder={(academicData.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'Score'}
-                        value={academicData.class12Percentage || ''}
+                        placeholder={(academicData.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'e.g. 85.25'}
+                        value={academicData.class12Percentage ?? ''}
                         onChange={(e) => {
+                          const rawValue = e.target.value;
+                          if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
+                            return;
+                          }
+
+                          const currentFormat = academicData.class12Format || 'Percentage';
+                          const nextValue = rawValue ? parseFloat(rawValue) : undefined;
                           setAcademicData((prev) => ({
                             ...prev,
-                            class12Percentage: parseFloat(e.target.value) || undefined,
+                            class12Percentage: nextValue,
                           }));
+
+                          updateScoreError('class12Percentage', getScoreError(currentFormat, nextValue));
                         }}
                         className={`flex-1 mt-0 ${errors.class12Percentage ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
+                          const currentFormat = academicData.class12Format || 'Percentage';
+                          const currentValue = academicData.class12Percentage;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            class12Format: 'CGPA',
+                            class12Format: nextFormat,
+                            class12Percentage: convertedValue,
                           }));
+
+                          updateScoreError('class12Percentage', getScoreError(nextFormat, convertedValue));
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           (academicData.class12Format || 'Percentage') === 'CGPA'
@@ -513,14 +646,22 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
+                          const currentFormat = academicData.class12Format || 'Percentage';
+                          const currentValue = academicData.class12Percentage;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            class12Format: 'Percentage',
+                            class12Format: nextFormat,
+                            class12Percentage: convertedValue,
                           }));
+
+                          updateScoreError('class12Percentage', getScoreError(nextFormat, convertedValue));
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           (academicData.class12Format || 'Percentage') === 'Percentage'
@@ -617,26 +758,44 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                       <Input
                         id="class10Marks"
                         type="number"
-                        step={(academicData.class10Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                        step="0.01"
+                        inputMode="decimal"
                         min="0"
                         max={(academicData.class10Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                        placeholder={(academicData.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'Score'}
-                        value={academicData.class10Marks || ''}
+                        placeholder={(academicData.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'e.g. 85.25'}
+                        value={academicData.class10Marks ?? ''}
                         onChange={(e) => {
+                          const rawValue = e.target.value;
+                          if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
+                            return;
+                          }
+
+                          const currentFormat = academicData.class10Format || 'Percentage';
+                          const nextValue = rawValue ? parseFloat(rawValue) : undefined;
                           setAcademicData((prev) => ({
                             ...prev,
-                            class10Marks: parseFloat(e.target.value) || undefined,
+                            class10Marks: nextValue,
                           }));
+
+                          updateScoreError('class10Marks', getScoreError(currentFormat, nextValue));
                         }}
                         className={`flex-1 mt-0 ${errors.class10Marks ? 'border-destructive' : ''}`}
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
+                          const currentFormat = academicData.class10Format || 'Percentage';
+                          const currentValue = academicData.class10Marks;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            class10Format: 'CGPA',
+                            class10Format: nextFormat,
+                            class10Marks: convertedValue,
                           }));
+
+                          updateScoreError('class10Marks', getScoreError(nextFormat, convertedValue));
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           (academicData.class10Format || 'Percentage') === 'CGPA'
@@ -645,14 +804,22 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         }`}
                       >
                         CGPA
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => {
+                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
+                          const currentFormat = academicData.class10Format || 'Percentage';
+                          const currentValue = academicData.class10Marks;
+                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
+
                           setAcademicData((prev) => ({
                             ...prev,
-                            class10Format: 'Percentage',
+                            class10Format: nextFormat,
+                            class10Marks: convertedValue,
                           }));
+
+                          updateScoreError('class10Marks', getScoreError(nextFormat, convertedValue));
                         }}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                           (academicData.class10Format || 'Percentage') === 'Percentage'
@@ -688,18 +855,39 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
               <div className="space-y-4">
                 <Label className="font-medium text-left block">Have you done any internships or jobs?</Label>
                 <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    type="button"
-                    variant={!hasInternship ? 'default' : 'outline'}
-                    onClick={() => setHasInternship(false)}
-                    className="h-10"
-                  >
-                    No, I&apos;m a Fresher
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className={isWorkingStatus ? 'cursor-not-allowed' : 'inline-block'}>
+                          <Button
+                            type="button"
+                            variant={!hasInternship ? 'default' : 'outline'}
+                            disabled={isWorkingStatus}
+                            onClick={() => {
+                              if (isWorkingStatus) return;
+                              hasInternshipEditedRef.current = true;
+                              setHasInternship(false);
+                            }}
+                            className="h-10 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            No, I&apos;m a Fresher
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      {isWorkingStatus && (
+                        <TooltipContent side="top" align="center">
+                          Your profile status is set to Working, so the Fresher option is disabled.
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                   <Button
                     type="button"
                     variant={hasInternship ? 'default' : 'outline'}
-                    onClick={() => setHasInternship(true)}
+                    onClick={() => {
+                      hasInternshipEditedRef.current = true;
+                      setHasInternship(true);
+                    }}
                     className="h-10"
                   >
                     Yes, I have experience
@@ -719,7 +907,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
                   {/* Added Experiences */}
                   {workExperiences.length > 0 && (
-                    <div className="divide-y divide-border">
+                    <div className="space-y-4">
                       {workExperiences.map((experience) => (
                         <WorkExperienceCard
                           key={experience.id}
@@ -775,7 +963,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   <div key={profile.platform} className="space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="flex gap-1">
-                        <button
+                        {/* <button
                           type="button"
                           onClick={() => setCurrentProfileIndex(Math.max(0, index - 1))}
                           disabled={index === 0}
@@ -785,16 +973,16 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </button>
-                        <button
+                       <button
                           type="button"
                           onClick={() => setCurrentProfileIndex(Math.min(competitiveProfiles.length - 1, index + 1))}
                           disabled={index === competitiveProfiles.length - 1}
                           className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
-                        >
+                        > 
                           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
-                        </button>
+                        </button> */}
                       </div>
                       <Label className="font-medium">{profile.platform}</Label>
                     </div>

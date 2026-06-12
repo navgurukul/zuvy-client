@@ -73,15 +73,15 @@ const ZoeFlashScreen = ({ isOpen, onClose, onStartInterview }: ZoeFlashScreenPro
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <Rocket className="w-5 h-5 text-zuvy-gold" />
-                                        <span className="text-sm font-semibold text-zuvy-gold">Beta Access Enabled</span>
+                                        <span className="text-sm font-semibold text-zuvy-gold">Meet Zoe, Your AI Career Companion</span>
                                     </div>
-                                    <h2 className="text-2xl font-bold text-foreground">Zoe is Live!</h2>
+                                    <h2 className="text-2xl text-start ml-6 font-bold text-foreground">Zoe is Live!</h2>
                                 </div>
                             </div>
 
                             {/* Description */}
                             <p className="text-muted-foreground mb-6">
-                                Zoe is an AI-powered tool to help you prepare for 1:1 interviews.
+                                Zoe is your AI-powered career companion practice interviews, crafts your resume, and learns concepts with a mentor who teaches, not just tells.
                             </p>
 
                             {/* Features */}
