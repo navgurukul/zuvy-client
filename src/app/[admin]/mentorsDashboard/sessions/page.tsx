@@ -20,7 +20,7 @@ import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
 import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
 
-type SessionTab = "all" | "upcoming" | "reschedule" | "completed"
+type SessionTab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled"
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-"
@@ -138,42 +138,42 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
   if (isCancelledValue(status) || isCancelledValue(lifecycle)) {
     return {
       label: "Cancelled",
-      className: "border-gray-300 bg-gray-100 text-gray-600",
+      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
     }
   }
 
   if (isMissedValue(status) || isMissedValue(lifecycle)) {
     return {
       label: "Missed",
-      className: "border-gray-300 bg-gray-100 text-gray-600",
+      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
     }
   }
 
   if (lifecycle === "completed") {
     return {
       label: "Completed",
-      className: "border-green-600/30 bg-green-50 text-green-700",
+      className: "border-green-600/30 bg-green-50 text-green-700 hover:border-green-600/30 hover:bg-green-50 hover:text-green-700 hover:opacity-100",
     }
   }
 
   if (hasReschedule) {
     return {
       label: "Action needed",
-      className: "border-orange-500/30 bg-orange-50 text-orange-600",
+      className: "border-orange-500/30 bg-orange-50 text-orange-600 hover:border-orange-500/30 hover:bg-orange-50 hover:text-orange-600 hover:opacity-100",
     }
   }
 
   return {
     label: "Upcoming",
-    className: "border-blue-300 bg-blue-50 text-blue-600",
+    className: "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 hover:opacity-100",
   }
 }
 
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<SessionTab>("all")
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
-  const [joinedAt, setJoinedAt] = useState("")
-  const [leftAt, setLeftAt] = useState("")
+  // const [joinedAt, setJoinedAt] = useState("")
+  // const [leftAt, setLeftAt] = useState("")
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
 
   const [feedbackDrafts, setFeedbackDrafts] = useState<
@@ -194,6 +194,7 @@ export default function SessionsPage() {
     upcoming: Number(counts.upcoming) || 0,
     reschedule: Number(counts.reschedule) || 0,
     completed: Number(counts.completed) || 0,
+    cancelled: Number(counts.cancelled) || 0,
   }
 
   const {
@@ -238,25 +239,35 @@ export default function SessionsPage() {
 
   const isReadOnlySession = Boolean(
     selectedSession &&
-      (isCancelledValue(selectedSession.status) ||
-        isCancelledValue(selectedSession.sessionLifecycleState) ||
-        isMissedValue(selectedSession.status) ||
-        isMissedValue(selectedSession.sessionLifecycleState))
+    (isCancelledValue(selectedSession.status) ||
+      isCancelledValue(selectedSession.sessionLifecycleState) ||
+      isMissedValue(selectedSession.status) ||
+      isMissedValue(selectedSession.sessionLifecycleState))
   )
 
-  const isUpcomingSession = Boolean(
-    selectedSession &&
-      (activeTab === "upcoming" ||
-        isUpcomingValue(selectedSession.status) ||
-        isUpcomingValue(selectedSession.sessionLifecycleState))
-  )
+  const isUpcomingSession = useMemo(() => {
+    if (!selectedSession) return false
+    if (activeTab === "upcoming") return true
+    if (activeTab === "completed" || activeTab === "cancelled" || activeTab === "reschedule") return false
+
+    const isCompletedOrCancelled =
+      selectedSession.sessionLifecycleState === "COMPLETED" ||
+      selectedSession.sessionLifecycleState === "CANCELLED" ||
+      selectedSession.status === "cancelled"
+
+    const isFuture = selectedSession.slotStart
+      ? new Date(selectedSession.slotStart).getTime() > nowTimestamp
+      : false
+
+    return !isCompletedOrCancelled && isFuture
+  }, [selectedSession, activeTab, nowTimestamp])
 
   const isRescheduleTab = activeTab === "reschedule"
   const hasRescheduleRequest = Boolean(
     selectedSession &&
-      (getRescheduleStatus(selectedSession) ||
-        isRescheduleValue(selectedSession.status) ||
-        isRescheduleValue(selectedSession.sessionLifecycleState))
+    (getRescheduleStatus(selectedSession) ||
+      isRescheduleValue(selectedSession.status) ||
+      isRescheduleValue(selectedSession.sessionLifecycleState))
   )
 
   const canJoinSelectedSession = Boolean(
@@ -459,20 +470,6 @@ export default function SessionsPage() {
     }
   }
 
-  const handleMarkAttendance = async () => {
-    if (!selectedSession || !joinedAt || !leftAt) return
-
-    const ok = await markAttendance(selectedSession.id, {
-      joinedAt: new Date(joinedAt).toISOString(),
-      leftAt: new Date(leftAt).toISOString(),
-    })
-
-    if (ok) {
-      await refetchMySessions()
-      await refetchSlotDetails()
-    }
-  }
-
   const handleCompleteSession = async () => {
     if (!selectedSession) return
 
@@ -511,7 +508,6 @@ export default function SessionsPage() {
       await refetchSlotDetails()
     }
   }
-
   useEffect(() => {
     if (!rescheduleError) return
 
@@ -527,10 +523,7 @@ export default function SessionsPage() {
   return isInitialLoading ? (
     <SessionsSkeleton />
   ) : (
-    // <div className="p-6">
-    // <div className="mb-6 text-left">
-
-        <div className="max-w-5xl mx-auto px-6 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
 
       <div className="mb-4 text-left">
         <h1 className="text-lg font-semibold">Sessions</h1>
@@ -545,11 +538,10 @@ export default function SessionsPage() {
             setActiveTab("all")
             setSelectedBookingId(null)
           }}
-          className={`relative flex items-center gap-2 pb-2.5 ${
-            activeTab === "all"
-              ? "font-medium text-[#111827]"
-              : "font-normal text-[#6b7280] hover:text-[#111827]"
-          }`}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "all"
+            ? "font-medium text-[#111827]"
+            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            }`}
         >
           <span>All</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
@@ -563,11 +555,10 @@ export default function SessionsPage() {
             setActiveTab("upcoming")
             setSelectedBookingId(null)
           }}
-          className={`relative flex items-center gap-2 pb-2.5 ${
-            activeTab === "upcoming"
-              ? "font-medium text-[#111827]"
-              : "font-normal text-[#6b7280] hover:text-[#111827]"
-          }`}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "upcoming"
+            ? "font-medium text-[#111827]"
+            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            }`}
         >
           <span>Upcoming</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
@@ -583,11 +574,10 @@ export default function SessionsPage() {
             setActiveTab("reschedule")
             setSelectedBookingId(null)
           }}
-          className={`relative flex items-center gap-2 pb-2.5 ${
-            activeTab === "reschedule"
-              ? "font-medium text-[#111827]"
-              : "font-normal text-[#6b7280] hover:text-[#111827]"
-          }`}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "reschedule"
+            ? "font-medium text-[#111827]"
+            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            }`}
         >
           <span>Action Needed</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f59e0b] px-1.5 text-[11px] font-medium text-white">
@@ -603,11 +593,10 @@ export default function SessionsPage() {
             setActiveTab("completed")
             setSelectedBookingId(null)
           }}
-          className={`relative flex items-center gap-2 pb-2.5 ${
-            activeTab === "completed"
-              ? "font-medium text-[#111827]"
-              : "font-normal text-[#6b7280] hover:text-[#111827]"
-          }`}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "completed"
+            ? "font-medium text-[#111827]"
+            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            }`}
         >
           <span>Completed</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
@@ -618,11 +607,23 @@ export default function SessionsPage() {
           )}
         </button>
 
-        <button className="relative flex items-center gap-2 pb-2.5 font-normal text-[#6b7280]">
+        <button
+          onClick={() => {
+            setActiveTab("cancelled")
+            setSelectedBookingId(null)
+          }}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "cancelled"
+            ? "font-medium text-[#111827]"
+            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            }`}
+        >
           <span>Cancelled</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
-            0
+            {Number(summaryCounts.cancelled) || 0}
           </span>
+          {activeTab === "cancelled" && (
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />
+          )}
         </button>
       </div>
       <div className="border-b border-gray-200"></div>
@@ -632,7 +633,7 @@ export default function SessionsPage() {
             <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-[#d1d5db] bg-[#fafafa">
               <Calendar size={16} className="text-[#9ca3af]" />
             </div>
-            
+
 
             <p className="text-sm text-gray-400 sm:whitespace-nowrap">
               No sessions yet. Sessions will appear here once students book your open slots.
@@ -667,9 +668,8 @@ export default function SessionsPage() {
                     <button
                       key={session.id}
                       onClick={() => setSelectedBookingId(session.id)}
-                      className={`w-full border-b border-[#e5e7eb] p-4 text-left transition ${
-                        isSelected ? "bg-[#f4faf4]" : "bg-white hover:bg-[#fafafa]"
-                      }`}
+                      className={`w-full border-b border-[#e5e7eb] p-4 text-left transition ${isSelected ? "bg-[#f4faf4]" : "bg-white hover:bg-[#fafafa]"
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] text-xs font-semibold text-[#4b6b50]">
@@ -685,19 +685,11 @@ export default function SessionsPage() {
                           </p>
 
                           <div className="mt-2 flex flex-wrap items-center gap-2">
-                            {/* <Badge className="bg-gray-100 text-gray-600">{session.status}</Badge> */}
-                            {/* <Badge className="bg-blue-100 text-blue-700">
-                              {session.sessionLifecycleState}
-                            </Badge>
-                            {rescheduleStatus && (
-                              <Badge className="bg-orange-100 text-orange-700">
-                                Reschedule: {rescheduleStatus}
-                              </Badge>
-                            )} */}
                           </div>
                         </div>
 
                         <Badge
+                          variant="outline"
                           className={`mt-1 flex-shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusBadge.className}`}
                         >
                           {statusBadge.label}
@@ -728,6 +720,7 @@ export default function SessionsPage() {
                       </div>
                     </div>
                     <Badge
+                      variant="outline"
                       className={`flex-shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${getSessionStatusBadge(selectedSession).className}`}
                     >
                       {getSessionStatusBadge(selectedSession).label}
@@ -749,50 +742,69 @@ export default function SessionsPage() {
                     </div>
                   </div>
 
-                  {/* <div className="mt-5 flex flex-wrap gap-2">
-                    <Badge className="bg-gray-100 text-gray-600">{selectedSession.status}</Badge>
-                    <Badge className="bg-blue-100 text-blue-700">
-                      {selectedSession.sessionLifecycleState}
-                    </Badge>
-                  </div> */}
+                  {selectedSession && (isCancelledValue(selectedSession.status) || isCancelledValue(selectedSession.sessionLifecycleState)) && (
+                    <div className="mt-4 space-y-3  bg-red-50/50  text-left">
+                      <p className="text-base font-semibold text-red-950">Cancellation Details</p>
+                      <div className="space-y-2 text-sm text-red-800">
+                        {/* {selectedSession.cancelledBy && (
+                          <div className="flex gap-2">
+                            <span className="font-semibold">Cancelled By:</span>
+                            <span className="capitalize">{selectedSession.cancelledBy}</span>
+                          </div>
+                        )}
+                        {selectedSession.cancelledAt && (
+                          <div className="flex gap-2">
+                            <span className="font-semibold">Cancelled Date:</span>
+                            <span>{formatDateTime(selectedSession.cancelledAt)}</span>
+                          </div>
+                        )} */}
+                        {selectedSession.cancellationReason && (
+                          <div className="mt-2 bg-white p-3 rounded-lg border border-red-100">
+                            <p className="font-semibold text-xs text-red-400 uppercase tracking-wider mb-1">Reason</p>
+                            <p className="whitespace-pre-wrap text-red-950">{selectedSession.cancellationReason}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
-                  <p className="text-xs text-muted-foreground pt-4 pb-2">
-                    Join opens 10 min before start
-                  </p>
-                )}
+                    <p className="text-xs text-muted-foreground pt-4 pb-2">
+                      Join opens 10 min before start
+                    </p>
+                  )}
 
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  selectedSession.meetingLink ? (
-                    <Button
-                      type="button"
-                      className="bg-green-700 hover:bg-green-800"
-                      asChild={canJoinSelectedSession}
-                      disabled={!canJoinSelectedSession}
-                    >
-                      {canJoinSelectedSession ? (
-                        <a
-                          href={selectedSession.meetingLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Video size={16} className="mr-2" />
-                          Join the Session
-                        </a>
-                      ) : (
-                        <>
-                          <Video size={16} className="mr-2" />
-                          Join the Session
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
-                      <Video size={16} className="mr-2" />
-                      Join unavailable
-                    </Button>
-                  )
-                )}
+                    selectedSession.meetingLink ? (
+                      <Button
+                        type="button"
+                        className="bg-green-700 hover:bg-green-800 mt-4"
+                        asChild={canJoinSelectedSession}
+                        disabled={!canJoinSelectedSession}
+                      >
+                        {canJoinSelectedSession ? (
+                          <a
+                            href={selectedSession.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Video size={16} className="mr-2" />
+                            Join the Session
+                          </a>
+                        ) : (
+                          <>
+                            <Video size={16} className="mr-2" />
+                            Join the Session
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
+                        <Video size={16} className="mr-2" />
+                        Join unavailable
+                      </Button>
+                    )
+                  )}
 
                   {selectedSession.sessionLifecycleState === "COMPLETED" && completedRecordingUrl && (
                     <a
@@ -805,44 +817,6 @@ export default function SessionsPage() {
                     </a>
                   )}
                 </div>
-
-                {/* {!isRescheduleTab && !hasRescheduleRequest && (
-                  <div className="space-y-2 l border-b p-4 text-left">
-                    <p className="text-base font-semibold">Slot & Bookings</p>
-                    {slotDetailsLoading && (
-                      <p className="text-sm text-muted-foreground">Loading slot details...</p>
-                    )}
-                    {!slotDetailsLoading && slotDetailsError && (
-                      <p className="text-sm text-red-500">{slotDetailsError}</p>
-                    )}
-                    {!slotDetailsLoading && !slotDetailsError && details?.slot && (
-                      <>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="flex items-center gap-2">
-                            <Calendar size={12} />
-                            {formatDateOnly(
-                              (details.slot.slotStartDateTime as string) ||
-                                (details.slot.slotEndDateTime as string)
-                            )}
-                          </span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="flex items-center gap-2">
-                            <Clock size={12} />
-                            {formatTimeRange(
-                              details.slot.slotStartDateTime as string,
-                              details.slot.slotEndDateTime as string
-                            )}
-                          </span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Total bookings: {details.bookings.length}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )} */}
-
                 {(isRescheduleTab || hasRescheduleRequest) && (
                   <div className="space-y-3  px-4 py-0 text-left ">
                     <p className="text-sm font-semibold">Reschedule Request</p>
@@ -864,45 +838,8 @@ export default function SessionsPage() {
                         Decline Reschedule
                       </Button>
                     </div>
-                  </div> 
-                )}
-
-                {!isRescheduleTab && !hasRescheduleRequest && !isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                  <div className="space-y-3 rounded-xl border p-4 text-left">
-                    <p className="text-base font-semibold">Mark Attendance</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Joined At</p>
-                        <Input
-                          type="datetime-local"
-                          value={joinedAt}
-                          onChange={(event) => setJoinedAt(event.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Left At</p>
-                        <Input
-                          type="datetime-local"
-                          value={leftAt}
-                          onChange={(event) => setLeftAt(event.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      className="bg-green-700 hover:bg-green-800"
-                      onClick={handleMarkAttendance}
-                      disabled={isMarkingAttendance || !joinedAt || !leftAt}
-                    >
-                      {isMarkingAttendance ? "Saving..." : "Mark Attendance"}
-                    </Button>
-                    {attendanceError && <p className="text-sm text-red-500">{attendanceError}</p>}
-                    {attendanceData?.message && (
-                      <p className="text-sm text-green-700">{attendanceData.message}</p>
-                    )}
                   </div>
                 )}
-
                 {!isRescheduleTab && !hasRescheduleRequest && !isUpcomingSession && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                   <div className="space-y-3 rounded-xl border p-4 text-left">
                     <p className="text-base font-semibold">Complete Session</p>
@@ -922,59 +859,94 @@ export default function SessionsPage() {
                 )}
 
                 {!isRescheduleTab && !hasRescheduleRequest && !isUpcomingSession && !isReadOnlySession && (
-                  <div className="space-y-3 px-4 py-0 text-left">
-                    <p className="text-base font-semibold">Submit Feedback</p>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="space-y-1 sm:col-span-1">
-                        <p className="text-sm text-muted-foreground">Rating (1-5)</p>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={5}
-                          value={currentFeedbackDraft.rating}
-                          onChange={(event) => updateFeedbackDraft("rating", event.target.value)}
-                          disabled={isAlreadySubmitted}
-                        />
+                  <div className="space-y-4 px-4 py-0 text-left">
+                    {isAlreadySubmitted ? (
+                      <div className="space-y-3">
+                        <p className="text-base font-semibold">Mentor Feedback</p>
+                        <div className="rounded-xl border p-4 space-y-3 bg-gray-50/50">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-500">Rating:</span>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => {
+                                const ratingVal = Number(currentFeedbackDraft.rating)
+                                const isFilled = i < ratingVal
+                                return (
+                                  <svg
+                                    key={i}
+                                    className={`h-4 w-4 ${isFilled ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                )
+                              })}
+                            </div>
+                            <span className="text-sm font-semibold text-gray-700">({currentFeedbackDraft.rating}/5)</span>
+                          </div>
+                          {currentFeedbackDraft.notes && (
+                            <div className="text-sm text-gray-700">
+                              <p className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-1 text-muted-foreground">Notes</p>
+                              <p className="whitespace-pre-wrap">{currentFeedbackDraft.notes}</p>
+                            </div>
+                          )}
+                          {currentFeedbackDraft.areasOfImprovement && (
+                            <div className="text-sm text-gray-700">
+                              <p className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-1 text-muted-foreground">Areas of Improvement</p>
+                              <p className="whitespace-pre-wrap">{currentFeedbackDraft.areasOfImprovement}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="space-y-1 sm:col-span-2">
-                        <p className="text-sm text-muted-foreground">Notes</p>
-                        <Textarea
-                          value={currentFeedbackDraft.notes}
-                          onChange={(event) => updateFeedbackDraft("notes", event.target.value)}
-                          disabled={isAlreadySubmitted}
-                        />
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-base font-semibold">Submit Feedback</p>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <div className="space-y-1 sm:col-span-1">
+                            <p className="text-sm text-muted-foreground">Rating (1-5)</p>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={5}
+                              value={currentFeedbackDraft.rating}
+                              onChange={(event) => updateFeedbackDraft("rating", event.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <p className="text-sm text-muted-foreground">Notes</p>
+                            <Textarea
+                              value={currentFeedbackDraft.notes}
+                              onChange={(event) => updateFeedbackDraft("notes", event.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">Areas of Improvement</p>
+                          <Textarea
+                            value={currentFeedbackDraft.areasOfImprovement}
+                            onChange={(event) =>
+                              updateFeedbackDraft("areasOfImprovement", event.target.value)
+                            }
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          className="bg-green-700 hover:bg-green-800"
+                          onClick={handleSubmitFeedback}
+                          disabled={
+                            isSubmittingFeedback ||
+                            Number(currentFeedbackDraft.rating) < 1 ||
+                            Number(currentFeedbackDraft.rating) > 5
+                          }
+                        >
+                          {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
+                        </Button>
+                        {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
+                        {feedbackData?.message && (
+                          <p className="text-sm text-green-700">{feedbackData.message}</p>
+                        )}
                       </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Areas of Improvement</p>
-                      <Textarea
-                        value={currentFeedbackDraft.areasOfImprovement}
-                        onChange={(event) =>
-                          updateFeedbackDraft("areasOfImprovement", event.target.value)
-                        }
-                        disabled={isAlreadySubmitted}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      className="bg-green-700 hover:bg-green-800"
-                      onClick={handleSubmitFeedback}
-                      disabled={
-                        isAlreadySubmitted ||
-                        isSubmittingFeedback ||
-                        Number(currentFeedbackDraft.rating) < 1 ||
-                        Number(currentFeedbackDraft.rating) > 5
-                      }
-                    >
-                      {isAlreadySubmitted
-                        ? "Feedback Submitted"
-                        : isSubmittingFeedback
-                          ? "Submitting..."
-                          : "Submit Feedback"}
-                    </Button>
-                    {feedbackError && <p className="text-sm text-red-500">{feedbackError}</p>}
-                    {feedbackData?.message && (
-                      <p className="text-sm text-green-700">{feedbackData.message}</p>
                     )}
                   </div>
                 )}

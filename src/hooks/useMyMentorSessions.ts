@@ -15,6 +15,8 @@ export interface MyMentorSession {
     joinedAt: string | null
     completedAt: string | null
     cancelledAt?: string | null
+    cancellationReason?: string | null
+    cancelledBy?: string | null
     bookedAt?: string | null
     updatedAt?: string | null
     createdAt?: string | null
@@ -30,6 +32,10 @@ export interface MyMentorSession {
         areasOfImprovement?: string | null
     } | null
     mentorRating?: number | null
+    studentRating?: number | null
+    studentFeedback?: string | null
+    studentFeedbackSubmittedAt?: string | null
+    studentFeedbackLocked?: boolean | null
 }
 
 type WrappedMyMentorSession = {

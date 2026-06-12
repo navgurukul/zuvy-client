@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
-import { usePathname } from "next/navigation"
+import { useMemo, Suspense } from "react"
+import { usePathname, useSearchParams } from "next/navigation"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,6 +20,7 @@ import {
   Bell,
   BellOff,
   CheckCheck,
+  AlertTriangle,
 } from "lucide-react"
 // import { useMyMentorSlots } from "@/hooks/useMyMentorSlots"
 import { useMyMentorSessions, type MyMentorSession } from "@/hooks/useMyMentorSessions"
@@ -164,8 +166,11 @@ const getLearnerLabel = (session: MyMentorSession) => {
   return "A learner"
 }
 
-export default function DashboardPage() {
+
+function DashboardPageContent() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const orgId = searchParams.get("orgId")
   const role = pathname.split("/")[1]
   const {
     sessions: completedSessions,
@@ -198,86 +203,269 @@ export default function DashboardPage() {
 
   const upcomingSessionsCount = Number(metrics?.upcomingSessions) || 0
   const isEmptyDashboard =
-  upcomingSessionsCount === 0 &&
-  (Number(metrics?.sessions?.total) || 0) === 0 &&
-  (Number(metrics?.sessions?.completed) || 0) === 0 &&
-  upcomingSessions.length === 0 &&
-  apiNotifications.length === 0
+    upcomingSessionsCount === 0 &&
+    (Number(metrics?.sessions?.total) || 0) === 0 &&
+    (Number(metrics?.sessions?.completed) || 0) === 0 &&
+    upcomingSessions.length === 0 &&
+    apiNotifications.length === 0
   // return isInitialLoading ? (
   //   <MentorDashboardSkeleton />
   // ) : 
   if (isInitialLoading) {
-  return <MentorDashboardSkeleton />
-}
+    return <MentorDashboardSkeleton />
+  }
 
-if (isEmptyDashboard) {
-  return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <Card className="border-slate-200">
-        <CardContent className="flex flex-col items-center justify-center text-center py-24">
-          <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
-            <Calendar className="h-7 w-7 text-emerald-700" />
-          </div>
+  const unreadNotifications = apiNotifications.filter((n) => !n.isRead)
 
-          <h2 className="text-2xl font-semibold ">
-            You're not available for booking yet
-          </h2>
-
-          <p className="text-sm text-muted-foreground mt-2 max-w-md">
-            Add your first open slot so students in your course can
-            discover and book a mentoring session with you.
-          </p>
-
-          <Button
-            asChild
-            className="mt-6 bg-emerald-700 hover:bg-emerald-800"
-          >
-            <Link href={`/${role}/mentorsDashboard/availability`}>
-              + Set up availability
-            </Link>
-          </Button>
-
-          <p className="text-xs text-muted-foreground mt-4">
-            You can add multiple slots at once and edit them any time.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+  const rescheduleNotifications = unreadNotifications.filter(
+    (n) => n.type === "RESCHEDULE_REQUEST"
   )
-}
-   return(
-    <div className="max-w-5xl mx-auto px-6 py-6 space-y-5">
-      <div className="text-left">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          {upcomingSessionsCount} Upcoming Sessions Scheduled
-        </p>
+
+  const upcomingNotifications = unreadNotifications.filter(
+    (n) => n.type === "UPCOMING_SESSION" || n.type === "BOOKING_CREATED"
+  )
+
+  const getSessionsLink = (tab: string) => {
+    const basePath = `/${role}/mentorsDashboard/sessions`
+    const params = new URLSearchParams()
+    params.set("tab", tab)
+    if (orgId) {
+      params.set("orgId", orgId)
+    }
+    return `${basePath}?${params.toString()}`
+  }
+
+  const formatMonthDay = (dateStr: string) => {
+    const d = new Date(dateStr)
+    if (Number.isNaN(d.getTime())) return ""
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  }
+
+  const formatRescheduleMessage = (notif: any) => {
+    if (notif.studentName && notif.sessionStart) {
+      return (
+        <span>
+          <span className="font-bold">{notif.studentName}</span> requested to reschedule their {formatMonthDay(notif.sessionStart)} session
+        </span>
+      )
+    }
+    return <span>{notif.message}</span>
+  }
+
+  const formatUpcomingMessage = (notif: any) => {
+    if (notif.studentName && notif.sessionStart) {
+      const sessionDate = new Date(notif.sessionStart)
+      const timeStr = sessionDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      const today = new Date()
+      const tomorrow = new Date()
+      tomorrow.setDate(today.getDate() + 1)
+      const isSameDay = (d1: Date, d2: Date) =>
+        d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear()
+
+      let dayText = ""
+      if (isSameDay(sessionDate, today)) {
+        dayText = "today"
+      } else if (isSameDay(sessionDate, tomorrow)) {
+        dayText = "tomorrow"
+      } else {
+        dayText = `on ${sessionDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+      }
+
+      return (
+        <span>
+          Your session with <span className="font-bold">{notif.studentName}</span> starts {dayText} at {timeStr}
+        </span>
+      )
+    }
+    return <span>{notif.message}</span>
+  }
+
+  const dashboardAlerts: {
+    ids: number[]
+    type: "reschedule" | "upcoming"
+    message: React.ReactNode
+    actionLabel: string | null
+    link: string
+  }[] = []
+
+  // 1. Reschedule Requests
+  if (rescheduleNotifications.length > 1) {
+    dashboardAlerts.push({
+      ids: rescheduleNotifications.map((n) => n.id),
+      type: "reschedule",
+      message: `${rescheduleNotifications.length} reschedule requests pending`,
+      actionLabel: "Review All",
+      link: getSessionsLink("reschedule"),
+    })
+  } else if (rescheduleNotifications.length === 1) {
+    dashboardAlerts.push({
+      ids: [rescheduleNotifications[0].id],
+      type: "reschedule",
+      message: formatRescheduleMessage(rescheduleNotifications[0]),
+      actionLabel: "Review",
+      link: getSessionsLink("reschedule"),
+    })
+  }
+
+  // 2. Upcoming Session Reminders (Maximum of 2 alerts total)
+  const remainingCapacity = 2 - dashboardAlerts.length
+  if (remainingCapacity > 0 && upcomingNotifications.length > 0) {
+    if (upcomingNotifications.length === 1) {
+      dashboardAlerts.push({
+        ids: [upcomingNotifications[0].id],
+        type: "upcoming",
+        message: formatUpcomingMessage(upcomingNotifications[0]),
+        actionLabel: null,
+        link: getSessionsLink("upcoming"),
+      })
+    } else if (remainingCapacity === 1) {
+      dashboardAlerts.push({
+        ids: upcomingNotifications.map((n) => n.id),
+        type: "upcoming",
+        message: `${upcomingNotifications.length} sessions starting soon`,
+        actionLabel: "View All",
+        link: getSessionsLink("upcoming"),
+      })
+    } else {
+      upcomingNotifications.slice(0, 2).forEach((notif) => {
+        dashboardAlerts.push({
+          ids: [notif.id],
+          type: "upcoming",
+          message: formatUpcomingMessage(notif),
+          actionLabel: null,
+          link: getSessionsLink("upcoming"),
+        })
+      })
+    }
+  }
+  if (isEmptyDashboard) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <Card className="border-slate-200">
+          <CardContent className="flex flex-col items-center justify-center text-center py-24">
+            <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+              <Calendar className="h-7 w-7 text-emerald-700" />
+            </div>
+
+            <h2 className="text-2xl font-semibold ">
+              You&apos;re not available for booking yet
+            </h2>
+
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">
+              Add your first open slot so students in your course can
+              discover and book a mentoring session with you.
+            </p>
+
+            <Button
+              asChild
+              className="mt-6 bg-emerald-700 hover:bg-emerald-800"
+            >
+              <Link href={`/${role}/mentorsDashboard/availability`}>
+                + Set up availability
+              </Link>
+            </Button>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              You can add multiple slots at once and edit them any time.
+            </p>
+          </CardContent>
+        </Card>
       </div>
+    )
+  }
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+      {dashboardAlerts.length > 0 && (
+        <div className="space-y-3 mb-4 text-left">
+          {dashboardAlerts.map((alert: any, index) => (
+            <div
+              key={index}
+              className={cn(
+                "flex items-center justify-between rounded-lg border px-4 py-3 shadow-sm",
+                alert.type === "reschedule"
+                  ? "border-amber-200 bg-amber-50 text-amber-900"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-950"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                {alert.type === "reschedule" ? (
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                ) : (
+                  <Users className="h-4 w-4 text-emerald-600 shrink-0" />
+                )}
+                <div className="text-sm font-medium">{alert.message}</div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {alert.actionLabel && (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className={cn(
+                      "text-xs font-semibold",
+                      alert.type === "reschedule"
+                        ? "border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-800 bg-amber-50"
+                        : "border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 bg-emerald-50"
+                    )}
+                  >
+                    <Link href={alert.link}>
+                      {alert.actionLabel} →
+                    </Link>
+                  </Button>
+                )}
+                <button
+                  onClick={() => {
+                    alert.ids.forEach((id: number) => markAsRead(id))
+                  }}
+                  className={cn(
+                    "text-xs font-semibold hover:underline px-2 py-1 flex items-center gap-0.5",
+                    alert.type === "reschedule"
+                      ? "text-amber-700 hover:text-amber-900"
+                      : "text-emerald-700 hover:text-emerald-900"
+                  )}
+                >
+                  Dismiss &times;
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="rounded-lg  gap-4 hover:shadow-md transition-shadow">
-        <CardContent className="p-4 flex justify-between items-start">
+          <CardContent className="p-4 flex justify-between items-start">
             <div className="space-y-1">
-                <div className="p-3 w-fit rounded-full bg-slate-100 mb-0">
-                <Calendar className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <div className="text-left">
-                  <p className="text-2xl font-bold">{upcomingSessionsCount}</p>
-                  <p className="text-xs text-muted-foreground">Upcoming Sessions</p>
-                  <p className="text-xs  mt-0">Next on your schedule</p>
-                </div>
+              <div className="w-fit  mb-3 mt-2">
+                <p className="text-2xl leading-none">
+                  📅
+                </p>
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-bold">{upcomingSessionsCount}</p>
+                <p className="text-xs text-muted-foreground">Upcoming Sessions</p>
+                <p className="text-xs  mt-0">Next on your schedule</p>
+              </div>
             </div>
 
             {/* <div className="flex flex-col items-end gap-2">
             <Sparkline bars={SPARKLINES.upcoming} color="bg-green-800" />
             </div> */}
-        </CardContent>
+          </CardContent>
         </Card>
         <Card className="rounded-lg  gap-4 hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex justify-between items-start">
             <div className="space-y-1">
-              <div className="p-3 w-fit rounded-full bg-slate-100 mb-0">
-                  <CheckCircle className="w-5 h-5 text-muted-foreground" />
+              <div className="w-fit  mb-3 mt-2">
+                <p className="text-2xl leading-none">
+                  ✅
+                </p>
               </div>
               <div className="text-left">
                 <p className="text-2xl font-bold">{Number(metrics?.sessions.completed) || 0}</p>
@@ -285,35 +473,15 @@ if (isEmptyDashboard) {
                 <p className="text-xs  mt-0">of {Number(metrics?.sessions.total) || 0} total bookings</p>
               </div>
             </div>
-               {/*<div className="flex flex-col items-end gap-2">
-            <Sparkline bars={SPARKLINES.completed} color="bg-green-600" />
-            </div> */}
           </CardContent>
         </Card>
-        <Card className="rounded-lg  gap-4 hover:shadow-md transition-shadow">
-          <CardContent className="p-4 flex justify-between items-start">
-                        <div className="space-y-1">
-                          <div className="p-3 w-fit rounded-full bg-slate-100 mb-0">
-                  <Users className="w-5 h-5 text-muted-foreground" />
-              </div>
-
-            <div className="text-left">
-              <p className="text-2xl font-bold">{Number(metrics?.sessions.total) || 0}</p>
-              <p className="text-xs text-muted-foreground">Bookings Managed</p>
-              <p className="text-xs  mt-0">All session states</p>
-            </div>
-            </div>
-            {/* <div className="flex flex-col items-end gap-2">
-            <Sparkline bars={SPARKLINES.bookings} color="bg-orange-600" />
-            </div> */}
-          </CardContent>
-        </Card>
-
         <Card className="rounded-lg  gap-4 hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex justify-between items-start">
             <div className="space-y-1">
-                <div className="p-3 w-fit rounded-full bg-slate-100 mb-0">
-                  <Star className="w-5 h-5 text-muted-foreground" />
+              <div className="w-fit  mb-3 mt-2">
+                <p className="text-2xl leading-none">
+                  ⭐
+                </p>
               </div>
               <div className="text-left">
                 <p className="text-2xl font-bold">{metrics?.ratings.averageRating ? Number(metrics.ratings.averageRating).toFixed(1) : "—"}</p>
@@ -325,9 +493,31 @@ if (isEmptyDashboard) {
                 </p>
               </div>
             </div>
-            {/* <div className="flex flex-col items-end gap-2">
-            <Sparkline bars={SPARKLINES.rating} color="bg-green-400" />
-            </div> */}
+          </CardContent>
+        </Card>
+        <Card className="rounded-lg  gap-4 hover:shadow-md transition-shadow">
+          <CardContent className="p-4 flex justify-between items-start">
+            <div className="space-y-1">
+              <div className="w-fit  mb-3 mt-2">
+                <p className="text-2xl leading-none">
+                  📊
+                </p>
+              </div>
+
+              <div className="text-left">
+                <p className="text-2xl font-bold">
+                  {metrics?.utilization?.utilizationRate
+                    ? `${Number(metrics.utilization.utilizationRate)}%`
+                    : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground">Utilization Rate</p>
+                <p className="text-xs  mt-0">
+                  {metrics?.utilization
+                    ? `${Number(metrics.utilization.usedSlots) || 0} of ${Number(metrics.utilization.totalSlots) || 0} slots used`
+                    : "No slot data"}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -336,9 +526,9 @@ if (isEmptyDashboard) {
         <div className="lg:col-span-2 space-y-6">
           <Card className='rounded-lg shadow-sm border-slate-200 hover:shadow-md transition-shadow min-h-[300px] flex flex-col'>
             <CardHeader className="flex flex-row justify-between items-center">
-                <CardTitle className="text-sm">Upcoming Sessions</CardTitle>
-              <Button asChild  size="sm" variant="link" className="text-emerald-700 text-xs font-semibold p-0 h-auto">
-                <Link href={`/${role}/mentorsDashboard/availability`}>
+              <CardTitle className="text-sm">Upcoming Sessions</CardTitle>
+              <Button asChild size="sm" variant="link" className="text-emerald-700 text-xs font-semibold p-0 h-auto">
+                <Link href={`/${role}/mentorsDashboard/sessions`}>
                   View all <ArrowRight className="ml-1 w-3 h-3" />
                 </Link>
               </Button>
@@ -348,11 +538,11 @@ if (isEmptyDashboard) {
               {upcomingSessionsLoading && <p className="text-sm text-muted-foreground">Loading upcoming sessions...</p>}
               {!upcomingSessionsLoading && upcomingSessionsError && <p className="text-sm text-red-500">{upcomingSessionsError}</p>}
               {!upcomingSessionsLoading && !upcomingSessionsError && upcomingSessions.length === 0 && (
-                 <div className='flex flex-col items-center justify-center text-center mt-10'>  
-                      <CalendarX className="h-10 w-10 text-muted-foreground" />
-                      <p className="text-sm font-semibold text-text-primary">No upcoming sessions</p>
-                      <p className="text-xs text-text-muted mt-0.5">Update your availability to let learners book sessions</p>
-                    </div>
+                <div className='flex flex-col items-center justify-center text-center mt-10'>
+                  <CalendarX className="h-10 w-10 text-muted-foreground" />
+                  <p className="text-sm font-semibold text-text-primary">No upcoming sessions</p>
+                  <p className="text-xs text-text-muted mt-0.5">Update your availability to let learners book sessions</p>
+                </div>
               )}
               {!upcomingSessionsLoading &&
                 !upcomingSessionsError &&
@@ -382,78 +572,8 @@ if (isEmptyDashboard) {
           </Card>
         </div>
 
+
         <div className="space-y-6">
-           <Card className="rounded-lg shadow-sm border-slate-200 hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-left">Notifications</CardTitle>
-              </div>
-              {apiNotifications.some((notification) => !notification.isRead) && (
-                <button
-                  onClick={markAllAsRead}
-                  className="flex items-center gap-1 text-xs text-emerald-700 font-semibold hover:underline"
-                >
-                  <CheckCheck className="w-3.5 h-3.5" />
-                  Mark all read
-                </button>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-3 text-left">
-              {notificationsLoading && (
-                <p className="text-xs text-muted-foreground text-left">Loading notifications...</p>
-              )}
-
-              {!notificationsLoading && notificationsError && (
-                <p className="text-xs text-red-500">{notificationsError}</p>
-              )}
-
-              {!notificationsLoading && !notificationsError && apiNotifications.length === 0 && (
-                <div className="flex flex-col items-center py-6 gap-2 text-center">
-                  <BellOff className="w-8 h-8 text-muted-foreground/50" />
-                  <p className="text-xs text-muted-foreground">No notifications yet.</p>
-                </div>
-              )}
-
-              {!notificationsLoading &&
-                !notificationsError &&
-                <div className="max-h-[280px] overflow-y-auto space-y-2 pr-1">
-                  {apiNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`flex items-start gap-3 rounded-xl p-2 transition-colors ${
-                        notification.isRead ? "opacity-60" : "bg-slate-50"
-                      }`}
-                    >
-                      <div className="mt-0.5 shrink-0">
-                        {notification.isRead ? (
-                          <Bell className="w-4 h-4 text-slate-400" />
-                        ) : (
-                          <Bell className="w-4 h-4 text-emerald-600" />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-700 truncate">{notification.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{notification.message}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {getRelativeTime(notification.createdAt)}
-                        </p>
-                      </div>
-
-                      {!notification.isRead && (
-                        <button
-                          disabled={markingRead.has(notification.id)}
-                          onClick={() => markAsRead(notification.id)}
-                          className="shrink-0 mt-0.5 text-[10px] font-semibold text-emerald-700 hover:underline disabled:opacity-40"
-                        >
-                          {markingRead.has(notification.id) ? "..." : "Mark read"}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>}
-            </CardContent>
-          </Card>
           <Card className='rounded-lg shadow-sm border-slate-200 hover:shadow-md transition-shadow'>
             <CardHeader className='text-left pb-3'>
               <CardTitle>Quick Actions</CardTitle>
@@ -505,5 +625,13 @@ if (isEmptyDashboard) {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<MentorDashboardSkeleton />}>
+      <DashboardPageContent />
+    </Suspense>
   )
 }
