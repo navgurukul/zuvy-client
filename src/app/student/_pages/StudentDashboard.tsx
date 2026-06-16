@@ -37,7 +37,7 @@ const StudentDashboard = () => {
   
   const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
-  const { strengthPercentage, strengthLevel, strengthMessage } = useLearnerProfileStrength();
+  const { strengthPercentage, strengthLevel, strengthMessage, isProfileComplete, missingFields } = useLearnerProfileStrength();
   const { refetchLearnerProfile } = useLearnerProfile(false);
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
@@ -167,22 +167,29 @@ const StudentDashboard = () => {
     return "Let's get started! Your dream job is just a few clicks away.";
   };
 
-  const getNextAction = (prog: number) => {
-    if (prog < 20) return { text: 'Add Basic Info', score: '+20%' };
-    if (prog < 40) return { text: 'Add Skills', score: '+20%' };
-    if (prog < 60) return { text: 'Add Project', score: '+20%' };
-    if (prog < 80) return { text: 'Add Career Goals', score: '+20%' };
-    if (prog < 90) return { text: 'Add LinkedIn', score: '+10%' };
-    if (prog < 95) return { text: 'Add Experience', score: '+5%' };
-    if (prog < 100) return { text: 'Add Competitive Profile', score: '+5%' };
-    return { text: 'Profile Complete', score: '100%' };
+  const formatMissingField = (fieldName: string) => {
+    const normalizedName = fieldName.trim();
+
+    return normalizedName
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
 
   const profileStatus = getProfileStatus(displayProgress);
   const profileLevel = strengthLevel ?? profileStatus.label;
   const profileMessage = strengthMessage ?? getSubtext(displayProgress);
   const profileLevelColor = getProfileStatusColor(strengthLevel, displayProgress);
-  const nextAction = getNextAction(displayProgress);
+  const remainingProfileItems = missingFields.map(formatMissingField);
+  const remainingProfileCount = remainingProfileItems.length;
+  const remainingProfilePercentage = Math.max(0, 100 - Math.round(displayProgress));
+  const remainingProfileMessage = isProfileComplete
+    ? 'Your profile is complete.'
+    : remainingProfileCount > 1
+      ? `${remainingProfileCount} fields remain to complete your profile.`
+      : remainingProfileCount === 1
+        ? `${remainingProfileItems[0]} is missing to complete your profile.`
+        : 'Complete the highlighted fields to unlock opportunities.';
 
   if (loading) {
     return <StudentDashboardSkeleton />;
@@ -617,8 +624,15 @@ const StudentDashboard = () => {
                     <Plus className="w-5 h-5 text-primary" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{nextAction.text}</p>
-                    <p className="text-xs text-primary font-medium">{nextAction.score} Score</p>
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {isProfileComplete ? 'Review profile' : 'Complete profile'}
+                    </p>
+                    <p className="text-xs text-primary font-medium">
+                      {isProfileComplete ? 'All key details are filled out' : `${remainingProfilePercentage}% remaining`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {isProfileComplete ? 'Your profile is complete.' : remainingProfileMessage}
+                    </p>
                   </div>
                 </button>
               </CardContent>

@@ -56,6 +56,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const [resumeUploadSource, setResumeUploadSource] = useState<'resume' | 'linkedin-pdf' | null>(null);
   const [isRemoveResumeDialogOpen, setIsRemoveResumeDialogOpen] = useState(false);
   const [resumeSkills, setResumeSkills] = useState<string[]>([]);
+  const [isResumeCleared, setIsResumeCleared] = useState(false);
   const [isSavingStepData, setIsSavingStepData] = useState(false);
   const [isTermsAgreed, setIsTermsAgreed] = useState(false);
   
@@ -68,6 +69,50 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const { parseResume } = useResumeParse();
   const { refetchParsedResume } = useParsedResume(false);
   const { learnerProfile } = useLearnerProfile();
+
+  const createEmptyStep1Data = (): Step1Type => ({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    linkedin: '',
+    collegeName: '',
+    customCollege: '',
+    degree: '',
+    branch: '',
+    yearOfStudy: '1st',
+    graduationDate: { month: '', year: '' },
+    currentStatus: 'Learning',
+  });
+
+  const createEmptyStep2Data = (): Step2Type => ({
+    externalProjects: [],
+    autoDetectedSkills: [],
+    additionalSkills: [],
+  });
+
+  const createEmptyStep3Data = (): Step3Type => ({
+    academicPerformance: undefined,
+    workExperiences: [],
+    competitiveProfiles: [],
+    hasInternshipExperience: false,
+  });
+
+  const createEmptyStep4Data = (): Step4Type => ({
+    targetRoles: [],
+    locationPreferences: {
+      remote: false,
+      cities: [],
+    },
+    salaryExpectations: undefined,
+    linkedinUrl: '',
+    communicationPreferences: {
+      email: false,
+      whatsapp: false,
+      phone: false,
+    },
+    allowCompaniesViewProfile: false,
+    consentTimestamp: new Date().toISOString(),
+  });
 
   const formatMonthYearToDate = (
     value?: { day?: string; month: string; year: string } | string
@@ -192,7 +237,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
     const projects = (step2Data?.externalProjects || []).map((project) => ({
       title: project.title,
-      description: project.oneLineDescription,
+      description: project.detailedDescription,
       techStack: project.techStack || [],
       projectType: project.projectType,
       startDate: formatMonthYearToDate(project.startDate),
@@ -211,7 +256,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       title: experience.role,
       company: experience.companyName,
       startDate: formatMonthYearToDate(experience.startDate),
-      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+     isCurrentlyWorking: experience.isCurrentlyWorking,
+      endDate: experience.isCurrentlyWorking
+      ? null
+      : formatMonthYearToDate(experience.endDate),
       description: experience.responsibilities,
     }));
 
@@ -255,8 +303,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       phoneNumber: normalizeText(step1Data.phoneNumber),
       email: normalizeEmail(step1Data.email),
       linkedinProfile: normalizeText(step1Data.linkedin),
-      collegeName: finalCollegeName,
-      otherCollegeName: finalOtherCollegeName,
+      collegeName: finalCollegeName || finalOtherCollegeName,
       degree: normalizeText(step1Data.degree),
       branch: normalizeText(step1Data.branch),
       yearOfStudy: normalizeText(step1Data.yearOfStudy),
@@ -388,7 +435,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       phoneNumber: learnerProfile.phoneNumber || '',
       linkedin: learnerProfile.linkedinProfile || '',
       collegeName: learnerProfile.collegeName || '',
-      customCollege: learnerProfile.otherCollegeName || '',
+      // customCollege: learnerProfile.otherCollegeName || '',
       degree: learnerProfile.degree || '',
       branch: learnerProfile.branch || '',
       yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
@@ -418,14 +465,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? String(onboardingData.step1?.graduationDate?.year)
           : profileStep1.graduationDate.year,
       },
-      currentStatus: onboardingData.step1?.currentStatus || profileStep1.currentStatus,
+      currentStatus: profileStep1.currentStatus || onboardingData.step1?.currentStatus || 'Learning',
     };
 
     const profileStep2: Step2Type = {
       externalProjects: (learnerProfile.projects || []).map((project: any, index: number) => ({
         id: `api-project-${learnerProfile.id}-${index}`,
         title: project.title || `Project ${index + 1}`,
-        oneLineDescription: project.description || '',
         detailedDescription: project.description || '',
         techStack: project.techStack || [],
         githubUrl: project.githubUrl || project.github || '',
@@ -469,9 +515,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         id: `api-work-${learnerProfile.id}-${index}`,
         companyName: experience?.company || experience?.companyName || '',
         role: experience?.title || experience?.role || '',
-        startDate: { month: '', year: '' },
-        endDate: { month: '', year: '' },
-        isCurrentlyWorking: false,
+        startDate: experience?.startDate || experience?.start_date || '',
+        endDate: experience?.endDate || experience?.end_date || '',
+        isCurrentlyWorking: Boolean(experience?.isCurrentlyWorking || experience?.is_currently_working),
         workMode: 'Remote',
         responsibilities: experience?.description || '',
       })),
@@ -480,8 +526,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles as any[]),
         buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles as any[]),
       ],
-      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+      hasInternshipExperience:
+        (learnerProfile.hasWorkExperience || false) || (learnerProfile.workExperiences?.length || 0) > 0,
     };
+
+    const hasSavedWorkExperience =
+      (onboardingData.step3?.workExperiences?.length || 0) > 0 ||
+      (profileStep3.workExperiences?.length || 0) > 0 ||
+      onboardingData.step3?.hasInternshipExperience ||
+      profileStep3.hasInternshipExperience;
 
     const mergedStep3: Step3Type = {
       academicPerformance: onboardingData.step3?.academicPerformance || profileStep3.academicPerformance,
@@ -494,7 +547,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? onboardingData.step3!.competitiveProfiles
           : profileStep3.competitiveProfiles,
       hasInternshipExperience:
-        onboardingData.step3?.hasInternshipExperience ?? profileStep3.hasInternshipExperience,
+        hasSavedWorkExperience,
     };
 
     const preferredMethods = new Set(
@@ -1035,7 +1088,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       return {
         id: `resume-project-${Date.now()}-${index}`,
         title: titleWords || `Project ${index + 1}`,
-        oneLineDescription: line.slice(0, 180),
         detailedDescription: line,
         techStack: inferredTech,
         projectType: 'Solo',
@@ -1214,6 +1266,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     source: 'resume' | 'linkedin-pdf'
   ) => {
     setResumeError('');
+    setIsResumeCleared(false);
     setResumeFileName(file.name);
     setIsParsingResume(true);
     try {
@@ -1251,7 +1304,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
             return {
               id: `resume-project-${Date.now()}-${index}`,
               title: project || `Project ${index + 1}`,
-              oneLineDescription: '',
               detailedDescription: '',
               techStack: [],
               githubUrl: '',
@@ -1267,7 +1319,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           return {
             id: `resume-project-${Date.now()}-${index}`,
             title: project?.title || project?.name || `Project ${index + 1}`,
-            oneLineDescription: project?.oneLineDescription || project?.description || '',
             detailedDescription: project?.detailedDescription || project?.description || '',
             techStack,
             githubUrl: project?.githubUrl || project?.github || '',
@@ -1364,21 +1415,20 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
       const existing: Partial<Step1Type> = onboardingData?.step1 ?? {};
       const next: Step1Type = {
-        ...(existing as Step1Type),
-        fullName: parsed.fullName || existing.fullName || '',
-        phoneNumber: parsed.phoneNumber || existing.phoneNumber || '',
-        linkedin: parsed.linkedin || existing.linkedin || '',
+        fullName: parsed.fullName || '',
+        phoneNumber: parsed.phoneNumber || '',
+        linkedin: parsed.linkedin || '',
         email: parsed.email || existing.email || userEmail || '',
         graduationDate: {
-          month: parsed.graduationDate?.month || existing.graduationDate?.month || '',
-          year: parsed.graduationDate?.year || existing.graduationDate?.year || '',
+          month: parsed.graduationDate?.month || '',
+          year: parsed.graduationDate?.year || '',
         },
         yearOfStudy: existing.yearOfStudy || '1st',
         currentStatus: existing.currentStatus || 'Learning',
-        collegeName: parsed.collegeName || existing.collegeName || '',
-        customCollege: existing.customCollege || '',
-        degree: parsed.degree || existing.degree || '',
-        branch: parsed.branch || existing.branch || '',
+        collegeName: parsed.collegeName || '',
+        customCollege: '',
+        degree: parsed.degree || '',
+        branch: parsed.branch || '',
       };
 
       // Detailed logging before saving
@@ -1444,7 +1494,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 : existingStep4.locationPreferences?.cities || [],
           },
           salaryExpectations: existingStep4.salaryExpectations,
-          linkedinUrl: parsed.linkedin || existingStep4.linkedinUrl || '',
+          linkedinUrl: parsed.linkedin || '',
           communicationPreferences: existingStep4.communicationPreferences || {
             email: true,
             whatsapp: true,
@@ -1487,10 +1537,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   };
 
   const handleClearUploadedResume = () => {
+    updateStepData(1, createEmptyStep1Data());
+    updateStepData(2, createEmptyStep2Data());
+    updateStepData(3, createEmptyStep3Data());
+    updateStepData(4, createEmptyStep4Data());
     setResumeFileName('');
     setResumeUploadSource(null);
     setResumeSkills([]);
     setResumeError('');
+    setCurrentStepData(null);
+    setIsResumeCleared(true);
 
     if (resumeUploadInputRef.current) {
       resumeUploadInputRef.current.value = '';
@@ -1501,7 +1557,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
     toast.success({
       title: 'Success',
-      description: 'Uploaded file has been delete successfully.',
+      description: 'Uploaded file has been deleted successfully.',
     });
   };
 
@@ -1785,6 +1841,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         <div className="mb-8">
             {currentStep === 1 && (
               <ProfileStep1Component
+                isResumeCleared={isResumeCleared}
                 initialData={onboardingData.step1}
                 userEmail={userEmail}
                 userFullName={userFullName}

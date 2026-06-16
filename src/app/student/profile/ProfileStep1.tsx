@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -23,6 +23,7 @@ interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
   userEmail?: string;
   userFullName?: string;
+  isResumeCleared?: boolean;
   onNext: (data: Step1Type) => void;
   onSkip: () => void;
   onBack?: () => void;
@@ -33,6 +34,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   initialData,
   userEmail = '',
   userFullName = '',
+  isResumeCleared = false,
   onNext,
   onSkip,
   onBack,
@@ -68,9 +70,28 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [customDegree, setCustomDegree] = useState<string>('');
   const [customBranch, setCustomBranch] = useState<string>('');
   const fullNameEditedRef = useRef(false);
+  const resumeClearedRef = useRef(false);
   const { colleges: filteredColleges, isLoading: isLoadingColleges } = useCollegeSearch(collegeSearch);
 
+  const buildEmptyStep1Data = (): Step1Type => ({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    linkedin: '',
+    collegeName: '',
+    customCollege: '',
+    degree: '',
+    branch: '',
+    yearOfStudy: '1st',
+    graduationDate: { month: '', year: '' },
+    currentStatus: 'Learning',
+  });
+
   useEffect(() => {
+    if (isResumeCleared) {
+      return;
+    }
+
     const nextEmail = resolvedUserEmail || initialData?.email || '';
     if (!nextEmail) return;
 
@@ -80,10 +101,14 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       }
       return { ...prev, email: nextEmail };
     });
-  }, [resolvedUserEmail, initialData?.email]);
+  }, [resolvedUserEmail, initialData?.email, isResumeCleared]);
 
   useEffect(() => {
-    const nextFullName = initialData?.fullName?.trim() || resolvedUserFullName;
+    if (isResumeCleared) {
+      return;
+    }
+
+    const nextFullName = initialData?.fullName?.trim() || '';
     if (!nextFullName) return;
 
     setFormData((prev) => {
@@ -93,33 +118,41 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       }
       return { ...prev, fullName: nextFullName };
     });
-  }, [resolvedUserFullName, initialData?.fullName]);
+  }, [resolvedUserFullName, initialData?.fullName, isResumeCleared]);
 
   const collegeDropdownRef = useRef<HTMLDivElement>(null);
   const graduationDateDropdownRef = useRef<HTMLDivElement>(null);
   const { degreeDetails, loading: isDegreeLoading } = useLearnerDegreeDetails();
-  const { branchDetails, loading: isBranchLoading } = useLearnerBranchDetails();
+  const { loading: isBranchLoading, getBranchesForDegree } = useLearnerBranchDetails();
   
   const years = getYearsArray(1990);
   const degreeOptions = degreeDetails.map((item) => item.name);
-  const branchOptions = branchDetails.map((item) => item.name);
+  const selectedDegreeDetails = useMemo(
+    () =>
+      degreeDetails.find(
+        (item) => String(item?.id ?? '').trim() === String(formData.degree ?? '').trim() || item.name === formData.degree
+      ),
+    [degreeDetails, formData.degree]
+  );
   
-  // Handle branches from API with fallback to mock data
-  const branches = (() => {
-    // If we have API branch data, use it
-    if (branchDetails.length > 0) {
-      return branchOptions;
-    }
-    
-    // Fallback to degree-specific branches from mock data
+  const branches = useMemo(() => {
     const currentDegree = formData.degree;
     if (!currentDegree || currentDegree === 'Other') return [];
-    
-    const selectedDegreeDetails = degreeDetails.find((item) => item.name === currentDegree);
-    return selectedDegreeDetails?.branches?.length
+
+    const degreeBranches = Array.isArray(selectedDegreeDetails?.branches)
       ? selectedDegreeDetails.branches
-      : getBranchesByDegree(currentDegree);
-  })();
+          .map((item) => (item ? String(item).trim() : ''))
+          .filter(Boolean)
+      : [];
+
+    const apiBranches = getBranchesForDegree(selectedDegreeDetails?.id ?? selectedDegreeDetails?.name ?? currentDegree)
+      .map((item) => (item?.name ? String(item.name).trim() : ''))
+      .filter(Boolean);
+
+    const source = degreeBranches.length > 0 ? degreeBranches : apiBranches.length > 0 ? apiBranches : getBranchesByDegree(currentDegree);
+    const unique = Array.from(new Set(source));
+    return unique.includes('Other') ? unique : [...unique, 'Other'];
+  }, [formData.degree, getBranchesForDegree, selectedDegreeDetails]);
   
   // Handle custom degree initialization
   useEffect(() => {
@@ -138,22 +171,66 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       return;
     }
 
-    const isCustomBranch = !branchOptions.includes(formData.branch);
+    const isCustomBranch = !branches.includes(formData.branch);
     if (isCustomBranch && customBranch !== formData.branch) {
       setCustomBranch(formData.branch);
     }
-  }, [branchDetails, formData.branch, branchOptions, customBranch]);
+  }, [branches, formData.branch, customBranch]);
   
   // Auto-save form data on change
   useEffect(() => {
+    if (isResumeCleared) {
+      return;
+    }
+
     if (onFieldChange) {
       onFieldChange(formData);
     }
-  }, [formData]);
+  }, [formData, isResumeCleared]);
 
   const lastAutofillRef = useRef<string>('');
 
+  const buildStep1FromInitialData = (data: Partial<Step1Type>): Step1Type => ({
+    fullName: data.fullName ?? '',
+    email: resolvedUserEmail || data.email || '',
+    phoneNumber: data.phoneNumber?.trim() || '',
+    linkedin: data.linkedin?.trim() || '',
+    collegeName: data.collegeName?.trim() || '',
+    customCollege: data.customCollege ?? '',
+    degree: data.degree?.trim() || '',
+    branch: data.branch?.trim() || '',
+    yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+    graduationDate: {
+      month: data.graduationDate?.month?.trim() || '',
+      year: data.graduationDate?.year?.trim() || '',
+    },
+    currentStatus: (data.currentStatus as Step1Type['currentStatus']) || 'Learning',
+  });
+
   useEffect(() => {
+    if (isResumeCleared) {
+      if (resumeClearedRef.current) {
+        return;
+      }
+
+      resumeClearedRef.current = true;
+      fullNameEditedRef.current = false;
+      lastAutofillRef.current = '';
+      setFormData(buildEmptyStep1Data());
+      setSelectedMonth('');
+      setSelectedYear('');
+      setCustomDegree('');
+      setCustomBranch('');
+      setCollegeSearch('');
+      setShowCollegeDropdown(false);
+      setShowGraduationDatePicker(false);
+      setErrors({});
+      setValidations({});
+      return;
+    }
+
+    resumeClearedRef.current = false;
+
     if (!initialData) {
       console.log('ProfileStep1: initialData is empty, skipping autofill');
       return;
@@ -177,6 +254,26 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       return;
     }
 
+    const onlyFullNameChanged =
+      Boolean(initialData.fullName) &&
+      initialData.fullName !== formData.fullName &&
+      (initialData.phoneNumber ?? '') === formData.phoneNumber &&
+      (initialData.linkedin ?? '') === (formData.linkedin ?? '') &&
+      (initialData.collegeName ?? '') === formData.collegeName &&
+      (initialData.customCollege ?? '') === (formData.customCollege ?? '') &&
+      (initialData.degree ?? '') === (formData.degree ?? '') &&
+      (initialData.branch ?? '') === (formData.branch ?? '') &&
+      (initialData.yearOfStudy ?? '') === formData.yearOfStudy &&
+      (initialData.currentStatus ?? '') === formData.currentStatus &&
+      (initialData.graduationDate?.month ?? '') === formData.graduationDate.month &&
+      (initialData.graduationDate?.year ?? '') === formData.graduationDate.year;
+
+    if (onlyFullNameChanged) {
+      fullNameEditedRef.current = true;
+      lastAutofillRef.current = signature;
+      return;
+    }
+
     // Debug log with full initialData details
     console.log('ProfileStep1 autofill triggered:', {
       fullName: initialData.fullName,
@@ -191,84 +288,23 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       graduationDate: initialData.graduationDate,
     });
 
-    setFormData((prev) => {
-      const next = { ...prev };
-      let changed = false;
-      
-      // Update if value exists and is different
-      if (!fullNameEditedRef.current && initialData.fullName && initialData.fullName !== prev.fullName) {
-        next.fullName = initialData.fullName;
-        changed = true;
-      }
-      if (initialData.phoneNumber && initialData.phoneNumber !== prev.phoneNumber) {
-        next.phoneNumber = initialData.phoneNumber;
-        changed = true;
-      }
-      if (initialData.linkedin && initialData.linkedin !== prev.linkedin) {
-        next.linkedin = initialData.linkedin;
-        changed = true;
-      }
-      if (initialData.collegeName && initialData.collegeName !== prev.collegeName) {
-        next.collegeName = initialData.collegeName;
-        changed = true;
-      }
-      if (initialData.customCollege && initialData.customCollege !== prev.customCollege) {
-        next.customCollege = initialData.customCollege;
-        changed = true;
-      }
-      if (initialData.degree && initialData.degree !== prev.degree) {
-        next.degree = initialData.degree;
-        changed = true;
-      }
-      if (initialData.branch && initialData.branch !== prev.branch) {
-        next.branch = initialData.branch;
-        changed = true;
-      }
-      if (initialData.yearOfStudy && initialData.yearOfStudy !== prev.yearOfStudy) {
-        next.yearOfStudy = initialData.yearOfStudy as any;
-        changed = true;
-      }
-      if (initialData.currentStatus && initialData.currentStatus !== prev.currentStatus) {
-        next.currentStatus = initialData.currentStatus as any;
-        changed = true;
-      }
+    const nextFormData = buildStep1FromInitialData(initialData);
 
-      if (initialData.graduationDate?.month && initialData.graduationDate.month !== prev.graduationDate.month) {
-        next.graduationDate = {
-          ...next.graduationDate,
-          month: initialData.graduationDate.month,
-        };
-        changed = true;
-      }
-      if (initialData.graduationDate?.year && initialData.graduationDate.year !== prev.graduationDate.year) {
-        next.graduationDate = {
-          ...next.graduationDate,
-          year: initialData.graduationDate.year,
-        };
-        changed = true;
-      }
+    fullNameEditedRef.current = false;
+    setFormData(nextFormData);
+    setSelectedMonth(nextFormData.graduationDate.month);
+    setSelectedYear(nextFormData.graduationDate.year);
+    setCustomDegree(nextFormData.degree && nextFormData.degree !== 'Other' ? nextFormData.degree : '');
+    setCustomBranch(nextFormData.branch && nextFormData.branch !== 'Other' ? nextFormData.branch : '');
+    setErrors({});
 
-      if (!changed) {
-        return prev;
-      }
-      
-      console.log('ProfileStep1 formData updated:', {
-        fullName: next.fullName,
-        phoneNumber: next.phoneNumber,
-        linkedin: next.linkedin,
-        collegeName: next.collegeName,
-        degree: next.degree,
-        branch: next.branch,
-      });
-      
-      return next;
-    });
-
-    if (initialData.phoneNumber) {
+    if (nextFormData.phoneNumber) {
       setValidations((prev) => ({
         ...prev,
-        phoneNumber: validatePhoneNumber(initialData.phoneNumber as string),
+        phoneNumber: validatePhoneNumber(nextFormData.phoneNumber),
       }));
+    } else {
+      setValidations({});
     }
 
     lastAutofillRef.current = signature;
@@ -615,6 +651,10 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const hasManualCollege = Boolean(formData.customCollege?.trim());
   const isSearchCollegeDisabled = hasManualCollege;
   const isManualCollegeDisabled = hasSelectedCollege;
+  const shouldShowCustomBranchInput =
+    formData.branch === 'Other' ||
+    Boolean(customBranch.trim()) ||
+    Boolean(formData.branch && !branches.includes(formData.branch));
 
   return (
     <>
@@ -991,11 +1031,12 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                               const branch = formData.branch ?? '';
                               // If it's empty, return empty
                               if (!branch) return '';
+                              if (branch === 'Other') return 'Other';
                               // Preserve previously selected branch while options are still loading
                               if (branches.length === 0) return branch;
                               // If it's a predefined branch (either API or mock data), show it
                               if (branches.includes(branch)) return branch;
-                              // Keep the saved custom branch selected instead of collapsing it to Other
+                              // Keep the saved branch visible even if the refreshed branch list does not include it
                               return branch;
                             })()} 
                             onValueChange={(value) => handleSelectChange('branch', value)}
@@ -1005,17 +1046,17 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                               <SelectValue placeholder={hasSelectedDegree ? 'Select Branch' : 'Select degree first'} />
                             </SelectTrigger>
                             <SelectContent>
-                              {formData.branch &&
-                                formData.branch !== 'Other' &&
-                                !branches.includes(formData.branch) && (
-                                  <SelectItem value={formData.branch}>{formData.branch}</SelectItem>
-                                )}
                               {isBranchLoading ? (
                                 <SelectItem value="loading" disabled>
                                   Loading branches...
                                 </SelectItem>
                               ) : branches.length > 0 ? (
                                 <>
+                                  {formData.branch && formData.branch !== 'Other' && !branches.includes(formData.branch) && (
+                                    <SelectItem value={formData.branch}>
+                                      {formData.branch}
+                                    </SelectItem>
+                                  )}
                                   {branches.map((branch) => (
                                     <SelectItem key={branch} value={branch}>
                                       {branch}
@@ -1046,7 +1087,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   </TooltipProvider>
                   
                   {/* Custom Branch Input - Show when "Other" is selected or custom branch */}
-                  {(formData.branch === 'Other' || (formData.branch && !branches.includes(formData.branch))) && (
+                  {shouldShowCustomBranchInput && (
                     <div className="mt-2">
                       <Input
                         placeholder="Enter your branch name"

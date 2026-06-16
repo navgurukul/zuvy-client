@@ -7,11 +7,6 @@ import {
     Database,
     Bell,
     Users,
-    LayoutGrid,
-    CalendarClock,
-    CalendarDays,
-    ClipboardList,
-    TrendingUp,
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -28,7 +23,7 @@ import { getPermissions } from '@/lib/GetPermissions'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
 import { formattedRole } from '@/lib/utils'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
 
 //Test
 const Navbar = () => {
@@ -64,7 +59,6 @@ const Navbar = () => {
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [loading, setLoading] = useState(true);
-    const [activeMentorTooltip, setActiveMentorTooltip] = useState<string | null>(null)
 
     const handleLogoutClick = () => {
         setShowLogoutDialog(true)
@@ -107,26 +101,26 @@ const Navbar = () => {
         },
         ...(isInstructorUser
             ? [
-                  {
-                      name: 'Mentors',
-                      href: `/${role}/mentorsDashboard/dashboard`,
-                      icon: Users,
-                      active: (pathname: string) =>
-                          pathname === `/${role}/mentorsDashboard/dashboard` ||
-                          pathname.startsWith(`/${role}/mentorsDashboard/`),
-                  },
-              ]
+                {
+                    name: 'Mentors',
+                    href: `/${role}/mentorsDashboard/dashboard`,
+                    icon: Users,
+                    active: (pathname: string) =>
+                        pathname === `/${role}/mentorsDashboard/dashboard` ||
+                        pathname.startsWith(`/${role}/mentorsDashboard/`),
+                },
+            ]
             : []),
         ...(isSuperAdmin
             ? [
-                  {
-                      name: 'All Organizations',
-                      href: `/${role}/organizations`,
-                      icon: Layers,
-                      active: (pathname: string) =>
-                          pathname === `/${role}/organizations`,
-                  },
-              ]
+                {
+                    name: 'All Organizations',
+                    href: `/${role}/organizations`,
+                    icon: Layers,
+                    active: (pathname: string) =>
+                        pathname === `/${role}/organizations`,
+                },
+            ]
             : []),
     ]
 
@@ -135,32 +129,18 @@ const Navbar = () => {
         {
             label: 'Dashboard',
             path: 'dashboard',
-            icon: LayoutGrid,
-            tooltip: 'Overview of your mentoring activity and key highlights.',
         },
         {
             label: 'Availability',
             path: 'availability',
-            icon: CalendarClock,
-            tooltip: 'Create and manage your open mentoring slots.',
-        },
-        {
-            label: 'Calendar',
-            path: 'calendar',
-            icon: CalendarDays,
-            tooltip: 'See your mentor schedule in calendar view.',
         },
         {
             label: 'Sessions',
             path: 'sessions',
-            icon: ClipboardList,
-            tooltip: 'Track upcoming, completed, missed, and cancelled sessions.',
         },
         {
             label: 'Performance',
             path: 'performance',
-            icon: TrendingUp,
-            tooltip: 'Review completion rate, utilization, ratings, and trends.',
         },
     ]
 
@@ -169,7 +149,7 @@ const Navbar = () => {
         let retryTimeout: ReturnType<typeof setTimeout> | null = null
         let retryCount = 0
         const maxRetries = 10
-        
+
         const loadPermissions = async () => {
             try {
                 const perms = await getPermissions();
@@ -193,9 +173,9 @@ const Navbar = () => {
                 }
             }
         };
-        
+
         loadPermissions();
-        
+
         return () => {
             isMounted = false;
             if (retryTimeout) {
@@ -210,7 +190,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={isSuperAdmin ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
-                          <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
+                        <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo' />
                     </Link>
 
                     <OrganizationDropdown orgId={orgId} />
@@ -261,7 +241,7 @@ const Navbar = () => {
                                         </Link>
                                     )}
                                     {item.name === 'Question Bank' && !loading && permissions.viewQuestion && (
-                                        <QuestionBankDropdown/>
+                                        <QuestionBankDropdown />
                                     )}
                                 </>
                             )
@@ -316,7 +296,7 @@ const Navbar = () => {
                             <span>Audit Log</span>
                         </Link>
                     )}
-                    
+
                     {/* <Button
                         variant="ghost"
                         size="sm"
@@ -344,51 +324,28 @@ const Navbar = () => {
             </div>
 
             {isInstructorUser && isMentorsDashboardRoute && (
-                <TooltipProvider delayDuration={120}>
-                    <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
-                        {mentorsTabs.map((tab) => {
-                            const basePath = `/${role}/mentorsDashboard/${tab.path}`
-                            const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
-                            const isTabActive = pathname === basePath
-                            const Icon = tab.icon
+                <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
+                    {mentorsTabs.map((tab) => {
+                        const basePath = `/${role}/mentorsDashboard/${tab.path}`
+                        const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
+                        const isTabActive = pathname === basePath
 
-                            return (
-                                <Tooltip
-                                    key={tab.path}
-                                    onOpenChange={(open) => {
-                                        setActiveMentorTooltip(open ? tab.path : null)
-                                    }}
-                                >
-                                    <TooltipTrigger asChild>
-                                        <Link
-                                            href={href}
-                                            className={cn(
-                                                'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
-                                                isTabActive
-                                                    ? 'border-green-600 text-foreground'
-                                                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                                            )}
-                                        >
-                                            <Icon className="h-4 w-4" />
-                                            {tab.label}
-                                        </Link>
-                                    </TooltipTrigger>
-                                    <TooltipContent
-                                        side="bottom"
-                                        sideOffset={8}
-                                        className="max-w-[260px] px-3.5 py-2 text-[13px] font-medium leading-relaxed bg-white text-foreground border-border shadow-md [&>svg]:fill-white"
-                                    >
-                                        {tab.tooltip}
-                                    </TooltipContent>
-                                </Tooltip>
-                            )
-                        })}
-                    </div>
-                </TooltipProvider>
-            )}
-
-            {isInstructorUser && isMentorsDashboardRoute && activeMentorTooltip && (
-                <div className="fixed left-0 right-0 bottom-0 top-28 z-30 pointer-events-none backdrop-blur-[2px] bg-black/25 transition-opacity duration-150" />
+                        return (
+                            <Link
+                                key={tab.path}
+                                href={href}
+                                className={cn(
+                                    'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
+                                    isTabActive
+                                        ? 'border-green-600 text-foreground'
+                                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                {tab.label}
+                            </Link>
+                        )
+                    })}
+                </div>
             )}
         </nav>
     )

@@ -20,7 +20,6 @@ export interface OnboardingStep1 {
 export interface ExternalProject {
   id: string;
   title: string;
-  oneLineDescription: string;
   detailedDescription?: string;
   techStack: string[];
   githubUrl?: string;
@@ -55,8 +54,8 @@ export interface WorkExperience {
   id: string;
   companyName: string;
   role: string;
-  startDate: { month: string; year: string };
-  endDate?: { month: string; year: string };
+  startDate: { month: string; year: string } | string;
+  endDate?: { month: string; year: string } | string;
   isCurrentlyWorking: boolean;
   workMode: 'Remote' | 'On-site';
   city?: string;

@@ -54,6 +54,12 @@ import type {
   OnboardingStep3 as Step3Type,
   OnboardingStep4 as Step4Type,
 } from '@/lib/profile.types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import useLearnerProfile from '@/hooks/useLearnerProfile';
 import useUpdateLearnerProfile from '@/hooks/useUpdateLearnerProfile';
 import useLearnerTechnicalSkills from '@/hooks/useLearnerTechnicalSkills';
@@ -79,7 +85,7 @@ export const EditProfilePage: React.FC = () => {
   const { updateLearnerProfile } = useUpdateLearnerProfile();
   const { technicalSkills, loading: isLoadingTechnicalSkills } = useLearnerTechnicalSkills();
   const { degreeDetails } = useLearnerDegreeDetails();
-  const { branchDetails } = useLearnerBranchDetails();
+  const { branchDetails, getBranchesForDegree } = useLearnerBranchDetails();
   const { boards } = useLearnerBoards();
   const { roles, loading: isLoadingRoles } = useLearnerRoles();
   const { remoteLocations, loading: isLoadingRemoteLocations } = useLearnerRemoteLocations();
@@ -173,23 +179,30 @@ export const EditProfilePage: React.FC = () => {
   const selectedDegreeValue = isCustomDegreeValue ? 'Other' : rawDegreeValue;
   const degreeCustomValue = editedData?.step1?.customDegree ?? (isCustomDegreeValue ? rawDegreeValue : '');
   const selectedDegreeForBranch = selectedDegreeValue === 'Other' ? '' : rawDegreeValue;
+  const selectedDegreeDetails = useMemo(
+    () =>
+      (degreeDetails || []).find(
+        (item) => String(item?.id ?? '').trim() === String(selectedDegreeForBranch).trim() || String(item?.name || '').trim() === String(selectedDegreeForBranch).trim()
+      ),
+    [degreeDetails, selectedDegreeForBranch]
+  );
   const branchOptions = useMemo(() => {
-    const matchedDegree = (degreeDetails || []).find(
-      (item) => String(item?.name || '').trim() === selectedDegreeForBranch
-    );
-    const degreeBranches = Array.isArray(matchedDegree?.branches)
-      ? matchedDegree.branches
+    const degreeBranches = Array.isArray(selectedDegreeDetails?.branches)
+      ? selectedDegreeDetails.branches
           .map((item) => (item ? String(item).trim() : ''))
           .filter(Boolean)
       : [];
+    const apiBranches = getBranchesForDegree(selectedDegreeDetails?.id ?? selectedDegreeDetails?.name ?? selectedDegreeForBranch)
+      .map((item) => (item?.name ? String(item.name).trim() : ''))
+      .filter(Boolean);
     const fallbackBranches = (branchDetails || [])
       .map((item) => (item?.name ? String(item.name).trim() : ''))
       .filter(Boolean);
 
-    const source = degreeBranches.length > 0 ? degreeBranches : fallbackBranches;
+    const source = degreeBranches.length > 0 ? degreeBranches : apiBranches.length > 0 ? apiBranches : fallbackBranches;
     const unique = Array.from(new Set(source));
     return unique.includes('Other') ? unique : [...unique, 'Other'];
-  }, [degreeDetails, branchDetails, selectedDegreeForBranch]);
+  }, [branchDetails, getBranchesForDegree, selectedDegreeDetails, selectedDegreeForBranch]);
   const rawBranchValue = editedData?.step1?.branch ?? onboardingData?.step1?.branch ?? '';
   const isCustomBranchValue =
     Boolean(rawBranchValue) && rawBranchValue !== 'Other' && !branchOptions.includes(rawBranchValue);
@@ -250,7 +263,8 @@ export const EditProfilePage: React.FC = () => {
     ...(step3?.academicPerformance || {}),
     ...(editedData?.step3?.academicPerformance || {}),
   };
-
+  const isWorkingStatus =
+  (onboardingData?.step1?.currentStatus ?? step1?.currentStatus) === 'Working';
   const updateAcademicPerformance = (updates: Record<string, any>) => {
     setEditedData((prev: any) => ({
       ...prev,
@@ -301,6 +315,26 @@ export const EditProfilePage: React.FC = () => {
         : '01';
 
     return `${value.year}-${month}-${day}`;
+  };
+
+  const formatWorkExperienceDate = (value?: { month: string; year: string } | string) => {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      const parsedDate = new Date(value);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+      }
+      return value;
+    }
+
+    return `${value.month} ${value.year}`;
   };
 
   const toMonthNumber = (month?: string) => {
@@ -359,7 +393,7 @@ export const EditProfilePage: React.FC = () => {
 
     const projects = (step2Data?.externalProjects || []).map((project) => ({
       title: project.title,
-      description: project.oneLineDescription || project.detailedDescription || '',
+      description: project.detailedDescription || '',
       techStack: project.techStack || [],
       projectType: project.projectType,
       startDate: formatMonthYearToDate(project.startDate),
@@ -378,7 +412,10 @@ export const EditProfilePage: React.FC = () => {
       title: experience.role,
       company: experience.companyName,
       startDate: formatMonthYearToDate(experience.startDate),
-      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+      isCurrentlyWorking: experience.isCurrentlyWorking,
+      endDate: experience.isCurrentlyWorking
+      ? null
+      : formatMonthYearToDate(experience.endDate),
       description: experience.responsibilities,
     }));
 
@@ -413,8 +450,7 @@ export const EditProfilePage: React.FC = () => {
       phoneNumber: normalizeText(step1Data.phoneNumber),
       email: normalizeEmail(step1Data.email),
       linkedinProfile: normalizeOptionalUrl(step1Data.linkedin),
-      collegeName: normalizeText(step1Data.collegeName),
-      otherCollegeName: normalizeText(step1Data.customCollege),
+      collegeName: normalizeText(step1Data.collegeName) || normalizeText(step1Data.customCollege),
       degree: normalizeText(step1Data.degree),
       branch: normalizeText(step1Data.branch),
       yearOfStudy: normalizeText(step1Data.yearOfStudy),
@@ -548,7 +584,6 @@ export const EditProfilePage: React.FC = () => {
       externalProjects: (learnerProfile.projects || []).map((project: any, index) => ({
         id: `api-project-${learnerProfile.id}-${index}`,
         title: project.title || `Project ${index + 1}`,
-        oneLineDescription: project.description || '',
         detailedDescription: project.description || '',
         techStack: project.techStack || [],
         githubUrl: project.githubUrl || (project as any).github || '',
@@ -644,9 +679,9 @@ export const EditProfilePage: React.FC = () => {
         id: `api-work-${learnerProfile.id}-${index}`,
         companyName: experience?.company || experience?.companyName || '',
         role: experience?.title || experience?.role || '',
-        startDate: { month: '', year: '' },
-        endDate: { month: '', year: '' },
-        isCurrentlyWorking: false,
+        startDate: experience?.startDate || experience?.start_date || '',
+        endDate: experience?.endDate || experience?.end_date || '',
+        isCurrentlyWorking: Boolean(experience?.isCurrentlyWorking || experience?.is_currently_working),
         workMode: 'Remote' as const,
         responsibilities: experience?.description || '',
       })),
@@ -655,7 +690,8 @@ export const EditProfilePage: React.FC = () => {
         buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles || []),
         buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles || []),
       ],
-      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+      hasInternshipExperience:
+        (learnerProfile.hasWorkExperience || false) || (learnerProfile.workExperiences?.length || 0) > 0,
     };
 
     const preferredMethods = new Set((learnerProfile.preferredContactMethods || []).map((item) => item.toLowerCase()));
@@ -806,78 +842,72 @@ export const EditProfilePage: React.FC = () => {
       setEditedData({});
     }
   };
-  
+
   const handleSaveAcademic = async () => {
-    if (step1 && step3) {
-      const step1Edits = editedData.step1 || {};
-      const shouldApplyCustomDegree = selectedDegreeValue === 'Other' && (step1Edits.degree === 'Other' || step1Edits.customDegree !== undefined);
-      const shouldApplyCustomBranch = selectedBranchValue === 'Other' && (step1Edits.branch === 'Other' || step1Edits.customBranch !== undefined);
-      const resolvedDegree =
-        shouldApplyCustomDegree
-          ? (String(step1Edits.customDegree || degreeCustomValue || '').trim() || step1.degree)
-          : step1Edits.degree;
-      const resolvedBranch =
-        shouldApplyCustomBranch
-          ? (String(step1Edits.customBranch || branchCustomValue || '').trim() || step1.branch)
-          : step1Edits.branch;
-      const { customDegree, customBranch, ...remainingStep1Edits } = step1Edits;
-      const normalizedStep1Edits = {
-        ...remainingStep1Edits,
-        ...(step1Edits.degree || shouldApplyCustomDegree ? { degree: resolvedDegree } : {}),
-        ...(step1Edits.branch || shouldApplyCustomBranch ? { branch: resolvedBranch } : {}),
-      };
+  // FIX: read fresh from onboardingData at call time, not closed-over step3
+  const currentStep3 = onboardingData?.step3;
 
-      const updatedStep1 = editedData.step1 ? { ...step1, ...normalizedStep1Edits } : step1;
-      const updatedStep3 = editedData.step3 ? { ...step3, ...editedData.step3 } : step3;
+  if (step1 && currentStep3) {
+    const step1Edits = editedData.step1 || {};
+    const shouldApplyCustomDegree =
+      selectedDegreeValue === 'Other' &&
+      (step1Edits.degree === 'Other' || step1Edits.customDegree !== undefined);
+    const shouldApplyCustomBranch =
+      selectedBranchValue === 'Other' &&
+      (step1Edits.branch === 'Other' || step1Edits.customBranch !== undefined);
 
-      const fieldErrors: string[] = [];
-      if (!String(updatedStep1.collegeName || '').trim() && !String(updatedStep1.customCollege || '').trim()) {
-        fieldErrors.push('College selection is required');
-      }
-      if (!String(updatedStep1.degree || '').trim()) {
-        fieldErrors.push('Degree selection is required');
-      }
-      if (!String(updatedStep1.branch || '').trim()) {
-        fieldErrors.push('Branch selection is required');
-      }
-      if (!String(updatedStep1.graduationDate?.month || '').trim() || !String(updatedStep1.graduationDate?.year || '').trim()) {
-        fieldErrors.push('Graduation month and year are required');
-      }
+    const resolvedDegree = shouldApplyCustomDegree
+      ? String(step1Edits.customDegree || degreeCustomValue || '').trim() || step1.degree
+      : step1Edits.degree;
+    const resolvedBranch = shouldApplyCustomBranch
+      ? String(step1Edits.customBranch || branchCustomValue || '').trim() || step1.branch
+      : step1Edits.branch;
 
-      const academic = updatedStep3?.academicPerformance;
-      if (academic?.marksFormat === 'CGPA') {
-        const cgpa = Number(academic?.cgpa);
-        if (!Number.isFinite(cgpa) || cgpa <= 0 || cgpa > 10) {
-          fieldErrors.push('Enter a valid CGPA between 0.0 and 10.0');
-        }
-      }
-      if (academic?.marksFormat === 'Percentage') {
-        const percentage = Number(academic?.percentage);
-        if (!Number.isFinite(percentage) || percentage <= 0 || percentage > 100) {
-          fieldErrors.push('Enter a valid percentage between 0 and 100');
-        }
-      }
+    const updatedStep1: Step1Type = {
+      ...step1,
+      ...(resolvedDegree !== undefined ? { degree: resolvedDegree } : {}),
+      ...(resolvedBranch !== undefined ? { branch: resolvedBranch } : {}),
+      ...(step1Edits.collegeName !== undefined ? { collegeName: step1Edits.collegeName } : {}),
+      ...(step1Edits.customCollege !== undefined ? { customCollege: step1Edits.customCollege } : {}),
+      ...(step1Edits.yearOfStudy !== undefined ? { yearOfStudy: step1Edits.yearOfStudy } : {}),
+      ...(step1Edits.graduationDate !== undefined ? { graduationDate: step1Edits.graduationDate } : {}),
+    };
 
-      if (fieldErrors.length > 0) {
-        showRequiredFieldErrors(fieldErrors);
-        return;
-      }
-
-      if (editedData.step1) {
-        updateStepData(1, updatedStep1);
-      }
-      if (editedData.step3) {
-        updateStepData(3, updatedStep3);
-      }
-
-      const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
-      if (!isSaved) return;
-
-      showSaveSuccess();
-      setEditingCard(null);
-      setEditedData({});
+    const fieldErrors: string[] = [];
+    if (!String(updatedStep1.collegeName || updatedStep1.customCollege || '').trim()) {
+      fieldErrors.push('College name is required');
     }
-  };
+    if (!String(updatedStep1.degree || '').trim()) {
+      fieldErrors.push('Degree is required');
+    }
+    if (!String(updatedStep1.branch || '').trim()) {
+      fieldErrors.push('Branch is required');
+    }
+    if (fieldErrors.length > 0) {
+      showRequiredFieldErrors(fieldErrors);
+      return;
+    }
+
+    // FIX: build updatedStep3 from currentStep3 (fresh), not stale step3 closure
+    const updatedStep3: Step3Type = {
+      ...currentStep3,
+      ...(editedData.step3 ? editedData.step3 : {}),
+      // Always preserve fresh work experiences — never let editedData overwrite them
+          workExperiences: hasInternship ? currentStep3.workExperiences : [],
+      hasInternshipExperience: hasInternship,
+    };
+
+    updateStepData(1, updatedStep1);
+    updateStepData(3, updatedStep3);
+
+    const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
+    if (!isSaved) return;
+
+    showSaveSuccess();
+    setEditingCard(null);
+    setEditedData({});
+  }
+};
   
   const handleSaveCompetitive = async () => {
     if (step3) {
@@ -1028,9 +1058,25 @@ export const EditProfilePage: React.FC = () => {
   // Initialize hasInternship when entering work-experience edit mode
   useEffect(() => {
     if (editingCard === 'work-experience') {
-      setHasInternship((step3?.workExperiences?.length ?? 0) > 0);
+      setHasInternship(((step3?.workExperiences?.length ?? 0) > 0) || !!step3?.hasInternshipExperience);
     }
   }, [editingCard, step3?.workExperiences]);
+
+  // Persist hasInternship selection into editedData so Save will include it
+  useEffect(() => {
+    if (editingCard === 'work-experience') {
+      setEditedData((prev: any) => ({
+        ...prev,
+        step3: {
+          ...(prev?.step3 || {}),
+          ...(step3 || {}),
+          hasInternshipExperience: hasInternship,
+          // keep existing workExperiences if present
+          workExperiences: prev?.step3?.workExperiences ?? step3?.workExperiences ?? [],
+        },
+      }));
+    }
+  }, [hasInternship, editingCard, step3]);
   
   // Initialize career goals edit state
   useEffect(() => {
@@ -1206,38 +1252,60 @@ export const EditProfilePage: React.FC = () => {
   };
 
   const handleAddOrEditExperience = async (experience: WorkExperience) => {
-    if (!step3) return;
+  // FIX: read fresh step3 at call time
+  const currentStep3 = onboardingData?.step3;
+  if (!step1 || !currentStep3) return;
 
-    const previousExperiences = step3.workExperiences || [];
-    const alreadyExists = previousExperiences.some((item) => item.id === experience.id);
-    const updatedWorkExperiences = alreadyExists
-      ? previousExperiences.map((item) => (item.id === experience.id ? experience : item))
-      : [...previousExperiences, experience];
+  const previousExperiences = currentStep3.workExperiences || [];
 
-    const updatedStep3 = {
-      ...step3,
-      workExperiences: updatedWorkExperiences,
-      hasInternshipExperience: true,
-    };
+  const alreadyExists = previousExperiences.some((item) => item.id === experience.id);
 
-    updateStepData(3, updatedStep3);
-    await persistProfileChanges(step1, step2, updatedStep3, step4);
-    setEditingExperience(undefined);
+  const updatedWorkExperiences = alreadyExists
+    ? previousExperiences.map((item) => (item.id === experience.id ? experience : item))
+    : [...previousExperiences, experience];
+
+  const updatedStep3: Step3Type = {
+    ...currentStep3,
+    workExperiences: updatedWorkExperiences,
+    hasInternshipExperience: true,
   };
+
+  // FIX: keep local hasInternship state in sync so Save Changes doesn't reset it
+  setHasInternship(true);
+
+  updateStepData(3, updatedStep3);
+
+  const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
+  if (!isSaved) return;
+
+  showSaveSuccess();
+};
 
   const handleDeleteExperience = async (experienceId: string) => {
-    if (!step3) return;
+  // FIX: read fresh step3 at call time
+  const currentStep3 = onboardingData?.step3;
+  if (!step1 || !currentStep3) return;
 
-    const updatedWorkExperiences = (step3.workExperiences || []).filter((item) => item.id !== experienceId);
-    const updatedStep3 = {
-      ...step3,
-      workExperiences: updatedWorkExperiences,
-      hasInternshipExperience: updatedWorkExperiences.length > 0,
-    };
+  const updatedWorkExperiences = (currentStep3.workExperiences || []).filter(
+    (item) => item.id !== experienceId
+  );
 
-    updateStepData(3, updatedStep3);
-    await persistProfileChanges(step1, step2, updatedStep3, step4);
+  const updatedStep3: Step3Type = {
+    ...currentStep3,
+    workExperiences: updatedWorkExperiences,
+    hasInternshipExperience: updatedWorkExperiences.length > 0,
   };
+
+  // Keep local state in sync
+  setHasInternship(updatedWorkExperiences.length > 0);
+
+  updateStepData(3, updatedStep3);
+
+  const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
+  if (!isSaved) return;
+
+  showSaveSuccess();
+};
 
   const handleVerifyProfile = async (platform: string) => {
     setVerifyingPlatform(platform);
@@ -1763,17 +1831,23 @@ export const EditProfilePage: React.FC = () => {
                     ) : (
                       <div className="space-y-6">
                         {step2.externalProjects.map((project) => (
-                          <div key={project.id} className="flex items-start gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-base">{project.title}</h4>
-                                <Badge variant="outline" className="text-xs">
+                          <div key={project.id} className="flex items-start gap-4 rounded-xl border border-border/50 bg-card/60 p-4 shadow-sm">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <h4 className="font-semibold text-base tracking-tight">{project.title}</h4>
+                                <Badge variant="outline" className="text-xs rounded-full px-2.5 py-0.5">
                                   {project.projectType}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-muted-foreground mb-2">{project.oneLineDescription}</p>
+                              <div
+                                tabIndex={0}
+                                aria-label="Project detailed description"
+                                className="mb-3 w-full max-h-20 overflow-y-hidden rounded-lg border border-border/50 bg-muted/20 px-5 py-3 text-left text-sm leading-6 text-muted-foreground whitespace-pre-wrap break-words transition-all duration-150 focus:overflow-y-auto focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-text"
+                              >
+                                {project.detailedDescription || 'No description added'}
+                              </div>
                               {(project.githubUrl || project.demoUrl) && (
-                                <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <div className="flex flex-wrap items-center gap-3 mb-3">
                                   {project.githubUrl && (
                                     <a
                                       href={project.githubUrl}
@@ -1797,9 +1871,9 @@ export const EditProfilePage: React.FC = () => {
                                 </div>
                               )}
                               {project.techStack.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-2">
                                   {project.techStack.map((tech) => (
-                                    <Badge key={tech} variant="secondary" className="text-xs bg-black dark:bg-white text-white dark:text-black">
+                                    <Badge key={tech} variant="secondary" className="text-xs rounded-full bg-black dark:bg-white text-white dark:text-black px-2.5 py-0.5">
                                       {tech}
                                     </Badge>
                                   ))}
@@ -1823,14 +1897,20 @@ export const EditProfilePage: React.FC = () => {
                       {step2?.externalProjects && step2.externalProjects.length > 0 && (
                         <div className="space-y-3">
                           {step2?.externalProjects?.map((project) => (
-                            <Card key={project.id} className="bg-muted/30 border-border/30">
+                            <Card key={project.id} className="rounded-xl border-border/30 bg-muted/30 shadow-sm">
                               <CardContent className="p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-base">{project.title}</h4>
-                                    <p className="text-sm text-muted-foreground">{project.oneLineDescription}</p>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-base tracking-tight">{project.title}</h4>
+                                    <div
+                                      tabIndex={0}
+                                      aria-label="Project detailed description"
+                                      className="mt-2 mb-3 w-full max-h-20 overflow-y-hidden rounded-lg border border-border/50 bg-muted/20 px-5 py-3 text-left text-sm leading-6 text-muted-foreground whitespace-pre-wrap break-words transition-all duration-150 focus:overflow-y-auto focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-text"
+                                    >
+                                      {project.detailedDescription || 'No description added'}
+                                    </div>
                                     {(project.githubUrl || project.demoUrl) && (
-                                      <div className="flex flex-wrap items-center gap-3 mt-2">
+                                      <div className="flex flex-wrap items-center gap-3 mt-3">
                                         {project.githubUrl && (
                                           <a
                                             href={project.githubUrl}
@@ -1853,9 +1933,9 @@ export const EditProfilePage: React.FC = () => {
                                         )}
                                       </div>
                                     )}
-                                    <div className="flex flex-wrap gap-1 mt-2">
+                                    <div className="flex flex-wrap gap-2 mt-2">
                                       {project.techStack.map((tech) => (
-                                        <Badge key={tech} variant="secondary" className="text-xs">
+                                        <Badge key={tech} variant="secondary" className="text-xs rounded-full px-2.5 py-0.5">
                                           {tech}
                                         </Badge>
                                       ))}
@@ -2374,7 +2454,7 @@ export const EditProfilePage: React.FC = () => {
                                     }}
                                     className="flex-1 bg-muted/30"
                                   />
-                                  <button
+                                  {/* <button
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                                       mergedAcademicPerformance.marksFormat === 'CGPA'
@@ -2384,7 +2464,7 @@ export const EditProfilePage: React.FC = () => {
                                     onClick={() => updateAcademicPerformance({ marksFormat: 'CGPA' })}
                                   >
                                     CGPA
-                                  </button>
+                                  </button> */}
                                   <button
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
@@ -2450,7 +2530,7 @@ export const EditProfilePage: React.FC = () => {
                                       }}
                                       className="flex-1 bg-muted/30"
                                     />
-                                    <button
+                                    {/* <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                                         (mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA'
@@ -2460,7 +2540,7 @@ export const EditProfilePage: React.FC = () => {
                                       onClick={() => updateAcademicPerformance({ class12Format: 'CGPA' })}
                                     >
                                       CGPA
-                                    </button>
+                                    </button> */}
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
@@ -2527,7 +2607,7 @@ export const EditProfilePage: React.FC = () => {
                                       }}
                                       className="flex-1 bg-muted/30"
                                     />
-                                    <button
+                                    {/* <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                                         (mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA'
@@ -2537,7 +2617,7 @@ export const EditProfilePage: React.FC = () => {
                                       onClick={() => updateAcademicPerformance({ class10Format: 'CGPA' })}
                                     >
                                       CGPA
-                                    </button>
+                                    </button> */}
                                     <button
                                       type="button"
                                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
@@ -2584,11 +2664,19 @@ export const EditProfilePage: React.FC = () => {
             <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <h3 className="text-base font-semibold tracking-wide">Work Experience</h3>
-                {editingCard !== 'work-experience' && step3?.workExperiences && step3.workExperiences.length > 0 && (
+                {editingCard !== 'work-experience' && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditingCard('work-experience')}
+                    // onClick={() => setEditingCard('work-experience')}
+                    onClick={() => {
+                     const currentStep3 = onboardingData?.step3;
+                     setEditingCard('work-experience');
+                     setHasInternship(
+                     Boolean(currentStep3?.hasInternshipExperience) ||
+                     (currentStep3?.workExperiences?.length ?? 0) > 0
+                     );
+                    }}
                     className="gap-2"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -2599,45 +2687,44 @@ export const EditProfilePage: React.FC = () => {
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'work-experience' ? (
                   <>
-                    {step3?.workExperiences && step3.workExperiences.length > 0 ? (
-                      /* View Mode - Display Work Experiences */
-                      <div className="space-y-3">
-                        {step3.workExperiences.map((exp) => (
-                          <Card key={exp.id} className="bg-muted/30 border-border/30">
-                            <CardContent className="p-4">
-                              <h4 className="font-medium">{exp.role}</h4>
-                              <p className="text-sm text-muted-foreground">{exp.companyName}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {exp.startDate.month} {exp.startDate.year} →{' '}
-                                {exp.isCurrentlyWorking ? 'Present' : `${exp.endDate?.month} ${exp.endDate?.year}`}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {exp.workMode}
-                                </Badge>
-                                {exp.city && (
+                    {((step3?.workExperiences?.length ?? 0) > 0 || step3?.hasInternshipExperience) ? (
+                      (step3?.workExperiences && step3.workExperiences.length > 0) ? (
+                        <div className="space-y-3">
+                          {step3.workExperiences.map((exp) => (
+                            
+                            <Card key={exp.id} className="bg-muted/30 border-border/30">
+                              <CardContent className="p-4">
+                                <h4 className="font-medium text-sm">{exp.role}</h4>
+                                <p className="text-sm text-muted-foreground">{exp.companyName}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatWorkExperienceDate(exp.startDate)} →{' '}
+                                  {exp.isCurrentlyWorking ? 'Present' : formatWorkExperienceDate(exp.endDate)}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
                                   <Badge variant="outline" className="text-xs">
-                                    {exp.city}
+                                    {exp.workMode}
                                   </Badge>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                                  {exp.city && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {exp.city}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-muted-foreground">You have indicated work experience but not added details</p>
+                          <p className="text-sm text-muted-foreground mt-3">Click the Edit icon to add details.</p>
+                        </div>
+                      )
                     ) : (
-                      /* Empty State */
                       <div className="text-center py-8">
-                        <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">No work experience added yet</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-4"
-                          onClick={() => setEditingCard('work-experience')}
-                        >
-                          Add Work Experience
-                        </Button>
+                        <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground">I am a Fresher</p>
                       </div>
                     )}
                   </>
@@ -2648,24 +2735,44 @@ export const EditProfilePage: React.FC = () => {
                         {/* Have Internship Toggle */}
                         <div className="space-y-4">
                           <Label className="font-medium">Have you done any internships or jobs?</Label>
-                          <div className="grid grid-cols-2 gap-4">
-                            <Button
-                              type="button"
-                              variant={!hasInternship ? 'default' : 'outline'}
-                              onClick={() => setHasInternship(false)}
-                              className="h-10"
-                            >
-                              No, I&apos;m a Fresher
-                            </Button>
-                            <Button
-                              type="button"
-                              variant={hasInternship ? 'default' : 'outline'}
-                              onClick={() => setHasInternship(true)}
-                              className="h-10"
-                            >
-                              Yes, I have experience
-                            </Button>
-                          </div>
+                          <div className="space-y-2">
+                             <div className="grid grid-cols-2 gap-4">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                  <TooltipTrigger asChild>
+                                   <span className={isWorkingStatus ? 'cursor-not-allowed' : 'inline-block w-full'}>
+                                     <Button
+                                       type="button"
+                                        variant={!hasInternship ? 'default' : 'outline'}
+                                        disabled={isWorkingStatus}
+                                         onClick={() => {
+                                         if (isWorkingStatus) return;
+                                        setHasInternship(false);
+                                        }}
+                                        className="h-10 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                        No, I&apos;m a Fresher
+                                       </Button>
+                                        </span>
+                                        </TooltipTrigger>
+                                          {isWorkingStatus && (
+                                           <TooltipContent side="top" align="center">
+                                             Your profile status is set to Working, so the Fresher option is disabled.
+                                             </TooltipContent>
+                                           )}
+                                        </Tooltip>
+                                        </TooltipProvider>
+
+                                       <Button
+                                          type="button"
+                                         variant={hasInternship ? 'default' : 'outline'}
+                                          onClick={() => setHasInternship(true)}
+                                        className="h-10"
+                                           >
+                                           Yes, I have experience
+                                      </Button>
+                                    </div>
+                              </div>
                         </div>
 
                         {/* Show Experience Form only if hasInternship is true */}
@@ -2684,26 +2791,27 @@ export const EditProfilePage: React.FC = () => {
                             />
 
                             {/* Existing Work Experiences */}
-                            {step3?.workExperiences && step3.workExperiences.length > 0 && (
-                              <div className="divide-y divide-border">
-                                {step3.workExperiences.map((experience) => (
-                                  <WorkExperienceCard
-                                    key={experience.id}
-                                    experience={experience}
-                                    onEdit={(exp) => {
-                                      setEditingExperience(exp);
-                                      setIsExperienceModalOpen(true);
-                                    }}
-                                    onDelete={handleDeleteExperience}
-                                  />
-                                ))}
-                              </div>
+                          {onboardingData?.step3?.workExperiences &&
+                          onboardingData.step3.workExperiences.length > 0 && (
+                           <div className="divide-y divide-border">
+                            {onboardingData.step3.workExperiences.map((experience) => (
+                              <WorkExperienceCard
+                               key={experience.id}
+                               experience={experience}
+                               onEdit={(exp) => {
+                               setEditingExperience(exp);
+                               setIsExperienceModalOpen(true);
+                                }}
+                              onDelete={handleDeleteExperience}
+                           />
+                              ))}
+                            </div>
                             )}
                             
                             {/* Add New Experience Button */}
                             <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                               <p className="text-sm text-muted-foreground mb-3">
-                                {step3?.workExperiences && step3.workExperiences.length > 0
+                                {onboardingData?.step3?.workExperiences && onboardingData.step3.workExperiences.length > 0
                                   ? 'Showcase more of your professional journey'
                                   : 'Build your professional profile'}
                               </p>
@@ -2722,6 +2830,14 @@ export const EditProfilePage: React.FC = () => {
                             </div>
                           </>
                         )}
+                        {!hasInternship && (
+                          <div className="text-center py-6">
+                           <GraduationCap className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                           <p className="text-sm text-muted-foreground">
+                             No experience added — you will be saved as a fresher.
+                           </p>
+                           </div>
+                         )}
                         
                         {/* Save Button */}
                         <div className="flex justify-end gap-2 pt-4">
