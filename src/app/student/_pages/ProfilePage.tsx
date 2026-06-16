@@ -248,9 +248,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     }));
 
     const academicPerformance = step3Data?.academicPerformance;
-    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
-      ? academicPerformance?.cgpa
-      : academicPerformance?.percentage;
+    const collegeScore = academicPerformance?.marksFormat === 'Percentage' ? academicPerformance.percentage : academicPerformance?.marksFormat;
 
     const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
       title: experience.role,
@@ -338,6 +336,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       termsAndCondition: step4Data?.termsAndCondition,
 
       preferredContactMethods,
+      profileVisibility: step4Data?.allowCompaniesViewProfile ?? false,
     };
   };
 
@@ -500,13 +499,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       academicPerformance:
         learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
           ? {
-              marksFormat: learnerProfile.collegeScoreType === '%' ? 'Percentage' : 'CGPA',
-              cgpa: learnerProfile.collegeScoreType !== '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              percentage: learnerProfile.collegeScoreType === '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              class12Format: learnerProfile.class12ScoreType === '%' ? 'Percentage' : 'CGPA',
+              marksFormat: 'Percentage' as const,
+              percentage: parseScore(learnerProfile.collegeScore),
+              class12Format: 'Percentage' as const,
               class12Percentage: parseScore(learnerProfile.class12Score),
               class12Board: learnerProfile.class12Board || undefined,
-              class10Format: learnerProfile.class10ScoreType === '%' ? 'Percentage' : 'CGPA',
+              class10Format: 'Percentage' as const,
               class10Marks: parseScore(learnerProfile.class10Score),
               class10Board: learnerProfile.class10Board || undefined,
             }
@@ -571,7 +569,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         phone: preferredMethods.has('phone'),
       },
       termsAndCondition: Boolean((learnerProfile as any)?.termsAndCondition),
-      allowCompaniesViewProfile: true,
+      allowCompaniesViewProfile: Boolean((learnerProfile as any)?.profileVisibility),
       consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
     };
 
@@ -1097,15 +1095,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const extractAcademicPerformanceFromText = (text: string): Step3Type['academicPerformance'] => {
     const normalized = text.replace(/\s+/g, ' ').trim();
-    const cgpaMatch = normalized.match(/(?:cgpa|gpa)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
     const percentageMatch = normalized.match(/(?:percentage|percent|\bmarks\b)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
-
-    if (cgpaMatch?.[1]) {
-      const cgpa = Number(cgpaMatch[1]);
-      if (!Number.isNaN(cgpa) && cgpa > 0 && cgpa <= 10) {
-        return { marksFormat: 'CGPA', cgpa };
-      }
-    }
 
     if (percentageMatch?.[1]) {
       const percentage = Number(percentageMatch[1]);
