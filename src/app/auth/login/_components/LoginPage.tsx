@@ -264,7 +264,7 @@ const handleGoogleSuccess = async (
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     const strengthPercentage = await getStudentStrengthPercentage()
-                    if (strengthPercentage !== null && strengthPercentage > 20) {
+                    if (strengthPercentage !== null && strengthPercentage > 90) {
                         router.push('/student')
                     } else {
                         router.push('/student/profile')

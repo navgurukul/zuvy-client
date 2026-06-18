@@ -199,7 +199,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     customCollege: data.customCollege ?? '',
     degree: data.degree?.trim() || '',
     branch: data.branch?.trim() || '',
-    yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+    yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || formData.yearOfStudy,
     graduationDate: {
       month: data.graduationDate?.month?.trim() || '',
       year: data.graduationDate?.year?.trim() || '',

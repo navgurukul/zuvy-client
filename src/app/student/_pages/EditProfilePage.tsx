@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStorage } from '@/hooks/use-profile';
-import { SKILLS_BY_CATEGORY, MONTHS } from '@/lib/profile.mockData';
+import { SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import type {
   CompetitiveProfile,
   WorkExperience,
@@ -2388,8 +2388,17 @@ export const EditProfilePage: React.FC = () => {
                                     <button
                                       key={year}
                                       type="button"
+                                      onClick={() =>
+                                        setEditedData((prev: any) => ({
+                                          ...prev,
+                                          step1: {
+                                            ...(prev.step1 || {}),
+                                            yearOfStudy: year,
+                                          },
+                                        }))
+                                      }
                                       className={`py-2 px-3 rounded-lg border-2 font-medium text-sm transition-all ${
-                                        step1.yearOfStudy === year
+                                        (editedData?.step1?.yearOfStudy ?? step1.yearOfStudy) === year
                                           ? 'border-primary bg-primary text-primary-foreground'
                                           : 'border-border bg-background hover:border-primary'
                                       }`}
@@ -2403,7 +2412,21 @@ export const EditProfilePage: React.FC = () => {
                               <div>
                                 <Label className="font-medium">Expected Graduation *</Label>
                                 <div className="grid grid-cols-2 gap-4 mt-2">
-                                  <Select defaultValue={step1.graduationDate.month}>
+                                  <Select
+                                    value={editedData?.step1?.graduationDate?.month ?? step1.graduationDate.month}
+                                    onValueChange={(val) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          graduationDate: {
+                                            ...(prev.step1?.graduationDate || step1.graduationDate),
+                                            month: val,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Month" />
                                     </SelectTrigger>
@@ -2422,16 +2445,28 @@ export const EditProfilePage: React.FC = () => {
                                       <SelectItem value="December">December</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                  <Select defaultValue={step1.graduationDate.year}>
+                                  <Select
+                                    value={editedData?.step1?.graduationDate?.year ?? step1.graduationDate.year}
+                                    onValueChange={(val) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          graduationDate: {
+                                            ...(prev.step1?.graduationDate || step1.graduationDate),
+                                            year: val,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Year" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="2024">2024</SelectItem>
-                                      <SelectItem value="2025">2025</SelectItem>
-                                      <SelectItem value="2026">2026</SelectItem>
-                                      <SelectItem value="2027">2027</SelectItem>
-                                      <SelectItem value="2028">2028</SelectItem>
+                                      {getYearsArray(1990).map((year) => (
+                                        <SelectItem key={year} value={year}>{year}</SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -2688,6 +2723,11 @@ export const EditProfilePage: React.FC = () => {
                                     </Badge>
                                   )}
                                 </div>
+                                {exp.responsibilities && (
+                                  <p className="text-sm text-muted-foreground whitespace-pre-line mt-2">
+                                    {exp.responsibilities}
+                                  </p>
+                                )}
                               </CardContent>
                             </Card>
                           ))}
