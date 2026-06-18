@@ -9,7 +9,7 @@ const initials = (name: string) => {
 
 const SkeletonLoader = () => (
   <div className="space-y-2">
-    {[...Array(10)].map((_, i) => (
+    {[...Array(5)].map((_, i) => (
       <div key={i} className="flex items-center justify-between py-3 px-1">
         <div className="flex items-center gap-3 flex-1">
           <div className="w-6 h-4 bg-muted rounded animate-pulse" />

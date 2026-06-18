@@ -85,12 +85,12 @@ const Page = ({ params }: { params: PageProps }) => {
         }))
     }
 
-    const handleLeaderboardToggle = () => {
-        setLocalSettings((prev) => ({
-            ...prev,
-            leaderboardEnabled: !prev.leaderboardEnabled,
-        }))
-    }
+    // const handleLeaderboardToggle = () => {
+    //     setLocalSettings((prev) => ({
+    //         ...prev,
+    //         leaderboardEnabled: !prev.leaderboardEnabled,
+    //     }))
+    // }
 
     const handleSaveSettings = async () => {
         if (!bootcampSettings) return
@@ -183,7 +183,7 @@ const Page = ({ params }: { params: PageProps }) => {
                             </span>
                         </h2>
                     )}
-                    {!isSuperAdmin && !isAdmin && (
+                    {/* {!isSuperAdmin && !isAdmin && (
                         <h2 className="text-base font-medium text-foreground">
                             Leaderboard -{' '}
                             <span className="font-light">
@@ -192,7 +192,7 @@ const Page = ({ params }: { params: PageProps }) => {
                                     : 'Disabled'}
                             </span>
                         </h2>
-                    )}
+                    )} */}
                     <RadioGroup
                         value={localSettings.type.toLowerCase()}
                         onValueChange={(value) =>
@@ -267,7 +267,7 @@ const Page = ({ params }: { params: PageProps }) => {
                 </div>
                 
                 {/* Leaderboard Toggle Switch */}
-                {(isSuperAdmin || isAdmin) && (
+                {/* {(isSuperAdmin || isAdmin) && (
                     <div className="mt-4 pt-2 border-t border-border">
                         <div className="flex items-center justify-between">
                             <div>
@@ -298,7 +298,7 @@ const Page = ({ params }: { params: PageProps }) => {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* One-on-One Sessions Toggle Switch */}
                 {isSuperAdmin && (
