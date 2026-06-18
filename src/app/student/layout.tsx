@@ -102,7 +102,7 @@ function StudentLayoutContent({
                 />
                 {!hideHeader && !isOnCourseModulePage && <Header />}
             </div>
-            <main className="flex-1 overflow-y-auto">
+            <main id="main-scroll-container" className="flex-1 overflow-y-auto">
                 {children}
             </main>
         </div>

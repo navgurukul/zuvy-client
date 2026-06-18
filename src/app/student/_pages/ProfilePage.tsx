@@ -346,6 +346,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     updateStepData(stepNumber, data);
   };
 
+  // Scroll to top whenever the step changes
+  useEffect(() => {
+    const scrollContainer = document.getElementById('main-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [onboardingData?.currentStep]);
+
   // Timer effect
   useEffect(() => {
     const timer = setInterval(() => {
@@ -437,7 +447,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       // customCollege: learnerProfile.otherCollegeName || '',
       degree: learnerProfile.degree || '',
       branch: learnerProfile.branch || '',
-      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || ('' as Step1Type['yearOfStudy']),
       graduationDate: {
         month: toMonthName(learnerProfile.graduationMonth),
         year: learnerProfile.graduationYear ? String(learnerProfile.graduationYear) : '',
@@ -455,7 +465,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       customCollege: hasText(onboardingData.step1?.customCollege) ? onboardingData.step1?.customCollege : profileStep1.customCollege,
       degree: hasText(onboardingData.step1?.degree) ? onboardingData.step1?.degree : profileStep1.degree,
       branch: hasText(onboardingData.step1?.branch) ? String(onboardingData.step1?.branch) : profileStep1.branch,
-      yearOfStudy: onboardingData.step1?.yearOfStudy || profileStep1.yearOfStudy,
+      yearOfStudy: profileStep1.yearOfStudy || onboardingData.step1?.yearOfStudy || '1st',
       graduationDate: {
         month: hasText(onboardingData.step1?.graduationDate?.month)
           ? String(onboardingData.step1?.graduationDate?.month)
