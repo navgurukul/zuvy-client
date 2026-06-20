@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 
 import { Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
@@ -21,6 +21,8 @@ const Header = () => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const params = useParams()
+    const orgId = params.orgId
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
     const courseIdFromPath = courseIdMatch?.[1]
     const courseIdFromQuery = searchParams.get('courseId')
@@ -54,7 +56,7 @@ const Header = () => {
     const handleSyllabusClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/course/${courseId}/courseSyllabus`)
+            router.push(`/student/course/${courseId}/org/${orgId}/courseSyllabus`)
             return
         }
 

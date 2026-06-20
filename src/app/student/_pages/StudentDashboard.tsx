@@ -55,7 +55,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
-      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}?orgId=${studentData?.inProgressBootcamps[0].organizationId}`);
+      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}/org/${studentData?.inProgressBootcamps[0].organizationId}`);
     }
   }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
 
@@ -88,7 +88,7 @@ const StudentDashboard = () => {
         <div className="flex items-center gap-3 w-full">
           <div className="hidden md:flex items-center gap-3 w-full">
             <Button variant="outline" className="flex-1 bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+              <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course 
               </Link>
@@ -96,7 +96,7 @@ const StudentDashboard = () => {
           </div>
           <div className="md:hidden flex flex-col gap-3 w-full">
             <Button variant="outline" className="w-full bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
-              <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+              <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course
               </Link>
@@ -109,7 +109,7 @@ const StudentDashboard = () => {
     if (bootcamp.progress === 0) {
       return (
         <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark  " asChild>
-          <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+          <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
             <Play className="w-4 h-4 mr-2" />
             Start Learning
           </Link>
@@ -119,7 +119,7 @@ const StudentDashboard = () => {
 
     return (
       <Button className="w-full md:w-auto bg-primary font-semibold text-primary-foreground hover:bg-primary-dark" asChild>
-        <Link href={`/student/course/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+        <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
           <RotateCcw className="w-4 h-4 mr-2" />
           Resume Learning
         </Link>
@@ -384,7 +384,7 @@ const StudentDashboard = () => {
                                     const liveClassStatus = item.status;
                                     return (
                                       <CarouselItem key={item.id} className="pl-2 md:basis-1/3">
-                                        <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
+                                        <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/org/${bootcamp.organizationId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
                                           <div className="w-full border rounded-lg p-3 h-full">
                                             <div className="flex items-start gap-3">
                                               <div className="flex-shrink-0 mt-1">

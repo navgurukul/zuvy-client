@@ -35,7 +35,7 @@ const ProjectPage = () => {
   const projectId = searchParams.get('projectId');
   const moduleId = searchParams.get('moduleId');
   const courseId = params.courseId;
-  const orgId = searchParams.get('orgId');
+  const orgId = params.orgId;
   
   const [projectState, setProjectState] = useState<ProjectState>({
     submissionLinks: [''],
@@ -102,7 +102,7 @@ const ProjectPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-heading font-bold mb-4">Project Not Found</h1>
             <p className="text-muted-foreground mb-6">{error || 'The requested project could not be found.'}</p>
-            <Button onClick={() => router.push(`/student/course/${courseId}?orgId=${orgId}`)}>
+            <Button onClick={() => router.push(`/student/course/${courseId}/org/${orgId}`)}>
               <X className="w-4 h-4 mr-2" />
               Back to Course Dashboard
             </Button>
