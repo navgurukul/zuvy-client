@@ -29,23 +29,33 @@ export const useCollegeSearch = (searchTerm: string, debounceMs = 400) => {
         });
 
         const payload = response.data;
-        const collegesFromApi = Array.isArray(payload?.data)
-          ? payload.data
-              .map((college: { name?: string; 'state-province'?: string }) => ({
-                name: String(college.name || '').trim(),
-                state: String(college['state-province'] || 'India').trim() || 'India',
-              }))
-              .filter((college: CollegeOption) => Boolean(college.name))
-          : [];
+        const rawData: unknown[] = Array.isArray(payload?.data) ? payload.data : [];
+
+        const collegesFromApi: CollegeOption[] = rawData
+          .map((college) => {
+            // API may return a plain string or an object with a name field
+            if (typeof college === 'string') {
+              return { name: college.trim(), state: '' };
+            }
+            if (typeof college === 'object' && college !== null) {
+              const obj = college as Record<string, unknown>;
+              return {
+                name: String(obj.name || '').trim(),
+                state: String(obj['state-province'] || obj.state || '').trim(),
+              };
+            }
+            return null;
+          })
+          .filter((c): c is CollegeOption => Boolean(c?.name));
 
         const uniqueColleges = collegesFromApi.filter(
-          (college: CollegeOption, index: number, list: CollegeOption[]) =>
+          (college, index, list) =>
             index === list.findIndex((item) => item.name.toLowerCase() === college.name.toLowerCase())
         );
 
-        const filtered = uniqueColleges.filter((college: CollegeOption) => {
+        const filtered = uniqueColleges.filter((college) => {
           const name = college.name.toLowerCase();
-          const state = college.state.toLowerCase();
+          const state = (college.state || '').toLowerCase();
           return name.includes(keyword) || state.includes(keyword);
         });
 

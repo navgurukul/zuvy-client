@@ -346,7 +346,7 @@ export const ProjectModal: React.FC<{
           {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
             <Label htmlFor="detailedDescription" className="font-medium text-left block">
-              Detailed Description (Optional)
+              Detailed Description 
             </Label>
             <Textarea
               id="detailedDescription"
@@ -868,12 +868,14 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     ? allAvailableSkills.filter(
         (skill) =>
           skill.toLowerCase().includes(customSkill.toLowerCase()) &&
-          !skills.includes(skill) &&
-          !autoDetectedSkills.includes(skill)
+          !skills.some((s) => s.toLowerCase() === skill.toLowerCase()) &&
+          !autoDetectedSkills.some((s) => s.toLowerCase() === skill.toLowerCase())
       )
     : allAvailableSkills.filter(
-        (skill) => !skills.includes(skill) && !autoDetectedSkills.includes(skill)
-      ).slice(0, 20); // Show top 20 suggestions when no search
+        (skill) =>
+          !skills.some((s) => s.toLowerCase() === skill.toLowerCase()) &&
+          !autoDetectedSkills.some((s) => s.toLowerCase() === skill.toLowerCase())
+      ).slice(0, 20);
 
   const totalSkills = autoDetectedSkills.length + skills.length;
   
@@ -935,17 +937,30 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     }
   };
 
+  const toTitleCase = (str: string) =>
+    str.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
+  const isDuplicateSkill = (skill: string) => {
+    const normalized = skill.toLowerCase();
+    return (
+      skills.some((s) => s.toLowerCase() === normalized) ||
+      autoDetectedSkills.some((s) => s.toLowerCase() === normalized)
+    );
+  };
+
   const handleAddSkill = (skill: string) => {
-    if (!skills.includes(skill) && totalSkills < 100) {
-      setSkills((prev) => [...prev, skill].sort());
+    const normalized = toTitleCase(skill.trim());
+    if (!isDuplicateSkill(normalized) && totalSkills < 100) {
+      setSkills((prev) => [...prev, normalized].sort());
     }
     setCustomSkill('');
     setShowSkillDropdown(false);
   };
 
   const handleAddCustomSkill = () => {
-    if (customSkill.trim() && !skills.includes(customSkill) && totalSkills < 100) {
-      setSkills((prev) => [...prev, customSkill].sort());
+    const normalized = toTitleCase(customSkill.trim());
+    if (normalized && !isDuplicateSkill(normalized) && totalSkills < 100) {
+      setSkills((prev) => [...prev, normalized].sort());
       setCustomSkill('');
       setShowSkillDropdown(false);
     }

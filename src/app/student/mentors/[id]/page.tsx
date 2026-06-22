@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/axios.config";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { getMentorBookHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
 
 const getMentorId = (idParam: string | string[] | undefined) => {
   if (Array.isArray(idParam)) {
@@ -30,7 +31,9 @@ export default function MentorProfilePage() {
   const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
-  const organizationId = searchParams.get("organizationId") || undefined;
+  const orgId = searchParams.get("orgId") || "";
+  const organizationId = searchParams.get("organizationId") || orgId || undefined;
+  const routeContext = { courseId, orgId };
   const [isGoogleConnecting, setIsGoogleConnecting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -106,7 +109,7 @@ export default function MentorProfilePage() {
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-4">
         <Link
-          href={courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors"}
+          href={getMentorsHref(routeContext)}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft size={16} />
@@ -123,7 +126,7 @@ export default function MentorProfilePage() {
 
       {/* Back button */}
       <Link
-        href={courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors"}
+        href={getMentorsHref(routeContext)}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
       >
         <ArrowLeft size={16} />
@@ -249,7 +252,7 @@ export default function MentorProfilePage() {
           </div>
 
           <Link
-            href={mentorId ? `/student/mentors/${mentorId}/book${courseId ? `?courseId=${courseId}` : ""}` : (courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors")}
+            href={mentorId ? getMentorBookHref(mentorId, routeContext) : getMentorsHref(routeContext)}
             className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all ${
               acceptsNewMentees
                 ? "bg-green-800 text-white hover:bg-green-900"

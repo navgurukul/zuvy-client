@@ -17,11 +17,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertCircle, Check, Plus, Trash2, Loader2, Code, Briefcase, GraduationCap, Calendar, X } from 'lucide-react';
+import { AlertCircle, Plus, Code, Briefcase, GraduationCap } from 'lucide-react';
 import type { OnboardingStep3 as Step3Type, AcademicPerformance, WorkExperience, CompetitiveProfile } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STACK } from '@/lib/profile.mockData';
 import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceComponents';
-import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 import { useLearnerBoards } from '@/hooks/useLearnerBoards';
 import { toast } from '@/components/ui/use-toast';
 
@@ -46,23 +45,8 @@ const hasAtMostTwoDecimalPlaces = (value: number) => {
   return !decimalPart || decimalPart.length <= 2;
 };
 
-const convertScoreValue = (value: number, fromFormat: 'CGPA' | 'Percentage', toFormat: 'CGPA' | 'Percentage') => {
-  if (fromFormat === toFormat) {
-    return value;
-  }
-
-  return fromFormat === 'CGPA' ? parseFloat((value * 9.5).toFixed(2)) : parseFloat((value / 9.5).toFixed(2));
-};
-
-const getScoreError = (format: 'CGPA' | 'Percentage', value?: number) => {
+const getScoreError = (value?: number) => {
   if (value === undefined || value === null || Number.isNaN(value)) {
-    return '';
-  }
-
-  if (format === 'CGPA') {
-    if (value < 0 || value > 10 || !hasAtMostTwoDecimalPlaces(value)) {
-      return 'Enter a valid CGPA between 0.0 and 10.0 with up to 2 decimal places';
-    }
     return '';
   }
 
@@ -82,45 +66,6 @@ interface ProfileStep3Props {
   onFieldChange?: (data: Step3Type) => void;
 }
 
-const CGPAPercentageConverter: React.FC<{
-  format: 'CGPA' | 'Percentage';
-  cgpa?: number;
-  percentage?: number;
-  onCGPAChange: (cgpa: number) => void;
-  onPercentageChange: (percentage: number) => void;
-}> = ({ format, cgpa, percentage, onCGPAChange, onPercentageChange }) => {
-  const convertCGPAToPercentage = (cgpa: number) => Math.round(cgpa * 9.5);
-  const convertPercentageToGPA = (percentage: number) => (percentage / 9.5).toFixed(2);
-
-  return (
-    <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg space-y-2">
-      <div className="font-medium text-foreground">Quick Converter:</div>
-      {format === 'CGPA' && cgpa ? (
-        <div>
-          CGPA {cgpa} ≈ {convertCGPAToPercentage(cgpa)}%
-          <button
-            type="button"
-            onClick={() => onPercentageChange(convertCGPAToPercentage(cgpa))}
-            className="ml-2 text-primary hover:underline text-xs"
-          >
-            Use this percentage
-          </button>
-        </div>
-      ) : format === 'Percentage' && percentage ? (
-        <div>
-          {percentage}% ≈ {convertPercentageToGPA(percentage)} CGPA
-          <button
-            type="button"
-            onClick={() => onCGPAChange(parseFloat(convertPercentageToGPA(percentage)))}
-            className="ml-2 text-primary hover:underline text-xs"
-          >
-            Use this CGPA
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-};
 
 export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   initialData,
@@ -134,7 +79,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   const [hasInternship, setHasInternship] = useState(hasInitialWorkExperience);
   const hasInternshipEditedRef = useRef<boolean>(false);
   const [academicData, setAcademicData] = useState<AcademicPerformance>(
-    initialData?.academicPerformance || { marksFormat: 'CGPA' }
+    initialData?.academicPerformance || { marksFormat: 'Percentage' }
   );
   const [showClass1012Marks, setShowClass1012Marks] = useState<boolean>(
     !!(initialData?.academicPerformance?.class12Percentage || initialData?.academicPerformance?.class12Board || initialData?.academicPerformance?.class10Marks)
@@ -145,18 +90,13 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   );
   const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState<WorkExperience | undefined>();
-  const [verifyingPlatform, setVerifyingPlatform] = useState<string | null>(null);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
-  const [rankError, setRankError] = useState<Record<string, string>>({});
   const [customClass12Board, setCustomClass12Board] = useState<string>('');
   const [customClass10Board, setCustomClass10Board] = useState<string>('');
-  const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const { boards, loading: isBoardsLoading } = useLearnerBoards();
   const isWorkingStatus = step1Data?.currentStatus === 'Working';
 
-  const updateScoreError = (key: 'cgpa' | 'percentage' | 'class12Percentage' | 'class10Marks', errorMessage?: string) => {
+  const updateScoreError = (key: 'percentage' | 'class12Percentage' | 'class10Marks', errorMessage?: string) => {
     setErrors((prev) => {
       const nextErrors = { ...prev };
 
@@ -171,22 +111,12 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   };
 
   const years = getYearsArray(1990);
-  
-  // Combine API boards with mock data as fallback
   const boardOptions = (() => {
-    // If we have API boards, use them
     if (boards.length > 0) {
       return boards.map(board => board.name);
     }
-    // Fallback to mock data
     return CLASS_12_BOARDS;
   })();
-
-  useEffect(() => {
-    return () => {
-      Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
-    };
-  }, []);
 
   // Sync work-experience toggle with Step 1 status unless user edited manually
   useEffect(() => {
@@ -245,36 +175,22 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
   const validateAcademic = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
-    if (academicData.marksFormat === 'CGPA') {
-      if (academicData.cgpa === undefined || academicData.cgpa === null) {
-        newErrors.cgpa = 'Enter a valid CGPA between 0.0 and 10.0 with up to 2 decimal places';
-      } else {
-        const cgpaError = getScoreError('CGPA', academicData.cgpa);
-        if (cgpaError) {
-          newErrors.cgpa = cgpaError;
-        }
-      }
-    }
-    if (academicData.marksFormat === 'Percentage') {
-      if (academicData.percentage === undefined || academicData.percentage === null) {
-        newErrors.percentage = 'Enter a valid percentage between 0 and 100 with up to 2 decimal places';
-      } else {
-        const percentageError = getScoreError('Percentage', academicData.percentage);
-        if (percentageError) {
-          newErrors.percentage = percentageError;
-        }
+    if (academicData.percentage === undefined || academicData.percentage === null) {
+      newErrors.percentage = 'Enter a valid percentage between 0 and 100 with up to 2 decimal places';
+    } else {
+      const percentageError = getScoreError(academicData.percentage);
+      if (percentageError) {
+        newErrors.percentage = percentageError;
       }
     }
     if (academicData.class12Percentage !== undefined) {
-      const class12Format = academicData.class12Format || 'Percentage';
-      const class12Error = getScoreError(class12Format, academicData.class12Percentage);
+      const class12Error = getScoreError(academicData.class12Percentage);
       if (class12Error) {
         newErrors.class12Percentage = class12Error;
       }
     }
     if (academicData.class10Marks !== undefined) {
-      const class10Format = academicData.class10Format || 'Percentage';
-      const class10Error = getScoreError(class10Format, academicData.class10Marks);
+      const class10Error = getScoreError(academicData.class10Marks);
       if (class10Error) {
         newErrors.class10Marks = class10Error;
       }
@@ -294,92 +210,6 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
   const handleDeleteExperience = (experienceId: string) => {
     setWorkExperiences((prev) => prev.filter((exp) => exp.id !== experienceId));
-  };
-
-  const handleVerifyProfile = async (platform: string) => {
-    setVerifyingPlatform(platform);
-    const profile = competitiveProfiles.find((p) => p.platform === platform);
-    if (profile?.username) {
-      if (isSupportedCompetitivePlatform(platform)) {
-        try {
-          const stats = await fetchCompetitiveProfileStats(platform, profile.username);
-          setCompetitiveProfiles((prev) =>
-            prev.map((p) =>
-              p.platform === platform
-                ? {
-                    ...p,
-                    ...stats,
-                    isVerified: true,
-                    verifiedUsername: profile.username?.trim(),
-                    lastVerifiedAt: new Date().toISOString(),
-                  }
-                : p
-            )
-          );
-        } catch (error) {
-          setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
-        } finally {
-          setVerifyingPlatform(null);
-        }
-        return;
-      }
-
-      // Simulate API call for unsupported platforms
-      setTimeout(() => {
-        setCompetitiveProfiles((prev) =>
-          prev.map((p) =>
-            p.platform === platform
-              ? {
-                  ...p,
-                  isVerified: true,
-                  verifiedUsername: p.username,
-                  problemsSolved: Math.floor(Math.random() * 500) + 50,
-                  rating: Math.floor(Math.random() * 2200) + 800,
-                  lastVerifiedAt: new Date().toISOString(),
-                }
-              : p
-          )
-        );
-        setVerifyingPlatform(null);
-      }, 1500);
-    }
-  };
-
-  const scheduleRankFetch = (platform: string, username: string) => {
-    if (!isSupportedCompetitivePlatform(platform)) return;
-
-    const trimmed = username.trim();
-    if (!trimmed) return;
-
-    const existingTimeout = rankFetchTimeoutsRef.current[platform];
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
-
-    rankFetchTimeoutsRef.current[platform] = setTimeout(async () => {
-      setRankLoading((prev) => ({ ...prev, [platform]: true }));
-      setRankError((prev) => ({ ...prev, [platform]: '' }));
-      try {
-        const stats = await fetchCompetitiveProfileStats(platform, trimmed);
-        setCompetitiveProfiles((prev) =>
-          prev.map((p) =>
-            p.platform === platform
-              ? {
-                  ...p,
-                  ...stats,
-                  isVerified: true,
-                  verifiedUsername: trimmed,
-                  lastVerifiedAt: new Date().toISOString(),
-                }
-              : p
-          )
-        );
-      } catch (error) {
-        setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
-      } finally {
-        setRankLoading((prev) => ({ ...prev, [platform]: false }));
-      }
-    }, 700);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -437,87 +267,29 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         step="0.01"
                         inputMode="decimal"
                         min="0"
-                        max={academicData.marksFormat === 'CGPA' ? '10' : '100'}
-                        placeholder={academicData.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85.25'}
-                        value={academicData.marksFormat === 'CGPA' ? (academicData.cgpa ?? '') : (academicData.percentage ?? '')}
+                        max="100"
+                        placeholder="e.g. 85.25"
+                        value={academicData.percentage ?? ''}
                         onChange={(e) => {
                           const rawValue = e.target.value;
                           if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
                             return;
                           }
-
                           const value = rawValue ? parseFloat(rawValue) : undefined;
-                          const scoreFormat = academicData.marksFormat;
-                          const scoreErrorKey = scoreFormat === 'CGPA' ? 'cgpa' : 'percentage';
-                          
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            ...(academicData.marksFormat === 'CGPA' 
-                              ? { cgpa: value as number | undefined }
-                              : { percentage: value as number | undefined })
-                          }));
-
-                          updateScoreError(scoreErrorKey, getScoreError(scoreFormat, value));
+                          if (value !== undefined && (value < 0 || value > 100)) return;
+                          setAcademicData((prev) => ({ ...prev, percentage: value }));
+                          updateScoreError('percentage', getScoreError(value));
                         }}
-                        className={`flex-1 mt-0 ${errors.cgpa || errors.percentage ? 'border-destructive' : ''}`}
+                        className={`flex-1 mt-0 ${errors.percentage ? 'border-destructive' : ''}`}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
-                          const currentFormat = academicData.marksFormat;
-                          const currentValue = currentFormat === 'CGPA' ? academicData.cgpa : academicData.percentage;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            marksFormat: nextFormat,
-                            cgpa: convertedValue,
-                            percentage: undefined,
-                          }));
-
-                          updateScoreError('cgpa', getScoreError(nextFormat, convertedValue));
-                          updateScoreError('percentage');
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          academicData.marksFormat === 'CGPA'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
-                        CGPA
-                      </button> */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
-                          const currentFormat = academicData.marksFormat;
-                          const currentValue = currentFormat === 'CGPA' ? academicData.cgpa : academicData.percentage;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            marksFormat: nextFormat,
-                            percentage: convertedValue,
-                            cgpa: undefined,
-                          }));
-
-                          updateScoreError('percentage', getScoreError(nextFormat, convertedValue));
-                          updateScoreError('cgpa');
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          academicData.marksFormat === 'Percentage'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
+                      <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                         %
-                      </button>
+                      </span>
                     </div>
-                    {(errors.cgpa || errors.percentage) && (
+                    {errors.percentage && (
                       <p className="text-sm text-destructive flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        {errors.cgpa || errors.percentage}
+                        {errors.percentage}
                       </p>
                     )}
                   </div>
@@ -603,74 +375,24 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         step="0.01"
                         inputMode="decimal"
                         min="0"
-                        max={(academicData.class12Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                        placeholder={(academicData.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'e.g. 85.25'}
+                        max="100"
+                        placeholder="e.g. 85.25"
                         value={academicData.class12Percentage ?? ''}
                         onChange={(e) => {
                           const rawValue = e.target.value;
                           if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
                             return;
                           }
-
-                          const currentFormat = academicData.class12Format || 'Percentage';
                           const nextValue = rawValue ? parseFloat(rawValue) : undefined;
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class12Percentage: nextValue,
-                          }));
-
-                          updateScoreError('class12Percentage', getScoreError(currentFormat, nextValue));
+                          if (nextValue !== undefined && (nextValue < 0 || nextValue > 100)) return;
+                          setAcademicData((prev) => ({ ...prev, class12Percentage: nextValue }));
+                          updateScoreError('class12Percentage', getScoreError(nextValue));
                         }}
                         className={`flex-1 mt-0 ${errors.class12Percentage ? 'border-destructive' : ''}`}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
-                          const currentFormat = academicData.class12Format || 'Percentage';
-                          const currentValue = academicData.class12Percentage;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class12Format: nextFormat,
-                            class12Percentage: convertedValue,
-                          }));
-
-                          updateScoreError('class12Percentage', getScoreError(nextFormat, convertedValue));
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          (academicData.class12Format || 'Percentage') === 'CGPA'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
-                        CGPA
-                      </button> */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
-                          const currentFormat = academicData.class12Format || 'Percentage';
-                          const currentValue = academicData.class12Percentage;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class12Format: nextFormat,
-                            class12Percentage: convertedValue,
-                          }));
-
-                          updateScoreError('class12Percentage', getScoreError(nextFormat, convertedValue));
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          (academicData.class12Format || 'Percentage') === 'Percentage'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
+                      <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                         %
-                      </button>
+                      </span>
                     </div>
                     {errors.class12Percentage && (
                       <p className="text-sm text-destructive flex items-center gap-1">
@@ -761,74 +483,24 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                         step="0.01"
                         inputMode="decimal"
                         min="0"
-                        max={(academicData.class10Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                        placeholder={(academicData.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'e.g. 85.25'}
+                        max="100"
+                        placeholder="e.g. 85.25"
                         value={academicData.class10Marks ?? ''}
                         onChange={(e) => {
                           const rawValue = e.target.value;
                           if (rawValue && !/^\d*(?:\.\d{0,2})?$/.test(rawValue)) {
                             return;
                           }
-
-                          const currentFormat = academicData.class10Format || 'Percentage';
                           const nextValue = rawValue ? parseFloat(rawValue) : undefined;
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class10Marks: nextValue,
-                          }));
-
-                          updateScoreError('class10Marks', getScoreError(currentFormat, nextValue));
+                          if (nextValue !== undefined && (nextValue < 0 || nextValue > 100)) return;
+                          setAcademicData((prev) => ({ ...prev, class10Marks: nextValue }));
+                          updateScoreError('class10Marks', getScoreError(nextValue));
                         }}
                         className={`flex-1 mt-0 ${errors.class10Marks ? 'border-destructive' : ''}`}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'CGPA';
-                          const currentFormat = academicData.class10Format || 'Percentage';
-                          const currentValue = academicData.class10Marks;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class10Format: nextFormat,
-                            class10Marks: convertedValue,
-                          }));
-
-                          updateScoreError('class10Marks', getScoreError(nextFormat, convertedValue));
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          (academicData.class10Format || 'Percentage') === 'CGPA'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
-                        CGPA
-                      </button> */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextFormat: 'CGPA' | 'Percentage' = 'Percentage';
-                          const currentFormat = academicData.class10Format || 'Percentage';
-                          const currentValue = academicData.class10Marks;
-                          const convertedValue = currentValue === undefined ? undefined : convertScoreValue(currentValue, currentFormat, nextFormat);
-
-                          setAcademicData((prev) => ({
-                            ...prev,
-                            class10Format: nextFormat,
-                            class10Marks: convertedValue,
-                          }));
-
-                          updateScoreError('class10Marks', getScoreError(nextFormat, convertedValue));
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                          (academicData.class10Format || 'Percentage') === 'Percentage'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
+                      <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                         %
-                      </button>
+                      </span>
                     </div>
                     {errors.class10Marks && (
                       <p className="text-sm text-destructive flex items-center gap-1">
@@ -956,145 +628,26 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
             <h3 className="text-base font-semibold uppercase tracking-wide">COMPETITIVE PROFILES</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-              {competitiveProfiles.map((profile, index) => {
-                const hasModified = profile.isVerified && profile.username !== profile.verifiedUsername;
-                
-                return (
-                  <div key={profile.platform} className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex gap-1">
-                        {/* <button
-                          type="button"
-                          onClick={() => setCurrentProfileIndex(Math.max(0, index - 1))}
-                          disabled={index === 0}
-                          className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                       <button
-                          type="button"
-                          onClick={() => setCurrentProfileIndex(Math.min(competitiveProfiles.length - 1, index + 1))}
-                          disabled={index === competitiveProfiles.length - 1}
-                          className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
-                        > 
-                          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button> */}
-                      </div>
-                      <Label className="font-medium">{profile.platform}</Label>
-                    </div>
-                    
-                    <Input
-                      placeholder="Username"
-                      value={profile.username || ''}
-                      onChange={(e) => {
-                        const nextUsername = e.target.value;
-                        setCompetitiveProfiles((prev) =>
-                          prev.map((p) =>
-                            p.platform === profile.platform
-                              ? {
-                                  ...p,
-                                  username: nextUsername,
-                                  isVerified: false,
-                                  verifiedUsername: undefined,
-                                  problemsSolved: undefined,
-                                  rating: undefined,
-                                  rank: undefined,
-                                  lastVerifiedAt: undefined,
-                                }
-                              : p
-                          )
-                        );
-                        setRankError((prev) => ({ ...prev, [profile.platform]: '' }));
-                        if (!nextUsername.trim()) {
-                          const existingTimeout = rankFetchTimeoutsRef.current[profile.platform];
-                          if (existingTimeout) {
-                            clearTimeout(existingTimeout);
-                          }
-                          setRankLoading((prev) => ({ ...prev, [profile.platform]: false }));
-                          return;
-                        }
-                        scheduleRankFetch(profile.platform, nextUsername);
-                      }}
-                      className="w-full"
-                    />
-
-                    {rankLoading[profile.platform] && (
-                      <p className="text-xs text-muted-foreground">Fetching rank...</p>
-                    )}
-                    {rankError[profile.platform] && (
-                      <p className="text-xs text-destructive">{rankError[profile.platform]}</p>
-                    )}
-                    
-                    {!profile.isVerified && (
-                      <div className="flex justify-start">
-                        <Button
-                          type="button"
-                          variant="default"
-                          onClick={() => handleVerifyProfile(profile.platform)}
-                          disabled={!profile.username || verifyingPlatform === profile.platform}
-                        >
-                          {verifyingPlatform === profile.platform && (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          )}
-                          Verify
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {profile.isVerified && hasModified && (profile.problemsSolved || profile.rating || profile.rank !== undefined) && (
-                      <div className="flex items-center gap-2 text-sm flex-wrap">
-                        <Button
-                          type="button"
-                          variant="default"
-                          onClick={() => handleVerifyProfile(profile.platform)}
-                          disabled={verifyingPlatform === profile.platform}
-                          size="sm"
-                        >
-                          {verifyingPlatform === profile.platform && (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          )}
-                          Re-Verify
-                        </Button>
-                        {profile.problemsSolved !== undefined && (
-                          <span className="text-muted-foreground">
-                            {profile.problemsSolved} problems solved
-                          </span>
-                        )}
-                        {profile.rating !== undefined && (
-                          <span className="text-muted-foreground">Rating: {profile.rating}</span>
-                        )}
-                        {profile.rank !== undefined && (
-                          <span className="text-muted-foreground">Rank: {profile.rank}</span>
-                        )}
-                      </div>
-                    )}
-                    
-                    {profile.isVerified && !hasModified && (profile.problemsSolved || profile.rating || profile.rank !== undefined) && (
-                      <div className="flex items-center gap-2 text-sm flex-wrap">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-600" />
-                          <span className="font-medium text-green-600">Verified</span>
-                        </div>
-                        {profile.problemsSolved !== undefined && (
-                          <span className="text-muted-foreground">
-                            {profile.problemsSolved} problems solved
-                          </span>
-                        )}
-                        {profile.rating !== undefined && (
-                          <span className="text-muted-foreground">Rating: {profile.rating}</span>
-                        )}
-                        {profile.rank !== undefined && (
-                          <span className="text-muted-foreground">Rank: {profile.rank}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {competitiveProfiles.map((profile) => (
+                <div key={profile.platform} className="space-y-2">
+                  <Label className="font-medium">{profile.platform}</Label>
+                  <Input
+                    placeholder="Username"
+                    value={profile.username || ''}
+                    onChange={(e) => {
+                      const nextUsername = e.target.value;
+                      setCompetitiveProfiles((prev) =>
+                        prev.map((p) =>
+                          p.platform === profile.platform
+                            ? { ...p, username: nextUsername }
+                            : p
+                        )
+                      );
+                    }}
+                    className="w-full"
+                  />
+                </div>
+              ))}
           </div>
         </CardContent>
       </Card>

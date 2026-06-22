@@ -3,13 +3,14 @@ import { Button } from '@/components/ui/button'
 
 import { Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
 import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
 import { useOnboardingStorage } from '@/hooks/use-profile'
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
+import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -21,9 +22,13 @@ const Header = () => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const params = useParams()
+    const orgId = params.orgId
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
     const courseIdFromPath = courseIdMatch?.[1]
     const courseIdFromQuery = searchParams.get('courseId')
+    const orgIdFromQuery = searchParams.get('orgId')
+    const currentOrgId = (orgId as string | undefined) || orgIdFromQuery || ''
     const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
     const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
     const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
@@ -54,7 +59,7 @@ const Header = () => {
     const handleSyllabusClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/course/${courseId}/courseSyllabus`)
+            router.push(`/student/course/${courseId}/org/${currentOrgId}/courseSyllabus`)
             return
         }
 
@@ -64,7 +69,7 @@ const Header = () => {
     const handleMentorshipClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/mentors?courseId=${courseId}`)
+            router.push(getMentorsHref({ courseId, orgId: currentOrgId }))
             return
         }
 

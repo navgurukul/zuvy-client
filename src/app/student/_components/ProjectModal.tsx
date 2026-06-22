@@ -118,7 +118,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
             <Label htmlFor="detailedDescription" className="font-medium">
-              Detailed Description (Optional)
+              Detailed Description 
             </Label>
             <Textarea
               id="detailedDescription"

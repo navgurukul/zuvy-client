@@ -25,8 +25,8 @@ import Image from 'next/image'
 const CourseSyllabusPage = () => {
     const { courseId } = useParams()
     const router = useRouter()
-    const searchParams = useSearchParams()
-    const orgId = searchParams.get('orgId')
+    const params = useParams()
+    const orgId = params.orgId
     const { syllabusData, loading, error, refetch } =
         useCourseSyllabus(courseId)
 
@@ -334,7 +334,7 @@ const CourseSyllabusPage = () => {
                                                                     <div className="flex items-center justify-between">
                                                                         <div className="text-left">
                                                                             <Link
-                                                                                href={`/student/course/${courseId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}&orgId=${orgId}`}
+                                                                                href={`/student/course/${courseId}/org/${orgId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}`}
                                                                                 className="hover:text-primary"
                                                                             >
                                                                                 <h4 className="font-medium text-sm text-left">

@@ -31,7 +31,7 @@ export function useLeaderboard(courseId: string): UseLeaderboardReturn {
       setError(null);
       try {
         const res = await api.get(
-          `/leaderboard/student/data?limit=5`
+          `/leaderboard/student/data?bootcampId=${courseId}&limit=5`
         );
 
         const data = res.data;

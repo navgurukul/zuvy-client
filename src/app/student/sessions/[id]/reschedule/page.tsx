@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
 import { useGetRescheduleSlots } from "@/hooks/useGetRescheduleSlots";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -28,7 +29,9 @@ export default function RescheduleBookingPage() {
 		params["id"] as string | string[] | undefined
 	);
 	const mentorId = searchParams.get("mentorId") || undefined;
-	const organizationId = searchParams.get("organizationId") || undefined;
+	const courseId = searchParams.get("courseId") || "";
+	const orgId = searchParams.get("orgId") || "";
+	const organizationId = searchParams.get("organizationId") || orgId || undefined;
 	const currentSlotIdParam = searchParams.get("currentSlotId");
 	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
 
@@ -119,7 +122,7 @@ export default function RescheduleBookingPage() {
 	return (
 		<div className="max-w-3xl mx-auto p-6 space-y-6">
 			<Link
-				href="/student/sessions"
+				href={getSessionsHref({ courseId, orgId })}
 				className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
 			>
 				<ArrowLeft size={16} />
