@@ -31,6 +31,7 @@ import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudent
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
 import { cn } from "@/lib/utils";
+import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
 // import Leaderboard from '@/components/Leaderboard';
 // import { useLeaderboard } from '@/hooks/useLeaderboard';
 
@@ -56,7 +57,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
-  const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0);
+  const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0, orgId as string | undefined);
   // const { topEntries: leaderboardEntries, selfEntry: leaderboardSelfEntry, isSelfInTopFive, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard(courseId);
   const { width } = useWindowSize();
   const isMobile = width < 768;
@@ -71,7 +72,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     {
       label: "Find a Mentor",
       sub: availableMentorCount > 0 ? `${availableMentorCount} mentor available now` : "No mentors available now",
-      href: `/student/mentors?courseId=${courseId}`,
+      href: getMentorsHref({ courseId, orgId: orgId as string | undefined }),
       icon: Search,
       color: "text-primary",
       bg: "bg-primary/10",
@@ -79,7 +80,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     {
       label: "My Sessions",
       sub: `${mentorshipSessionCount} upcoming`,
-      href: `/student/sessions?courseId=${courseId}`,
+      href: getSessionsHref({ courseId, orgId: orgId as string | undefined }),
       icon: CalendarDays,
       color: "text-accent",
       bg: "bg-accent/10",
@@ -278,7 +279,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const getMentorSessionJoinHref = (item: MentorSessionEvent) => {
     if (!item.meetingLink) return null;
 
-    return `/student/sessions/${item.id}/join?joinUrl=${encodeURIComponent(item.meetingLink)}`;
+    return getSessionJoinHref(item.id, item.meetingLink, { courseId, orgId: orgId as string | undefined });
   };
 
   const getEventActionText = (type: string) => {
@@ -1293,7 +1294,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
                                     {eventType === 'Mentor Session' ? (
                                       <Link
-                                        href={`/student/sessions?courseId=${courseId}`}
+                                        href={getSessionsHref({ courseId, orgId: orgId as string | undefined })}
                                         target="_self"
                                         className="hover:text-primary hover:underline underline-offset-[4px]"
                                       >

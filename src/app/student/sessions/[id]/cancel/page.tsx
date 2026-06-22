@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useCancelMentorSlotBooking } from "@/hooks/useCancelMentorSlotBooking";
+import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -21,9 +22,12 @@ const getBookingIdFromParam = (
 
 export default function CancelBookingPage() {
 	const params = useParams();
+	const searchParams = useSearchParams();
 	const bookingId = getBookingIdFromParam(
 		params["id"] as string | string[] | undefined
 	);
+	const courseId = searchParams.get("courseId") || "";
+	const orgId = searchParams.get("orgId") || "";
 
 	const [reason, setReason] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
@@ -49,7 +53,7 @@ export default function CancelBookingPage() {
 	return (
 		<div className="max-w-3xl mx-auto p-6 space-y-6">
 			<Link
-				href="/student/sessions"
+				href={getSessionsHref({ courseId, orgId })}
 				className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
 			>
 				<ArrowLeft size={16} />

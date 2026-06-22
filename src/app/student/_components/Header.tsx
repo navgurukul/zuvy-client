@@ -10,6 +10,7 @@ import StudentProfileDropDown from './StudentProfileDropDown'
 import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
 import { useOnboardingStorage } from '@/hooks/use-profile'
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
+import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -26,6 +27,8 @@ const Header = () => {
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
     const courseIdFromPath = courseIdMatch?.[1]
     const courseIdFromQuery = searchParams.get('courseId')
+    const orgIdFromQuery = searchParams.get('orgId')
+    const currentOrgId = (orgId as string | undefined) || orgIdFromQuery || ''
     const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
     const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
     const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
@@ -56,7 +59,7 @@ const Header = () => {
     const handleSyllabusClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/course/${courseId}/org/${orgId}/courseSyllabus`)
+            router.push(`/student/course/${courseId}/org/${currentOrgId}/courseSyllabus`)
             return
         }
 
@@ -66,7 +69,7 @@ const Header = () => {
     const handleMentorshipClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/mentors?courseId=${courseId}`)
+            router.push(getMentorsHref({ courseId, orgId: currentOrgId }))
             return
         }
 
