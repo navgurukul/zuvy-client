@@ -2,11 +2,15 @@
 
 import { useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { getSessionsHref } from "@/utils/studentMentorshipRoutes"
 
 export default function JoinSessionPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const joinUrl = searchParams.get("joinUrl")?.trim() || ""
+  const courseId = searchParams.get("courseId") || ""
+  const orgId = searchParams.get("orgId") || ""
+  const sessionsHref = getSessionsHref({ courseId, orgId })
 
   const isAllowedMeetingHost = (hostname: string) => {
     const normalizedHost = hostname.toLowerCase()
@@ -16,7 +20,7 @@ export default function JoinSessionPage() {
 
   useEffect(() => {
     if (!joinUrl) {
-      router.replace("/student/sessions")
+      router.replace(sessionsHref)
       return
     }
 
@@ -26,15 +30,15 @@ export default function JoinSessionPage() {
       const isAllowedHost = isAllowedMeetingHost(parsedMeetingUrl.hostname)
 
       if (!isHttps || !isAllowedHost) {
-        router.replace("/student/sessions")
+        router.replace(sessionsHref)
         return
       }
 
       window.location.replace(parsedMeetingUrl.toString())
     } catch {
-      router.replace("/student/sessions")
+      router.replace(sessionsHref)
     }
-  }, [joinUrl, router])
+  }, [joinUrl, router, sessionsHref])
 
   return null
 }

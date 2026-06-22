@@ -48,6 +48,7 @@ export default function MentorsPage() {
     const offset = (page - 1) * limit
     const searchQuery = searchParams.get("search")?.trim() || ""
     const courseId = searchParams.get("courseId") || ""
+    const orgId = searchParams.get("orgId") || ""
     const [showAllMentors, setShowAllMentors] = useState(false)
     const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null)
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -56,14 +57,15 @@ export default function MentorsPage() {
         searchQuery,
         showAllMentors,
         limit,
-        offset
+        offset,
+        orgId || undefined
     )
 
     const {
         mentors: availableMentorPool,
         loading: availableMentorPoolLoading,
         error: availableMentorPoolError,
-    } = useMentors(searchQuery, !showAllMentors, 1000, 0)
+    } = useMentors(searchQuery, !showAllMentors, 1000, 0, orgId || undefined)
 
     const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 
@@ -99,12 +101,13 @@ export default function MentorsPage() {
             searchTerm: searchQuery,
             limit,
             offset: nextOffset,
+            organizationId: orgId || undefined,
         })
-    }, [showAllMentors, refetchMentors, searchQuery, limit])
+    }, [showAllMentors, refetchMentors, searchQuery, limit, orgId])
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get<MentorsSearchResponse>(
-                `/student/mentors?search=${encodeURIComponent(query)}`
+                `/student/mentors?search=${encodeURIComponent(query)}${orgId ? `&organizationId=${encodeURIComponent(orgId)}` : ""}`
             );
 
             const mentorList = parseMentors(response.data);
@@ -117,7 +120,7 @@ export default function MentorsPage() {
             console.error("Error fetching mentor suggestions:", fetchError);
             return [];
         }
-    }, []);
+    }, [orgId]);
 
     const fetchSearchResultsApi = useCallback(async () => {
         return [];
@@ -140,7 +143,7 @@ export default function MentorsPage() {
                 {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or review your booked sessions.</p> */}
             </div>
 
-            <MentorshipTabs courseId={courseId} />
+            <MentorshipTabs courseId={courseId} orgId={orgId} />
 
             {/* Booking Metrics Banner */}
             {!metricsLoading && metrics && (
@@ -389,6 +392,7 @@ export default function MentorsPage() {
                 open={isDrawerOpen}
                 onOpenChange={setIsDrawerOpen}
                 courseId={courseId}
+                orgId={orgId}
             />
         </div>
     );

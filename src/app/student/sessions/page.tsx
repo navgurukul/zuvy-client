@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -37,6 +37,13 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { useSubmitStudentFeedback } from "@/hooks/useSubmitStudentFeedback"
+import {
+  getMentorProfileHref,
+  getMentorsHref,
+  getSessionCancelHref,
+  getSessionJoinHref,
+  getSessionRescheduleHref,
+} from "@/utils/studentMentorshipRoutes"
 
 type Tab = "upcoming" | "completed" | "cancelled"
 
@@ -141,12 +148,9 @@ function RecordingLink({ bookingId }: { bookingId: number }) {
 
 export default function MySessions() {
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const courseId = searchParams.get("courseId") || ""
-  const mentorsHref = courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors"
-  const sessionsHref = courseId ? `/student/sessions?courseId=${courseId}` : "/student/sessions"
-  const isMentorsTabActive = pathname.startsWith("/student/mentors")
-  const isSessionsTabActive = pathname.startsWith("/student/sessions")
+  const orgId = searchParams.get("orgId") || ""
+  const routeContext = { courseId, orgId }
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
   const [feedbackBookingId, setFeedbackBookingId] = useState<number | null>(null)
@@ -230,7 +234,7 @@ export default function MySessions() {
         {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or manage your sessions.</p> */}
       </div>
 
-      <MentorshipTabs courseId={courseId} />
+      <MentorshipTabs courseId={courseId} orgId={orgId} />
       {/* TABS */}
 
       <div className="flex items-center  rounded-full p-1 w-fit gap-3">
@@ -336,7 +340,7 @@ export default function MySessions() {
               <div className="border-t pt-4" />
 
               <Link
-                href={`/student/mentors/${session.mentorUserId}`}
+                href={getMentorProfileHref(session.mentorUserId, routeContext)}
                 className="text-green-600 text-sm font-medium flex items-center gap-2"
               >
 
@@ -376,7 +380,7 @@ export default function MySessions() {
 
             <Button className="mt-4 text-sm text-white px-5 py-2 rounded-lg flex items-center gap-2" asChild>
 
-              <Link href="/student/mentors">
+              <Link href={getMentorsHref(routeContext)}>
                 <Users size={16} />
 
                 Book a Session
@@ -558,7 +562,7 @@ export default function MySessions() {
               >
                 {canJoinNow ? (
                   <Link
-                    href={`/student/sessions/${session.id}/join?joinUrl=${encodeURIComponent(joinUrl)}`}
+                    href={getSessionJoinHref(session.id, joinUrl, routeContext)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -580,14 +584,17 @@ export default function MySessions() {
 
               <Button variant="outline" asChild>
                 <Link
-                  href={`/student/sessions/${session.id}/reschedule?currentSlotId=${session.slotAvailabilityId}&mentorId=${session.mentorUserId}`}
+                  href={getSessionRescheduleHref(session.id, routeContext, {
+                    currentSlotId: session.slotAvailabilityId,
+                    mentorId: session.mentorUserId,
+                  })}
                 >
                   Reschedule
                 </Link>
               </Button>
 
               <Button variant="outline" asChild>
-                <Link href={`/student/sessions/${session.id}/cancel`}>
+                <Link href={getSessionCancelHref(session.id, routeContext)}>
                   Cancel
                 </Link>
               </Button>
