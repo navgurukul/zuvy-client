@@ -28,9 +28,8 @@ function resolveVirtualImport(importPath: string): string | null {
   if (virtualFileNames.has(bare)) return bare;
 
   // Match without extension
-  for (const name of virtualFileNames) {
-    if (stripExt(name) === bare) return name;
-  }
+  const match = Array.from(virtualFileNames).find((name) => stripExt(name) === bare);
+  if (match) return match;
 
   return null;
 }
