@@ -12,12 +12,14 @@ import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
+import { getSessionsHref } from "@/utils/studentMentorshipRoutes"
 
 type MentorBookingDrawerProps = {
   mentor: Mentor | null
   open: boolean
   onOpenChange: (open: boolean) => void
   courseId?: string
+  orgId?: string
 }
 
 const formatSlotDate = (value: string) =>
@@ -49,6 +51,7 @@ export default function MentorBookingDrawer({
   open,
   onOpenChange,
   courseId,
+  orgId,
 }: MentorBookingDrawerProps) {
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null)
   const [bookedSlotDetails, setBookedSlotDetails] = useState<MentorAvailabilitySlot | null>(null)
@@ -353,11 +356,7 @@ export default function MentorBookingDrawer({
 
                     {/* BUTTON */}
                     <Link
-                      href={
-                        courseId
-                          ? `/student/sessions?courseId=${courseId}`
-                          : "/student/sessions"
-                      }
+                      href={getSessionsHref({ courseId, orgId })}
                       className="mt-4 w-full"
                     >
                       <Button
