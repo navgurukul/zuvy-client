@@ -252,7 +252,7 @@ function TreeNodeRow({
                     </div>
 
                     {/* Action buttons (hover) */}
-                    {!node.isFolder && hovered && (
+                    {/* {!node.isFolder && hovered && (
                         <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                             {!isProtected && (
                                 <button
@@ -267,7 +267,7 @@ function TreeNodeRow({
                                 </button>
                             )}
                         </div>
-                    )}
+                    )} */}
                 </div>
             )}
 
@@ -341,7 +341,7 @@ export function FileTree({
                 <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     Explorer
                 </span>
-                <div className="flex items-center gap-1">
+                {/* <div className="flex items-center gap-1">
                     <button
                         title="New file"
                         onClick={() => setIsAddingFile(true)}
@@ -349,7 +349,7 @@ export function FileTree({
                     >
                         <FilePlus2 className="h-3.5 w-3.5" />
                     </button>
-                </div>
+                </div> */}
             </div>
 
             {/* Project label */}
@@ -359,7 +359,7 @@ export function FileTree({
             </div>
 
             {/* New file input */}
-            {isAddingFile && (
+            {/* {isAddingFile && (
                 <>
                     <InlineInput
                         placeholder="filename.jsx"
@@ -370,7 +370,7 @@ export function FileTree({
                         <p className="px-3 text-[10px] text-destructive">{createError}</p>
                     )}
                 </>
-            )}
+            )} */}
 
 
             {/* Tree nodes */}
