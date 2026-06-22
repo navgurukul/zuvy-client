@@ -2,24 +2,23 @@
 
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
+import { getMentorsHref, getSessionsHref } from "@/utils/studentMentorshipRoutes"
 
 type Props = {
   courseId?: string
+  orgId?: string
 }
 
-export default function MentorshipTabs({ courseId }: Props) {
+export default function MentorshipTabs({ courseId, orgId }: Props) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
   const cid = courseId ?? searchParams?.get("courseId") ?? ""
+  const oid = orgId ?? searchParams?.get("orgId") ?? ""
 
-  const mentorsHref = cid
-    ? `/student/mentors?courseId=${cid}`
-    : "/student/mentors"
-
-  const sessionsHref = cid
-    ? `/student/sessions?courseId=${cid}`
-    : "/student/sessions"
+  const routeContext = { courseId: cid, orgId: oid }
+  const mentorsHref = getMentorsHref(routeContext)
+  const sessionsHref = getSessionsHref(routeContext)
 
   const isMentorsTabActive = pathname?.startsWith("/student/mentors")
   const isSessionsTabActive = pathname?.startsWith("/student/sessions")

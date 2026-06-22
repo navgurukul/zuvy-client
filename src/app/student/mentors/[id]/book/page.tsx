@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useMentorAvailability";
 import { useBookMentorSlot } from "@/hooks/useBookMentorSlot";
 import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
+import { getMentorProfileHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
 
 const getMentorId = (idParam: string | string[] | undefined) => {
   if (Array.isArray(idParam)) {
@@ -65,7 +66,9 @@ export default function BookSessionPage() {
   const searchParams = useSearchParams();
   const mentorId = getMentorId(params["id"] as string | string[] | undefined);
   const courseId = searchParams.get("courseId") || "";
-  const organizationId = searchParams.get("organizationId") || undefined;
+  const orgId = searchParams.get("orgId") || "";
+  const organizationId = searchParams.get("organizationId") || orgId || undefined;
+  const routeContext = { courseId, orgId };
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
   const {
@@ -120,7 +123,7 @@ export default function BookSessionPage() {
 
       {/* Back */}
       <Link
-        href={mentorId ? `/student/mentors/${mentorId}${courseId ? `?courseId=${courseId}` : ""}` : (courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors")}
+        href={mentorId ? getMentorProfileHref(mentorId, routeContext) : getMentorsHref(routeContext)}
         className="flex items-center text-sm text-gray-500 hover:text-gray-700"
       >
         <ArrowLeft size={16} className="mr-1" />

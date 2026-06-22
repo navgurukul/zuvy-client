@@ -40,6 +40,7 @@ interface GetMentorsParams {
     searchTerm?: string
     limit?: number
     offset?: number
+    organizationId?: string | number
 }
 
 const parseMentorsResponse = (response: MentorsApiResponse): ParsedMentorsResponse => {
@@ -81,7 +82,7 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch mentors'
 }
 
-export function useMentors(search?: string, initialFetch = true, limit = 10, offset = 0) {
+export function useMentors(search?: string, initialFetch = true, limit = 10, offset = 0, organizationId?: string | number) {
     const [mentors, setMentors] = useState<Mentor[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -108,6 +109,10 @@ export function useMentors(search?: string, initialFetch = true, limit = 10, off
                 queryParams.append('offset', String(params.offset))
             }
 
+            if (params.organizationId) {
+                queryParams.append('organizationId', String(params.organizationId))
+            }
+
             const url = `/student/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
             const response = await api.get<MentorsApiResponse>(url)
             const parsedResponse = parseMentorsResponse(response.data)
@@ -128,9 +133,9 @@ export function useMentors(search?: string, initialFetch = true, limit = 10, off
 
     useEffect(() => {
         if (initialFetch) {
-            getMentors({ searchTerm: search, limit, offset })
+            getMentors({ searchTerm: search, limit, offset, organizationId })
         }
-    }, [initialFetch, getMentors, limit, offset, search])
+    }, [initialFetch, getMentors, limit, offset, organizationId, search])
 
     return {
         mentors,
