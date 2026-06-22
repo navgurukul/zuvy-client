@@ -21,6 +21,13 @@ export interface MentorSlotDetailsBooking {
     mentorRating?: number | null
     mentorFeedbackSubmittedAt?: string | null
     mentorFeedbackLocked?: boolean | null
+    studentRating?: number | null
+    studentFeedback?: string | null
+    studentFeedbackSubmittedAt?: string | null
+    studentFeedbackLocked?: boolean | null
+    cancelledAt?: string | null
+    cancellationReason?: string | null
+    cancelledBy?: string | null
     [key: string]: unknown
 }
 

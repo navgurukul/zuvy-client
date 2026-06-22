@@ -21,3 +21,20 @@ export interface QuizQuestionDetails {
     difficulty: string
     tagId: number
 }
+
+// ui/leaderboard.tsx
+
+export type Entry = {
+  rank: number
+  name: string
+  points: number
+  isYou?: boolean
+}
+
+export interface LeaderboardProps {
+  entries: Entry[]
+  loading?: boolean
+  error?: string | null
+  selfEntry?: Entry | null
+  showSelfEntry?: boolean
+}

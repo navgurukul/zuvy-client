@@ -3,8 +3,8 @@ import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
-import { QuestionPanel } from '@/app/student/course/[courseId]/codingChallenge/components'
+import { showProctoringAlert } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
+import { QuestionPanel } from '@/app/student/course/[courseId]/org/[orgId]/codingChallenge/components'
 
 export const fetchStudentData = async (
     id: number, 

@@ -38,14 +38,13 @@ import {
   Save,
   Trophy,
   Trash2,
-  Loader2,
-  Check,
   ChevronDown,
-  ChevronLeft
+  ChevronLeft,
+  AlertTriangle
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStorage } from '@/hooks/use-profile';
-import { SKILLS_BY_CATEGORY, MONTHS } from '@/lib/profile.mockData';
+import { SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import type {
   CompetitiveProfile,
   WorkExperience,
@@ -54,8 +53,15 @@ import type {
   OnboardingStep3 as Step3Type,
   OnboardingStep4 as Step4Type,
 } from '@/lib/profile.types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import useLearnerProfile from '@/hooks/useLearnerProfile';
 import useUpdateLearnerProfile from '@/hooks/useUpdateLearnerProfile';
+import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength';
 import useLearnerTechnicalSkills from '@/hooks/useLearnerTechnicalSkills';
 import useLearnerDegreeDetails from '@/hooks/useLearnerDegreeDetails';
 import useLearnerBranchDetails from '@/hooks/useLearnerBranchDetails';
@@ -66,7 +72,6 @@ import useCollegeSearch from '@/hooks/useCollegeSearch';
 import { toast } from '@/components/ui/use-toast';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
 import { WorkExperienceModal, WorkExperienceCard } from '@/app/student/profile/WorkExperienceComponents';
-import { fetchCompetitiveProfileStats, isSupportedCompetitivePlatform } from '@/lib/competitiveProfileApi';
 
 type TabType = 'basic-info' | 'skills-projects' | 'education' | 'career-goals';
 type EditingCard = 'personal-info' | 'skills' | 'projects' | 'academic-info' | 'academic-performance' | 'work-experience' | 'competitive-profiles' | 'career-goals' | null;
@@ -83,6 +88,7 @@ export const EditProfilePage: React.FC = () => {
   const { boards } = useLearnerBoards();
   const { roles, loading: isLoadingRoles } = useLearnerRoles();
   const { remoteLocations, loading: isLoadingRemoteLocations } = useLearnerRemoteLocations();
+  const { missingFields, refetchLearnerProfileStrength } = useLearnerProfileStrength();
   const technicalSkillOptions = useMemo(
     () =>
       (technicalSkills || [])
@@ -162,10 +168,6 @@ export const EditProfilePage: React.FC = () => {
   const [editedData, setEditedData] = useState<any>({});
   const [customSkill, setCustomSkill] = useState('');
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
-  const [verifyingPlatform, setVerifyingPlatform] = useState<string | null>(null);
-  const [rankLoading, setRankLoading] = useState<Record<string, boolean>>({});
-  const [rankError, setRankError] = useState<Record<string, string>>({});
-  const rankFetchTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const hydratedProfileIdRef = useRef<number | null>(null);
   const rawDegreeValue = editedData?.step1?.degree ?? onboardingData?.step1?.degree ?? '';
   const isCustomDegreeValue =
@@ -225,7 +227,7 @@ export const EditProfilePage: React.FC = () => {
   const [customLocation, setCustomLocation] = useState('');
   const [internshipSalary, setInternshipSalary] = useState('');
   const [fullTimeSalary, setFullTimeSalary] = useState('');
-  const [allowCompanies, setAllowCompanies] = useState(false);
+  const [allowCompanies, setAllowCompanies] = useState(true);
   const [emailPref, setEmailPref] = useState(true);
   const [whatsappPref, setWhatsappPref] = useState(false);
   const [phonePref, setPhonePref] = useState(false);
@@ -257,7 +259,8 @@ export const EditProfilePage: React.FC = () => {
     ...(step3?.academicPerformance || {}),
     ...(editedData?.step3?.academicPerformance || {}),
   };
-
+  const isWorkingStatus =
+  (onboardingData?.step1?.currentStatus ?? step1?.currentStatus) === 'Working';
   const updateAcademicPerformance = (updates: Record<string, any>) => {
     setEditedData((prev: any) => ({
       ...prev,
@@ -308,6 +311,26 @@ export const EditProfilePage: React.FC = () => {
         : '01';
 
     return `${value.year}-${month}-${day}`;
+  };
+
+  const formatWorkExperienceDate = (value?: { month: string; year: string } | string) => {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      const parsedDate = new Date(value);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+      }
+      return value;
+    }
+
+    return `${value.month} ${value.year}`;
   };
 
   const toMonthNumber = (month?: string) => {
@@ -377,15 +400,16 @@ export const EditProfilePage: React.FC = () => {
     }));
 
     const academicPerformance = step3Data?.academicPerformance;
-    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
-      ? academicPerformance?.cgpa
-      : academicPerformance?.percentage;
+    const collegeScore = academicPerformance?.percentage;
 
     const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
       title: experience.role,
       company: experience.companyName,
       startDate: formatMonthYearToDate(experience.startDate),
-      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+      isCurrentlyWorking: experience.isCurrentlyWorking,
+      endDate: experience.isCurrentlyWorking
+      ? null
+      : formatMonthYearToDate(experience.endDate),
       description: experience.responsibilities,
     }));
 
@@ -431,13 +455,13 @@ export const EditProfilePage: React.FC = () => {
       projects,
       collegeStream: normalizeText(step1Data.branch),
       collegeScore: collegeScore !== undefined ? String(collegeScore) : undefined,
-      collegeScoreType: academicPerformance?.marksFormat === 'Percentage' ? '%' : academicPerformance?.marksFormat,
+      collegeScoreType: '%',
       class12Board: normalizeText(academicPerformance?.class12Board),
       class12Score: academicPerformance?.class12Percentage !== undefined ? String(academicPerformance.class12Percentage) : undefined,
-      class12ScoreType: academicPerformance?.class12Format === 'Percentage' ? '%' : academicPerformance?.class12Format,
+      class12ScoreType: '%',
       class10Board: normalizeText(academicPerformance?.class10Board),
       class10Score: academicPerformance?.class10Marks !== undefined ? String(academicPerformance.class10Marks) : undefined,
-      class10ScoreType: academicPerformance?.class10Format === 'Percentage' ? '%' : academicPerformance?.class10Format,
+      class10ScoreType: '%',
       hasWorkExperience: step3Data?.hasInternshipExperience,
       workExperiences,
       leetcodeUsername: normalizeText(leetcodeUsername),
@@ -452,6 +476,7 @@ export const EditProfilePage: React.FC = () => {
       internshipStipend: normalizeText(step4Data?.salaryExpectations?.internship),
       fullTimeCtc: normalizeText(step4Data?.salaryExpectations?.fullTime),
       preferredContactMethods,
+      profileVisibility: step4Data?.allowCompaniesViewProfile ?? false,
     };
   };
 
@@ -625,22 +650,12 @@ export const EditProfilePage: React.FC = () => {
       academicPerformance:
         learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
           ? {
-              marksFormat:
-                learnerProfile.collegeScoreType === '%' ? 'Percentage' : ('CGPA' as const),
-              cgpa:
-                learnerProfile.collegeScoreType !== '%'
-                  ? parseScore(learnerProfile.collegeScore)
-                  : undefined,
-              percentage:
-                learnerProfile.collegeScoreType === '%'
-                  ? parseScore(learnerProfile.collegeScore)
-                  : undefined,
-              class12Format:
-                learnerProfile.class12ScoreType === '%' ? ('Percentage' as const) : ('CGPA' as const),
+              marksFormat: 'Percentage' as const,
+              percentage: parseScore(learnerProfile.collegeScore),
+              class12Format: 'Percentage' as const,
               class12Percentage: parseScore(learnerProfile.class12Score),
               class12Board: learnerProfile.class12Board || undefined,
-              class10Format:
-                learnerProfile.class10ScoreType === '%' ? ('Percentage' as const) : ('CGPA' as const),
+              class10Format: 'Percentage' as const,
               class10Marks: parseScore(learnerProfile.class10Score),
               class10Board: learnerProfile.class10Board || undefined,
             }
@@ -649,9 +664,9 @@ export const EditProfilePage: React.FC = () => {
         id: `api-work-${learnerProfile.id}-${index}`,
         companyName: experience?.company || experience?.companyName || '',
         role: experience?.title || experience?.role || '',
-        startDate: { month: '', year: '' },
-        endDate: { month: '', year: '' },
-        isCurrentlyWorking: false,
+        startDate: experience?.startDate || experience?.start_date || '',
+        endDate: experience?.endDate || experience?.end_date || '',
+        isCurrentlyWorking: Boolean(experience?.isCurrentlyWorking || experience?.is_currently_working),
         workMode: 'Remote' as const,
         responsibilities: experience?.description || '',
       })),
@@ -660,7 +675,8 @@ export const EditProfilePage: React.FC = () => {
         buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles || []),
         buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles || []),
       ],
-      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+      hasInternshipExperience:
+        (learnerProfile.hasWorkExperience || false) || (learnerProfile.workExperiences?.length || 0) > 0,
     };
 
     const preferredMethods = new Set((learnerProfile.preferredContactMethods || []).map((item) => item.toLowerCase()));
@@ -681,7 +697,7 @@ export const EditProfilePage: React.FC = () => {
         whatsapp: preferredMethods.has('whatsapp'),
         phone: preferredMethods.has('phone'),
       },
-      allowCompaniesViewProfile: true,
+      allowCompaniesViewProfile: Boolean((learnerProfile as any)?.profileVisibility),
       consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
     };
 
@@ -706,6 +722,8 @@ export const EditProfilePage: React.FC = () => {
       title: 'Saved successfully',
       description: 'Your profile changes have been saved.',
     });
+    // Refetch strength so missing-field indicators update immediately
+    refetchLearnerProfileStrength();
   };
 
   const normalizeAndValidateLinkedInUrl = (value: string) => {
@@ -811,78 +829,72 @@ export const EditProfilePage: React.FC = () => {
       setEditedData({});
     }
   };
-  
+
   const handleSaveAcademic = async () => {
-    if (step1 && step3) {
-      const step1Edits = editedData.step1 || {};
-      const shouldApplyCustomDegree = selectedDegreeValue === 'Other' && (step1Edits.degree === 'Other' || step1Edits.customDegree !== undefined);
-      const shouldApplyCustomBranch = selectedBranchValue === 'Other' && (step1Edits.branch === 'Other' || step1Edits.customBranch !== undefined);
-      const resolvedDegree =
-        shouldApplyCustomDegree
-          ? (String(step1Edits.customDegree || degreeCustomValue || '').trim() || step1.degree)
-          : step1Edits.degree;
-      const resolvedBranch =
-        shouldApplyCustomBranch
-          ? (String(step1Edits.customBranch || branchCustomValue || '').trim() || step1.branch)
-          : step1Edits.branch;
-      const { customDegree, customBranch, ...remainingStep1Edits } = step1Edits;
-      const normalizedStep1Edits = {
-        ...remainingStep1Edits,
-        ...(step1Edits.degree || shouldApplyCustomDegree ? { degree: resolvedDegree } : {}),
-        ...(step1Edits.branch || shouldApplyCustomBranch ? { branch: resolvedBranch } : {}),
-      };
+  // FIX: read fresh from onboardingData at call time, not closed-over step3
+  const currentStep3 = onboardingData?.step3;
 
-      const updatedStep1 = editedData.step1 ? { ...step1, ...normalizedStep1Edits } : step1;
-      const updatedStep3 = editedData.step3 ? { ...step3, ...editedData.step3 } : step3;
+  if (step1 && currentStep3) {
+    const step1Edits = editedData.step1 || {};
+    const shouldApplyCustomDegree =
+      selectedDegreeValue === 'Other' &&
+      (step1Edits.degree === 'Other' || step1Edits.customDegree !== undefined);
+    const shouldApplyCustomBranch =
+      selectedBranchValue === 'Other' &&
+      (step1Edits.branch === 'Other' || step1Edits.customBranch !== undefined);
 
-      const fieldErrors: string[] = [];
-      if (!String(updatedStep1.collegeName || '').trim() && !String(updatedStep1.customCollege || '').trim()) {
-        fieldErrors.push('College selection is required');
-      }
-      if (!String(updatedStep1.degree || '').trim()) {
-        fieldErrors.push('Degree selection is required');
-      }
-      if (!String(updatedStep1.branch || '').trim()) {
-        fieldErrors.push('Branch selection is required');
-      }
-      if (!String(updatedStep1.graduationDate?.month || '').trim() || !String(updatedStep1.graduationDate?.year || '').trim()) {
-        fieldErrors.push('Graduation month and year are required');
-      }
+    const resolvedDegree = shouldApplyCustomDegree
+      ? String(step1Edits.customDegree || degreeCustomValue || '').trim() || step1.degree
+      : step1Edits.degree;
+    const resolvedBranch = shouldApplyCustomBranch
+      ? String(step1Edits.customBranch || branchCustomValue || '').trim() || step1.branch
+      : step1Edits.branch;
 
-      const academic = updatedStep3?.academicPerformance;
-      if (academic?.marksFormat === 'CGPA') {
-        const cgpa = Number(academic?.cgpa);
-        if (!Number.isFinite(cgpa) || cgpa <= 0 || cgpa > 10) {
-          fieldErrors.push('Enter a valid CGPA between 0.0 and 10.0');
-        }
-      }
-      if (academic?.marksFormat === 'Percentage') {
-        const percentage = Number(academic?.percentage);
-        if (!Number.isFinite(percentage) || percentage <= 0 || percentage > 100) {
-          fieldErrors.push('Enter a valid percentage between 0 and 100');
-        }
-      }
+    const updatedStep1: Step1Type = {
+      ...step1,
+      ...(resolvedDegree !== undefined ? { degree: resolvedDegree } : {}),
+      ...(resolvedBranch !== undefined ? { branch: resolvedBranch } : {}),
+      ...(step1Edits.collegeName !== undefined ? { collegeName: step1Edits.collegeName } : {}),
+      ...(step1Edits.customCollege !== undefined ? { customCollege: step1Edits.customCollege } : {}),
+      ...(step1Edits.yearOfStudy !== undefined ? { yearOfStudy: step1Edits.yearOfStudy } : {}),
+      ...(step1Edits.graduationDate !== undefined ? { graduationDate: step1Edits.graduationDate } : {}),
+    };
 
-      if (fieldErrors.length > 0) {
-        showRequiredFieldErrors(fieldErrors);
-        return;
-      }
-
-      if (editedData.step1) {
-        updateStepData(1, updatedStep1);
-      }
-      if (editedData.step3) {
-        updateStepData(3, updatedStep3);
-      }
-
-      const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
-      if (!isSaved) return;
-
-      showSaveSuccess();
-      setEditingCard(null);
-      setEditedData({});
+    const fieldErrors: string[] = [];
+    if (!String(updatedStep1.collegeName || updatedStep1.customCollege || '').trim()) {
+      fieldErrors.push('College name is required');
     }
-  };
+    if (!String(updatedStep1.degree || '').trim()) {
+      fieldErrors.push('Degree is required');
+    }
+    if (!String(updatedStep1.branch || '').trim()) {
+      fieldErrors.push('Branch is required');
+    }
+    if (fieldErrors.length > 0) {
+      showRequiredFieldErrors(fieldErrors);
+      return;
+    }
+
+    // FIX: build updatedStep3 from currentStep3 (fresh), not stale step3 closure
+    const updatedStep3: Step3Type = {
+      ...currentStep3,
+      ...(editedData.step3 ? editedData.step3 : {}),
+      // Always preserve fresh work experiences — never let editedData overwrite them
+          workExperiences: hasInternship ? currentStep3.workExperiences : [],
+      hasInternshipExperience: hasInternship,
+    };
+
+    updateStepData(1, updatedStep1);
+    updateStepData(3, updatedStep3);
+
+    const isSaved = await persistProfileChanges(updatedStep1, step2, updatedStep3, step4);
+    if (!isSaved) return;
+
+    showSaveSuccess();
+    setEditingCard(null);
+    setEditedData({});
+  }
+};
   
   const handleSaveCompetitive = async () => {
     if (step3) {
@@ -1011,11 +1023,11 @@ export const EditProfilePage: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSkillDropdown]);
 
-  useEffect(() => {
-    return () => {
-      Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     Object.values(rankFetchTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId));
+  //   };
+  // }, []);
   
   // College dropdown click-outside
   useEffect(() => {
@@ -1033,7 +1045,7 @@ export const EditProfilePage: React.FC = () => {
   // Initialize hasInternship when entering work-experience edit mode
   useEffect(() => {
     if (editingCard === 'work-experience') {
-      setHasInternship((step3?.workExperiences?.length ?? 0) > 0);
+      setHasInternship(((step3?.workExperiences?.length ?? 0) > 0) || !!step3?.hasInternshipExperience);
     }
   }, [editingCard, step3?.workExperiences]);
 
@@ -1126,10 +1138,22 @@ export const EditProfilePage: React.FC = () => {
     }));
   };
   
+  const toTitleCase = (str: string) =>
+    str.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
+  const isDuplicateSkill = (skill: string) => {
+    const normalized = skill.toLowerCase();
+    return (
+      skills.some((s) => s.toLowerCase() === normalized) ||
+      editableAutoDetectedSkills.some((s) => s.toLowerCase() === normalized)
+    );
+  };
+
   const handleAddSkill = (skill: string) => {
+    const normalized = toTitleCase(skill.trim());
     const totalSkills = editableAutoDetectedSkills.length + skills.length;
-    if (totalSkills < 20 && !skills.includes(skill)) {
-      setSkills([...skills, skill]);
+    if (totalSkills < 20 && !isDuplicateSkill(normalized)) {
+      setSkills([...skills, normalized]);
       setCustomSkill('');
     }
   };
@@ -1190,6 +1214,7 @@ export const EditProfilePage: React.FC = () => {
 
       updateStepData(2, updatedStep2);
       await persistProfileChanges(step1, updatedStep2, step3, step4);
+      refetchLearnerProfileStrength();
     }
   };
   
@@ -1205,6 +1230,7 @@ export const EditProfilePage: React.FC = () => {
 
       updateStepData(2, updatedStep2);
       await persistProfileChanges(step1, updatedStep2, step3, step4);
+      refetchLearnerProfileStrength();
     }
   };
   
@@ -1222,149 +1248,66 @@ export const EditProfilePage: React.FC = () => {
 
       updateStepData(2, updatedStep2);
       await persistProfileChanges(step1, updatedStep2, step3, step4);
+      refetchLearnerProfileStrength();
       setProjectToDelete(null);
     }
   };
 
   const handleAddOrEditExperience = async (experience: WorkExperience) => {
-    if (!step3) return;
+  // FIX: read fresh step3 at call time
+  const currentStep3 = onboardingData?.step3;
+  if (!step1 || !currentStep3) return;
 
-    const previousExperiences = step3.workExperiences || [];
-    const alreadyExists = previousExperiences.some((item) => item.id === experience.id);
-    const updatedWorkExperiences = alreadyExists
-      ? previousExperiences.map((item) => (item.id === experience.id ? experience : item))
-      : [...previousExperiences, experience];
+  const previousExperiences = currentStep3.workExperiences || [];
 
-    const updatedStep3 = {
-      ...step3,
-      workExperiences: updatedWorkExperiences,
-      hasInternshipExperience: true,
-    };
+  const alreadyExists = previousExperiences.some((item) => item.id === experience.id);
 
-    updateStepData(3, updatedStep3);
-    await persistProfileChanges(step1, step2, updatedStep3, step4);
-    setEditingExperience(undefined);
+  const updatedWorkExperiences = alreadyExists
+    ? previousExperiences.map((item) => (item.id === experience.id ? experience : item))
+    : [...previousExperiences, experience];
+
+  const updatedStep3: Step3Type = {
+    ...currentStep3,
+    workExperiences: updatedWorkExperiences,
+    hasInternshipExperience: true,
   };
+
+  // FIX: keep local hasInternship state in sync so Save Changes doesn't reset it
+  setHasInternship(true);
+
+  updateStepData(3, updatedStep3);
+
+  const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
+  if (!isSaved) return;
+
+  showSaveSuccess();
+};
 
   const handleDeleteExperience = async (experienceId: string) => {
-    if (!step3) return;
+  // FIX: read fresh step3 at call time
+  const currentStep3 = onboardingData?.step3;
+  if (!step1 || !currentStep3) return;
 
-    const updatedWorkExperiences = (step3.workExperiences || []).filter((item) => item.id !== experienceId);
-    const updatedStep3 = {
-      ...step3,
-      workExperiences: updatedWorkExperiences,
-      hasInternshipExperience: updatedWorkExperiences.length > 0,
-    };
+  const updatedWorkExperiences = (currentStep3.workExperiences || []).filter(
+    (item) => item.id !== experienceId
+  );
 
-    updateStepData(3, updatedStep3);
-    await persistProfileChanges(step1, step2, updatedStep3, step4);
+  const updatedStep3: Step3Type = {
+    ...currentStep3,
+    workExperiences: updatedWorkExperiences,
+    hasInternshipExperience: updatedWorkExperiences.length > 0,
   };
 
-  const handleVerifyProfile = async (platform: string) => {
-    setVerifyingPlatform(platform);
-    if (!step3) return;
-    
-    const profileIndex = step3.competitiveProfiles.findIndex((p) => p.platform === platform);
-    if (profileIndex === -1) return;
-    
-    const currentUsername = editedData.competitiveProfiles?.[profileIndex]?.username ?? step3.competitiveProfiles[profileIndex].username;
-    
-    if (currentUsername) {
-      if (isSupportedCompetitivePlatform(platform)) {
-        try {
-          const stats = await fetchCompetitiveProfileStats(platform, currentUsername);
-          const updatedProfiles = step3.competitiveProfiles.map((p, idx) =>
-            idx === profileIndex
-              ? {
-                  ...p,
-                  ...stats,
-                  username: currentUsername,
-                  isVerified: true,
-                  verifiedUsername: currentUsername,
-                  lastVerifiedAt: new Date().toISOString(),
-                }
-              : p
-          );
-          updateStepData(3, {
-            ...step3,
-            competitiveProfiles: updatedProfiles,
-          });
-          setEditedData((prev: any) => ({ ...prev, competitiveProfiles: undefined }));
-        } catch (error) {
-          setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
-        } finally {
-          setVerifyingPlatform(null);
-        }
-        return;
-      }
+  // Keep local state in sync
+  setHasInternship(updatedWorkExperiences.length > 0);
 
-      // Simulate API call for unsupported platforms
-      setTimeout(() => {
-        if (step3) {
-          const updatedProfiles = step3.competitiveProfiles.map((p, idx) =>
-            idx === profileIndex
-              ? {
-                  ...p,
-                  username: currentUsername,
-                  isVerified: true,
-                  verifiedUsername: currentUsername,
-                  problemsSolved: Math.floor(Math.random() * 500) + 50,
-                  rating: Math.floor(Math.random() * 2200) + 800,
-                  lastVerifiedAt: new Date().toISOString(),
-                }
-              : p
-          );
-          updateStepData(3, {
-            ...step3,
-            competitiveProfiles: updatedProfiles,
-          });
-          // Clear edited data for this profile since it's now saved
-          setEditedData((prev: any) => ({ ...prev, competitiveProfiles: undefined }));
-        }
-        setVerifyingPlatform(null);
-      }, 1500);
-    }
-  };
+  updateStepData(3, updatedStep3);
 
-  const scheduleRankFetch = (platform: string, username: string, index: number) => {
-    if (!isSupportedCompetitivePlatform(platform)) return;
+  const isSaved = await persistProfileChanges(step1, step2, updatedStep3, step4);
+  if (!isSaved) return;
 
-    const trimmed = username.trim();
-    if (!trimmed) return;
-
-    const key = `${platform}-${index}`;
-    const existingTimeout = rankFetchTimeoutsRef.current[key];
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
-
-    rankFetchTimeoutsRef.current[key] = setTimeout(async () => {
-      setRankLoading((prev) => ({ ...prev, [platform]: true }));
-      setRankError((prev) => ({ ...prev, [platform]: '' }));
-      try {
-        const stats = await fetchCompetitiveProfileStats(platform, trimmed);
-        setEditedData((prev: any) => {
-          const baseProfiles = prev.competitiveProfiles
-            || (step3?.competitiveProfiles || []).map((p) => ({ ...p }));
-          const nextProfiles = [...baseProfiles];
-          const current = nextProfiles[index] || { platform, isVerified: false };
-          nextProfiles[index] = {
-            ...current,
-            ...stats,
-            username: trimmed,
-            isVerified: true,
-            verifiedUsername: trimmed,
-            lastVerifiedAt: new Date().toISOString(),
-          };
-          return { ...prev, competitiveProfiles: nextProfiles };
-        });
-      } catch (error) {
-        setRankError((prev) => ({ ...prev, [platform]: 'Unable to fetch profile data' }));
-      } finally {
-        setRankLoading((prev) => ({ ...prev, [platform]: false }));
-      }
-    }, 700);
-  };
+  showSaveSuccess();
+};
 
   // Get initials for avatar
   const getInitials = (name: string) => {
@@ -1378,6 +1321,82 @@ export const EditProfilePage: React.FC = () => {
 
   // Get primary location
   const primaryLocation = step4?.locationPreferences?.cities?.[0] || 'Bangalore, India';
+
+  // Map API missingFields keys to card section IDs
+  const MISSING_FIELD_TO_CARD: Record<string, EditingCard> = {
+    projects: 'projects',
+    technicalSkills: 'skills',
+    skills: 'skills',
+    workExperiences: 'work-experience',
+    workExperience: 'work-experience',
+    academicPerformance: 'academic-performance',
+    collegeScore: 'academic-performance',
+    class12Score: 'academic-performance',
+    class10Score: 'academic-performance',
+    leetcodeUsername: 'competitive-profiles',
+    codechefUsername: 'competitive-profiles',
+    codeforcesUsername: 'competitive-profiles',
+    competitiveProfiles: 'competitive-profiles',
+    targetRoles: 'career-goals',
+    preferredLocations: 'career-goals',
+    salaryExpectations: 'career-goals',
+    phoneNumber: 'personal-info',
+    linkedin: 'personal-info',
+    linkedinProfile: 'personal-info',
+  };
+
+  // Map API missingFields keys to tab IDs
+  const MISSING_FIELD_TO_TAB: Record<string, TabType> = {
+    projects: 'skills-projects',
+    technicalSkills: 'skills-projects',
+    skills: 'skills-projects',
+    workExperiences: 'education',
+    workExperience: 'education',
+    academicPerformance: 'education',
+    collegeScore: 'education',
+    class12Score: 'education',
+    class10Score: 'education',
+    leetcodeUsername: 'education',
+    codechefUsername: 'education',
+    codeforcesUsername: 'education',
+    competitiveProfiles: 'education',
+    targetRoles: 'career-goals',
+    preferredLocations: 'career-goals',
+    salaryExpectations: 'career-goals',
+    phoneNumber: 'basic-info',
+    linkedin: 'basic-info',
+    linkedinProfile: 'basic-info',
+  };
+
+  /** Returns the missing field labels that belong to a given card section */
+  const getMissingLabelsForCard = (cardId: EditingCard): string[] => {
+    if (!cardId || missingFields.length === 0) return [];
+    return missingFields
+      .filter((f) => MISSING_FIELD_TO_CARD[f] === cardId)
+      .map((f) =>
+        f
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      );
+  };
+
+  /** Returns true if the given tab has any missing fields */
+  const tabHasMissingFields = (tabId: TabType): boolean =>
+    missingFields.some((f) => MISSING_FIELD_TO_TAB[f] === tabId);
+
+  /** Returns formatted missing field labels for a whole tab */
+  const getMissingLabelsForTab = (tabId: TabType): string[] => {
+    if (missingFields.length === 0) return [];
+    return missingFields
+      .filter((f) => MISSING_FIELD_TO_TAB[f] === tabId)
+      .map((f) =>
+        f
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      );
+  };
 
   const tabs = [
     { id: 'basic-info' as TabType, label: 'Basic Info', icon: User },
@@ -1481,6 +1500,23 @@ export const EditProfilePage: React.FC = () => {
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
+                  {tabHasMissingFields(tab.id) && (
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 cursor-default" aria-label="Has missing fields" />
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[160px] text-xs">
+                          <p className="font-semibold mb-1 text-amber-500 text-[11px]">Missing:</p>
+                          <ul className="space-y-0.5">
+                            {getMissingLabelsForTab(tab.id).map((label) => (
+                              <li key={label} className="text-[11px]">• {label}</li>
+                            ))}
+                          </ul>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   {activeTab === tab.id && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                   )}
@@ -1507,6 +1543,15 @@ export const EditProfilePage: React.FC = () => {
                 </Button>
               )}
             </div>
+            {getMissingLabelsForCard('personal-info').length > 0 && editingCard !== 'personal-info' && (
+              <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <span className="font-medium">Missing: </span>
+                  {getMissingLabelsForCard('personal-info').join(', ')}
+                </p>
+              </div>
+            )}
             <CardContent className="pb-6 pt-6 text-left block">
               {editingCard !== 'personal-info' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1613,6 +1658,15 @@ export const EditProfilePage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              {getMissingLabelsForCard('skills').length > 0 && editingCard !== 'skills' && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <span className="font-medium">Missing: </span>
+                    {getMissingLabelsForCard('skills').join(', ')}
+                  </p>
+                </div>
+              )}
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'skills' ? (
                   <>
@@ -1764,6 +1818,15 @@ export const EditProfilePage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              {getMissingLabelsForCard('projects').length > 0 && editingCard !== 'projects' && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <span className="font-medium">Missing: </span>
+                    {getMissingLabelsForCard('projects').join(', ')}
+                  </p>
+                </div>
+              )}
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'projects' ? (
                   <>
@@ -2009,6 +2072,15 @@ export const EditProfilePage: React.FC = () => {
                     </Button>
                   )}
                 </div>
+                {getMissingLabelsForCard('academic-performance').length > 0 && editingCard !== 'academic-info' && (
+                  <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      <span className="font-medium">Missing: </span>
+                      {getMissingLabelsForCard('academic-performance').join(', ')}
+                    </p>
+                  </div>
+                )}
                 <CardContent className="pb-6 pt-6">
                   {editingCard !== 'academic-info' ? (
                     <>
@@ -2040,9 +2112,7 @@ export const EditProfilePage: React.FC = () => {
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">College marks</p>
                           <p className="font-medium">
-                            {step3?.academicPerformance?.marksFormat === 'CGPA'
-                              ? `${step3.academicPerformance.cgpa || '-'} ${step3.academicPerformance.cgpa ? 'CGPA' : ''}`
-                              : step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : '-'}
+                            {step3?.academicPerformance?.percentage ? `${step3.academicPerformance.percentage}%` : '-'}
                           </p>
                         </div>
                         
@@ -2057,7 +2127,7 @@ export const EditProfilePage: React.FC = () => {
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class12Percentage 
-                                  ? `${step3.academicPerformance.class12Percentage}${step3.academicPerformance.class12Format === 'CGPA' ? ' CGPA' : '%'}` 
+                                  ? `${step3.academicPerformance.class12Percentage}%` 
                                   : '-'}
                               </p>
                             </div>
@@ -2075,7 +2145,7 @@ export const EditProfilePage: React.FC = () => {
                               <p className="text-xs text-muted-foreground font-medium mb-1">Score</p>
                               <p className="font-medium">
                                 {step3?.academicPerformance?.class10Marks 
-                                  ? `${step3.academicPerformance.class10Marks}${step3.academicPerformance.class10Format === 'CGPA' ? ' CGPA' : '%'}`
+                                  ? `${step3.academicPerformance.class10Marks}%`
                                   : '-'}
                               </p>
                             </div>
@@ -2318,8 +2388,17 @@ export const EditProfilePage: React.FC = () => {
                                     <button
                                       key={year}
                                       type="button"
+                                      onClick={() =>
+                                        setEditedData((prev: any) => ({
+                                          ...prev,
+                                          step1: {
+                                            ...(prev.step1 || {}),
+                                            yearOfStudy: year,
+                                          },
+                                        }))
+                                      }
                                       className={`py-2 px-3 rounded-lg border-2 font-medium text-sm transition-all ${
-                                        step1.yearOfStudy === year
+                                        (editedData?.step1?.yearOfStudy ?? step1.yearOfStudy) === year
                                           ? 'border-primary bg-primary text-primary-foreground'
                                           : 'border-border bg-background hover:border-primary'
                                       }`}
@@ -2333,7 +2412,21 @@ export const EditProfilePage: React.FC = () => {
                               <div>
                                 <Label className="font-medium">Expected Graduation *</Label>
                                 <div className="grid grid-cols-2 gap-4 mt-2">
-                                  <Select defaultValue={step1.graduationDate.month}>
+                                  <Select
+                                    value={editedData?.step1?.graduationDate?.month ?? step1.graduationDate.month}
+                                    onValueChange={(val) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          graduationDate: {
+                                            ...(prev.step1?.graduationDate || step1.graduationDate),
+                                            month: val,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Month" />
                                     </SelectTrigger>
@@ -2352,16 +2445,28 @@ export const EditProfilePage: React.FC = () => {
                                       <SelectItem value="December">December</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                  <Select defaultValue={step1.graduationDate.year}>
+                                  <Select
+                                    value={editedData?.step1?.graduationDate?.year ?? step1.graduationDate.year}
+                                    onValueChange={(val) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          graduationDate: {
+                                            ...(prev.step1?.graduationDate || step1.graduationDate),
+                                            year: val,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Year" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="2024">2024</SelectItem>
-                                      <SelectItem value="2025">2025</SelectItem>
-                                      <SelectItem value="2026">2026</SelectItem>
-                                      <SelectItem value="2027">2027</SelectItem>
-                                      <SelectItem value="2028">2028</SelectItem>
+                                      {getYearsArray(1990).map((year) => (
+                                        <SelectItem key={year} value={year}>{year}</SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -2381,54 +2486,28 @@ export const EditProfilePage: React.FC = () => {
                                   <Input 
                                     id="collegeScore"
                                     type="number"
-                                    step={mergedAcademicPerformance.marksFormat === 'CGPA' ? '0.01' : '1'}
+                                    step="0.01"
+                                    inputMode="decimal"
                                     min="0"
-                                    max={mergedAcademicPerformance.marksFormat === 'CGPA' ? '10' : '100'}
-                                    placeholder={mergedAcademicPerformance.marksFormat === 'CGPA' ? 'e.g. 8.5' : 'e.g. 85'}
-                                    value={
-                                      mergedAcademicPerformance.marksFormat === 'CGPA'
-                                        ? (mergedAcademicPerformance.cgpa ?? '')
-                                        : (mergedAcademicPerformance.percentage ?? '')
-                                    }
+                                    max="100"
+                                    placeholder="e.g. 85"
+                                    value={mergedAcademicPerformance.percentage ?? ''}
                                     onChange={(e) => {
                                       const value = e.target.value;
-                                      const parsed = value === '' ? undefined : Number(value);
-                                      if (mergedAcademicPerformance.marksFormat === 'CGPA') {
-                                        updateAcademicPerformance({
-                                          cgpa: Number.isFinite(parsed) ? parsed : undefined,
-                                          percentage: undefined,
-                                        });
-                                      } else {
-                                        updateAcademicPerformance({
-                                          percentage: Number.isFinite(parsed) ? parsed : undefined,
-                                          cgpa: undefined,
-                                        });
+                                      if (value && !/^\d*(?:\.\d{0,2})?$/.test(value)) return;
+                                      if (value === '') {
+                                        updateAcademicPerformance({ percentage: undefined });
+                                        return;
                                       }
+                                      const parsed = Number(value);
+                                      if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) return;
+                                      updateAcademicPerformance({ percentage: parsed });
                                     }}
                                     className="flex-1 bg-muted/30"
                                   />
-                                  <button
-                                    type="button"
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                      mergedAcademicPerformance.marksFormat === 'CGPA'
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                    }`}
-                                    onClick={() => updateAcademicPerformance({ marksFormat: 'CGPA' })}
-                                  >
-                                    CGPA
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                      mergedAcademicPerformance.marksFormat === 'Percentage'
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                    }`}
-                                    onClick={() => updateAcademicPerformance({ marksFormat: 'Percentage' })}
-                                  >
+                                  <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                                     %
-                                  </button>
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -2469,42 +2548,28 @@ export const EditProfilePage: React.FC = () => {
                                     <Input 
                                       id="class12Score"
                                       type="number"
-                                      step={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                                      step="0.01"
+                                      inputMode="decimal"
                                       min="0"
-                                      max={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                                      placeholder={(mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA' ? 'e.g. 9.0' : 'Score'}
+                                      max="100"
+                                      placeholder="Score"
                                       value={mergedAcademicPerformance.class12Percentage ?? ''}
                                       onChange={(e) => {
                                         const value = e.target.value;
-                                        const parsed = value === '' ? undefined : Number(value);
-                                        updateAcademicPerformance({
-                                          class12Percentage: Number.isFinite(parsed) ? parsed : undefined,
-                                        });
+                                        if (value && !/^\d*(?:\.\d{0,2})?$/.test(value)) return;
+                                        if (value === '') {
+                                          updateAcademicPerformance({ class12Percentage: undefined });
+                                          return;
+                                        }
+                                        const parsed = Number(value);
+                                        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) return;
+                                        updateAcademicPerformance({ class12Percentage: parsed });
                                       }}
                                       className="flex-1 bg-muted/30"
                                     />
-                                    <button
-                                      type="button"
-                                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (mergedAcademicPerformance.class12Format || 'Percentage') === 'CGPA'
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                      }`}
-                                      onClick={() => updateAcademicPerformance({ class12Format: 'CGPA' })}
-                                    >
-                                      CGPA
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (mergedAcademicPerformance.class12Format || 'Percentage') === 'Percentage'
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                      }`}
-                                      onClick={() => updateAcademicPerformance({ class12Format: 'Percentage' })}
-                                    >
+                                    <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                                       %
-                                    </button>
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2546,42 +2611,28 @@ export const EditProfilePage: React.FC = () => {
                                     <Input 
                                       id="class10Marks"
                                       type="number"
-                                      step={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? '0.01' : '1'}
+                                      step="0.01"
+                                      inputMode="decimal"
                                       min="0"
-                                      max={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? '10' : '100'}
-                                      placeholder={(mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA' ? 'e.g. 9.5' : 'Score'}
+                                      max="100"
+                                      placeholder="Score"
                                       value={mergedAcademicPerformance.class10Marks ?? ''}
                                       onChange={(e) => {
                                         const value = e.target.value;
-                                        const parsed = value === '' ? undefined : Number(value);
-                                        updateAcademicPerformance({
-                                          class10Marks: Number.isFinite(parsed) ? parsed : undefined,
-                                        });
+                                        if (value && !/^\d*(?:\.\d{0,2})?$/.test(value)) return;
+                                        if (value === '') {
+                                          updateAcademicPerformance({ class10Marks: undefined });
+                                          return;
+                                        }
+                                        const parsed = Number(value);
+                                        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) return;
+                                        updateAcademicPerformance({ class10Marks: parsed });
                                       }}
                                       className="flex-1 bg-muted/30"
                                     />
-                                    <button
-                                      type="button"
-                                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (mergedAcademicPerformance.class10Format || 'Percentage') === 'CGPA'
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                      }`}
-                                      onClick={() => updateAcademicPerformance({ class10Format: 'CGPA' })}
-                                    >
-                                      CGPA
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                        (mergedAcademicPerformance.class10Format || 'Percentage') === 'Percentage'
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                      }`}
-                                      onClick={() => updateAcademicPerformance({ class10Format: 'Percentage' })}
-                                    >
+                                    <span className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground">
                                       %
-                                    </button>
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2621,7 +2672,15 @@ export const EditProfilePage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditingCard('work-experience')}
+                    // onClick={() => setEditingCard('work-experience')}
+                    onClick={() => {
+                     const currentStep3 = onboardingData?.step3;
+                     setEditingCard('work-experience');
+                     setHasInternship(
+                     Boolean(currentStep3?.hasInternshipExperience) ||
+                     (currentStep3?.workExperiences?.length ?? 0) > 0
+                     );
+                    }}
                     className="gap-2"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -2629,20 +2688,30 @@ export const EditProfilePage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              {getMissingLabelsForCard('work-experience').length > 0 && editingCard !== 'work-experience' && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <span className="font-medium">Missing: </span>
+                    {getMissingLabelsForCard('work-experience').join(', ')}
+                  </p>
+                </div>
+              )}
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'work-experience' ? (
                   <>
-                    {step3?.hasInternshipExperience ? (
+                    {((step3?.workExperiences?.length ?? 0) > 0 || step3?.hasInternshipExperience) ? (
                       (step3?.workExperiences && step3.workExperiences.length > 0) ? (
                         <div className="space-y-3">
                           {step3.workExperiences.map((exp) => (
+                            
                             <Card key={exp.id} className="bg-muted/30 border-border/30">
                               <CardContent className="p-4">
-                                <h4 className="font-medium">{exp.role}</h4>
+                                <h4 className="font-medium text-sm">{exp.role}</h4>
                                 <p className="text-sm text-muted-foreground">{exp.companyName}</p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {exp.startDate.month} {exp.startDate.year} →{' '}
-                                  {exp.isCurrentlyWorking ? 'Present' : `${exp.endDate?.month} ${exp.endDate?.year}`}
+                                  {formatWorkExperienceDate(exp.startDate)} →{' '}
+                                  {exp.isCurrentlyWorking ? 'Present' : formatWorkExperienceDate(exp.endDate)}
                                 </p>
                                 <div className="flex items-center gap-2 mt-2">
                                   <Badge variant="outline" className="text-xs">
@@ -2654,6 +2723,11 @@ export const EditProfilePage: React.FC = () => {
                                     </Badge>
                                   )}
                                 </div>
+                                {exp.responsibilities && (
+                                  <p className="text-sm text-muted-foreground whitespace-pre-line mt-2">
+                                    {exp.responsibilities}
+                                  </p>
+                                )}
                               </CardContent>
                             </Card>
                           ))}
@@ -2679,24 +2753,44 @@ export const EditProfilePage: React.FC = () => {
                         {/* Have Internship Toggle */}
                         <div className="space-y-4">
                           <Label className="font-medium">Have you done any internships or jobs?</Label>
-                          <div className="grid grid-cols-2 gap-4">
-                            <Button
-                              type="button"
-                              variant={!hasInternship ? 'default' : 'outline'}
-                              onClick={() => setHasInternship(false)}
-                              className="h-10"
-                            >
-                              No, I&apos;m a Fresher
-                            </Button>
-                            <Button
-                              type="button"
-                              variant={hasInternship ? 'default' : 'outline'}
-                              onClick={() => setHasInternship(true)}
-                              className="h-10"
-                            >
-                              Yes, I have experience
-                            </Button>
-                          </div>
+                          <div className="space-y-2">
+                             <div className="grid grid-cols-2 gap-4">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                  <TooltipTrigger asChild>
+                                   <span className={isWorkingStatus ? 'cursor-not-allowed' : 'inline-block w-full'}>
+                                     <Button
+                                       type="button"
+                                        variant={!hasInternship ? 'default' : 'outline'}
+                                        disabled={isWorkingStatus}
+                                         onClick={() => {
+                                         if (isWorkingStatus) return;
+                                        setHasInternship(false);
+                                        }}
+                                        className="h-10 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                        No, I&apos;m a Fresher
+                                       </Button>
+                                        </span>
+                                        </TooltipTrigger>
+                                          {isWorkingStatus && (
+                                           <TooltipContent side="top" align="center">
+                                             Your profile status is set to Working, so the Fresher option is disabled.
+                                             </TooltipContent>
+                                           )}
+                                        </Tooltip>
+                                        </TooltipProvider>
+
+                                       <Button
+                                          type="button"
+                                         variant={hasInternship ? 'default' : 'outline'}
+                                          onClick={() => setHasInternship(true)}
+                                        className="h-10"
+                                           >
+                                           Yes, I have experience
+                                      </Button>
+                                    </div>
+                              </div>
                         </div>
 
                         {/* Show Experience Form only if hasInternship is true */}
@@ -2715,26 +2809,27 @@ export const EditProfilePage: React.FC = () => {
                             />
 
                             {/* Existing Work Experiences */}
-                            {step3?.workExperiences && step3.workExperiences.length > 0 && (
-                              <div className="divide-y divide-border">
-                                {step3.workExperiences.map((experience) => (
-                                  <WorkExperienceCard
-                                    key={experience.id}
-                                    experience={experience}
-                                    onEdit={(exp) => {
-                                      setEditingExperience(exp);
-                                      setIsExperienceModalOpen(true);
-                                    }}
-                                    onDelete={handleDeleteExperience}
-                                  />
-                                ))}
-                              </div>
+                          {onboardingData?.step3?.workExperiences &&
+                          onboardingData.step3.workExperiences.length > 0 && (
+                           <div className="divide-y divide-border">
+                            {onboardingData.step3.workExperiences.map((experience) => (
+                              <WorkExperienceCard
+                               key={experience.id}
+                               experience={experience}
+                               onEdit={(exp) => {
+                               setEditingExperience(exp);
+                               setIsExperienceModalOpen(true);
+                                }}
+                              onDelete={handleDeleteExperience}
+                           />
+                              ))}
+                            </div>
                             )}
                             
                             {/* Add New Experience Button */}
                             <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                               <p className="text-sm text-muted-foreground mb-3">
-                                {step3?.workExperiences && step3.workExperiences.length > 0
+                                {onboardingData?.step3?.workExperiences && onboardingData.step3.workExperiences.length > 0
                                   ? 'Showcase more of your professional journey'
                                   : 'Build your professional profile'}
                               </p>
@@ -2753,6 +2848,14 @@ export const EditProfilePage: React.FC = () => {
                             </div>
                           </>
                         )}
+                        {!hasInternship && (
+                          <div className="text-center py-6">
+                           <GraduationCap className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                           <p className="text-sm text-muted-foreground">
+                             No experience added — you will be saved as a fresher.
+                           </p>
+                           </div>
+                         )}
                         
                         {/* Save Button */}
                         <div className="flex justify-end gap-2 pt-4">
@@ -2797,6 +2900,15 @@ export const EditProfilePage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              {getMissingLabelsForCard('competitive-profiles').length > 0 && editingCard !== 'competitive-profiles' && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <span className="font-medium">Missing: </span>
+                    {getMissingLabelsForCard('competitive-profiles').join(', ')}
+                  </p>
+                </div>
+              )}
               <CardContent className="pb-6 pt-6">
                 {editingCard !== 'competitive-profiles' ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2805,15 +2917,6 @@ export const EditProfilePage: React.FC = () => {
                         <div key={profile.platform} className="space-y-1">
                           <p className="text-xs text-muted-foreground font-medium">{profile.platform}</p>
                           <p className="font-medium">{profile.username || '-'}</p>
-                          {profile.rating !== undefined && (
-                            <p className="text-xs text-muted-foreground">Rating: {profile.rating}</p>
-                          )}
-                          {profile.rank !== undefined && (
-                            <p className="text-xs text-muted-foreground">Rank: {profile.rank}</p>
-                          )}
-                          {profile.problemsSolved !== undefined && (
-                            <p className="text-xs text-muted-foreground">Problems Solved: {profile.problemsSolved}</p>
-                          )}
                         </div>
                       ))
                     ) : (
@@ -2842,13 +2945,10 @@ export const EditProfilePage: React.FC = () => {
                       ] as CompetitiveProfile[]).map((profile, index) => {
                           const currentProfile = editedData.competitiveProfiles?.[index] ?? profile;
                           const currentUsername = currentProfile.username ?? '';
-                          const hasUsername = currentUsername.trim() !== '';
-                          const hasModified = Boolean(profile.username && profile.username.trim()) && currentUsername !== profile.username;
                           
                           return (
-                            <div key={profile.platform} className="space-y-4">
+                            <div key={profile.platform} className="space-y-2">
                               <Label className="font-medium text-base">{profile.platform}</Label>
-                              
                               <Input 
                                 value={currentUsername}
                                 placeholder="Username"
@@ -2860,108 +2960,11 @@ export const EditProfilePage: React.FC = () => {
                                       ...newProfiles[index],
                                       ...profile,
                                       username: nextUsername,
-                                      isVerified: false,
-                                      verifiedUsername: undefined,
-                                      problemsSolved: undefined,
-                                      rating: undefined,
-                                      rank: undefined,
-                                      lastVerifiedAt: undefined,
                                     };
                                     return { ...prev, competitiveProfiles: newProfiles };
                                   });
-                                  setRankError((prev) => ({ ...prev, [profile.platform]: '' }));
-                                  if (!nextUsername.trim()) {
-                                    const key = `${profile.platform}-${index}`;
-                                    const existingTimeout = rankFetchTimeoutsRef.current[key];
-                                    if (existingTimeout) {
-                                      clearTimeout(existingTimeout);
-                                    }
-                                    setRankLoading((prev) => ({ ...prev, [profile.platform]: false }));
-                                    return;
-                                  }
-                                  scheduleRankFetch(profile.platform, nextUsername, index);
                                 }}
                               />
-
-                              {rankLoading[profile.platform] && (
-                                <p className="text-xs text-muted-foreground">Fetching rank...</p>
-                              )}
-                              {rankError[profile.platform] && (
-                                <p className="text-xs text-destructive">{rankError[profile.platform]}</p>
-                              )}
-                              
-                              {/* Show Verify button for empty profiles or newly entered usernames */}
-                              {!hasUsername && (
-                                <Button
-                                  type="button"
-                                  variant="default"
-                                  onClick={() => handleVerifyProfile(profile.platform)}
-                                  disabled={!currentUsername || verifyingPlatform === profile.platform}
-                                >
-                                  {verifyingPlatform === profile.platform && (
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  )}
-                                  Verify
-                                </Button>
-                              )}
-                              
-                              {/* Show Re-Verify when username was modified */}
-                              {hasUsername && hasModified && (
-                                <div className="flex items-center gap-2 text-sm flex-wrap">
-                                  <Button
-                                    type="button"
-                                    variant="default"
-                                    onClick={() => handleVerifyProfile(profile.platform)}
-                                    disabled={verifyingPlatform === profile.platform}
-                                    size="sm"
-                                  >
-                                    {verifyingPlatform === profile.platform && (
-                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    )}
-                                    Re-Verify
-                                  </Button>
-                                  {(currentProfile.problemsSolved || currentProfile.rating || currentProfile.rank !== undefined) && (
-                                    <>
-                                      {currentProfile.problemsSolved !== undefined && (
-                                        <span className="text-muted-foreground">
-                                          {currentProfile.problemsSolved} problems solved
-                                        </span>
-                                      )}
-                                      {currentProfile.rating !== undefined && (
-                                        <span className="text-muted-foreground">Rating: {currentProfile.rating}</span>
-                                      )}
-                                      {currentProfile.rank !== undefined && (
-                                        <span className="text-muted-foreground">Rank: {currentProfile.rank}</span>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                              
-                              {/* Show Verified status when username exists and not modified */}
-                              {hasUsername && !hasModified && (
-                                <div className="flex items-center gap-2 text-sm flex-wrap">
-                                  <div className="flex items-center gap-2">
-                                    <Check className="w-4 h-4 text-green-600" />
-                                    <span className="font-medium text-green-600">Verified</span>
-                                  </div>
-                                  {(currentProfile.problemsSolved || currentProfile.rating || currentProfile.rank !== undefined) && (
-                                    <>
-                                      {currentProfile.problemsSolved !== undefined && (
-                                        <span className="text-muted-foreground">
-                                          {currentProfile.problemsSolved} problems solved
-                                        </span>
-                                      )}
-                                      {currentProfile.rating !== undefined && (
-                                        <span className="text-muted-foreground">Rating: {currentProfile.rating}</span>
-                                      )}
-                                      {currentProfile.rank !== undefined && (
-                                        <span className="text-muted-foreground">Rank: {currentProfile.rank}</span>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              )}
                             </div>
                           );
                         })}
@@ -3002,6 +3005,15 @@ export const EditProfilePage: React.FC = () => {
                 </Button>
               )}
             </div>
+            {getMissingLabelsForCard('career-goals').length > 0 && editingCard !== 'career-goals' && (
+              <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <span className="font-medium">Missing: </span>
+                  {getMissingLabelsForCard('career-goals').join(', ')}
+                </p>
+              </div>
+            )}
             <CardContent className="pb-6 pt-6">
               {editingCard !== 'career-goals' ? (
                 <>
