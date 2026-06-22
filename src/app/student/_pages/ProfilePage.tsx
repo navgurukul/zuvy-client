@@ -248,15 +248,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     }));
 
     const academicPerformance = step3Data?.academicPerformance;
-    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
-      ? academicPerformance?.cgpa
-      : academicPerformance?.percentage;
+    const collegeScore = academicPerformance?.marksFormat === 'Percentage' ? academicPerformance.percentage : academicPerformance?.marksFormat;
 
     const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
       title: experience.role,
       company: experience.companyName,
       startDate: formatMonthYearToDate(experience.startDate),
-      endDate: experience.isCurrentlyWorking ? undefined : formatMonthYearToDate(experience.endDate),
+     isCurrentlyWorking: experience.isCurrentlyWorking,
+      endDate: experience.isCurrentlyWorking
+      ? null
+      : formatMonthYearToDate(experience.endDate),
       description: experience.responsibilities,
     }));
 
@@ -335,6 +336,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       termsAndCondition: step4Data?.termsAndCondition,
 
       preferredContactMethods,
+      profileVisibility: step4Data?.allowCompaniesViewProfile ?? false,
     };
   };
 
@@ -343,6 +345,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     setCurrentStepData(data);
     updateStepData(stepNumber, data);
   };
+
+  // Scroll to top whenever the step changes
+  useEffect(() => {
+    const scrollContainer = document.getElementById('main-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [onboardingData?.currentStep]);
 
   // Timer effect
   useEffect(() => {
@@ -435,7 +447,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       // customCollege: learnerProfile.otherCollegeName || '',
       degree: learnerProfile.degree || '',
       branch: learnerProfile.branch || '',
-      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || ('' as Step1Type['yearOfStudy']),
       graduationDate: {
         month: toMonthName(learnerProfile.graduationMonth),
         year: learnerProfile.graduationYear ? String(learnerProfile.graduationYear) : '',
@@ -453,7 +465,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       customCollege: hasText(onboardingData.step1?.customCollege) ? onboardingData.step1?.customCollege : profileStep1.customCollege,
       degree: hasText(onboardingData.step1?.degree) ? onboardingData.step1?.degree : profileStep1.degree,
       branch: hasText(onboardingData.step1?.branch) ? String(onboardingData.step1?.branch) : profileStep1.branch,
-      yearOfStudy: onboardingData.step1?.yearOfStudy || profileStep1.yearOfStudy,
+      yearOfStudy: profileStep1.yearOfStudy || onboardingData.step1?.yearOfStudy || '1st',
       graduationDate: {
         month: hasText(onboardingData.step1?.graduationDate?.month)
           ? String(onboardingData.step1?.graduationDate?.month)
@@ -462,7 +474,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? String(onboardingData.step1?.graduationDate?.year)
           : profileStep1.graduationDate.year,
       },
-      currentStatus: onboardingData.step1?.currentStatus || profileStep1.currentStatus,
+      currentStatus: profileStep1.currentStatus || onboardingData.step1?.currentStatus || 'Learning',
     };
 
     const profileStep2: Step2Type = {
@@ -497,13 +509,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       academicPerformance:
         learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
           ? {
-              marksFormat: learnerProfile.collegeScoreType === '%' ? 'Percentage' : 'CGPA',
-              cgpa: learnerProfile.collegeScoreType !== '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              percentage: learnerProfile.collegeScoreType === '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              class12Format: learnerProfile.class12ScoreType === '%' ? 'Percentage' : 'CGPA',
+              marksFormat: 'Percentage' as const,
+              percentage: parseScore(learnerProfile.collegeScore),
+              class12Format: 'Percentage' as const,
               class12Percentage: parseScore(learnerProfile.class12Score),
               class12Board: learnerProfile.class12Board || undefined,
-              class10Format: learnerProfile.class10ScoreType === '%' ? 'Percentage' : 'CGPA',
+              class10Format: 'Percentage' as const,
               class10Marks: parseScore(learnerProfile.class10Score),
               class10Board: learnerProfile.class10Board || undefined,
             }
@@ -512,9 +523,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         id: `api-work-${learnerProfile.id}-${index}`,
         companyName: experience?.company || experience?.companyName || '',
         role: experience?.title || experience?.role || '',
-        startDate: { month: '', year: '' },
-        endDate: { month: '', year: '' },
-        isCurrentlyWorking: false,
+        startDate: experience?.startDate || experience?.start_date || '',
+        endDate: experience?.endDate || experience?.end_date || '',
+        isCurrentlyWorking: Boolean(experience?.isCurrentlyWorking || experience?.is_currently_working),
         workMode: 'Remote',
         responsibilities: experience?.description || '',
       })),
@@ -523,8 +534,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         buildCompetitiveProfile('CodeChef', learnerProfile.codechefProfiles as any[]),
         buildCompetitiveProfile('Codeforces', learnerProfile.codeforcesProfiles as any[]),
       ],
-      hasInternshipExperience: learnerProfile.hasWorkExperience || false,
+      hasInternshipExperience:
+        (learnerProfile.hasWorkExperience || false) || (learnerProfile.workExperiences?.length || 0) > 0,
     };
+
+    const hasSavedWorkExperience =
+      (onboardingData.step3?.workExperiences?.length || 0) > 0 ||
+      (profileStep3.workExperiences?.length || 0) > 0 ||
+      onboardingData.step3?.hasInternshipExperience ||
+      profileStep3.hasInternshipExperience;
 
     const mergedStep3: Step3Type = {
       academicPerformance: onboardingData.step3?.academicPerformance || profileStep3.academicPerformance,
@@ -537,7 +555,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
           ? onboardingData.step3!.competitiveProfiles
           : profileStep3.competitiveProfiles,
       hasInternshipExperience:
-        onboardingData.step3?.hasInternshipExperience ?? profileStep3.hasInternshipExperience,
+        hasSavedWorkExperience,
     };
 
     const preferredMethods = new Set(
@@ -561,7 +579,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         phone: preferredMethods.has('phone'),
       },
       termsAndCondition: Boolean((learnerProfile as any)?.termsAndCondition),
-      allowCompaniesViewProfile: true,
+      allowCompaniesViewProfile: Boolean((learnerProfile as any)?.profileVisibility),
       consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
     };
 
@@ -1087,15 +1105,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const extractAcademicPerformanceFromText = (text: string): Step3Type['academicPerformance'] => {
     const normalized = text.replace(/\s+/g, ' ').trim();
-    const cgpaMatch = normalized.match(/(?:cgpa|gpa)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
     const percentageMatch = normalized.match(/(?:percentage|percent|\bmarks\b)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
-
-    if (cgpaMatch?.[1]) {
-      const cgpa = Number(cgpaMatch[1]);
-      if (!Number.isNaN(cgpa) && cgpa > 0 && cgpa <= 10) {
-        return { marksFormat: 'CGPA', cgpa };
-      }
-    }
 
     if (percentageMatch?.[1]) {
       const percentage = Number(percentageMatch[1]);

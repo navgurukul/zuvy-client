@@ -23,8 +23,20 @@ import {
   XCircle,
   Video,
   Users,
-  ArrowLeft
+  ArrowLeft,
+  Star
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { toast } from "@/components/ui/use-toast"
+import { useSubmitStudentFeedback } from "@/hooks/useSubmitStudentFeedback"
 
 type Tab = "upcoming" | "completed" | "cancelled"
 
@@ -137,6 +149,37 @@ export default function MySessions() {
   const isSessionsTabActive = pathname.startsWith("/student/sessions")
   const [activeTab, setActiveTab] = useState<Tab>("upcoming")
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
+  const [feedbackBookingId, setFeedbackBookingId] = useState<number | null>(null)
+  const [tempRating, setTempRating] = useState(5)
+  const [tempFeedback, setTempFeedback] = useState("")
+  const [locallySubmittedFeedbackIds, setLocallySubmittedFeedbackIds] = useState<
+    Record<number, { rating: number; feedback: string }>
+  >({})
+
+  const { isSubmitting, error: submitError, submitFeedback } = useSubmitStudentFeedback()
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackBookingId) return
+
+    const success = await submitFeedback(feedbackBookingId, {
+      rating: tempRating,
+      feedback: tempFeedback,
+      notes: tempFeedback,
+    })
+
+    if (success) {
+      setLocallySubmittedFeedbackIds((prev) => ({
+        ...prev,
+        [feedbackBookingId]: { rating: tempRating, feedback: tempFeedback },
+      }))
+      toast.success({
+        title: "Feedback Submitted",
+        description: "Your feedback has been submitted successfully.",
+      })
+      setFeedbackBookingId(null)
+      refetchMySessions()
+    }
+  }
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -393,6 +436,59 @@ export default function MySessions() {
                 </p>
                 <RecordingLink bookingId={session.id} />
               </div>
+
+              {(() => {
+                const hasStudentFeedback = Boolean(
+                  (session as any).studentRating ||
+                  (session as any).studentFeedback ||
+                  (session as any).studentFeedbackNotes ||
+                  locallySubmittedFeedbackIds[session.id]
+                )
+
+                const studentRating = Number((session as any).studentRating || locallySubmittedFeedbackIds[session.id]?.rating || 0)
+                const studentFeedback = (session as any).studentFeedback || (session as any).studentFeedbackNotes || (session as any).studentNotes || locallySubmittedFeedbackIds[session.id]?.feedback || ""
+
+                return hasStudentFeedback ? (
+                  <div className="mt-4 border-t pt-4 space-y-1 text-left">
+                    <p className="text-sm font-semibold text-slate-800">Your Feedback to Mentor</p>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span>Rating:</span>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star
+                            key={idx}
+                            size={12}
+                            className={
+                              idx < studentRating
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {studentFeedback && (
+                      <p className="text-xs text-muted-foreground italic">
+                        &ldquo;{studentFeedback}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-4 border-t pt-4 flex justify-end">
+                    <Button
+                      size="sm"
+                      className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                      onClick={() => {
+                        setFeedbackBookingId(session.id)
+                        setTempRating(5)
+                        setTempFeedback("")
+                      }}
+                    >
+                      Submit Feedback
+                    </Button>
+                  </div>
+                )
+              })()}
             </CardContent>
           </Card>
         ))
@@ -509,6 +605,79 @@ export default function MySessions() {
         </Card>
       ) : null}
 
+      {feedbackBookingId !== null && (
+        <Dialog open={feedbackBookingId !== null} onOpenChange={(open) => !open && setFeedbackBookingId(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-left">Submit Feedback for Mentor</DialogTitle>
+              <DialogDescription className="text-sm text-left text-muted-foreground">
+                Please share your experience with your mentor. Your feedback helps improve mentoring quality.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5 text-left">
+                <p className="text-sm font-medium text-gray-700">Rating</p>
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, index) => {
+                    const starValue = index + 1
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setTempRating(starValue)}
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          size={28}
+                          className={
+                            starValue <= tempRating
+                              ? "text-yellow-500 fill-yellow-500"
+                              : "text-gray-300"
+                          }
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-left">
+                <p className="text-sm font-medium text-gray-700">Feedback / Notes</p>
+                <Textarea
+                  placeholder="Share details about what went well and areas for improvement..."
+                  value={tempFeedback}
+                  onChange={(e) => setTempFeedback(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {submitError && (
+                <p className="text-xs text-red-500 text-left">{submitError}</p>
+              )}
+            </div>
+
+            <DialogFooter className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFeedbackBookingId(null)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                onClick={handleSubmitFeedback}
+                disabled={isSubmitting || tempRating < 1 || tempRating > 5}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Feedback"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
     </div>
   )

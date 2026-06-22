@@ -38,24 +38,23 @@ export interface OnboardingStep2 {
 
 // Onboarding Step 3 - Education & Experience
 export interface AcademicPerformance {
-  marksFormat: 'CGPA' | 'Percentage';
-  cgpa?: number;
+  marksFormat: 'Percentage';
   percentage?: number;
-  class12Format?: 'CGPA' | 'Percentage';
+  class12Format?: 'Percentage';
   class12Percentage?: number;
   class12Board?: string;
-  class10Format?: 'CGPA' | 'Percentage';
+  class10Format?: 'Percentage';
   class10Marks?: number;
   class10Board?: string;
-  class10MarksOut?: '10' | '100';
+  class10MarksOut?: '100';
 }
 
 export interface WorkExperience {
   id: string;
   companyName: string;
   role: string;
-  startDate: { month: string; year: string };
-  endDate?: { month: string; year: string };
+  startDate: { month: string; year: string } | string;
+  endDate?: { month: string; year: string } | string;
   isCurrentlyWorking: boolean;
   workMode: 'Remote' | 'On-site';
   city?: string;

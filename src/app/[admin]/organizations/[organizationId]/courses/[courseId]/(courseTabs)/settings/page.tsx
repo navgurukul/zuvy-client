@@ -28,6 +28,7 @@ const Page = ({ params }: { params: PageProps }) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin'
+    const isAdmin = userRole === 'admin'
     const orgId = Number(organizationId) || user?.orgId; 
 
     // Use the custom hooks
@@ -45,6 +46,7 @@ const Page = ({ params }: { params: PageProps }) => {
         type: '',
         isModuleLocked: false,
         mentorshipEnabled: false,
+        leaderboardEnabled: false,
     })
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
@@ -57,6 +59,7 @@ const Page = ({ params }: { params: PageProps }) => {
                 type: bootcampSettings.type,
                 isModuleLocked: bootcampSettings.isModuleLocked,
                 mentorshipEnabled: bootcampSettings.mentorshipEnabled,
+                leaderboardEnabled: bootcampSettings.leaderboardEnabled,
             })
         }
     }, [bootcampSettings])
@@ -81,6 +84,13 @@ const Page = ({ params }: { params: PageProps }) => {
             mentorshipEnabled: !prev.mentorshipEnabled,
         }))
     }
+
+    // const handleLeaderboardToggle = () => {
+    //     setLocalSettings((prev) => ({
+    //         ...prev,
+    //         leaderboardEnabled: !prev.leaderboardEnabled,
+    //     }))
+    // }
 
     const handleSaveSettings = async () => {
         if (!bootcampSettings) return
@@ -173,6 +183,16 @@ const Page = ({ params }: { params: PageProps }) => {
                             </span>
                         </h2>
                     )}
+                    {/* {!isSuperAdmin && !isAdmin && (
+                        <h2 className="text-base font-medium text-foreground">
+                            Leaderboard -{' '}
+                            <span className="font-light">
+                                {localSettings.leaderboardEnabled
+                                    ? 'Enabled'
+                                    : 'Disabled'}
+                            </span>
+                        </h2>
+                    )} */}
                     <RadioGroup
                         value={localSettings.type.toLowerCase()}
                         onValueChange={(value) =>
@@ -245,6 +265,40 @@ const Page = ({ params }: { params: PageProps }) => {
                         </div>
                     </div>
                 </div>
+                
+                {/* Leaderboard Toggle Switch */}
+                {/* {(isSuperAdmin || isAdmin) && (
+                    <div className="mt-4 pt-2 border-t border-border">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-base font-medium text-foreground mb-1">
+                                    Leaderboard
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    If enabled, leaderboard data will be visible in learner, leader views.
+                                </p>
+                            </div>
+                            <div className="flex flex-col justify-left items-start">
+                                <div
+                                    className={`relative w-11 h-6 rounded-full bg-gray-300 p-0.5 cursor-pointer ${
+                                        localSettings.leaderboardEnabled
+                                            ? 'bg-primary'
+                                            : ''
+                                    }`}
+                                    onClick={handleLeaderboardToggle}
+                                >
+                                    <div
+                                        className={`absolute ml-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                                            localSettings.leaderboardEnabled
+                                                ? 'translate-x-full'
+                                                : ''
+                                        }`}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )} */}
 
                 {/* One-on-One Sessions Toggle Switch */}
                 {isSuperAdmin && (

@@ -486,6 +486,7 @@ export interface LatestUpdatedCourseData {
   bootcampName: string;
   newChapter: NewChapter;
   mentorshipEnabled?: boolean;
+  leaderboardEnabled: boolean;
 }
 
 export interface LatestUpdatedCourseResponse {
@@ -493,6 +494,7 @@ export interface LatestUpdatedCourseResponse {
   code: number;
   isSuccess: boolean;
   mentorshipEnabled: boolean;
+  leaderboardEnabled: boolean;
   data: LatestUpdatedCourseData;
 }
 
@@ -697,6 +699,7 @@ export interface BootcampSettingsData {
   type: string;
   isModuleLocked: boolean;
   mentorshipEnabled: boolean;
+  leaderboardEnabled: boolean;
 }
 
 export interface UseBootcampSettingsReturn {
