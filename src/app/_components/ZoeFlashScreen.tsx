@@ -24,6 +24,7 @@ const ZoeFlashScreen = ({ isOpen, onClose, onStartInterview }: ZoeFlashScreenPro
         onStartInterview?.();
     };
 
+    return null;
     // return (
     //     <AnimatePresence>
     //         {isOpen && (
