@@ -43,7 +43,8 @@ const StudentProfileDropDown = ({
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Avatar className="h-9 w-9 cursor-pointer transition-all">
+                    <Avatar 
+                    className="h-9 w-9 cursor-pointer transition-all">
                         <AvatarFallback className="bg-[#2f6f3e] text-white text-base font-semibold">
                             {getUserInitials(studentData?.name)}
                         </AvatarFallback>
