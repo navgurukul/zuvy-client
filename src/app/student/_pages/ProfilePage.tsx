@@ -1607,7 +1607,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Setup your Profile</h1>
+              <h1 id="tour-profile" className="text-3xl md:text-4xl font-bold mb-2">Setup your Profile</h1>
               <p className="text-muted-foreground">Complete these steps to unlock job applications.</p>
             </div>
             <div className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm font-medium">

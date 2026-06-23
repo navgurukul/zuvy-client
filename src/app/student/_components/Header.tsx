@@ -295,6 +295,7 @@ const Header = () => {
                         </Button>
                         {showMentorshipNavLink && (
                             <Button
+                                id="tour-mentorship"
                                 variant="link"
                                 size="sm"
                                 onClick={handleMentorshipClick}

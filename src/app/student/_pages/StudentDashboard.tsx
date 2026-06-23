@@ -271,7 +271,7 @@ const StudentDashboard = () => {
 
 
             <div className="mb-6">
-              <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
+              <h2 className="text-2xl font-heading text-left font-semibold mb-6" id="tour-courses">My Courses</h2>
 
               <div className="flex gap-3 mb-6">
                 <Button
