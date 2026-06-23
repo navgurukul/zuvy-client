@@ -265,7 +265,7 @@ export default function MentorsPage() {
                 <p className="text-sm text-gray-500">No mentors available right now.</p>
             ) : (
                 <div className="grid w-full grid-cols-1 gap-5  md:grid-cols-2 lg:grid-cols-3">
-                    {visibleMentors.map((mentor) => {
+                    {visibleMentors.map((mentor, index) => {
                         const expertise = Array.isArray(mentor.expertise)
                             ? mentor.expertise
                             : [];
@@ -368,6 +368,7 @@ export default function MentorsPage() {
 
                         return (
                             <button
+                                id={index === 0 ? "tour-mentor-card" : undefined}
                                 key={`${mentor.userId}-${mentor.organizationId}`}
                                 type="button"
                                 onClick={() => handleMentorClick(mentor)}

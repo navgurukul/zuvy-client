@@ -27,6 +27,7 @@ export default function MentorshipTabs({ courseId, orgId }: Props) {
     <div className="w-full border-b border-[#e8ece8]">
       <div className="flex items-center gap-8">
         <Link
+          id="tour-browse-mentors"
           href={mentorsHref}
           className={`
             relative flex items-center gap-2 px-3 py-2  text-sm transition-all
@@ -58,6 +59,7 @@ export default function MentorshipTabs({ courseId, orgId }: Props) {
         </Link>
 
         <Link
+          id="tour-my-sessions"
           href={sessionsHref}
           className={`
             relative flex items-center gap-2 px-3 py-2  text-sm transition-all

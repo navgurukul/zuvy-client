@@ -240,6 +240,7 @@ export default function MySessions() {
       <div className="flex items-center  rounded-full p-1 w-fit gap-3">
 
         <TabButton
+          id="tour-upcoming-sessions"
           active={activeTab === "upcoming"}
           icon={CalendarDays}
           label="Upcoming"
@@ -248,6 +249,7 @@ export default function MySessions() {
         />
 
         <TabButton
+          id="tour-completed-sessions"
           active={activeTab === "completed"}
           icon={CheckCircle2}
           label="Completed"
@@ -729,6 +731,7 @@ function StatCard({
 }
 
 function TabButton({
+  id,
   icon: Icon,
   label,
   count,
@@ -737,6 +740,7 @@ function TabButton({
 }: any) {
   return (
     <button
+      id={id}
       onClick={onClick}
       className={cn(
         "flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
