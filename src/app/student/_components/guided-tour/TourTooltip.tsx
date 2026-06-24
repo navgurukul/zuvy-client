@@ -29,10 +29,17 @@ export const TourTooltip: React.FC = () => {
   const step = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
   const [isPositioned, setIsPositioned] = useState(false);
+  const [pollingDone, setPollingDone] = useState(false);
 
-  // Reset positioned state on step change
+  // Reset on step change
   useEffect(() => {
     setIsPositioned(false);
+    setPollingDone(false);
+    // Wait 3.1s (slightly more than TourContext's 3s polling max) before showing fallback
+    const timer = setTimeout(() => {
+      setPollingDone(true);
+    }, 3100);
+    return () => clearTimeout(timer);
   }, [currentStepIndex]);
 
   // Resolve only static routes (skip DYNAMIC_ tokens — TourContext handles those)
@@ -80,7 +87,10 @@ export const TourTooltip: React.FC = () => {
   // Hide only while navigating to a different page
   if (isTransitioning) return null;
 
-  // Fallback: target element not found — render centered modal
+  // While polling for element — don't show anything yet
+  if (!activeElementRect && !pollingDone) return null;
+
+  // Fallback: target element not found after polling — render centered modal
   if (!activeElementRect) {
     return (
       <div className="fixed inset-0 flex items-center justify-center p-4 z-[10000] pointer-events-none">
