@@ -20,9 +20,14 @@ export default function Page() {
   useEffect(() => {
     if (!isClient) return;
     if (!isTourCompleted) {
-      startTour();
+      const isLoginFirst = localStorage.getItem('isLoginFirst');
+      if (isLoginFirst) {
+        localStorage.removeItem('isLoginFirst');
+        startTour();
+      }
     }
   }, [isClient, isTourCompleted, startTour]);
+
   if (isLoading) {
     return null;
   }
