@@ -28,12 +28,19 @@ export const TourTooltip: React.FC = () => {
 
   const step = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
+  const [isPositioned, setIsPositioned] = useState(false);
 
-  // Resolve only static routes (skip DYNAMIC_ tokens — TourContext handles those)
+  // Reset on step change or tour open — hide tooltip until element is found
+  useEffect(() => {
+    if (!isOpen) return;
+    setIsPositioned(false);
+  }, [currentStepIndex, isOpen]);
+
+  // Resolve only static routes (skip DYNAMIC_ tokens)
   const resolvedRoute =
     step?.route && !step.route.startsWith('DYNAMIC_') ? step.route : null;
 
-  // Only hide during active route transition (we're on a different page than expected)
+  // Hide during route transition
   const currentPath = pathname.split('?')[0];
   const expectedPath = resolvedRoute ? resolvedRoute.split('?')[0] : null;
   const isTransitioning = expectedPath !== null && currentPath !== expectedPath;
@@ -66,75 +73,14 @@ export const TourTooltip: React.FC = () => {
     }
 
     setCoords({ top, left, placement });
+    setIsPositioned(true);
   }, [activeElementRect]);
 
   if (!isOpen || !step) return null;
-
-  // Hide only while navigating to a different page
   if (isTransitioning) return null;
 
-  // Fallback: target element not found — render centered modal
-  if (!activeElementRect) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center p-4 z-[10000] pointer-events-none">
-        <div className="w-[340px] p-6 rounded-2xl bg-card border border-border shadow-2xl animate-in fade-in zoom-in-95 duration-200 pointer-events-auto">
-          <div className="flex items-center justify-between mb-4">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary px-2.5 py-0.5 rounded-full bg-primary-light/50">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              Onboarding Tour: {step.stepNumber}/{step.totalSteps}
-            </span>
-            <button
-              onClick={skipTour}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
-              aria-label="Skip onboarding tour"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <h3 className="text-lg font-bold text-foreground mb-2 text-left">{step.title}</h3>
-          <p className="text-sm text-muted-foreground mb-6 leading-relaxed text-left">{step.content}</p>
-
-          <div className="flex items-center justify-between pt-2 border-t border-border">
-            <button
-              onClick={skipTour}
-              className="text-xs text-muted-foreground hover:text-foreground font-semibold"
-            >
-              Skip Tour
-            </button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={prevStep}
-                disabled={currentStepIndex === 0}
-                className="h-8 text-xs font-medium border-border"
-              >
-                Back
-              </Button>
-              {isLastStep ? (
-                <Button
-                  size="sm"
-                  onClick={finishTour}
-                  className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary-dark font-semibold px-3"
-                >
-                  Finish
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={nextStep}
-                  className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary-dark font-semibold px-3"
-                >
-                  Next
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // If element not found yet — don't show anything (no center fallback)
+  if (!activeElementRect) return null;
 
   return (
     <div
@@ -142,9 +88,11 @@ export const TourTooltip: React.FC = () => {
         position: 'fixed',
         top: coords.top,
         left: coords.left,
+        visibility: isPositioned ? 'visible' : 'hidden',
       }}
-      className="w-[320px] p-5 rounded-2xl bg-card border border-border shadow-2xl z-[10000] animate-in fade-in slide-in-from-top-2 duration-300 pointer-events-auto"
+      className="w-[320px] p-5 rounded-2xl bg-card border border-border shadow-2xl z-[10000] pointer-events-auto transition-all duration-200"
     >
+      {/* Arrow pointing at target */}
       <div
         className={`absolute w-3 h-3 bg-card border-border rotate-45 z-[-1] ${
           coords.placement === 'bottom'
@@ -167,7 +115,7 @@ export const TourTooltip: React.FC = () => {
       </div>
 
       <h3 className="text-base font-bold text-foreground mb-1.5 text-left">{step.title}</h3>
-      <p className="text-[13px] text-muted-foreground mb-5 leading-relaxed text-left">{step.content}</p>
+      <p className="text-[13px] text-foreground mb-5 leading-relaxed text-left">{step.content}</p>
 
       <div className="flex items-center justify-between pt-3 border-t border-border">
         <button
