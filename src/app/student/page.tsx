@@ -1,60 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import StudentDashboard from './_pages/StudentDashboard';
-import ZoeFlashScreen from '../_components/ZoeFlashScreen';
+// import ZoeFlashScreen from '../_components/ZoeFlashScreen';
 import { useTour } from './_components/guided-tour';
 
-
 const Page = () => {
-  const [showAnnouncement, setShowAnnouncement] = useState<boolean>(false);
-  const [isClient, setIsClient] = useState<boolean>(false);
   const { startTour, isTourCompleted } = useTour();
 
   useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const isLoginFirst = localStorage.getItem('isLoginFirst');
-      setShowAnnouncement(!!isLoginFirst);
-    }
-  }, []);
+    if (isTourCompleted) return;
+    const isLoginFirst = localStorage.getItem('isLoginFirst');
+    if (!isLoginFirst) return;
+    localStorage.removeItem('isLoginFirst');
+    startTour(1);
+  }, [isTourCompleted, startTour]);
 
-  useEffect(() => {
-    if (isClient && !showAnnouncement && !isTourCompleted) {
-      startTour(1); // Start from Courses step (index 1) since we're on /student
-    }
-  }, [isClient, showAnnouncement, isTourCompleted, startTour]);
+  // const handleCloseAnnouncement = () => {
+  //   localStorage.removeItem('isLoginFirst');
+  //   if (!isTourCompleted) startTour(1);
+  // };
 
-  const handleCloseAnnouncement = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
-
-  const handleStartInterview = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
-
-
-  if (!isClient) {
-    return (
-      <div>
-        <StudentDashboard />
-      </div>
-    );
-  }
+  // const handleStartInterview = () => {
+  //   localStorage.removeItem('isLoginFirst');
+  //   if (!isTourCompleted) startTour(1);
+  // };
 
   return (
     <div>
-      <ZoeFlashScreen 
+      {/* <ZoeFlashScreen
         isOpen={showAnnouncement}
         onClose={handleCloseAnnouncement}
         onStartInterview={handleStartInterview}
-      />
+      /> */}
       <StudentDashboard />
     </div>
   );

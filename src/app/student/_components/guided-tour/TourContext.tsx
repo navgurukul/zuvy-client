@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
 
@@ -36,7 +36,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Manage your profile information, update personal details, and access account settings from here.',
     route: '/student/profile',
     stepNumber: 1,
-    totalSteps: 5,
+    totalSteps: 8,
   },
   {
     id: 'courses',
@@ -45,7 +45,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'View your enrolled courses and continue your learning journey from this section.',
     route: '/student',
     stepNumber: 2,
-    totalSteps: 5,
+    totalSteps: 8,
   },
   {
     id: 'mentorship',
@@ -54,7 +54,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Connect with mentors and receive personalized guidance to accelerate your learning and career growth.',
     route: 'DYNAMIC_COURSE_SYLLABUS',
     stepNumber: 3,
-    totalSteps: 5,
+    totalSteps: 8,
   },
   {
     id: 'browse-mentors',
@@ -63,7 +63,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Explore available mentors, view their profiles, and book mentorship sessions based on your interests and goals.',
     route: 'DYNAMIC_MENTORS',
     stepNumber: 4,
-    totalSteps: 5,
+    totalSteps: 8,
   },
   {
     id: 'book-session',
@@ -71,8 +71,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Book a Session',
     content: 'Click on any available mentor to view their available slots and book a mentorship session.',
     route: 'DYNAMIC_MENTORS',
-    stepNumber: 4,
-    totalSteps: 5,
+    stepNumber: 5,
+    totalSteps: 8,
   },
   {
     id: 'my-sessions',
@@ -80,8 +80,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'My Sessions',
     content: 'Track all your mentorship sessions in one place.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 5,
-    totalSteps: 5,
+    stepNumber: 6,
+    totalSteps: 8,
   },
   {
     id: 'upcoming-sessions',
@@ -89,8 +89,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Upcoming Sessions',
     content: 'View all your upcoming booked mentorship sessions here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 5,
-    totalSteps: 5,
+    stepNumber: 7,
+    totalSteps: 8,
   },
   {
     id: 'completed-sessions',
@@ -98,8 +98,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Completed Sessions',
     content: 'Review your completed mentorship sessions and learning history here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 5,
-    totalSteps: 5,
+    stepNumber: 8,
+    totalSteps: 8,
   },
 ];
 
@@ -180,15 +180,49 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return stepRoute;
   }, [studentData]);
 
+  // Stable ref so polling effect doesn't restart when studentData loads mid-tour
+  const getActualRouteRef = useRef(getActualRoute);
+  useEffect(() => {
+    getActualRouteRef.current = getActualRoute;
+  }, [getActualRoute]);
+
+  const pendingStepRef = useRef<TourStepConfig | null>(null);
+
   const navigateToStepRoute = useCallback((step: TourStepConfig) => {
     const actualRoute = getActualRoute(step.route);
-    if (actualRoute) {
-      const getPathOnly = (url: string) => url.split('?')[0];
-      if (getPathOnly(pathname) !== getPathOnly(actualRoute)) {
-        router.push(actualRoute);
-      }
+    const getPathOnly = (url: string) => url.split('?')[0];
+
+    // If DYNAMIC route resolved to fallback '/student' but studentData not loaded yet,
+    // store pending step and retry when studentData arrives
+    const isDynamic = step.route?.startsWith('DYNAMIC_');
+    const studentDataReady = !!studentData?.inProgressBootcamps;
+
+    if (isDynamic && !studentDataReady) {
+      pendingStepRef.current = step;
+      return;
     }
-  }, [pathname, router, getActualRoute]);
+
+    pendingStepRef.current = null;
+
+    if (actualRoute && getPathOnly(pathname) !== getPathOnly(actualRoute)) {
+      router.push(actualRoute);
+    }
+  }, [pathname, router, getActualRoute, studentData]);
+
+  // Retry pending navigation once studentData is available
+  useEffect(() => {
+    if (!pendingStepRef.current) return;
+    if (!studentData?.inProgressBootcamps) return;
+
+    const step = pendingStepRef.current;
+    pendingStepRef.current = null;
+
+    const actualRoute = getActualRoute(step.route);
+    const getPathOnly = (url: string) => url.split('?')[0];
+    if (actualRoute && getPathOnly(pathname) !== getPathOnly(actualRoute)) {
+      router.push(actualRoute);
+    }
+  }, [studentData, getActualRoute, pathname, router]);
 
   const nextStep = useCallback(() => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -235,43 +269,41 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const step = TOUR_STEPS[currentStepIndex];
     if (!step) return;
 
-    // Check if we are on the correct route first
-    const actualRoute = getActualRoute(step.route);
+    // Use ref so studentData loading mid-tour doesn't restart polling
+    const actualRoute = getActualRouteRef.current(step.route);
     const getPathOnly = (url: string) => url.split('?')[0];
     if (actualRoute && getPathOnly(pathname) !== getPathOnly(actualRoute)) {
-      setActiveElementRect(null); // Keep overlay solid during route transition
+      setActiveElementRect(null);
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = 30; // 3 seconds max polling time
+    const maxAttempts = 30;
 
     const interval = setInterval(() => {
       const element = document.querySelector(step.targetSelector);
       if (element) {
         clearInterval(interval);
-        
-        // Element found, record bounds
-        setActiveElementRect(element.getBoundingClientRect());
-        
-        // Scroll target element to center smoothly if needed
         element.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
           inline: 'nearest',
         });
+        setTimeout(() => {
+          setActiveElementRect(element.getBoundingClientRect());
+        }, 400);
       } else {
         attempts++;
         if (attempts >= maxAttempts) {
           clearInterval(interval);
           console.warn(`[Tour] target selector "${step.targetSelector}" not found after 3s.`);
-          setActiveElementRect(null); // Fallback to centered modal tooltip
+          setActiveElementRect(null);
         }
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [currentStepIndex, pathname, isOpen, getActualRoute]);
+  }, [currentStepIndex, pathname, isOpen]); // removed getActualRoute — using stable ref instead
 
   // Event listeners for window resize / scroll (with capturing) to update bounding rects
   useEffect(() => {

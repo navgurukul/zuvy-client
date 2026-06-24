@@ -27,6 +27,7 @@ import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
 import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/hooks/useLearnerProfile";
+import { useTour } from "@/app/student/_components/guided-tour";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -54,11 +55,13 @@ const StudentDashboard = () => {
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
   const displayProgress = strengthPercentage ?? 0;
 
+  const { isOpen: isTourOpen } = useTour();
+
   useEffect(() => {
-    if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
+    if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse && !isTourOpen) {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}/org/${studentData?.inProgressBootcamps[0].organizationId}`);
     }
-  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
+  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps, isTourOpen]);
 
   const handleEnrollCourse = async (bootcampId: number) => {
     if (!bootcampId || isEnrolling) return;
