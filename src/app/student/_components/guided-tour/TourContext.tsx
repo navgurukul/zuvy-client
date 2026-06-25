@@ -36,7 +36,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Manage your profile information, update personal details, and access account settings from here.',
     route: '/student/profile',
     stepNumber: 1,
-    totalSteps: 8,
+    totalSteps: 9,
   },
   {
     id: 'courses',
@@ -45,7 +45,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'View your enrolled courses and continue your learning journey from this section.',
     route: '/student',
     stepNumber: 2,
-    totalSteps: 8,
+    totalSteps: 9,
   },
   {
     id: 'mentorship',
@@ -54,7 +54,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Connect with mentors and receive personalized guidance to accelerate your learning and career growth.',
     route: 'DYNAMIC_COURSE_SYLLABUS',
     stepNumber: 3,
-    totalSteps: 8,
+    totalSteps: 9,
   },
   {
     id: 'browse-mentors',
@@ -63,7 +63,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Explore available mentors, view their profiles, and book mentorship sessions based on your interests and goals.',
     route: 'DYNAMIC_MENTORS',
     stepNumber: 4,
-    totalSteps: 8,
+    totalSteps: 9,
   },
   {
     id: 'book-session',
@@ -72,7 +72,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Click on any available mentor to view their available slots and book a mentorship session.',
     route: 'DYNAMIC_MENTORS',
     stepNumber: 5,
-    totalSteps: 8,
+    totalSteps: 9,
   },
   {
     id: 'my-sessions',
@@ -81,7 +81,16 @@ const TOUR_STEPS: TourStepConfig[] = [
     content: 'Track all your mentorship sessions in one place.',
     route: 'DYNAMIC_SESSIONS',
     stepNumber: 6,
-    totalSteps: 8,
+    totalSteps: 9,
+  },
+  {
+    id: 'all-sessions',
+    targetSelector: '#tour-all-sessions',
+    title: 'All Sessions',
+    content: 'View all your sessions in one place — upcoming, in progress, completed, and cancelled.',
+    route: 'DYNAMIC_SESSIONS',
+    stepNumber: 7,
+    totalSteps: 9,
   },
   {
     id: 'upcoming-sessions',
@@ -89,8 +98,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Upcoming Sessions',
     content: 'View all your upcoming booked mentorship sessions here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 7,
-    totalSteps: 8,
+    stepNumber: 8,
+    totalSteps: 9,
   },
   {
     id: 'completed-sessions',
@@ -98,8 +107,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Completed Sessions',
     content: 'Review your completed mentorship sessions and learning history here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 8,
-    totalSteps: 8,
+    stepNumber: 9,
+    totalSteps: 9,
   },
 ];
 
