@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
+import { useOnboardingStorage } from '@/hooks/use-profile';
+import { api } from '@/utils/axios.config';
 
 export interface TourStepConfig {
   id: string;
@@ -120,11 +122,69 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const pathname = usePathname();
   const { studentData } = useStudentData();
-  
+  const { onboardingData } = useOnboardingStorage();
+
   const [isOpen, setIsOpen] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [activeElementRect, setActiveElementRect] = useState<DOMRect | null>(null);
   const [isTourCompleted, setIsTourCompleted] = useState(false);
+  const [hasMentorshipEnabled, setHasMentorshipEnabled] = useState<boolean | null>(null);
+
+  // Fetch settings for all student bootcamps to check if mentorship is enabled
+  useEffect(() => {
+    if (!studentData) return;
+
+    const bootcampIds = Array.from(new Set([
+      ...(studentData.inProgressBootcamps || []).map(b => b.id),
+      ...(studentData.completedBootcamps || []).map(b => b.id)
+    ]));
+
+    if (bootcampIds.length === 0) {
+      setHasMentorshipEnabled(false);
+      return;
+    }
+
+    let isMounted = true;
+    const checkMentorship = async () => {
+      try {
+        const results = await Promise.all(
+          bootcampIds.map(id => api.get(`/tracking/latestUpdatedCourse?bootcampId=${id}`).catch(() => null))
+        );
+
+        const anyMentorshipEnabled = results.some(res => {
+          if (!res || !res.data) return false;
+          return res.data.mentorshipEnabled === true;
+        });
+
+        if (isMounted) {
+          setHasMentorshipEnabled(anyMentorshipEnabled);
+        }
+      } catch (err) {
+        console.error('Error checking mentorship settings:', err);
+        if (isMounted) {
+          setHasMentorshipEnabled(false);
+        }
+      }
+    };
+
+    checkMentorship();
+    return () => {
+      isMounted = false;
+    };
+  }, [studentData]);
+
+  // Dynamically filter tour steps based on mentorship settings
+  const steps = React.useMemo(() => {
+    const filtered = hasMentorshipEnabled === true
+      ? TOUR_STEPS
+      : TOUR_STEPS.filter(step => step.id === 'profile' || step.id === 'courses');
+
+    return filtered.map((step, index) => ({
+      ...step,
+      stepNumber: index + 1,
+      totalSteps: filtered.length,
+    }));
+  }, [hasMentorshipEnabled]);
 
   // Check initial completion status from localStorage
   useEffect(() => {
@@ -139,7 +199,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsOpen(true);
   }, []);
 
-  const skipTour = useCallback(() => {
+  const skipTour = useCallback(async () => {
     setIsOpen(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
@@ -147,13 +207,48 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const finishTour = useCallback(() => {
+  const finishTour = useCallback(async () => {
     setIsOpen(false);
+    
     if (typeof window !== 'undefined') {
       localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
       setIsTourCompleted(true);
     }
-  }, []);
+
+    try {
+      // Check actual backend profile strength to avoid stale localStorage data
+      const res = await api.get('/learner-profile/strength');
+      const isComplete = 
+        res.data?.isProfileComplete === true || 
+        res.data?.data?.isProfileComplete === true || 
+        res.data?.profileCompletion === 100;
+        
+      if (isComplete) {
+        router.push('/student');
+      } else {
+        router.push('/student/profile');
+      }
+    } catch (err) {
+      console.error('Error fetching profile strength during finishTour:', err);
+      // Fallback to local storage
+      let isCompleted = onboardingData?.isCompleted;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('zuvy_onboarding_data');
+        if (stored) {
+          try {
+            const parsedData = JSON.parse(stored);
+            isCompleted = parsedData.isCompleted;
+          } catch (e) {}
+        }
+      }
+
+      if (isCompleted) {
+        router.push('/student');
+      } else {
+        router.push('/student/profile');
+      }
+    }
+  }, [onboardingData, router]);
 
   const resetTour = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -234,30 +329,30 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [studentData, getActualRoute, pathname, router]);
 
   const nextStep = useCallback(() => {
-    if (currentStepIndex < TOUR_STEPS.length - 1) {
+    if (currentStepIndex < steps.length - 1) {
       const nextIndex = currentStepIndex + 1;
       setActiveElementRect(null);
       setCurrentStepIndex(nextIndex);
-      navigateToStepRoute(TOUR_STEPS[nextIndex]);
+      navigateToStepRoute(steps[nextIndex]);
     } else {
       finishTour();
     }
-  }, [currentStepIndex, navigateToStepRoute, finishTour]);
+  }, [currentStepIndex, steps, navigateToStepRoute, finishTour]);
 
   const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
       const prevIndex = currentStepIndex - 1;
       setActiveElementRect(null);
       setCurrentStepIndex(prevIndex);
-      navigateToStepRoute(TOUR_STEPS[prevIndex]);
+      navigateToStepRoute(steps[prevIndex]);
     }
-  }, [currentStepIndex, navigateToStepRoute]);
+  }, [currentStepIndex, steps, navigateToStepRoute]);
 
   // Track target element size & position updates
   const updateActiveRect = useCallback(() => {
     if (!isOpen) return;
-    
-    const step = TOUR_STEPS[currentStepIndex];
+
+    const step = steps[currentStepIndex];
     if (!step) return;
 
     const element = document.querySelector(step.targetSelector);
@@ -266,7 +361,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       setActiveElementRect(null);
     }
-  }, [isOpen, currentStepIndex]);
+  }, [isOpen, currentStepIndex, steps]);
 
   // Handle polling for dynamic elements (especially during routing)
   useEffect(() => {
@@ -275,7 +370,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    const step = TOUR_STEPS[currentStepIndex];
+    const step = steps[currentStepIndex];
     if (!step) return;
 
     // Use ref so studentData loading mid-tour doesn't restart polling
@@ -312,7 +407,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 100);
 
     return () => clearInterval(interval);
-  }, [currentStepIndex, pathname, isOpen]); // removed getActualRoute — using stable ref instead
+  }, [currentStepIndex, pathname, isOpen, steps]); // removed getActualRoute — using stable ref instead
 
   // Event listeners for window resize / scroll (with capturing) to update bounding rects
   useEffect(() => {
@@ -357,7 +452,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         isOpen,
         currentStepIndex,
-        steps: TOUR_STEPS,
+        steps,
         activeElementRect,
         isTourCompleted,
         startTour,
