@@ -20,29 +20,20 @@ import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
-    BootcampData,
     PageParams,
     IndividualStudentData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const [individualStudentData, setIndividualStudentData] =
         useState<IndividualStudentData | null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [assignmentTitle, setAssignmentTItle] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
     const [urls, setUrls] = useState<string[]>([])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {}
-    }, [params.courseId])
 
     useEffect(() => {
         const fetchIndividualStudentStatus = async () => {
@@ -85,8 +76,7 @@ const Page = ({ params }: PageParams) => {
         }
 
         fetchIndividualStudentStatus()
-        getBootcampHandler()
-    }, [params.assignmentData, params.individualStatus, getBootcampHandler])
+    }, [params.assignmentData, params.individualStatus])
 
     const dateString = individualStudentData?.completedAt
     const date = new Date(dateString?.toString())

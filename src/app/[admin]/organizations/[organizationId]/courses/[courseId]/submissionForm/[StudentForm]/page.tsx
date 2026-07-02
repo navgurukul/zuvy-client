@@ -29,6 +29,7 @@ import {
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 type Props = {}
 interface Batch {
@@ -54,7 +55,7 @@ const Page = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const [studentStatus, setStudentStatus] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<any>()
+    useCourseExistenceCheck(params.courseId)
     const [totalStudents, setTotalStudents] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
@@ -66,7 +67,7 @@ const Page = ({ params }: any) => {
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     // Separate state for overall statistics (NEVER changes during search)
     const [overallStats, setOverallStats] = useState({
@@ -152,7 +153,7 @@ const Page = ({ params }: any) => {
             queryParams.append('limit', '5')
             queryParams.append('offset', '0')
             queryParams.append('searchStudent', query)
-            
+
             if (selectedBatch !== 'all') {
                 queryParams.append('batchId', selectedBatch)
             }
@@ -175,20 +176,20 @@ const Page = ({ params }: any) => {
         async (query: string) => {
             if (!moduleId) return []
             setLoading(true)
-            
+
             const queryParams = new URLSearchParams()
             queryParams.append('limit', position.toString())
             queryParams.append('offset', offset.toString())
             queryParams.append('searchStudent', query)
-            
+
             if (selectedBatch !== 'all') {
                 queryParams.append('batchId', selectedBatch)
             }
-            
+
             if (sortField) {
                 queryParams.append('orderBy', sortField)
             }
-            
+
             if (sortDirection) {
                 queryParams.append('orderDirection', sortDirection)
             }
@@ -219,19 +220,19 @@ const Page = ({ params }: any) => {
     const defaultFetchApi = useCallback(async () => {
         if (!moduleId) return []
         setLoading(true)
-        
+
         const queryParams = new URLSearchParams()
         queryParams.append('limit', position.toString())
         queryParams.append('offset', offset.toString())
-        
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-        
+
         if (sortField) {
             queryParams.append('orderBy', sortField)
         }
-        
+
         if (sortDirection) {
             queryParams.append('orderDirection', sortDirection)
         }
@@ -257,19 +258,6 @@ const Page = ({ params }: any) => {
         return data
     }, [params.courseId, params.StudentForm, moduleId, position, offset, selectedBatch, sortField, sortDirection])
 
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description: 'Error fetching bootcamps',
-                variant: 'destructive',
-            })
-        }
-    }, [params.courseId])
-
     const getChapterDetails = useCallback(async () => {
         try {
             const res = await api.get(
@@ -287,37 +275,37 @@ const Page = ({ params }: any) => {
 
     const handleVideoDownloadCsv = useCallback(() => {
         if (!moduleId) return
-    
+
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-    
+
         const currentSearchQuery = searchParams.get('search')
         if (currentSearchQuery) {
             queryParams.append('searchStudent', currentSearchQuery)
         }
-    
+
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
+
         downloadCsv({
             endpoint: `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`,
-    
+
             fileName: `feedback_${chapterDetails?.title || 'submissions'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'combinedData',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'email' },
                 { header: 'Batch', key: 'batchName' },
                 { header: 'Status', key: 'status' },
             ],
-    
+
             mapData: (item: any) => ({
                 name: item.name || '',
                 email: item.email || '',
@@ -325,8 +313,8 @@ const Page = ({ params }: any) => {
                 status: item.status || '',
             }),
         })
-    }, [moduleId,params.courseId,params.StudentForm,selectedBatch,searchParams,sortField,sortDirection,chapterDetails,])
-    
+    }, [moduleId, params.courseId, params.StudentForm, selectedBatch, searchParams, sortField, sortDirection, chapterDetails,])
+
     const handleBatchChange = useCallback((value: string) => {
         setSelectedBatch(value)
     }, [])
@@ -358,7 +346,6 @@ const Page = ({ params }: any) => {
             if (!moduleId) return
 
             await Promise.all([
-                getBootcampHandler(), 
                 getChapterDetails(),
                 fetchBatches()
             ])
@@ -367,7 +354,7 @@ const Page = ({ params }: any) => {
         }
 
         initializeData()
-    }, [moduleId, getBootcampHandler, getChapterDetails, fetchBatches, fetchOverallStats])
+    }, [moduleId, getChapterDetails, fetchBatches, fetchOverallStats])
 
     // Pagination effect - this will handle data fetching based on search state
     useEffect(() => {
@@ -507,8 +494,8 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable 
-                        data={studentStatus || []} 
+                    <DataTable
+                        data={studentStatus || []}
                         columns={columns}
                         onSortingChange={handleSortingChange}
                     />
