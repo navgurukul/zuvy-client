@@ -154,6 +154,7 @@ export interface Session {
   status: string;
   attendance: string;
   duration: number;
+  batchId?: number;
 }
 
 export interface LiveClassContentProps {
