@@ -78,9 +78,8 @@ export const TourTooltip: React.FC = () => {
 
   if (!isOpen || !step) return null;
   if (isTransitioning) return null;
-
-  // If element not found yet — don't show anything (no center fallback)
   if (!activeElementRect) return null;
+  if (!isPositioned) return null;
 
   return (
     <div
@@ -88,7 +87,6 @@ export const TourTooltip: React.FC = () => {
         position: 'fixed',
         top: coords.top,
         left: coords.left,
-        visibility: isPositioned ? 'visible' : 'hidden',
       }}
       className="w-[320px] p-5 rounded-2xl bg-card border border-border shadow-2xl z-[10000] pointer-events-auto transition-all duration-200"
     >

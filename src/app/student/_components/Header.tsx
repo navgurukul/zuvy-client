@@ -44,11 +44,11 @@ const Header = () => {
     }
 
     const handleLogoClick = () => {
-        router.push('/student')
+        router.push('/student?stay=dashboard')
     }
 
     const handleDashboardClick = () => {
-        router.push(`/student`)
+        router.push('/student?stay=dashboard')
     }
 
     const getCurrentCourseId = () => {
