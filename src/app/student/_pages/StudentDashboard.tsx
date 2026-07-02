@@ -233,7 +233,7 @@ const StudentDashboard = () => {
                 </p>
               </div>
 
-              <TooltipProvider delayDuration={200}>
+              {/* <TooltipProvider delayDuration={200}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href="/student/reactplayground" className="group flex items-center gap-2.5 bg-background hover:bg-primary/5 border border-border hover:border-primary/30 text-foreground px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300 text-sm font-medium sm:mb-1">
@@ -249,7 +249,7 @@ const StudentDashboard = () => {
                     <p className="text-xs flex text-muted-foreground">Practice writing React components directly in your browser with live previews. No setup required. NPM Packages are supported</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
+              </TooltipProvider> */}
             </div>
 
             <Card className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
