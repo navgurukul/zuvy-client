@@ -128,63 +128,14 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [activeElementRect, setActiveElementRect] = useState<DOMRect | null>(null);
   const [isTourCompleted, setIsTourCompleted] = useState(false);
-  const [hasMentorshipEnabled, setHasMentorshipEnabled] = useState<boolean | null>(null);
-
-  // Fetch settings for all student bootcamps to check if mentorship is enabled
-  useEffect(() => {
-    if (!studentData) return;
-
-    const bootcampIds = Array.from(new Set([
-      ...(studentData.inProgressBootcamps || []).map(b => b.id),
-      ...(studentData.completedBootcamps || []).map(b => b.id)
-    ]));
-
-    if (bootcampIds.length === 0) {
-      setHasMentorshipEnabled(false);
-      return;
-    }
-
-    let isMounted = true;
-    const checkMentorship = async () => {
-      try {
-        const results = await Promise.all(
-          bootcampIds.map(id => api.get(`/tracking/latestUpdatedCourse?bootcampId=${id}`).catch(() => null))
-        );
-
-        const anyMentorshipEnabled = results.some(res => {
-          if (!res || !res.data) return false;
-          return res.data.mentorshipEnabled === true;
-        });
-
-        if (isMounted) {
-          setHasMentorshipEnabled(anyMentorshipEnabled);
-        }
-      } catch (err) {
-        console.error('Error checking mentorship settings:', err);
-        if (isMounted) {
-          setHasMentorshipEnabled(false);
-        }
-      }
-    };
-
-    checkMentorship();
-    return () => {
-      isMounted = false;
-    };
-  }, [studentData]);
-
-  // Dynamically filter tour steps based on mentorship settings
+  // Keep the full 9-step tour available at all times.
   const steps = React.useMemo(() => {
-    const filtered = hasMentorshipEnabled === true
-      ? TOUR_STEPS
-      : TOUR_STEPS.filter(step => step.id === 'profile' || step.id === 'courses');
-
-    return filtered.map((step, index) => ({
+    return TOUR_STEPS.map((step, index) => ({
       ...step,
       stepNumber: index + 1,
-      totalSteps: filtered.length,
+      totalSteps: TOUR_STEPS.length,
     }));
-  }, [hasMentorshipEnabled]);
+  }, []);
 
   // Check initial completion status from localStorage
   useEffect(() => {
@@ -331,7 +282,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const nextStep = useCallback(() => {
     if (currentStepIndex < steps.length - 1) {
       const nextIndex = currentStepIndex + 1;
-      setActiveElementRect(null);
+      // setActiveElementRect(null);
       setCurrentStepIndex(nextIndex);
       navigateToStepRoute(steps[nextIndex]);
     } else {
@@ -342,7 +293,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
       const prevIndex = currentStepIndex - 1;
-      setActiveElementRect(null);
+      // setActiveElementRect(null);
       setCurrentStepIndex(prevIndex);
       navigateToStepRoute(steps[prevIndex]);
     }
@@ -376,11 +327,24 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Use ref so studentData loading mid-tour doesn't restart polling
     const actualRoute = getActualRouteRef.current(step.route);
     const getPathOnly = (url: string) => url.split('?')[0];
-    if (actualRoute && getPathOnly(pathname) !== getPathOnly(actualRoute)) {
-      setActiveElementRect(null);
+
+    // If the target element is already present in the DOM (e.g. a header item that
+    // exists across pages), set rect immediately so the tooltip does not vanish
+    // during route transitions. Otherwise start polling and wait for the element
+    // to appear on the destination page.
+    const immediateElement = document.querySelector(step.targetSelector);
+    if (immediateElement) {
+      immediateElement.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        const el = document.querySelector(step.targetSelector);
+        if (el) setActiveElementRect(el.getBoundingClientRect());
+      });
       return;
     }
 
+    // If element not present now and route doesn't match expected destination,
+    // keep polling — don't hide the tooltip aggressively. This allows transitions
+    // where header elements persist across pages to remain visible.
     let attempts = 0;
     const maxAttempts = 30;
 
@@ -388,19 +352,19 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const element = document.querySelector(step.targetSelector);
       if (element) {
         clearInterval(interval);
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest',
+        element.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+        requestAnimationFrame(() => {
+          const el = document.querySelector(step.targetSelector);
+          if (el) setActiveElementRect(el.getBoundingClientRect());
         });
-        setTimeout(() => {
-          setActiveElementRect(element.getBoundingClientRect());
-        }, 400);
-      } else {
+      }
+      else {
         attempts++;
         if (attempts >= maxAttempts) {
           clearInterval(interval);
-          console.warn(`[Tour] target selector "${step.targetSelector}" not found after 3s.`);
+          console.warn(`[Tour] target selector "${step.targetSelector}" not found after ${
+            (maxAttempts * 100) / 1000
+          }s.`);
           setActiveElementRect(null);
         }
       }
