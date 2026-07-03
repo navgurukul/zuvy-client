@@ -1,5 +1,6 @@
 'use client';
 import Header from './_components/Header'
+import { TourProvider, TourOverlay, TourTooltip } from './_components/guided-tour';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense, useState } from 'react';
 import { getUser, useThemeStore } from '@/store/store';
@@ -90,22 +91,26 @@ function StudentLayoutContent({
     };
 
     return (
-        <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
+        <TourProvider>
+            <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
 
-            <ThemeInitializer />
-            <div className="sticky top-0 z-50">
-                <ZoeBanner 
-                    isVisible={showZoeBanner}
-                    onDismiss={handleDismissBanner}
-                    onStartInterview={handleStartInterview}
-                    onGiveFeedback={handleGiveFeedback}
-                />
-                {!hideHeader && !isOnCourseModulePage && <Header />}
+                <ThemeInitializer />
+                <div className="sticky top-0 z-50">
+                    <ZoeBanner 
+                        isVisible={showZoeBanner}
+                        onDismiss={handleDismissBanner}
+                        onStartInterview={handleStartInterview}
+                        onGiveFeedback={handleGiveFeedback}
+                    />
+                    {!hideHeader && !isOnCourseModulePage && <Header />}
+                </div>
+                <main id="main-scroll-container" className="flex-1 overflow-y-auto">
+                    {children}
+                </main>
+                <TourOverlay />
+                <TourTooltip />
             </div>
-            <main id="main-scroll-container" className="flex-1 overflow-y-auto">
-                {children}
-            </main>
-        </div>
+        </TourProvider>
     )
 }
 

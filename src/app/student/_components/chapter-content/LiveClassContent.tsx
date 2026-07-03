@@ -3,11 +3,11 @@ import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Play, Check, VideoIcon } from 'lucide-react'
+import { Check, VideoIcon, Lock } from 'lucide-react'
 import useChapterCompletion from '@/hooks/useChapterCompletion'
+import useCourseSyllabus from '@/hooks/useCourseSyllabus'
 import { getEmbedLink } from '@/utils/students'
 import {
-    Session,
     LiveClassContentProps,
 } from '@/app/student/_components/chapter-content/componentChapterType'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -22,6 +22,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
 }) => {
     const { courseId, moduleId } = useParams()
     const { progress, setProgress } = useVideoStore()
+
+    // Get student's own batch ID to check against the session's batch
+    const { syllabusData } = useCourseSyllabus(courseId as string)
+    const studentBatchId = syllabusData?.studentBatchId ?? null
 
     const playerRef = useRef<ReactPlayer>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -239,7 +243,15 @@ if (loading) {
         hangoutLink: session.hangoutLink,
         s3link: session.s3link,
         attendance: session.attendance,
+        batchId: session.batchId,
     }
+
+    // Batch restriction: if we know the session's batch and the student's batch,
+    // and they don't match → student is not allowed to join this session
+    const isWrongBatch =
+        typeof studentBatchId === 'number' &&
+        typeof item.batchId === 'number' &&
+        item.batchId !== studentBatchId
 
     if (item.type === 'live-class') {
         const isScheduled = item.status === 'upcoming'
@@ -328,19 +340,33 @@ if (loading) {
                         </div>
                     </div>
                     <div className="text-left">
-                        <Button
-                            className="mb-6 text-left font-semibold bg-primary hover:bg-primary-dark text-white"
-                            onClick={() =>
-                                item.hangoutLink &&
-                                window.open(item.hangoutLink, '_blank')
-                            }
-                            disabled={
-                                !item.hangoutLink ||
-                                item.hangoutLink === 'not found'
-                            }
-                        >
-                            Join Class
-                        </Button>
+                        {isWrongBatch ? (
+                            <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 mb-6">
+                                <Lock className="w-5 h-5 text-destructive flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-semibold text-destructive">
+                                        Session not available for your batch
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                        This live session was scheduled for a different batch. Please check your batch schedule.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <Button
+                                className="mb-6 text-left font-semibold bg-primary hover:bg-primary-dark text-white"
+                                onClick={() =>
+                                    item.hangoutLink &&
+                                    window.open(item.hangoutLink, '_blank')
+                                }
+                                disabled={
+                                    !item.hangoutLink ||
+                                    item.hangoutLink === 'not found'
+                                }
+                            >
+                                Join Class
+                            </Button>
+                        )}
                     </div>
                 </div>
             )

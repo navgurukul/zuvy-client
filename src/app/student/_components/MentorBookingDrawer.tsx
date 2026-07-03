@@ -397,14 +397,13 @@ export default function MentorBookingDrawer({
                       ) : null}
                     </div>
                   )}
-
                   <Button
-                    onClick={handleBook}
-                    disabled={!canBook}
-                    className="h-10 w-full bg-green-800 text-white hover:bg-green-900 text-sm font-medium cursor-not-allowed"
-                  >
-                    {isBooking ? "Booking..." : "Book this Session"}
-                  </Button>
+                      onClick={handleBook}
+                      disabled={!canBook}
+                      className="h-10 w-full bg-green-800 text-white text-sm font-medium cursor-pointer hover:bg-green-900 disabled:cursor-not-allowed  disabled:hover:bg-green-800"
+                    >
+                      {isBooking ? "Booking..." : "Book this Session"}
+                    </Button>
                 </div>
               </div>
             )}

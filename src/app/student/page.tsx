@@ -1,55 +1,52 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import StudentDashboard from './_pages/StudentDashboard';
-import ZoeFlashScreen from '../_components/ZoeFlashScreen';
+// import ZoeFlashScreen from '../_components/ZoeFlashScreen';
+import { useTour } from './_components/guided-tour';
+import { useOnboardingStorage } from '@/hooks/use-profile';
 
 const Page = () => {
-  const [showAnnouncement, setShowAnnouncement] = useState<boolean>(false);
-  const [isClient, setIsClient] = useState<boolean>(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { startTour, isTourCompleted, isOpen } = useTour();
+  const { onboardingData, isLoading } = useOnboardingStorage();
+  const stayOnDashboard = searchParams.get('stay') === 'dashboard';
 
+  // Route guard: Redirect to profile page if profile is incomplete
   useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const isLoginFirst = localStorage.getItem('isLoginFirst');
-      setShowAnnouncement(!!isLoginFirst);
+    if (isLoading) return;
+    if (isOpen || isTourCompleted) return; // Bypass if tour is active or was just completed/skipped
+    if (onboardingData && !onboardingData.isCompleted && !stayOnDashboard) {
+      router.push('/student/profile');
     }
-    if (typeof window !== 'undefined') {
-      const isLoginFirst = localStorage.getItem('isLoginFirst');
-      setShowAnnouncement(!!isLoginFirst);
-    }
-  }, []);
+  }, [onboardingData, isLoading, router, isOpen, isTourCompleted, stayOnDashboard]);
 
-  const handleCloseAnnouncement = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
+  // Start guided tour if necessary and profile is completed
+  useEffect(() => {
+    if (isLoading) return;
+    if (onboardingData && !onboardingData.isCompleted) return;
 
-  const handleStartInterview = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
+    if (isTourCompleted) return;
+    const isLoginFirst = localStorage.getItem('isLoginFirst');
+    if (!isLoginFirst) return;
+    localStorage.removeItem('isLoginFirst');
+    startTour(1);
+  }, [isTourCompleted, startTour, onboardingData, isLoading]);
 
-
-  if (!isClient) {
-    return (
-      <div>
-        <StudentDashboard />
-      </div>
-    );
+  // Return null during loading or redirecting to prevent UI flash (bypass during tour)
+  if (isLoading || (!isOpen && !isTourCompleted && onboardingData && !onboardingData.isCompleted && !stayOnDashboard)) {
+    return null;
   }
 
   return (
     <div>
-      <ZoeFlashScreen 
+      {/* <ZoeFlashScreen
         isOpen={showAnnouncement}
         onClose={handleCloseAnnouncement}
         onStartInterview={handleStartInterview}
-      />
+      /> */}
       <StudentDashboard />
     </div>
   );

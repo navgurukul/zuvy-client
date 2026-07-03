@@ -44,11 +44,11 @@ const Header = () => {
     }
 
     const handleLogoClick = () => {
-        router.push('/student')
+        router.push('/student?stay=dashboard')
     }
 
     const handleDashboardClick = () => {
-        router.push(`/student`)
+        router.push('/student?stay=dashboard')
     }
 
     const getCurrentCourseId = () => {
@@ -295,6 +295,7 @@ const Header = () => {
                         </Button>
                         {showMentorshipNavLink && (
                             <Button
+                                id="tour-mentorship"
                                 variant="link"
                                 size="sm"
                                 onClick={handleMentorshipClick}
