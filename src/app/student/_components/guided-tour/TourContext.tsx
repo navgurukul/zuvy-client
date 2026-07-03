@@ -30,7 +30,26 @@ interface TourContextType {
   resetTour: () => void;
 }
 
-const TOUR_STEPS: TourStepConfig[] = [
+// IDs of steps that require mentorship to be enabled for the course
+const MENTORSHIP_STEP_IDS = new Set([
+  'mentorship',
+  'browse-mentors',
+  'book-session',
+  'my-sessions',
+  'all-sessions',
+  'upcoming-sessions',
+  'completed-sessions',
+]);
+
+const MENTORSHIP_SUBSEQUENT_STEP_IDS = new Set([
+  'book-session',
+  'my-sessions',
+  'all-sessions',
+  'upcoming-sessions',
+  'completed-sessions',
+]);
+
+const getTourSteps = (mentorshipEnabled: boolean): TourStepConfig[] => [
   {
     id: 'profile',
     targetSelector: '#tour-profile',
@@ -50,12 +69,23 @@ const TOUR_STEPS: TourStepConfig[] = [
     totalSteps: 9,
   },
   {
+    id: 'course-syllabus',
+    targetSelector: '#tour-course-syllabus',
+    title: 'Course Syllabus',
+    content: mentorshipEnabled
+      ? 'Browse all modules and chapters of your course here. Mentorship is enabled for this course — you can connect with mentors for personalised guidance.'
+      : 'Browse all modules and chapters of your course here.',
+    route: 'DYNAMIC_COURSE_SYLLABUS',
+    stepNumber: 3,
+    totalSteps: 9,
+  },
+  {
     id: 'mentorship',
     targetSelector: '#tour-mentorship',
     title: 'Mentorship',
     content: 'Connect with mentors and receive personalized guidance to accelerate your learning and career growth.',
     route: 'DYNAMIC_COURSE_SYLLABUS',
-    stepNumber: 3,
+    stepNumber: 4,
     totalSteps: 9,
   },
   {
@@ -64,7 +94,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Browse Mentors',
     content: 'Explore available mentors, view their profiles, and book mentorship sessions based on your interests and goals.',
     route: 'DYNAMIC_MENTORS',
-    stepNumber: 4,
+    stepNumber: 5,
     totalSteps: 9,
   },
   {
@@ -73,7 +103,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Book a Session',
     content: 'Click on any available mentor to view their available slots and book a mentorship session.',
     route: 'DYNAMIC_MENTORS',
-    stepNumber: 5,
+    stepNumber: 6,
     totalSteps: 9,
   },
   {
@@ -82,7 +112,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'My Sessions',
     content: 'Track all your mentorship sessions in one place.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 6,
+    stepNumber: 7,
     totalSteps: 9,
   },
   {
@@ -91,7 +121,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'All Sessions',
     content: 'View all your sessions in one place — upcoming, in progress, completed, and cancelled.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 7,
+    stepNumber: 8,
     totalSteps: 9,
   },
   {
@@ -100,7 +130,7 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Upcoming Sessions',
     content: 'View all your upcoming booked mentorship sessions here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 8,
+    stepNumber: 9,
     totalSteps: 9,
   },
   {
@@ -109,8 +139,8 @@ const TOUR_STEPS: TourStepConfig[] = [
     title: 'Completed Sessions',
     content: 'Review your completed mentorship sessions and learning history here.',
     route: 'DYNAMIC_SESSIONS',
-    stepNumber: 9,
-    totalSteps: 9,
+    stepNumber: 10,
+    totalSteps: 10,
   },
 ];
 
@@ -118,7 +148,7 @@ const TourContext = createContext<TourContextType | undefined>(undefined);
 
 const TOUR_COMPLETED_KEY = 'zuvy_dashboard_tour_completed';
 
-export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TourProvider: React.FC<{ children: React.ReactNode; mentorshipEnabled?: boolean; hasAvailableMentors?: boolean }> = ({ children, mentorshipEnabled, hasAvailableMentors = true }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { studentData } = useStudentData();
@@ -128,14 +158,24 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [activeElementRect, setActiveElementRect] = useState<DOMRect | null>(null);
   const [isTourCompleted, setIsTourCompleted] = useState(false);
-  // Keep the full 9-step tour available at all times.
+
+  // Build steps from the factory so the course-syllabus step content is
+  // dynamic (mentions mentorship when it is enabled).
+  // Then filter out mentorship-only steps when mentorship is off.
+  // Also filter out subsequent mentorship steps when no mentors are available.
   const steps = React.useMemo(() => {
-    return TOUR_STEPS.map((step, index) => ({
+    const allSteps = getTourSteps(Boolean(mentorshipEnabled));
+    const filtered = allSteps.filter((step) => {
+      if (!mentorshipEnabled && MENTORSHIP_STEP_IDS.has(step.id)) return false;
+      if (mentorshipEnabled && !hasAvailableMentors && MENTORSHIP_SUBSEQUENT_STEP_IDS.has(step.id)) return false;
+      return true;
+    });
+    return filtered.map((step, index) => ({
       ...step,
       stepNumber: index + 1,
-      totalSteps: TOUR_STEPS.length,
+      totalSteps: filtered.length,
     }));
-  }, []);
+  }, [mentorshipEnabled, hasAvailableMentors]);
 
   // Check initial completion status from localStorage
   useEffect(() => {
@@ -160,7 +200,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const finishTour = useCallback(async () => {
     setIsOpen(false);
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
       setIsTourCompleted(true);
@@ -169,11 +209,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Check actual backend profile strength to avoid stale localStorage data
       const res = await api.get('/learner-profile/strength');
-      const isComplete = 
-        res.data?.isProfileComplete === true || 
-        res.data?.data?.isProfileComplete === true || 
+      const isComplete =
+        res.data?.isProfileComplete === true ||
+        res.data?.data?.isProfileComplete === true ||
         res.data?.profileCompletion === 100;
-        
+
       if (isComplete) {
         router.push('/student');
       } else {
@@ -189,7 +229,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             const parsedData = JSON.parse(stored);
             isCompleted = parsedData.isCompleted;
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -362,9 +402,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         attempts++;
         if (attempts >= maxAttempts) {
           clearInterval(interval);
-          console.warn(`[Tour] target selector "${step.targetSelector}" not found after ${
-            (maxAttempts * 100) / 1000
-          }s.`);
+          console.warn(`[Tour] target selector "${step.targetSelector}" not found after ${(maxAttempts * 100) / 1000
+            }s.`);
           setActiveElementRect(null);
         }
       }
