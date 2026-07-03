@@ -228,7 +228,12 @@ const handleGoogleSuccess = async (
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
                 })
-                localStorage.setItem('isLoginFirst' , 'true')
+                
+                if (response.data.showTooltip) {
+                    localStorage.setItem('isLoginFirst', 'true')
+                } else {
+                    localStorage.removeItem('isLoginFirst')
+                }
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
@@ -264,7 +269,7 @@ const handleGoogleSuccess = async (
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     const strengthPercentage = await getStudentStrengthPercentage()
-                    if (strengthPercentage !== null && strengthPercentage > 90) {
+                    if (strengthPercentage !== null && strengthPercentage > 20) {
                         router.push('/student')
                     } else {
                         router.push('/student/profile')

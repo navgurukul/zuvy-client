@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Carousel,
   CarouselContent,
@@ -26,15 +27,16 @@ import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
 import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/hooks/useLearnerProfile";
+import { useTour } from "@/app/student/_components/guided-tour";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const [enrollingBootcampId, setEnrollingBootcampId] = useState<number | null>(null);
   const { studentData, loading, error, refetch } = useStudentData();
-  
+
   // ✅ Fix: Use correct property name 'globalCourses'
   const { globalCourses, loading: globalLoading, error: globalError, refetch: refetchGlobalCourses } = useFetchGlobalCourses();
-  
+
   const { enrollCourse, isEnrolling, error: enrollError } = useEnrollCourse();
   const { upcomingEventsData, loading: eventsLoading } = useUpcomingEvents();
   const { strengthPercentage, strengthLevel, strengthMessage, isProfileComplete, missingFields } = useLearnerProfileStrength();
@@ -53,11 +55,13 @@ const StudentDashboard = () => {
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
   const displayProgress = strengthPercentage ?? 0;
 
+  const { isOpen: isTourOpen } = useTour();
+
   useEffect(() => {
-    if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
+    if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse && !isTourOpen) {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}/org/${studentData?.inProgressBootcamps[0].organizationId}`);
     }
-  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
+  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps, isTourOpen]);
 
   const handleEnrollCourse = async (bootcampId: number) => {
     if (!bootcampId || isEnrolling) return;
@@ -90,7 +94,7 @@ const StudentDashboard = () => {
             <Button variant="outline" className="flex-1 bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
               <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
-                View Course 
+                View Course
               </Link>
             </Button>
           </div>
@@ -219,13 +223,33 @@ const StudentDashboard = () => {
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <div className="mb-8 text-left">
-              <h1 className="text-3xl font-heading font-bold mb-2">
-                Welcome {studentProfile?.name || 'Student'}!
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                What will you be learning today?
-              </p>
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="text-left">
+                <h1 className="text-3xl font-heading font-bold mb-2">
+                  Welcome {studentProfile?.name || 'Student'}!
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  What will you be learning today?
+                </p>
+              </div>
+
+              {/* <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/student/reactplayground" className="group flex items-center gap-2.5 bg-background hover:bg-primary/5 border border-border hover:border-primary/30 text-foreground px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300 text-sm font-medium sm:mb-1">
+                      <div className="bg-primary/10 p-1.5 rounded-full group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>
+                      </div>
+                      React Playground
+                      <span className="bg-accent/10 text-accent text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider ml-1">New</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs shadow-lg border-primary/20 bg-background text-foreground">
+                    <p className="font-semibold mb-1">React Code Playground</p>
+                    <p className="text-xs flex text-muted-foreground">Practice writing React components directly in your browser with live previews. No setup required. NPM Packages are supported</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider> */}
             </div>
 
             <Card className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
@@ -271,7 +295,7 @@ const StudentDashboard = () => {
 
 
             <div className="mb-6">
-              <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
+              <h2 className="text-2xl font-heading text-left font-semibold mb-6" id="tour-courses">My Courses</h2>
 
               <div className="flex gap-3 mb-6">
                 <Button
@@ -321,11 +345,11 @@ const StudentDashboard = () => {
                             <h3 className="text-xl font-heading font-semibold mb-2">
                               {bootcamp.name}
                             </h3>
-                        <div className="mb-3">
-                          <Badge variant="outline" className="capitalize">
-                            {bootcamp.courseOrgName || "N/A"}
-                          </Badge>
-                        </div>
+                            <div className="mb-3">
+                              <Badge variant="outline" className="capitalize">
+                                {bootcamp.courseOrgName || "N/A"}
+                              </Badge>
+                            </div>
                             <TruncatedDescription
                               text={bootcamp.description || ``}
                               maxLength={150}
@@ -454,96 +478,96 @@ const StudentDashboard = () => {
             </div>
 
             {/* ✅ Fixed Global Courses Section */}
-        {globalCourses && globalCourses.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
-            
-            {globalLoading ? (
-              <CarouselSkeleton />
-            ) : globalError ? (
-              <Card className="w-full shadow-4dp">
-                <CardContent className="p-6 text-center">
-                  <p className="text-destructive mb-4">{globalError}</p>
-                  <Button onClick={refetchGlobalCourses}>Try Again</Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                {/* ✅ Map over globalCourses array */}
-                {globalCourses.map((course) => (
-                  <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        {/* Course Image */}
-                        <div className="mt-2">
-                          <Image
-                            src={course.coverImage || '/logo.PNG'}
-                            alt={course.name}
-                            width={128}
-                            height={128}
-                            className="rounded-lg object-cover"
-                          />
-                        </div>
+            {globalCourses && globalCourses.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
 
-                        {/* Course Info */}
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div className="flex-1 text-left">
-                              <h3 className="text-xl font-heading font-semibold mb-2">
-                                {course.name}
-                              </h3>
-                              <div className="mb-3">
-                                <Badge variant="outline" className="capitalize">
-                                  {course.courseOrgName || "N/A"}
-                                </Badge>
-                              </div>
-                              <TruncatedDescription 
-                                text={course.description || ''}
-                                maxLength={150}
-                                className="text-muted-foreground mb-3"
-                              />
-                              
-                              {/* ✅ Fixed instructor path */}
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className="text-sm text-muted-foreground capitalize">
-                                  Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action Button - Desktop */}
-                            <div className="hidden md:flex flex-shrink-0">
-                              <Button 
-                                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                                onClick={() => handleEnrollCourse(course.bootcampId)}
-                                disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                              >
-                                <Play className="w-4 h-4 mr-2" />
-                                {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Action Button - Mobile */}
-                          <div className="md:hidden mt-4">
-                            <Button 
-                              className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
-                              onClick={() => handleEnrollCourse(course.bootcampId)}
-                              disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
-                            >
-                              <Play className="w-4 h-4 mr-2" />
-                              {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                {globalLoading ? (
+                  <CarouselSkeleton />
+                ) : globalError ? (
+                  <Card className="w-full shadow-4dp">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-destructive mb-4">{globalError}</p>
+                      <Button onClick={refetchGlobalCourses}>Try Again</Button>
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  <div className="space-y-6">
+                    {/* ✅ Map over globalCourses array */}
+                    {globalCourses.map((course) => (
+                      <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                        <CardContent className="p-6">
+                          <div className="flex flex-col md:flex-row gap-6">
+                            {/* Course Image */}
+                            <div className="mt-2">
+                              <Image
+                                src={course.coverImage || '/logo.PNG'}
+                                alt={course.name}
+                                width={128}
+                                height={128}
+                                className="rounded-lg object-cover"
+                              />
+                            </div>
+
+                            {/* Course Info */}
+                            <div className="flex-1">
+                              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                <div className="flex-1 text-left">
+                                  <h3 className="text-xl font-heading font-semibold mb-2">
+                                    {course.name}
+                                  </h3>
+                                  <div className="mb-3">
+                                    <Badge variant="outline" className="capitalize">
+                                      {course.courseOrgName || "N/A"}
+                                    </Badge>
+                                  </div>
+                                  <TruncatedDescription
+                                    text={course.description || ''}
+                                    maxLength={150}
+                                    className="text-muted-foreground mb-3"
+                                  />
+
+                                  {/* ✅ Fixed instructor path */}
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <span className="text-sm text-muted-foreground capitalize">
+                                      Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Action Button - Desktop */}
+                                <div className="hidden md:flex flex-shrink-0">
+                                  <Button
+                                    className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark"
+                                    onClick={() => handleEnrollCourse(course.bootcampId)}
+                                    disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                                  >
+                                    <Play className="w-4 h-4 mr-2" />
+                                    {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Action Button - Mobile */}
+                              <div className="md:hidden mt-4">
+                                <Button
+                                  className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark"
+                                  onClick={() => handleEnrollCourse(course.bootcampId)}
+                                  disabled={isEnrolling && enrollingBootcampId === course.bootcampId}
+                                >
+                                  <Play className="w-4 h-4 mr-2" />
+                                  {isEnrolling && enrollingBootcampId === course.bootcampId ? 'Enrolling...' : 'Enroll Now'}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
             {filteredBootcamps.length === 0 && (
               <Card className="text-center py-12 shadow-4dp">
@@ -561,7 +585,7 @@ const StudentDashboard = () => {
                 </CardContent>
               </Card>
             )}
-          </div>  
+          </div>
 
           <div className="lg:col-span-1 space-y-4">
             <Card className="shadow-sm">
