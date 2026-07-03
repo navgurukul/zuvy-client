@@ -141,6 +141,7 @@ const Header = () => {
                                 Dashboard
                             </Button>
                             <Button
+                                id="tour-course-syllabus"
                                 variant="link"
                                 size="sm"
                                 onClick={handleSyllabusClick}
@@ -282,6 +283,7 @@ const Header = () => {
                             Dashboard
                         </Button>
                         <Button
+                            id="tour-course-syllabus"
                             variant="link"
                             size="sm"
                             onClick={handleSyllabusClick}
