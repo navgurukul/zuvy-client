@@ -11,6 +11,8 @@ import UnauthorizedStudent from '@/components/UnauthorizedStudent';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import ZoeBanner from '../_components/ZoeBanner';
+import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/hooks/useMentors';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,6 +52,22 @@ function StudentLayoutContent({
     const [showZoeBanner, setShowZoeBanner] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
+    // Derive the active courseId the same way Header does so TourProvider can
+    // know whether mentorship is enabled for the current course.
+    const courseIdMatch = pathname.match(/\/course\/([^\/]+)/);
+    const courseIdFromPath = courseIdMatch?.[1];
+    const courseIdFromQuery = searchParams.get('courseId');
+    const activeCourseId = courseIdFromPath || courseIdFromQuery || '';
+    const { latestCourseData } = useLatestUpdatedCourse(activeCourseId);
+    const mentorshipEnabled = Boolean(latestCourseData?.mentorshipEnabled);
+
+    // Fetch mentors only when mentorship is enabled so we can decide whether
+    // the tour should continue past the "Browse Mentors" step.
+    const { mentors, loading: mentorsLoading } = useMentors('', mentorshipEnabled, 1000, 0);
+    const hasAvailableMentors = mentorsLoading ? true : mentors.some(
+        (m) => m.availabilityStatus?.trim().toLowerCase() === 'available'
+    );
+
     useEffect(() => {
         setIsMounted(true);
         if (typeof window !== 'undefined') {
@@ -72,7 +90,7 @@ function StudentLayoutContent({
             document.documentElement.style.overflow = previousHtmlOverflow;
         };
     }, []);
-    
+
     const handleDismissBanner = () => {
         setShowZoeBanner(false);
         if (typeof window !== 'undefined') {
@@ -91,7 +109,7 @@ function StudentLayoutContent({
     };
 
     return (
-        <TourProvider>
+        <TourProvider mentorshipEnabled={mentorshipEnabled} hasAvailableMentors={hasAvailableMentors}>
             <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
 
                 <ThemeInitializer />

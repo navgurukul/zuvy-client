@@ -44,11 +44,11 @@ const Header = () => {
     }
 
     const handleLogoClick = () => {
-        router.push('/student')
+        router.push('/student?stay=dashboard')
     }
 
     const handleDashboardClick = () => {
-        router.push(`/student`)
+        router.push('/student?stay=dashboard')
     }
 
     const getCurrentCourseId = () => {
@@ -141,6 +141,7 @@ const Header = () => {
                                 Dashboard
                             </Button>
                             <Button
+                                id="tour-course-syllabus"
                                 variant="link"
                                 size="sm"
                                 onClick={handleSyllabusClick}
@@ -282,6 +283,7 @@ const Header = () => {
                             Dashboard
                         </Button>
                         <Button
+                            id="tour-course-syllabus"
                             variant="link"
                             size="sm"
                             onClick={handleSyllabusClick}
