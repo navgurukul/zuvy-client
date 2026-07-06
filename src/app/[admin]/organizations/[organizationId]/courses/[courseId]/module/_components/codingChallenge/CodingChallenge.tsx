@@ -14,10 +14,11 @@ import {
     getCodingQuestionTags,
     getUser,
 } from '@/store/store'
+import useCodingQuestions from '@/hooks/useCodingQuestions'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
-import { handleSaveChapter } from '@/utils/admin'
+import { fetchAllTags, handleSaveChapter } from '@/utils/admin'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -197,74 +198,41 @@ function CodingChallenge({
         (isSaved && !hasTitleChanged);
 
 
+// Use reusable hook for fetching coding questions
+const {
+    codingQuestions: fetchedQuestions,
+    loading: questionsLoading,
+    error: questionsError,
+    fetchCodingQuestions,
+    refetch: refetchCodingQuestions,
+} = useCodingQuestions({
+    orgId: Number(orgId),
+    selectedTopics: selectedOptions,
+    selectedDifficulties: selectedDifficulty,
+    searchTerm: debouncedSearch,
+    initialFetch: true,
+})
+
+// Mirror previous behavior: update local filteredQuestions and loading when hook data changes
 useEffect(() => {
-    async function getAllCodingQuestions() {
-        try {
+    setFilteredQuestions(fetchedQuestions || [])
+    setIsDataLoading(questionsLoading)
+}, [fetchedQuestions, questionsLoading])
 
-            let url = `/Content/${orgId}/allCodingQuestions`
-            const queryParams = []
-
-            let selectedTagIds = ''
-            selectedOptions.forEach((topic: any) => {
-                if (topic.id !== -1 && topic.id !== 0) {
-                    selectedTagIds += `&tagId=${topic.id}`
-                }
-            })
-
-            let selectedDiff = ''
-            selectedDifficulty.forEach((difficulty: string) => {
-                if (difficulty !== 'Any Difficulty') {
-                    selectedDiff += `&difficulty=${difficulty}`
-                }
-            })
-
-            if (selectedTagIds.length > 0) {
-                queryParams.push(selectedTagIds.substring(1))
-            }
-
-            if (selectedDiff.length > 0) {
-                queryParams.push(selectedDiff.substring(1))
-            }
-
-            if (debouncedSearch) {
-                queryParams.push(
-                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
-                )
-            }
-
-            if (queryParams.length > 0) {
-                url += `?${queryParams.join('&')}`
-            }
-
-            const response = await api.get(url)
-            setFilteredQuestions(response.data.data)
-
-            setIsDataLoading(false)
-
-        } catch (error) {
-            console.error('Error:', error)
-        }
-    }
-
-    getAllCodingQuestions()
-}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions])
+// Trigger fetch when filters/search/selection changes (keeps original dependency list)
+useEffect(() => {
+    fetchCodingQuestions({ topics: selectedOptions, difficulties: selectedDifficulty, search: debouncedSearch })
+}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions, fetchCodingQuestions])
 
 
 
     async function getAllTags() {
         try {
-            const response = await api.get('Content/allTags')
-            if (response) {
-                const tagArr = [
-                    { tagName: 'All Topics', id: -1 },
-                    ...response.data.allTags,
-                ]
-                setTags(tagArr)
-            }
+            const tagArr = await fetchAllTags()
+            setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
-        } 
-        
+        }
     }
 
     useEffect(() => {

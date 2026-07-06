@@ -10,6 +10,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
+import { fetchAllTags } from '@/utils/admin'
 import { PageTag } from '../../../../../resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -26,6 +27,7 @@ import {
     ChapterDetailsResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import useDebounce from '@/hooks/useDebounce'
+import useQuizQuestions from '@/hooks/useQuizQuestions'
 import CodingTopics from '../codingChallenge/CodingTopics'
 
 import { z } from 'zod'
@@ -97,74 +99,16 @@ function Quiz(props: QuizProps) {
         mode: 'onChange',
     })
 
-    const fetchQuizQuestions = useCallback(
-        async (
-            searchTerm: string = '',
-            selectedOptions: any[],
-            selectedDifficulty: any[]
-        ) => {
-            try {
-                let url = `/Content/${orgId}/allQuizQuestions`
-
-                const queryParams = []
-
-                let selectedTagIds = ''
-                selectedOptions.forEach((topic: any) => {
-                    if (topic.id !== -1 && topic.id !== 0) {
-                        // Skip 'All Topics'
-                        selectedTagIds += `&tagId=${topic.id}`
-                    }
-                })
-                // Handle multiple selected difficulties, but ignore 'Any Difficulty'
-                let selectedDiff = ''
-                selectedDifficulty.forEach((difficulty: string) => {
-                    if (difficulty !== 'Any Difficulty') {
-                        selectedDiff += `&difficulty=${difficulty}`
-                    }
-                })
-
-                if (selectedTagIds.length > 0) {
-                    queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
-                }
-                if (selectedDiff.length > 0) {
-                    queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
-                }
-                if (searchTerm) {
-                    queryParams.push(`searchTerm=${searchTerm}`)
-                }
-
-                // Combine query parameters into the URL
-                if (queryParams.length > 0) {
-                    url += '?' + queryParams.join('&')
-                }
-
-                const response = await api.get(url)
-
-                const allQuestions: QuizDataLibrary[] = response?.data?.data
-                setIsDataLoading(false)
-
-                const easyQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Easy'
-                )
-                const mediumQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Medium'
-                )
-                const hardQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Hard'
-                )
-
-                setQuizData({
-                    allQuestions,
-                    easyQuestions,
-                    mediumQuestions,
-                    hardQuestions,
-                })
-            } catch (error) {
-                console.error('Error fetching quiz questions:', error)
-            }
-        },
-        [debouncedSeatch, selectedOptions, selectedDifficulty]
-    )
+    const {
+        quizQuestions: fetchedQuizQuestions,
+        loading: quizQuestionsLoading,
+    } = useQuizQuestions({
+        orgId,
+        selectedTopics: selectedOptions,
+        selectedDifficulties: selectedDifficulty,
+        searchTerm: debouncedSeatch,
+        initialFetch: true,
+    })
 
 
 
@@ -172,13 +116,26 @@ function Quiz(props: QuizProps) {
     
 
     useEffect(() => {
-        fetchQuizQuestions(debouncedSeatch, selectedOptions, selectedDifficulty)
-    }, [
-        debouncedSeatch,
-        fetchQuizQuestions,
-        selectedOptions,
-        selectedDifficulty,
-    ])
+        const allQuestions: QuizDataLibrary[] = fetchedQuizQuestions || []
+
+        const easyQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Easy'
+        )
+        const mediumQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Medium'
+        )
+        const hardQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Hard'
+        )
+
+        setQuizData({
+            allQuestions,
+            easyQuestions,
+            mediumQuestions,
+            hardQuestions,
+        })
+        setIsDataLoading(quizQuestionsLoading)
+    }, [fetchedQuizQuestions, quizQuestionsLoading])
 
     const handleAddQuestion = (data: QuizDataLibrary[]) => {
         if (!canEdit) return
@@ -222,19 +179,11 @@ function Quiz(props: QuizProps) {
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const transformedData = response.data.allTags.map(
-                (item: { id: number; tagName: string }) => ({
-                    id: item.id.toString(),
-                    tagName: item.tagName,
-                })
-            )
-            const tagArr = [
-                { id: -1, tagName: 'All Topics' },
-                ...transformedData,
-            ]
+        try {
+            const tagArr = await fetchAllTags()
             setTags(tagArr)
+        } catch (error) {
+            console.error('Error fetching tags:', error)
         }
     }
     const removeQuestionById = (questionId: number) => {
