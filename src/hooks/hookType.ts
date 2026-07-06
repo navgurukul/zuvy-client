@@ -861,6 +861,7 @@ export interface UseTrackingLogArgs {
   timeRange?: string
   search?: string
   initialFetch?: boolean
+  updateState?: boolean
 }
 
 export interface UseTrackingLogReturn {
@@ -870,7 +871,7 @@ export interface UseTrackingLogReturn {
   totalRows: number
   pagination: TrackingLogPagination
   refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
-  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<TrackingLogEntry[]>
 }
 
 

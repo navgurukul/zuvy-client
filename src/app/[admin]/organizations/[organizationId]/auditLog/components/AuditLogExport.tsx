@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { api } from '@/utils/axios.config';
+import { useTrackingLog } from '@/hooks/useTrackingLog';
 import { TrackingLogEntry } from '@/hooks/hookType';
 
 interface AuditLogExportProps {
@@ -19,6 +19,11 @@ interface AuditLogExportProps {
 
 export default function AuditLogExport({ orgId, currentFilters }: AuditLogExportProps) {
   const [isExporting, setIsExporting] = useState(false);
+
+  const { fetchTrackingLog } = useTrackingLog({
+    orgId,
+    initialFetch: false,
+  });
 
   const downloadCSV = (data: TrackingLogEntry[], filename: string) => {
     // CSV headers
@@ -109,43 +114,23 @@ export default function AuditLogExport({ orgId, currentFilters }: AuditLogExport
     setIsExporting(true);
 
     try {
-      // Build query parameters
-      const params: any = {
-        orgId: orgId,
-        limit: 10000, // Get all records for export
+      const logs = await fetchTrackingLog({
+        orgId,
         offset: 0,
-        timeRange: currentFilters.timeRange || 'all'
-      };
+        limit: 10000,
+        role: currentFilters.role,
+        action: currentFilters.action,
+        status: currentFilters.status,
+        timeRange: currentFilters.timeRange,
+        search: currentFilters.search,
+      });
 
-      // Add filter parameters if they exist
-      if (currentFilters.role && currentFilters.role !== 'all') {
-        params.role = currentFilters.role;
-      }
-      if (currentFilters.action && currentFilters.action !== 'all') {
-        params.action = currentFilters.action;
-      }
-      if (currentFilters.status && currentFilters.status !== 'all') {
-        params.status = currentFilters.status;
-      }
-      if (currentFilters.search) {
-        params.search = currentFilters.search;
-      }
-
-      console.log('Exporting with filters:', params);
-
-      // Fetch data from API
-      const response = await api.get('/trackinglog', { params });
-
-      if (response.data?.success && response.data?.data?.logs) {
-        const logs = response.data.data.logs;
-        
-        // Generate filename with current date and filters info
+      if (logs && logs.length > 0) {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
         
         let filename = `audit-log-${dateStr}`;
         
-        // Add filter info to filename
         const activeFilters = [];
         if (currentFilters.role && currentFilters.role !== 'all') {
           activeFilters.push(`role-${currentFilters.role}`);

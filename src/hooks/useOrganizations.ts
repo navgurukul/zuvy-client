@@ -1,38 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
+import { getOrganizations, type Organization, type OrganizationApiResponse } from '@/utils/organizations'
 
-export interface Organization {
-    id: number
-    title: string
-    code: string
-    isManagedByZuvy: boolean
-    logoUrl: string
-    pocName: string
-    pocEmail: string
-    zuvyPocName: string
-    zuvyPocEmail: string
-    isVerified: boolean
-    createdAt: string
-    updatedAt: string
-    version: string | null
-}
-
-interface ApiResponse {
-    status: string
-    message: string
-    statusCode: number
-    data: Organization[]
-    meta: {
-        total: number
-        page: number
-        limit: number
-        totalPages: number
-    }
-}
+export type { Organization, OrganizationApiResponse } from '@/utils/organizations'
 
 interface UseOrganizationsParams {
     search?: string
@@ -52,35 +25,29 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
 
     const debouncedSearch = useDebounce(params.search, 500)
 
-    // Update fetchOrganizations to accept filter parameter
     const fetchOrganizations = useCallback(async (searchTerm?: string, page?: number, limit?: number, filterType?: string) => {
+        // console.trace("fetchOrganizations called");
+        console.count("fetchOrganizations");
+        
         try {
             setLoading(true)
             setError(null)
 
-            const queryParams = new URLSearchParams()
-            if (searchTerm) queryParams.append('search', searchTerm)
+            const response = await getOrganizations({
+                search: searchTerm,
+                page,
+                limit: limit ?? params.limit,
+                filterType,
+                all: params.all,
+            })
 
-            if (params.all) {
-                queryParams.append('limit', (limit || params.limit || 100).toString())
-                queryParams.append('page', '1')
+            if (response.status === 'success') {
+                setOrganizations(response.data)
+                setTotalCount(response.meta?.total ?? response.data.length)
+                setTotalPages(response.meta?.totalPages ?? 1)
+                setCurrentPage(response.meta?.page ?? 1)
             } else {
-                if (limit) queryParams.append('limit', limit.toString())
-                if (page) queryParams.append('page', page.toString())
-            }
-            if (filterType) queryParams.append('filterType', filterType) // Add filter parameter
-
-            const url = `/org/getAllOrgs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-
-            const response = await api.get<ApiResponse>(url)
-
-            if (response.data.status === 'success') {
-                setOrganizations(response.data.data)
-                setTotalCount(response.data.meta?.total ?? response.data.data.length)
-                setTotalPages(response.data.meta?.totalPages ?? 1)
-                setCurrentPage(response.data.meta?.page ?? 1)
-            } else {
-                throw new Error(response.data.message || 'Failed to fetch organizations')
+                throw new Error(response.message || 'Failed to fetch organizations')
             }
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch organizations'
@@ -99,7 +66,6 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
         fetchOrganizations(searchTerm, page, limit, filterType)
     }, [fetchOrganizations])
 
-    // Only run auto fetch once with initial params
     useEffect(() => {
         if (params.auto !== false) {
             fetchOrganizations(debouncedSearch, params.page, params.limit)
