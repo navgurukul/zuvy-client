@@ -244,6 +244,20 @@ export interface UseChapterCompletionReturn {
 
 
 // UseChapterDetails
+export interface LiveClassSession {
+  id: number;
+  meetingId: string;
+  hangoutLink: string;
+  startTime: string;
+  endTime: string;
+  title: string;
+  s3link: string;
+  status: string;          // 'upcoming' | 'ongoing' | 'completed'
+  attendance: string;      // 'present' | 'absent'
+  duration: number;
+  batchId?: number;        // which batch this session belongs to
+}
+
 export interface ChapterDetails {
   id: number;
   title: string;
@@ -262,6 +276,7 @@ export interface ChapterDetails {
   version: string | null;
   chapterTrackingDetails: any[];
   status: string;
+  sessions?: LiveClassSession[];  // present when topicId === 8 (live class)
 }
 
 export interface UseChapterDetailsResponse {
