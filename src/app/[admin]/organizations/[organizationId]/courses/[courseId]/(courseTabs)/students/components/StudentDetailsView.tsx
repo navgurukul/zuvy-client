@@ -119,12 +119,6 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         const search = params.get("search") || ""
 
         setSearchTerm(search)
-
-        if (search) {
-            fetchCompletedClasses(search)
-        } else {
-            fetchCompletedClasses("")
-        }
     }, [studentId, courseId])
 
     const fetchStudentInfo = async () => {
