@@ -35,12 +35,10 @@ export const usePracticeCodeSubmit = ({
       } catch (err: any) {
         const errData = err.response?.data?.data ?? null;
         setCodeResult(errData);
-        setError(
-          err.response?.data?.message ||
-            err instanceof Error
-            ? err.message
-            : 'Failed to submit code',
-        );
+        const message =
+          err.response?.data?.message ??
+          (err instanceof Error ? err.message : 'Failed to submit code');
+        setError(message);
         throw err;
       } finally {
         setLoading(false);

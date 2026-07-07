@@ -45,15 +45,16 @@ export const useGetCodingQuestion = ({
         setError(null);
 
         try {
+            const orgIdStr = Array.isArray(orgId) ? orgId[0] : orgId;
             const response = await api.get(
-                `codingPlatform/${orgId}/get-coding-question/${questionId}`
+                `/codingPlatform/${orgIdStr}/get-coding-question/${questionId}`
             );
 
             const data = response?.data?.data;
             setQuestionDetails(data);
             setTestCases(data?.testCases ?? []);
             setTemplates(data?.templates ?? {});
-            setExamples(response?.data?.[0]?.examples ?? []);
+            setExamples(data?.examples ?? []);
         } catch (err) {
             console.error('Error fetching coding question:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch coding question');
