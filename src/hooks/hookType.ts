@@ -358,6 +358,7 @@ export interface UseCompletedClassesReturn {
   completedClassesData: CompletedClassesData | null;
   loading: boolean;
   error: string | null;
+  fetchCompletedClasses: (courseId: string | number, studentId: string | number) => Promise<any>;
 }
 
 
