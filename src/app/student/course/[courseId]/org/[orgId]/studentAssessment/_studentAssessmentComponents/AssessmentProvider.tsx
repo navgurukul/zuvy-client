@@ -11,26 +11,36 @@ import {
 import QuizQuestions from "./QuizQuestions";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import IDE from "./IDE";
-import { api } from "@/utils/axios.config";
+import { useCodingSubmissions } from "@/hooks/useCodingSubmissions";
+import useStartAssessment from "@/hooks/useStartAssessment";
+import useChapterCompletion from "@/hooks/useChapterCompletion";
+import useAssessmentQuizQuestions from "@/hooks/useAssessmentQuizQuestions";
+import useAssessmentOpenEndedQuestions from "@/hooks/useAssessmentOpenEndedQuestions";
+import useAssessmentSubmissions from "@/hooks/useAssessmentSubmissions";
+import useSubmitAssessment from "@/hooks/useSubmitAssessment";
 
 import { toast } from "@/components/ui/use-toast";
 import { usePathname, useRouter } from "next/navigation";
-import { getAssessmentStore,  } from "@/store/store";
 import { AlertProvider } from "./ProctoringAlerts";
 
 import PreventBackNavigation from "./PreventBackNavigation";
 import useWindowSize from "@/hooks/useHeightWidth";
 import {
-  AssessmentSubmissionResponse,
-  CodingSubmissionResponse,
   AssessmentData,
   CodingQuestion,
   PageParams,
-  QType
+  QType,
 } from "@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType";
 
-import { TopBar, FullscreenPrompt, AssessmentHeader, CodingSection, McqSection, OpenEndedSection, SubmitAssessmentDialog } from "@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/utils/assessmentUtils";
-import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import {
+  TopBar,
+  FullscreenPrompt,
+  AssessmentHeader,
+  CodingSection,
+  McqSection,
+  OpenEndedSection,
+  SubmitAssessmentDialog,
+} from "@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/utils/assessmentUtils";
 
 
 function Page({ params }: PageParams) {
@@ -43,9 +53,7 @@ function Page({ params }: PageParams) {
   const pathname = usePathname();
   const { width } = useWindowSize();
   const isMobile = width < 768;
-
-  // -------- store/theme --------
-  const { setFullScreenExitInstance } = getAssessmentStore(); // kept for parity
+  const orgId = params.orgId;
 
   // -------- state --------
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -55,12 +63,9 @@ function Page({ params }: PageParams) {
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [assessmentData, setAssessmentData] = useState<AssessmentData | null>(null);
-  const [separateQuizQuestions, setSeparateQuizQuestions] = useState<any>();
-  const [separateOpenEndedQuestions, setSeparateOpenEndedQuestions] = useState<any>([]);
   const [assessmentSubmitId, setAssessmentSubmitId] = useState<number | null>(null);
   const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] = useState<number | null>(null);
   const [chapterId, setChapterId] = useState<number | null>(null);
-  const [isCodingSubmitted, setIsCodingSubmitted] = useState(false);
 
   const [runCodeLanguageId, setRunCodeLanguageId] = useState<number>(0);
   const [runSourceCode, setRunSourceCode] = useState<string>("");
@@ -68,12 +73,41 @@ function Page({ params }: PageParams) {
   const [isTabProctorOn, setIsTabProctorOn] = useState(false);
   const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(false);
   const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(false);
-  const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState<boolean | null>(null);
 
   const [disableSubmit, setDisableSubmit] = useState(false);
   const intervalIdRef = useRef<number | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
-  const orgId = params.orgId;
+
+  // -------- hooks --------
+  const { startAssessment } = useStartAssessment();
+
+  const { quizQuestions: separateQuizQuestions, refetch: refetchQuizQuestions } =
+    useAssessmentQuizQuestions(decodedAssessmentId);
+
+  const { openEndedQuestions: separateOpenEndedQuestions, refetch: refetchOpenEndedQuestions } =
+    useAssessmentOpenEndedQuestions(decodedAssessmentId);
+
+  const { fetchSubmissions } = useAssessmentSubmissions({
+    assessmentId: decodedAssessmentId,
+    moduleId: params.moduleID,
+    bootcampId: params.viewcourses,
+    chapterId: params.chapterId,
+  });
+
+  const { submitAssessment: submitAssessmentApi } = useSubmitAssessment();
+
+  const { completeChapter } = useChapterCompletion({
+    courseId: params.viewcourses,
+    moduleId: params.moduleID,
+    chapterId: chapterId ? String(chapterId) : params.chapterId,
+  });
+
+  const { fetchCodingSubmissions } = useCodingSubmissions({
+    codingOutsourseId: null,
+    assessmentSubmissionId: null,
+    questionId: null,
+    enabled: false,
+  });
 
   // -------- helpers --------
   const isCurrentPageSubmitAssessment = useCallback(() => {
@@ -112,85 +146,34 @@ function Page({ params }: PageParams) {
     [router, orgId]
   );
 
-  const completeChapter = useCallback(() => {
-    if (!chapterId) return;
-    api.post(`tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`).catch(() => {});
-  }, [chapterId, params.moduleID, params.viewcourses]);
-
   // -------- data fetchers --------
-  const getAssessmentData = useCallback(async (isNewStart: boolean = false) => {
-    try {
-      const res = await api.get<{ data: AssessmentData & { submission: { id: number } } }>(
-        `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedAssessmentId}/newStart=${isNewStart}`
-      );
-      const data = res?.data?.data;
+  const fetchAndApplyAssessmentData = useCallback(
+    async (isNewStart: boolean = false) => {
+      const data = await startAssessment(decodedAssessmentId, isNewStart);
+      if (!data) return;
       setIsFullScreen(true);
       setAssessmentData(data);
       setStartedAt(new Date(data.submission?.startedAt).getTime());
       setIsTabProctorOn(!!data.canTabChange);
       setIsFullScreenProctorOn(!!data.canScreenExit);
       setIsCopyPasteProctorOn(!!data.canCopyPaste);
-      setIsEyeTrackingProctorOn(!!data.canEyeTrack);
       setAssessmentSubmitId(data.submission?.id ?? null);
       setChapterId(data.chapterId ?? null);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [decodedAssessmentId]);
-
-  const getSeparateQuizQuestions = useCallback(async () => {
-    try {
-      const res = await api.get(`/Content/assessmentDetailsOfQuiz/${decodedAssessmentId}`);
-      setSeparateQuizQuestions(res.data);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [decodedAssessmentId]);
-
-  const getSeparateOpenEndedQuestions = useCallback(async () => {
-    try {
-      const res = await api.get(`/Content/assessmentDetailsOfOpenEnded/${decodedAssessmentId}`);
-      setSeparateOpenEndedQuestions(res.data);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [decodedAssessmentId]);
+    },
+    [decodedAssessmentId, startAssessment]
+  );
 
   const getAssessmentSubmissionsData = useCallback(async () => {
     const startPageUrl = `/student/courses/${params.viewcourses}/org/${orgId}/modules/${params.moduleID}/chapters/${params.chapterId}`;
-    try {
-      const res = await api.get<AssessmentSubmissionResponse>(
-        `Content/students/assessmentId=${decodedAssessmentId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
-      );
-      const sub = res.data.submitedOutsourseAssessments?.[0];
-      if (sub?.submitedAt && sub?.reattemptApproved === false) {
-        router.push(startPageUrl);
-      } else if (sub?.startedAt && sub?.reattemptApproved === false) {
-        getAssessmentData();
-      }
-    } catch (error) {
-      console.error("Error fetching coding submissions data:", error);
+    const data = await fetchSubmissions();
+    if (!data) return;
+    const sub = data.submitedOutsourseAssessments?.[0];
+    if (sub?.submitedAt && sub?.reattemptApproved === false) {
+      router.push(startPageUrl);
+    } else if (sub?.startedAt && sub?.reattemptApproved === false) {
+      fetchAndApplyAssessmentData();
     }
-  }, [decodedAssessmentId, getAssessmentData, params.chapterId, params.moduleID, params.viewcourses, router]);
-
-  const getCodingSubmissionsData = useCallback(
-    async (codingOutsourseId: number, assessmentSubmissionId: number, questionId: number) => {
-      try {
-        const res = await api.get<CodingSubmissionResponse>(
-          `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
-        );
-        const payload = res?.data?.data;
-        const action = payload?.action as "submit" | null;
-        setRunCodeLanguageId(payload?.languageId || 0);
-        setRunSourceCode(payload?.sourceCode || "");
-        return action;
-      } catch (error) {
-        console.error("Error fetching coding submissions data:", error);
-        return null;
-      }
-    },
-    []
-  );
+  }, [fetchSubmissions, fetchAndApplyAssessmentData, orgId, params.chapterId, params.moduleID, params.viewcourses, router]);
 
   // -------- effects --------
   useEffect(() => {
@@ -199,17 +182,17 @@ function Page({ params }: PageParams) {
   }, [getAssessmentSubmissionsData]);
 
   useEffect(() => {
-    if (isFullScreen) getAssessmentData();
-    getSeparateQuizQuestions();
-    getSeparateOpenEndedQuestions();
-  }, [decodedAssessmentId, getAssessmentData, getSeparateOpenEndedQuestions, getSeparateQuizQuestions, isFullScreen]);
+    if (isFullScreen) fetchAndApplyAssessmentData();
+    refetchQuizQuestions();
+    refetchOpenEndedQuestions();
+  }, [decodedAssessmentId, fetchAndApplyAssessmentData, refetchOpenEndedQuestions, refetchQuizQuestions, isFullScreen]);
 
   useEffect(() => {
     if (assessmentData) {
-      getSeparateQuizQuestions();
-      getSeparateOpenEndedQuestions();
+      refetchQuizQuestions();
+      refetchOpenEndedQuestions();
     }
-  }, [assessmentData, getSeparateOpenEndedQuestions, getSeparateQuizQuestions]);
+  }, [assessmentData, refetchOpenEndedQuestions, refetchQuizQuestions]);
 
   useEffect(() => {
     if (!assessmentSubmitId && !assessmentData) return;
@@ -257,18 +240,19 @@ function Page({ params }: PageParams) {
     updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
   }, [assessmentSubmitId, isCopyPasteProctorOn]);
 
-  const submitAssessment = useCallback(async (typeOfsubmission: "studentSubmit" | "auto-submit" = "studentSubmit") => {
-    setDisableSubmit(true);
-    if (!assessmentSubmitId) return;
-    try {
+  const submitAssessment = useCallback(
+    async (typeOfsubmission: "studentSubmit" | "auto-submit" = "studentSubmit") => {
+      setDisableSubmit(true);
+      if (!assessmentSubmitId) return;
       const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-      await api.patch(`/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`, {
+      const success = await submitAssessmentApi(assessmentSubmitId, {
         tabChange,
         copyPaste,
         fullScreenExit,
         eyeMomentCount,
         typeOfsubmission,
       });
+      if (!success) return;
       toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
       completeChapter();
       navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
@@ -276,10 +260,9 @@ function Page({ params }: PageParams) {
       channel.postMessage("assessment_submitted");
       channel.close();
       setTimeout(() => window.close(), 2000);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter]);
+    },
+    [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter, submitAssessmentApi]
+  );
 
   const handleSolveChallenge = useCallback(
     async (type: QType, id?: number, codingQuestion?: CodingQuestion) => {
@@ -287,7 +270,15 @@ function Page({ params }: PageParams) {
       setIsSolving(true);
 
       if (type === "coding" && id && assessmentSubmitId) {
-        const action = await getCodingSubmissionsData(codingQuestion!.codingOutsourseId, assessmentSubmitId, id);
+        const responseData = await fetchCodingSubmissions(
+          codingQuestion!.codingOutsourseId,
+          assessmentSubmitId,
+          id
+        );
+        const payload = responseData?.data;
+        const action = payload?.action as "submit" | null;
+        setRunCodeLanguageId(payload?.languageId || 0);
+        setRunSourceCode(payload?.sourceCode || "");
         if (action !== "submit") {
           setSelectedQuestionId(id);
           setSelectedCodingOutsourseId(codingQuestion?.codingOutsourseId ?? null);
@@ -295,14 +286,14 @@ function Page({ params }: PageParams) {
         }
         return;
       }
-      if (type === "quiz" && assessmentData?.IsQuizzSubmission) return; // already submitted
+      if (type === "quiz" && assessmentData?.IsQuizzSubmission) return;
       if (type === "open-ended" && separateOpenEndedQuestions?.[0]?.submissionsData?.length > 0) {
         toast.info({ title: "Open Ended Questions Already Submitted", description: "You have already submitted the open ended questions" });
         return;
       }
       requestFullScreen(document.documentElement);
     },
-    [assessmentData?.IsQuizzSubmission, assessmentSubmitId, getCodingSubmissionsData, separateOpenEndedQuestions]
+    [assessmentData?.IsQuizzSubmission, assessmentSubmitId, fetchCodingSubmissions, separateOpenEndedQuestions]
   );
 
   const handleBack = useCallback(() => {
@@ -318,7 +309,11 @@ function Page({ params }: PageParams) {
     selectedQuesType === "quiz" &&
     !assessmentData?.IsQuizzSubmission &&
     ((assessmentData?.hardMcqQuestions ?? 0) + (assessmentData?.easyMcqQuestions ?? 0) + (assessmentData?.mediumMcqQuestions ?? 0) > 0);
-  const showOpenEnded = isSolving && isFullScreen && selectedQuesType === "open-ended" && !(separateOpenEndedQuestions?.[0]?.submissionsData?.length > 0);
+  const showOpenEnded =
+    isSolving &&
+    isFullScreen &&
+    selectedQuesType === "open-ended" &&
+    !(separateOpenEndedQuestions?.[0]?.submissionsData?.length > 0);
   const submitDisabled = disableSubmit || (!!assessmentData?.totalMcqQuestions && assessmentData?.IsQuizzSubmission === false);
 
   // -------- early routes (solving views) --------
@@ -333,8 +328,8 @@ function Page({ params }: PageParams) {
             remainingTime={remainingTime}
             questions={separateQuizQuestions}
             assessmentSubmitId={assessmentSubmitId as number}
-            getSeperateQuizQuestions={getSeparateQuizQuestions}
-            getAssessmentData={getAssessmentData}
+            getSeperateQuizQuestions={refetchQuizQuestions}
+            getAssessmentData={fetchAndApplyAssessmentData}
           />
         </AlertProvider>
       </>
@@ -350,8 +345,8 @@ function Page({ params }: PageParams) {
             remainingTime={remainingTime}
             questions={separateOpenEndedQuestions}
             assessmentSubmitId={assessmentSubmitId as number}
-            getSeperateOpenEndedQuestions={getSeparateOpenEndedQuestions}
-            getAssessmentData={getAssessmentData}
+            getSeperateOpenEndedQuestions={refetchOpenEndedQuestions}
+            getAssessmentData={fetchAndApplyAssessmentData}
           />
         </AlertProvider>
       </>
@@ -368,10 +363,9 @@ function Page({ params }: PageParams) {
             remainingTime={remainingTime}
             assessmentSubmitId={assessmentSubmitId as number}
             selectedCodingOutsourseId={selectedCodingOutsourseId as number}
-            getAssessmentData={getAssessmentData}
+            getAssessmentData={fetchAndApplyAssessmentData}
             runCodeLanguageId={runCodeLanguageId}
             runSourceCode={runSourceCode}
-            getCodingSubmissionsData={getCodingSubmissionsData}
           />
         </AlertProvider>
       </>
@@ -390,7 +384,7 @@ function Page({ params }: PageParams) {
               onOpenChange={setIsOpeningdialogOpen}
               onProceed={() => {
                 handleFullScreenRequest();
-                getAssessmentData(true);
+                fetchAndApplyAssessmentData(true);
               }}
               onCancel={() => window.close()}
               remainingTime={remainingTime}
@@ -404,7 +398,7 @@ function Page({ params }: PageParams) {
                   assessmentData={assessmentData}
                   isMobile={isMobile}
                   assessmentSubmitId={assessmentSubmitId}
-                  setIsCodingSubmitted={setIsCodingSubmitted}
+                  setIsCodingSubmitted={() => {}}
                   onSolve={(id, cq) => handleSolveChallenge("coding", id, cq)}
                 />
                 <McqSection

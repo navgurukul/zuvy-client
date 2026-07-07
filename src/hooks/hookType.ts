@@ -300,20 +300,23 @@ export interface UseCodingChallengeProps {
 }
 
 // useCodingSubmissions
+export interface CodingSubmissionsResponseData {
+  action: string | null;
+  languageId: number;
+  sourceCode: string;
+  TestCasesSubmission: any[];
+}
+
 export interface CodingSubmissionsResponse {
   status?: string;
-  action?: string;
   message?: string;
-  data?: {
-    sourceCode: string;
-    TestCasesSubmission: any[];
-  };
+  data?: CodingSubmissionsResponseData;
 }
 
 export interface UseCodingSubmissionsParams {
-  codingOutsourseId: string | null;
-  assessmentSubmissionId: string | null;
-  questionId: string | null;
+  codingOutsourseId: number | null;
+  assessmentSubmissionId: number | null;
+  questionId: number | null;
   enabled?: boolean;
 }
 
@@ -957,6 +960,45 @@ export interface UseEnrollCourseReturn {
   error: string | null;
 }
 
+// useRequestReattempt
+export interface UseRequestReattemptReturn {
+  requestReattempt: (submissionId: number | string, userId: number | string) => Promise<void>;
+  isRequesting: boolean;
+  error: string | null;
+}
+
+// useSubmitQuizAndAssignment
+export interface SubmitAssignmentPayload {
+  submitAssignment: {
+    projectUrl: string;
+    timeLimit: string;
+  };
+}
+
+export interface SubmitQuizAnswer {
+  mcqId: number;
+  chossenOption: number;
+}
+
+export interface SubmitQuizPayload {
+  submitQuiz: SubmitQuizAnswer[];
+}
+
+export interface UseSubmitQuizAndAssignmentParams {
+  courseId: string;
+  moduleId: string;
+  chapterId: string | number;
+  onSuccess?: () => void;
+}
+
+export interface UseSubmitQuizAndAssignmentReturn {
+  submitAssignment: (payload: SubmitAssignmentPayload) => Promise<void>;
+  submitQuiz: (payload: SubmitQuizPayload) => Promise<void>;
+  isSubmitting: boolean;
+  error: string | null;
+}
+
+
 // useSwitchOrg
 export interface SwitchOrgPayload {
   orgId: number;
@@ -999,5 +1041,146 @@ export interface SwitchOrgResult {
 export interface UseSwitchOrgReturn {
   switchOrg: (payload: SwitchOrgPayload) => Promise<SwitchOrgResult>;
   isSwitching: boolean;
+  error: string | null;
+}
+
+
+// useQuizAndAssignmentWithStatus
+export interface CodingProblem {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  tagName?: string;
+  status: string;
+}
+
+export interface QuizAndAssignmentWithStatusData {
+  codingProblem: CodingProblem[];
+  [key: string]: any;
+}
+
+export interface UseQuizAndAssignmentWithStatusParams {
+  chapterId: number | null;
+  enabled?: boolean;
+}
+
+export interface UseQuizAndAssignmentWithStatusReturn {
+  codingProblems: CodingProblem[];
+  data: QuizAndAssignmentWithStatusData | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+// useCodingSubmissionsByQuestion
+export interface CodingSubmissionByQuestionData {
+  questionId: number;
+  sourceCode: string;
+  programLangId: string;
+  action: string;
+  status: string;
+  questionDetail: {
+    title: string;
+    description: string;
+    difficulty: string;
+  };
+  createdAt: string;
+  TestCasesSubmission: Array<{
+    status: string;
+    [key: string]: any;
+  }>;
+}
+
+export interface UseCodingSubmissionsByQuestionParams {
+  questionId: number | null;
+  enabled?: boolean;
+}
+
+export interface UseCodingSubmissionsByQuestionReturn {
+  submissionData: CodingSubmissionByQuestionData | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+// useOpenEndedSubmission
+export interface OpenEndedAnswerDto {
+  questionId: number;
+  answer: string;
+}
+
+export interface OpenEndedSubmissionPayload {
+  openEndedQuestionSubmissionDto: OpenEndedAnswerDto[];
+}
+
+export interface OpenEndedSubmissionResponse {
+  status?: string;
+  message?: string;
+  data?: any;
+}
+
+export interface UseOpenEndedSubmissionReturn {
+  submitOpenEnded: (payload: OpenEndedSubmissionPayload) => Promise<OpenEndedSubmissionResponse | null>;
+  isSubmitting: boolean;
+  error: string | null;
+}
+
+// usePracticeCodeSubmit
+export interface PracticeCodeSubmitPayload {
+  languageId: number;
+  sourceCode: string;
+}
+
+export interface PracticeCodeTestCaseResult {
+  status: string;
+  stdout?: string;
+  stdOut?: string;
+  stderr?: string;
+  stdErr?: string;
+  stdIn?: any;
+  expectedOutput?: any;
+  compileOutput?: any;
+  testCases?: any;
+  memory?: string;
+  time?: string;
+  [key: string]: any;
+}
+
+export interface PracticeCodeSubmitResponse {
+  status?: string;
+  message?: string;
+  data: PracticeCodeTestCaseResult[];
+}
+
+export interface UsePracticeCodeSubmitParams {
+  questionId: string | null;
+  assessmentSubmitId: number | null | undefined;
+  selectedCodingOutsourseId: number | null | undefined;
+}
+
+
+// useQuizSubmission
+export interface QuizAnswerDto {
+  questionId: number;
+  variantId: number;
+  attemptCount: number;
+  chosenOption: number;
+}
+
+export interface QuizSubmissionPayload {
+  quizSubmissionDto: QuizAnswerDto[];
+}
+
+export interface QuizSubmissionResponse {
+  status?: string;
+  message?: string;
+  data?: any;
+}
+
+export interface UseQuizSubmissionReturn {
+  submitQuiz: (payload: QuizSubmissionPayload) => Promise<QuizSubmissionResponse | null>;
+  isSubmitting: boolean;
   error: string | null;
 }

@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
 import useAssignmentDetails from '@/hooks/useAssignmentDetails';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-import { api } from '@/utils/axios.config';
+import useSubmitQuizAndAssignment from '@/hooks/useSubmitQuizAndAssignment';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
@@ -44,6 +44,12 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       setLocalIsCompleted(true);
       onChapterComplete(); 
     },
+  });
+
+  const { submitAssignment, isSubmitting: isSubmittingApi } = useSubmitQuizAndAssignment({
+    courseId: courseId as string,
+    moduleId: moduleId as string,
+    chapterId: chapterDetails.id,
   });
 
   useEffect(() => {
@@ -151,10 +157,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     };
 
     try {
-      await api.post(
-        `/tracking/updateQuizAndAssignmentStatus/${courseId}/${moduleId}?chapterId=${chapterDetails.id}`,
-        submissionBody
-      );
+      await submitAssignment(submissionBody);
 
       await completeChapter();
       
@@ -195,7 +198,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   const trimmedLinks = submissionLinks.map((link) => link.trim());
   const hasEmptyLink = trimmedLinks.some((link) => link.length === 0);
   const hasInvalidLink = trimmedLinks.some((link) => link.length > 0 && !isValidUrl(link));
-  const isSubmitDisabled = isSubmitting || isCompleting || hasEmptyLink || hasInvalidLink;
+  const isSubmitDisabled = isSubmitting || isSubmittingApi || isCompleting || hasEmptyLink || hasInvalidLink;
 
   if (loading) {
     // return (
