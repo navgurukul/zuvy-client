@@ -19,6 +19,7 @@ import {
 import Image from 'next/image';
 import useAssessmentDetails from "@/hooks/useAssessmentDetails";
 import useChapterDetails from "@/hooks/useChapterDetails";
+import useRequestReattempt from "@/hooks/useRequestReattempt";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
 import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
@@ -77,6 +78,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   );
 
   const { refetch: refetchChapter } = useChapterDetails(chapterId);
+
+  const { requestReattempt, isRequesting } = useRequestReattempt();
 
   // Derived states from assessment details
   const hasQuestions = assessmentDetails ? (
@@ -190,26 +193,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     }
   };
 
-  // Request re-attempt
-  const requestReattempt = async () => {
-    try {
-      await api.post(
-        `/student/assessment/request-reattempt?assessmentSubmissionId=${submissionId}&userId=${assessmentDetails?.submitedOutsourseAssessments?.[0]?.userId}`
-      );
-      toast({
-        title: 'Re-attempt Requested',
-        description: 'Your request for a re-attempt has been sent.',
-      });
-      refetch();
-    } catch (error) {
-      console.error('Error requesting re-attempt:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to request re-attempt. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
+  // Request re-attempt is handled by useRequestReattempt hook
 
   // Time over check effect
   useEffect(() => {
@@ -423,8 +407,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                       >
                         Cancel
                       </Button>
-                      <Button className="sm:ml-4 w-full sm:w-auto bg-primary hover:bg-primary-dark text-primary-foreground" onClick={requestReattempt}>
-                        Send Request
+                      <Button className="sm:ml-4 w-full sm:w-auto bg-primary hover:bg-primary-dark text-primary-foreground" onClick={async () => {
+                        await requestReattempt(submissionId, assessmentDetails?.submitedOutsourseAssessments?.[0]?.userId);
+                        refetch();
+                      }} disabled={isRequesting}>
+                        {isRequesting ? 'Sending...' : 'Send Request'}
                       </Button>
                     </div>
                   </DialogContent>

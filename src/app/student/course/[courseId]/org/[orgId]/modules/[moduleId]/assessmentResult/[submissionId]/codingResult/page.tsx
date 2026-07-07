@@ -11,13 +11,15 @@ const Page = ({ params }: { params: AssessmentParams }) => {
     const searchParams = useSearchParams()
     
     // Get query parameters
-    const codingOutsourseId = searchParams.get('codingOutsourseId')
-    const questionId = searchParams.get('questionId')
+    const codingOutsourseIdParam = searchParams.get('codingOutsourseId')
+    const questionIdParam = searchParams.get('questionId')
+    const codingOutsourseId = codingOutsourseIdParam ? Number(codingOutsourseIdParam) : null
+    const questionId = questionIdParam ? Number(questionIdParam) : null
     
     // Use the custom hook for API call
     const { data: codingSubmissionsData, loading, error } = useCodingSubmissions({
         codingOutsourseId,
-        assessmentSubmissionId: params.submissionId,
+        assessmentSubmissionId: params.submissionId ? Number(params.submissionId) : null,
         questionId,
         enabled: !!studentData?.id // Only fetch when user data is available
     })    // Show loading state

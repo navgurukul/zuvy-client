@@ -40,6 +40,9 @@ import {
 import { X } from 'lucide-react'
 
 import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
+import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
+import { useGetCodingQuestion } from '@/hooks/useGetCodingQuestion'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -50,35 +53,47 @@ const IDE: React.FC<IDEProps> = ({
     getAssessmentData,
     runCodeLanguageId,
     runSourceCode,
-    getCodingSubmissionsData,
-
 }) => {
     const pathname = usePathname()
     const router = useRouter()
     const { toast } = useToast()
     const { viewcourses, moduleID, chapterID, orgId } = useParams()
-    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
-        title: '',
-        description: '',
-        examples: {
-            input: [],
-            output: 0,
-        },
-        constraints: '',
-    })
     const [isDisabled, setIsDisabled] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [codeResult, setCodeResult] = useState<any>([])
     const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
     const { codingSubmissionAction, setCodingSubmissionAction } = useCodingSubmissionStore()
 
-    const [testCases, setTestCases] = useState<any>([])
-    const [templates, setTemplates] = useState<any>([])
-    const [examples, setExamples] = useState<any>([])
-    const [loading, setLoading] = useState(false)
+    const {
+        questionDetails,
+        testCases,
+        templates,
+        examples,
+    } = useGetCodingQuestion({
+        questionId: params.editor ?? null,
+        orgId: orgId as string ?? null,
+    })
+
+    const { fetchCodingSubmissions } = useCodingSubmissions({
+        codingOutsourseId: selectedCodingOutsourseId ?? null,
+        assessmentSubmissionId: assessmentSubmitId ?? null,
+        questionId: params.editor ? parseInt(params.editor) : null,
+        enabled: false,
+    })
+
+    const {
+        submitCode,
+        loading,
+        codeResult,
+        setCodeResult,
+    } = usePracticeCodeSubmit({
+        questionId: params.editor ?? null,
+        assessmentSubmitId: assessmentSubmitId,
+        selectedCodingOutsourseId: selectedCodingOutsourseId,
+    })
+
     const [isOpen, setIsOpen] = useState(false)
     const [modalType, setModalType] = useState<'success' | 'error'>('success')
     const isDarkMode = useThemeStore((state) => state.isDark)
@@ -131,11 +146,10 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
-        setLoading(true)
 
         try {
-            const response = await api.post(
-                `/codingPlatform/practicecode/questionId=${params.editor}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
+            const response = await submitCode(
+                action as 'run' | 'submit',
                 {
                     languageId: Number(
                         getDataFromField(
@@ -149,11 +163,10 @@ const IDE: React.FC<IDEProps> = ({
                 }
             )
 
-            // Set the code result data
-            setCodeResult(response.data.data)
+            if (!response) return
 
             // Check if all test cases passed
-            const allTestCasesPassed = response.data.data.every(
+            const allTestCasesPassed = response.data.every(
                 (testCase: any) => testCase.status === 'Accepted'
             )
 
@@ -162,24 +175,9 @@ const IDE: React.FC<IDEProps> = ({
                 setIsSubmitted(true)
                 setIsOpen(true)
 
-                // toast({
-                //     title: 'You have submitted the question. You can go back and do other questions',
-                //     className:
-                //         'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                // })
-
                 if (allTestCasesPassed) {
                     setModalType('success')
-                    // toast({
-                    //     title: `Test Cases Passed Solution submitted`,
-                    //     className:
-                    //         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                    // })
                     getAssessmentData()
-
-                    // if (onBack) {
-                    //     onBack()
-                    // }
                 } else {
                     setModalType('error')
                 }
@@ -199,19 +197,16 @@ const IDE: React.FC<IDEProps> = ({
 
             // Trigger re-render for the output window
             setResult(
-                response.data.data[0].stdOut ||
-                response.data.data[0].stdout ||
+                response.data[0].stdOut ||
+                response.data[0].stdout ||
                 'No Output Available'
             )
-            setLoading(false)
 
             const closeTimeout = setTimeout(() => {
                 setIsOpen(false)
             }, 7000)
             return () => clearTimeout(closeTimeout)
         } catch (error: any) {
-            setLoading(false)
-            setCodeResult(error.response?.data?.data)
             toast.error({
                 title: 'Failed',
                 description:
@@ -228,33 +223,11 @@ const IDE: React.FC<IDEProps> = ({
         setCurrentCode(value)
     }
 
-    const getQuestionDetails = async () => {
-        try {
-            await api
-                .get(`codingPlatform/${orgId}/get-coding-question/${params.editor}`)
-                .then((response) => {
-                    setQuestionDetails(response?.data.data)
-
-                    setTestCases(response?.data?.data?.testCases)
-
-                    setTemplates(response?.data?.data?.templates)
-
-                    setExamples(response?.data[0].examples)
-                })
-        } catch (error: any) {
-            console.error('Error fetching courses:', error)
-        }
-    }
-
-    useEffect(() => {
-        getQuestionDetails()
-    }, [language, orgId])
-
     useEffect(() => {
         if (templates?.[language]?.template) {
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
-    }, [language])
+    }, [language, templates])
 
 
     useEffect(() => {
@@ -272,7 +245,12 @@ const IDE: React.FC<IDEProps> = ({
 
     useEffect(() => {
         const getActions = async () => {
-            const action = await getCodingSubmissionsData(selectedCodingOutsourseId, assessmentSubmitId, params.editor)
+            const responseData = await fetchCodingSubmissions(
+                selectedCodingOutsourseId,
+                assessmentSubmitId,
+                params.editor ? parseInt(params.editor) : null,
+            )
+            const action = responseData?.data?.action ?? null
             setCodingSubmissionAction(action)
             if (action === 'submit') {
                 setIsSubmitted(true)
@@ -623,7 +601,7 @@ const IDE: React.FC<IDEProps> = ({
                                             )}
 
                                             {/* Error Results (Compile/Runtime) */}
-                                            {!loading && codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
+                                            {!loading && codeError && codeResult?.map((testCase: any, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     <div className="flex items-center space-x-2 text-red-500 font-bold">
                                                         <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
@@ -666,7 +644,7 @@ const IDE: React.FC<IDEProps> = ({
                                             ))}
 
                                             {/* Success/Run Results */}
-                                            {!loading && !codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
+                                            {!loading && !codeError && codeResult?.map((testCase: any, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     {testCase.status === 'Accepted' ? (
                                                         <div className="flex items-center space-x-2 text-green-600 font-bold">
