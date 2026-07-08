@@ -70,10 +70,6 @@ export default function OrganizationsPage() {
 
     // Function to update URL params
     const updateURLParams = useCallback((page: number, newLimit?: number, filters?: string) => {
-//         console.log(
-//     "Current URL",
-//     searchParams.toString()
-// )
 
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
@@ -84,10 +80,6 @@ export default function OrganizationsPage() {
         } else {
             newParams.delete('filterType')
         }
-        // console.log(
-        //     "New URL",
-        //     newParams.toString()
-        // )
         const newUrl = newParams.toString()
 
         if (newUrl !== searchParams.toString()) {
@@ -97,7 +89,6 @@ export default function OrganizationsPage() {
 
     // Initialize from URL
     const initializeFromURL = useCallback(() => {
-        console.log('🟢 initializeFromURL', urlInitialized)
         if (urlInitialized) return
 
         const urlFilter = searchParams.get('filterType')
@@ -123,16 +114,11 @@ export default function OrganizationsPage() {
 
     // Initialize from URL on mount
     useEffect(() => {
-        // console.log('🟣 initialize effect')
-// console.trace()
         initializeFromURL()
     }, [initializeFromURL])
 
     // Update URL when filters change
     useEffect(() => {
-        // console.log('🔵 URL update effect')
-        
-// console.trace()
         if (!urlInitialized) return
 
         const filterQuery = getFilterQuery()
@@ -141,7 +127,6 @@ export default function OrganizationsPage() {
 
     // Search API functions for SearchBox - ADD FILTER TO SUGGESTIONS
     const fetchSuggestionsApi = useCallback(async (query: string) => {
-        // console.log('⚪ fetchSuggestionsApi', query)
         try {
             const currentFilter = getFilterQuery()
             const response = await getOrganizations({
@@ -158,7 +143,6 @@ export default function OrganizationsPage() {
     }, [managementTypeFilter]) // ADD managementTypeFilter as dependency
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        // console.log('🟤 fetchSearchResultsApi', query)
         setCurrentSearchQuery(query);
         updateURLParams(1, limit, getFilterQuery());
         await fetchOrganizations(query, 1, limit, getFilterQuery());
@@ -166,10 +150,6 @@ export default function OrganizationsPage() {
     }, [fetchOrganizations, limit, updateURLParams, managementTypeFilter])
 
     const defaultFetchApi = useCallback(async () => {
-        // console.log('🟠 defaultFetchApi')
-        console.count("defaultFetchApi");
-        // console.trace("defaultFetchApi")
-
         setCurrentSearchQuery('');
         updateURLParams(1, limit, getFilterQuery());
         await fetchOrganizations('', 1, limit, getFilterQuery());
@@ -195,24 +175,7 @@ export default function OrganizationsPage() {
 
     // Fetch data when URL params change
     useEffect(() => {
-        console.log("Previous", prev.current);
 
-    console.log("Current", {
-        currentPage,
-        limit,
-        urlInitialized,
-        managementTypeFilter,
-        fetchOrganizations
-    });
-
-    prev.current = {
-        currentPage,
-        limit,
-        urlInitialized,
-        managementTypeFilter,
-        fetchOrganizations
-    };
-        console.count("Fetch Effect");
         if (!urlInitialized) return
 
         const filterQuery = getFilterQuery()
