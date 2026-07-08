@@ -57,6 +57,7 @@ import {
 } from './adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
 import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import useOpenEndedQuestions from '@/hooks/useOpenEndedQuestions'
 
 type Props = {}
 
@@ -121,38 +122,35 @@ const OpenEndedQuestions = (props: Props) => {
         return response.data.data || []
     }, [])
 
+    // Use hook for main list fetching
+    const {
+        openEndedQuestions: hookQuestions,
+        totalRows: hookTotalRows,
+        totalPages: hookTotalPages,
+        loading: hookLoading,
+        fetchOpenEndedQuestions,
+    } = useOpenEndedQuestions({
+        orgId,
+        selectedTopics: selectedOptions,
+        selectedDifficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
+        searchTerm: searchParams.get('search') || '',
+        offset,
+        position: position as string | number,
+        initialFetch: false,
+    })
+
     const fetchSearchResultsApi = useCallback(
         async (query: string) => {
             if (query.trim()) {
-                // For search results, use the same API endpoint
-                const response = await api.get(
-                    `/content/${orgId}/openEndedQuestions?searchTerm=${encodeURIComponent(
-                        query
-                    )}&limit=${position}&offset=${offset}`
-                )
-                setOpenEndedQuestions(response.data.data || [])
-                setTotalOpenEndedQuestion(response.data.totalRows || 0)
-                setTotalPages(response.data.totalPages || 0)
-                setLastPage(response.data.totalPages || 0)
+                await fetchOpenEndedQuestions({ search: query, off: 0, pos: position })
             }
         },
-        [offset, position, difficulty, selectedOptions, setOpenEndedQuestions]
+        [fetchOpenEndedQuestions, position]
     )
 
-    const defaultFetchApi = useCallback(async () => {
-        await filteredOpenEndedQuestions(
-            setOpenEndedQuestions,
-            orgId,
-            offset,
-            position,
-            difficulty,
-            selectedOptions,
-            setTotalOpenEndedQuestion,
-            setLastPage,
-            setTotalPages,
-            ''
-        )
-    }, [offset, position, difficulty, selectedOptions, setOpenEndedQuestions])
+    const defaultFetchApi = useCallback(() => {
+        return Promise.resolve([])
+    }, [])
 
     useEffect(() => {
         if (!options || options.length <= 1 || hasSetInitialTopicsFromURL)
@@ -232,59 +230,34 @@ const OpenEndedQuestions = (props: Props) => {
         router.replace(newUrl)
     }, [selectedOptions, difficulty, filtersInitialized, router, searchParams])
 
-    const fetchCodingQuestions = useCallback(
-        async (offset: number) => {
-            const searchParam = searchParams.get('search') || ''
+    // Update local state when hook data changes
+    useEffect(() => {
+        setOpenEndedQuestions(hookQuestions || [])
+        setTotalOpenEndedQuestion(hookTotalRows || 0)
+        setTotalPages(hookTotalPages || 0)
+        setLastPage(hookTotalPages || 0)
+        setLoading(hookLoading)
+    }, [hookQuestions, hookTotalRows, hookTotalPages, hookLoading])
 
-            const selectedTopicIds = selectedOptions
-                .filter((option) => option.value !== '-1')
-                .map((option) => Number(option.value)) // Convert to numbers
-
-            const selectedDifficultyLevels = difficulty
-                .filter((option) => option.value !== 'None')
-                .map((option) => option.value)
-
-            try {
-                const response = await api.get(`/content/${orgId}/openEndedQuestions`, {
-                    params: {
-                        searchTerm: searchParam,
-                        limit: position,
-                        offset: offset,
-                        tagId: selectedTopicIds, // ✅ Change 'topics' to 'tagId'
-                        difficulty: selectedDifficultyLevels,
-                    },
-                })
-
-                const { data, totalRows, totalPages } = response.data
-
-                setOpenEndedQuestions(data || [])
-                setTotalOpenEndedQuestion(totalRows || 0)
-                setTotalPages(totalPages || 0)
-                setLastPage(totalPages || 0)
-                setLoading(false)
-            } catch (error) {
-                console.error('Error fetching open-ended questions:', error)
-            }
-        },
-        [
-            difficulty,
-            selectedOptions,
-            position,
-            searchParams,
-            setOpenEndedQuestions,
-        ]
-    )
-
-    // Fetch questions when filters change
+    // Fetch questions when filters change or page changes
     useEffect(() => {
         if (!filtersInitialized) return
-        fetchCodingQuestions(offset)
+        const searchParam = searchParams.get('search') || ''
+        fetchOpenEndedQuestions({
+            topics: selectedOptions,
+            difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
+            search: searchParam,
+            off: offset,
+            pos: position,
+        })
     }, [
         difficulty,
         selectedOptions,
-        // offset,
+        offset,
+        position,
         filtersInitialized,
-        // fetchCodingQuestions,
+        searchParams,
+        fetchOpenEndedQuestions,
     ])
 
     useEffect(() => {
@@ -295,8 +268,15 @@ const OpenEndedQuestions = (props: Props) => {
 
     // Add this refresh function
     const refreshQuestions = useCallback(async () => {
-        await fetchCodingQuestions(offset)
-    }, [fetchCodingQuestions, offset])
+        const searchParam = searchParams.get('search') || ''
+        await fetchOpenEndedQuestions({
+            topics: selectedOptions,
+            difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
+            search: searchParam,
+            off: offset,
+            pos: position,
+        })
+    }, [fetchOpenEndedQuestions, offset, position, searchParams, selectedOptions, difficulty])
 
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t) => t.tagName === value) || {
@@ -573,7 +553,16 @@ const OpenEndedQuestions = (props: Props) => {
                             totalStudents={totalOpenEndedQuestion}
                             lastPage={lastPage}
                             pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
+                            fetchStudentData={(newOffset: number) => {
+                                const searchParam = searchParams.get('search') || ''
+                                fetchOpenEndedQuestions({
+                                    topics: selectedOptions,
+                                    difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
+                                    search: searchParam,
+                                    off: newOffset,
+                                    pos: position,
+                                })
+                            }}
                         />
                     </div>
                 </div>

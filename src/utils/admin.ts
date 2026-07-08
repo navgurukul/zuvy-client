@@ -310,13 +310,14 @@ export const handlerQuizQuestions = (
     setIsQuizQuestionId(quizQuestion.id)
 }
 
-export async function getAllTags(setTags: any, setOptions?: any) {
+export async function fetchAllTags() {
     const response = await api.get('Content/allTags')
-    if (response) {
-        const tagArr = [
-            { id: -1, tagName: 'All Topics' },
-            ...response.data.allTags,
-        ]
+    return [{ id: -1, tagName: 'All Topics' }, ...response.data.allTags]
+}
+
+export async function getAllTags(setTags: any, setOptions?: any) {
+    const tagArr = await fetchAllTags()
+    if (tagArr) {
         const transformedTags = tagArr.map(
             (item: { id: any; tagName: any }) => ({
                 id: item.id,
@@ -338,9 +339,9 @@ export async function getAllTags(setTags: any, setOptions?: any) {
 // get tags without filtering:
 
 export async function getAllTagsWithoutFilter(setTags: any) {
-    const response = await api.get('Content/allTags')
-    if (response) {
-        setTags([{ id: -1, tagName: 'All Topics' }, ...response.data.allTags])
+    const tagArr = await fetchAllTags()
+    if (tagArr) {
+        setTags(tagArr)
     }
 }
 
