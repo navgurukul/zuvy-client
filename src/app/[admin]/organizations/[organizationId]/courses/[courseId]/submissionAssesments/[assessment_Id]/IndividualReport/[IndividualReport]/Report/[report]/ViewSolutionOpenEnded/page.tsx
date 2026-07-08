@@ -7,8 +7,9 @@ import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore, getUser } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import type { PageAssessmentData, PageSubmissionData, BootcampData } from './ViewSolutionPageType'
+import type { PageAssessmentData, PageSubmissionData } from './ViewSolutionPageType'
 import { useParams } from 'next/navigation'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 type SubmissionData = {
     id: number
@@ -53,13 +54,13 @@ const Page = ({ params }: { params: paramsType }) => {
     >([])
     const [individualAssesmentData, setIndividualAssesmentData] =
         useState<any>()
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     const crumbs = [
         {
@@ -93,15 +94,6 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: true,
         },
     ]
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -130,13 +122,11 @@ const Page = ({ params }: { params: paramsType }) => {
     useEffect(() => {
         fetchOpenEndedQuestionsDetails()
         fetchProctoringData(params.report, params.IndividualReport)
-        getBootcampHandler()
         getStudentAssesmentDataHandler()
     }, [
         fetchOpenEndedQuestionsDetails,
         fetchProctoringData,
         params,
-        getBootcampHandler,
         getStudentAssesmentDataHandler,
     ])
 

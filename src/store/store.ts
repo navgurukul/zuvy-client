@@ -36,6 +36,7 @@ interface CourseData {
     language: string
     startTime: string
     unassigned_students: number
+    students_in_bootcamp?: number
 }
 interface Permissions {
     editCourse: boolean

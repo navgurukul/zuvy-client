@@ -17,9 +17,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import{ComboboxStudentProps,CourseStudentBatchItem} from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
+import { useBatchReassign } from '@/hooks/useBatchReassign'
+import { useAssignBatch } from '@/hooks/useAssignBatch'
 export function ComboboxStudent({
     batchData,
     batchName,
@@ -35,6 +36,8 @@ export function ComboboxStudent({
         batchName || 'Unassigned'
     )
     const [batchisFull, setBatchisFull] = React.useState(false)
+    const { reassignBatch } = useBatchReassign()
+    const { assignBatch } = useAssignBatch()
 
     React.useEffect(() => {
         setDisplayBatchName(batchName || 'Unassigned')
@@ -60,10 +63,11 @@ export function ComboboxStudent({
         }
         setOpen(false)
         try {
-            await api
-                .patch(
-                    `/batch/reassign/student_id=${userId}/new_batch_id=${selectedValue}?bootcamp_id=${bootcampId}`
-                )
+            await reassignBatch({
+                userId,
+                selectedValue,
+                bootcampId
+            })
                 .then((res) => {
                     toast.success({
                         title: res.data.status,
@@ -93,10 +97,11 @@ export function ComboboxStudent({
         const [batchId, label] = currentValue.split('-')
         const courseId = bootcampId
         try {
-            await api
-                .post(`/bootcamp/students/${bootcampId}?batch_id=${batchId}`, {
-                    students: selected,
-                })
+            await assignBatch({
+                bootcampId,
+                batchId,
+                students: selected
+            })
                 .then((res) => {
                     toast.success({
                         title: res.data.status,

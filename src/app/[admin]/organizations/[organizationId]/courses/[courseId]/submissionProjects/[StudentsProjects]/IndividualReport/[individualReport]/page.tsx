@@ -10,16 +10,16 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PageParams,
-    BootcampData,
     IndividualStudentData,
     ProjectSubmissionDetails,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const [indiviDualStudentData, setIndividualStudentData] =
         useState<IndividualStudentData | null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
@@ -42,21 +42,9 @@ const Page = ({ params }: PageParams) => {
                 )
             })
     }, [params.individualReport, params.courseId, params.StudentsProjects])
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
     useEffect(() => {
         getIndividualStudentData()
-        getBootcampHandler()
-    }, [getIndividualStudentData, getBootcampHandler])
+    }, [getIndividualStudentData])
 
     const dateString = submittedDate
     const date = new Date(dateString?.toString())

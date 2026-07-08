@@ -18,32 +18,18 @@ import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 
 import {
-    BootcampData,
     TrackedFormData,
     FormItem,
     Params,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: { params: Params }) => {
     const router = useRouter()
     const [individualFormData, setIndividualFormData] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [user, setUser] = useState<any>()
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description: 'Error fetching bootcamps:',
-            })
-        }
-    }, [params.courseId])
 
     const getIndividualStudentFormDataHandler = useCallback(async () => {
         const chapterId = params.report
@@ -100,9 +86,8 @@ const Page = ({ params }: { params: Params }) => {
 
     useEffect(() => {
         getIndividualStudentFormDataHandler()
-        getBootcampHandler()
         getIndividualStudent()
-    }, [getIndividualStudentFormDataHandler, getBootcampHandler])
+    }, [getIndividualStudentFormDataHandler, getIndividualStudent])
 
     return (
         <div className="min-h-screen font-semibold bg-background">
@@ -186,11 +171,10 @@ const Page = ({ params }: { params: Params }) => {
                                                             return (
                                                                 <div
                                                                     key={option}
-                                                                    className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                        answer ==
-                                                                            option &&
+                                                                    className={`flex space-x-2 mr-4 mt-1 p-3 ${answer ==
+                                                                        option &&
                                                                         'border-gray-800 border-2 rounded-lg'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     <div className="flex items-center w-full space-x-3 space-y-0">
                                                                         <RadioGroupItem
@@ -207,7 +191,7 @@ const Page = ({ params }: { params: Params }) => {
                                                                             {
                                                                                 item
                                                                                     .options[
-                                                                                    option
+                                                                                option
                                                                                 ]
                                                                             }
                                                                         </label>
@@ -239,12 +223,11 @@ const Page = ({ params }: { params: Params }) => {
                                                         return (
                                                             <div
                                                                 key={option}
-                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${
-                                                                    answer.includes(
-                                                                        optionNumber
-                                                                    ) &&
+                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${answer.includes(
+                                                                    optionNumber
+                                                                ) &&
                                                                     'border-gray-800 border-2 rounded-lg'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <Checkbox
                                                                     checked={answer.includes(
@@ -254,17 +237,16 @@ const Page = ({ params }: { params: Params }) => {
                                                                     aria-label={
                                                                         option
                                                                     }
-                                                                    className={`translate-y-[2px] mr-1 ${
-                                                                        answer.includes(
-                                                                            optionNumber
-                                                                        ) &&
+                                                                    className={`translate-y-[2px] mr-1 ${answer.includes(
+                                                                        optionNumber
+                                                                    ) &&
                                                                         'bg-green-500'
-                                                                    }`}
+                                                                        }`}
                                                                 />
                                                                 {
                                                                     item
                                                                         .options[
-                                                                        option
+                                                                    option
                                                                     ]
                                                                 }
                                                             </div>
