@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {X, ChevronLeft, Timer, Edit3, CheckCircle, AlertCircle } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
+import { X, Edit3, CheckCircle } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
 import TimerDisplay from './TimerDisplay'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
+import { useOpenEndedSubmission } from '@/hooks/useOpenEndedSubmission'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -28,7 +26,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-import { useRouter } from 'next/navigation'
 import {AssessmentProps,Question} from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 
@@ -40,13 +37,12 @@ const OpenEndedQuestions = ({
     getSeperateOpenEndedQuestions,
     getAssessmentData
 }: AssessmentProps) => {
-    const router = useRouter()
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const { submitOpenEnded, isSubmitting } = useOpenEndedSubmission(assessmentSubmitId)
 
     const formSchema = z.object({
         answers: z.array(
-            z.string().nonempty({ message: 'This question is required.' })
+            z.string().min(1, { message: 'This question is required.' })
         ),
     })
 
@@ -66,7 +62,6 @@ const OpenEndedQuestions = ({
     }, [questions, form])
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        setIsSubmitting(true)
         setIsDialogOpen(false)
         
         const openEndedQuestionSubmissionDto = data.answers.map(
@@ -75,12 +70,10 @@ const OpenEndedQuestions = ({
                 answer,
             })
         )
-        try {
-            const response = await api.patch(
-                `/submission/openended/assessmentSubmissionId=${assessmentSubmitId}`,
-                { openEndedQuestionSubmissionDto }
-            )
 
+        const result = await submitOpenEnded({ openEndedQuestionSubmissionDto })
+
+        if (result !== null) {
             getAssessmentData()
 
             toast.success({
@@ -93,14 +86,11 @@ const OpenEndedQuestions = ({
             setTimeout(() => {
                 onBack()
             }, 3000)
-        } catch (error: any) {
+        } else {
             toast.error({
                 title: 'Error',
-                description:
-                    error?.response?.data?.message || 'An error occurred',
+                description: 'An error occurred while submitting your answers',
             })
-        } finally {
-            setIsSubmitting(false)
         }
     }
 

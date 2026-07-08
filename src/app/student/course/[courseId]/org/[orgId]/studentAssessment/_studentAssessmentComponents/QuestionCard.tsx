@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
 import { useCodingSubmissionStore } from '@/store/store'
+import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
 import {QuestionCardProps,Tag}from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const QuestionCard = ({
@@ -24,22 +24,23 @@ const QuestionCard = ({
     isMobile,
     setIsCodingSubmitted,
 }: QuestionCardProps) => {
-    // const [tag, setTag] = useState<Tag>()
-    const [action, setAction] = useState<string | null>(null)
-    const { setCodingSubmissionAction} = useCodingSubmissionStore()
-    // async function getAllTags() {
-    //     const response = await api.get('/content/allTags')
-    //     if (response) {
-    //         const tag = response?.data?.allTags?.find(
-    //             (item: any) => item.id == tagId
-    //         )
-    //         setTag(tag)
-    //     }
-    // }
+    const { setCodingSubmissionAction } = useCodingSubmissionStore()
 
-    // useEffect(() => {
-    //     getAllTags()
-    // }, [])
+    const { data: submissionData } = useCodingSubmissions({
+        codingOutsourseId: codingOutsourseId ?? null,
+        assessmentSubmissionId: assessmentSubmitId ?? null,
+        questionId: id ?? null,
+        enabled: !!(codingOutsourseId && assessmentSubmitId && id),
+    })
+
+    const action = submissionData?.data?.action ?? null
+
+    useEffect(() => {
+        if (action) {
+            setCodingSubmissionAction(action)
+            setIsCodingSubmitted(true)
+        }
+    }, [action, setCodingSubmissionAction, setIsCodingSubmitted])
 
     function codingQuestionMarks(difficulty: string) {
         if (difficulty === 'Easy') {
@@ -50,31 +51,6 @@ const QuestionCard = ({
             return hardCodingMark
         }
     }
-
-    async function getCodingSubmissionsData(
-        codingOutsourseId: any,
-        assessmentSubmissionId: any,
-        questionId: any
-    ) {
-        try {
-            const res = await api.get(
-                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
-            )
-            const action = res.data.data.action
-            setAction(action)
-            setCodingSubmissionAction(action)
-            setIsCodingSubmitted(true)
-        } catch (error) {
-            console.error('Error fetching coding submissions data:', error)
-            return null
-        }
-    }
-
-    useEffect(() => {
-        if (codingOutsourseId && assessmentSubmitId && id) {
-            getCodingSubmissionsData(codingOutsourseId, assessmentSubmitId, id)
-        }
-    }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
         <div className="bg-card  rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
