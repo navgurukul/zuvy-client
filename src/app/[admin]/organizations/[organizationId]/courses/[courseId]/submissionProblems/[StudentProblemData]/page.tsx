@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
-import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Download } from 'lucide-react'
 import Link from 'next/link'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 interface BatchFilter {
     id: number
@@ -25,7 +26,7 @@ const PracticeProblems = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'practice'
     const [matchingData, setMatchingData] = useState<any>(null)
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [studentStatus, setStudentStatus] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [loading, setLoading] = useState(false)
@@ -38,7 +39,7 @@ const PracticeProblems = ({ params }: any) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -92,7 +93,7 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection, selectedBatch])
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
@@ -118,38 +119,29 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection, selectedBatch])
 
     const handleVideoDownloadCsv = useCallback(() => {
         if (!matchingData) return
-    
+
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-    
+
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-            
+
         downloadCsv({
             endpoint: `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`,
-    
+
             fileName: `practice_problem_${matchingData.moduleChapterData[0].codingQuestionDetails?.title || 'submissions'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'data',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'email' },
@@ -158,7 +150,7 @@ const PracticeProblems = ({ params }: any) => {
                 { header: 'Completed At', key: 'completedAt' },
                 { header: 'Attempts', key: 'noOfAttempts' },
             ],
-    
+
             mapData: (item: any) => ({
                 name: item.name || '',
                 email: item.email || '',
@@ -168,8 +160,8 @@ const PracticeProblems = ({ params }: any) => {
                 noOfAttempts: item.noOfAttempts ?? '',
             }),
         })
-    }, [matchingData,selectedBatch,sortField,sortDirection])
-    
+    }, [matchingData, selectedBatch, sortField, sortDirection])
+
     useEffect(() => {
         if (bootcampData?.name && matchingData?.moduleChapterData) {
             setCrumbData([
@@ -178,21 +170,17 @@ const PracticeProblems = ({ params }: any) => {
             ])
         }
     }, [bootcampData, matchingData])
-    
+
     // Initial data fetch - exactly like projects code
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [submissionRes, bootcampRes] = await Promise.all([
-                    api.get(
-                        `/submission/submissionsOfPractiseProblems/${params.courseId}`
-                    ),
-                    api.get(`/bootcamp/${params.courseId}`),
-                ])
+                const submissionRes = await api.get(
+                    `/submission/submissionsOfPractiseProblems/${params.courseId}`
+                )
 
                 const submissions = submissionRes.data.trackingData
                 setTotalStudents(submissionRes.data.totalStudents)
-                setBootcampData(bootcampRes.data.bootcamp)
 
                 if (submissions.length > 0 && params.StudentProblemData) {
                     const matchingModule = submissions.find(
@@ -212,7 +200,7 @@ const PracticeProblems = ({ params }: any) => {
         fetchInitialData()
     }, [params.courseId, params.StudentProblemData])
 
-  // Handle sorting change
+    // Handle sorting change
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
@@ -221,19 +209,19 @@ const PracticeProblems = ({ params }: any) => {
     useEffect(() => {
         fetchBatches()
     }, [fetchBatches])
-    
+
     useEffect(() => {
         if (matchingData) {
             defaultFetchApi()
         }
-    }, [matchingData, sortField, sortDirection, defaultFetchApi,selectedBatch])
+    }, [matchingData, sortField, sortDirection, defaultFetchApi, selectedBatch])
 
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
                 <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
-                        variant="ghost"                   
+                        variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -269,16 +257,16 @@ const PracticeProblems = ({ params }: any) => {
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                <SelectItem value="all">All Batches</SelectItem>
+                                    <SelectItem value="all">All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
                                         </SelectItem>
-                                    ))}                                  
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
-                        </div>
+                    </div>
                 </CardContent>
             </Card>
             <Card className="bg-card">
@@ -315,8 +303,8 @@ const PracticeProblems = ({ params }: any) => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <DataTable 
-                        data={studentStatus} 
+                    <DataTable
+                        data={studentStatus}
                         columns={columns}
                         onSortingChange={handleSortingChange}
                     />

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getStoreStudentDataNew } from '@/store/store'
+import { useUpdateStudent } from '@/hooks/useUpdateStudent'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -54,7 +53,7 @@ export const EditModal: React.FC<EditModalProps> = ({
         search,
     } = getStoreStudentDataNew()
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const { updateStudent, isSubmitting } = useUpdateStudent()
     const [studentData, setStudentData] = useState({
         name: name || '',
         email: email || '',
@@ -83,39 +82,22 @@ export const EditModal: React.FC<EditModalProps> = ({
     }
 
     const handleSave = async () => {
-        if (isSubmitting) return
-        
-        setIsSubmitting(true)
-        
         // Create payload according to schema
         const payload = {
             email: studentData.email,
             name: studentData.name,
             status: studentData.status,
-            batchId: studentData.batchId 
+            batchId: studentData.batchId,
         }
-        
-        try {
-            const response = await api.patch(`/bootcamp/updateUserDetails/${userId}`, payload)
-            
-            toast.success({
-                title: "Success",
-                description: "Student updated successfully",
-            })
-            
-            // Instead of using fetchStudentsHandler, trigger the parent's fetchFilteredData
-            // This will maintain current filters and pagination
-            window.dispatchEvent(new CustomEvent('refreshStudentData'))
-            
-            onClose()
-        } catch (error: any) {
-            toast.error({
-                title: 'Failed',
-                description: error.response?.data?.message || 'An error occurred.',
-            })
-        } finally {
-            setIsSubmitting(false)
-        }
+
+        await updateStudent(userId, payload, {
+            onSuccess: () => {
+                // Instead of using fetchStudentsHandler, trigger the parent's fetchFilteredData
+                // This will maintain current filters and pagination
+                window.dispatchEvent(new CustomEvent('refreshStudentData'))
+                onClose()
+            },
+        })
     }
 
     return (

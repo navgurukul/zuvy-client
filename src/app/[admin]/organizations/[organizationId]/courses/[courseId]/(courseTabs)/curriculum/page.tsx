@@ -17,6 +17,8 @@ import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
+import { useEditModuleOfBootcamp } from '@/hooks/useEditModuleOfBootcamp'
+import { useCreateModule } from '@/hooks/useCreateModule'
 import {
     CurriculumItem,
     ModuleData,
@@ -67,6 +69,9 @@ function Page() {
     const [isDragging, setIsDragging] = useState(false)
     const [hasOrderChanged, setHasOrderChanged] = useState(false)
 
+    const { editModule: editModuleApi, loading: editModuleLoading } = useEditModuleOfBootcamp()
+    const { createModule: createModuleApi, loading: createModuleLoading } = useCreateModule()
+
     // New states for border flash functionality
     const [flashingModuleId, setFlashingModuleId] = useState<number | null>(
         null
@@ -103,24 +108,6 @@ function Page() {
         const { name, value } = e.target
         setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
     }
-
-    useEffect(() => {
-        if (moduleId && courseData?.id) {
-            api.get(`/content/allModules/${courseData.id}`)
-                .then((res) => {
-                    const data = res?.data?.modules?.find(
-                        (item: ModuleData) => moduleId === item.id
-                    )
-                    setSelectedModuleData(data)
-                })
-                .catch((error) => {
-                    toast.error({
-                        title: 'Error',
-                        description: 'Failed to fetch module data',
-                    })
-                })
-        }
-    }, [moduleId, courseData?.id])
 
     const editHandle = (module: any) => {
         setEditMode(true)
@@ -261,10 +248,7 @@ function Page() {
             return
         }
 
-        api.put(
-            `/content/editModuleOfBootcamp/${courseData.id}?moduleId=${moduleId}`,
-            { moduleDto }
-        )
+        editModuleApi(courseData.id, moduleId, { moduleDto })
             .then((res) => {
                 if (res.data.message === 'Modified successfully') {
                     toast.success({
@@ -330,7 +314,7 @@ function Page() {
             return
         }
 
-        api.post(`/content/modules/${courseData.id}?typeId=${typeId}`, {
+        createModuleApi(courseData.id, typeId, {
             ...moduleData,
             timeAlloted: totalSeconds,
         })
@@ -440,12 +424,9 @@ function Page() {
         setIsReordering(true)
 
         try {
-            const response = await api.put(
-                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
-                {
-                    reOrderDto: { newOrder: newPosition },
-                }
-            )
+            const response = await editModuleApi(courseData.id, draggedModuleId, {
+                reOrderDto: { newOrder: newPosition },
+            })
             
             const warningMsg = response.data?.[0]?.message ?? ''
 
