@@ -20,6 +20,7 @@ type roleCellProps = {
   roles: any; 
   rolesLoading: boolean;
   onRoleUpdate?: () => void;
+  roleId?: number;
 };
 
 export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate }: roleCellProps & { userId: number }) => {
