@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { api } from '@/utils/axios.config'
+import { useState } from 'react'
+import { useAssignUserRole } from '@/hooks/useAssignUserRole'
 import {
     Select,
     SelectContent,
@@ -20,20 +20,15 @@ type roleCellProps = {
   roles: any; 
   rolesLoading: boolean;
   onRoleUpdate?: () => void;
+  roleId?: number;
 };
 
-export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRoleUpdate }: roleCellProps & { userId: number; roleId: number }) => {
+export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate }: roleCellProps & { userId: number }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
-    const [isUpdating, setIsUpdating] = useState(false)
+    const orgId = Number(organizationId) || user?.orgId;
+    const { assignUserRole, loading } = useAssignUserRole()
     const [originalRole, setOriginalRole] = useState(role)
-
-    // Update original role when prop changes
-    useEffect(() => {
-        setOriginalRole(role)
-    }, [role])
 
     const handleRoleChange = async (newRoleName: string) => {
         // Only save if the role actually changed
@@ -42,12 +37,11 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRo
         }
 
         try {
-            setIsUpdating(true)
             // Find the roleId from the roles array based on the selected role name
             const selectedRole = roles.find((r: any) => r.name.toLowerCase() === newRoleName.toLowerCase())
             if (!selectedRole) return
 
-            await api.post('/users/users/assign-role', {
+            await assignUserRole({
                 userId: userId,
                 roleId: selectedRole.id,
                 orgId: orgId
@@ -67,8 +61,6 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRo
                 title: 'Error Updating Role',
                 description: 'There was an error updating the user role. Please try again later.',
             })
-        } finally {
-            setIsUpdating(false)
         }
     }
 
@@ -76,7 +68,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRo
         <Select 
             value={role} 
             onValueChange={handleRoleChange} 
-            disabled={isUpdating}
+            disabled={loading}
         >
             <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
                 <SelectValue />

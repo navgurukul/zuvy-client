@@ -814,6 +814,7 @@ export const fetchProjectDetails = async (
             `Content/project/${projectID}?bootcampId=${courseId}`
         )
         setProjectData(response.data)
+        return response.data
     } catch (error) {
         console.error(error)
     }

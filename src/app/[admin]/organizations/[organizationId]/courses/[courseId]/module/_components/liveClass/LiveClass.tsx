@@ -25,6 +25,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
+import { useUpdateLiveClassSession} from '@/hooks/useUpdateLiveClassSession'
 
 const liveClassSchema = z
     .object({
@@ -68,6 +69,7 @@ const LiveClass = ({
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
     const [isLoading, setIsLoading] = useState(true)
+    const { updateLiveClassSession, updating } = useUpdateLiveClassSession()
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
@@ -314,7 +316,7 @@ const LiveClass = ({
             // console.log('Payload:', payload)
             
             const sessionId =  session.id
-            await api.put(`/classes/sessions/${sessionId}`, payload)
+            await updateLiveClassSession(sessionId, payload)
             
             // Update both moduleData and chapterData in store to reflect title change in sidebar
             if (capitalizedTitle !== content?.title) {
@@ -727,8 +729,9 @@ const LiveClass = ({
                         <Button
                             type="submit"
                             className="px-6 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={updating}
                         >
-                            Save Live Class
+                            {updating ? 'Saving...' : 'Save Live Class'}
                         </Button>
                     </div>
                 )}

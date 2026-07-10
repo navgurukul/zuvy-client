@@ -27,6 +27,8 @@ import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
 import { useModuleChapters } from '@/hooks/useModuleChapters';
 import AdaptiveAssessment from '../[chapterID]/AdaptiveAssessment'
+import { useGetChapterDetails } from '@/hooks/useGetChapterDetails'
+import { get } from 'http'
 export default function Page({
     params,
 }: {
@@ -39,6 +41,7 @@ export default function Page({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
     const { courseId, moduleId, chapterID } = useParams()
+    const courseID = Array.isArray(courseId) ? courseId[0] : courseId
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -59,14 +62,18 @@ export default function Page({
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
+    const { getChapterDetails } = useGetChapterDetails()
 
     const fetchChapterContent = useCallback(
         
         async (chapterId: number, topicId: number) => {
             try {
-                const response = await api.get(
-                    `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-                )
+                const response = await getChapterDetails({
+                    chapterId,
+                    bootcampId: courseID,
+                    moduleId: moduleID,
+                    topicId,
+                })
 
                 setChapterId(chapterId)
                 const currentModule: any = moduleData.find(
@@ -88,7 +95,7 @@ export default function Page({
                 setContentLoading(false)
             }
         },
-        [moduleData, courseId, moduleId]
+        [moduleData, courseId, moduleId, getChapterDetails]
     )
 
     useEffect(() => {

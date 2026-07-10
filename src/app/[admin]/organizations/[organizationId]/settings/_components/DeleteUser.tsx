@@ -14,10 +14,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
+import { useUsers } from '@/hooks/useUsers'
 
 interface DeleteUserProps {
     title: string
@@ -36,6 +36,7 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
+    const { deleteUser } = useUsers()
     const [open, setOpen] = useState(false)  // ✅ Modal control
     const [isDeleting, setIsDeleting] = useState(false)  // ✅ Loading state
 
@@ -44,7 +45,7 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
         
         try {
             
-            const res = await api.delete(`/users/deleteUser/${userId}?orgId=${orgId}`)
+            const res = await deleteUser(userId, orgId)
             
             // Log the full response for easier debugging in DevTools
             console.log('deleteUser response', res)
