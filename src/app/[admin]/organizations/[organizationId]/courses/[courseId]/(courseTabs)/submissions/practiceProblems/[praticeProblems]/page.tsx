@@ -1,12 +1,12 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 
 import { columns } from './columns'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { api } from '@/utils/axios.config'
+import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
 
 interface CodingQuestionDetails {
     id: number
@@ -31,44 +31,18 @@ interface Module {
     timeAlloted: number
     moduleChapterData: ModuleChapterData[]
 }
+import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
+
+
 const PraticeProblems = ({ params }: any) => {
-    const [submissionData, setSubmissionData] = useState<any[]>([])
+    const { trackingData: submissionData, totalStudents } = usePracticeProblemSubmissions(params.courseId)
     const [matchingData, setMatchingData] = useState<any>(null)
-    const [totalStudents, setTotalStudents] = useState<number>(0)
-    const [studentDetails, setStudentDetails] = useState<any[]>([])
 
-    const getSubmissionDataHandler = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/submission/submissionsOfPractiseProblems/${params.courseId}`
-            )
-            setSubmissionData(res.data.trackingData)
-            setTotalStudents(res.data.totalStudents)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
-    const getStudentDetails = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/submission/practiseProblemStatus/${matchingData?.id}?chapterId=${matchingData?.moduleChapterData[0].id}&questionId=${matchingData?.moduleChapterData[0].codingQuestionDetails.id}`
-            )
-            
-            setStudentDetails(res.data.data)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [matchingData?.id, matchingData?.moduleChapterData])
-
-    useEffect(() => {
-        getSubmissionDataHandler()
-    }, [getSubmissionDataHandler])
-    useEffect(() => {
-        if (matchingData) {
-            getStudentDetails()
-        }
-    }, [getStudentDetails, matchingData])
+    const { studentDetails } = usePracticeProblemStatus(matchingData?.id, {
+        chapterId: matchingData?.moduleChapterData?.[0]?.id,
+        questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
+        enabled: !!matchingData,
+    })
 
     useEffect(() => {
         if (submissionData.length > 0 && params.praticeProblems) {

@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,8 @@ import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
+import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
 
 interface BatchFilter {
     id: number
@@ -27,9 +29,7 @@ const PracticeProblems = ({ params }: any) => {
     const currentTab = searchParams.get('tab') || 'practice'
     const [matchingData, setMatchingData] = useState<any>(null)
     const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
-    const [studentStatus, setStudentStatus] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState<number>(0)
-    const [loading, setLoading] = useState(false)
+    const { trackingData, totalStudents } = usePracticeProblemSubmissions(params.courseId)
     const [crumbData, setCrumbData] = useState<string[]>([])
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -40,6 +40,29 @@ const PracticeProblems = ({ params }: any) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
+
+    const [appliedSearchQuery, setAppliedSearchQuery] = useState('')
+    const { studentDetails, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
+        chapterId: matchingData?.moduleChapterData?.[0]?.id,
+        questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
+        searchStudent: appliedSearchQuery,
+        batchId: selectedBatch,
+        orderBy: sortField,
+        orderDirection: sortDirection,
+        enabled: !!matchingData,
+    })
+
+    const loading = hookLoading || !matchingData
+
+    const studentStatus = useMemo(() => {
+        if (!matchingData?.moduleChapterData?.[0]) return []
+        return studentDetails.map((student: any) => ({
+            ...student,
+            bootcampId: params.courseId,
+            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
+            moduleId: params.StudentProblemData,
+        }))
+    }, [studentDetails, matchingData, params.courseId, params.StudentProblemData])
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -56,70 +79,22 @@ const PracticeProblems = ({ params }: any) => {
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
 
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&searchStudent=${encodeURIComponent(query)}`
-        )
-
-        return res.data.data.map((student: any) => ({
+        const res = await fetchStatus({ searchStudent: query })
+        return res?.data?.map((student: any) => ({
             id: student.id,
             name: student.name,
             email: student.emailId,
             ...student,
         })) || []
-    }, [matchingData])
+    }, [fetchStatus])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        setLoading(true)
-
-        const queryParams = new URLSearchParams()
-        queryParams.append('searchStudent', query)
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
-        )
-
-        const students = res.data.data.map((student: any) => ({
-            ...student,
-            // email: student.emailId,
-            bootcampId: params.courseId,
-            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
-            moduleId: params.StudentProblemData,
-        })) || []
-
-        setStudentStatus(students)
-        setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection, selectedBatch])
+        setAppliedSearchQuery(query)
+    }, [])
 
     const defaultFetchApi = useCallback(async () => {
-        setLoading(true)
-
-        const queryParams = new URLSearchParams()
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
-        )
-
-        const students = res.data.data.map((student: any) => ({
-            ...student,
-            // email: student.emailId,
-            bootcampId: params.courseId,
-            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
-            moduleId: params.StudentProblemData,
-        })) || []
-
-        setStudentStatus(students)
-        setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection, selectedBatch])
+        setAppliedSearchQuery('')
+    }, [])
 
     const handleVideoDownloadCsv = useCallback(() => {
         if (!matchingData) return
@@ -171,34 +146,18 @@ const PracticeProblems = ({ params }: any) => {
         }
     }, [bootcampData, matchingData])
 
-    // Initial data fetch - exactly like projects code
+    // Derive matchingData from hook's trackingData - preserving exact existing logic
     useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const submissionRes = await api.get(
-                    `/submission/submissionsOfPractiseProblems/${params.courseId}`
-                )
-
-                const submissions = submissionRes.data.trackingData
-                setTotalStudents(submissionRes.data.totalStudents)
-
-                if (submissions.length > 0 && params.StudentProblemData) {
-                    const matchingModule = submissions.find(
-                        (module: any) =>
-                            module.id === +params.StudentProblemData
-                    )
-                    setMatchingData(matchingModule || null)
-                } else {
-                    setMatchingData(null)
-                    setStudentStatus([])
-                }
-            } catch (error) {
-                console.error('Error fetching initial data', error)
-            }
+        if (trackingData.length > 0 && params.StudentProblemData) {
+            const matchingModule = trackingData.find(
+                (module: any) =>
+                    module.id === +params.StudentProblemData
+            )
+            setMatchingData(matchingModule || null)
+        } else {
+            setMatchingData(null)
         }
-
-        fetchInitialData()
-    }, [params.courseId, params.StudentProblemData])
+    }, [trackingData, params.StudentProblemData])
 
     // Handle sorting change
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
@@ -209,12 +168,6 @@ const PracticeProblems = ({ params }: any) => {
     useEffect(() => {
         fetchBatches()
     }, [fetchBatches])
-
-    useEffect(() => {
-        if (matchingData) {
-            defaultFetchApi()
-        }
-    }, [matchingData, sortField, sortDirection, defaultFetchApi, selectedBatch])
 
     return (
         <>

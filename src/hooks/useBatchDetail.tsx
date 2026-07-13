@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState ,useRef} from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { z } from 'zod'
@@ -7,11 +7,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { api } from '@/utils/axios.config'
-import { getUser, getDeleteStudentStore, getStoreStudentData } from '@/store/store'
+import { getUser, getDeleteStudentStore, getStoreStudentData, getStoreStudentDataNew } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { POSITION } from '@/utils/constant'
-import { useStudentData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
 import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
 import type { StudentDataPage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
 import { PermissionsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
@@ -25,13 +24,13 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
 
-    const { students, setStudents } = useStudentData(params.courseId)
+    const { students, setStudents } = getStoreStudentDataNew()
     const { studentsData, setStoreStudentData } = getStoreStudentData()
 
     const [allBatches, setAllBatches] = useState<any>([])
     const [studentData, setStudentData] = useState<StudentDataPage[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
-    const [search, setSearch] = useState('')
+    const [search, setSearch] = useState(searchParams?.get('search') || '')
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false)
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
@@ -44,6 +43,12 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
+
+    const urlSearch = searchParams?.get('search') || ''
+    useEffect(() => {
+        setSearch(urlSearch)
+    }, [urlSearch])
+
     const [loading, setLoading] = useState(true)
     const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<StudentDataState | any>({})
@@ -53,6 +58,10 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
         editBatch: false,
         viewBatch: false,
     })
+
+    const lastFetchedStudentsRef = useRef<{ courseId?: string; batchId?: string; limit?: any; offset?: number; search?: string }>({})
+    const lastFetchedBatchesRef = useRef<string | null>(null)
+    const lastFetchedInstructorRef = useRef<string | null>(null)
 
     const formSchema = z.object({
         name: z.string().min(2, { message: 'Batch name must be at least 2 characters.' }),
@@ -95,6 +104,8 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
 
     const fetchBatches = useCallback(
         async (courseId: string) => {
+            if (!courseId || lastFetchedBatchesRef.current === courseId) return
+            lastFetchedBatchesRef.current = courseId
             try {
                 const response = await api.get(`/bootcamp/batches/${courseId}`)
                 const batchData: BatchOption[] = response.data.data?.map((data: any) => ({ value: data.id, label: data.name }))
@@ -118,8 +129,10 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     }, [params.courseId, fetchBatches])
 
     const fetchInstructorInfo = useCallback(
-        async (batchId: string) => {
+        async (batchId: string, force = false) => {
             if (batchId) {
+                if (!force && lastFetchedInstructorRef.current === batchId) return
+                lastFetchedInstructorRef.current = batchId
                 try {
                     const response = await api.get(`/batch/${batchId}`)
                     const batchData = response.data.batch
@@ -135,13 +148,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
 
     useEffect(() => {
         fetchInstructorInfo(params.batchId)
-    }, [isFormOpen, fetchInstructorInfo, params.batchId])
-
-    useEffect(() => {
-        if (params.batchId) {
-            fetchInstructorInfo(params.batchId)
-        }
-    }, [params.batchId, router, fetchInstructorInfo])
+    }, [fetchInstructorInfo, params.batchId])
 
     const batchDeleteHandler = async () => {
         try {
@@ -178,7 +185,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                     } catch (error) {}
                 }
                 fetchBatchesInfo()
-                fetchInstructorInfo(params.batchId)
+                fetchInstructorInfo(params.batchId, true)
             })
         } catch (error) {
             toast.error({ title: "Batches Didn't Update Succesfully" })
@@ -194,6 +201,24 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
+            const searchKey = debouncedValue || '';
+            if (
+                lastFetchedStudentsRef.current.courseId === params.courseId &&
+                lastFetchedStudentsRef.current.batchId === params.batchId &&
+                lastFetchedStudentsRef.current.limit === position &&
+                lastFetchedStudentsRef.current.offset === offset &&
+                lastFetchedStudentsRef.current.search === searchKey
+            ) {
+                return;
+            }
+            lastFetchedStudentsRef.current = {
+                courseId: params.courseId,
+                batchId: params.batchId,
+                limit: position,
+                offset: offset,
+                search: searchKey,
+            };
+
             let endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
             if (debouncedValue) endpoint += `&searchTerm=${debouncedValue}`
             await api.get(endpoint).then((response) => {
@@ -206,7 +231,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                 setLoading(false)
             })
         },
-        [params, position, setStoreStudentData, setStudents, setLastPage, setPages, setTotalStudents, debouncedValue]
+        [params.courseId, params.batchId, position, setStoreStudentData, setStudents, debouncedValue]
     )
 
     useEffect(() => {

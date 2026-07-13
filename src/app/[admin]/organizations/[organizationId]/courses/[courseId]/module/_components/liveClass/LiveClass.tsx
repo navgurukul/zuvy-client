@@ -6,6 +6,7 @@ import { Calendar, Clock, Video, Users, ExternalLink, Info, CalendarIcon } from 
 import { LiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
 import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
+import { useClassAnalytics } from '@/hooks/useClassAnalytics'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -73,6 +74,7 @@ const LiveClass = ({
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
+    const { getClassAnalytics } = useClassAnalytics()
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -129,8 +131,7 @@ const LiveClass = ({
         if (!canEdit) return
         try {
             const sessionId = session.id || session.meetingId || session.title
-            const res = await api.get(`/classes/analytics/${sessionId}`)
-            const data = res.data
+            const data = await getClassAnalytics({ classId: sessionId })
 
             const studentRecords =
                 data?.data?.session?.studentAttendanceRecords ?? []
@@ -227,11 +228,11 @@ const LiveClass = ({
         const fetchRecordingLink = async () => {
             if (session?.status?.toLowerCase() === 'completed' && session?.id) {
                 try {
-                    const res = await api.get(`/classes/analytics/${session.id}`)
-                    const analyticsS3Link = res.data?.data?.session?.s3link
-                    const analyticsRecordingLink = res.data?.data?.session?.recordingLink
-                    const analyticsYoutubeLink = res.data?.data?.session?.youtubeLink
-                    
+                    const data = await getClassAnalytics({ classId: session.id })
+                    const analyticsS3Link = data?.data?.session?.s3link
+                    const analyticsRecordingLink = (data?.data?.session as any)?.recordingLink
+                    const analyticsYoutubeLink = (data?.data?.session as any)?.youtubeLink
+
                     // Set recording link if available
                     if (analyticsS3Link && analyticsS3Link !== 'not found') {
                         setRecordingLink(analyticsS3Link)

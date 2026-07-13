@@ -1,11 +1,10 @@
 "use client"
-import React, { useState, useMemo,useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useSearchParams } from "next/navigation"
-
 import {
     Card,
     CardContent,
@@ -141,6 +140,12 @@ const Page = ({ params }: { params: ParamsType }) => {
     useEffect(() => {
         setBatchesPerPage(position);   // update hook limit when URL changes
     }, [position, setBatchesPerPage]);
+    
+    // Memoized callback — sirf tab change hoga jab defaultFetchApi ya position actually change ho
+    const handleFetchStudentData = useCallback(
+        (off: number) => defaultFetchApi(off, position),
+        [defaultFetchApi, position]
+    );
     
     // Local UI-only value derived from the form provided by the hook
     const capEnrollmentValue = form.watch('capEnrollment')
@@ -990,7 +995,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     totalStudents={totalBatches}
                     pages={Math.ceil(totalBatches / position)}
                     lastPage={Math.ceil(totalBatches / position)}
-                    fetchStudentData={(offset: number) => defaultFetchApi(offset, position)}
+                    fetchStudentData={handleFetchStudentData}
                 />
             </div>
         )

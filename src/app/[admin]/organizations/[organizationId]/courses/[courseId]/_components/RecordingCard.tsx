@@ -23,13 +23,13 @@ import {
 } from '@/components/ui/tooltip'
 
 import { ellipsis } from '@/lib/utils'
-import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import {
     ClassDatas,
     DisplayAttendance,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
+import { useClassAnalytics } from '@/hooks/useClassAnalytics'
 
 function RecordingCard({
     classData,
@@ -43,6 +43,7 @@ function RecordingCard({
         null
     )
     const [isLoading, setIsLoading] = useState(false)
+    const { getClassAnalytics } = useClassAnalytics()
 
     const isVideo = classDetails?.data?.session?.s3link
 
@@ -63,10 +64,8 @@ function RecordingCard({
     async function handleClassDetails() {
         setIsLoading(true)
         try {
-            const response = await api.get(
-                `/classes/analytics/${classData?.id}`
-            )
-            setClassDetails(response.data)
+            const data = await getClassAnalytics({ classId: classData?.id })
+            setClassDetails(data)
         } catch (err) {
             console.error(err)
         } finally {

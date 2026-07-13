@@ -2,10 +2,10 @@ import { isPlural } from '@/lib/utils'
 import { GripVertical, Trash2, Edit, FolderOpen } from 'lucide-react'
 import React, { useState } from 'react'
 import DeleteConfirmationModal from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/deleteModal'
-import { api } from '@/utils/axios.config'
 import { useRouter, useParams } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import { useDeleteModule } from '@/hooks/useDeleteModule'
 import { Reorder, useDragControls } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,8 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId
+    const { deleteModule } = useDeleteModule()
     const [isDragging, setIsDragging] = useState(false)
     const [originalOrder, setOriginalOrder] = useState(order)
 
@@ -60,22 +61,19 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     }
 
     const handleDeleteModule = async () => {
-        const response = await api
-            .delete(`Content/deleteModule/${courseId}?moduleId=${moduleId}`)
-            .then((response) => {
-                toast.success({
-                    title: 'Success',
-                    description: 'Module Deleted Successfully',
-                })
-                fetchCourseModules()
+        try {
+            await deleteModule({ courseId, moduleId })
+            toast.success({
+                title: 'Success',
+                description: 'Module Deleted Successfully',
             })
-            .catch((error) => {
-                toast.error({
-                    title: 'Error',
-                    description:
-                        'There was an error while deleting. Please try again.',
-                })
+            fetchCourseModules()
+        } catch (error) {
+            toast.error({
+                title: 'Error',
+                description: 'There was an error while deleting. Please try again.',
             })
+        }
     }
 
     const handleModuleRoute = () => {

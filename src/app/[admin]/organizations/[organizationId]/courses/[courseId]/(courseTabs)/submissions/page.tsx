@@ -20,8 +20,9 @@ import VideoSubmission from './components/VideoSubmission'
 import Image from 'next/image'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
-import {CourseSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { CourseSubmissionSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import ProjectsComponent from './components/projectSubmissionComponent'
+import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
 
 interface SearchSuggestion {
     id: string
@@ -57,11 +58,15 @@ const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState(initialTab)
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
-    const [bootcampModules, setBootcampModules] = useState<any[]>([])
     const [formData, setFormData] = useState<any[]>([])
     const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get('search') || '')
+
+    const { bootcampModules: hookBootcampModules, totalStudents: hookTotalStudents } = useProjectSubmissions(params.courseId, {
+        searchProject: appliedSearchQuery,
+        enabled: activeTab === 'projects'
+    })
 
     // New state for controlling search input display vs applied search
     const [searchInputValue, setSearchInputValue] = useState(searchParams.get('search') || '')
@@ -264,7 +269,7 @@ const Page = ({ params }: { params: any }) => {
                 index === self.findIndex((s) => s.id === suggestion.id && s.type === suggestion.type)
         )
 
-        
+
 
         return uniqueSuggestions.slice(0, 8)
     }, [params.courseId, activeTab])
@@ -328,24 +333,6 @@ const Page = ({ params }: { params: any }) => {
         // Don't update appliedSearchQuery here - only update for suggestions
     }
 
-    const getProjectsData = useCallback(async () => {
-        try {
-            let url = `/submission/submissionsOfProjects/${params.courseId}`
-            if (appliedSearchQuery && activeTab === 'projects') {
-                url += `?searchProject=${encodeURIComponent(appliedSearchQuery)}`
-            }
-
-            const res = await api.get(url)
-            const projectsData = res.data?.data?.bootcampModules || []
-            setBootcampModules(projectsData)
-            setTotalStudents(res.data?.totalStudents || 0)
-        } catch (error) {
-            setBootcampModules([])
-            setTotalStudents(0)
-        }
-
-    }, [params.courseId, appliedSearchQuery, activeTab])
-
     const getFormData = useCallback(async () => {
         try {
             let url = `/submission/submissionsOfForms/${params.courseId}`
@@ -387,12 +374,11 @@ const Page = ({ params }: { params: any }) => {
 
     useEffect(() => {
         if (!params.courseId) return
-        if (activeTab === 'projects') getProjectsData()
         if (activeTab === 'form') getFormData()
         if (activeTab === 'live') getLiveClassData()
-    }, [params.courseId, activeTab, appliedSearchQuery, getProjectsData, getFormData, getLiveClassData])
+    }, [params.courseId, activeTab, appliedSearchQuery, getFormData, getLiveClassData])
 
-    
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
@@ -403,7 +389,7 @@ const Page = ({ params }: { params: any }) => {
     return (
         <div className="">
             {loading ? (
-                 <CourseSubmissionSkeleton/>
+                <CourseSubmissionSkeleton />
             ) : (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
@@ -433,7 +419,7 @@ const Page = ({ params }: { params: any }) => {
                         <div className="flex flex-col lg:flex-row justify-between mt-6">
                             <div className="relative w-full mr-2">
                                 {/* <div className="relative w-full lg:w-1/3"> */}
-                                 <div className="relative w-full lg:max-w-[500px] [&_input]:pl-10">
+                                <div className="relative w-full lg:max-w-[500px] [&_input]:pl-10">
                                     <SearchBox
                                         placeholder={`${activeTab === 'practice'
                                             ? 'Search for practice problems by name'
@@ -459,27 +445,27 @@ const Page = ({ params }: { params: any }) => {
                         {submissionTypes.map(type => (
                             <TabsContent key={type.id} value={type.id} className="mt-6">
                                 <div className="w-full">
-                                    {activeTab === 'practice' && (
+                                    {type.id === 'practice' && (
                                         <PraticeProblemsComponent
                                             courseId={params.courseId}
                                             debouncedSearch={appliedSearchQuery}
                                         />
                                     )}
-                                    {activeTab === 'assessments' && (
+                                    {type.id === 'assessments' && (
                                         <AssesmentSubmissionComponent
                                             searchTerm={appliedSearchQuery}
                                             courseId={params.courseId}
                                         />
                                     )}
-                                    {activeTab === 'projects' &&
+                                    {type.id === 'projects' &&
                                         <ProjectsComponent
                                             courseId={params.courseId}
                                             debouncedSearch={appliedSearchQuery}
-                                            bootcampModules={bootcampModules}
-                                            totalStudents={totalStudents}
+                                            bootcampModules={hookBootcampModules}
+                                            totalStudents={hookTotalStudents}
                                         />
                                     }
-                                    {activeTab === 'form' && (
+                                    {type.id === 'form' && (
                                         <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
                                                 <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
@@ -514,19 +500,19 @@ const Page = ({ params }: { params: any }) => {
                                             )}
                                         </div>
                                     )}
-                                    {activeTab === 'assignments' && (
+                                    {type.id === 'assignments' && (
                                         <Assignments
                                             debouncedSearch={appliedSearchQuery}
                                             courseId={params.courseId}
                                         />
                                     )}
-                                    {activeTab === 'video' && (
+                                    {type.id === 'video' && (
                                         <VideoSubmission
                                             debouncedSearch={appliedSearchQuery}
                                             courseId={params.courseId}
                                         />
                                     )}
-                                    {activeTab === 'live' && (
+                                    {type.id === 'live' && (
                                         <LiveClassSubmission
                                             debouncedSearch={appliedSearchQuery}
                                             courseId={params.courseId}
