@@ -12,6 +12,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 
 import { StudentData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
+import { useAssignBatch } from '@/hooks/useAssignBatch'
 
 type AssignmentMethod = 'unassigned' | 'single' | 'csv'
 
@@ -27,6 +28,10 @@ export type AddStudentOptionsProps = {
     onCsvChange?: (data: any[]) => void
     onValidityChange?: (valid: boolean) => void
     onSuccess?: () => void
+    // externally-managed unassigned students (from useBatches hook)
+    externalUnassignedStudents?: StudentData[]
+    externalSearchStudent?: string
+    onExternalSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
     // ui
     className?: string
 }
@@ -42,8 +47,12 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
     onCsvChange,
     onValidityChange,
     onSuccess,
+    externalUnassignedStudents,
+    externalSearchStudent,
+    onExternalSearchChange,
     className,
 }) => {
+    const useExternalData = externalUnassignedStudents !== undefined
     const [method, setMethod] = useState<AssignmentMethod>(initialMethod)
     const [searchTerm, setSearchTerm] = useState('')
     const [loadingUnassigned, setLoadingUnassigned] = useState(false)
@@ -52,11 +61,12 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
     const [singleStudent, setSingleStudent] = useState({ name: '', email: '' })
     const [csvStudents, setCsvStudents] = useState<any[]>([])
     const [submitting, setSubmitting] = useState(false)
+    const { assignBatch } = useAssignBatch()
 
     const columns = useMemo(() => createColumns(Number(capEnrollment || 0)), [capEnrollment])
 
     const fetchUnassigned = useCallback(async () => {
-        if (!courseId) return
+        if (useExternalData || !courseId) return
         try {
             setLoadingUnassigned(true)
             const res = await api.get(`/batch/allUnassignStudent/${courseId}?searchTerm=${encodeURIComponent(searchTerm)}`)
@@ -66,16 +76,21 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
         } finally {
             setLoadingUnassigned(false)
         }
-    }, [courseId, searchTerm])
+    }, [courseId, searchTerm, useExternalData])
 
     useEffect(() => {
-        if (method === 'unassigned') {
+        if (!useExternalData && method === 'unassigned') {
             const t = setTimeout(() => {
                 fetchUnassigned()
             }, 500)
             return () => clearTimeout(t)
         }
-    }, [method, searchTerm, fetchUnassigned])
+    }, [method, searchTerm, fetchUnassigned, useExternalData])
+
+    // Derive the actual students list: external data takes priority
+    const resolvedStudents = useExternalData ? externalUnassignedStudents : unassignedStudents
+    const resolvedSearch = useExternalData ? (externalSearchStudent ?? '') : searchTerm
+    const resolvedSearchHandler = useExternalData ? onExternalSearchChange : (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)
 
     useEffect(() => {
         let valid = false
@@ -106,26 +121,29 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
 
         try {
             setSubmitting(true)
+            let studentsPayload: { name: string; email: string }[] = []
+
             if (method === 'unassigned') {
-                const studentsPayload = selectedRows.map(s => ({ name: (s as any).name, email: (s as any).email }))
+                studentsPayload = selectedRows.map(s => ({ name: (s as any).name, email: (s as any).email }))
                 if (studentsPayload.length === 0) {
                     toast.error({ title: 'No Students Selected', description: 'Please select at least one student' })
                     return
                 }
-                await api.post(`/bootcamp/students/${courseId}?batch_id=${batchId}`, { students: studentsPayload })
             } else if (method === 'single') {
                 if (!singleStudent.name.trim() || !singleStudent.email.trim()) {
                     toast.error({ title: 'Incomplete Student Data', description: 'Provide both name and email' })
                     return
                 }
-                await api.post(`/bootcamp/students/${courseId}?batch_id=${batchId}`, { students: [{ name: singleStudent.name.trim(), email: singleStudent.email.trim() }] })
+                studentsPayload = [{ name: singleStudent.name.trim(), email: singleStudent.email.trim() }]
             } else if (method === 'csv') {
                 if (!Array.isArray(csvStudents) || csvStudents.length === 0) {
                     toast.error({ title: 'No CSV Data', description: 'Please upload a valid CSV' })
                     return
                 }
-                await api.post(`/bootcamp/students/${courseId}?batch_id=${batchId}`, { students: csvStudents })
+                studentsPayload = csvStudents
             }
+
+            await assignBatch({ bootcampId: courseId, batchId, students: studentsPayload })
             toast.success({ title: 'Success', description: 'Students added successfully' })
             // reset
             setSelectedRows([])
@@ -164,11 +182,11 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
                 {method === 'unassigned' && (
                     <>
                         <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Unassigned Students: {unassignedStudents.length}</p>
-                            <Input type="search" placeholder="Search students" className="w-[280px]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <p className="text-sm text-muted-foreground">Unassigned Students: {resolvedStudents.length}</p>
+                            <Input type="search" placeholder="Search students" className="w-[280px]" value={resolvedSearch} onChange={resolvedSearchHandler} />
                         </div>
                         <div className="mt-3">
-                            <DataTable data={unassignedStudents} columns={columns} setSelectedRows={setSelectedRows} assignStudents={'manually'} />
+                            <DataTable data={resolvedStudents} columns={columns} setSelectedRows={setSelectedRows} assignStudents={'manually'} />
                             <p className="pt-2 text-sm">Selected: {selectedRows.length}{capEnrollment ? ` / ${capEnrollment}` : ''}</p>
                         </div>
                     </>

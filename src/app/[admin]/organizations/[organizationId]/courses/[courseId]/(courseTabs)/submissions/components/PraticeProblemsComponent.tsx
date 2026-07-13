@@ -1,47 +1,29 @@
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import PracticeProblems from '../../../_components/PraticeProblems'
 import Image from 'next/image'
-import { Spinner } from '@/components/ui/spinner'
 import {
     PractieProblemProps,
-    SubmissionsResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {PracticeProblemSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
 
 const PraticeProblemsComponent = ({
     courseId,
     debouncedSearch,
 }: PractieProblemProps) => {
-    const [submissions, setSubmissions] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState(0)
-     const [loading, setLoading] = useState(true)
+    const { trackingData: submissions, totalStudents, loading, error } = usePracticeProblemSubmissions(courseId, {
+        searchPractiseProblem: debouncedSearch,
+    })
 
-    const getSubmissions = useCallback(async () => {
-        try {
-            // const res = await api.get(
-            //     `/submission/submissionsOfPractiseProblems/${courseId}`
-            // )
-            const url = debouncedSearch
-                ? `/submission/submissionsOfPractiseProblems/${courseId}?searchPractiseProblem=${debouncedSearch}`
-                : `/submission/submissionsOfPractiseProblems/${courseId}`
-            const res = await api.get<SubmissionsResponse>(url)
-            setSubmissions(res.data.trackingData)
-            setTotalStudents(res.data.totalStudents)
-            setLoading(false)
-        } catch (error) {
-            console.error('Error fetching submissions:', error)
+    useEffect(() => {
+        if (error) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching submissions.',
             })
-        } 
-    }, [courseId, debouncedSearch])
-
-    useEffect(() => {
-        getSubmissions()
-    }, [getSubmissions])
+        }
+    }, [error])
 
     const allEmpty = submissions?.every(
         ({ moduleChapterData }) => moduleChapterData.length === 0

@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowDownToLine, ChevronRight, Play,Eye } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
@@ -17,48 +16,32 @@ interface LiveClassSubmissionsProps {
     debouncedSearch: string
 }
 
+import { useLiveClassSubmissions } from '@/hooks/useLiveClassSubmissions'
+
+
 const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     courseId,
     debouncedSearch,
 }) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
-    const [liveClassData, setLiveClassData] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState(0)
-    const [loading, setLoading] = useState(true)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
 
-    const getLiveClassData = useCallback(async () => {
-        try {
-            let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${courseId}`
-            if (debouncedSearch) {
-                url += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
-            }
+    const { liveClassData, totalStudents, loading, error } = useLiveClassSubmissions(courseId, {
+        searchTerm: debouncedSearch,
+    })
 
-            const res = await api.get(url)
-            const trackingData = res.data?.data?.trackingData || []
-            setLiveClassData(trackingData)
-            setTotalStudents(res.data?.data?.totalStudents || 0)
-            setLoading(false)
-        } catch (error) {
-            console.error('Error fetching live class data:', error)
-            setLiveClassData([])
-            setTotalStudents(0)
+    useEffect(() => {
+        if (error) {
             toast({
                 title: 'Error',
                 description: 'Failed to fetch live class data',
                 variant: 'destructive',
             })
-        } 
-    }, [courseId, debouncedSearch])
-
-    useEffect(() => {
-        if (courseId) {
-            getLiveClassData()
         }
-    }, [courseId, debouncedSearch, getLiveClassData])
+    }, [error])
       
     const handleDownloadCsv = (liveClassId: string, liveClassTitle: string) => {
         if (!liveClassId) return

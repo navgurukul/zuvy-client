@@ -15,6 +15,7 @@ import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
 
 type Props = {}
 
@@ -29,7 +30,7 @@ const Page = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'projects'
     const [data, setData] = useState<any>()
-    const [totalStudents, setTotalStudents] = useState<number>(0)
+    const { rawResponse, totalStudents } = useProjectSubmissions(params.courseId)
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
     useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState<boolean>(false)
@@ -116,18 +117,12 @@ const Page = ({ params }: any) => {
     }, [params.courseId, params.StudentsProjects, sortField, sortDirection, selectedBatch])
 
 
-    const getProjectsData = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/submission/submissionsOfProjects/${params.courseId}`
-            )
-            setData(res.data.data.bootcampModules[0])
-            setSubmitStudents(res.data.data.bootcampModules[0]?.projectData[0]?.submitStudents || 0)
-            setTotalStudents(res.data.totalStudents)
-        } catch (error) {
-            console.error(error)
+    useEffect(() => {
+        if (rawResponse?.data?.bootcampModules) {
+            setData(rawResponse.data.bootcampModules[0])
+            setSubmitStudents(rawResponse.data.bootcampModules[0]?.projectData?.[0]?.submitStudents || 0)
         }
-    }, [params.courseId])
+    }, [rawResponse])
 
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
@@ -170,9 +165,6 @@ const Page = ({ params }: any) => {
         setSortDirection(direction)
     }, [])
 
-    useEffect(() => {
-        getProjectsData()
-    }, [getProjectsData])
     useEffect(() => {
         fetchBatches()
     }, [fetchBatches])
