@@ -200,6 +200,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
     onSolveOpenEnded: () => void;
   }) {
     if (!(questions?.length > 0)) return null;
+    const isSubmitted = questions[0]?.submissionsData?.length > 0;
     return (
       <div className="mb-8 overflow-hidden">
         <div className="p-6">
@@ -216,6 +217,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
             title="Open-Ended Questions"
             description={`${questions.length || 0} questions`}
             onSolveChallenge={onSolveOpenEnded}
+            isQuizSubmitted={isSubmitted}
             setIsCodingSubmitted={noop}
           />
         </div>
