@@ -1,50 +1,45 @@
-import { useState, useEffect } from 'react';
-import { api } from '@/utils/axios.config';
-import{LatestUpdatedCourseResponse,LatestUpdatedCourseData} from '@/hooks/hookType'
+import { useEffect, useRef } from 'react'
+import { useLatestCourseStore } from '@/store/latestCourseStore'
 
+/**
+ * Thin wrapper around the Zustand latestCourseStore.
+ *
+ * Deduplication guarantee:
+ * - All components sharing the same courseId share ONE fetch.
+ * - The store's fetchedForId acts as a mutex: the first call sets it
+ *   atomically, all subsequent calls in the same render cycle see it
+ *   already set and bail out immediately.
+ * - On courseId change (navigation), only the FIRST component to detect
+ *   the change triggers a new fetch; others see the updated fetchedForId
+ *   and skip.
+ *
+ * Return shape is identical to the original hook — no consumer changes needed.
+ */
 export const useLatestUpdatedCourse = (courseId: string) => {
-  const [latestCourseData, setLatestCourseData] = useState<LatestUpdatedCourseData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { latestCourseData, loading, error, fetchLatestCourse, fetchedForId } =
+    useLatestCourseStore()
+
+  // Track the previous courseId this hook instance saw, without triggering re-renders
+  const prevCourseIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!courseId) {
-      setLatestCourseData(null);
-      setError(null);
-      setLoading(false);
-      return;
+    if (!courseId) return
+
+    const prevCourseId = prevCourseIdRef.current
+    prevCourseIdRef.current = courseId
+
+    // If this component instance has seen a different courseId before,
+    // and the store is still caching the old one, trigger a fresh fetch.
+    // fetchLatestCourse handles the atomic dedup so only one component wins.
+    if (prevCourseId && prevCourseId !== courseId) {
+      // Force a new fetch by calling fetchLatestCourse —
+      // the store will detect fetchedForId !== courseId and reset+fetch
+      fetchLatestCourse(courseId)
+      return
     }
 
-    const fetchLatestUpdatedCourse = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await api.get<LatestUpdatedCourseResponse>(`/tracking/latestUpdatedCourse?bootcampId=${courseId}`);
-        
-        if (response.data.isSuccess) {
-          setLatestCourseData({
-            ...response.data.data,
-            mentorshipEnabled: response.data.mentorshipEnabled,
-            leaderboardEnabled: response.data.leaderboardEnabled,
-          });
-        } else {
-          setError(response.data.message || 'Failed to fetch latest updated course');
-        }
-      } catch (err: any) {
-        console.error('Error fetching latest updated course:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to fetch latest updated course');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchLatestCourse(courseId)
+  }, [courseId])
 
-    fetchLatestUpdatedCourse();
-  }, [courseId]);
-
-  return {
-    latestCourseData,
-    loading,
-    error
-  };
-}; 
+  return { latestCourseData, loading, error }
+}

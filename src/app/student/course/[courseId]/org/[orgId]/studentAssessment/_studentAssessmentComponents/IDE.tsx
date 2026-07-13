@@ -40,7 +40,6 @@ import {
 import { X } from 'lucide-react'
 
 import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
-import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
 import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
 import { useGetCodingQuestion } from '@/hooks/useGetCodingQuestion'
 
@@ -74,13 +73,6 @@ const IDE: React.FC<IDEProps> = ({
     } = useGetCodingQuestion({
         questionId: params.editor ?? null,
         orgId: orgId as string ?? null,
-    })
-
-    const { fetchCodingSubmissions } = useCodingSubmissions({
-        codingOutsourseId: selectedCodingOutsourseId ?? null,
-        assessmentSubmissionId: assessmentSubmitId ?? null,
-        questionId: params.editor ? parseInt(params.editor) : null,
-        enabled: false,
     })
 
     const {
@@ -242,22 +234,6 @@ const IDE: React.FC<IDEProps> = ({
             }
         }
     }, [runCodeLanguageId, runSourceCode])
-
-    useEffect(() => {
-        const getActions = async () => {
-            const responseData = await fetchCodingSubmissions(
-                selectedCodingOutsourseId,
-                assessmentSubmitId,
-                params.editor ? parseInt(params.editor) : null,
-            )
-            const action = responseData?.data?.action ?? null
-            setCodingSubmissionAction(action)
-            if (action === 'submit') {
-                setIsSubmitted(true)
-            }
-        }
-        getActions()
-    }, [])
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">

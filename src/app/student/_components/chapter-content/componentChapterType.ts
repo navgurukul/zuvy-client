@@ -28,6 +28,7 @@ export interface AssessmentContentProps {
     moduleId: number;
   };
   onChapterComplete?: () => void;
+  refetchChapter?: () => void;
 }
 
 

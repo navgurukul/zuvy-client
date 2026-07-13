@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import Image from 'next/image';
 import useAssessmentDetails from "@/hooks/useAssessmentDetails";
-import useChapterDetails from "@/hooks/useChapterDetails";
 import useRequestReattempt from "@/hooks/useRequestReattempt";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
@@ -42,7 +41,7 @@ function formatToIST(dateString: string | undefined) {
   return `${day} ${month} ${year}`;
 }
 
-const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
+const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, onChapterComplete, refetchChapter }) => {
   const router = useRouter();
   const { courseId: courseIdParam, moduleId: moduleIdParam, orgId } = useParams();
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,6 +55,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   const [isStartingAssessment, setIsStartingAssessment] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
   const [chapterStatus, setChapterStatus] = useState(chapterDetails.status);
+  // Track previous status to avoid firing onChapterComplete on initial mount
+  const prevChapterStatusRef = useRef(chapterDetails.status);
   // Memoize IDs to prevent unnecessary API calls
   const moduleId = useMemo(
     () => chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null,
@@ -76,8 +77,6 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     bootcampId,
     chapterId
   );
-
-  const { refetch: refetchChapter } = useChapterDetails(chapterId);
 
   const { requestReattempt, isRequesting } = useRequestReattempt();
 
@@ -228,7 +227,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     channel.onmessage = (event) => {
       if (event.data === 'assessment_submitted') {
         refetch();
-        refetchChapter();
+        if (typeof refetchChapter === 'function') {
+          refetchChapter();
+        }
         // Update chapter status to completed
         if (chapterStatus === 'Pending') {
           setChapterStatus('Completed');
@@ -264,9 +265,12 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   }, [assessmentDetails]);
 
   useEffect(() => {
-    if (chapterStatus === 'Completed') {
-      onChapterComplete?.()
+    // Only call onChapterComplete when status *transitions* to Completed,
+    // not on initial mount when the chapter is already Completed.
+    if (chapterStatus === 'Completed' && prevChapterStatusRef.current !== 'Completed') {
+      onChapterComplete?.();
     }
+    prevChapterStatusRef.current = chapterStatus;
   }, [chapterStatus])
 
 

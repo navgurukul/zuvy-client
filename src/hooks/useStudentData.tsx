@@ -1,38 +1,25 @@
-import { useState, useEffect } from 'react';
-import { api } from "@/utils/axios.config";
-import{StudentData} from '@/hooks/hookType'
+import { useEffect } from 'react'
+import { useStudentDataStore } from '@/store/studentDataStore'
 
+/**
+ * Thin wrapper around the Zustand studentDataStore.
+ *
+ * Deduplication guarantee:
+ * - All components sharing this hook share ONE fetch.
+ * - The store's `fetched` flag acts as a mutex: the first component to call
+ *   fetchStudentData sets it atomically; all subsequent callers see it already
+ *   set and bail out immediately — no duplicate /student requests.
+ * - Calling `refetch` (e.g. after enroll) bypasses the cache and forces a fresh fetch.
+ *
+ * Return shape is identical to the original hook — no consumer changes needed.
+ */
 export const useStudentData = () => {
-  const [studentData, setStudentData] = useState<StudentData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStudentData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await api.get('/student');
-      setStudentData(response.data);
-    } catch (err) {
-      console.error('Error fetching student data:', err);
-      setError('Failed to load student data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refetch = () => {
-    fetchStudentData();
-  };
+  const { studentData, loading, error, fetchStudentData, refetch } =
+    useStudentDataStore()
 
   useEffect(() => {
-    fetchStudentData();
-  }, []);
+    fetchStudentData()
+  }, [])
 
-  return {
-    studentData,
-    loading,
-    error,
-    refetch
-  };
-}; 
+  return { studentData, loading, error, refetch }
+}
