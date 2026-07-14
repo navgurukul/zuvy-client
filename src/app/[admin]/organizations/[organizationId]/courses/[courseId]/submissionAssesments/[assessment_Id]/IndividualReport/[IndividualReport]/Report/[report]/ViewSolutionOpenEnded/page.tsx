@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import useOpenEndedSolutionForStudents from '@/hooks/useOpenEndedSolutionForStudents'
 import type { OpenEndedSubmissionData } from '@/hooks/hookType'
+import { toast } from '@/components/ui/use-toast'
 
 export type paramsType = {
     courseId: string
@@ -22,7 +23,7 @@ export type paramsType = {
 
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
-    const { data: openEndedQuestionDetails } = useOpenEndedSolutionForStudents(params?.report)
+    const { data: openEndedQuestionDetails, error: openEndedError } = useOpenEndedSolutionForStudents(params?.report)
     const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
     const { organizationId } = useParams()
@@ -79,6 +80,15 @@ const Page = ({ params }: { params: paramsType }) => {
         params,
         getStudentAssesmentDataHandler,
     ])
+
+    useEffect(() => {
+        if (openEndedError) {
+            toast.error({
+                title: 'Error',
+                description: openEndedError,
+            })
+        }
+    }, [openEndedError])
 
     const getquestionAnswerData = (openEndedQuestionDetails ?? []).map((data: OpenEndedSubmissionData) => {
         const question = data?.OpenEndedQuestion?.question

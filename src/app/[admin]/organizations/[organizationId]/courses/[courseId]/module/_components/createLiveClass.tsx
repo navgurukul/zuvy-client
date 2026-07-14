@@ -149,11 +149,10 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
-    const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
     const { chapters, refetch: refetchChapters } = useModuleChapters(params.moduleId as string)
-    const { createClass } = useCreateClass()
+    const { createClass, creating: isLoading } = useCreateClass()
     const [isCalendarOpen, setCalendarOpen] = useState(false)
 
     const { batchData } = useBatchList(params.courseId as string)
@@ -221,8 +220,6 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsLoading(true)
-
         const combineDateTime = (date: Date, time: string) => {
             const year = date.getFullYear()
             const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -270,8 +267,6 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                 title: 'Error',
                 description: error.response?.data?.message || 'Class not created',
             })
-        } finally {
-            setIsLoading(false)
         }
     }
 

@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
 import Image from 'next/image'
 import useDebounce from '@/hooks/useDebounce'
@@ -19,10 +19,6 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         courseId,
         searchTerm: debouncedSearch,
     })
-
-    useEffect(() => {
-        fetchAssessments()
-    }, [fetchAssessments])
 
     const handleDownloadCsv = (assessment: AssessmentSubmissions) => {
         if (!assessment) return

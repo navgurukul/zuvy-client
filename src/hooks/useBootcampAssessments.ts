@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { AssessmentSubmissions } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 
@@ -53,6 +53,10 @@ const useBootcampAssessments = ({
             setLoading(false)
         }
     }, [courseId, searchTerm])
+
+    useEffect(() => {
+        fetchAssessments()
+    }, [fetchAssessments])
 
     return {
         assessments,
