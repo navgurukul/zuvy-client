@@ -79,12 +79,15 @@ export const usePracticeProblemSubmissions = (
       if (mountedRef.current) {
         setTrackingData(data.trackingData || [])
         setTotalStudents(data.totalStudents || 0)
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching practice problem submissions:', err)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [bootcampId, enabled, fetchSubmissions])

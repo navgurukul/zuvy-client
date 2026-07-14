@@ -71,12 +71,15 @@ export const useProjectSubmissions = (
         setRawResponse(data)
         setBootcampModules(data?.data?.bootcampModules || [])
         setTotalStudents(data?.totalStudents || 0)
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching project submissions:', err)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [bootcampId, searchProject, enabled])

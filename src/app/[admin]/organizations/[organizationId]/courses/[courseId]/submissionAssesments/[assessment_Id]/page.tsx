@@ -23,6 +23,7 @@ import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
+const assessmentRequestCache = new Map<string, Promise<any>>()
 type Props = {}
 
 interface PageParams {
@@ -100,6 +101,24 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
+
+const getCachedRequest = (url: string) => {
+    const cachedRequest = assessmentRequestCache.get(url);
+
+    if (cachedRequest) {
+        return cachedRequest;
+    }
+
+    const request = api.get(url);
+
+    assessmentRequestCache.set(url, request);
+
+    request.finally(() => {
+        assessmentRequestCache.delete(url);
+    });
+
+    return request;
+};
     // Fetch student assessments with sorting, batch filter and search
     const fetchStudentAssessmentsWithBatch = useCallback(async (
         assessmentId: string,
@@ -134,9 +153,9 @@ const Page = ({ params }: any) => {
             queryParams.append('offset', offset.toString())
             queryParams.append('limit', limit.toString())
 
-            const res = await api.get(
-                `/admin/assessment/students/assessment_id${assessmentId}?${queryParams.toString()}`
-            )
+            const url = `/admin/assessment/students/assessment_id${assessmentId}?${queryParams.toString()}`
+             
+            const res = await getCachedRequest(url);
 
             const data = res.data
             const assessments = data.submitedOutsourseAssessments || []
@@ -244,10 +263,10 @@ const Page = ({ params }: any) => {
         },
     ]
 
+    const currentSearchQuery = searchParams.get('search') || ''
     const getStudentAssesmentDataHandler = useCallback(
         async (offset: number) => {
             if (offset >= 0) {
-                const currentSearchQuery = searchParams.get('search') || ''
                 const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessmentsWithBatch(
                     params?.assessment_Id,
                     params?.courseId,
@@ -264,7 +283,7 @@ const Page = ({ params }: any) => {
                 setTotalStudents(moduleAssessment?.totalSubmitedStudents || 0)
             }
         },
-        [params.assessment_Id, params.courseId, position, searchParams, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch]
+        [params.assessment_Id, params.courseId, position, currentSearchQuery, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch]
     )
 
     // Handle batch change
@@ -296,14 +315,7 @@ const Page = ({ params }: any) => {
         getStudentAssesmentDataHandler(offset)
     }, [
         offset,
-        getStudentAssesmentDataHandler,
-        position,
-        setLastPage,
-        setTotalPages,
-        searchParams.get('search'),
-        selectedBatch,
-        sortField,
-        sortDirection
+        getStudentAssesmentDataHandler
     ])
 
     const handleVideoDownloadCsv = useCallback(() => {

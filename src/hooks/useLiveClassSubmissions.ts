@@ -69,12 +69,16 @@ export const useLiveClassSubmissions = (
         const total = res?.data?.totalStudents || 0
         setLiveClassData(trackingData)
         setTotalStudents(total)
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching live class submissions:', err)
+      }
+    }
+    finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [bootcampId, searchTerm, enabled])
