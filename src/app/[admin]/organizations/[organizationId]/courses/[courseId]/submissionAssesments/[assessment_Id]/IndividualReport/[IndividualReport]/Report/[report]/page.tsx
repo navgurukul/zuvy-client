@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 // import IndividualStudentAssesment from '../../../../_components/individualStudentAssesment'
-import { api } from '@/utils/axios.config'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/utils'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -36,6 +35,7 @@ import {
     PageParams,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionQuizQuestion/viewQuizQuestionPageType'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssessmentTracking from '@/hooks/useAssessmentTracking'
 
 const Page = ({ params }: { params: paramsType }) => {
     const router = useRouter()
@@ -47,6 +47,7 @@ const Page = ({ params }: { params: paramsType }) => {
     const [proctoringData, setProctoringData] = useState<any>()
     const [timeTaken, setTimeTaken] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(true)
+    const { fetchAssessmentTracking } = useAssessmentTracking()
     const [totalQuestions, setTotalQuestion] = useState({
         totalCodingQuestion: 0,
         totalMcqQuestion: 0,
@@ -55,41 +56,36 @@ const Page = ({ params }: { params: paramsType }) => {
 
     const getIndividualCodingDataHandler = useCallback(async () => {
         try {
-            await api
-                .get<AssessmentResponse>(
-                    `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
-                )
-                .then((res) => {
-                    const timeTaken = calculateTimeTaken(
-                        res?.data?.startedAt,
-                        res?.data?.submitedAt
-                    )
-                    setTimeTaken(timeTaken)
-                    setCodingData(res?.data?.PracticeCode)
-                    setUsername(res?.data?.user?.name)
-                    setmoduleId(
-                        res?.data?.submitedOutsourseAssessment?.moduleId
-                    )
-                    setAssesmentData(res?.data)
-                    setTotalQuestion({
-                        totalCodingQuestion: res?.data?.codingQuestionCount,
-                        totalMcqQuestion: res?.data?.mcqQuestionCount,
-                        totalOpenEnded: res?.data?.openEndedQuestionCount,
-                    })
-                    setProctoringData({
-                        canEyeTrack:
-                            res?.data?.submitedOutsourseAssessment?.canEyeTrack,
-                        canTabChange:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canTabChange,
-                        canScreenExit:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canScreenExit,
-                        canCopyPaste:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canCopyPaste,
-                    })
-                })
+            const data = await fetchAssessmentTracking<AssessmentResponse>({
+                submissionId: params.report,
+                studentId: params.IndividualReport,
+            })
+
+            if (!data) {
+                return
+            }
+
+            const timeTaken = calculateTimeTaken(
+                data?.startedAt,
+                data?.submitedAt
+            )
+            setTimeTaken(timeTaken)
+            setCodingData(data?.PracticeCode)
+            setUsername(data?.user?.name)
+            setmoduleId(data?.submitedOutsourseAssessment?.moduleId)
+            setAssesmentData(data)
+            setTotalQuestion({
+                totalCodingQuestion: data?.codingQuestionCount,
+                totalMcqQuestion: data?.mcqQuestionCount,
+                totalOpenEnded: data?.openEndedQuestionCount,
+            })
+            setProctoringData({
+                canEyeTrack: data?.submitedOutsourseAssessment?.canEyeTrack,
+                canTabChange: data?.submitedOutsourseAssessment?.canTabChange,
+                canScreenExit:
+                    data?.submitedOutsourseAssessment?.canScreenExit,
+                canCopyPaste: data?.submitedOutsourseAssessment?.canCopyPaste,
+            })
         } catch (error) {
             toast.error({
                 title: 'Error',
@@ -98,11 +94,11 @@ const Page = ({ params }: { params: paramsType }) => {
         } finally {
             // setLoading(false)
         }
-    }, [params])
+    }, [fetchAssessmentTracking, params.IndividualReport, params.report])
 
     useEffect(() => {
         getIndividualCodingDataHandler()
-    }, [getIndividualCodingDataHandler, params])
+    }, [getIndividualCodingDataHandler])
 
     const timestamp = assesmentData?.submitedAt
     const date = new Date(timestamp)

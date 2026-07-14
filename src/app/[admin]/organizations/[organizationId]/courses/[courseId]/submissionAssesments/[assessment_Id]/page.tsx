@@ -22,8 +22,28 @@ import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useStudentAssessments from '@/hooks/useStudentAssessments'
 
 const assessmentRequestCache = new Map<string, Promise<any>>()
+
+const getCachedRequest = (url: string) => {
+    const cachedRequest = assessmentRequestCache.get(url)
+
+    if (cachedRequest) {
+        return cachedRequest
+    }
+
+    const request = api.get(url)
+
+    assessmentRequestCache.set(url, request)
+
+    request.finally(() => {
+        assessmentRequestCache.delete(url)
+    })
+
+    return request
+}
+
 type Props = {}
 
 interface PageParams {
@@ -57,6 +77,7 @@ const Page = ({ params }: any) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const { fetchStudentAssessments } = useStudentAssessments()
     const [assesmentData, setAssessmentData] = useState<any>()
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
@@ -101,24 +122,6 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
-
-const getCachedRequest = (url: string) => {
-    const cachedRequest = assessmentRequestCache.get(url);
-
-    if (cachedRequest) {
-        return cachedRequest;
-    }
-
-    const request = api.get(url);
-
-    assessmentRequestCache.set(url, request);
-
-    request.finally(() => {
-        assessmentRequestCache.delete(url);
-    });
-
-    return request;
-};
     // Fetch student assessments with sorting, batch filter and search
     const fetchStudentAssessmentsWithBatch = useCallback(async (
         assessmentId: string,
@@ -131,47 +134,30 @@ const getCachedRequest = (url: string) => {
         orderDirection?: 'asc' | 'desc'
     ) => {
         try {
-            // Build query parameters
-            const queryParams = new URLSearchParams()
+            const {
+                assessments,
+                moduleAssessment,
+                passPercentage,
+                totalPages,
+                lastPage,
+            } = await fetchStudentAssessments({
+                assessmentId,
+                offset,
+                limit,
+                searchStudent: searchQuery,
+                batchId,
+                orderBy,
+                orderDirection,
+                requester: getCachedRequest,
+            })
 
-            if (batchId && batchId !== 'all') {
-                queryParams.append('batchId', batchId)
-            }
-
-            if (searchQuery) {
-                queryParams.append('searchStudent', searchQuery)
-            }
-
-            if (orderBy) {
-                queryParams.append('orderBy', orderBy)
-            }
-
-            if (orderDirection) {
-                queryParams.append('orderDirection', orderDirection)
-            }
-
-            queryParams.append('offset', offset.toString())
-            queryParams.append('limit', limit.toString())
-
-            const url = `/admin/assessment/students/assessment_id${assessmentId}?${queryParams.toString()}`
-             
-            const res = await getCachedRequest(url);
-
-            const data = res.data
-            const assessments = data.submitedOutsourseAssessments || []
-            const moduleAssessment = data.ModuleAssessment || {}
-
-            // Calculate total pages
-            const totalStudents = moduleAssessment.totalSubmitedStudents || 0
-            const calculatedTotalPages = Math.ceil(totalStudents / Number(limit))
-
-            setTotalPages(calculatedTotalPages)
-            setLastPage(calculatedTotalPages)
+            setTotalPages(totalPages)
+            setLastPage(lastPage)
 
             return {
                 assessments,
                 moduleAssessment,
-                passPercentage: moduleAssessment.passPercentage || 0
+                passPercentage
             }
         } catch (error) {
             console.error('Error fetching student assessments:', error)
@@ -181,7 +167,7 @@ const getCachedRequest = (url: string) => {
                 passPercentage: 0
             }
         }
-    }, [])
+    }, [fetchStudentAssessments])
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<Suggestion[]> => {

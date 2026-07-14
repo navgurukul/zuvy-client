@@ -210,7 +210,7 @@ const {
     selectedTopics: selectedOptions,
     selectedDifficulties: selectedDifficulty,
     searchTerm: debouncedSearch,
-    initialFetch: true,
+    initialFetch: false,
 })
 
 // Mirror previous behavior: update local filteredQuestions and loading when hook data changes
@@ -222,7 +222,7 @@ useEffect(() => {
 // Trigger fetch when filters/search/selection changes (keeps original dependency list)
 useEffect(() => {
     fetchCodingQuestions({ topics: selectedOptions, difficulties: selectedDifficulty, search: debouncedSearch })
-}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions, fetchCodingQuestions])
+}, [selectedDifficulty, debouncedSearch, selectedOptions, fetchCodingQuestions])
 
 
 

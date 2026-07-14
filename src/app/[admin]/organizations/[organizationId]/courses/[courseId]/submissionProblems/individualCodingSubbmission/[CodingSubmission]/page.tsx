@@ -1,5 +1,4 @@
 'use client'
-import { api } from '@/utils/axios.config'
 import { useSearchParams, useParams } from 'next/navigation'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -17,6 +16,7 @@ import {
     CodingSubmission,
     ApiResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProblems/individualCodingSubbmission/CodingSubmissionType'
+import useCodingSubmissionDetails from '@/hooks/useCodingSubmissionDetails'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
@@ -32,6 +32,7 @@ const Page = ({ params }: PageParams) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
+    const { fetchCodingSubmissionDetails } = useCodingSubmissionDetails()
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -76,19 +77,25 @@ const Page = ({ params }: PageParams) => {
     )
 
     const fetchCodingSubbmissionDataHandler = useCallback(async () => {
+        if (!questionId) return
+
         try {
-            await api
-                .get<ApiResponse>(
-                    `/codingPlatform/submissions/questionId=${questionId}?studentId=${params.CodingSubmission}`
-                )
-                .then((res) => {
-                    setCodingSubmissiondata(res?.data?.data)
-                    setDecodedString(res?.data?.data.sourceCode)
-                })
+            const data = await fetchCodingSubmissionDetails<ApiResponse>({
+                questionId,
+                studentId: params.CodingSubmission as string | number,
+            })
+
+            setCodingSubmissiondata(data?.data)
+            setDecodedString(data?.data.sourceCode)
         } catch (error: any) {
             console.error('Error Fetching Data')
         }
-    }, [questionId, params.CodingSubmission, setCodingSubmissiondata])
+    }, [
+        fetchCodingSubmissionDetails,
+        questionId,
+        params.CodingSubmission,
+        setCodingSubmissiondata,
+    ])
 
     useEffect(() => {
         fetchCodingSubbmissionDataHandler()

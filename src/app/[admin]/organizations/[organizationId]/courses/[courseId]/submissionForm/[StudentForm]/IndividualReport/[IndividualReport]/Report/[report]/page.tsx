@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { api } from '@/utils/axios.config'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/utils'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -16,9 +15,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import useFormsStatus from '@/hooks/useFormsStatus'
+import useFormDetailsById from '@/hooks/useFormDetailsById'
+import useChapterDetails from '@/hooks/useChapterDetails'
 
 import {
-    TrackedFormData,
     FormItem,
     Params,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
@@ -26,8 +27,13 @@ import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: { params: Params }) => {
     const router = useRouter()
+    const { fetchFormsStatus } = useFormsStatus()
+    const { fetchFormDetailsById } = useFormDetailsById()
     const [individualFormData, setIndividualFormData] = useState<any>()
-    const [chapterDetails, setChapterDetails] = useState<any>()
+    const {
+        chapterDetails,
+        error: chapterDetailsError,
+    } = useChapterDetails(params.report)
     useCourseExistenceCheck(params.courseId)
     const [user, setUser] = useState<any>()
 
@@ -35,59 +41,66 @@ const Page = ({ params }: { params: Params }) => {
         const chapterId = params.report
         const moduleId = params.StudentForm
         const userId = params.IndividualReport
-        await api
-            .get<TrackedFormData>(
-                `submission/getFormDetailsById/${moduleId}?chapterId=${chapterId}&userId=${userId}`
-            )
-            .then((res) => {
-                setIndividualFormData(res.data.trackedData)
+        try {
+            const responseData = await fetchFormDetailsById({
+                moduleId,
+                chapterId,
+                userId,
             })
-            .catch((err) => {
-                toast.error({
-                    title: 'Error',
-                    description: 'Error fetching Form details:',
-                })
+            setIndividualFormData(responseData.trackedData)
+        } catch (err) {
+            toast.error({
+                title: 'Error',
+                description: 'Error fetching Form details:',
             })
-
-        await api
-            .get<TrackedFormData>(
-                `/tracking/getChapterDetailsWithStatus/${chapterId}`
-            )
-            .then((res) => {
-                setChapterDetails(res.data.trackingData)
-            })
-            .catch((err) => {
-                toast.error({
-                    title: 'Error',
-                    description: 'Error fetching Chapter details:',
-                })
-            })
-    }, [params.report])
+        }
+    }, [
+        params.report,
+        params.StudentForm,
+        params.IndividualReport,
+        fetchFormDetailsById,
+    ])
 
     const getIndividualStudent = useCallback(async () => {
         try {
-            await api
-                .get(
-                    `submission/formsStatus/${params.courseId}/${params.StudentForm}?chapterId=${params.report}&limit=3&offset=0`
-                )
-                .then((res) => {
-                    const student = res.data.combinedData.find(
-                        (item: FormItem) => item.id == params.IndividualReport
-                    )
-                    setUser(student)
-                })
+            const responseData = await fetchFormsStatus({
+                courseId: params.courseId,
+                moduleId: params.StudentForm,
+                chapterId: params.report,
+                limit: 3,
+                offset: 0,
+            })
+            const student = responseData.combinedData.find(
+                (item: FormItem) => item.id == params.IndividualReport
+            )
+            setUser(student)
         } catch (err) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching Student details:',
             })
         }
-    }, [params.report, params.IndividualReport])
+    }, [
+        params.courseId,
+        params.StudentForm,
+        params.report,
+        params.IndividualReport,
+        fetchFormsStatus,
+    ])
 
     useEffect(() => {
         getIndividualStudentFormDataHandler()
         getIndividualStudent()
     }, [getIndividualStudentFormDataHandler, getIndividualStudent])
+
+    useEffect(() => {
+        if (!chapterDetailsError) return
+
+        toast.error({
+            title: 'Error',
+            description: 'Error fetching Chapter details:',
+        })
+    }, [chapterDetailsError])
 
     return (
         <div className="min-h-screen font-semibold bg-background">

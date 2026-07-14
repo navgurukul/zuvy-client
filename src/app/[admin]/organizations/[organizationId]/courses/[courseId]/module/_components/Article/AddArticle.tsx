@@ -191,6 +191,56 @@ const AddArticle: React.FC<AddArticleProps> = ({
         }
     }
 
+    const applyArticleContent = (articleData: any) => {
+        const contentDetails = articleData?.contentDetails?.[0]
+
+        const link = contentDetails?.links?.[0]
+        // setIsDataLoading(false)
+        if (link) {
+            setpdfLink(link)
+            setDefaultValue('pdf')
+            setIsPdfUploaded(true)
+            setIsEditorSaved(false) 
+        } else {
+            setpdfLink(null)
+            setDefaultValue('editor')
+            setIsPdfUploaded(false)
+            // --- Check if editor me content hai ---
+            const data = contentDetails?.content
+            let hasEditorContent = false
+            if (data && data.length > 0) {
+                hasEditorContent = true
+                setHasUserSaved(true)
+                setWasContentNonEmptyWhenSaved(true)
+            }
+            setIsEditorSaved(hasEditorContent)
+        }
+        const fetchedTitle = articleData.title || articleData.name || ''
+        setTitle(fetchedTitle)
+        setOriginalTitle(fetchedTitle)
+
+        const data = contentDetails?.content
+        let parsedContent
+        if (data && data.length > 0) {
+            if (typeof data[0] === 'string') {
+                parsedContent = JSON.parse(data[0])
+            } else {
+                parsedContent = data[0]
+            }
+        } else {
+            // Empty content - create default empty doc structure
+            parsedContent = undefined
+        }
+
+        setInitialContent(parsedContent)
+
+        // NEW: Set initial content states
+        setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
+        setPreviousContentHash(generateContentHash(parsedContent))
+        setIsDataLoading(false)
+        setTimeout(() => setIsInitialLoad(false), 500)
+    }
+
     const getArticleContent = async () => {
         try {
             const response = await getChapterDetails({
@@ -199,52 +249,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-            const contentDetails = response?.data?.contentDetails?.[0]
-
-            const link = contentDetails?.links?.[0]
-            // setIsDataLoading(false)
-            if (link) {
-                setpdfLink(link)
-                setDefaultValue('pdf')
-                setIsPdfUploaded(true)
-                setIsEditorSaved(false) 
-            } else {
-                setpdfLink(null)
-                setDefaultValue('editor')
-                setIsPdfUploaded(false)
-                // --- Check if editor me content hai ---
-                const data = contentDetails?.content
-                let hasEditorContent = false
-                if (data && data.length > 0) {
-                    hasEditorContent = true
-                    setHasUserSaved(true)
-                    setWasContentNonEmptyWhenSaved(true)
-                }
-                setIsEditorSaved(hasEditorContent)
-            }
-            const fetchedTitle = response.data.title || response.data.name || ''
-            setTitle(fetchedTitle)
-            setOriginalTitle(fetchedTitle)
-
-            const data = contentDetails?.content
-            let parsedContent
-            if (data && data.length > 0) {
-                if (typeof data[0] === 'string') {
-                    parsedContent = JSON.parse(data[0])
-                } else {
-                    parsedContent = data[0]
-                }
-            } else {
-                // Empty content - create default empty doc structure
-                parsedContent = undefined
-            }
-
-            setInitialContent(parsedContent)
-
-            // NEW: Set initial content states
-            setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
-            setPreviousContentHash(generateContentHash(parsedContent))
-            
+            applyArticleContent(response.data)
         } catch (error) {
             console.error('Error fetching article content:', error)
         } finally {
@@ -301,7 +306,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     useEffect(() => {
         if (content?.id && !hasFetched.current) {
             hasFetched.current = true
-            getArticleContent()
+            applyArticleContent(content)
         }
     }, [content?.id]) 
 

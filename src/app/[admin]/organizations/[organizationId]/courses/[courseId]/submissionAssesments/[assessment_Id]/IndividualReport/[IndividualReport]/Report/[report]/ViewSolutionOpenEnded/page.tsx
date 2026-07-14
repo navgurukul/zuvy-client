@@ -10,6 +10,7 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import type { PageAssessmentData, PageSubmissionData } from './ViewSolutionPageType'
 import { useParams } from 'next/navigation'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useStudentAssessments from '@/hooks/useStudentAssessments'
 
 type SubmissionData = {
     id: number
@@ -49,6 +50,7 @@ export type paramsType = {
 
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
+    const { fetchStudentAssessments } = useStudentAssessments()
     const [openEndedQuestionDetails, setOpenEndedQuestionsDetails] = useState<
         PageAssessmentData[]
     >([])
@@ -95,14 +97,15 @@ const Page = ({ params }: { params: paramsType }) => {
         },
     ]
     const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.assessment_Id}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
+        try {
+            const { moduleAssessment } = await fetchStudentAssessments({
+                assessmentId: params.assessment_Id,
             })
-    }, [params.assessment_Id])
+            setAssesmentData(moduleAssessment)
+        } catch (error) {
+            console.error('Error fetching student assessment data:', error)
+        }
+    }, [params.assessment_Id, fetchStudentAssessments])
     const fetchOpenEndedQuestionsDetails = useCallback(async () => {
         try {
             const res = await api.get(

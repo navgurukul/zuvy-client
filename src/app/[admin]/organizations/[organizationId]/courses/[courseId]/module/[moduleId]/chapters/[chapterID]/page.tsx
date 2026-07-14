@@ -63,11 +63,16 @@ export default function Page({
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
     const { getChapterDetails } = useGetChapterDetails()
+    const fetchingChapterRef = useRef<string>('')
 
     const fetchChapterContent = useCallback(
         
         async (chapterId: number, topicId: number) => {
+            const requestKey = `${chapterId}-${courseID}-${moduleID}-${topicId}`
+            if (fetchingChapterRef.current === requestKey) return
+
             try {
+                fetchingChapterRef.current = requestKey
                 const response = await getChapterDetails({
                     chapterId,
                     bootcampId: courseID,
@@ -93,6 +98,8 @@ export default function Page({
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
                 setContentLoading(false)
+            } finally {
+                fetchingChapterRef.current = ''
             }
         },
         [moduleData, courseId, moduleId, getChapterDetails]

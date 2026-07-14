@@ -1,6 +1,5 @@
 'use client'
 import { calculateTimeTaken } from '@/utils/admin'
-import { api } from '@/utils/axios.config'
 import { format } from 'date-fns'
 import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
@@ -11,9 +10,11 @@ import {
     ReportData,
     DownloadReportProps,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType'
+import useAssessmentTracking from '@/hooks/useAssessmentTracking'
 
 const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
+    const { fetchAssessmentTracking } = useAssessmentTracking()
 
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A'
@@ -26,10 +27,14 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
 
     async function fetchReportData() {
         try {
-            const res = await api.get(
-                `/tracking/assessment/submissionId=${id}?studentId=${userId}`
-            )
-            generatePDF(res?.data)
+            const data = await fetchAssessmentTracking<ReportData>({
+                submissionId: id,
+                studentId: userId,
+            })
+
+            if (data) {
+                generatePDF(data)
+            }
         } catch (error) {
             console.error('Error fetching report data:', error)
         }
