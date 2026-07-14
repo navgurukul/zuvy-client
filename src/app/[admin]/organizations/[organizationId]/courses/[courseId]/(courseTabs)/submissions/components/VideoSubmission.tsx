@@ -20,11 +20,12 @@ import { getUser } from '@/store/store'
 
 
 import { useVideoSubmissions } from '@/hooks/useVideoSubmissions'
-
+import { useChapterStudents } from '@/hooks/useChapterStudents'
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
+    const { getChapterStudentsUrl } = useChapterStudents()
 
     // Add pathname extraction like CourseLayout
     const pathname = usePathname()
@@ -56,7 +57,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         if (!chapterId) return
       
         downloadCsv({
-          endpoint: `/admin/moduleChapter/students/chapter_id${chapterId}`,
+          endpoint: getChapterStudentsUrl(chapterId),
           fileName: chapterTitle || 'video-chapter',
       
           dataPath: 'submittedStudents',

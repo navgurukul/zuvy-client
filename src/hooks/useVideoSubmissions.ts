@@ -65,12 +65,15 @@ export const useVideoSubmissions = (
 
       if (mountedRef.current) {
         setVideoData(res)
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching video submissions:', err)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [bootcampId, searchAssessment, enabled])

@@ -115,12 +115,15 @@ export const usePracticeProblemStatus = (
 
       if (mountedRef.current) {
         setStudentDetails(res?.data || [])
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching practice problem status:', err)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [moduleId, enabled, chapterId, questionId, fetchStatus])

@@ -2,30 +2,30 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
 
-const COURSE_CHECK_CACHE_TTL_MS = 5_000
+const COURSE_CHECK_CACHE_TTL_MS = 300_000
 const COURSE_CHECK_POLL_INTERVAL_MS = 30_000
 
 const courseCheckRequests = new Map<string, Promise<boolean>>()
 const courseCheckLastFetchedAt = new Map<string, number>()
 
-type UseCourseExistenceCheckOptions = {
-  pollIntervalMs?: number
-}
+// type UseCourseExistenceCheckOptions = {
+//   pollIntervalMs?: number
+// }
 
 const normalizeCourseId = (courseId: string | number | undefined) =>
   courseId?.toString()
 
 export const useCourseExistenceCheck = (
   courseId: string | number | undefined,
-  options: UseCourseExistenceCheckOptions = {}
+  // options: UseCourseExistenceCheckOptions = {}
 ) => {
   const { courseData, Permissions } = getCourseData()
   const [isCourseDeleted, setIsCourseDeleted] = useState(false)
   const [loadingCourseCheck, setLoadingCourseCheck] = useState(true)
   const hasLoadedCourseDataRef = useRef(false)
   const courseIdKey = normalizeCourseId(courseId)
-  const pollIntervalMs =
-    options.pollIntervalMs ?? COURSE_CHECK_POLL_INTERVAL_MS
+  // const pollIntervalMs =
+  //   options.pollIntervalMs ?? COURSE_CHECK_POLL_INTERVAL_MS
   const currentCourseData =
     courseIdKey && courseData?.id?.toString() === courseIdKey
       ? courseData
@@ -97,17 +97,10 @@ export const useCourseExistenceCheck = (
   }, [courseIdKey])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
-
     if (!isCourseDeleted) {
       checkIfCourseExists(false)
-      interval = setInterval(() => {
-        checkIfCourseExists(true)
-      }, pollIntervalMs)
     }
-
-    return () => clearInterval(interval)
-  }, [checkIfCourseExists, isCourseDeleted, pollIntervalMs])
+  }, [checkIfCourseExists, isCourseDeleted])
 
   return {
     isCourseDeleted,

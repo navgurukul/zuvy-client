@@ -71,12 +71,15 @@ export const useAssignmentSubmissions = (
       if (mountedRef.current) {
         setAssignmentData(res.data.trackingData || [])
         setTotalStudents(res.data.totalStudents || 0)
-        setLoading(false)
       }
     } catch (err: any) {
       if (mountedRef.current) {
         setError(err)
         console.error('Error fetching assignment submissions:', err)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
       }
     }
   }, [bootcampId, searchAssignment, enabled])

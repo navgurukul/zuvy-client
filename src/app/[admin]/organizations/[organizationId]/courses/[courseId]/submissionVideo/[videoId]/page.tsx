@@ -17,6 +17,7 @@ import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useChapterStudents } from '@/hooks/useChapterStudents'
 
 type Props = {}
 interface BatchFilter {
@@ -25,6 +26,7 @@ interface BatchFilter {
 }
 
 const Page = ({ params }: any) => {
+    const { fetchChapterStudents, getChapterStudentsUrl } = useChapterStudents()
     const router = useRouter()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
@@ -60,80 +62,64 @@ const Page = ({ params }: any) => {
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
 
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=5&offset=0`
-        const response = await api.get(url)
-        return response.data.submittedStudents?.map((student: any) => ({
+        const response = await fetchChapterStudents(params.videoId, {
+            searchStudent: query,
+            limit: 10,
+            offset: 0
+        })
+        return response?.data?.submittedStudents?.map((student: any) => ({
             id: student.id,
             name: student.name,
             email: student.email,
             ...student
         })) || []
-    }, [params.videoId])
+    }, [params.videoId, fetchChapterStudents])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
 
-        const queryParams = new URLSearchParams()
-        queryParams.append('searchStudent', query)
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
+        const response = await fetchChapterStudents(params.videoId, {
+            searchStudent: query,
+            limit: 10,
+            offset: 0,
+            batchId: selectedBatch,
+            orderBy: sortField,
+            orderDirection: sortDirection
+        })
 
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
-        const response = await api.get(url)
-
-        setDataTableVideo(response.data.submittedStudents || [])
-        setVideoData(response.data.moduleVideochapter)
+        setDataTableVideo(response?.data?.submittedStudents || [])
+        setVideoData(response?.data?.moduleVideochapter)
 
         setLoading(false)
-    }, [params.videoId, selectedBatch,sortField, sortDirection])
+    }, [params.videoId, selectedBatch, sortField, sortDirection, fetchChapterStudents])
 
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
 
-        const queryParams = new URLSearchParams()
+        const response = await fetchChapterStudents(params.videoId, {
+            batchId: selectedBatch,
+            orderBy: sortField,
+            orderDirection: sortDirection
+        })
 
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-
-        const url = queryParams.toString()
-            ? `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
-            : `/admin/moduleChapter/students/chapter_id${params.videoId}`
-
-        const response = await api.get(url)
-
-        const students = response.data.submittedStudents || []
+        const students = response?.data?.submittedStudents || []
         setDataTableVideo(students)
-        setVideoData(response.data.moduleVideochapter)
+        setVideoData(response?.data?.moduleVideochapter)
 
         setLoading(false)
-    }, [params.videoId, selectedBatch, sortField, sortDirection])
+    }, [params.videoId, selectedBatch, sortField, sortDirection, fetchChapterStudents])
     useEffect(() => {
         defaultFetchApi()
     }, [selectedBatch, sortField, sortDirection, defaultFetchApi])
 
     const handleVideoDownloadCsv = useCallback(() => {
-        const queryParams = new URLSearchParams()
-
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
         downloadCsv({
-            endpoint: `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`,
+            endpoint: getChapterStudentsUrl(params.videoId, {
+                batchId: selectedBatch,
+                orderBy: sortField,
+                orderDirection: sortDirection
+            }),
 
             fileName: `video_submissions_${videoData?.title || 'video'}_${new Date()
                 .toISOString()
