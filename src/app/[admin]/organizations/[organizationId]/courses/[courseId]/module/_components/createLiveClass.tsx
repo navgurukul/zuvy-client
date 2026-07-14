@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -42,8 +42,10 @@ import {
 } from '@/components/ui/command'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
-import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
+import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { useCreateClass } from '@/hooks/useCreateClass'
+import { useBatchList } from '@/hooks/useBatchList'
 // Removed conflicting imported type CreateSessionDialogProps (local type declared below)
 
 const formSchema = z
@@ -150,8 +152,16 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
+    const { chapters, refetch: refetchChapters } = useModuleChapters(params.moduleId as string)
+    const { createClass } = useCreateClass()
     const [isCalendarOpen, setCalendarOpen] = useState(false)
-    const [bootcampData, setBootcampData] = useState<any>([])
+
+    const { batchData } = useBatchList(params.courseId as string)
+    // Map to {value, label} shape used by the batch selects in the form
+    const bootcampData = batchData.map((b) => ({
+        value: b.id.toString(),
+        label: b.name,
+    }))
 
     // Reusable select styling helper
     const baseSelectClass =
@@ -162,27 +172,6 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         { value: 'zoom', label: 'Zoom' },
         // { value: 'google-meet', label: 'Google Meet' },
     ]
-    const getHandleAllBootcampBatches = useCallback(async () => {
-        if (params.courseId) {
-            await api
-                .get(`/bootcamp/batches/${params.courseId}`)
-                .then((response) => {
-                    const transformedData = response.data.data.map(
-                        (item: { id: number; name: string }) => ({
-                            value: item.id.toString(),
-                            label: item.name,
-                        })
-                    )
-                    setBootcampData(transformedData)
-                })
-                .catch((error) => {
-                    console.error('Error fetching data:', error)
-                })
-        }
-    }, [params.courseId])
-    useEffect(() => {
-        getHandleAllBootcampBatches()
-    }, [getHandleAllBootcampBatches])
 
     // Removed toggleForm since dialog-based selects were replaced with native dropdowns
 
@@ -260,13 +249,9 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         }
 
         try {
-            await api.post('/classes', transformedData)
+            await createClass(transformedData)
 
-            const chaptersRes = await api.get(
-                `/Content/allChaptersOfModule/${params.moduleId}`
-            )
-            const chapters = chaptersRes?.data?.chapterWithTopic || []
-
+            await refetchChapters()
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
                 router.push(

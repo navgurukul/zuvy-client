@@ -14,6 +14,7 @@ import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 type Props = {}
@@ -36,25 +37,10 @@ const Page = ({ params }: { params: any }) => {
     const [sortField, setSortField] = useState<string>('submittedDate')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId;
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
-
+    const orgId = Number(organizationId) || user?.orgId; 
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -141,19 +127,9 @@ const Page = ({ params }: { params: any }) => {
         defaultFetchApi();
     }, [defaultFetchApi, sortField, sortDirection]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await fetchBatches()
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
 
-        fetchData()
-    }, [fetchBatches])
-    // Handle sorting change
-    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+     // Handle sorting change
+     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
     }, [])

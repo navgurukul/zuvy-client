@@ -1,50 +1,28 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
 import useDebounce from '@/hooks/useDebounce'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import {
     AssessmentSubmissions,
-    StudentAssessmentSubmission,
-    APIResponses,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
-// import assesmentNotfound from @/public
 import {AssessmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useBootcampAssessments from '@/hooks/useBootcampAssessments'
 
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const { downloadCsv } = useDownloadCsv()
-    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
-        null
-    )
-    const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
-    const getAssessments = useCallback(async () => {
-        try {
-            const url = debouncedSearch
-                ? `/admin/bootcampAssessment/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
-                : `/admin/bootcampAssessment/bootcamp_id${courseId}`
-
-            const res = await api.get(url)
-            setAssesments(res.data)
-             setLoading(false)
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description: 'Error fetching assessments:',
-            })
-        }
-    }, [courseId, debouncedSearch])
+    const { assessments: assesments, loading, fetchAssessments } = useBootcampAssessments({
+        courseId,
+        searchTerm: debouncedSearch,
+    })
 
     useEffect(() => {
-        getAssessments()
-    }, [getAssessments])
+        fetchAssessments()
+    }, [fetchAssessments])
 
     const handleDownloadCsv = (assessment: AssessmentSubmissions) => {
         if (!assessment) return
@@ -99,7 +77,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                     </h2>
                                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {Array.isArray(assesments[key]) &&
-                                            assesments[key].map(
+                                            (assesments[key] as AssessmentSubmissions[]).map(
                                                 (assessment: AssessmentSubmissions) => (
                                                     <AssesmentComponent
                                                         key={assessment.id}

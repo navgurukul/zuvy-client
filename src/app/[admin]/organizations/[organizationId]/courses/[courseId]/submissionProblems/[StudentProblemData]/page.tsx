@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
 import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
@@ -34,8 +35,7 @@ const PracticeProblems = ({ params }: any) => {
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -63,18 +63,6 @@ const PracticeProblems = ({ params }: any) => {
             moduleId: params.StudentProblemData,
         }))
     }, [studentDetails, matchingData, params.courseId, params.StudentProblemData])
-
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -166,8 +154,10 @@ const PracticeProblems = ({ params }: any) => {
     }, [])
 
     useEffect(() => {
-        fetchBatches()
-    }, [fetchBatches])
+        if (matchingData) {
+            defaultFetchApi()
+        }
+    }, [matchingData, sortField, sortDirection, defaultFetchApi, selectedBatch])
 
     return (
         <>
