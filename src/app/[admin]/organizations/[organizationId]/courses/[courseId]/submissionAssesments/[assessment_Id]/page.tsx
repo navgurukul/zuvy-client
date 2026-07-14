@@ -101,7 +101,6 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
-    const assessmentRequestCache = new Map<string, Promise<any>>();
 
 const getCachedRequest = (url: string) => {
     const cachedRequest = assessmentRequestCache.get(url);
