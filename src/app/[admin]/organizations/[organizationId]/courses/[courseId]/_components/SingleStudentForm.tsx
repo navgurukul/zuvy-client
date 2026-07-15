@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -8,12 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { api } from '@/utils/axios.config'
-
-type BatchType = { 
-    id: string | number
-    name: string 
-}
+import { useBatchList } from '@/hooks/useBatchList'
 
 type StudentDataType = {
     name: string
@@ -32,26 +27,10 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
     studentData,
     setStudentData,
     courseId,
-    showBatchSelection = true
+    showBatchSelection = true,
 }) => {
-    const [localBatchData, setLocalBatchData] = useState<BatchType[]>([])
-
-    // Fetch batches when component mounts
-    useEffect(() => {
-        const fetchBatches = async () => {
-            if (showBatchSelection) {
-                try {
-                    const response = await api.get(`/bootcamp/batches/${courseId}`)
-                    setLocalBatchData(response.data.data || [])
-                } catch (error) {
-                    console.error('Error fetching batches:', error)
-                    setLocalBatchData([])
-                }
-            }
-        }
-
-        fetchBatches()
-    }, [courseId, showBatchSelection])
+    // enabled mirrors showBatchSelection — no fetch happens when the section is hidden
+    const { batchData } = useBatchList(courseId, { enabled: showBatchSelection })
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -59,10 +38,7 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
     }
 
     const handleBatchChange = (value: string) => {
-        setStudentData({
-            ...studentData,
-            batchId: value,
-        })
+        setStudentData({ ...studentData, batchId: value })
     }
 
     return (
@@ -102,8 +78,8 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                             <SelectValue placeholder="Select a batch" />
                         </SelectTrigger>
                         <SelectContent>
-                            {localBatchData && localBatchData.length > 0 ? (
-                                localBatchData.map((batch) => (
+                            {batchData.length > 0 ? (
+                                batchData.map((batch) => (
                                     <SelectItem
                                         key={batch.id}
                                         value={batch.id.toString()}

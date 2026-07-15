@@ -10,6 +10,7 @@ import { api } from '@/utils/axios.config'
 import { getUser, getDeleteStudentStore, getStoreStudentData, getStoreStudentDataNew } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
+import { useBatchList } from '@/hooks/useBatchList'
 import { POSITION } from '@/utils/constant'
 import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
 import type { StudentDataPage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
@@ -27,7 +28,6 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const { students, setStudents } = getStoreStudentDataNew()
     const { studentsData, setStoreStudentData } = getStoreStudentData()
 
-    const [allBatches, setAllBatches] = useState<any>([])
     const [studentData, setStudentData] = useState<StudentDataPage[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState(searchParams?.get('search') || '')
@@ -52,12 +52,36 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const [loading, setLoading] = useState(true)
     const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<StudentDataState | any>({})
-    const [permissions, setPermissions] = useState<PermissionsType>({
+
+    // useBatchList handles the /bootcamp/batches/${courseId} call.
+    // We keep the redirect-on-delete error handling here since it's specific to this hook.
+    const {
+        batchData,
+        permissions: batchPermissions,
+        error: batchError,
+    } = useBatchList(params.courseId)
+
+    // Map raw batch data to {value, label} shape expected by the batch switcher
+    const allBatches: BatchOption[] = batchData.map((b) => ({ value: String(b.id), label: b.name }))
+
+    // Permissions come from the same API response via useBatchList
+    const permissions: PermissionsType = batchPermissions ?? {
         createBatch: false,
         deleteBatch: false,
         editBatch: false,
         viewBatch: false,
-    })
+    }
+
+    // Handle course-deleted redirect — mirrors the original fetchBatches error handling
+    useEffect(() => {
+        if (!batchError) return
+        if (axios.isAxiosError(batchError)) {
+            if (batchError?.response?.data?.message === 'Bootcamp not found!') {
+                router.push(`/${userRole}/organizations/${orgId}/courses`)
+                toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
+            }
+        }
+    }, [batchError, router, userRole, orgId])
 
     const lastFetchedStudentsRef = useRef<{ courseId?: string; batchId?: string; limit?: any; offset?: number; search?: string }>({})
     const lastFetchedBatchesRef = useRef<string | null>(null)
@@ -101,32 +125,6 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
         setIsFormOpen(!isFormOpen)
         form.clearErrors()
     }
-
-    const fetchBatches = useCallback(
-        async (courseId: string) => {
-            if (!courseId || lastFetchedBatchesRef.current === courseId) return
-            lastFetchedBatchesRef.current = courseId
-            try {
-                const response = await api.get(`/bootcamp/batches/${courseId}`)
-                const batchData: BatchOption[] = response.data.data?.map((data: any) => ({ value: data.id, label: data.name }))
-                setAllBatches(batchData)
-                setPermissions(response.data?.permissions)
-            } catch (error: any) {
-                if (axios.isAxiosError(error)) {
-                    if (error?.response?.data.message === 'Bootcamp not found!') {
-                        router.push(`/${userRole}/organizations/${orgId}/courses`)
-                        toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
-                    }
-                }
-                console.error('Error fetching batches', error)
-            }
-        },
-        [router, userRole, orgId]
-    )
-
-    useEffect(() => {
-        fetchBatches(params?.courseId)
-    }, [params.courseId, fetchBatches])
 
     const fetchInstructorInfo = useCallback(
         async (batchId: string, force = false) => {
@@ -333,7 +331,6 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
         formSchema,
         form,
         toggleForm,
-        fetchBatches,
         fetchInstructorInfo,
         batchDeleteHandler,
         onSubmit,

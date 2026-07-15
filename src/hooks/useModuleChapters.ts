@@ -66,10 +66,10 @@ export function useModuleChapters(moduleId: string | number | undefined) {
         if (!moduleId) return;
 
         if (moduleCache[cacheKey]) {
-            setData(moduleCache[cacheKey]);  
+            setData(moduleCache[cacheKey]);
             setLoading(false);
-            fetchData(false);
-            return;
+            // fetchData(false);
+            return; // cache hit — skip network call
         }
 
         fetchData();

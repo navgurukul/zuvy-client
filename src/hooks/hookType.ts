@@ -1186,3 +1186,25 @@ export interface UseQuizSubmissionReturn {
   isSubmitting: boolean;
   error: string | null;
 }
+
+// useOpenEndedSolutionForStudents
+export interface OpenEndedQuestionDetail {
+  id: number;
+  question: string;
+  difficulty: string;
+}
+
+export interface OpenEndedSubmissionData {
+  id: number;
+  openEndedQuestionId: number;
+  assessmentSubmissionId: number;
+  answer: string;
+  OpenEndedQuestion: OpenEndedQuestionDetail;
+}
+
+export interface UseOpenEndedSolutionForStudentsReturn {
+  data: OpenEndedSubmissionData[] | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
