@@ -29,6 +29,7 @@ import {
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 type Props = {}
@@ -61,8 +62,7 @@ const Page = ({ params }: any) => {
     const [lastPage, setLastPage] = useState(0)
     const [loading, setLoading] = useState(false)
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [batches, setBatches] = useState<Batch[]>([])
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const { user } = getUser()
@@ -90,24 +90,6 @@ const Page = ({ params }: any) => {
         () => (currentPage - 1) * +position,
         [currentPage, position]
     )
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-            toast({
-                title: 'Error',
-                description: 'Error fetching batches',
-                variant: 'destructive',
-            })
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
 
     // Fetch overall statistics ONCE when component mounts
     const fetchOverallStats = useCallback(async () => {
@@ -347,14 +329,13 @@ const Page = ({ params }: any) => {
 
             await Promise.all([
                 getChapterDetails(),
-                fetchBatches()
             ])
 
             await fetchOverallStats()
         }
 
         initializeData()
-    }, [moduleId, getChapterDetails, fetchBatches, fetchOverallStats])
+    }, [moduleId, getChapterDetails, fetchOverallStats])
 
     // Pagination effect - this will handle data fetching based on search state
     useEffect(() => {

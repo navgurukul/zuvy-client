@@ -14,6 +14,7 @@ import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
 
@@ -38,26 +39,12 @@ const Page = ({ params }: any) => {
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
-
+    
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -165,9 +152,7 @@ const Page = ({ params }: any) => {
         setSortDirection(direction)
     }, [])
 
-    useEffect(() => {
-        fetchBatches()
-    }, [fetchBatches])
+
     useEffect(() => {
         defaultFetchApi()
     }, [sortField, sortDirection, defaultFetchApi, selectedBatch])

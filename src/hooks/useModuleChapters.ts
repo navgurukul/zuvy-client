@@ -49,9 +49,9 @@ export function useModuleChapters(moduleId: string | number | undefined) {
         if (!moduleId) return;
 
         if (moduleCache[cacheKey]) {
-            setData(moduleCache[cacheKey]);  
-            fetchData();                     
-            return;
+            setData(moduleCache[cacheKey]);
+            setLoading(false);
+            return; // cache hit — skip network call
         }
 
         fetchData();

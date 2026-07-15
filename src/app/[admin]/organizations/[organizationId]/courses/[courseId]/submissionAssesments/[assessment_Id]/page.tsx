@@ -22,6 +22,7 @@ import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useBatchList } from '@/hooks/useBatchList'
 
 const assessmentRequestCache = new Map<string, Promise<any>>()
 type Props = {}
@@ -62,8 +63,7 @@ const Page = ({ params }: any) => {
     const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [passPercentage, setPassPercentage] = useState<number>(0)
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [batches, setBatches] = useState<Batch[]>([])
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const [sortField, setSortField] = useState<string>('submittedDate')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
@@ -87,19 +87,6 @@ const Page = ({ params }: any) => {
         courseId: params.courseId,
         assessment_Id: params.assessment_Id
     }), [params.courseId, params.assessment_Id])
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
 
 
 const getCachedRequest = (url: string) => {
@@ -298,18 +285,6 @@ const getCachedRequest = (url: string) => {
         setSortDirection(direction)
         setOffset(0)
     }, [setOffset])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await fetchBatches()
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
-
-        fetchData()
-    }, [isReattemptApproved, fetchBatches])
 
     useEffect(() => {
         getStudentAssesmentDataHandler(offset)
