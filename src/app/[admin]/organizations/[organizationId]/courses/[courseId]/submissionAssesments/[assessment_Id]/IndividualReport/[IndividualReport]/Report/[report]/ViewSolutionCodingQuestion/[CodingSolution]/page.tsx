@@ -30,11 +30,13 @@ const Page = ({ params }: { params: paramsType }) => {
     const [codingQuestionData, setcodingQuestionData] = useState<any>()
     useCourseExistenceCheck(params.courseId)
     const [decodedString, setDecodedString] = useState<string>('')
-    const [proctoringData, setProctorngData] = useState<ProctoringData | null>(
-        null
-    )
     const [testCases, setTestCases] = useState<any>([])
-    const { fetchAssessmentTracking } = useAssessmentTracking()
+    const {
+    data: proctoringData,
+    loading: isProctoringLoading,
+    error: proctoringError,
+    fetchAssessmentTracking,
+} = useAssessmentTracking()
     const { fetchCodingSubmissionDetails } = useCodingSubmissionDetails()
 
     const saerchQuery = useSearchParams()
@@ -44,15 +46,13 @@ const Page = ({ params }: { params: paramsType }) => {
 
     const fetchProctoringDataOfCodingQuestion = useCallback(async () => {
         try {
-            const data = await fetchAssessmentTracking<ProctoringData>({
+            await fetchAssessmentTracking<ProctoringData>({
                 submissionId: params.report,
                 studentId: params.IndividualReport,
             })
-
-            if (data) {
-                setProctorngData(data)
-            }
-        } catch (error: any) { }
+        } catch {
+            // hook already sets proctoringError`
+        }
     }, [fetchAssessmentTracking, params.IndividualReport, params.report])
 
     const fetchCodingSubmissionData = useCallback(async () => {

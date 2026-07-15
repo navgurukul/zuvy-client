@@ -1,5 +1,6 @@
 'use client'
 import { calculateTimeTaken } from '@/utils/admin'
+import { useEffect } from 'react'
 import { format } from 'date-fns'
 import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
@@ -14,7 +15,7 @@ import useAssessmentTracking from '@/hooks/useAssessmentTracking'
 
 const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
-    const { fetchAssessmentTracking } = useAssessmentTracking()
+    const { data, loading, error, fetchAssessmentTracking } = useAssessmentTracking()
 
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A'
@@ -27,18 +28,19 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
 
     async function fetchReportData() {
         try {
-            const data = await fetchAssessmentTracking<ReportData>({
+            await fetchAssessmentTracking<ReportData>({
                 submissionId: id,
                 studentId: userId,
             })
-
-            if (data) {
-                generatePDF(data)
-            }
         } catch (error) {
             console.error('Error fetching report data:', error)
         }
     }
+    useEffect(() => {
+    if (data) {
+        generatePDF(data as ReportData)
+    }
+}, [data])
 
     async function generatePDF(reportData: ReportData) {
         const doc = new jsPDF()
@@ -206,6 +208,7 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
         <div className="flex items-center space-x-2">
             <button
                 onClick={handleDownload}
+                disabled={loading || !submitedAt}
                 className={
                     submitedAt
                         ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center`
