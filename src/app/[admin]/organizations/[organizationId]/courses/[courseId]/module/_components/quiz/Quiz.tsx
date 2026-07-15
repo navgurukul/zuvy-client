@@ -34,7 +34,6 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useEditChapter from '@/hooks/useEditChapter' 
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 import {QuizSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
@@ -88,7 +87,6 @@ function Quiz(props: QuizProps) {
         hardQuestions: [],
     })
     const { editChapter } = useEditChapter()
-    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const { chapterData, setChapterData } = getChapterDataState()
 
     const form = useForm<z.infer<typeof quizSchema>>({
@@ -258,31 +256,18 @@ function Quiz(props: QuizProps) {
         }
     }
 
-    const getAllSavedQuizQuestion = useCallback(async () => {
-        if (!props.chapterId || props.chapterId === 0) return
+    const applySavedQuizQuestion = useCallback((chapterDetails: any) => {
+        setAddQuestion(chapterDetails?.quizQuestionDetails || [])
+        setQuizTitle(chapterDetails?.title || '')
+        setSavedQuestions(chapterDetails?.quizQuestionDetails || [])
+        setIsSaved(true)
 
-        try {
-            const res = await getChapterDetails({
-                chapterId: props.chapterId,
-                bootcampId: props.courseId,
-                moduleId: props.moduleId,
-                topicId: props.content.topicId,
-            })
-            setAddQuestion(res.data.quizQuestionDetails)
-            setQuizTitle(res.data.title)
-            setSavedQuestions(res.data.quizQuestionDetails)
-            setIsSaved(true)
-
-            // ensure input and form reflect server title
-            if (res.data.title) {
-                setInputValue(res.data.title)
-                setOriginalTitle(res.data.title)
-                form.reset({ title: res.data.title })
-            }
-        } catch (error) {
-            console.error('Failed to fetch chapter details', error)
+        if (chapterDetails?.title) {
+            setInputValue(chapterDetails.title)
+            setOriginalTitle(chapterDetails.title)
+            form.reset({ title: chapterDetails.title })
         }
-    }, [props.chapterId])
+    }, [form])
 
 
 
@@ -290,11 +275,11 @@ function Quiz(props: QuizProps) {
         const fetchData = async () => {
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
-                await getAllSavedQuizQuestion()
+                applySavedQuizQuestion(props.content)
             }
         }
         fetchData()
-    }, [props.chapterId, getAllSavedQuizQuestion])
+    }, [props.chapterId, props.content, applySavedQuizQuestion])
 
 
 

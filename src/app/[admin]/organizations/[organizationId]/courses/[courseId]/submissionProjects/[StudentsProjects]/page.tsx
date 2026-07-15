@@ -17,6 +17,7 @@ import { getUser } from '@/store/store'
 import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
+import useProjectStudentSubmissions from '@/hooks/useProjectStudentSubmissions'
 
 type Props = {}
 
@@ -32,6 +33,7 @@ const Page = ({ params }: any) => {
     const currentTab = searchParams.get('tab') || 'projects'
     const [data, setData] = useState<any>()
     const { rawResponse, totalStudents } = useProjectSubmissions(params.courseId)
+    const { fetchProjectStudentSubmissions } = useProjectStudentSubmissions()
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
     useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState<boolean>(false)
@@ -87,21 +89,22 @@ const Page = ({ params }: any) => {
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
 
-        const queryParams = new URLSearchParams()
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
+        try {
+            const { projectTrackingData } =
+                await fetchProjectStudentSubmissions({
+                    projectId: params.StudentsProjects,
+                    bootcampId: params.courseId,
+                    batchId:
+                        selectedBatch !== 'all' ? selectedBatch : undefined,
+                    orderBy: sortField,
+                    orderDirection: sortDirection,
+                })
+
+            setProjectStudentData(projectTrackingData)
+        } finally {
+            setLoading(false)
         }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
-        )
-
-        const students = res.data.projectSubmissionData?.projectTrackingData || []
-        setProjectStudentData(students)
-        setLoading(false)
-    }, [params.courseId, params.StudentsProjects, sortField, sortDirection, selectedBatch])
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection, selectedBatch, fetchProjectStudentSubmissions])
 
 
     useEffect(() => {

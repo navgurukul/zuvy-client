@@ -16,6 +16,7 @@ import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
 import { useBatchList } from '@/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssignmentStatus from '@/hooks/useAssignmentStatus'
 
 type Props = {}
 
@@ -29,6 +30,7 @@ const Page = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
     const { organizationId } = useParams()
     const { downloadCsv } = useDownloadCsv()
+    const { fetchAssignmentStatus } = useAssignmentStatus()
     const currentTab = searchParams.get('tab') || 'assignments'
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
@@ -91,25 +93,14 @@ const Page = ({ params }: { params: any }) => {
 
 
     const defaultFetchApi = useCallback(async () => {
-        const queryParams = new URLSearchParams()
-        queryParams.append('limit', '100')
-        queryParams.append('offset', '0')
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) {
-            queryParams.append('orderBy', sortField)
-        }
-
-        if (sortDirection) {
-            queryParams.append('orderDirection', sortDirection)
-        }
-
-        const res = await api.get(
-            `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`
-        )
-
-        const assignmentData = res?.data?.data
+        const assignmentData = await fetchAssignmentStatus({
+            chapterId: params.assignmentData,
+            limit: 100,
+            offset: 0,
+            ...(selectedBatch !== 'all' ? { batchId: selectedBatch } : {}),
+            orderBy: sortField,
+            orderDirection: sortDirection,
+        })
         if (assignmentData) {
             const chapterId = assignmentData?.chapterId
             assignmentData.data.forEach((data: any) => {
@@ -121,7 +112,7 @@ const Page = ({ params }: { params: any }) => {
         }
 
         return assignmentData?.data || []
-    }, [params.assignmentData, sortField, sortDirection, selectedBatch])
+    }, [params.assignmentData, sortField, sortDirection, selectedBatch, fetchAssignmentStatus])
 
     useEffect(() => {
         defaultFetchApi();

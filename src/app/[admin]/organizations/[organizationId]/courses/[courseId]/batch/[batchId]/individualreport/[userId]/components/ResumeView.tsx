@@ -349,7 +349,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-800 mb-1">
+                                                <h3 className="font-semibold text-gray-800 mb-1 text-lg">
                                                     {assessment?.name || `Assessment ${index + 1}`}
                                                 </h3>
                                                 <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-600">
