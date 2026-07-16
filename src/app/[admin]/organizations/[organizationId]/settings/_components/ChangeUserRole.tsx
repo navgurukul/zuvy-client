@@ -12,6 +12,12 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 // Role Cell Component
 
@@ -67,31 +73,46 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
     }
 
     return (
-        <Select 
-            value={role} 
-            onValueChange={handleRoleChange} 
-            disabled={loading || isCurrentUser}
-        >
-            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                {rolesLoading ? (
-                    <SelectItem value="loading" disabled>
-                        Loading...
-                    </SelectItem>
-                ) : (
-                    roles.map((roleOption: any) => (
-                        <SelectItem
-                            key={roleOption.id}
-                            value={roleOption.name}
-                            className="capitalize"
+        <TooltipProvider delayDuration={150}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span className="inline-block">
+                        <Select
+                            value={role}
+                            onValueChange={handleRoleChange}
+                            disabled={loading || isCurrentUser}
                         >
-                            {roleOption.name}
-                        </SelectItem>
-                    ))
+                            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
+                                <SelectValue />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                {rolesLoading ? (
+                                    <SelectItem value="loading" disabled>
+                                        Loading...
+                                    </SelectItem>
+                                ) : (
+                                    roles.map((roleOption: any) => (
+                                        <SelectItem
+                                            key={roleOption.id}
+                                            value={roleOption.name}
+                                            className="capitalize"
+                                        >
+                                            {roleOption.name}
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </span>
+                </TooltipTrigger>
+
+                {isCurrentUser && (
+                    <TooltipContent side="top">
+                        <p>You can&apos;t change your own role.</p>
+                    </TooltipContent>
                 )}
-            </SelectContent>
-        </Select>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
