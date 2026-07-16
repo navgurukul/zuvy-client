@@ -7,6 +7,7 @@ export type EditChapterPayload = {
   links?: any | null
   completionDate?: string | null
   description?: string | null
+  newOrder?: number
 }
 
 /**

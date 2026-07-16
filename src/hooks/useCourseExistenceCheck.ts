@@ -8,12 +8,43 @@ const COURSE_CHECK_POLL_INTERVAL_MS = 30_000
 const courseCheckRequests = new Map<string, Promise<boolean>>()
 const courseCheckLastFetchedAt = new Map<string, number>()
 
-// type UseCourseExistenceCheckOptions = {
-//   pollIntervalMs?: number
-// }
-
 const normalizeCourseId = (courseId: string | number | undefined) =>
   courseId?.toString()
+
+/**
+ * Standalone async utility (not a hook) — can be called from Zustand store
+ * actions or anywhere outside React component lifecycle.
+ *
+ * Fetches /bootcamp/{courseIdKey}, updates the getCourseData store, and
+ * returns true on success / throws on error.
+ */
+export async function fetchCourseById(courseIdKey: string): Promise<boolean> {
+    let request = courseCheckRequests.get(courseIdKey)
+
+    if (!request) {
+        request = api
+            .get(`/bootcamp/${courseIdKey}`)
+            .then((response) => {
+                getCourseData.setState({
+                    courseData: response.data.bootcamp,
+                    Permissions: response.data.permissions,
+                })
+                courseCheckLastFetchedAt.set(courseIdKey, Date.now())
+                return true
+            })
+            .catch((error) => {
+                getCourseData.setState({ courseData: null })
+                throw error
+            })
+            .finally(() => {
+                courseCheckRequests.delete(courseIdKey)
+            })
+
+        courseCheckRequests.set(courseIdKey, request)
+    }
+
+    return request
+}
 
 export const useCourseExistenceCheck = (
   courseId: string | number | undefined,
@@ -54,40 +85,9 @@ export const useCourseExistenceCheck = (
         return
       }
 
-      let request = courseCheckRequests.get(courseIdKey)
-
-      if (!request) {
-        request = api
-          .get(`/bootcamp/${courseIdKey}`)
-          .then((response) => {
-            const currentStoreCourse = getCourseData.getState().courseData
-
-            if (
-              !hasLoadedCourseDataRef.current ||
-              currentStoreCourse?.id?.toString() !== courseIdKey
-            ) {
-              getCourseData.setState({
-                courseData: response.data.bootcamp,
-                Permissions: response.data.permissions,
-              })
-              hasLoadedCourseDataRef.current = true
-            }
-
-            courseCheckLastFetchedAt.set(courseIdKey, Date.now())
-            return true
-          })
-          .catch((error) => {
-            getCourseData.setState({ courseData: null })
-            throw error
-          })
-          .finally(() => {
-            courseCheckRequests.delete(courseIdKey)
-          })
-
-        courseCheckRequests.set(courseIdKey, request)
-      }
-
-      await request
+      // Delegate to shared utility — handles deduplication and store update
+      await fetchCourseById(courseIdKey)
+      hasLoadedCourseDataRef.current = true
       setIsCourseDeleted(false)
     } catch (error) {
       setIsCourseDeleted(true)

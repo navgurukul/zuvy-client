@@ -42,6 +42,7 @@ import { X } from 'lucide-react'
 import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
 import { useGetCodingQuestion } from '@/hooks/useGetCodingQuestion'
+import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -61,9 +62,25 @@ const IDE: React.FC<IDEProps> = ({
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
     const { codingSubmissionAction, setCodingSubmissionAction } = useCodingSubmissionStore()
+
+    const editorLanguages = [
+        { lang: 'java', id: 96 },
+        { lang: 'python', id: 100 },
+        { lang: 'javascript', id: 102 },
+        { lang: 'cpp', id: 105 },
+        // { lang: 'c', id: 104 },
+    ]
+
+    const {
+        language,
+        setLanguage,
+        languageId,
+        setLanguageId,
+        handleLanguageChange,
+        getDataFromField,
+    } = useLanguageSelection(runCodeLanguageId, editorLanguages)
 
     const {
         questionDetails,
@@ -94,43 +111,6 @@ const IDE: React.FC<IDEProps> = ({
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { isDark, toggleTheme } = useThemeStore();
-
-
-    const editorLanguages = [
-        { lang: 'java', id: 96 },
-        { lang: 'python', id: 100 },
-        { lang: 'javascript', id: 102 },
-        { lang: 'cpp', id: 105 },
-        // { lang: 'c', id: 104 },
-    ]
-
-    const [language, setLanguage] = useState(
-        runCodeLanguageId
-            ? editorLanguages.find((lang) => lang.id === runCodeLanguageId)
-                ?.lang || ''
-            : ''
-    )
-
-    const handleLanguageChange = (lang: string) => {
-        setLanguage(lang)
-        const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
-        setLanguageId(langID)
-    }
-
-    const getDataFromField = (
-        array: any[],
-        searchValue: any,
-        searchField: string | number,
-        targetField: string | number
-    ) => {
-        let result = languageId
-        array.forEach((obj) => {
-            if (obj[searchField] === searchValue) {
-                result = obj[targetField]
-            }
-        })
-        return result
-    }
 
 
     const handleSubmit = async (

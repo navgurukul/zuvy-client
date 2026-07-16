@@ -27,7 +27,7 @@ import {
     ListItemExtension,
 } from 'remirror/extensions'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { api } from "@/utils/axios.config"
+import { useUploadImage } from '@/hooks/useUploadImage'
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
 import useWindowSize from '@/hooks/useHeightWidth'
@@ -129,6 +129,7 @@ const CodeBlockHelper = () => {
 // Custom hook to handle paste events
 const usePasteImageHandler = () => {
     const commands = useCommands();
+    const { uploadImage } = useUploadImage();
 
     useEditorEvent('paste', (event) => {
         const clipboard = event.clipboardData;
@@ -150,18 +151,7 @@ const usePasteImageHandler = () => {
                     const file = item.getAsFile();
                     if (!file) continue;
 
-                    const formData = new FormData();
-                    formData.append("images", file, file.name);
-
-                    const res = await api.post(
-                        "/Content/curriculum/upload-images",
-                        formData,
-                        {
-                            headers: { "Content-Type": "multipart/form-data" },
-                        }
-                    );
-
-                    const url = res?.data?.urls?.[0];
+                    const url = await uploadImage(file);
                     if (url) {
                         commands.insertImage({
                             src: url,
