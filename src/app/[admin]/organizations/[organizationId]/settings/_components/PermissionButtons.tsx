@@ -12,11 +12,12 @@ interface PermissionButtonsProps {
     maxAllowedTier?: PermissionTier
     currentTier: number
     isAdminRole?: boolean
+    isOwnRole?: boolean
     hoveredRowId?: number | null
     onChange: (resourceId: number, tier: PermissionTier, isParent?: boolean) => void
 }
 
-const PermissionButtons: React.FC<PermissionButtonsProps> = ({ resourceId, isChild = false, moduleChildren, maxAllowedTier, currentTier, isAdminRole = false, hoveredRowId, onChange }) => {
+const PermissionButtons: React.FC<PermissionButtonsProps> = ({ resourceId, isChild = false, moduleChildren, maxAllowedTier, currentTier, isAdminRole = false, isOwnRole = false, hoveredRowId, onChange }) => {
     return (
         <div className="flex gap-8 flex-shrink-0" style={{ width: '620px' }}>
             {Object.values(PERMISSION_TIERS)
@@ -30,19 +31,19 @@ const PermissionButtons: React.FC<PermissionButtonsProps> = ({ resourceId, isChi
                         <button
                             key={tier.tier}
                             onClick={() => {
-                                if (!isAdminRole) {
+                                if (!isAdminRole && !isOwnRole) {
                                     if (!isDisabledByParent) {
                                         onChange(resourceId, tier.tier as PermissionTier, !isChild)
                                     }
                                 }
                             }}
-                            disabled={isAdminRole || isDisabledByParent}
+                            disabled={isAdminRole || isDisabledByParent || isOwnRole}
                             className={cn(
                                 'transition-all duration-200 rounded-md',
                                 'h-10 flex items-center justify-center flex-1',
                                 'text-xs font-semibold uppercase',
                                 'min-w-0 relative group',
-                                (isAdminRole || isDisabledByParent) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                (isAdminRole || isDisabledByParent || isOwnRole) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                                 isActive
                                     ? cn('border-2', tier.borderColorClass, tier.backgroundColor, tier.textColorClass)
                                     : cn(isChild ? 'bg-white hover:bg-gray-100' : 'bg-muted-light hover:bg-gray-200', tier.textColorClass)

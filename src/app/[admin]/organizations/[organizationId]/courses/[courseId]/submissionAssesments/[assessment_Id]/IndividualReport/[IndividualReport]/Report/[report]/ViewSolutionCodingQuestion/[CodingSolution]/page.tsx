@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { paramsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType'
 import { toast } from '@/components/ui/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '@/utils/axios.config'
 import { FileText, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
@@ -17,60 +16,60 @@ import TestCaseResults from './TestCases'
 import { cn, difficultyColor } from '@/lib/utils'
 import {
     CodingSubmissionData,
-    BootcampData,
     ProctoringData,
     CodingSubmissionResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/SubmissionViewPageType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssessmentTracking from '@/hooks/useAssessmentTracking'
+import useCodingSubmissionDetails from '@/hooks/useCodingSubmissionDetails'
 
 const Page = ({ params }: { params: paramsType }) => {
     const router = useRouter()
     const [codingSubmissionData, setCodingSubmissionData] =
         useState<CodingSubmissionData | null>(null)
     const [codingQuestionData, setcodingQuestionData] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [decodedString, setDecodedString] = useState<string>('')
-    const [proctoringData, setProctorngData] = useState<ProctoringData | null>(
-        null
-    )
     const [testCases, setTestCases] = useState<any>([])
+    const {
+    data: proctoringData,
+    loading: isProctoringLoading,
+    error: proctoringError,
+    fetchAssessmentTracking,
+} = useAssessmentTracking()
+    const { fetchCodingSubmissionDetails } = useCodingSubmissionDetails()
 
     const saerchQuery = useSearchParams()
     const [loading, setLoading] = useState<boolean>(true)
 
     const questionId = saerchQuery.get('id')
 
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
     const fetchProctoringDataOfCodingQuestion = useCallback(async () => {
         try {
-            await api
-                .get(
-                    `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
-                )
-                .then((res) => {
-                    setProctorngData(res?.data)
-                })
-        } catch (error: any) {}
-    }, [params])
+            await fetchAssessmentTracking<ProctoringData>({
+                submissionId: params.report,
+                studentId: params.IndividualReport,
+            })
+        } catch {
+            // hook already sets proctoringError`
+        }
+    }, [fetchAssessmentTracking, params.IndividualReport, params.report])
 
     const fetchCodingSubmissionData = useCallback(async () => {
+        if (!questionId) return
+
         try {
-            await api
-                .get<CodingSubmissionResponse>(
-                    `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${params.report}&studentId=${params.IndividualReport}&codingOutsourseId=${params.CodingSolution}`
-                )
-                .then((res) => {
-                    setCodingSubmissionData(res?.data)
-                    setDecodedString(res?.data?.data.sourceCode)
-                    setTestCases(res?.data?.data.TestCasesSubmission)
+            const data =
+                await fetchCodingSubmissionDetails<CodingSubmissionResponse>({
+                    questionId,
+                    assessmentSubmissionId: params.report,
+                    studentId: params.IndividualReport,
+                    codingOutsourseId: params.CodingSolution,
                 })
+
+            setCodingSubmissionData(data)
+            setDecodedString(data?.data.sourceCode)
+            setTestCases(data?.data.TestCasesSubmission)
         } catch (error) {
             toast.error({
                 title: 'Error',
@@ -79,18 +78,18 @@ const Page = ({ params }: { params: paramsType }) => {
         } finally {
             setLoading(false)
         }
-    }, [params, questionId])
+    }, [
+        fetchCodingSubmissionDetails,
+        params.CodingSolution,
+        params.IndividualReport,
+        params.report,
+        questionId,
+    ])
 
     useEffect(() => {
         fetchCodingSubmissionData()
         fetchProctoringDataOfCodingQuestion()
-        getBootcampHandler()
-    }, [
-        params,
-        fetchCodingSubmissionData,
-        getBootcampHandler,
-        fetchProctoringDataOfCodingQuestion,
-    ])
+    }, [fetchCodingSubmissionData, fetchProctoringDataOfCodingQuestion])
 
     return (
         <>
@@ -227,15 +226,15 @@ const Page = ({ params }: { params: paramsType }) => {
                                                     codingSubmissionData?.data
                                                         ?.questionDetail
                                                         ?.difficulty ??
-                                                        'unknown'
+                                                    'unknown'
                                                 )
                                             )}
                                         >
                                             <p className="text-sm text-muted-foreground">
-                                            {
-                                                codingSubmissionData?.data
-                                                    ?.questionDetail?.difficulty
-                                            }
+                                                {
+                                                    codingSubmissionData?.data
+                                                        ?.questionDetail?.difficulty
+                                                }
                                             </p>
                                         </span>
                                     </div>
@@ -277,7 +276,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     </CardContent>
                 </Card>
                 <div className="flex flex-col md:flex-row gap-4 mb-8">
-                <div className="w-full md:w-1/2">
+                    <div className="w-full md:w-1/2">
                         <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
                             <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-6 py-4 border-b border-border">
                                 <div className="flex items-center space-x-3">

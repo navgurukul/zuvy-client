@@ -1,10 +1,10 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
-import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Download } from 'lucide-react'
 import Link from 'next/link'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
@@ -13,6 +13,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
+import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
 
 interface BatchFilter {
     id: number
@@ -25,131 +29,82 @@ const PracticeProblems = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'practice'
     const [matchingData, setMatchingData] = useState<any>(null)
-    const [bootcampData, setBootcampData] = useState<any>({})
-    const [studentStatus, setStudentStatus] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState<number>(0)
-    const [loading, setLoading] = useState(false)
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
+    const { trackingData, totalStudents } = usePracticeProblemSubmissions(params.courseId)
     const [crumbData, setCrumbData] = useState<string[]>([])
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
+    const [appliedSearchQuery, setAppliedSearchQuery] = useState('')
+    const { studentDetails, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
+        chapterId: matchingData?.moduleChapterData?.[0]?.id,
+        questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
+        searchStudent: appliedSearchQuery,
+        batchId: selectedBatch,
+        orderBy: sortField,
+        orderDirection: sortDirection,
+        enabled: !!matchingData,
+    })
+
+    const loading = hookLoading || !matchingData
+
+    const studentStatus = useMemo(() => {
+        if (!matchingData?.moduleChapterData?.[0]) return []
+        return studentDetails.map((student: any) => ({
+            ...student,
+            bootcampId: params.courseId,
+            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
+            moduleId: params.StudentProblemData,
+        }))
+    }, [studentDetails, matchingData, params.courseId, params.StudentProblemData])
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
 
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&searchStudent=${encodeURIComponent(query)}`
-        )
-
-        return res.data.data.map((student: any) => ({
+        const res = await fetchStatus({ searchStudent: query })
+        return res?.data?.map((student: any) => ({
             id: student.id,
             name: student.name,
             email: student.emailId,
             ...student,
         })) || []
-    }, [matchingData])
+    }, [fetchStatus])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        setLoading(true)
-
-        const queryParams = new URLSearchParams()
-        queryParams.append('searchStudent', query)
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
-        )
-
-        const students = res.data.data.map((student: any) => ({
-            ...student,
-            // email: student.emailId,
-            bootcampId: params.courseId,
-            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
-            moduleId: params.StudentProblemData,
-        })) || []
-
-        setStudentStatus(students)
-        setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
+        setAppliedSearchQuery(query)
+    }, [])
 
     const defaultFetchApi = useCallback(async () => {
-        setLoading(true)
-
-        const queryParams = new URLSearchParams()
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
-        )
-
-        const students = res.data.data.map((student: any) => ({
-            ...student,
-            // email: student.emailId,
-            bootcampId: params.courseId,
-            questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
-            moduleId: params.StudentProblemData,
-        })) || []
-
-        setStudentStatus(students)
-        setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
+        setAppliedSearchQuery('')
+    }, [])
 
     const handleVideoDownloadCsv = useCallback(() => {
         if (!matchingData) return
-    
+
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-    
+
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-            
+
         downloadCsv({
             endpoint: `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`,
-    
+
             fileName: `practice_problem_${matchingData.moduleChapterData[0].codingQuestionDetails?.title || 'submissions'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'data',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'email' },
@@ -158,7 +113,7 @@ const PracticeProblems = ({ params }: any) => {
                 { header: 'Completed At', key: 'completedAt' },
                 { header: 'Attempts', key: 'noOfAttempts' },
             ],
-    
+
             mapData: (item: any) => ({
                 name: item.name || '',
                 email: item.email || '',
@@ -168,8 +123,8 @@ const PracticeProblems = ({ params }: any) => {
                 noOfAttempts: item.noOfAttempts ?? '',
             }),
         })
-    }, [matchingData,selectedBatch,sortField,sortDirection])
-    
+    }, [matchingData, selectedBatch, sortField, sortDirection])
+
     useEffect(() => {
         if (bootcampData?.name && matchingData?.moduleChapterData) {
             setCrumbData([
@@ -178,62 +133,38 @@ const PracticeProblems = ({ params }: any) => {
             ])
         }
     }, [bootcampData, matchingData])
-    
-    // Initial data fetch - exactly like projects code
+
+    // Derive matchingData from hook's trackingData - preserving exact existing logic
     useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const [submissionRes, bootcampRes] = await Promise.all([
-                    api.get(
-                        `/submission/submissionsOfPractiseProblems/${params.courseId}`
-                    ),
-                    api.get(`/bootcamp/${params.courseId}`),
-                ])
-
-                const submissions = submissionRes.data.trackingData
-                setTotalStudents(submissionRes.data.totalStudents)
-                setBootcampData(bootcampRes.data.bootcamp)
-
-                if (submissions.length > 0 && params.StudentProblemData) {
-                    const matchingModule = submissions.find(
-                        (module: any) =>
-                            module.id === +params.StudentProblemData
-                    )
-                    setMatchingData(matchingModule || null)
-                } else {
-                    setMatchingData(null)
-                    setStudentStatus([])
-                }
-            } catch (error) {
-                console.error('Error fetching initial data', error)
-            }
+        if (trackingData.length > 0 && params.StudentProblemData) {
+            const matchingModule = trackingData.find(
+                (module: any) =>
+                    module.id === +params.StudentProblemData
+            )
+            setMatchingData(matchingModule || null)
+        } else {
+            setMatchingData(null)
         }
+    }, [trackingData, params.StudentProblemData])
 
-        fetchInitialData()
-    }, [params.courseId, params.StudentProblemData])
-
-  // Handle sorting change
+    // Handle sorting change
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
     }, [])
 
     useEffect(() => {
-        fetchBatches()
-    }, [fetchBatches])
-    
-    useEffect(() => {
         if (matchingData) {
             defaultFetchApi()
         }
-    }, [matchingData, sortField, sortDirection, defaultFetchApi,selectedBatch])
+    }, [matchingData, sortField, sortDirection, defaultFetchApi, selectedBatch])
 
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
                 <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
-                        variant="ghost"                   
+                        variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -269,16 +200,16 @@ const PracticeProblems = ({ params }: any) => {
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                <SelectItem value="all">All Batches</SelectItem>
+                                    <SelectItem value="all">All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
                                         </SelectItem>
-                                    ))}                                  
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
-                        </div>
+                    </div>
                 </CardContent>
             </Card>
             <Card className="bg-card">
@@ -315,8 +246,8 @@ const PracticeProblems = ({ params }: any) => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <DataTable 
-                        data={studentStatus} 
+                    <DataTable
+                        data={studentStatus}
                         columns={columns}
                         onSortingChange={handleSortingChange}
                     />

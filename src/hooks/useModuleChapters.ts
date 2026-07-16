@@ -9,6 +9,7 @@ type ModuleChaptersResponse = {
 };
 
 const moduleCache: Record<string, ModuleChaptersResponse> = {};
+const inFlightRequests: Record<string, Promise<ModuleChaptersResponse> | undefined> = {};
 
 export function useModuleChapters(moduleId: string | number | undefined) {
     const cacheKey = moduleId ? String(moduleId) : '';
@@ -17,22 +18,36 @@ export function useModuleChapters(moduleId: string | number | undefined) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (showLoading = true, force = false) => {
         if (!moduleId) {
             setLoading(false);
             setData(null);
             return;
         }
 
-        setLoading(true); 
-        try {
-            const res = await api.get(`/Content/allChaptersOfModule/${moduleId}`);
+        if (showLoading) {
+            setLoading(true);
+        }
 
-            const normalized: ModuleChaptersResponse = {
-                chapterWithTopic: res.data.chapterWithTopic ?? [],
-                moduleName: res.data.moduleName ?? '',
-                permissions: res.data.permissions ?? {},
-            };
+        try {
+            let request = !force ? inFlightRequests[cacheKey] : undefined;
+
+            if (!request) {
+                request = api
+                    .get(`/Content/allChaptersOfModule/${moduleId}`)
+                    .then((res) => ({
+                        chapterWithTopic: res.data.chapterWithTopic ?? [],
+                        moduleName: res.data.moduleName ?? '',
+                        permissions: res.data.permissions ?? {},
+                    }))
+                    .finally(() => {
+                        inFlightRequests[cacheKey] = undefined;
+                    });
+
+                inFlightRequests[cacheKey] = request;
+            }
+
+            const normalized = await request;
 
             moduleCache[cacheKey] = normalized;
             setData(normalized);
@@ -44,14 +59,17 @@ export function useModuleChapters(moduleId: string | number | undefined) {
         }
     }, [moduleId, cacheKey]);
 
+    const refetch = useCallback(() => fetchData(true, true), [fetchData]);
+
 
     useEffect(() => {
         if (!moduleId) return;
 
         if (moduleCache[cacheKey]) {
-            setData(moduleCache[cacheKey]);  
-            fetchData();                     
-            return;
+            setData(moduleCache[cacheKey]);
+            setLoading(false);
+            // fetchData(false);
+            return; // cache hit — skip network call
         }
 
         fetchData();
@@ -64,6 +82,6 @@ export function useModuleChapters(moduleId: string | number | undefined) {
         permissions: data?.permissions ?? {},
         loading,
         error,
-        refetch: fetchData,
+        refetch,
     };
 }

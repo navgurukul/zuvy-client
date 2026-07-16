@@ -19,7 +19,7 @@ import {
     List,
 } from 'lucide-react'
 import './remirror-editor.css'
-import { api } from '@/utils/axios.config'
+import { useUploadImage } from '@/hooks/useUploadImage'
 import { TextSelection } from 'prosemirror-state'
 
 export const Toolbar = () => {
@@ -43,31 +43,7 @@ export const Toolbar = () => {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { insertImage } = useCommands()
-
-    const uploadImageToServer = async (file: File): Promise<string> => {
-        // ⚠️ 1) Build the FormData
-        const formData = new FormData()
-        formData.append('images', file, file.name) // must match FilesInterceptor('images')
-
-        try {
-            // ⚠️ 2) Pass formData *directly*, not [formData]
-            const response = await api.post(
-                '/Content/curriculum/upload-images',
-                formData,
-                {
-                    // Let axios set the correct multipart boundary for you:
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                }
-            )
-
-            // response.data should be { urls: string[] }
-            const { urls } = response.data as { urls: string[] }
-            return urls[0] // or whatever index you need
-        } catch (err: any) {
-            console.error('Image upload failed:', err)
-            throw err
-        }
-    }
+    const { uploadImage } = useUploadImage()
 
     const handleFileChange = async (
         event: React.ChangeEvent<HTMLInputElement>
@@ -75,9 +51,7 @@ export const Toolbar = () => {
         const file = event.target.files?.[0]
         if (!file) return
 
-        // Create a URL for the uploaded image
-        // const imageUrl = URL.createObjectURL(file)
-        const imageUrl = file && (await uploadImageToServer(file))
+        const imageUrl = await uploadImage(file)
 
         // Insert the image into the editor
         insertImage({ src: imageUrl, alt: file.name })

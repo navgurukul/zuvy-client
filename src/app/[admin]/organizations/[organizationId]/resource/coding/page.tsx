@@ -37,7 +37,7 @@ import {
     getSelectedOptions,
     getDifficulty,
 } from '@/store/store'
-import { getAllCodingQuestions, filteredCodingQuestions } from '@/utils/admin'
+import { getAllCodingQuestions, filteredCodingQuestions, fetchAllTags } from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
@@ -54,7 +54,7 @@ import {
 } from './adminResourceCodinType'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
-import {CodingProblemsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { CodingProblemsSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 const CodingProblems = () => {
     const router = useRouter()
@@ -104,35 +104,35 @@ const CodingProblems = () => {
     const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
-    try {
-        const response = await api.get(`/Content/${orgId}/allCodingQuestions`, {
-            params: {
-                searchTerm: query,
-            },
-        })
+        try {
+            const response = await api.get(`/Content/${orgId}/allCodingQuestions`, {
+                params: {
+                    searchTerm: query,
+                },
+            })
 
-        let questionsData = response.data
-        if (response.data.data) questionsData = response.data.data
-        if (response.data.questions) questionsData = response.data.questions
+            let questionsData = response.data
+            if (response.data.data) questionsData = response.data.data
+            if (response.data.questions) questionsData = response.data.questions
 
-        if (!Array.isArray(questionsData)) {
-            console.error('Expected array but got:', typeof questionsData)
+            if (!Array.isArray(questionsData)) {
+                console.error('Expected array but got:', typeof questionsData)
+                return []
+            }
+
+            const suggestions = questionsData.map((question: SearchSuggestion) => ({
+                id: question.id,
+                title: question.title,
+                difficulty: question.difficulty || 'N/A',
+            }))
+            return suggestions
+
+        } catch (error) {
+            console.error("Error while fetching suggestions:", error)
             return []
+
         }
-
-        const suggestions = questionsData.map((question: SearchSuggestion) => ({
-            id: question.id,
-            title: question.title,
-            difficulty: question.difficulty || 'N/A',
-        }))
-        return suggestions
-        
-    } catch (error) {
-        console.error("Error while fetching suggestions:", error)
-        return [] 
-
-    }
-}, [])
+    }, [])
 
 
     const fetchSearchResultsApi = useCallback(
@@ -157,8 +157,8 @@ const CodingProblems = () => {
                 ''
             )
         },
-    [position, difficulty, selectedOptions, orgId]
-)
+        [position, difficulty, selectedOptions, orgId]
+    )
 
     // Modified defaultFetchApi - no automatic calls
     const defaultFetchApi = useCallback(async () => {
@@ -183,11 +183,7 @@ const CodingProblems = () => {
     // First, load all tags and options
     async function getAllTags() {
         try {
-            const response = await api.get('Content/allTags')
-            const tagArr = [
-                { id: -1, tagName: 'All Topics' },
-                ...response.data.allTags,
-            ]
+            const tagArr = await fetchAllTags()
 
             const transformedData = tagArr.map(
                 (item: { id: any; tagName: any }) => ({
@@ -446,13 +442,13 @@ const CodingProblems = () => {
                                     </h1>
                                 </div>
                                 <div className="flex flex-row items-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                className="lg:max-w-[150px] w-full shadow-4dp"
+                                    <Button
+                                        variant="outline"
+                                        className="lg:max-w-[150px] w-full shadow-4dp"
                                         onClick={() => setIsManageTopicsOpen(true)}
-                                            >
+                                    >
                                         <p>Manage Topics</p>
-                                            </Button>
+                                    </Button>
 
                                     <Dialog
                                         open={isDialogOpen}

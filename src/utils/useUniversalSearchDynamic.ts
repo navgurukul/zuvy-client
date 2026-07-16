@@ -23,6 +23,7 @@ import {
     maxSuggestions = 6,
     onError,
     initialQuery,
+    autoFetchOnMount = true,
   }: UseSearchWithSuggestionsProps): UseSearchWithSuggestionsReturn {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -66,7 +67,10 @@ import {
         const newURL = params.toString()
           ? `?${params.toString()}`
           : window.location.pathname;
-        router.replace(newURL, { scroll: false });
+        const currentURL = window.location.pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+        if (newURL !== currentURL) {
+          router.replace(newURL, { scroll: false });
+        }
       },
       [router, searchParams]
     );
@@ -74,6 +78,7 @@ import {
     useEffect(() => {
       const urlQuery = searchParams.get("search")?.trim() || initialQuery || "";
       setSearchQuery(urlQuery);
+      if (!autoFetchOnMount) return;
       (async () => {
         if (urlQuery) {
           previousQueryRef.current = urlQuery;
@@ -83,7 +88,7 @@ import {
         }
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [autoFetchOnMount]);
     
     useEffect(() => {
       if (debouncedQuery.trim()) {

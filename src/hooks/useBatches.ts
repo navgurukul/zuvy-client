@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, usePathname, useParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
 import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/columns'
+import { useAssignBatch } from '@/hooks/useAssignBatch'
 import {
     StudentData,
     BatchSuggestion,
@@ -26,7 +27,7 @@ export default function useBatches(params: ParamsType) {
     const { user } = getUser()
     const pathname = usePathname()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     const { students } = { students: [] as StudentData[] } // placeholder if needed
 
@@ -34,6 +35,7 @@ export default function useBatches(params: ParamsType) {
     const { batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+    const { assignBatch } = useAssignBatch()
 
     const [loading, setLoading] = useState(true)
     const [assignStudents, setAssignStudents] = useState('')
@@ -59,7 +61,10 @@ export default function useBatches(params: ParamsType) {
     const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
     const [currentStep, setCurrentStep] = useState(1)
     const [totalBatches, setTotalBatches] = useState(0);
-    const [batchesPerPage, setBatchesPerPage] = useState(10); // default value
+    const [batchesPerPage, setBatchesPerPage] = useState(10);
+    // Ref mirrors batchesPerPage so defaultFetchApi stays stable across re-renders
+    const batchesPerPageRef = useRef(10);
+    batchesPerPageRef.current = batchesPerPage;
 
     const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
@@ -132,17 +137,15 @@ export default function useBatches(params: ParamsType) {
         [params.courseId, setBatchData]
     )
 
-    // const defaultFetchApi = useCallback(async () => {
-    //     setSearchQuery('')
-    //     const response = await api.get(`/bootcamp/batches/${params.courseId}`)
-    //     setBatchData(response.data?.data || [])
-    //     setPermissions(response.data?.permissions)
-    //     return response.data?.data || []
-    // }, [params.courseId, setBatchData])
 
+    const isFetchingRef = useRef(false);
 
     const defaultFetchApi = useCallback(
-        async (offset: number = 0, limit: number = batchesPerPage) => {
+        async (offset: number = 0, limit: number = batchesPerPageRef.current) => {
+            // Guard: agar pehle se fetch chal raha hai, toh naya call ignore karo
+            if (isFetchingRef.current) return [];
+
+            isFetchingRef.current = true;
             setLoading(true);
             try {
                 const response = await api.get(
@@ -150,17 +153,21 @@ export default function useBatches(params: ParamsType) {
                 );
 
                 setBatchData(response.data?.data || []);
-                setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
+                setTotalBatches(response.data?.totalBatches || 0);
                 setPermissions(response.data?.permissions);
 
                 return response.data?.data || [];
             } catch (error) {
                 console.error(error);
+                return [];
             } finally {
                 setLoading(false);
+                isFetchingRef.current = false;
             }
         },
-        [params.courseId, batchesPerPage, setBatchData]
+        // batchesPerPage intentionally excluded — read via ref to keep this stable
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [params.courseId, setBatchData]
     );
 
 
@@ -180,7 +187,7 @@ export default function useBatches(params: ParamsType) {
                     if (editingBatch) {
                         const parsedValue = parseInt(capEnrollment)
                         const currentStudents = editingBatch.students_enrolled || 0
-                        
+
                         if (parsedValue < currentStudents) {
                             ctx.addIssue({
                                 code: z.ZodIssueCode.custom,
@@ -226,7 +233,7 @@ export default function useBatches(params: ParamsType) {
         })
         setIsEditModalOpen(true)
         setCurrentStep(1)
-        
+
         // Trigger validation after setting the batch
         setTimeout(() => {
             form.trigger('capEnrollment')
@@ -388,8 +395,11 @@ export default function useBatches(params: ParamsType) {
 
             if (studentsToAdd.length > 0) {
                 try {
-                    const studentsPayload = { students: studentsToAdd }
-                    await api.post(`/bootcamp/students/${params.courseId}?batch_id=${newBatchId}`, studentsPayload)
+                    await assignBatch({
+                        bootcampId: params.courseId,
+                        batchId: newBatchId,
+                        students: studentsToAdd,
+                    })
                 } catch (error) {
                     toast.warning({
                         title: 'Partial Success',
@@ -430,16 +440,11 @@ export default function useBatches(params: ParamsType) {
         }
     }
     useEffect(() => {
-        if (params.courseId) fetchCourseDetails(params.courseId)
-    }, [params.courseId, fetchCourseDetails])
-
-    useEffect(() => {
-        if (courseData?.id) {
-            defaultFetchApi();
-        }
-    }, [courseData?.id]);
-
-
+        if (!params.courseId) return
+        defaultFetchApi()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [params.courseId])
+    
 
     const getUnAssignedStudents = useCallback(async () => {
         try {
@@ -451,8 +456,10 @@ export default function useBatches(params: ParamsType) {
     }, [debouncedSearchStudent, params.courseId])
 
     useEffect(() => {
-        getUnAssignedStudents()
-    }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
+        if (debouncedSearchStudent) {
+            getUnAssignedStudents()
+        }
+    }, [getUnAssignedStudents, debouncedSearchStudent])
 
     const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => setSearchStudent(e.target.value)
 
@@ -490,6 +497,7 @@ export default function useBatches(params: ParamsType) {
         isManualValid,
         setIsManualValid,
         searchQuery,
+        setSearchQuery,
         csvFile,
         setCsvFile,
         singleStudentData,

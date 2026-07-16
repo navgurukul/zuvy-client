@@ -1,10 +1,21 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 import { UseTrackingLogArgs, UseTrackingLogReturn, TrackingLogResponse, TrackingLogEntry } from './hookType'
+
+interface TrackingLogFetchResult {
+    logs: TrackingLogEntry[]
+    pagination: {
+        offset: number
+        limit: number
+        total: number
+    }
+}
+
+const pendingTrackingLogRequests = new Map<string, Promise<TrackingLogFetchResult>>()
 
 export function useTrackingLog({
     orgId: propOrgId,
@@ -46,6 +57,8 @@ export function useTrackingLog({
         return Number.isFinite(n) ? n : 0
     }, [offset])
 
+    const initialFetchState = useRef({ fetchedOrgId: orgId, hasFetched: false })
+
     const buildQueryString = useCallback((params: {
         orgId?: number | string
         actorUserId?: number | string
@@ -74,15 +87,21 @@ export function useTrackingLog({
 
     const fetchTrackingLog = useCallback(
         async (params?: Partial<UseTrackingLogArgs>) => {
+            const updateState = params?.updateState !== false
+
             if (!orgId) {
-                setError(new Error('Organization ID is required'))
-                setLoading(false)
-                return
+                if (updateState) {
+                    setError(new Error('Organization ID is required'))
+                    setLoading(false)
+                }
+                return []
             }
 
             try {
-                setLoading(true)
-                setError(null)
+                if (updateState) {
+                    setLoading(true)
+                    setError(null)
+                }
 
                 const finalParams = {
                     orgId,
@@ -97,31 +116,73 @@ export function useTrackingLog({
                 }
 
                 const queryString = buildQueryString(finalParams)
-                
-                const res = await api.get<TrackingLogResponse>(`/trackinglog?${queryString}`)
-                
-                if (res.data?.success && res.data?.data) {
-                    const { logs, pagination } = res.data.data
-                    
-                    setTrackingLogs(logs || [])
-                    setTotalRows(pagination?.total || 0)
-                    setPagination({
-                        offset: pagination?.offset || 0,
-                        limit: pagination?.limit || 100,
-                        total: pagination?.total || 0
-                    })
-                } else {
+
+                if (pendingTrackingLogRequests.has(queryString)) {
+                    const existingRequest = pendingTrackingLogRequests.get(queryString)
+                    if (existingRequest) {
+                        const existingResult = await existingRequest
+                        if (updateState) {
+                            setTrackingLogs(existingResult.logs)
+                            setTotalRows(existingResult.pagination.total)
+                            setPagination(existingResult.pagination)
+                        }
+                        return existingResult.logs
+                    }
+                }
+
+                const requestPromise = (async () => {
+                    const res = await api.get<TrackingLogResponse>(`/trackinglog?${queryString}`)
+
+                    const result: TrackingLogFetchResult = {
+                        logs: [],
+                        pagination: {
+                            offset: 0,
+                            limit: 100,
+                            total: 0
+                        }
+                    }
+
+                    if (res.data?.success && res.data?.data) {
+                        const { logs: responseLogs, pagination } = res.data.data
+
+                        result.logs = responseLogs || []
+                        result.pagination = {
+                            offset: pagination?.offset || 0,
+                            limit: pagination?.limit || 100,
+                            total: pagination?.total || 0
+                        }
+                    }
+
+                    return result
+                })()
+
+                pendingTrackingLogRequests.set(queryString, requestPromise)
+
+                try {
+                    const result = await requestPromise
+                    if (updateState) {
+                        setTrackingLogs(result.logs)
+                        setTotalRows(result.pagination.total)
+                        setPagination(result.pagination)
+                    }
+                    return result.logs
+                } finally {
+                    if (pendingTrackingLogRequests.get(queryString) === requestPromise) {
+                        pendingTrackingLogRequests.delete(queryString)
+                    }
+                }
+            } catch (err) {
+                if (updateState) {
+                    setError(err)
                     setTrackingLogs([])
                     setTotalRows(0)
                 }
-                setError(null)
-            } catch (err) {
-                setError(err)
-                setTrackingLogs([])
-                setTotalRows(0)
                 console.error('Error fetching tracking log:', err)
+                return []
             } finally {
-                setLoading(false)
+                if (updateState) {
+                    setLoading(false)
+                }
             }
         },
         [
@@ -139,10 +200,28 @@ export function useTrackingLog({
     )
 
     useEffect(() => {
-        if (initialFetch && orgId) {
-            fetchTrackingLog()
+        if (!initialFetch || !orgId) {
+            return
         }
+
+        if (
+            initialFetchState.current.hasFetched &&
+            initialFetchState.current.fetchedOrgId === orgId
+        ) {
+            return
+        }
+
+        initialFetchState.current = {
+            hasFetched: true,
+            fetchedOrgId: orgId
+        }
+
+        fetchTrackingLog()
     }, [initialFetch, fetchTrackingLog, orgId])
+
+    const refetch = useCallback(async (params?: Partial<UseTrackingLogArgs>) => {
+        await fetchTrackingLog(params)
+    }, [fetchTrackingLog])
 
     return {
         trackingLogs,
@@ -150,7 +229,7 @@ export function useTrackingLog({
         error,
         totalRows,
         pagination,
-        refetch: fetchTrackingLog,
+        refetch,
         fetchTrackingLog
     }
 }

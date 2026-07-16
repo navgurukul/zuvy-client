@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -16,77 +16,76 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
-    BootcampData,
     PageParams,
     IndividualStudentData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssignmentDetailForAUser from '@/hooks/useAssignmentDetailForAUser'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const [individualStudentData, setIndividualStudentData] =
         useState<IndividualStudentData | null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [assignmentTitle, setAssignmentTItle] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
     const [urls, setUrls] = useState<string[]>([])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {}
-    }, [params.courseId])
+    const {
+        data: assignmentDetail,
+        loading,
+        error,
+    } = useAssignmentDetailForAUser({
+        chapterId: params.assignmentData,
+        userId: params.individualStatus,
+    })
 
     useEffect(() => {
-        const fetchIndividualStudentStatus = async () => {
-            try {
-                const res = await api.get(
-                    `/submission/getAssignmentDetailForAUser?chapterId=${params.assignmentData}&userId=${params.individualStatus}`
-                )
+        if (error) {
+            toast.error({
+                title: 'Error',
+                description: error,
+            })
+        }
+    }, [error])
 
-                const data = res?.data?.data
-                if (data) {
-                    const chapterTrackingDetails: IndividualStudentData =
-                        data.chapterTrackingDetails?.[0]
-                    const articleContent = data.articleContent?.[0]
+    useEffect(() => {
+        if (!assignmentDetail) return
 
-                    if (chapterTrackingDetails && articleContent) {
-                        setIndividualStudentData(chapterTrackingDetails)
-                        setInitialContent(JSON.parse(articleContent))
+        try {
+            const chapterTrackingDetails: IndividualStudentData =
+                assignmentDetail.chapterTrackingDetails?.[0]
+            const articleContent = assignmentDetail.articleContent?.[0]
 
-                        const projectUrl =
-                            chapterTrackingDetails.user?.studentAssignmentStatus
-                                ?.projectUrl
-                        if (projectUrl) {
-                            setUrls(normalizeLinks(projectUrl))
-                        }
+            if (chapterTrackingDetails && articleContent) {
+                setIndividualStudentData(chapterTrackingDetails)
+                setInitialContent(JSON.parse(articleContent))
 
-                        setAssignmentTItle(data.title)
-                    } else {
-                        console.error('Incomplete data received')
-                    }
-                } else {
-                    throw new Error('No data found')
+                const projectUrl =
+                    chapterTrackingDetails.user?.studentAssignmentStatus
+                        ?.projectUrl
+                if (projectUrl) {
+                    setUrls(normalizeLinks(projectUrl))
                 }
-            } catch (error: any) {
+
+                setAssignmentTItle(assignmentDetail.title)
+            } else {
+                console.error('Incomplete data received')
                 toast.error({
                     title: 'Error',
-                    description:
-                        error.message || 'Error fetching Student Details',
+                    description: 'Incomplete data received',
                 })
             }
+        } catch (error: any) {
+            toast.error({
+                title: 'Error',
+                description: error.message || 'Error fetching Student Details',
+            })
         }
-
-        fetchIndividualStudentStatus()
-        getBootcampHandler()
-    }, [params.assignmentData, params.individualStatus, getBootcampHandler])
+    }, [assignmentDetail])
 
     const dateString = individualStudentData?.completedAt
     const date = new Date(dateString?.toString())
@@ -124,7 +123,7 @@ const Page = ({ params }: PageParams) => {
 
     return (
         <>
-            {!individualStudentData && (
+            {loading && !individualStudentData && (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">

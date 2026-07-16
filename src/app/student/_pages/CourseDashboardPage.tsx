@@ -32,6 +32,7 @@ import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
 import { cn } from "@/lib/utils";
 import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
+import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
 // import Leaderboard from '@/components/Leaderboard';
 // import { useLeaderboard } from '@/hooks/useLeaderboard';
 
@@ -247,33 +248,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const canStartEvent = (eventDate: string) => {
     return new Date(eventDate).getTime() <= new Date().getTime();
-  };
-
-  const parseDateValue = (value?: string | null) => {
-    if (!value) return null;
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-
-    return date;
-  };
-
-  const isMentorSessionJoinWindowOpen = (
-    startTime?: string | null,
-    endTime?: string | null,
-    nowTimestamp: number = Date.now()
-  ) => {
-    const startDate = parseDateValue(startTime);
-    if (!startDate) return false;
-
-    const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000;
-    const endDate = parseDateValue(endTime);
-
-    if (!endDate) {
-      return nowTimestamp >= tenMinutesBeforeStart;
-    }
-
-    return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime();
   };
 
   const getMentorSessionJoinHref = (item: MentorSessionEvent) => {

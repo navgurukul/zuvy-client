@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { DataTable } from '@/app/_components/datatable/data-table';
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
@@ -12,10 +12,10 @@ import { useOrganizations, Organization } from '@/hooks/useOrganizations'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
-import { api } from '@/utils/axios.config'
 import { useSearchParams, useRouter } from 'next/navigation'
 import MultiSelector from '@/components/ui/multi-selector'
 import { OFFSET, POSITION } from '@/utils/constant'
+import { getOrganizations } from '@/utils/organizations'
 
 // Add interface for filter options
 interface FilterOption {
@@ -26,6 +26,7 @@ interface FilterOption {
 export default function OrganizationsPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const prev = useRef<any>();
 
     // Get page and limit from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
@@ -69,6 +70,7 @@ export default function OrganizationsPage() {
 
     // Function to update URL params
     const updateURLParams = useCallback((page: number, newLimit?: number, filters?: string) => {
+
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(newLimit || limit))
@@ -78,8 +80,11 @@ export default function OrganizationsPage() {
         } else {
             newParams.delete('filterType')
         }
+        const newUrl = newParams.toString()
 
-        router.replace(`?${newParams.toString()}`)
+        if (newUrl !== searchParams.toString()) {
+            router.replace(`?${newUrl}`)
+        }
     }, [searchParams, router, limit])
 
     // Initialize from URL
@@ -123,18 +128,14 @@ export default function OrganizationsPage() {
     // Search API functions for SearchBox - ADD FILTER TO SUGGESTIONS
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
-            const queryParams = new URLSearchParams()
-            queryParams.append('search', query)
-            queryParams.append('limit', '10')
-
-            // ADD CURRENT FILTER TO SUGGESTIONS API CALL
             const currentFilter = getFilterQuery()
-            if (currentFilter) {
-                queryParams.append('filterType', currentFilter)
-            }
+            const response = await getOrganizations({
+                search: query,
+                limit: 10,
+                filterType: currentFilter,
+            })
 
-            const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
-            return response.data.data || []
+            return response.data || []
         } catch (error) {
             console.error('Error fetching suggestions:', error)
             return []
@@ -159,6 +160,7 @@ export default function OrganizationsPage() {
         fetchSuggestionsApi,
         fetchSearchResultsApi,
         defaultFetchApi,
+        autoFetchOnMount: false,
     })
 
     // Handle management type filter - Enforce single selection
@@ -173,6 +175,7 @@ export default function OrganizationsPage() {
 
     // Fetch data when URL params change
     useEffect(() => {
+
         if (!urlInitialized) return
 
         const filterQuery = getFilterQuery()

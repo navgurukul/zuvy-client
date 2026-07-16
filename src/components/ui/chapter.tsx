@@ -1,6 +1,5 @@
 'use client'
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
@@ -22,6 +21,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { useEditChapter } from '@/hooks/useEditChapter'
 import { ModuleContentSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
@@ -72,6 +72,8 @@ function Chapter() {
         loading: moduleLoading,
         refetch,
     } = useModuleChapters(moduleID)
+
+    const { editChapter } = useEditChapter()
 
     // Fetch course details on mount
     useEffect(() => {
@@ -243,35 +245,42 @@ function Chapter() {
         }
 
         try {
-            await api.put(
-                `/Content/editChapterOfModule/${moduleId}?chapterId=${chapterId}`,
-                { newOrder: newPosition }
+            await editChapter(
+                moduleID,
+                chapterId,
+                { newOrder: newPosition },
+                {
+                    onSuccess: () => {
+                        toast.success({
+                            title: 'Success',
+                            description: 'Chapter order updated successfully',
+                        })
+
+                        triggerBorderFlash(chapterId)
+
+                        // Update reference data
+                        const updatedOriginalData = chapterData.map((item, index) => ({
+                            ...item,
+                            order: index + 1,
+                        }))
+                        setOriginalChapterData(updatedOriginalData)
+                        lastOrderRef.current = chapterData.map((c) => c.chapterId)
+                    },
+                    onError: (error: any) => {
+                        console.error('Reorder error:', error)
+
+                        toast.error({
+                            title: 'Failed',
+                            description:
+                                error.response?.data?.message || 'Failed to update chapter order',
+                        })
+
+                        setChapterData([...originalChapterData])
+                    },
+                }
             )
-
-            toast.success({
-                title: 'Success',
-                description: 'Chapter order updated successfully',
-            })
-
-            triggerBorderFlash(chapterId)
-
-            // Update reference data
-            const updatedOriginalData = chapterData.map((item, index) => ({
-                ...item,
-                order: index + 1,
-            }))
-            setOriginalChapterData(updatedOriginalData)
-            lastOrderRef.current = chapterData.map((c) => c.chapterId)
-        } catch (error: any) {
-            console.error('Reorder error:', error)
-
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'Failed to update chapter order',
-            })
-
-            setChapterData([...originalChapterData])
+        } catch {
+            // errors are handled via onError callback above
         }
     }
 

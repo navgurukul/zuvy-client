@@ -18,7 +18,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter, useParams } from 'next/navigation'
 import { getTopicId } from '@/store/store'
@@ -26,6 +25,7 @@ import { useState } from 'react'
 import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
 import { ChapterModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
+import { useChapterActions } from '@/hooks/useChapterActions'
 
 function ChapterModal({
     fetchChapters,
@@ -40,33 +40,48 @@ function ChapterModal({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [classType, setClassType] = useState('createLiveClass')
     const [liveDialogOpen, setLiveDialogOpen] = useState(false)
+    const [adaptiveDialogOpen, setAdaptiveDialogOpen] = useState(false)
+    const { createChapter: createChapterAction } = useChapterActions()
+
+    const handleAdaptiveAssessmentSave = ({
+        topic,
+    }: {
+        topic: string
+        description: string
+    }) => {
+        toast.success({
+            title: 'Adaptive assessment details saved',
+            description: `Topic: ${topic}`,
+        })
+        setAdaptiveDialogOpen(false)
+    }
 
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
-        await api
-            .post(`Content/chapter`, {
+        try {
+            const res = await createChapterAction({
                 moduleId: Number(moduleId),
                 bootcampId: Number(courseId),
                 topicId: topicId,
             })
-            .then((res) => {
-                const data = res?.data?.module[0]
-                router.push(
-                    `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
-                )
-                toast.success({
-                    title: res?.data?.module[0]?.title,
-                    description: res?.data?.message,
-                })
-                onClose() // <-- Close parent dialog
+
+            const data = res?.data?.module[0]
+            router.push(
+                `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
+            )
+            toast.success({
+                title: res?.data?.module[0]?.title,
+                description: res?.data?.message,
             })
-            .catch((error) => {
-                toast.error({
-                    title: 'Error',
-                    description: error?.response?.data?.message[0],
-                })
+            onClose() // <-- Close parent dialog
+        } catch (error: any) {
+            toast.error({
+                title: 'Error',
+                description: error?.response?.data?.message[0],
             })
-        fetchChapters()
+        } finally {
+            fetchChapters()
+        }
     }
 
     return (

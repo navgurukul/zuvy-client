@@ -11,6 +11,7 @@ import UnsavedChangesDialog from './UnsavedChangesDialog'
 import { cn } from '@/lib/utils'
 import { permissionLevelToTier } from '@/utils/types/rbac'
 import { Button } from '@/components/ui/button'
+import { getUser } from '@/store/store'
 
 interface RoleManagementPanelProps {
     selectedRole: string | undefined
@@ -65,6 +66,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
         discardChanges,
     } = hook as any
 
+    const { user } = getUser()
+    const currentUserRole = user?.rolesList?.[0]?.toLowerCase()
+    const isOwnRole = selectedRole?.toLowerCase() === currentUserRole
     const isAdminRole = selectedRole?.toLowerCase() === 'admin'
 
     const toggleModuleExpansion = (moduleId: string) => {
@@ -214,6 +218,17 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
                 </div>
 
                 <div className="lg:col-span-3 space-y-6">
+                    {(isOwnRole || isAdminRole) && (
+                        <div className="flex items-center gap-3 px-2 py-1 text-sm text-secondary-dark">
+                            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+                            <p>
+                            {isOwnRole
+                                ? "You can't modify your own role's permissions. Switch to another role with sufficient privileges to make changes."
+                                : "You can't modify the Admin role's permissions. Switch to another role with sufficient privileges to make changes."}
+                            </p>
+                        </div>
+                    )}
+
                     <div className="relative">
                         <div className="bg-card rounded-lg border border-border overflow-hidden">
                             <div className="bg-background px-6 py-4 border-b border-border">
@@ -251,7 +266,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
                                                         </div>
                                                         <span className="text-base font-semibold text-foreground truncate">{moduleName}</span>
                                                     </div>
-                                                    <PermissionButtons resourceId={mod.children[0]?.id || 0} isChild={false} moduleChildren={mod.children} currentTier={permissionLevelToTier((permissionLevels as any)[mod.children[0]?.id] || 'No access')} onChange={handlePermissionChange} hoveredRowId={hoveredRowId} isAdminRole={isAdminRole} />
+                                                    <PermissionButtons resourceId={mod.children[0]?.id || 0} isChild={false} moduleChildren={mod.children} currentTier={permissionLevelToTier((permissionLevels as any)[mod.children[0]?.id] || 'No access')} onChange={handlePermissionChange} hoveredRowId={hoveredRowId} isAdminRole={isAdminRole} isOwnRole={isOwnRole} />
                                                 </div>
 
                                                 {(isExpanded) && (() => {
@@ -277,7 +292,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
                                                                 {showDisabledMessage ? (
                                                                     <div className="flex items-center justify-end text-sm text-muted-foreground italic" style={{ width: '620px' }}>Enable Parent Access to configure</div>
                                                                 ) : (
-                                                                    <PermissionButtons resourceId={child.id} isChild={true} currentTier={permissionLevelToTier((permissionLevels as any)[child.id] || 'No access')} maxAllowedTier={parentLevel as any} hoveredRowId={hoveredRowId} isAdminRole={isAdminRole} onChange={handlePermissionChange} />
+                                                                    <PermissionButtons resourceId={child.id} isChild={true} currentTier={permissionLevelToTier((permissionLevels as any)[child.id] || 'No access')} maxAllowedTier={parentLevel as any} hoveredRowId={hoveredRowId} isAdminRole={isAdminRole} isOwnRole={isOwnRole} onChange={handlePermissionChange} />
                                                                 )}
                                                             </div>
                                                         </div>
@@ -295,7 +310,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/></svg>
                                         <span>Permissions cascade down</span>
                                     </div>
-                                    <Button onClick={() => handleSaveAllPermissions(resolveRoleId)} disabled={!hasUnsavedChanges || assigning || isAdminRole} size="lg">
+                                    <Button onClick={() => handleSaveAllPermissions(resolveRoleId)} disabled={!hasUnsavedChanges || assigning || isAdminRole || isOwnRole} size="lg">
                                         <Save className="h-4 w-4 mr-2" />
                                         {assigning ? 'Saving...' : 'Save Configuration'}
                                     </Button>

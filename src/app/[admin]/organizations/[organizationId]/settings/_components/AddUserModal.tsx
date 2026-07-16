@@ -12,7 +12,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRoles } from '@/hooks/useRoles'
-import { api } from '@/utils/axios.config'
+import { useUsers } from '@/hooks/useUsers'
+import { useUser } from '@/hooks/useSingleUser'
 import { toast } from '@/components/ui/use-toast'
 import {
     GraduationCap,
@@ -116,9 +117,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             : currentUser?.orgId
 
     const { roles, loading: rolesLoading } = useRoles()
+    const { addUser, updateUser } = useUsers()
+    const shouldFetchFreshUser = isEditMode && isOpen && !!user?.id
+    const {
+        user: fetchedUser,
+        loading: isFetchingFreshData,
+        error: fetchedUserError,
+    } = useUser(shouldFetchFreshUser ? user.id : null, {
+        enabled: shouldFetchFreshUser,
+    })
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [freshUserData, setFreshUserData] = useState<any>(null)
-    const [isFetchingFreshData, setIsFetchingFreshData] = useState(false)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
         name: '',
         email: '',
@@ -130,53 +139,48 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         roleId: null,
     })
 
-    // Fetch fresh user data when entering edit mode
+    // Sync fresh user data from the reusable hook when entering edit mode
     useEffect(() => {
-        if (isEditMode && user?.id && isOpen) {
-            const fetchFreshUserData = async () => {
-                setIsFetchingFreshData(true)
-                try {
-                    const response = await api.get(`/users/getUser/${user.id}`)
-                    setFreshUserData(response.data)
-                    const fetchedName = response.data.name || ''
-                    const fetchedEmail = response.data.email || ''
-                    const fetchedRoleId = response.data.roleId || null
-                    
-                    setNewUser({
-                        name: fetchedName,
-                        email: fetchedEmail,
-                    })
-                    setPendingUserRole(fetchedRoleId)
-                    // Store original values
-                    setOriginalUser({
-                        name: fetchedName,
-                        email: fetchedEmail,
-                        roleId: fetchedRoleId,
-                    })
-                } catch (error) {
-                    // Fallback to passed user data if fetch fails
-                    console.error('Error fetching fresh user data:', error)
-                    const fallbackName = user.name || ''
-                    const fallbackEmail = user.email || ''
-                    const fallbackRoleId = user.roleId || null
-                    
-                    setNewUser({
-                        name: fallbackName,
-                        email: fallbackEmail,
-                    })
-                    setPendingUserRole(fallbackRoleId)
-                    // Store original values
-                    setOriginalUser({
-                        name: fallbackName,
-                        email: fallbackEmail,
-                        roleId: fallbackRoleId,
-                    })
-                } finally {
-                    setIsFetchingFreshData(false)
-                }
+        if (isEditMode && isOpen && shouldFetchFreshUser) {
+            if (fetchedUser) {
+                setFreshUserData(fetchedUser)
+                const fetchedName = fetchedUser.name || ''
+                const fetchedEmail = fetchedUser.email || ''
+                const fetchedRoleId = fetchedUser.roleId || null
+
+                setNewUser({
+                    name: fetchedName,
+                    email: fetchedEmail,
+                })
+                setPendingUserRole(fetchedRoleId)
+                // Store original values
+                setOriginalUser({
+                    name: fetchedName,
+                    email: fetchedEmail,
+                    roleId: fetchedRoleId,
+                })
+                return
             }
 
-            fetchFreshUserData()
+            if (fetchedUserError && !isFetchingFreshData) {
+                // Fallback to passed user data if fetch fails
+                console.error('Error fetching fresh user data:', fetchedUserError)
+                const fallbackName = user.name || ''
+                const fallbackEmail = user.email || ''
+                const fallbackRoleId = user.roleId || null
+
+                setNewUser({
+                    name: fallbackName,
+                    email: fallbackEmail,
+                })
+                setPendingUserRole(fallbackRoleId)
+                // Store original values
+                setOriginalUser({
+                    name: fallbackName,
+                    email: fallbackEmail,
+                    roleId: fallbackRoleId,
+                })
+            }
         } else if (!isEditMode && isOpen) {
             // Reset form for add mode
             setNewUser({
@@ -191,7 +195,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 roleId: null,
             })
         }
-    }, [isEditMode, user?.id, isOpen])
+    }, [
+        isEditMode,
+        isOpen,
+        shouldFetchFreshUser,
+        fetchedUser,
+        fetchedUserError,
+        isFetchingFreshData,
+        user,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -263,7 +275,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         }
 
         try {
-            const response = await api.post('/users/addUsers', payload)
+            const response = await addUser(payload)
             if(response.status === 201) {
                 toast.success({
                     title: 'User added successfully',
@@ -301,7 +313,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         }
 
         try {
-            const response = await api.put(`/users/updateUser/${user.id}`, payload)
+            const response = await updateUser(user.id, payload)
             if(response.status === 200) {
                 // Update the cached fresh data immediately
                 setFreshUserData({

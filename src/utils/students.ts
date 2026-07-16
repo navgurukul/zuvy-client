@@ -467,38 +467,6 @@ export const getEmbedLink = (link: string) => {
 
 // --------------------------------------------
 
-export const formatToIST = (dateString: string | null | undefined) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-
-        const options: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: 'long',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Kolkata',
-        };
-
-        const formatter = new Intl.DateTimeFormat('en-IN', options);
-        const parts = formatter.formatToParts(date);
-
-        const getPart = (type: string) =>
-            parts.find(part => part.type === type)?.value || '';
-
-        const day = getPart('day');
-        const month = getPart('month');
-        const year = getPart('year');
-        const hour = getPart('hour');
-        const minute = getPart('minute');
-        const dayPeriod = getPart('dayPeriod');
-
-        return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
-    };
-
-// --------------------------------------------
-
 
 
 

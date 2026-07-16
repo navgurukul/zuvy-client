@@ -16,8 +16,8 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useQuizSubmission } from '@/hooks/useQuizSubmission'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -56,6 +56,7 @@ const QuizQuestions = ({
     const searchParams = useSearchParams();
     const assessmentOutSourceId = searchParams.get('assessmentId');
     const { isDark, toggleTheme } = useThemeStore();
+    const { submitQuiz, isSubmitting: isQuizSubmitting } = useQuizSubmission(assessmentSubmitId, assessmentOutSourceId);
 
 
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -133,10 +134,7 @@ const QuizQuestions = ({
                 setIsAlertModal(true)
                 return
             } else {
-                const response = await api.patch(
-                    `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${assessmentOutSourceId}`,
-                    { quizSubmissionDto }
-                )
+                await submitQuiz({ quizSubmissionDto })
 
                 getAssessmentData()
 
@@ -331,7 +329,7 @@ const QuizQuestions = ({
                             <button
                                 type="button"
                                 onClick={handleSubmitClick}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isQuizSubmitting}
                                 className={cn(
                                     "px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp",
                                     isDisabled

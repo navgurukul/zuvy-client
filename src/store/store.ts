@@ -8,6 +8,7 @@ import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
+import { fetchCourseById } from '@/hooks/useCourseExistenceCheck'
 
 type CounterStore = {
     studentData: {
@@ -36,6 +37,7 @@ interface CourseData {
     language: string
     startTime: string
     unassigned_students: number
+    students_in_bootcamp?: number
 }
 interface Permissions {
     editCourse: boolean
@@ -122,10 +124,7 @@ export const getCourseData = create<StoreCourseData>((set) => ({
     },
     fetchCourseDetails: async (courseId: number): Promise<boolean> => {
         try {
-            const response = await api.get(`/bootcamp/${courseId}`)
-            const data = response.data
-            set({ courseData: data.bootcamp })
-            set({ Permissions: data.permissions })
+            await fetchCourseById(courseId.toString())
             return true
         } catch (error: unknown) {
             console.error('Error fetching course details:', error)

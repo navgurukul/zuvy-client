@@ -52,7 +52,7 @@ import {
 } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
-import { filteredQuizQuestions } from '@/utils/admin'
+import { filteredQuizQuestions, fetchAllTags } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
@@ -394,12 +394,8 @@ const Mcqs = (props: Props) => {
     const closeModal = () => setIsOpen(false)
 
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const tagArr = [
-                { id: -1, tagName: 'All Topics' },
-                ...response.data.allTags,
-            ]
+        try {
+            const tagArr = await fetchAllTags()
             const transformedTags = tagArr.map(
                 (item: { id: any; tagName: any }) => ({
                     id: item.id,
@@ -415,6 +411,12 @@ const Mcqs = (props: Props) => {
 
             setTags(transformedTags)
             setOptions(transformedData)
+        } catch (error) {
+            console.error('Error fetching tags:', error)
+            toast.error({
+                title: 'Error',
+                description: 'Failed to fetch tags',
+            })
         }
     }
 

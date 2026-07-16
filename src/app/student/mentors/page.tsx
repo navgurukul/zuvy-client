@@ -65,7 +65,7 @@ export default function MentorsPage() {
         mentors: availableMentorPool,
         loading: availableMentorPoolLoading,
         error: availableMentorPoolError,
-    } = useMentors(searchQuery, !showAllMentors, 1000, 0, orgId || undefined)
+    } = useMentors(searchQuery, !showAllMentors, 10, 0, orgId || undefined)
 
     const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 

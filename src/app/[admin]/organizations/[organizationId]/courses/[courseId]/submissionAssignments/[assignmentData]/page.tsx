@@ -7,13 +7,16 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { ArrowLeft,Download } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssignmentStatus from '@/hooks/useAssignmentStatus'
 
 type Props = {}
 
@@ -27,33 +30,19 @@ const Page = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
     const { organizationId } = useParams()
     const { downloadCsv } = useDownloadCsv()
+    const { fetchAssignmentStatus } = useAssignmentStatus()
     const currentTab = searchParams.get('tab') || 'assignments'
     const [assignmentData, setAssignmentData] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
     const [submittedStudents, setSubmittedStudents] = useState<number>(0)
     const [sortField, setSortField] = useState<string>('submittedDate')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
-
-     // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
-    
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -77,15 +66,15 @@ const Page = ({ params }: { params: any }) => {
         if (sortField) {
             queryParams.append('orderBy', sortField)
         }
-    
+
         if (sortDirection) {
             queryParams.append('orderDirection', sortDirection)
         }
-    
+
         const res = await api.get(
             `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`
         )
-    
+
         const assignmentData = res?.data?.data
         if (assignmentData) {
             const chapterId = assignmentData?.chapterId
@@ -98,31 +87,20 @@ const Page = ({ params }: { params: any }) => {
                 setAssignmentTitle(assignmentData.chapterName)
             }
         }
-    
+
         return assignmentData?.data || []
-    }, [params.assignmentData, sortField, sortDirection,selectedBatch])
-    
+    }, [params.assignmentData, sortField, sortDirection, selectedBatch])
+
 
     const defaultFetchApi = useCallback(async () => {
-        const queryParams = new URLSearchParams()
-        queryParams.append('limit', '100')
-        queryParams.append('offset', '0')
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) {
-            queryParams.append('orderBy', sortField)
-        }
-    
-        if (sortDirection) {
-            queryParams.append('orderDirection', sortDirection)
-        }
-    
-        const res = await api.get(
-            `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`
-        )
-    
-        const assignmentData = res?.data?.data
+        const assignmentData = await fetchAssignmentStatus({
+            chapterId: params.assignmentData,
+            limit: 100,
+            offset: 0,
+            ...(selectedBatch !== 'all' ? { batchId: selectedBatch } : {}),
+            orderBy: sortField,
+            orderDirection: sortDirection,
+        })
         if (assignmentData) {
             const chapterId = assignmentData?.chapterId
             assignmentData.data.forEach((data: any) => {
@@ -132,41 +110,15 @@ const Page = ({ params }: { params: any }) => {
             setSubmittedStudents(assignmentData.data.length)
             setAssignmentTitle(assignmentData.chapterName)
         }
-    
+
         return assignmentData?.data || []
-    }, [params.assignmentData, sortField, sortDirection,selectedBatch])
-    
+    }, [params.assignmentData, sortField, sortDirection, selectedBatch, fetchAssignmentStatus])
+
     useEffect(() => {
         defaultFetchApi();
     }, [defaultFetchApi, sortField, sortDirection]);
-    
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('Error fetching bootcamp data:', error)
-        }
-    }, [params.courseId])
 
-    useEffect(() => {
-        getBootcampHandler()
-    }, [getBootcampHandler])
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([
-                    getBootcampHandler(),
-                    fetchBatches()
-                ])
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
-
-        fetchData()
-    }, [fetchBatches])
      // Handle sorting change
      const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
@@ -174,28 +126,28 @@ const Page = ({ params }: { params: any }) => {
     }, [])
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-    
+
         const currentSearchQuery = searchParams.get('search') || ''
         if (currentSearchQuery) {
             queryParams.append('searchStudent', currentSearchQuery)
         }
-    
+
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
+
         downloadCsv({
             endpoint: `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`,
-    
+
             fileName: `assignment_${assignmentTitle || 'submissions'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'data.data',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'emailId' },
@@ -203,7 +155,7 @@ const Page = ({ params }: { params: any }) => {
                 { header: 'Submitted Status', key: 'status' },
                 { header: 'Submitted Date', key: 'submitted_date' },
             ],
-    
+
             mapData: (item: any) => ({
                 name: item.name || '',
                 emailId: item.emailId || '',
@@ -212,9 +164,11 @@ const Page = ({ params }: { params: any }) => {
                 submitted_date: item.submitted_date || '',
             }),
         })
-    }, [params.assignmentData,selectedBatch,searchParams,sortField,sortDirection,assignmentTitle])
-    
-    const totalStudents = bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
+    }, [params.assignmentData, selectedBatch, searchParams, sortField, sortDirection, assignmentTitle])
+
+    const totalStudents =
+        (bootcampData?.students_in_bootcamp || 0) -
+        (bootcampData?.unassigned_students || 0)
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-5">
@@ -311,7 +265,7 @@ const Page = ({ params }: { params: any }) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={assignmentData} columns={columns} onSortingChange={handleSortingChange}/>
+                    <DataTable data={assignmentData} columns={columns} onSortingChange={handleSortingChange} />
                 </CardContent>
             </Card>
         </>

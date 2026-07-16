@@ -19,6 +19,11 @@ import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback
 import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
 import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
+import {
+  formatDateOnly,
+  formatTimeRange,
+  isJoinWindowOpen,
+} from "@/utils/sessionDateTime"
 
 type SessionTab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled"
 
@@ -35,69 +40,6 @@ const formatDateTime = (value?: string | null) => {
     hour: "numeric",
     minute: "2-digit",
   })
-}
-
-const formatDateOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
-const formatTimeOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-const formatTimeRange = (start?: string | null, end?: string | null) => {
-  const startTime = formatTimeOnly(start)
-  const endTime = formatTimeOnly(end)
-
-  if (startTime === "-" && endTime === "-") return "-"
-  if (startTime === "-") return endTime
-  if (endTime === "-") return startTime
-
-  return `${startTime} - ${endTime}`
-}
-
-const parseDateValue = (value?: string | null) => {
-  if (!value) return null
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-
-  return date
-}
-
-const isJoinWindowOpen = (
-  slotStart?: string | null,
-  slotEnd?: string | null,
-  nowTimestamp: number = Date.now()
-) => {
-  const startDate = parseDateValue(slotStart)
-  if (!startDate) return false
-
-  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
-  const endDate = parseDateValue(slotEnd)
-
-  if (!endDate) {
-    return nowTimestamp >= tenMinutesBeforeStart
-  }
-
-  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
 }
 
 const getRescheduleStatus = (session: MyMentorSession) => {
