@@ -21,14 +21,16 @@ type roleCellProps = {
   rolesLoading: boolean;
   onRoleUpdate?: () => void;
   roleId?: number;
+  userEmail: string;
 };
 
-export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate }: roleCellProps & { userId: number }) => {
+export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, onRoleUpdate }: roleCellProps & { userId: number }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const orgId = Number(organizationId) || user?.orgId;
     const { assignUserRole, loading } = useAssignUserRole()
     const [originalRole, setOriginalRole] = useState(role)
+    const isCurrentUser = user?.email?.trim().toLowerCase() === userEmail?.trim().toLowerCase()
 
     const handleRoleChange = async (newRoleName: string) => {
         // Only save if the role actually changed
@@ -68,7 +70,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate
         <Select 
             value={role} 
             onValueChange={handleRoleChange} 
-            disabled={loading}
+            disabled={loading || isCurrentUser}
         >
             <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
                 <SelectValue />

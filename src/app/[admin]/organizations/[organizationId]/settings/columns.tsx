@@ -105,7 +105,8 @@ export const createColumns = (
             const role = row.getValue('roleName') as string
             const userId = row.original.userId
             const roleId = row.original.roleId
-            return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} roleId={roleId} onRoleUpdate={refreshData} />
+            const userEmail = row.original.email
+            return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} userEmail={userEmail} roleId={roleId} onRoleUpdate={refreshData} />
         },
     },
    {
