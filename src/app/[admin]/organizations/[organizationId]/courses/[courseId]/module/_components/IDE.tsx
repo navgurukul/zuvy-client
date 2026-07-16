@@ -45,6 +45,7 @@ import {
     questionDetails,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
 import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
+import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 // export interface questionDetails{
 //     title: string
@@ -80,7 +81,6 @@ const IDE: React.FC<IDEProps> = ({
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
 
     const [testCases, setTestCases] = useState<any>([])
@@ -113,33 +113,14 @@ const IDE: React.FC<IDEProps> = ({
         // { lang: 'c', id: 104 },
     ]
 
-    const [language, setLanguage] = useState(
-        runCodeLanguageId
-            ? editorLanguages.find((lang) => lang.id === runCodeLanguageId)
-                  ?.lang || ''
-            : ''
-    )
-
-    const handleLanguageChange = (lang: string) => {
-        setLanguage(lang)
-        const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
-        setLanguageId(langID)
-    }
-
-    const getDataFromField = (
-        array: any[],
-        searchValue: any,
-        searchField: string | number,
-        targetField: string | number
-    ) => {
-        let result = languageId
-        array.forEach((obj) => {
-            if (obj[searchField] === searchValue) {
-                result = obj[targetField]
-            }
-        })
-        return result
-    }
+    const {
+        language,
+        setLanguage,
+        languageId,
+        setLanguageId,
+        handleLanguageChange,
+        getDataFromField,
+    } = useLanguageSelection(runCodeLanguageId, editorLanguages)
 
     const formatValue = (value: any, type: string): string => {
         if (type === 'jsonType') {
