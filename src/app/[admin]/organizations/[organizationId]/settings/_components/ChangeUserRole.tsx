@@ -12,6 +12,12 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 // Role Cell Component
 
@@ -21,14 +27,16 @@ type roleCellProps = {
   rolesLoading: boolean;
   onRoleUpdate?: () => void;
   roleId?: number;
+  userEmail: string;
 };
 
-export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate }: roleCellProps & { userId: number }) => {
+export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, onRoleUpdate }: roleCellProps & { userId: number }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const orgId = Number(organizationId) || user?.orgId;
     const { assignUserRole, loading } = useAssignUserRole()
     const [originalRole, setOriginalRole] = useState(role)
+    const isCurrentUser = user?.email?.trim().toLowerCase() === userEmail?.trim().toLowerCase()
 
     const handleRoleChange = async (newRoleName: string) => {
         // Only save if the role actually changed
@@ -65,31 +73,46 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, onRoleUpdate
     }
 
     return (
-        <Select 
-            value={role} 
-            onValueChange={handleRoleChange} 
-            disabled={loading}
-        >
-            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                {rolesLoading ? (
-                    <SelectItem value="loading" disabled>
-                        Loading...
-                    </SelectItem>
-                ) : (
-                    roles.map((roleOption: any) => (
-                        <SelectItem
-                            key={roleOption.id}
-                            value={roleOption.name}
-                            className="capitalize"
+        <TooltipProvider delayDuration={150}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span className="inline-block">
+                        <Select
+                            value={role}
+                            onValueChange={handleRoleChange}
+                            disabled={loading || isCurrentUser}
                         >
-                            {roleOption.name}
-                        </SelectItem>
-                    ))
+                            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
+                                <SelectValue />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                {rolesLoading ? (
+                                    <SelectItem value="loading" disabled>
+                                        Loading...
+                                    </SelectItem>
+                                ) : (
+                                    roles.map((roleOption: any) => (
+                                        <SelectItem
+                                            key={roleOption.id}
+                                            value={roleOption.name}
+                                            className="capitalize"
+                                        >
+                                            {roleOption.name}
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </span>
+                </TooltipTrigger>
+
+                {isCurrentUser && (
+                    <TooltipContent side="top">
+                        <p>You can&apos;t change your own role.</p>
+                    </TooltipContent>
                 )}
-            </SelectContent>
-        </Select>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
