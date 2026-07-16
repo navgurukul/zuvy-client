@@ -32,7 +32,7 @@ const AdaptiveAssessment = (props: Props) => {
   }
 
   return (
-    <div className="w-full p-6">
+    <div className="w-full h-[calc(100vh-48px)]">
       <AdaptiveAssessmentTopicForm
         open={formOpen}
         onOpenChange={setFormOpen}

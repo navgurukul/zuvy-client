@@ -3,12 +3,15 @@ import { THEME, DIFF_BG, DIFF_COLOR, DIFF_LABEL } from './constants';
 
 export const Card = ({
   children,
+  className,
   style,
 }: {
   children: React.ReactNode;
+  className?: string;
   style?: React.CSSProperties;
 }) => (
   <div
+    className={className}
     style={{
       background: THEME.card,
       borderRadius: 8,

@@ -1,7 +1,17 @@
 import React from 'react';
+import { Check } from 'lucide-react';
 import { THEME, LEVELS } from '../constants';
-import { Card, Field, Btn, inputStyle, Check } from '../ui-primitives';
+import { Card } from '../ui-primitives';
 import { BuilderState } from '../types';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 interface StepSettingsProps {
   a: BuilderState;
@@ -10,15 +20,19 @@ interface StepSettingsProps {
 
 export function StepSettings({ a, set }: StepSettingsProps) {
   return (
-    <Card style={{ padding: 26, maxWidth: 680 }}>
-      <h4 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 18px' }}>Settings</h4>
-      <Field label="Assessment mode" required>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+    <Card className="p-[26px] max-w-[680px]">
+      <h4 className="text-lg flex font-bold m-0 mb-[18px]">Settings</h4>
+
+      <div className="mb-5">
+        <Label className="mb-2 flex ">
+          Assessment mode <span className="text-red-500">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-3">
           {[
             {
               id: 'formative',
               title: 'Checkpoint',
-              desc: 'Practice reading. No pass mark. Updates the learner's level.',
+              desc: "Practice reading. No pass mark. Updates the learner's level.",
             },
             {
               id: 'summative',
@@ -29,65 +43,71 @@ export function StepSettings({ a, set }: StepSettingsProps) {
             <div
               key={m.id}
               onClick={() => set({ mode: m.id as any })}
+              className="rounded-lg p-[15px] cursor-pointer border-2"
               style={{
-                border: `2px solid ${a.mode === m.id ? THEME.primary : THEME.border}`,
+                borderColor: a.mode === m.id ? THEME.primary : THEME.border,
                 background: a.mode === m.id ? THEME.primaryLight : THEME.card,
-                borderRadius: 8,
-                padding: 15,
-                cursor: 'pointer',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 5,
-                }}
-              >
-                <span style={{ fontWeight: 700, fontSize: 14, color: THEME.text }}>
+              <div className="flex justify-between items-center mb-[5px]">
+                <span className="font-bold text-sm" style={{ color: THEME.text }}>
                   {m.title}
                 </span>
                 {a.mode === m.id && <Check size={14} color={THEME.primary} />}
               </div>
-              <div style={{ fontSize: 12.5, color: THEME.textSub, lineHeight: 1.5 }}>
+              <div className="text-[12.5px] leading-[1.5]" style={{ color: THEME.textSub }}>
                 {m.desc}
               </div>
             </div>
           ))}
         </div>
-      </Field>
+      </div>
+
       {a.mode === 'summative' && (
-        <Field label="Target level" hint="Shown alongside the learner's result.">
-          <select
+        <div className="mb-5">
+          <Label className="mb-2 flex">Target level</Label>
+          <Select
             value={a.gateLevel}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              set({ gateLevel: e.target.value as any })
-            }
-            style={{ ...inputStyle, width: 200 }}
+            onValueChange={(value) => set({ gateLevel: value as any })}
           >
-            {LEVELS.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.label} or above
-              </option>
-            ))}
-          </select>
-        </Field>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select level" />
+            </SelectTrigger>
+            <SelectContent>
+              {LEVELS.map((l) => (
+                <SelectItem key={l.id} value={l.id}>
+                  {l.label} or above
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs mt-1" style={{ color: THEME.textTertiary }}>
+            Shown alongside the learner's result.
+          </p>
+        </div>
       )}
-      <Field label="Time limit">
-        <select
+
+      <div className="mb-5">
+        <Label className="mb-2 flex">Time limit</Label>
+        <Select
           value={a.timeLimit}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            set({ timeLimit: e.target.value })
-          }
-          style={{ ...inputStyle, width: 170 }}
+          onValueChange={(value) => set({ timeLimit: value })}
         >
-          {['30 min', '45 min', '1 hour', '2 hours'].map((x) => (
-            <option key={x}>{x}</option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Proctoring">
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="Select time limit" />
+          </SelectTrigger>
+          <SelectContent>
+            {['30 min', '45 min', '1 hour', '2 hours'].map((x) => (
+              <SelectItem key={x} value={x}>
+                {x}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="mb-2 flex">Proctoring</Label>
         {(
           [
             ['proctorCopyPaste', 'Block copy and paste', 'Prevents copying question text.'],
@@ -96,48 +116,22 @@ export function StepSettings({ a, set }: StepSettingsProps) {
         ).map(([k, lbl, desc]) => (
           <div
             key={k}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '10px 0',
-              borderBottom: `1px solid ${THEME.border}`,
-            }}
+            className="flex justify-between items-center py-2.5 border-b"
+            style={{ borderColor: THEME.border }}
           >
             <div>
-              <div style={{ fontWeight: 600, fontSize: 13.5 }}>{lbl}</div>
-              <div style={{ fontSize: 12, color: THEME.textTertiary }}>{desc}</div>
+              <div className="font-semibold text-[13.5px]">{lbl}</div>
+              <div className="text-xs" style={{ color: THEME.textTertiary }}>
+                {desc}
+              </div>
             </div>
-            <button
-              onClick={() => set({ [k]: !a[k] })}
-              style={{
-                width: 42,
-                height: 24,
-                borderRadius: 99,
-                border: 'none',
-                cursor: 'pointer',
-                background: a[k] ? THEME.primary : THEME.muted,
-                position: 'relative',
-                transition: 'background .2s',
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 3,
-                  left: a[k] ? 19 : 2,
-                  width: 18,
-                  height: 18,
-                  borderRadius: 99,
-                  background: '#fff',
-                  transition: 'left .2s',
-                }}
-              />
-            </button>
+            <Switch
+              checked={a[k]}
+              onCheckedChange={(checked) => set({ [k]: checked } as Partial<BuilderState>)}
+            />
           </div>
         ))}
-      </Field>
+      </div>
     </Card>
   );
 }

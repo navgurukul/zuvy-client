@@ -1,46 +1,46 @@
 export type LevelId = 'E' | 'D' | 'C' | 'B' | 'A' | 'A+';
 
 export const THEME = {
-  bg: '#f8fafc',
-  card: '#ffffff',
-  border: '#e2e8f0',
+  bg: 'hsl(var(--background))',
+  card: 'hsl(var(--card))',
+  border: 'hsl(var(--border))',
   shadowSoft: '0 1px 3px rgba(0,0,0,0.1)',
   shadowStrong: '0 4px 6px rgba(0,0,0,0.1)',
-  text: '#0f172a',
-  textSub: '#475569',
-  textTertiary: '#64748b',
-  textMuted: '#94a3b8',
-  primary: '#0ea5e9',
-  primaryDark: '#0284c7',
-  primaryMid: '#38bdf8',
-  primaryLight: '#e0f2fe',
-  secondary: '#8b5cf6',
-  secondaryDark: '#6d28d9',
-  secondaryLight: '#ede9fe',
-  danger: '#ef4444',
-  dangerDark: '#b91c1c',
-  dangerLight: '#fee2e2',
-  success: '#22c55e',
-  successDark: '#15803d',
-  successLight: '#dcfce7',
-  warning: '#f59e0b',
-  warningDark: '#b45309',
-  warningLight: '#fef3c7',
-  info: '#3b82f6',
-  infoLight: '#dbeafe',
-  muted: '#f1f5f9',
+  text: 'hsl(var(--text-primary))',
+  textSub: 'hsl(var(--text-secondary))',
+  textTertiary: 'hsl(var(--text-tertiary))',
+  textMuted: 'hsl(var(--text-muted))',
+  primary: 'hsl(var(--primary))',
+  primaryDark: 'hsl(var(--primary-dark))',
+  primaryMid: 'hsl(var(--primary))',
+  primaryLight: 'hsl(var(--primary-light))',
+  secondary: 'hsl(var(--secondary))',
+  secondaryDark: 'hsl(var(--secondary-dark))',
+  secondaryLight: 'hsl(var(--secondary-light))',
+  danger: 'hsl(var(--destructive))',
+  dangerDark: 'hsl(var(--destructive-dark))',
+  dangerLight: 'hsl(var(--destructive-light))',
+  success: 'hsl(var(--success))',
+  successDark: 'hsl(var(--success-dark))',
+  successLight: 'hsl(var(--success-light))',
+  warning: 'hsl(var(--warning))',
+  warningDark: 'hsl(var(--warning-dark))',
+  warningLight: 'hsl(var(--warning-light))',
+  info: 'hsl(var(--info))',
+  infoLight: 'hsl(var(--info-light))',
+  muted: 'hsl(var(--muted))',
 };
 
 export const DIFF_BG: Record<string, string> = {
-  easy: '#dcfce7',
-  medium: '#fef3c7',
-  hard: '#fee2e2',
+  easy: 'hsl(var(--success-light))',
+  medium: 'hsl(var(--warning-light))',
+  hard: 'hsl(var(--destructive-light))',
 };
 
 export const DIFF_COLOR: Record<string, string> = {
-  easy: '#166534',
-  medium: '#92400e',
-  hard: '#991b1b',
+  easy: 'hsl(var(--success-dark))',
+  medium: 'hsl(var(--warning-dark))',
+  hard: 'hsl(var(--destructive-dark))',
 };
 
 export const DIFF_LABEL: Record<string, string> = {
@@ -62,8 +62,8 @@ export const BANDS = ['easy', 'medium', 'hard'] as const;
 
 export const QTYPES = [
   { id: 'mcq', label: 'MCQs (adaptive)', adaptive: true },
-  { id: 'coding', label: 'Coding problems (fixed)', adaptive: false },
-  { id: 'open', label: 'Open-ended (fixed)', adaptive: false },
+  // { id: 'coding', label: 'Coding problems (fixed)', adaptive: false },
+  // { id: 'open', label: 'Open-ended (fixed)', adaptive: false },
 ];
 
 export const CHAPTER_TOPIC_MAP: Record<number, string[]> = {

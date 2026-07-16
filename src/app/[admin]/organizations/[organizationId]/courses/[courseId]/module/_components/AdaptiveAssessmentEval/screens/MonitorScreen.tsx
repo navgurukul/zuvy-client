@@ -1,8 +1,18 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { THEME } from '../constants';
-import { Card, Badge } from '../ui-primitives';
+import { Card } from '../ui-primitives';
 import { BuilderState, Question, Chapter } from '../types';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface MonitorScreenProps {
   a: BuilderState;
@@ -39,42 +49,25 @@ export function MonitorScreen({
   ];
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '22px 28px' }}>
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: THEME.textSub,
-          cursor: 'pointer',
-          display: 'flex',
-          gap: 6,
-          alignItems: 'center',
-          fontSize: 13,
-          fontFamily: 'inherit',
-          padding: 0,
-          marginBottom: 14,
-        }}
-      >
-        ← Back to builder
-      </button>
+    <div className="flex-1 overflow-y-auto py-[22px] px-7">
+      <div className='flex' >
+        <Button
+          variant="ghost"
+          onClick={onBack}
+          className="w-fit justify-start gap-1.5 text-[13px] p-2 mb-3.5 h-auto"
+        >
+          ← Back to builder
+        </Button>
+      </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 20,
-          flexWrap: 'wrap' as const,
-        }}
-      >
-        <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
-          {a.name || 'Untitled'}
-        </h2>
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
+        <h2 className="text-[22px] font-bold m-0">{a.name || 'Untitled'}</h2>
         <Badge
-          bg={a.status === 'published' ? THEME.primaryLight : THEME.infoLight}
-          color={a.status === 'published' ? THEME.primaryDark : THEME.info}
-          style={{ padding: '5px 12px' }}
+          className="py-[5px] px-3"
+          style={{
+            background: a.status === 'published' ? THEME.primaryLight : THEME.infoLight,
+            color: a.status === 'published' ? THEME.primaryDark : THEME.info,
+          }}
         >
           {a.status === 'published'
             ? 'Published'
@@ -82,130 +75,91 @@ export function MonitorScreen({
               ? `Scheduled · ${a.scheduledDate}`
               : 'Draft'}
         </Badge>
-        <Badge bg={THEME.muted} color={THEME.textSub}>
+        <Badge style={{ background: THEME.muted, color: THEME.textSub }}>
           {a.mode === 'formative'
             ? 'Checkpoint'
             : `Milestone · Level ${a.gateLevel}+ target`}
         </Badge>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <Card style={{ padding: 18 }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 11 }}>
-            Baseline signal
-          </div>
-          <div style={{ fontSize: 12.5, color: THEME.textSub, marginBottom: 10 }}>
+      <div className="grid gap-3.5 mb-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+        <Card className="p-[18px]">
+          <div className="font-bold flex text-[13.5px] mb-[11px]">Baseline signal</div>
+          <div className="text-[12.5px] flex mb-2.5" style={{ color: THEME.textSub }}>
             Learner level is inferred from:
           </div>
           {linkedChapters.map((c) => (
             <div
               key={c.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '5px 0',
-                borderBottom: `1px solid ${THEME.border}`,
-                fontSize: 13,
-              }}
+              className="flex justify-between py-[5px] text-[13px] border-b"
+              style={{ borderColor: THEME.border }}
             >
               <span>{c.title}</span>
               <span style={{ color: THEME.textTertiary }}>{c.questionCount}Q</span>
             </div>
           ))}
-          <div style={{ fontSize: 11.5, color: THEME.textTertiary, marginTop: 8 }}>
+          <div className="text-[11.5px] mt-2" style={{ color: THEME.textTertiary }}>
             No separate baseline test. MCQ attempts during the module are enough.
           </div>
         </Card>
 
-        <Card style={{ padding: 18 }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 11 }}>
-            Attempts
-          </div>
-          <div style={{ display: 'flex', gap: 22 }}>
+        <Card className="p-[18px]">
+          <div className="font-bold flex text-[13.5px] mb-[11px]">Attempts</div>
+          <div className="flex gap-[22px]">
             {[
               ['18', 'completed'],
               ['3', 'in progress'],
               ['11', 'not started'],
             ].map(([n, l]) => (
               <div key={l}>
-                <div style={{ fontSize: 22, fontWeight: 700 }}>{n}</div>
-                <div style={{ fontSize: 11, color: THEME.textTertiary }}>{l}</div>
+                <div className="text-[22px] font-bold">{n}</div>
+                <div className="text-[11px]" style={{ color: THEME.textTertiary }}>
+                  {l}
+                </div>
               </div>
             ))}
           </div>
           <div
-            style={{
-              marginTop: 11,
-              height: 5,
-              background: THEME.muted,
-              borderRadius: 99,
-              overflow: 'hidden',
-              display: 'flex',
-            }}
+            className="mt-[11px] h-[5px] rounded-full overflow-hidden flex"
+            style={{ background: THEME.muted }}
           >
-            <div style={{ width: '56%', background: THEME.primary }} />
-            <div style={{ width: '9%', background: THEME.warning }} />
+            <div className="w-[56%]" style={{ background: THEME.primary }} />
+            <div className="w-[9%]" style={{ background: THEME.warning }} />
           </div>
         </Card>
 
-        <Card style={{ padding: 18 }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 11 }}>
-            Level distribution
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              gap: 7,
-              height: 90,
-            }}
-          >
+        <Card className="p-[18px]">
+          <div className="font-bold flex text-[13.5px] mb-[11px]">Level distribution</div>
+          <div className="flex items-end gap-[7px] h-[90px]">
             {mockDist.map((d) => (
-              <div
-                key={d.l}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column' as const,
-                  alignItems: 'center',
-                  gap: 3,
-                }}
-              >
-                <span style={{ fontSize: 10, color: THEME.textSub, fontWeight: 600 }}>
+              <div key={d.l} className="flex-1 flex flex-col items-center gap-[3px]">
+                <span className="text-[10px] font-semibold" style={{ color: THEME.textSub }}>
                   {d.n}
                 </span>
                 <div
+                  className="w-full rounded-t-[3px] transition-[height] duration-300"
                   style={{
-                    width: '100%',
                     height: `${(d.n / maxN) * 72}px`,
                     background:
                       d.l === 'C' || d.l === 'B' ? THEME.primary : THEME.primaryLight,
-                    borderRadius: '3px 3px 0 0',
-                    transition: 'height .3s',
                   }}
                 />
-                <span style={{ fontSize: 10, color: THEME.textTertiary, fontWeight: 600 }}>
+                <span
+                  className="text-[10px] font-semibold"
+                  style={{ color: THEME.textTertiary }}
+                >
                   {d.l}
                 </span>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 11, color: THEME.textTertiary, marginTop: 7 }}>
+          <div className="text-[11px] mt-[7px]" style={{ color: THEME.textTertiary }}>
             Level derived from module MCQ history, not a baseline sitting.
           </div>
         </Card>
 
-        <Card style={{ padding: 18 }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 11 }}>
-            Pool
-          </div>
+        <Card className="p-[18px] flex flex-col justify-start">
+          <div className="font-bold text-[13.5px] flex mb-[11px]">Pool</div>
           {[
             [`${pool.length} questions total`],
             [`${pool.filter((q) => q.source === 'ai').length} AI-generated (provisional)`],
@@ -213,27 +167,20 @@ export function MonitorScreen({
           ].map(([txt], i) => (
             <div
               key={i}
-              style={{
-                padding: '5px 0',
-                fontSize: 12.5,
-                color: THEME.textSub,
-                borderBottom: i < 2 ? `1px solid ${THEME.border}` : 'none',
-              }}
+              className="py-[5px] flex text-[12.5px]"
+
             >
               {txt}
             </div>
           ))}
         </Card>
 
-        <Card style={{ padding: 18 }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 11 }}>
-            Pool capacity
-          </div>
-          <div style={{ marginBottom: 10 }}>
+        <Card className="p-[18px]">
+          <div className="font-bold text-[13.5px] flex mb-[11px]">Pool capacity</div>
+          <div className="mb-2.5">
             <span
+              className="text-[28px] flex flex-row justify-center font-bold"
               style={{
-                fontSize: 28,
-                fontWeight: 700,
                 color:
                   capacity < 2
                     ? THEME.danger
@@ -244,14 +191,17 @@ export function MonitorScreen({
             >
               {capacity}
             </span>
-            <span style={{ fontSize: 13, color: THEME.textSub, marginLeft: 6 }}>
+            <span className="text-[13px] flex ml-1.5">
               unique attempt{capacity !== 1 ? 's' : ''} before any question repeats
             </span>
           </div>
-          <div style={{ height: 5, background: THEME.muted, borderRadius: 99, marginBottom: 10 }}>
+          <div
+            className="h-[5px] rounded-full mb-2.5"
+            style={{ background: THEME.muted }}
+          >
             <div
+              className="h-[5px] rounded-full transition-[width] duration-300"
               style={{
-                height: 5,
                 width: `${Math.min(100, (capacity / 5) * 100)}%`,
                 background:
                   capacity < 2
@@ -259,113 +209,75 @@ export function MonitorScreen({
                     : capacity < 3
                       ? THEME.warning
                       : THEME.success,
-                borderRadius: 99,
-                transition: 'width .3s',
               }}
             />
           </div>
-          <div style={{ fontSize: 12, color: THEME.textTertiary, lineHeight: 1.5 }}>
+          <div className="text-xs leading-[1.5]" style={{ color: THEME.textTertiary }}>
             Bottlenecked by the thinnest (topic × difficulty) cell. Add more questions to
             raise this number. Target: ≥ 3 for most cohorts.
           </div>
           {capacity < 2 && (
             <div
-              style={{
-                marginTop: 10,
-                background: THEME.dangerLight,
-                borderRadius: 6,
-                padding: '7px 10px',
-                fontSize: 12,
-                color: THEME.danger,
-                display: 'flex',
-                gap: 6,
-              }}
+              className="mt-2.5 rounded-md py-[7px] px-2.5 text-xs flex gap-1.5"
+              style={{ background: THEME.dangerLight, color: THEME.danger }}
             >
-              <AlertTriangle size={12} style={{ flexShrink: 0, marginTop: 1 }} />
+              <AlertTriangle size={12} className="shrink-0 mt-px" />
               Returning learners will see repeated questions. Add more questions.
             </div>
           )}
         </Card>
 
-        <Card style={{ padding: 18, gridColumn: 'span 2' }}>
-          <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 6 }}>
-            Repeat prevention log
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              color: THEME.textSub,
-              marginBottom: 12,
-              lineHeight: 1.5,
-            }}
-          >
+        <Card className="p-[18px] col-span-2">
+          <div className="font-bold flex text-[13.5px] mb-1.5">Repeat prevention log</div>
+          <div className="text-xs flex mb-3 text-left">
             Questions served to each learner are recorded so retakes draw from unseen
             questions first. In production this log lives on the backend and is queried at
             attempt-start time.{' '}
-            <span style={{ color: THEME.textTertiary }}>Showing mock data.</span>
+            {/* <span style={{ color: THEME.textTertiary }}>Showing mock data.</span> */}
           </div>
-          <div
-            style={{
-              border: `1px solid ${THEME.border}`,
-              borderRadius: 8,
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '120px 80px 1fr',
-                background: THEME.muted,
-                fontSize: 11.5,
-                fontWeight: 700,
-                color: THEME.textTertiary,
-              }}
-            >
-              <div style={{ padding: '7px 12px' }}>Learner</div>
-              <div style={{ padding: '7px 12px', borderLeft: `1px solid ${THEME.border}` }}>
-                Attempt
-              </div>
-              <div style={{ padding: '7px 12px', borderLeft: `1px solid ${THEME.border}` }}>
-                Question IDs served
-              </div>
-            </div>
-            {mockAttemptLog.map((row, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 80px 1fr',
-                  borderTop: `1px solid ${THEME.border}`,
-                }}
-              >
-                <div style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600 }}>
-                  {row.learner}
-                </div>
-                <div
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: 13,
-                    color: THEME.textSub,
-                    borderLeft: `1px solid ${THEME.border}`,
-                  }}
-                >
-                  #{row.attempt}
-                </div>
-                <div
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: 11.5,
-                    color: THEME.textTertiary,
-                    borderLeft: `1px solid ${THEME.border}`,
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {row.qIds.join(', ')}
-                </div>
-              </div>
-            ))}
+          <div className="rounded-lg overflow-hidden border" style={{ borderColor: THEME.border }}>
+            <Table>
+              <TableHeader>
+                <TableRow style={{ background: THEME.muted }}>
+                  <TableHead className="text-[11.5px] font-bold" style={{ color: THEME.textTertiary }}>
+                    Learner
+                  </TableHead>
+                  <TableHead
+                    className="text-[11.5px] font-bold border-l"
+                    style={{ color: THEME.textTertiary, borderColor: THEME.border }}
+                  >
+                    Attempt
+                  </TableHead>
+                  <TableHead
+                    className="text-[11.5px] font-bold border-l"
+                    style={{ color: THEME.textTertiary, borderColor: THEME.border }}
+                  >
+                    Question IDs served
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockAttemptLog.map((row, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="text-[13px] font-semibold">{row.learner}</TableCell>
+                    <TableCell
+                      className="text-[13px] border-l"
+                      style={{ color: THEME.textSub, borderColor: THEME.border }}
+                    >
+                      #{row.attempt}
+                    </TableCell>
+                    <TableCell
+                      className="text-[11.5px] border-l font-mono"
+                      style={{ color: THEME.textTertiary, borderColor: THEME.border }}
+                    >
+                      {row.qIds.join(', ')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <div style={{ marginTop: 8, fontSize: 11.5, color: THEME.textTertiary }}>
+          <div className="mt-2 text-[11.5px]" style={{ color: THEME.textTertiary }}>
             On retake, these IDs are excluded from the draw pool — learners see fresh
             questions up to pool capacity.
           </div>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Info, AlertTriangle, AlertCircle, X, Loader2, Check } from 'lucide-react';
-import { THEME, BANDS, QTYPES, LEVELS, POOL_MULTIPLIER, DIFF_LABEL } from '../constants';
-import { Card, Btn, inputStyle } from '../ui-primitives';
-import { bandCount, cellTarget } from '../helpers';
+import { Info, AlertCircle, X, Loader2, Check } from 'lucide-react';
+import { BANDS, QTYPES, LEVELS, POOL_MULTIPLIER, DIFF_LABEL } from '../constants';
+import { Btn } from '../ui-primitives';
+import { bandCount } from '../helpers';
 import { Question, Chapter, BuilderState } from '../types';
 
 interface StepPoolProps {
@@ -53,45 +53,21 @@ export function StepPool({
 
   return (
     <div>
-      <div
-        style={{
-          background: THEME.primaryLight,
-          border: `1px solid ${THEME.primaryMid}`,
-          borderRadius: 10,
-          padding: '14px 18px',
-          marginBottom: 20,
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: 14,
-            color: THEME.primaryDark,
-            marginBottom: 4,
-          }}
-        >
-          Baseline signal — {linkedChapters.length} MCQ chapter
-          {linkedChapters.length !== 1 ? 's' : ''} linked
+      <div className="bg-primary-light border border-primary rounded-[10px] py-[14px] px-[18px] mb-5">
+        <div className="font-bold flex text-[14px] text-primary-dark mb-1">
+          Baseline signal — {linkedChapters.length} MCQ chapter{linkedChapters.length !== 1 ? 's' : ''} linked
         </div>
-        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' as const, marginBottom: 8 }}>
+        <div className="flex gap-[7px] flex-wrap mb-2">
           {linkedChapters.map((c: Chapter) => (
             <span
               key={c.id}
-              style={{
-                background: THEME.card,
-                border: `1px solid ${THEME.primaryMid}`,
-                color: THEME.primaryDark,
-                fontSize: 12,
-                fontWeight: 600,
-                padding: '3px 10px',
-                borderRadius: 99,
-              }}
+              className="bg-card border border-primary text-primary-dark text-[12px] font-semibold py-[3px] px-[10px] rounded-full"
             >
               {c.title} · {c.questionCount}Q
             </span>
           ))}
         </div>
-        <div style={{ fontSize: 12.5, color: THEME.textSub, lineHeight: 1.5 }}>
+        <div className="text-[12.5px] flex text-muted-foreground leading-relaxed">
           When a learner opens this assessment, the system reads their MCQ history and
           maps it to a level (E → A+). The pool below serves the right difficulty mix
           for that level.
@@ -99,41 +75,21 @@ export function StepPool({
       </div>
 
       {smeAvailable > 0 && (
-        <div
-          style={{
-            background: THEME.secondaryLight,
-            border: `1px solid ${THEME.secondary}`,
-            borderRadius: 10,
-            padding: '11px 16px',
-            marginBottom: 16,
-          }}
-        >
-          <span style={{ fontSize: 13, color: THEME.secondaryDark }}>
+        <div className="bg-secondary-light border border-secondary rounded-[10px] py-[11px] px-4 mb-4">
+          <span className="text-[13px] flex text-secondary-dark">
             <strong>{smeAvailable} SME-validated question{smeAvailable !== 1 ? 's' : ''}</strong>{' '}
             in the bank ready to add — click &quot;Bank (N)&quot; in any cell.
           </span>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 2, borderBottom: `1px solid ${THEME.border}`, marginBottom: 22 }}>
+      <div className="flex gap-0.5 border-b border-border mb-[22px]">
         {QTYPES.map((t) => (
           <button
             key={t.id}
             onClick={() => setQTab(t.id)}
-            style={{
-              padding: '9px 18px 11px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontWeight: 600,
-              fontSize: 13,
-              color: qTab === t.id ? THEME.primaryDark : THEME.textTertiary,
-              borderBottom: `3px solid ${qTab === t.id ? THEME.primary : 'transparent'}`,
-              display: 'flex',
-              gap: 6,
-              alignItems: 'center',
-            }}
+            className={`px-[18px] pt-[9px] pb-[11px] border-none bg-transparent cursor-pointer font-semibold text-[13px] flex gap-1.5 items-center border-b-[3px] transition-colors ${qTab === t.id ? 'text-primary-dark border-primary' : 'text-muted-foreground border-transparent'
+              }`}
           >
             {t.label} ({typeCount(t.id)})
           </button>
@@ -142,124 +98,48 @@ export function StepPool({
 
       {qTab === 'mcq' && (
         <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: 13,
-            }}
-          >
+          <div className="flex justify-between items-start mb-[13px]">
             <div>
-              <h4 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>MCQ pool</h4>
-              <div
-                style={{
-                  background: THEME.muted,
-                  borderRadius: 6,
-                  padding: '8px 12px',
-                  fontSize: 12.5,
-                  color: THEME.textSub,
-                  lineHeight: 1.55,
-                  maxWidth: 520,
-                }}
-              >
-                <strong style={{ color: THEME.text }}>Why these targets?</strong> Each
+              <h4 className="text-[16px] flex font-bold m-0 mb-0.5">MCQ pool</h4>
+              <div className="bg-muted flex rounded-md py-2 px-3 text-[12.5px] text-muted-foreground leading-relaxed max-w-[520px]">
+                <strong className="text-foreground">Why these targets?</strong> Each
                 cell needs {POOL_MULTIPLIER}× the maximum draw any level makes. With{' '}
-                {a.questionsPerForm} questions/form and {a.poolTopics.length || 1} topic
-                {a.poolTopics.length !== 1 ? 's' : ''}, Level A+ draws the most hard
-                questions ({Math.max(...LEVELS.map((l) => l.mix[2]))}%).
+                {a.questionsPerForm} questions/form and {a.poolTopics.length || 1} topic{a.poolTopics.length !== 1 ? 's' : ''},
+                Level A+ draws the most hard questions ({Math.max(...LEVELS.map((l) => l.mix[2]))}%).
               </div>
             </div>
-            <div
-              style={{
-                textAlign: 'right' as const,
-                flexShrink: 0,
-                marginLeft: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: coverage.complete ? THEME.successDark : THEME.text,
-                }}
-              >
+            <div className="text-right shrink-0 ml-4">
+              <div className={`text-[22px] font-bold ${coverage.complete ? 'text-success-dark' : 'text-foreground'}`}>
                 {coverage.met}/{coverage.total}
               </div>
-              <div style={{ fontSize: 11, color: THEME.textTertiary }}>cells at target</div>
+              <div className="text-[11px] text-muted-foreground">cells at target</div>
               {capacity > 0 && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: capacity < 2 ? THEME.danger : THEME.primaryDark,
-                    marginTop: 3,
-                    fontWeight: 600,
-                  }}
-                >
+                <div className={`text-[11px] mt-[3px] font-semibold ${capacity < 2 ? 'text-destructive' : 'text-primary-dark'}`}>
                   ~{capacity} unique attempt{capacity !== 1 ? 's' : ''}
                 </div>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              border: `1px solid ${THEME.border}`,
-              borderRadius: 8,
-              overflow: 'hidden',
-              marginBottom: 14,
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '160px repeat(3,1fr)',
-                background: THEME.muted,
-                fontSize: 12,
-                fontWeight: 700,
-                color: THEME.textTertiary,
-              }}
-            >
-              <div style={{ padding: '8px 12px' }}>Topic</div>
+          <div className="border border-border rounded-lg overflow-hidden mb-[14px]">
+            <div className="grid grid-cols-[160px_repeat(3,1fr)] bg-muted text-[12px] font-bold text-muted-foreground">
+              <div className="py-2 px-3">Topic</div>
               {BANDS.map((b) => (
-                <div
-                  key={b}
-                  style={{
-                    padding: '8px 12px',
-                    borderLeft: `1px solid ${THEME.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                  }}
-                >
+                <div key={b} className="py-2 px-3 border-l border-border flex items-center gap-[5px]">
                   {DIFF_LABEL[b]}
                 </div>
               ))}
             </div>
 
             {a.poolTopics.length === 0 && (
-              <div
-                style={{
-                  padding: '22px',
-                  color: THEME.textTertiary,
-                  fontSize: 13,
-                  textAlign: 'center' as const,
-                }}
-              >
+              <div className="p-[22px] text-muted-foreground text-[13px] text-center">
                 Select topics in Step 2 first.
               </div>
             )}
 
             {a.poolTopics.map((topic: string) => (
-              <div
-                key={topic}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '160px repeat(3,1fr)',
-                  borderTop: `1px solid ${THEME.border}`,
-                }}
-              >
-                <div style={{ padding: '12px', fontWeight: 600, fontSize: 13 }}>
+              <div key={topic} className="grid grid-cols-[160px_repeat(3,1fr)] border-t border-border">
+                <div className="p-3 font-semibold text-[13px]">
                   {topic}
                 </div>
                 {BANDS.map((b) => {
@@ -281,65 +161,32 @@ export function StepPool({
                     generating.band === b;
 
                   return (
-                    <div
-                      key={b}
-                      style={{
-                        padding: '10px 12px',
-                        borderLeft: `1px solid ${THEME.border}`,
-                        background: met ? THEME.successLight : THEME.card,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'baseline',
-                          marginBottom: 5,
-                        }}
-                      >
-                        <span style={{ fontWeight: 700, fontSize: 13, color: met ? THEME.successDark : THEME.text }}>
+                    <div key={b} className={`py-2.5 px-3 border-l border-border ${met ? 'bg-success-light' : 'bg-card'}`}>
+                      <div className="flex justify-between items-baseline mb-[5px]">
+                        <span className={`font-bold text-[13px] ${met ? 'text-success-dark' : 'text-foreground'}`}>
                           {have}
-                          <span style={{ fontWeight: 400, color: THEME.textTertiary, fontSize: 11 }}>
+                          <span className="font-normal text-muted-foreground text-[11px]">
                             {' '}
                             / {need}
                           </span>
                         </span>
-                        {met && <Check size={13} color={THEME.successDark} />}
+                        {met && <Check size={13} className="text-success-dark" />}
                       </div>
-                      <div
-                        style={{
-                          height: 4,
-                          background: THEME.muted,
-                          borderRadius: 99,
-                          marginBottom: 8,
-                        }}
-                      >
+                      <div className="h-1 bg-muted rounded-full mb-2">
                         <div
+                          className="h-1 rounded-full transition-all duration-300"
                           style={{
-                            height: 4,
                             width: `${Math.min(100, Math.round((have / Math.max(need, 1)) * 100))}%`,
                             background: met ? '#7CB342' : '#fbbf24',
-                            borderRadius: 99,
-                            transition: 'width .3s',
                           }}
                         />
                       </div>
                       {!met && (
-                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' as const }}>
+                        <div className="flex gap-[5px] flex-wrap">
                           {inBank > 0 && (
                             <button
                               onClick={() => setBankPicker({ topic, band: b })}
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: THEME.primary,
-                                background: 'none',
-                                border: `1px solid ${THEME.primary}`,
-                                borderRadius: 5,
-                                padding: '3px 7px',
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                              }}
+                              className="text-[11px] font-semibold text-primary bg-transparent border border-primary rounded-[5px] py-[3px] px-[7px] cursor-pointer"
                             >
                               Bank ({inBank})
                             </button>
@@ -347,24 +194,10 @@ export function StepPool({
                           <button
                             disabled={!!busy || generating === 'bulk'}
                             onClick={() => generateForCell(topic, b, need - have)}
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 600,
-                              color: '#fff',
-                              background: THEME.secondary,
-                              border: 'none',
-                              borderRadius: 5,
-                              padding: '3px 7px',
-                              cursor: 'pointer',
-                              opacity: busy || generating === 'bulk' ? 0.55 : 1,
-                              fontFamily: 'inherit',
-                              display: 'flex',
-                              gap: 3,
-                              alignItems: 'center',
-                            }}
+                            className={`text-[11px] font-semibold text-white bg-secondary border-none rounded-[5px] py-[3px] px-[7px] cursor-pointer flex gap-[3px] items-center ${busy || generating === 'bulk' ? 'opacity-55' : 'opacity-100'}`}
                           >
                             {busy ? (
-                              <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} />
+                              <Loader2 size={10} className="animate-spin" />
                             ) : null}
                             Gen {need - have}
                           </button>
@@ -378,60 +211,35 @@ export function StepPool({
           </div>
 
           {genError && (
-            <div
-              style={{
-                background: THEME.dangerLight,
-                border: `1px solid ${THEME.danger}`,
-                borderRadius: 8,
-                padding: '9px 13px',
-                fontSize: 13,
-                color: THEME.danger,
-                marginBottom: 12,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <span>
-                <AlertCircle size={13} style={{ verticalAlign: -2, marginRight: 5 }} />
+            <div className="bg-destructive-light border border-destructive rounded-lg py-[9px] px-[13px] text-[13px] text-destructive mb-3 flex justify-between items-center">
+              <span className="flex items-center gap-[5px]">
+                <AlertCircle size={13} className="shrink-0" />
                 {genError}
               </span>
               <button
                 onClick={() => setGenError(null)}
-                style={{ background: 'none', border: 'none', color: THEME.danger, cursor: 'pointer' }}
+                className="bg-transparent border-none text-destructive cursor-pointer p-0 flex items-center"
               >
                 <X size={13} />
               </button>
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 11, alignItems: 'center' }}>
+          <div className="flex gap-[11px] items-center">
             <Btn
               variant="secondary"
               disabled={!!generating || coverage.complete}
               onClick={fillAllGaps}
             >
               {generating === 'bulk' ? (
-                <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                <Loader2 size={13} className="animate-spin mr-1.5 inline-block" />
               ) : null}
               {generating === 'bulk' ? 'Filling…' : `Fill all ${coverage.missing} gaps`}
             </Btn>
           </div>
 
-          <div
-            style={{
-              marginTop: 18,
-              background: THEME.infoLight,
-              border: `1px solid ${THEME.info}`,
-              borderRadius: 8,
-              padding: '11px 15px',
-              fontSize: 12.5,
-              color: THEME.info,
-              display: 'flex',
-              gap: 8,
-            }}
-          >
-            <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div className="mt-[18px] flex items-center bg-info-light border border-info rounded-lg py-[11px] px-[15px] text-[12.5px] text-info flex gap-2">
+            <Info size={14} className="shrink-0 mt-[1px]" />
             <div>
               <strong>Cross-topic questions (roadmap):</strong> Each question currently
               belongs to exactly one topic.
@@ -441,18 +249,8 @@ export function StepPool({
       )}
 
       {qTab !== 'mcq' && (
-        <div
-          style={{
-            background: THEME.infoLight,
-            borderRadius: 8,
-            padding: '14px 18px',
-            fontSize: 13,
-            color: THEME.info,
-            display: 'flex',
-            gap: 9,
-          }}
-        >
-          <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+        <div className="bg-info-light rounded-lg py-[14px] px-[18px] text-[13px] text-info flex gap-[9px]">
+          <Info size={14} className="shrink-0 mt-[1px]" />
           Fixed section — identical for every student. Adaptivity applies to MCQs only.
         </div>
       )}

@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import AssessmentBuilder, { Chapter } from '../AdaptiveAssessmentEval/AssessmentBuilder'
+import AssessmentBuilder from '../AdaptiveAssessmentEval/AssessmentBuilder'
+import { Chapter } from '../AdaptiveAssessmentEval/types'
 
 export type AdaptiveAssessmentTopicPayload = any;
 
@@ -24,7 +25,7 @@ export default function AdaptiveAssessmentTopicForm({
 	];
 
 	return (
-		<div className="">
+		<div className="h-full">
 			<AssessmentBuilder
 				chapterId={0}
 				moduleId={moduleId}

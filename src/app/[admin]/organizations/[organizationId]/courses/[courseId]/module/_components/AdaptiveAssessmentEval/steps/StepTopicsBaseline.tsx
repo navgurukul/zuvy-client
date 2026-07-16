@@ -1,7 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
-import { THEME, CHAPTER_TOPIC_MAP } from '../constants';
-import { Card, Badge, inputStyle } from '../ui-primitives';
+import { CHAPTER_TOPIC_MAP } from '../constants';
 import { BuilderState, Question, Chapter } from '../types';
 import { PoolTopicPicker } from '../components/PoolTopicPicker';
 
@@ -39,99 +38,57 @@ export function StepTopicsBaseline({
   );
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 18,
-        alignItems: 'start',
-      }}
-    >
-      <Card style={{ padding: 22 }}>
-        <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 6px' }}>
+    <div className="grid grid-cols-2 gap-[18px] items-start">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-[22px]">
+        <h4 className="text-base flex font-bold mb-1.5 mt-0">
           Baseline signal
         </h4>
-        <p style={{ fontSize: 13, color: THEME.textSub, margin: '0 0 16px', lineHeight: 1.5 }}>
+        <p className="text-[13px] text-slate-600 mb-4 mt-0 leading-relaxed">
           MCQ chapters in this module. Learner performance is used to assign a
           starting level. <strong>No separate baseline test is needed.</strong>
         </p>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column' as const,
-            gap: 8,
-            marginBottom: 14,
-          }}
-        >
+        <div className="flex flex-col gap-2 mb-3.5">
           {baselineOptions.length === 0 && (
-            <div style={{ fontSize: 13, color: THEME.textTertiary, padding: '12px 0' }}>
+            <div className="text-[13px] text-slate-500 py-3">
               No MCQ chapters found in this module.
             </div>
           )}
           {baselineOptions.map((ch: Chapter) => {
             const sel = a.baselineChapterIds.includes(ch.id);
             const covers = CHAPTER_TOPIC_MAP[ch.id] ?? [];
+            const selClass = sel ? "border-primary bg-primary-light/30" : "border-slate-200 bg-white";
+            const checkClass = sel ? "border-primary bg-primary" : "border-slate-200 bg-white";
             return (
               <div
                 key={ch.id}
                 onClick={() => toggleBaseline(ch.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '11px 14px',
-                  border: `2px solid ${sel ? THEME.primary : THEME.border}`,
-                  background: sel ? THEME.primaryLight : THEME.card,
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  transition: 'all .12s',
-                }}
+                className={`flex items-center gap-3 py-[11px] px-[14px] border-2 rounded-lg cursor-pointer transition-all duration-150 ${selClass}`}
               >
-                <div
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: 4,
-                    border: `2px solid ${sel ? THEME.primary : THEME.border}`,
-                    background: sel ? THEME.primary : THEME.card,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
+                <div className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 border-2 ${checkClass}`}>
                   {sel && <Check size={11} color="#fff" />}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>{ch.title}</div>
-                  <div style={{ fontSize: 11.5, color: THEME.textTertiary, marginTop: 2 }}>
+                <div className="flex-1">
+                  <div className="text-[13.5px] flex font-semibold">{ch.title}</div>
+                  <div className="text-[13.5px] flex text-slate-500 ">
                     {ch.questionCount || 0} questions
                     {covers.length > 0 && (
-                      <span style={{ marginLeft: 6, color: THEME.primaryDark }}>
+                      <span className=" text-[13.5px]  flex text-primary">
                         · covers {covers.join(', ')}
                       </span>
                     )}
                   </div>
                 </div>
-                <Badge bg={THEME.secondaryLight} color={THEME.secondaryDark}>
+                <span className="bg-secondary-light text-secondary-dark text-[11.5px] font-semibold px-[9px] py-[3px] rounded-full inline-flex items-center gap-1 whitespace-nowrap">
                   MCQ
-                </Badge>
+                </span>
               </div>
             );
           })}
         </div>
 
-        <div style={{ background: THEME.muted, borderRadius: 8, padding: '12px 14px' }}>
-          <div
-            style={{
-              fontSize: 11.5,
-              fontWeight: 700,
-              color: THEME.textTertiary,
-              letterSpacing: '.06em',
-              marginBottom: 8,
-            }}
-          >
+        <div className="bg-slate-100 rounded-lg py-3 px-3.5">
+          <div className="text-[11.5px] flex font-bold text-slate-500 tracking-wider mb-2">
             HOW LEVEL IS ASSIGNED
           </div>
           {[
@@ -144,35 +101,29 @@ export function StepTopicsBaseline({
           ].map(([range, level]) => (
             <div
               key={range}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 12,
-                color: THEME.textSub,
-                padding: '2px 0',
-              }}
+              className="flex justify-between text-xs text-slate-600 py-0.5"
             >
-              <span>{range} correct across baseline MCQs</span>
-              <strong>{level}</strong>
+              <span className='text-[13px] flex'>{range} correct across baseline MCQs</span>
+              <strong className='text-[13px] flex'>{level}</strong>
             </div>
           ))}
-          <div style={{ fontSize: 11.5, color: THEME.textTertiary, marginTop: 7 }}>
+          <div className="text-[11.5px] text-slate-500 mt-[7px]">
             Learners with no MCQ attempts start at Level C.
           </div>
         </div>
 
         {totalBaselineQ > 0 && (
-          <div style={{ marginTop: 12, fontSize: 13, color: THEME.primaryDark }}>
+          <div className="mt-3 text-[13px] text-primary">
             {totalBaselineQ} questions across {a.baselineChapterIds.length} chapter
             {a.baselineChapterIds.length !== 1 ? 's' : ''} will feed the level signal
           </div>
         )}
-      </Card>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
-        <Card style={{ padding: 22 }}>
-          <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 6px' }}>Pool topics</h4>
-          <p style={{ fontSize: 13, color: THEME.textSub, margin: '0 0 14px', lineHeight: 1.5 }}>
+      <div className="flex flex-col gap-3">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-[22px]">
+          <h4 className="text-base flex font-bold mb-1.5 mt-0">Pool topics</h4>
+          <p className="text-[13px] text-slate-600 mb-3.5 mt-0 leading-relaxed">
             Choose the topics to draw questions from. Questions are assembled per
             student based on their level.
           </p>
@@ -183,27 +134,15 @@ export function StepTopicsBaseline({
             bankQuestions={bankQuestions}
           />
           {a.poolTopics.length === 0 && (
-            <div style={{ marginTop: 14, fontSize: 13, color: THEME.textTertiary }}>
+            <div className="mt-3.5 text-[13px] text-slate-500">
               Select at least one topic to continue.
             </div>
           )}
-        </Card>
+        </div>
 
         {uncoveredTopics.length > 0 && (
-          <div
-            style={{
-              background: THEME.warningLight,
-              border: `1px solid ${THEME.warning}`,
-              borderRadius: 8,
-              padding: '11px 14px',
-              fontSize: 13,
-              color: THEME.warningDark,
-              display: 'flex',
-              gap: 8,
-              alignItems: 'flex-start',
-            }}
-          >
-            <AlertTriangle size={14} style={{ marginTop: 1, flexShrink: 0 }} />
+          <div className="bg-amber-100 border border-amber-500 rounded-lg py-[11px] px-[14px] text-[13px] text-amber-700 flex gap-2 items-start">
+            <AlertTriangle size={14} className="mt-[1px] shrink-0" />
             <div>
               <strong>Baseline–topic mismatch:</strong> {uncoveredTopics.join(', ')}{' '}
               {uncoveredTopics.length === 1 ? 'is' : 'are'} in the pool but no selected

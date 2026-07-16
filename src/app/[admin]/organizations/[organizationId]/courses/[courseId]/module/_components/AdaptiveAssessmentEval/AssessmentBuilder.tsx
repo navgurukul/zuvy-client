@@ -232,7 +232,7 @@ export default function AssessmentBuilder({
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: THEME.bg }}>
+    <div className="h-full flex flex-col overflow-hidden bg-slate-50 w-full">
       {screen === 'builder' ? (
         <BuilderScreen {...P} />
       ) : (
@@ -268,21 +268,7 @@ export default function AssessmentBuilder({
       )}
 
       {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 76,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: THEME.primaryDark,
-            color: '#fff',
-            padding: '10px 18px',
-            borderRadius: 8,
-            boxShadow: THEME.shadowStrong,
-            fontSize: 13.5,
-            zIndex: 99,
-          }}
-        >
+        <div className="fixed bottom-[76px] left-1/2 -translate-x-1/2 text-white px-[18px] py-2.5 rounded-lg text-[13.5px] z-[99] bg-primary shadow-md">
           {toast}
         </div>
       )}

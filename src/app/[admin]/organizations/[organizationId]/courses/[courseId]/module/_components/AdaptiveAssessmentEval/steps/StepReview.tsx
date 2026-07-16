@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Eye, RefreshCw, Trash2, AlertTriangle, X, Check } from 'lucide-react';
-import { THEME, LEVELS, DIFF_LABEL } from '../constants';
-import { Card, Btn, Badge, DiffBadge, inputStyle } from '../ui-primitives';
+import { Eye, RefreshCw, Trash2, X, Check } from 'lucide-react';
+import { LEVELS, DIFF_LABEL, DIFF_BG, DIFF_COLOR } from '../constants';
+import { Btn } from '../ui-primitives';
 import { Question, BuilderState, LevelId } from '../types';
 
 interface StepReviewProps {
   a: BuilderState;
   pool: Question[];
-  setPool: (pool: Question[]) => void;
+  setPool: any;
   expanded: string | null;
   setExpanded: (id: string | null) => void;
   setReplaceModal: (question: Question | null) => void;
@@ -53,32 +53,23 @@ export function StepReview({
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap' as const,
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      <div className="flex justify-between items-center flex-wrap gap-3 mb-4">
         <div>
-          <h4 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>
+          <h4 className="text-[18px] flex font-bold m-0 mb-0.5">
             Review the pool
           </h4>
-          <p style={{ fontSize: 13, color: THEME.textSub, margin: 0 }}>
+          <p className="text-[13px] text-muted-foreground m-0">
             Replace or remove any question. Preview shows how a form assembles for a
             given level.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+        <div className="flex gap-[9px] items-center">
           <select
             value={previewLevel}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setPreviewLevel(e.target.value as LevelId)
             }
-            style={{ ...inputStyle, width: 115, padding: '7px 10px' }}
+            className="w-[115px] py-[7px] px-[10px] rounded-md border border-border text-[14px] text-foreground bg-card outline-none font-inherit box-border"
           >
             {LEVELS.map((l) => (
               <option key={l.id} value={l.id}>
@@ -87,12 +78,12 @@ export function StepReview({
             ))}
           </select>
           <Btn variant="outline" onClick={() => setShowPreview(true)}>
-            <Eye size={13} /> Preview form
+            <Eye size={13} className="mr-1" /> Preview form
           </Btn>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' as const }}>
+      <div className="flex gap-1.5 mb-[14px] flex-wrap">
         {[
           ['all', `All (${pool.length})`],
           ['ai', `AI (${pool.filter((q: Question) => q.source === 'ai').length})`],
@@ -101,17 +92,10 @@ export function StepReview({
           <button
             key={k}
             onClick={() => setFilter(k)}
-            style={{
-              padding: '5px 12px',
-              borderRadius: 99,
-              border: `1px solid ${filter === k ? THEME.primary : THEME.border}`,
-              background: filter === k ? THEME.primaryLight : THEME.card,
-              color: filter === k ? THEME.primaryDark : THEME.textSub,
-              fontWeight: 600,
-              fontSize: 12.5,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
+            className={`py-[5px] px-[12px] rounded-full border font-semibold text-[12.5px] cursor-pointer font-inherit transition-colors ${filter === k
+              ? 'border-primary bg-primary-light text-primary-dark'
+              : 'border-border bg-card text-muted-foreground'
+              }`}
           >
             {lbl}
           </button>
@@ -119,58 +103,48 @@ export function StepReview({
       </div>
 
       {shown.length === 0 && (
-        <Card style={{ padding: 28, textAlign: 'center' as const, color: THEME.textTertiary, fontSize: 14 }}>
+        <div className="bg-card rounded-lg border border-border shadow-soft p-7 text-center text-muted-foreground text-[14px]">
           Pool is empty — go back to Build Pool.
-        </Card>
+        </div>
       )}
 
       {shown.map((item: Question) => (
-        <Card
+        <div
           key={item.id}
-          style={{
-            padding: '13px 17px',
-            marginBottom: 8,
-            opacity: item.quarantined ? 0.5 : 1,
-          }}
+          className={`bg-card rounded-lg border border-border shadow-soft p-[13px_17px] mb-2 ${item.quarantined ? 'opacity-50' : 'opacity-100'
+            }`}
         >
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-            }}
-          >
+          <div className="flex gap-3 items-start justify-between">
             <div
-              style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}
+              className="flex-1 cursor-pointer min-w-0"
               onClick={() => setExpanded(expanded === item.id ? null : item.id)}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 5,
-                  marginBottom: 6,
-                  flexWrap: 'wrap' as const,
-                }}
-              >
-                <Badge bg={THEME.muted} color={THEME.textSub}>
+              <div className="flex gap-[5px] mb-1.5 flex-wrap">
+                <span className="bg-muted text-muted-foreground text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap">
                   {item.topic}
-                </Badge>
-                <DiffBadge d={item.difficulty} />
-                <Badge
-                  bg={item.source === 'ai' ? THEME.secondaryLight : THEME.infoLight}
-                  color={item.source === 'ai' ? THEME.secondaryDark : THEME.info}
+                </span>
+                <span
+                  style={{ background: DIFF_BG[item.difficulty], color: DIFF_COLOR[item.difficulty] }}
+                  className="text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap"
+                >
+                  {DIFF_LABEL[item.difficulty]}
+                </span>
+                <span
+                  className={`text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap ${item.source === 'ai'
+                    ? 'bg-secondary-light text-secondary-dark'
+                    : 'bg-info-light text-info-dark'
+                    }`}
                 >
                   {item.source === 'ai' ? 'AI · provisional' : 'Bank · validated'}
-                </Badge>
+                </span>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.45 }}>
+              <div className="text-[14px] flex font-medium leading-relaxed">
                 {item.text}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+            <div className="flex gap-[5px] shrink-0">
               <Btn size="sm" variant="outline" onClick={() => setReplaceModal(item)}>
-                <RefreshCw size={12} /> Replace
+                <RefreshCw size={12} className="mr-1" /> Replace
               </Btn>
               <Btn
                 size="sm"
@@ -182,156 +156,86 @@ export function StepReview({
             </div>
           </div>
           {expanded === item.id && item.options && (
-            <div
-              style={{
-                marginTop: 11,
-                borderTop: `1px solid ${THEME.border}`,
-                paddingTop: 11,
-              }}
-            >
+            <div className="mt-[11px] border-t border-border pt-[11px]">
               {item.options.map((opt: string, i: number) => {
                 const correct = i === item.correctIndex;
                 return (
                   <div
                     key={i}
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      padding: '5px 9px',
-                      borderRadius: 6,
-                      background: correct ? THEME.successLight : 'transparent',
-                      marginBottom: 3,
-                    }}
+                    className={`flex gap-2 py-[5px] px-[9px] rounded-md mb-[3px] ${correct ? 'bg-success-light' : 'bg-transparent'
+                      }`}
                   >
                     <span
-                      style={{
-                        fontWeight: 700,
-                        color: correct ? THEME.successDark : THEME.textTertiary,
-                        width: 17,
-                        fontSize: 13,
-                      }}
+                      className={`font-bold w-[17px] text-[13px] ${correct ? 'text-success-dark' : 'text-muted-foreground'
+                        }`}
                     >
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span
-                      style={{
-                        fontSize: 13.5,
-                        color: correct ? THEME.successDark : THEME.text,
-                        fontWeight: correct ? 600 : 400,
-                        flex: 1,
-                      }}
+                      className={`text-[13.5px] flex-1 ${correct ? 'text-success-dark font-semibold' : 'text-foreground font-normal'
+                        }`}
                     >
                       {opt}
                     </span>
-                    {correct && <Check size={13} color={THEME.successDark} />}
+                    {correct && <Check size={13} className="text-success-dark" />}
                   </div>
                 );
               })}
-              <div
-                style={{
-                  marginTop: 8,
-                  background: THEME.muted,
-                  borderRadius: 6,
-                  padding: '8px 12px',
-                  fontSize: 13,
-                  color: THEME.textSub,
-                }}
-              >
-                <strong style={{ color: THEME.text }}>Explanation:</strong>{' '}
+              <div className="mt-2 bg-muted rounded-md py-2 px-3 text-[13px] text-muted-foreground">
+                <strong className="text-foreground">Explanation:</strong>{' '}
                 {item.explanation}
               </div>
             </div>
           )}
-        </Card>
+        </div>
       ))}
 
       {showPreview && (() => {
         const preview = assemblePreview();
         return (
           <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(33,48,43,.45)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 60,
-              padding: 20,
-            }}
+            className="fixed inset-0 bg-black/45 flex items-center justify-center z-[60] p-5"
             onClick={() => setShowPreview(false)}
           >
             <div
-              style={{
-                background: THEME.card,
-                borderRadius: 10,
-                boxShadow: THEME.shadowStrong,
-                width: '100%',
-                maxWidth: 680,
-                maxHeight: '84vh',
-                display: 'flex',
-                flexDirection: 'column' as const,
-              }}
+              className="bg-card rounded-[10px] shadow-strong w-full max-w-[680px] max-h-[84vh] flex flex-col"
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
-              <div
-                style={{
-                  padding: '16px 22px',
-                  borderBottom: `1px solid ${THEME.border}`,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
+              <div className="py-4 px-[22px] border-b border-border flex justify-between items-center">
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 18 }}>
+                  <div className="font-bold text-[18px]">
                     Form preview — {LEVELS.find((l) => l.id === previewLevel)?.label}
                   </div>
-                  <div style={{ fontSize: 13, color: THEME.textSub, marginTop: 2 }}>
+                  <div className="text-[13px] text-muted-foreground mt-[2px]">
                     Assembled randomly from the pool.
                   </div>
                 </div>
                 <button
                   onClick={() => setShowPreview(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: THEME.textTertiary,
-                  }}
+                  className="bg-transparent border-none cursor-pointer text-muted-foreground"
                 >
                   <X size={18} />
                 </button>
               </div>
-              <div style={{ overflowY: 'auto', padding: 20 }}>
+              <div className="overflow-y-auto p-5">
                 {preview.map((q, i) => (
                   <div
                     key={q.id}
-                    style={{
-                      display: 'flex',
-                      gap: 10,
-                      padding: '9px 12px',
-                      border: `1px solid ${THEME.border}`,
-                      borderRadius: 8,
-                      marginBottom: 6,
-                      alignItems: 'center',
-                    }}
+                    className="flex gap-[10px] py-[9px] px-[12px] border border-border rounded-lg mb-1.5 items-center"
                   >
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        color: THEME.textTertiary,
-                        width: 17,
-                        fontSize: 13,
-                      }}
-                    >
+                    <span className="font-bold text-muted-foreground w-[17px] text-[13px]">
                       {i + 1}
                     </span>
-                    <span style={{ flex: 1, fontSize: 13.5 }}>{q.text}</span>
-                    <DiffBadge d={q.difficulty} />
-                    <Badge bg={THEME.muted} color={THEME.textSub}>
+                    <span className="flex-1 text-[13.5px]">{q.text}</span>
+                    <span
+                      style={{ background: DIFF_BG[q.difficulty], color: DIFF_COLOR[q.difficulty] }}
+                      className="text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap"
+                    >
+                      {DIFF_LABEL[q.difficulty]}
+                    </span>
+                    <span className="bg-muted text-muted-foreground text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap">
                       {q.topic}
-                    </Badge>
+                    </span>
                   </div>
                 ))}
               </div>
