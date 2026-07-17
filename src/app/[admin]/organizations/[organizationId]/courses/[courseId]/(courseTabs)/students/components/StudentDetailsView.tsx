@@ -28,33 +28,33 @@ const dateFilterSchema = z.object({
     fromDate: z.string().optional(),
     toDate: z.string().optional(),
 })
-.refine((data) => {
-    // If toDate is provided but fromDate is not, return error
-    if (data.toDate && !data.fromDate) {
-        return false
-    }
-    return true
-}, {
-    message: 'Please select a From date first.',
-    path: ['toDate']
-})
-.refine((data) => {
-    // If both dates exist, fromDate should not be after toDate
-    if (data.fromDate && data.toDate && data.fromDate > data.toDate) {
-        return false
-    }
-    return true
-}, {
-    message: 'From date cannot be after To date.',
-    path: ['fromDate']
-})
+    .refine((data) => {
+        // If toDate is provided but fromDate is not, return error
+        if (data.toDate && !data.fromDate) {
+            return false
+        }
+        return true
+    }, {
+        message: 'Please select a From date first.',
+        path: ['toDate']
+    })
+    .refine((data) => {
+        // If both dates exist, fromDate should not be after toDate
+        if (data.fromDate && data.toDate && data.fromDate > data.toDate) {
+            return false
+        }
+        return true
+    }, {
+        message: 'From date cannot be after To date.',
+        path: ['fromDate']
+    })
 
 const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     courseId,
     studentId,
     onBack
 }) => {
-    
+
     const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
     const [loading, setLoading] = useState(true)
@@ -83,8 +83,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     // Create columns with courseId and studentId
     const attendanceColumns = createAttendanceColumns(
-        courseId, 
-        studentId, 
+        courseId,
+        studentId,
         () => {
             fetchCompletedClasses(searchTerm)
         }
@@ -104,7 +104,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     errors[path] = error.message
                 })
                 setDateErrors(errors)
-                
+
                 // Show toast for the first error
                 const firstError = err.errors[0]
             }
@@ -112,20 +112,6 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
     }
 
-    useEffect(() => {
-        fetchStudentInfo()
-
-        const params = new URLSearchParams(window.location.search)
-        const search = params.get("search") || ""
-
-        setSearchTerm(search)
-
-        if (search) {
-            fetchCompletedClasses(search)
-        } else {
-            fetchCompletedClasses("")
-        }
-    }, [studentId, courseId])
 
     const fetchStudentInfo = async () => {
         try {
@@ -161,22 +147,22 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             })
 
             const currentSearchTerm = searchTermParam !== undefined ? searchTermParam : searchTerm
-            
+
             if (currentSearchTerm && currentSearchTerm.trim()) {
                 params.append('searchTerm', currentSearchTerm.trim())
             }
-            
+
             if (statusFilter !== 'all') {
                 params.append('attendanceStatus', statusFilter)
             }
-            
+
             // Only add date filters if BOTH dates are selected and valid
             if (fromDate && toDate && fromDate <= toDate) {
                 params.append('fromDate', fromDate)
                 params.append('toDate', toDate)
             }
 
-            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`             
+            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
             const response = await api.get(endpoint)
 
             const classes = response.data?.data?.classes || []
@@ -202,12 +188,27 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
             toast.error({
                 title: 'API Error',
-                description: errorMessage,            
+                description: errorMessage,
             })
         } finally {
             setLoading(false)
         }
     }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
+    
+    useEffect(() => {
+        const loadData = async () => {
+            await fetchStudentInfo()
+
+            const params = new URLSearchParams(window.location.search)
+            const search = params.get("search") || ""
+
+            setSearchTerm(search)
+            fetchCompletedClasses(search)
+        }
+
+        loadData()
+    }, [studentId, courseId, fetchCompletedClasses])
+
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -221,7 +222,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             if (statusFilter !== 'all') {
                 params.append('attendanceStatus', statusFilter)
             }
-            
+
             if (fromDate && toDate && fromDate <= toDate) {
                 params.append('fromDate', fromDate)
                 params.append('toDate', toDate)
@@ -230,7 +231,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             const res = await api.get(
                 `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
             )
-            
+
             return res.data?.data?.classes?.map((classItem: any) => ({
                 ...classItem,
                 name: classItem.title
@@ -275,16 +276,16 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             return
         }
 
-        const shouldFetch = 
+        const shouldFetch =
             statusFilter !== 'all' ||
             (fromDate && toDate && fromDate <= toDate) ||
             (!fromDate && !toDate)
-        
+
         if (shouldFetch && !loading) {
             const timer = setTimeout(() => {
                 fetchCompletedClasses(searchTerm)
             }, 300)
-            
+
             return () => clearTimeout(timer)
         }
     }, [statusFilter, fromDate, toDate, dateErrors])
@@ -404,38 +405,37 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         <Popover open={isFromCalendarOpen} onOpenChange={setFromCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <div className="relative w-[150px]">
-                                <Input
-                                    value={fromDate ? format(new Date(fromDate), "dd-MM-yyyy") : ""}
-                                    placeholder="From Date"
-                                    readOnly
-                                    className={`cursor-pointer pr-10 ${
-                                    dateErrors.fromDate ? "border-red-500" : ""
-                                    }`}
-                                />
-                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        value={fromDate ? format(new Date(fromDate), "dd-MM-yyyy") : ""}
+                                        placeholder="From Date"
+                                        readOnly
+                                        className={`cursor-pointer pr-10 ${dateErrors.fromDate ? "border-red-500" : ""
+                                            }`}
+                                    />
+                                    <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </PopoverTrigger>
 
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
-                                mode="single"
-                                selected={fromDate ? new Date(fromDate) : undefined}
-                                onSelect={(date) => {
-                                    if (date) {
-                                    handleFromDateChange(date.toISOString().split("T")[0])
-                                    setFromCalendarOpen(false)
-                                    }
-                                }}
-                                disabled={(date) => {
-                                    // Disable dates after `toDate`
-                                    if (toDate) {
-                                    return date > new Date(toDate)
-                                    }
-                                    return false
-                                }}
+                                    mode="single"
+                                    selected={fromDate ? new Date(fromDate) : undefined}
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            handleFromDateChange(date.toISOString().split("T")[0])
+                                            setFromCalendarOpen(false)
+                                        }
+                                    }}
+                                    disabled={(date) => {
+                                        // Disable dates after `toDate`
+                                        if (toDate) {
+                                            return date > new Date(toDate)
+                                        }
+                                        return false
+                                    }}
                                 />
                             </PopoverContent>
-                        </Popover>                          
+                        </Popover>
                     </div>
                     {dateErrors.fromDate && (
                         <p className="text-xs text-red-500 ml-14">{dateErrors.fromDate}</p>
@@ -449,38 +449,37 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         <Popover open={isToCalendarOpen} onOpenChange={setToCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <div className="relative w-[150px]">
-                                <Input
-                                    value={toDate ? format(new Date(toDate), "dd-MM-yyyy") : ""}
-                                    placeholder="To Date"
-                                    readOnly
-                                    className={`cursor-pointer pr-10 ${
-                                    dateErrors.toDate ? "border-red-500" : ""
-                                    }`}
-                                />
-                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        value={toDate ? format(new Date(toDate), "dd-MM-yyyy") : ""}
+                                        placeholder="To Date"
+                                        readOnly
+                                        className={`cursor-pointer pr-10 ${dateErrors.toDate ? "border-red-500" : ""
+                                            }`}
+                                    />
+                                    <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </PopoverTrigger>
 
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
-                                mode="single"
-                                selected={toDate ? new Date(toDate) : undefined}
-                                onSelect={(date) => {
-                                    if (date) {
-                                    handleToDateChange(date.toISOString().split("T")[0])
-                                    setToCalendarOpen(false)
-                                    }
-                                }}
-                                disabled={(date) => {
-                                    // Disable dates after `toDate`
-                                    if (toDate) {
-                                    return date > new Date(toDate)
-                                    }
-                                    return false
-                                }}
+                                    mode="single"
+                                    selected={toDate ? new Date(toDate) : undefined}
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            handleToDateChange(date.toISOString().split("T")[0])
+                                            setToCalendarOpen(false)
+                                        }
+                                    }}
+                                    disabled={(date) => {
+                                        // Disable dates after `toDate`
+                                        if (toDate) {
+                                            return date > new Date(toDate)
+                                        }
+                                        return false
+                                    }}
                                 />
                             </PopoverContent>
-                        </Popover>  
+                        </Popover>
                     </div>
                     {dateErrors.toDate && (
                         <p className="text-xs text-red-500 ml-8">{dateErrors.toDate}</p>

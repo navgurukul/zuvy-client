@@ -15,7 +15,12 @@ export interface User {
 }
 
 
-export function useUser(userId: number | null) {
+type UseUserOptions = {
+    enabled?: boolean
+}
+
+export function useUser(userId: number | null, options: UseUserOptions = {}) {
+    const { enabled = true } = options
     const [user, setUser] = useState<User>()
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<unknown>(null)
@@ -41,13 +46,19 @@ export function useUser(userId: number | null) {
     }, []) 
 
     useEffect(() => {
+        if (!enabled || !userId) {
+            setUser(undefined)
+            setLoading(false)
+            return
+        }
+
         if (userId) {
             getUser(userId)
         } else {
             setUser(undefined)
             setLoading(false)
         }
-    }, [userId, getUser])
+    }, [userId, getUser, enabled])
 
     return {
         user,

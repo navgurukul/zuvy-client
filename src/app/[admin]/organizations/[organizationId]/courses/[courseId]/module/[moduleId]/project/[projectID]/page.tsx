@@ -25,7 +25,6 @@ import {
 } from '@/components/ui/popover'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
-import { api } from '@/utils/axios.config'
 import { ArrowUpRightSquare, CalendarIcon, Eye, ArrowLeft } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { useForm } from 'react-hook-form'
@@ -44,6 +43,8 @@ import {
     ProjectDataProject,
     ProjectData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType'
+import { useUpdateProject } from '@/hooks/useUpdateProject'
+import { fetchProjectDetails as fetchProjectDetailsData } from '@/utils/admin'
 
 export default function Project() {
     const router = useRouter()
@@ -61,6 +62,7 @@ export default function Project() {
     const [lastSavedContent, setLastSavedContent] = useState<string>('')
     const [lastSavedTitle, setLastSavedTitle] = useState('')
     const [hasUserSavedBefore, setHasUserSavedBefore] = useState(false)
+    const { updateProject } = useUpdateProject()
 
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -85,12 +87,15 @@ export default function Project() {
 
     const fetchProjectDetails = async () => {
         try {
-            const response = await api.get(
-                `Content/project/${projectID}?bootcampId=${courseId}`
+            const projectDetails = await fetchProjectDetailsData(
+                setProjectData,
+                projectID,
+                courseId
             )
-            const project = response.data.project[0]
+            if (!projectDetails?.project?.[0]) return
 
-            setProjectData(response.data)
+            const project = projectDetails.project[0]
+
             setTitle(project.title)
             setLastSavedTitle(project.title)
 
@@ -152,8 +157,7 @@ export default function Project() {
             const initialContentString = initialContent
                 ? JSON.stringify(initialContent)
                 : ''
-            await api.patch(`/Content/updateProjects/${projectID}`, {
-                title,
+            await updateProject(projectID, {                title,
                 instruction: { description: initialContentString },
                 isLock: projectData?.project[0].isLock,
                 deadline: deadlineDate,
@@ -244,7 +248,7 @@ export default function Project() {
         ) {
             const autoSave = async () => {
                 try {
-                    await api.patch(`/Content/updateProjects/${projectID}`, {
+                    await updateProject(projectID, {
                         title: lastSavedTitle,
                         instruction: { description: currentContentString },
                         isLock: projectData?.project[0].isLock,
@@ -266,7 +270,7 @@ export default function Project() {
 
             autoSave()
         }
-    }, [initialContent])
+    }, [initialContent, updateProject])
 
     return (
         <>

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useParams } from 'next/navigation';
 import useAssignmentDetails from '@/hooks/useAssignmentDetails';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-import { api } from '@/utils/axios.config';
+import useSubmitQuizAndAssignment from '@/hooks/useSubmitQuizAndAssignment';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import parse from 'html-react-parser';
@@ -43,6 +43,12 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
       setLocalIsCompleted(true);
       onChapterComplete();
     },
+  });
+
+  const { submitQuiz } = useSubmitQuizAndAssignment({
+    courseId: courseId as string,
+    moduleId: moduleId as string,
+    chapterId: chapterDetails.id,
   });
 
   // Update local state when assignment data changes
@@ -88,10 +94,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     );
     
     try {
-      await api.post(
-        `/tracking/updateQuizAndAssignmentStatus/${courseId}/${moduleId}?chapterId=${chapterDetails.id}`,
-        { submitQuiz: mappedAnswers }
-      );
+      await submitQuiz({ submitQuiz: mappedAnswers });
       await completeChapter();
       refetchAssignmentDetails();
       toast({

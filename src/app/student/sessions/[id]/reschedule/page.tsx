@@ -8,6 +8,7 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useGetRescheduleSlots } from "@/hooks/useGetRescheduleSlots";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
+import { formatDateOnly, formatTimeRange } from "@/utils/sessionDateTime";
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -49,42 +50,6 @@ export default function RescheduleBookingPage() {
 	const { mentorProfile } = useMentorProfile(mentorId, true, organizationId);
 	const mentorDisplayName =
 		mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "-");
-
-	const formatDateOnly = (value?: string | null) => {
-		if (!value) return "-";
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return "-";
-
-		return date.toLocaleDateString("en-US", {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		});
-	};
-
-	const formatTimeOnly = (value?: string | null) => {
-		if (!value) return "-";
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return "-";
-
-		return date.toLocaleTimeString("en-US", {
-			hour: "numeric",
-			minute: "2-digit",
-		});
-	};
-
-	const formatTimeRange = (start?: string | null, end?: string | null) => {
-		const startTime = formatTimeOnly(start);
-		const endTime = formatTimeOnly(end);
-
-		if (startTime === "-" && endTime === "-") return "-";
-		if (startTime === "-") return endTime;
-		if (endTime === "-") return startTime;
-
-		return `${startTime} - ${endTime}`;
-	};
 
 	const { proposeReschedule, isRescheduling, error, responseData } =
 		useRescheduleMentorSlotBooking();

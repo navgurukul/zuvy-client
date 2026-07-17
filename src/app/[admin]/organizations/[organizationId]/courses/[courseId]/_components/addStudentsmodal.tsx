@@ -7,7 +7,6 @@ import Dropzone from './dropzone'
 import SingleStudentForm from './SingleStudentForm'
 
 import { Button } from '@/components/ui/button'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
     DialogClose,
@@ -23,6 +22,7 @@ import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
 import { AddStudentsModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
+import { useAssignBatch } from '@/hooks/useAssignBatch'
 
 type StudentDataType = {
     name: string
@@ -46,6 +46,7 @@ const AddStudentsModal = ({
     setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
 }) => {
     const [selectedOption, setSelectedOption] = useState('1')
+    const { assignBatch } = useAssignBatch()
 
     const handleStudentUploadType = (value: string) => {
         setSelectedOption(value)
@@ -83,10 +84,12 @@ const AddStudentsModal = ({
         if (transformedObject) {
             const requestBody = transformedObject
             try {
-                const endpoint = studentData.batchId
-                    ? `/bootcamp/students/${id}?batch_id=${studentData.batchId}`
-                    : `/bootcamp/students/${id}`
-                await api.post(endpoint, requestBody).then((response) => {
+                const batchId = studentData.batchId ? studentData.batchId : undefined
+                await assignBatch({
+                    bootcampId: id,
+                    batchId,
+                    students: requestBody.students as { name: string; email: string }[],
+                }).then((response) => {
                     batch && fetchBatchesData()
                     toast.success({
                         title: response.data.status,

@@ -45,73 +45,18 @@ import {
   getSessionRescheduleHref,
 } from "@/utils/studentMentorshipRoutes"
 
+import {
+  formatDateOnly,
+  formatTimeOnly,
+  formatTimeRange,
+  parseDateValue,
+  isJoinWindowOpen,
+} from "@/utils/sessionDateTime"
+
 type Tab = "all" | "upcoming" | "completed" | "cancelled"
 
 const formatLifecycleValue = (value: string | null | undefined) =>
   (value || "-").replaceAll("_", " ")
-
-const formatDateOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
-const formatTimeOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-const formatTimeRange = (start?: string | null, end?: string | null) => {
-  const startTime = formatTimeOnly(start)
-  const endTime = formatTimeOnly(end)
-
-  if (startTime === "-" && endTime === "-") return "-"
-  if (startTime === "-") return endTime
-  if (endTime === "-") return startTime
-
-  return `${startTime} - ${endTime}`
-}
-
-const parseDateValue = (value?: string | null) => {
-  if (!value) return null
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-
-  return date
-}
-
-const isJoinWindowOpen = (
-  slotStart?: string | null,
-  slotEnd?: string | null,
-  nowTimestamp: number = Date.now()
-) => {
-  const startDate = parseDateValue(slotStart)
-  if (!startDate) return false
-
-  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
-  const endDate = parseDateValue(slotEnd)
-
-  if (!endDate) {
-    return nowTimestamp >= tenMinutesBeforeStart
-  }
-
-  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
-}
 
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
   mentorName?.trim() || `Mentor ${mentorUserId}`

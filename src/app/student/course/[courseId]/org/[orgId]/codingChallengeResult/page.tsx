@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
+import { useCodingSubmissionsByQuestion } from '@/hooks/useCodingSubmissionsByQuestion';
 import { 
   ChevronLeft, 
   Code2, 
@@ -34,41 +34,35 @@ const CodingResultContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const questionId = searchParams.get('questionId');
-    const [submissionData, setSubmissionData] = useState<CodingSubmissionData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const questionIdNum = questionId ? parseInt(questionId, 10) : null;
     const moduleId = searchParams.get('moduleId');
     const params = useParams();
     const chapterId = searchParams.get('chapterId');
     const { isDark, toggleTheme } = useThemeStore();
     const orgId = params.orgId;
 
+    const {
+        submissionData: rawSubmission,
+        loading,
+        error,
+    } = useCodingSubmissionsByQuestion({ questionId: questionIdNum, enabled: !!questionIdNum });
+
+    // Shape the data to match what this page expects
+    const submissionData: CodingSubmissionData | null = error
+        ? { status: 'error', message: error }
+        : rawSubmission
+        ? { data: { sourceCode: rawSubmission.sourceCode, TestCasesSubmission: rawSubmission.TestCasesSubmission as any } }
+        : null;
+
     useEffect(() => {
-        if (questionId) {
-            const fetchSubmission = async () => {
-                setLoading(true);
-                try {
-                    const res = await api.get(`/codingPlatform/submissions/questionId=${questionId}`);
-                    if(res.data.isSuccess) {
-                        setSubmissionData(res.data);
-                    } else {
-                        throw new Error(res.data.message || 'Failed to fetch submission data.');
-                    }
-                } catch (error: any) {
-                    toast({
-                        title: 'Error',
-                        description: error.message || 'Could not load submission results.',
-                        variant: 'destructive',
-                    });
-                    setSubmissionData({ status: 'error', message: error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchSubmission();
-        } else {
-            setLoading(false);
+        if (error) {
+            toast({
+                title: 'Error',
+                description: error || 'Could not load submission results.',
+                variant: 'destructive',
+            });
         }
-    }, [questionId]);
+    }, [error]);
     
     
   if (loading) return <CodingSubmissionSkeleton/>

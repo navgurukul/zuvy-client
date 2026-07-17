@@ -99,7 +99,7 @@ if (loading) {
       case 5:
         return <AssignmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 6:
-        return <AssessmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
+        return <AssessmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} refetchChapter={refetch} />;
       case 7:
         return <FeedbackFormContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete}/>;
       case 8:

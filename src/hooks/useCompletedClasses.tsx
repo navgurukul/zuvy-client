@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '@/utils/axios.config';
-import{UseCompletedClassesReturn,CompletedClassesData} from '@/hooks/hookType'
-
+import { api } from '../utils/axios.config';
+import { UseCompletedClassesReturn, CompletedClassesData } from './hookType';
 export const useCompletedClasses = (bootcampId: string): UseCompletedClassesReturn => {
   const [completedClassesData, setCompletedClassesData] = useState<CompletedClassesData | null>(null);
   const [loading, setLoading] = useState(true);

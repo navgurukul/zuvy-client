@@ -1,9 +1,8 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, Play, Eye, DownloadIcon ,ArrowDownToLine} from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
@@ -20,11 +19,13 @@ import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
 
 
+import { useVideoSubmissions } from '@/hooks/useVideoSubmissions'
+import { useChapterStudents } from '@/hooks/useChapterStudents'
+
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
-    const [videoData, setVideoData] = useState<VideoData | null>(null)
-    const [loading, setLoading] = useState(true)
+    const { getChapterStudentsUrl } = useChapterStudents()
 
     // Add pathname extraction like CourseLayout
     const pathname = usePathname()
@@ -33,26 +34,18 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
 
-    const getVideoSubmission = useCallback(async () => {
-        try {
-            const url = debouncedSearch
-                ? `/admin/bootcampModuleCompletion/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
-                : `/admin/bootcampModuleCompletion/bootcamp_id${courseId}`
+    const { videoData, loading, error } = useVideoSubmissions(courseId, {
+        searchAssessment: debouncedSearch,
+    })
 
-            const res = await api.get(url)
-            setVideoData(res.data)
-            setLoading(false)
-        } catch (error) {
+    useEffect(() => {
+        if (error) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
         }
-    }, [courseId, debouncedSearch])
-
-    useEffect(() => {
-        getVideoSubmission()
-    }, [getVideoSubmission])
+    }, [error])
 
     if (loading) {
         return<VideoSubmissionSkeleton/>
@@ -64,7 +57,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         if (!chapterId) return
       
         downloadCsv({
-          endpoint: `/admin/moduleChapter/students/chapter_id${chapterId}`,
+          endpoint: getChapterStudentsUrl(chapterId),
           fileName: chapterTitle || 'video-chapter',
       
           dataPath: 'submittedStudents',

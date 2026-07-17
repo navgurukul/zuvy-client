@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 // import IndividualStudentAssesment from '../../../../_components/individualStudentAssesment'
-import { api } from '@/utils/axios.config'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/utils'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -31,15 +30,16 @@ import { calculateTimeTaken } from '@/utils/admin'
 import { paramsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType'
 import {
     SubmissionData,
-    BootcampData,
     AssessmentResponse,
     CodingQuestion,
     PageParams,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionQuizQuestion/viewQuizQuestionPageType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useAssessmentTracking from '@/hooks/useAssessmentTracking'
 
 const Page = ({ params }: { params: paramsType }) => {
     const router = useRouter()
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [assesmentData, setAssesmentData] = useState<any>()
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
     const [username, setUsername] = useState<string>('')
@@ -47,60 +47,45 @@ const Page = ({ params }: { params: paramsType }) => {
     const [proctoringData, setProctoringData] = useState<any>()
     const [timeTaken, setTimeTaken] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(true)
+    const { fetchAssessmentTracking } = useAssessmentTracking()
     const [totalQuestions, setTotalQuestion] = useState({
         totalCodingQuestion: 0,
         totalMcqQuestion: 0,
         totalOpenEnded: 0,
     })
 
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
     const getIndividualCodingDataHandler = useCallback(async () => {
         try {
-            await api
-                .get<AssessmentResponse>(
-                    `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
-                )
-                .then((res) => {
-                    const timeTaken = calculateTimeTaken(
-                        res?.data?.startedAt,
-                        res?.data?.submitedAt
-                    )
-                    setTimeTaken(timeTaken)
-                    setCodingData(res?.data?.PracticeCode)
-                    setUsername(res?.data?.user?.name)
-                    setmoduleId(
-                        res?.data?.submitedOutsourseAssessment?.moduleId
-                    )
-                    setAssesmentData(res?.data)
-                    setTotalQuestion({
-                        totalCodingQuestion: res?.data?.codingQuestionCount,
-                        totalMcqQuestion: res?.data?.mcqQuestionCount,
-                        totalOpenEnded: res?.data?.openEndedQuestionCount,
-                    })
-                    setProctoringData({
-                        canEyeTrack:
-                            res?.data?.submitedOutsourseAssessment?.canEyeTrack,
-                        canTabChange:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canTabChange,
-                        canScreenExit:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canScreenExit,
-                        canCopyPaste:
-                            res?.data?.submitedOutsourseAssessment
-                                ?.canCopyPaste,
-                    })
-                })
+            const data = await fetchAssessmentTracking<AssessmentResponse>({
+                submissionId: params.report,
+                studentId: params.IndividualReport,
+            })
+
+            if (!data) {
+                return
+            }
+
+            const timeTaken = calculateTimeTaken(
+                data?.startedAt,
+                data?.submitedAt
+            )
+            setTimeTaken(timeTaken)
+            setCodingData(data?.PracticeCode)
+            setUsername(data?.user?.name)
+            setmoduleId(data?.submitedOutsourseAssessment?.moduleId)
+            setAssesmentData(data)
+            setTotalQuestion({
+                totalCodingQuestion: data?.codingQuestionCount,
+                totalMcqQuestion: data?.mcqQuestionCount,
+                totalOpenEnded: data?.openEndedQuestionCount,
+            })
+            setProctoringData({
+                canEyeTrack: data?.submitedOutsourseAssessment?.canEyeTrack,
+                canTabChange: data?.submitedOutsourseAssessment?.canTabChange,
+                canScreenExit:
+                    data?.submitedOutsourseAssessment?.canScreenExit,
+                canCopyPaste: data?.submitedOutsourseAssessment?.canCopyPaste,
+            })
         } catch (error) {
             toast.error({
                 title: 'Error',
@@ -109,12 +94,11 @@ const Page = ({ params }: { params: paramsType }) => {
         } finally {
             // setLoading(false)
         }
-    }, [params])
+    }, [fetchAssessmentTracking, params.IndividualReport, params.report])
 
     useEffect(() => {
-        getBootcampHandler()
         getIndividualCodingDataHandler()
-    }, [getBootcampHandler, getIndividualCodingDataHandler, params])
+    }, [getIndividualCodingDataHandler])
 
     const timestamp = assesmentData?.submitedAt
     const date = new Date(timestamp)
@@ -277,60 +261,60 @@ const Page = ({ params }: { params: paramsType }) => {
                             ?.mediumMcqQuestions ||
                         assesmentData?.submitedOutsourseAssessment
                             ?.hardMcqQuestions > 0) && (
-                        <div className="w-full">
-                            <div className="flex items-center gap-2 mb-4">
-                                <CheckSquare className="h-5 w-5 text-primary" />
-                                <h1 className="text-lg font-semibold">
-                                    Multiple Choice Questions
-                                </h1>
-                            </div>
+                            <div className="w-full">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <CheckSquare className="h-5 w-5 text-primary" />
+                                    <h1 className="text-lg font-semibold">
+                                        Multiple Choice Questions
+                                    </h1>
+                                </div>
 
-                            {assesmentData?.mcqQuestionCount === 0 &&
-                            assesmentData?.attemptedMCQQuestions === 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                                        <CardContent className="p-4">
-                                            <div className="mb-4">
-                                                <p className="text-base font-bold mb-1">
-                                                    This student has not
-                                                    submitted any quiz question.
-                                                </p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            ) : assesmentData?.attemptedMCQQuestions >= 1 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <IndividualStudentAssesment
-                                        data={[]}
-                                        params={params}
-                                        type="quizSubmission"
-                                        copyPaste={assesmentData?.copyPaste}
-                                        tabchanges={assesmentData?.tabChange}
-                                        mcqScore={assesmentData?.mcqScore}
-                                        totalMcqScore={
-                                            assesmentData
-                                                ?.submitedOutsourseAssessment
-                                                .weightageMcqQuestions
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                                        <CardContent className="p-4">
-                                            <div className="mb-4">
-                                                <p className="text-base font-bold mb-1">
-                                                    This student has not
-                                                    submitted any quiz question.
-                                                </p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                {assesmentData?.mcqQuestionCount === 0 &&
+                                    assesmentData?.attemptedMCQQuestions === 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                                            <CardContent className="p-4">
+                                                <div className="mb-4">
+                                                    <p className="text-base font-bold mb-1">
+                                                        This student has not
+                                                        submitted any quiz question.
+                                                    </p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                ) : assesmentData?.attemptedMCQQuestions >= 1 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <IndividualStudentAssesment
+                                            data={[]}
+                                            params={params}
+                                            type="quizSubmission"
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={assesmentData?.tabChange}
+                                            mcqScore={assesmentData?.mcqScore}
+                                            totalMcqScore={
+                                                assesmentData
+                                                    ?.submitedOutsourseAssessment
+                                                    .weightageMcqQuestions
+                                            }
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                                            <CardContent className="p-4">
+                                                <div className="mb-4">
+                                                    <p className="text-base font-bold mb-1">
+                                                        This student has not
+                                                        submitted any quiz question.
+                                                    </p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                     {assesmentData?.attemptedOpenEndedQuestions !== null && (
                         <div className="w-full">
@@ -342,13 +326,13 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
 
                             {assesmentData?.openEndedQuestionCount === 0 &&
-                            assesmentData?.attemptedOpenEndedQuestions === 0 ? (
+                                assesmentData?.attemptedOpenEndedQuestions === 0 ? (
                                 <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg transition-transform transform hover:shadow-xl">
                                     There are no open-ended questions in this
                                     assessment.
                                 </p>
                             ) : assesmentData?.attemptedOpenEndedQuestions >=
-                              1 ? (
+                                1 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <IndividualStudentAssesment
                                         data={[]}

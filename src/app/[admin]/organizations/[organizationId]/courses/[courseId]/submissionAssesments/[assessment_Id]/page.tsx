@@ -21,6 +21,29 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useBatchList } from '@/hooks/useBatchList'
+import useStudentAssessments from '@/hooks/useStudentAssessments'
+
+const assessmentRequestCache = new Map<string, Promise<any>>()
+
+const getCachedRequest = (url: string) => {
+    const cachedRequest = assessmentRequestCache.get(url)
+
+    if (cachedRequest) {
+        return cachedRequest
+    }
+
+    const request = api.get(url)
+
+    assessmentRequestCache.set(url, request)
+
+    request.finally(() => {
+        assessmentRequestCache.delete(url)
+    })
+
+    return request
+}
 
 type Props = {}
 
@@ -55,13 +78,13 @@ const Page = ({ params }: any) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const { fetchStudentAssessments } = useStudentAssessments()
     const [assesmentData, setAssessmentData] = useState<any>()
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [passPercentage, setPassPercentage] = useState<number>(0)
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [batches, setBatches] = useState<Batch[]>([])
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const [sortField, setSortField] = useState<string>('submittedDate')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
@@ -78,26 +101,13 @@ const Page = ({ params }: any) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     // Create columns with context
     const columns = useMemo(() => getColumns({
         courseId: params.courseId,
         assessment_Id: params.assessment_Id
     }), [params.courseId, params.assessment_Id])
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
 
     // Fetch student assessments with sorting, batch filter and search
     const fetchStudentAssessmentsWithBatch = useCallback(async (
@@ -111,47 +121,30 @@ const Page = ({ params }: any) => {
         orderDirection?: 'asc' | 'desc'
     ) => {
         try {
-            // Build query parameters
-            const queryParams = new URLSearchParams()
-            
-            if (batchId && batchId !== 'all') {
-                queryParams.append('batchId', batchId)
-            }
-            
-            if (searchQuery) {
-                queryParams.append('searchStudent', searchQuery)
-            }
-            
-            if (orderBy) {
-                queryParams.append('orderBy', orderBy)
-            }
-            
-            if (orderDirection) {
-                queryParams.append('orderDirection', orderDirection)
-            }
-            
-            queryParams.append('offset', offset.toString())
-            queryParams.append('limit', limit.toString())
+            const {
+                assessments,
+                moduleAssessment,
+                passPercentage,
+                totalPages,
+                lastPage,
+            } = await fetchStudentAssessments({
+                assessmentId,
+                offset,
+                limit,
+                searchStudent: searchQuery,
+                batchId,
+                orderBy,
+                orderDirection,
+                requester: getCachedRequest,
+            })
 
-            const res = await api.get(
-                `/admin/assessment/students/assessment_id${assessmentId}?${queryParams.toString()}`
-            )
+            setTotalPages(totalPages)
+            setLastPage(lastPage)
 
-            const data = res.data
-            const assessments = data.submitedOutsourseAssessments || []
-            const moduleAssessment = data.ModuleAssessment || {}
-            
-            // Calculate total pages
-            const totalStudents = moduleAssessment.totalSubmitedStudents || 0
-            const calculatedTotalPages = Math.ceil(totalStudents / Number(limit))
-            
-            setTotalPages(calculatedTotalPages)
-            setLastPage(calculatedTotalPages)
-            
             return {
                 assessments,
                 moduleAssessment,
-                passPercentage: moduleAssessment.passPercentage || 0
+                passPercentage
             }
         } catch (error) {
             console.error('Error fetching student assessments:', error)
@@ -161,7 +154,7 @@ const Page = ({ params }: any) => {
                 passPercentage: 0
             }
         }
-    }, [])
+    }, [fetchStudentAssessments])
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<Suggestion[]> => {
@@ -243,19 +236,10 @@ const Page = ({ params }: any) => {
         },
     ]
 
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
+    const currentSearchQuery = searchParams.get('search') || ''
     const getStudentAssesmentDataHandler = useCallback(
         async (offset: number) => {
             if (offset >= 0) {
-                const currentSearchQuery = searchParams.get('search') || ''
                 const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessmentsWithBatch(
                     params?.assessment_Id,
                     params?.courseId,
@@ -272,7 +256,7 @@ const Page = ({ params }: any) => {
                 setTotalStudents(moduleAssessment?.totalSubmitedStudents || 0)
             }
         },
-        [params.assessment_Id, params.courseId, position, searchParams, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch]
+        [params.assessment_Id, params.courseId, position, currentSearchQuery, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch]
     )
 
     // Handle batch change
@@ -289,60 +273,38 @@ const Page = ({ params }: any) => {
     }, [setOffset])
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([
-                    getBootcampHandler(),
-                    fetchBatches()
-                ])
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
-
-        fetchData()
-    }, [isReattemptApproved, getBootcampHandler, fetchBatches])
-
-    useEffect(() => {
         getStudentAssesmentDataHandler(offset)
     }, [
         offset,
-        getStudentAssesmentDataHandler,
-        position,
-        setLastPage,
-        setTotalPages,
-        searchParams.get('search'),
-        selectedBatch,
-        sortField,
-        sortDirection
+        getStudentAssesmentDataHandler
     ])
 
     const handleVideoDownloadCsv = useCallback(() => {
         if (!params.assessment_Id) return
-    
+
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch && selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
-    
+
         const currentSearchQuery = searchParams.get('search') || ''
         if (currentSearchQuery) {
             queryParams.append('searchStudent', currentSearchQuery)
         }
-    
+
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
 
         downloadCsv({
             endpoint: `/admin/assessment/students/assessment_id${params.assessment_Id}?${queryParams.toString()}`,
-    
+
             fileName: `assessment_${assesmentData?.title || 'submissions'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'submitedOutsourseAssessments',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'email' },
@@ -354,7 +316,7 @@ const Page = ({ params }: any) => {
                 { header: 'Attempts', key: 'attempts' },
                 { header: 'Time Taken', key: 'timeTaken' },
             ],
-    
+
             mapData: (assessment: any) => ({
                 name: assessment.name || '',
                 email: assessment.email || '',
@@ -364,13 +326,12 @@ const Page = ({ params }: any) => {
                 percentage: `${assessment.percentage || 0}%`,
                 qualified: assessment.isPassed ? 'Yes' : 'No',
                 attempts: (assessment.reattemptCount ?? 0) + 1,
-                timeTaken: `${Math.floor((assessment.timeTaken || 0) / 60)}m ${
-                    (assessment.timeTaken || 0) % 60
-                }s`,
+                timeTaken: `${Math.floor((assessment.timeTaken || 0) / 60)}m ${(assessment.timeTaken || 0) % 60
+                    }s`,
             }),
         })
-    }, [params.assessment_Id,selectedBatch,searchParams,sortField,sortDirection,assesmentData])
-    
+    }, [params.assessment_Id, selectedBatch, searchParams, sortField, sortDirection, assesmentData])
+
     return (
         <>
             <MaxWidthWrapper className="">
@@ -433,7 +394,7 @@ const Page = ({ params }: any) => {
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card className="bg-card">
                     <CardHeader>
                         <div className="flex items-center justify-between">
@@ -467,8 +428,8 @@ const Page = ({ params }: any) => {
                         />
                     </div>
                     <CardContent className="p-0">
-                        <DataTable 
-                            data={dataTableAssesment} 
+                        <DataTable
+                            data={dataTableAssesment}
                             columns={columns}
                             onSortingChange={handleSortingChange}
                         />

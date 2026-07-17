@@ -6,6 +6,7 @@ import { Calendar, Clock, Video, Users, ExternalLink, Info, CalendarIcon } from 
 import { LiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
 import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
+import { useClassAnalytics } from '@/hooks/useClassAnalytics'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -25,6 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
+import { useUpdateLiveClassSession} from '@/hooks/useUpdateLiveClassSession'
 
 const liveClassSchema = z
     .object({
@@ -68,9 +70,11 @@ const LiveClass = ({
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
     const [isLoading, setIsLoading] = useState(true)
+    const { updateLiveClassSession, updating } = useUpdateLiveClassSession()
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
+    const { getClassAnalytics } = useClassAnalytics()
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -127,8 +131,7 @@ const LiveClass = ({
         if (!canEdit) return
         try {
             const sessionId = session.id || session.meetingId || session.title
-            const res = await api.get(`/classes/analytics/${sessionId}`)
-            const data = res.data
+            const data = await getClassAnalytics({ classId: sessionId })
 
             const studentRecords =
                 data?.data?.session?.studentAttendanceRecords ?? []
@@ -225,11 +228,11 @@ const LiveClass = ({
         const fetchRecordingLink = async () => {
             if (session?.status?.toLowerCase() === 'completed' && session?.id) {
                 try {
-                    const res = await api.get(`/classes/analytics/${session.id}`)
-                    const analyticsS3Link = res.data?.data?.session?.s3link
-                    const analyticsRecordingLink = res.data?.data?.session?.recordingLink
-                    const analyticsYoutubeLink = res.data?.data?.session?.youtubeLink
-                    
+                    const data = await getClassAnalytics({ classId: session.id })
+                    const analyticsS3Link = data?.data?.session?.s3link
+                    const analyticsRecordingLink = (data?.data?.session as any)?.recordingLink
+                    const analyticsYoutubeLink = (data?.data?.session as any)?.youtubeLink
+
                     // Set recording link if available
                     if (analyticsS3Link && analyticsS3Link !== 'not found') {
                         setRecordingLink(analyticsS3Link)
@@ -314,7 +317,7 @@ const LiveClass = ({
             // console.log('Payload:', payload)
             
             const sessionId =  session.id
-            await api.put(`/classes/sessions/${sessionId}`, payload)
+            await updateLiveClassSession(sessionId, payload)
             
             // Update both moduleData and chapterData in store to reflect title change in sidebar
             if (capitalizedTitle !== content?.title) {
@@ -727,8 +730,9 @@ const LiveClass = ({
                         <Button
                             type="submit"
                             className="px-6 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={updating}
                         >
-                            Save Live Class
+                            {updating ? 'Saving...' : 'Save Live Class'}
                         </Button>
                     </div>
                 )}

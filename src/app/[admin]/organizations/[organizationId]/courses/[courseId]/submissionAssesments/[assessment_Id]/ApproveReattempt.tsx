@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { api } from '@/utils/axios.config'
 import {
     Dialog,
     DialogOverlay,
@@ -13,6 +12,7 @@ import {
 import { Check } from 'lucide-react'
 import { getIsReattemptApproved } from '@/store/store'
 import { ReattemptData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/individualReportApproveType'
+import useApproveReattempt from '@/hooks/useApproveReattempt'
 const ApproveReattempt = ({ data }: { data: ReattemptData }) => {
     const [reattemptRequested, setReattemptRequested] = useState(
         data?.reattemptRequested
@@ -21,6 +21,7 @@ const ApproveReattempt = ({ data }: { data: ReattemptData }) => {
         data?.reattemptApproved
     )
     const { setIsReattemptApproved } = getIsReattemptApproved()
+    const { approveReattempt } = useApproveReattempt()
 
     const [confirmationOpen, setConfirmationOpen] = useState(false)
     const [apiSuccess, setApiSuccess] = useState<boolean | null>(null)
@@ -28,11 +29,9 @@ const ApproveReattempt = ({ data }: { data: ReattemptData }) => {
 
     async function handleApproveReattempt() {
         try {
-            if (reattemptRequested && !reattemptApproved) {
+            if (reattemptRequested && !reattemptApproved && data?.id) {
                 setButtonDisabled(true)
-                const res = await api.post(
-                    `admin/assessment/approve-reattempt?assessmentSubmissionId=${data?.id}`
-                )
+                await approveReattempt(data?.id)
 
                 setReattemptApproved(true)
 

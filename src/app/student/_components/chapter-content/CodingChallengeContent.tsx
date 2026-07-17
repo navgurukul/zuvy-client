@@ -1,66 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { api } from '@/utils/axios.config';
-import { toast } from '@/components/ui/use-toast';
-import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
+import { Code2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
-import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
-import {CodingContentChapterSkeleton} from "@/app/student/_components/Skeletons";
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { CodingChallengeContentProps, CodingQuestions } from "@/app/student/_components/chapter-content/componentChapterType";
+import { CodingContentChapterSkeleton } from "@/app/student/_components/Skeletons";
+import { useQuizAndAssignmentWithStatus } from '@/hooks/useQuizAndAssignmentWithStatus';
+import { useCodingSubmissionsByQuestion } from '@/hooks/useCodingSubmissionsByQuestion';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const params = useParams();
   const orgId = params.orgId;
-  const [codingQuestions, setCodingQuestions] = useState<CodingQuestions[]>([]);
-  const [submissionResults, setSubmissionResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
 
-  const fetchCodingQuestions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/tracking/getQuizAndAssignmentWithStatus?chapterId=${chapterDetails.id}`);
-      const questions = res.data.data?.codingProblem || [];
-      setCodingQuestions(questions);
+  const {
+    codingProblems: codingQuestions,
+    loading,
+  } = useQuizAndAssignmentWithStatus({ chapterId: chapterDetails.id });
 
-      if (chapterDetails.status === 'Completed' && questions.length > 0) {
-        // Fetch submission results for each question
-        const resultsPromises = questions.map((q: CodingQuestions) =>
-          api.get(`/codingPlatform/submissions/questionId=${q.id}`).catch(err => {
-            console.error(`Failed to fetch submission for question ${q.id}`, err);
-            return null; // Return null on error to not break Promise.all
-          })
-        );
-        const resultsResponses = await Promise.all(resultsPromises);
-        const successfulResults = resultsResponses
-          .filter(res => res && res.data.isSuccess)
-          .map(res => ({
-              questionId: res.data.data.questionId,
-              result: res.data.data,
-          }));
-        setSubmissionResults(successfulResults);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch coding questions.',
-        variant: 'destructive',
-      });
-      setCodingQuestions([]);
-    } finally {
-      setLoading(false);
-        // setTimeout(() => setLoading(false), 1500);
-    }
-  }, [chapterDetails.id, chapterDetails.status]);
+  // Fetch submission for each question only when chapter is completed
+  // We use the first question's id as a representative fetch; for multi-question
+  // chapters the component maps over codingQuestions and passes results down.
+  const firstQuestionId = isCompleted && codingQuestions.length > 0
+    ? codingQuestions[0].id
+    : null;
 
-  useEffect(() => {
-    fetchCodingQuestions();
-  }, [fetchCodingQuestions]);
+  const { submissionData: firstSubmission } = useCodingSubmissionsByQuestion({
+    questionId: firstQuestionId,
+  });
+
+  // Build submissionResults in the same shape CodingChallengeResult expects
+  const submissionResults = firstSubmission
+    ? [{ questionId: firstSubmission.questionId, result: firstSubmission }]
+    : [];
 
   useEffect(() => {
     setIsCompleted(chapterDetails.status === 'Completed');

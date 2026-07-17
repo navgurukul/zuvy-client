@@ -1,6 +1,6 @@
 'use client'
 import { calculateTimeTaken } from '@/utils/admin'
-import { api } from '@/utils/axios.config'
+import { useEffect } from 'react'
 import { format } from 'date-fns'
 import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
@@ -11,9 +11,11 @@ import {
     ReportData,
     DownloadReportProps,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType'
+import useAssessmentTracking from '@/hooks/useAssessmentTracking'
 
 const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
+    const { data, loading, error, fetchAssessmentTracking } = useAssessmentTracking()
 
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A'
@@ -26,14 +28,19 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
 
     async function fetchReportData() {
         try {
-            const res = await api.get(
-                `/tracking/assessment/submissionId=${id}?studentId=${userId}`
-            )
-            generatePDF(res?.data)
+            await fetchAssessmentTracking<ReportData>({
+                submissionId: id,
+                studentId: userId,
+            })
         } catch (error) {
             console.error('Error fetching report data:', error)
         }
     }
+    useEffect(() => {
+    if (data) {
+        generatePDF(data as ReportData)
+    }
+}, [data])
 
     async function generatePDF(reportData: ReportData) {
         const doc = new jsPDF()
@@ -201,6 +208,7 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
         <div className="flex items-center space-x-2">
             <button
                 onClick={handleDownload}
+                disabled={loading || !submitedAt}
                 className={
                     submitedAt
                         ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center`

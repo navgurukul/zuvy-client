@@ -25,6 +25,7 @@ import {
     QuestionIdInput,
     QuestionParams,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/coding/[codingQuestionId]/articleCodingPageType'
+import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 function IdePreview({ params }: { params: QuestionParams }) {
     const [questionDetails, setQuestionDetails] =
@@ -39,8 +40,6 @@ function IdePreview({ params }: { params: QuestionParams }) {
             },
         })
     const [currentCode, setCurrentCode] = useState('')
-    const [languageId, setLanguageId] = useState(93)
-    const [language, setLanguage] = useState('')
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
     const router = useRouter()
@@ -53,26 +52,14 @@ function IdePreview({ params }: { params: QuestionParams }) {
         { lang: 'c', id: 48 },
     ]
 
-    const handleLanguageChange = (lang: string) => {
-        setLanguage(lang)
-        const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
-        setLanguageId(langID)
-    }
-
-    const getDataFromField = (
-        array: any[],
-        searchValue: any,
-        searchField: string | number,
-        targetField: string | number
-    ) => {
-        let result = languageId
-        array.forEach((obj) => {
-            if (obj[searchField] === searchValue) {
-                result = obj[targetField]
-            }
-        })
-        return result
-    }
+    const {
+        language,
+        setLanguage,
+        languageId,
+        setLanguageId,
+        handleLanguageChange,
+        getDataFromField,
+    } = useLanguageSelection(93, editorLanguages, true)
 
     function handleEditorChange(value: any) {
         setCurrentCode(value)

@@ -97,7 +97,6 @@ const BatchesInfo = ({
         formSchema,
         form,
         toggleForm,
-        fetchBatches,
         fetchInstructorInfo,
         batchDeleteHandler,
         onSubmit,

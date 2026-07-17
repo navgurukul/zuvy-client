@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/use-toast'
 
 import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
-import { api } from '@/utils/axios.config'
+import useCreateQuizQuestions from '@/hooks/useCreateQuizQuestions'
 import { BulkMcqProps } from './adminResourceComponentType'
 import { useParams } from 'next/navigation';
 
@@ -28,6 +28,7 @@ const BulkUploadMcq = ({ closeModal, getAllQuizQuesiton }: BulkMcqProps) => {
     const [mcqData, setMcqData] = useState(null)
     const { organizationId } = useParams()
     const orgId = Number(organizationId)
+    const { createQuizQuestions, loading: creating, error: createError } = useCreateQuizQuestions(orgId)
 
     async function handleSubmit(e: any) {
         e.preventDefault()
@@ -39,7 +40,7 @@ const BulkUploadMcq = ({ closeModal, getAllQuizQuesiton }: BulkMcqProps) => {
             return
         }
         try {
-            await api.post(`/content/${orgId}/quiz`, mcqData)
+            await createQuizQuestions(mcqData)
             toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
