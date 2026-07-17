@@ -9,6 +9,7 @@ import { CodingChallengeContentProps, CodingQuestions } from "@/app/student/_com
 import { CodingContentChapterSkeleton } from "@/app/student/_components/Skeletons";
 import { useQuizAndAssignmentWithStatus } from '@/hooks/useQuizAndAssignmentWithStatus';
 import { useCodingSubmissionsByQuestion } from '@/hooks/useCodingSubmissionsByQuestion';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
