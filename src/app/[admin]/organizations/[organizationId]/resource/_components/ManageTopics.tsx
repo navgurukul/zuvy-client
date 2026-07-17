@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { X, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
+import useManageTags from '@/hooks/useManageTags'
+import { fetchAllTags } from '@/utils/admin'
 
 interface Topic {
     id: number
@@ -38,6 +39,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
     const [deleteConfirmTopic, setDeleteConfirmTopic] = useState<Topic | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
     const [loading, setLoading] = useState(true)
+    const { createTags, deleteTag, loading: tagsLoading } = useManageTags()
     const [showAddTopicInput, setShowAddTopicInput] = useState(false)
     const [showAllTopics, setShowAllTopics] = useState(false)
     const [newlyAddedTopics, setNewlyAddedTopics] = useState<string[]>([])
@@ -51,11 +53,11 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
             setLoading(true)
             
             // Fetch topics
-            const response = await api.get('/Content/allTags')
-            const topicsData = response.data.allTags || []
+            const topicsData = await fetchAllTags()
+            const filteredTopics = topicsData.filter((tag) => tag.id !== -1)
             
             // Sort topics by ID (newest first)
-            const sortedTopics = topicsData.sort((a: Topic, b: Topic) => b.id - a.id)
+            const sortedTopics = filteredTopics.sort((a: Topic, b: Topic) => b.id - a.id)
             
             setTopics(sortedTopics)
         } catch (error) {
@@ -159,7 +161,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
         try {
             setIsDeleting(true)
             
-            await api.delete(`/content/deletequestiontag/${topic.id}`)
+            await deleteTag(topic.id)
             
             toast.success({
                 title: 'Success',
@@ -196,10 +198,8 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                 setIsCreating(true)
                 
                 // Create all newly added topics
-               await api.post('/Content/createTag', {
-                tagNames: newlyAddedTopics  // Send array with correct field name
-            })               
-             toast.success({
+                await createTags(newlyAddedTopics)
+                toast.success({
                     title: 'Success',
                     description: `${newlyAddedTopics.length} topic${newlyAddedTopics.length > 1 ? 's' : ''} created successfully`,
                 })

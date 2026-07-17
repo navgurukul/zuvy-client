@@ -5,58 +5,49 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PageParams,
-    BootcampData,
     IndividualStudentData,
-    ProjectSubmissionDetails,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import useIndividualProjectReport from '@/hooks/useIndividualProjectReport'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const [indiviDualStudentData, setIndividualStudentData] =
         useState<IndividualStudentData | null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
+    const { fetchIndividualProjectReport } = useIndividualProjectReport()
 
     const getIndividualStudentData = useCallback(async () => {
-        await api
-            .get<ProjectSubmissionDetails>(
-                `/submission/projectDetail/${params.individualReport}?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
-            )
-            .then((res) => {
-                setIndividualStudentData(res?.data)
-                const projectDetail =
-                    res?.data?.projectSubmissionDetails?.instruction
-                        ?.description
-                if (projectDetail) {
-                    setInitialContent(JSON.parse(projectDetail))
-                }
-                setSubmittedDate(
-                    res?.data.projectSubmissionDetails?.projectTrackingData[0]
-                        ?.updatedAt
-                )
-            })
-    }, [params.individualReport, params.courseId, params.StudentsProjects])
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
+        const data = await fetchIndividualProjectReport({
+            userId: params.individualReport,
+            projectId: params.StudentsProjects,
+            bootcampId: params.courseId,
+        })
 
+        setIndividualStudentData(data)
+        const projectDetail =
+            data?.projectSubmissionDetails?.instruction?.description
+        if (projectDetail) {
+            setInitialContent(JSON.parse(projectDetail))
+        }
+        setSubmittedDate(
+            data.projectSubmissionDetails?.projectTrackingData[0]?.updatedAt
+        )
+    }, [
+        fetchIndividualProjectReport,
+        params.individualReport,
+        params.courseId,
+        params.StudentsProjects,
+    ])
     useEffect(() => {
         getIndividualStudentData()
-        getBootcampHandler()
-    }, [getIndividualStudentData, getBootcampHandler])
+    }, [getIndividualStudentData])
 
     const dateString = submittedDate
     const date = new Date(dateString?.toString())

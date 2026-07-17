@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
 import { getAttendancePercentage, getCompletedClasses } from '@/store/store'
+import { useCompletedClasses } from '@/hooks/useCompletedClasses'
 
 interface ClassData {
     id: number
@@ -70,10 +71,11 @@ const getAttendanceStatusDisplay = (status: string) => {
 }
 
 const updateAttendanceStatus = async (
-    courseId: string, 
-    sessionId: number, 
-    studentId: string, 
+    courseId: string,
+    sessionId: number,
+    studentId: string,
     status: 'present' | 'absent',
+    fetchCompletedClasses: (courseId: string | number, studentId: string | number) => Promise<any>,
     setCompletedClasses: (classes: ClassData[]) => void,
     setAttendancePercentage: (percentage: number) => void
 ) => {
@@ -87,8 +89,7 @@ const updateAttendanceStatus = async (
         
         await api.post(endpoint, payload)
 
-        const completedClassesEndpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`             
-        const response = await api.get(completedClassesEndpoint)
+        const response = await fetchCompletedClasses(courseId, studentId)
 
         const classes = response.data?.data?.classes || []
         setCompletedClasses(classes)
@@ -141,6 +142,7 @@ const UpdateStatusCell = ({
     const isPresent = currentStatus === 'present'
     const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
+    const { fetchCompletedClasses } = useCompletedClasses()
     
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
@@ -151,10 +153,11 @@ const UpdateStatusCell = ({
         setCurrentStatus(newStatus)
         
         const success = await updateAttendanceStatus(
-            courseId, 
-            classData.id, 
-            studentId, 
+            courseId,
+            classData.id,
+            studentId,
             newStatus,
+            fetchCompletedClasses,
             setCompletedClasses,
             setAttendancePercentage
         )

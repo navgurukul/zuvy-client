@@ -42,6 +42,7 @@ export function SearchBox(props: SearchBoxProps) {
     defaultFetchApi,
     getSuggestionValue,
     maxSuggestions: 50, // Increased to show more suggestions
+    autoFetchOnMount: false, // SearchBox never auto-fetches; the parent controls when to fetch
   });
 
   //  Sync the parent value with the local searchQuery

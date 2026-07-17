@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { useCreateOrganization } from '@/hooks/useCreateOrganization'
 import {
     GraduationCap,
     Shield,
@@ -110,6 +110,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     isOpen = false,
 }) => {
     const { fetchOrgById, uploadOrgLogo, completeOrgSetup, updateOrgById } = useOrgSettings()
+    const { createOrganization, creating } = useCreateOrganization()
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [freshUserData, setFreshUserData] = useState<any>(null)
     const [isFetchingFreshData, setIsFetchingFreshData] = useState(false)
@@ -308,12 +309,12 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         }
 
         try {
-            const response = await api.post('/org/create', payload)
+            const response = await createOrganization(payload)
 
-            if (response.data?.status === 'success') {
+            if (response?.status === 'success') {
                 toast.success({
                     title: 'Organisation created',
-                    description: response.data.message,
+                    description: response.message,
                 })
             }
         } catch (error: any) {
@@ -528,7 +529,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
-                        disabled={!canSubmit || isFetchingFreshData}
+                        disabled={!canSubmit || isFetchingFreshData || creating}
                         onClick={handleSubmit}
                     >
                         {isEditMode ? 'Save Change' : 'Add Organisation'}

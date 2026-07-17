@@ -1,55 +1,41 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, ArrowDownToLine, FileText,Eye } from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
-import { error } from 'console'
-import { nullable } from 'zod'
 import {
     AssignmentProps,
     AssignmentModuleData,
-    AssignmentApiResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useAssignmentSubmissions } from '@/hooks/useAssignmentSubmissions'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
-    const [assignmentData, setAssignmentData] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState(0)
-    const [loading, setLoading] = useState(true)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
 
-    useEffect(() => {
-        const fetchAssignmentDataHandler = async () => {
-            try {
-                const url = debouncedSearch
-                    ? `/submission/submissionsOfAssignment/${courseId}?searchAssignment=${debouncedSearch}`
-                    : `/submission/submissionsOfAssignment/${courseId}`
-                const res = await api.get<AssignmentApiResponse>(url)
-                setAssignmentData(res.data.data.trackingData)
-                setTotalStudents(res.data.data.totalStudents)
-            setLoading(false)
-            } catch (error) {
-                toast.error({
-                    title: 'Error',
-                    description: 'Error while fetching assignment data',
-                })
-            }
-        }
+    const { assignmentData, totalStudents, loading, error } = useAssignmentSubmissions(courseId, {
+        searchAssignment: debouncedSearch,
+    })
 
-        fetchAssignmentDataHandler()
-    }, [courseId, debouncedSearch])
+    useEffect(() => {
+        if (error) {
+            toast.error({
+                title: 'Error',
+                description: 'Error while fetching assignment data',
+            })
+        }
+    }, [error])
 
     const handleDownloadCsv = (id: number) => {
         downloadCsv({

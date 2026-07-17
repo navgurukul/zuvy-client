@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { api } from '@/utils/axios.config'
-import { OFFSET, POSITION } from '@/utils/constant'
 import { useParams, useRouter } from 'next/navigation'
 import { existingClassColumns } from './existingLiveClassesColumn'
-import { getUser, getIsRowSelected } from '@/store/store'
-import { Table } from '@/components/ui/table'
+import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -15,10 +11,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-    DialogClose,
 } from '@/components/ui/dialog'
-
+import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { useBootcampClasses } from '@/hooks/useBootcampClasses'
+import { useAddLiveClassesAsChapters } from '@/hooks/useAddLiveClassesAsChapters'
 import { ExistingLiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
+
 const ExistingLiveClass = ({
     fetchingChapters,
     onClose,
@@ -26,65 +24,39 @@ const ExistingLiveClass = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
-    const [position, setPosition] = useState(POSITION)
+    const orgId = Number(organizationId) || user?.orgId
     const [selectedRows, setSelectedRows] = useState<any[]>([])
     const [open, setOpen] = useState(false)
     const param = useParams()
     const router = useRouter()
-    const [pages, setPages] = useState(0)
-    const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [classes, setClasses] = useState([])
 
-    // Main fetch function
-    async function getAllClasses() {
-        if (!param?.courseId) return
+    const { classes } = useBootcampClasses(param.courseId)
+    const { addLiveClassesAsChapters } = useAddLiveClassesAsChapters()
+    const { chapters, refetch: refetchChapters } = useModuleChapters(param.moduleId as string)
 
-        try {
-            const res = await api.get(
-                `/classes/bootcamp/${param.courseId}/classes`
-            )
-            setClasses(res.data.classes)
-        } catch (err) {
-            console.error('Failed to fetch classes', err)
-        }
-    }
-    useEffect(() => {
-        getAllClasses()
-    }, [offset, position, param?.courseId])
-    const sesssionIds = selectedRows.map((rows) => rows.id)
-    async function addLiveClassesAsaChapter() {
-        const transformedBody = {
-            sessionIds: sesssionIds,
-            moduleId: +param.moduleId,
-        }
-        await api
-            .post(`/classes/addliveClassesAsChapters`, transformedBody)
-            .then((res) => {
-                toast.success({
-                    title: 'Success',
-                    description: 'Added Classes as a Chapter',
-                })
-                fetchingChapters()
-            })
-            .catch((error) => {
-                toast.error({
-                    title: 'Error',
-                    description: 'Classes Not added',
-                })
-            })
-    }
+    const sessionIds = selectedRows.map((row) => row.id)
 
     async function handleCreateChapters() {
-        await addLiveClassesAsaChapter()
+        try {
+            await addLiveClassesAsChapters({
+                sessionIds,
+                moduleId: Number(param.moduleId),
+            })
+            toast.success({
+                title: 'Success',
+                description: 'Added Classes as a Chapter',
+            })
+            fetchingChapters()
+        } catch {
+            toast.error({
+                title: 'Error',
+                description: 'Classes Not added',
+            })
+            setOpen(false)
+            return
+        }
 
-        const chaptersRes = await api.get(
-            `/Content/allChaptersOfModule/${param.moduleId}`
-        )
-        const chapters = chaptersRes?.data?.chapterWithTopic || []
-
+        await refetchChapters()
         const latestChapter = chapters[chapters.length - 1]
         if (latestChapter) {
             router.push(

@@ -10,6 +10,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
+import { fetchAllTags } from '@/utils/admin'
 import { PageTag } from '../../../../../resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -26,13 +27,13 @@ import {
     ChapterDetailsResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import useDebounce from '@/hooks/useDebounce'
+import useQuizQuestions from '@/hooks/useQuizQuestions'
 import CodingTopics from '../codingChallenge/CodingTopics'
 
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useEditChapter from '@/hooks/useEditChapter' 
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 import {QuizSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
@@ -86,7 +87,6 @@ function Quiz(props: QuizProps) {
         hardQuestions: [],
     })
     const { editChapter } = useEditChapter()
-    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const { chapterData, setChapterData } = getChapterDataState()
 
     const form = useForm<z.infer<typeof quizSchema>>({
@@ -97,74 +97,16 @@ function Quiz(props: QuizProps) {
         mode: 'onChange',
     })
 
-    const fetchQuizQuestions = useCallback(
-        async (
-            searchTerm: string = '',
-            selectedOptions: any[],
-            selectedDifficulty: any[]
-        ) => {
-            try {
-                let url = `/Content/${orgId}/allQuizQuestions`
-
-                const queryParams = []
-
-                let selectedTagIds = ''
-                selectedOptions.forEach((topic: any) => {
-                    if (topic.id !== -1 && topic.id !== 0) {
-                        // Skip 'All Topics'
-                        selectedTagIds += `&tagId=${topic.id}`
-                    }
-                })
-                // Handle multiple selected difficulties, but ignore 'Any Difficulty'
-                let selectedDiff = ''
-                selectedDifficulty.forEach((difficulty: string) => {
-                    if (difficulty !== 'Any Difficulty') {
-                        selectedDiff += `&difficulty=${difficulty}`
-                    }
-                })
-
-                if (selectedTagIds.length > 0) {
-                    queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
-                }
-                if (selectedDiff.length > 0) {
-                    queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
-                }
-                if (searchTerm) {
-                    queryParams.push(`searchTerm=${searchTerm}`)
-                }
-
-                // Combine query parameters into the URL
-                if (queryParams.length > 0) {
-                    url += '?' + queryParams.join('&')
-                }
-
-                const response = await api.get(url)
-
-                const allQuestions: QuizDataLibrary[] = response?.data?.data
-                setIsDataLoading(false)
-
-                const easyQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Easy'
-                )
-                const mediumQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Medium'
-                )
-                const hardQuestions = allQuestions.filter(
-                    (question) => question.difficulty === 'Hard'
-                )
-
-                setQuizData({
-                    allQuestions,
-                    easyQuestions,
-                    mediumQuestions,
-                    hardQuestions,
-                })
-            } catch (error) {
-                console.error('Error fetching quiz questions:', error)
-            }
-        },
-        [debouncedSeatch, selectedOptions, selectedDifficulty]
-    )
+    const {
+        quizQuestions: fetchedQuizQuestions,
+        loading: quizQuestionsLoading,
+    } = useQuizQuestions({
+        orgId,
+        selectedTopics: selectedOptions,
+        selectedDifficulties: selectedDifficulty,
+        searchTerm: debouncedSeatch,
+        initialFetch: true,
+    })
 
 
 
@@ -172,13 +114,26 @@ function Quiz(props: QuizProps) {
     
 
     useEffect(() => {
-        fetchQuizQuestions(debouncedSeatch, selectedOptions, selectedDifficulty)
-    }, [
-        debouncedSeatch,
-        fetchQuizQuestions,
-        selectedOptions,
-        selectedDifficulty,
-    ])
+        const allQuestions: QuizDataLibrary[] = fetchedQuizQuestions || []
+
+        const easyQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Easy'
+        )
+        const mediumQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Medium'
+        )
+        const hardQuestions = allQuestions.filter(
+            (question) => question.difficulty === 'Hard'
+        )
+
+        setQuizData({
+            allQuestions,
+            easyQuestions,
+            mediumQuestions,
+            hardQuestions,
+        })
+        setIsDataLoading(quizQuestionsLoading)
+    }, [fetchedQuizQuestions, quizQuestionsLoading])
 
     const handleAddQuestion = (data: QuizDataLibrary[]) => {
         if (!canEdit) return
@@ -222,19 +177,11 @@ function Quiz(props: QuizProps) {
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const transformedData = response.data.allTags.map(
-                (item: { id: number; tagName: string }) => ({
-                    id: item.id.toString(),
-                    tagName: item.tagName,
-                })
-            )
-            const tagArr = [
-                { id: -1, tagName: 'All Topics' },
-                ...transformedData,
-            ]
+        try {
+            const tagArr = await fetchAllTags()
             setTags(tagArr)
+        } catch (error) {
+            console.error('Error fetching tags:', error)
         }
     }
     const removeQuestionById = (questionId: number) => {
@@ -309,31 +256,18 @@ function Quiz(props: QuizProps) {
         }
     }
 
-    const getAllSavedQuizQuestion = useCallback(async () => {
-        if (!props.chapterId || props.chapterId === 0) return
+    const applySavedQuizQuestion = useCallback((chapterDetails: any) => {
+        setAddQuestion(chapterDetails?.quizQuestionDetails || [])
+        setQuizTitle(chapterDetails?.title || '')
+        setSavedQuestions(chapterDetails?.quizQuestionDetails || [])
+        setIsSaved(true)
 
-        try {
-            const res = await getChapterDetails({
-                chapterId: props.chapterId,
-                bootcampId: props.courseId,
-                moduleId: props.moduleId,
-                topicId: props.content.topicId,
-            })
-            setAddQuestion(res.data.quizQuestionDetails)
-            setQuizTitle(res.data.title)
-            setSavedQuestions(res.data.quizQuestionDetails)
-            setIsSaved(true)
-
-            // ensure input and form reflect server title
-            if (res.data.title) {
-                setInputValue(res.data.title)
-                setOriginalTitle(res.data.title)
-                form.reset({ title: res.data.title })
-            }
-        } catch (error) {
-            console.error('Failed to fetch chapter details', error)
+        if (chapterDetails?.title) {
+            setInputValue(chapterDetails.title)
+            setOriginalTitle(chapterDetails.title)
+            form.reset({ title: chapterDetails.title })
         }
-    }, [props.chapterId])
+    }, [form])
 
 
 
@@ -341,11 +275,11 @@ function Quiz(props: QuizProps) {
         const fetchData = async () => {
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
-                await getAllSavedQuizQuestion()
+                applySavedQuizQuestion(props.content)
             }
         }
         fetchData()
-    }, [props.chapterId, getAllSavedQuizQuestion])
+    }, [props.chapterId, props.content, applySavedQuizQuestion])
 
 
 

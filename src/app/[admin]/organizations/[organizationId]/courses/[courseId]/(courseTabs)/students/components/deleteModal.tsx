@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -9,8 +9,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { AlertCircle } from 'lucide-react'
 import {
@@ -18,6 +16,7 @@ import {
     getIsRowSelected,
 } from '@/store/store'
 import { DeleteModalDialogProps } from './courseStudentComponentType'
+import { useDeleteStudent } from '@/hooks/useDeleteStudent'
 
 export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
     title,
@@ -28,7 +27,7 @@ export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
     onClose,
     setSelectedRows, // Add this parameter
 }) => {
-    const [isDeleting, setIsDeleting] = useState(false)
+    const { deleteStudent, isDeleting } = useDeleteStudent()
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
     const {
         setStudents,
@@ -42,17 +41,8 @@ export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
     } = getStoreStudentDataNew()
 
     async function deleteStudentHandler() {
-        if (isDeleting) return
-        
-        setIsDeleting(true)
-        try {
-            let url = `/student/{userId}/${bootcampId}?`
-            url += 'userId=' + userId.join('&userId=')
-            await api.delete(url).then((res) => {
-                toast.success({
-                    title: 'User Deleted Successfully!',
-                    description: res.data.message,
-                })
+        await deleteStudent(userId, bootcampId, {
+            onSuccess: () => {
                 fetchStudentsHandler({
                     courseId: String(bootcampId),
                     limit,
@@ -74,16 +64,8 @@ export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
                 if (onClose) {
                     onClose()
                 }
-            })
-        } catch (error: any) {
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'An error occurred.',
-            })
-        } finally {
-            setIsDeleting(false)
-        }
+            }
+        })
     }
 
     return (

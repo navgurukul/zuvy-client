@@ -12,8 +12,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import { fetchBatchStudentsHandler } from '@/utils/admin'
 import {
     getStoreStudentDataNew,
@@ -22,6 +20,7 @@ import {
 } from '@/store/store'
 import{DeleteAlertDialogProps} from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 import { useParams } from 'next/navigation'
+import { useDeleteStudent } from '@/hooks/useDeleteStudent'
 
 export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,
@@ -47,15 +46,11 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
         search,
     } = getStoreStudentDataNew()
 
+    const { deleteStudent } = useDeleteStudent()
+
     async function deleteStudentHandler(userId: any, bootcampId: any) {
-        try {
-            let url = `/student/{userId}/${bootcampId}?`
-            url += 'userId=' + userId.join('&userId=')
-            await api.delete(url).then((res) => {
-                toast.success({
-                    title: 'User Deleted Successfully!',
-                    description: res.data.message,
-                })
+        await deleteStudent(userId, bootcampId, {
+            onSuccess: () => {
                 fetchBatchStudentsHandler({
                     courseId: bootcampId,
                     batchId:selectedBatchId,
@@ -69,14 +64,8 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     setCurrentPage,
                 })
                 setIsRowUnSelected(!isRowUnSelected)
-            })
-        } catch (error: any) {
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'An error occurred.',
-            })
-        }
+            }
+        })
     }
 
     return (
