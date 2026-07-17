@@ -12,14 +12,7 @@ import {
 import { useBookMentorSlot } from "@/hooks/useBookMentorSlot";
 import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
 import { getMentorProfileHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
-
-const getMentorId = (idParam: string | string[] | undefined) => {
-  if (Array.isArray(idParam)) {
-    return idParam[0];
-  }
-
-  return idParam;
-};
+import { getMentorId } from "@/utils/mentorUtils";
 
 const getInitials = (label: string) =>
   label
