@@ -30,6 +30,26 @@ export interface UsersResponse {
     }
 }
 
+// Multiple effects can ask for the same page while it is mounting (including
+// React Strict Mode in development). Keep only one network request per URL
+// until that request has settled.
+const pendingUserRequests = new Map<string, Promise<UsersResponse>>()
+
+const fetchUsers = (url: string): Promise<UsersResponse> => {
+    const pendingRequest = pendingUserRequests.get(url)
+    if (pendingRequest) return pendingRequest
+
+    const request = api
+        .get<UsersResponse>(url)
+        .then((res) => res.data)
+        .finally(() => {
+            pendingUserRequests.delete(url)
+        })
+
+    pendingUserRequests.set(url, request)
+    return request
+}
+
 type UseAllUsersArgs = {
     limit: number | string
     searchTerm: string
@@ -66,21 +86,25 @@ export function useAllUsers({
 
     const getAllUsers = useCallback(
         async (offset: number, filterRoleId?: string | number) => {
-            try {
-                // setLoading(true)
+            if (orgId === undefined) {
                 setLoading(false)
+                return
+            }
+
+            try {
+                setLoading(true)
                 setError(null)
                 const roleIdParam = filterRoleId || roleId
                 const roleQuery = roleIdParam ? `&roleId=${roleIdParam}` : ''
-                const res = await api.get<UsersResponse>(`/users/get/all/users/${orgId}?limit=${stableLimit}&offset=${offset}${roleQuery}`)
-                const allUsers = res.data || []
+                const url = `/users/get/all/users/${orgId}?limit=${stableLimit}&offset=${offset}${roleQuery}`
+                const allUsers = await fetchUsers(url)
 
                 setUsers(allUsers.data)
                 setTotalRows(allUsers.totalRows)
                 setTotalPages(allUsers.totalPages)
 
-                if (res.data.permissions) {
-                    setPermissions(res.data.permissions)
+                if (allUsers.permissions) {
+                    setPermissions(allUsers.permissions)
                 }
                 setError(null)
             } catch (err) {
@@ -90,7 +114,7 @@ export function useAllUsers({
                 setLoading(false)
             }
         },
-        [roleId, stableLimit]
+        [orgId, roleId, stableLimit]
     )
 
     useEffect(() => {
