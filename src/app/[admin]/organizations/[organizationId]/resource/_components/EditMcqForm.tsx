@@ -24,10 +24,11 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useState } from 'react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
 import useGetMCQs from '@/hooks/useGetMcq'
+import useAddQuizVariants from '@/hooks/useAddQuizVariants'
+import useDeleteQuizVariant from '@/hooks/useDeleteQuizVariant'
 import {
     Tooltip,
     TooltipContent,
@@ -41,6 +42,7 @@ import {
     QuizDataType,
 } from './adminResourceComponentType'
 import { useParams } from 'next/navigation';
+import useEditQuizQuestions from '@/hooks/useEditQuizQuestions'
 
 type Props = {}
 
@@ -82,9 +84,12 @@ const EditMcqForm = ({
     const { quizData, noofExistingVariants, refetch } = useGetMCQs({
         id: quizQuestionId,
     })
+    const { addQuizVariants, loading: addingVariants } = useAddQuizVariants(orgId)
+    const { deleteQuizVariant, loading: deletingVariant } = useDeleteQuizVariant(orgId)
+    const { editQuizQuestions, loading: editingQuiz } =
+        useEditQuizQuestions(orgId)
     const [isVariantAdded, setIsVariantAdded] = useState<boolean>(false)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-    const [loading, setLoading] = useState(false)
 
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
@@ -145,34 +150,27 @@ const EditMcqForm = ({
         }
         setIsVariantAdded(fields.length - 1 > noofExistingVariants)
         const removedVariantId = fields[index].variantId
-        const reqBody = {
-            questionIds: [
-                {
-                    id: removedVariantId,
-                    type: 'variant',
-                },
-            ],
+
+        if (!removedVariantId) {
+            setDeleteModalOpen(false)
+            return
         }
-        await api({
-            method: 'delete',
-            url: `/Content/${orgId}/deleteMainQuizOrVariant`,
-            data: reqBody,
-        })
-            .then((res) => {
-                toast.success({
-                    title: 'Success',
-                    description: res.data.message,
-                })
-                setDeleteModalOpen(false)
-                refetch()
+
+        try {
+            const res = await deleteQuizVariant(removedVariantId)
+            toast.success({
+                title: 'Success',
+                description: res.data.message,
             })
-            .catch((error) => {
-                toast.error({
-                    title: 'Error',
-                    description:
-                        error.response?.data?.message || 'An error occurred',
-                })
+            setDeleteModalOpen(false)
+            refetch()
+        } catch (error: any) {
+            toast.error({
+                title: 'Error',
+                description:
+                    error.response?.data?.message || 'An error occurred',
             })
+        }
     }
     function findMissingVariants(object1: any, object2: any) {
         const variantsObject1 = object1.variantMCQs || []
@@ -230,15 +228,11 @@ const EditMcqForm = ({
             }
 
             try {
-                await api
-                    .post(`/Content/${orgId}/quiz/add/variants`, reqBody)
-                    .then((res) => {
-                        toast.success({
-                            title: 'Success',
-                            description: res.data.message,
-                        })
-                        closeModal() // Close modal after success
-                    })
+                const res = await addQuizVariants(reqBody)
+                toast.success({
+                    title: 'Success',
+                    description: res.data.message,
+                })
 
                 setIsVariantAdded(false)
                 await refetch()
@@ -288,15 +282,11 @@ const EditMcqForm = ({
                 })),
             }
             try {
-                await api
-                    .post(`/Content/${orgId}/editquiz`, transformedObj)
-                    .then((res) => {
-                        toast.success({
-                            title: 'Success',
-                            description: res?.data.message,
-                        })
-                        closeModal() // Close modal after success
-                    })
+                const res = await editQuizQuestions(transformedObj)
+                toast.success({
+                    title: 'Success',
+                    description: res.data.message,
+                })
                 await refetch()
                 
                 // ✅ ADD THIS - Refresh main table data  
@@ -659,16 +649,20 @@ const EditMcqForm = ({
                                 input={false}
                                 buttonText="Delete Variant"
                                 instructorInfo={''}
-                                loading={loading}
+                                loading={deletingVariant}
                             />
                         </>
                     )}
                     <Button
                         className="bg-primary hover:bg-primary-dark"
                         type="submit"
-                        disabled={!isContentValid} // Disable button if content is invalid
+                        disabled={!isContentValid || addingVariants} // Disable button if content is invalid
                     >
-                        {isVariantAdded ? 'Add Variant' : 'Save Question'}
+                        {addingVariants
+                            ? 'Adding Variant...'
+                            : isVariantAdded
+                              ? 'Add Variant'
+                              : 'Save Question'}
                     </Button>
                 </div>
             </form>

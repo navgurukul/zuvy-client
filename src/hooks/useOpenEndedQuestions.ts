@@ -34,6 +34,12 @@ export default function useOpenEndedQuestions({
     const [error, setError] = useState<any>(null)
 
     const lastSignatureRef = useRef<string>('')
+    const inFlightSignatureRef = useRef<string>('')
+    const latestResultRef = useRef<FetchedData>({
+        data: [],
+        totalRows: 0,
+        totalPages: 0,
+    })
 
     const buildQuery = useCallback(
         (ov?: {
@@ -96,11 +102,15 @@ export default function useOpenEndedQuestions({
             const qs = buildQuery(opts)
             const signature = getSignature(qs)
 
-            if (signature === lastSignatureRef.current) {
-                return { data: openEndedQuestions, totalRows, totalPages }
+            if (
+                signature === lastSignatureRef.current ||
+                signature === inFlightSignatureRef.current
+            ) {
+                return latestResultRef.current
             }
 
             try {
+                inFlightSignatureRef.current = signature
                 setLoading(true)
                 setError(null)
 
@@ -114,16 +124,22 @@ export default function useOpenEndedQuestions({
                 setTotalRows(total)
                 setTotalPages(pages)
                 lastSignatureRef.current = signature
+                latestResultRef.current = {
+                    data,
+                    totalRows: total,
+                    totalPages: pages,
+                }
 
                 return { data, totalRows: total, totalPages: pages }
             } catch (err) {
                 setError(err)
                 return { data: [], error: err }
             } finally {
+                inFlightSignatureRef.current = ''
                 setLoading(false)
             }
         },
-        [buildQuery, getSignature, orgId, openEndedQuestions, totalRows, totalPages]
+        [buildQuery, getSignature, orgId]
     )
 
     const refetch = useCallback(() => fetchOpenEndedQuestions(), [fetchOpenEndedQuestions])

@@ -820,6 +820,15 @@ export interface UseCreateOpenEndedQuestionReturn {
   error: string | null;
 }
 
+// useUpdateOpenEndedQuestion
+export type UpdateOpenEndedQuestionData = CreateOpenEndedQuestionData;
+
+export interface UseUpdateOpenEndedQuestionReturn {
+  updateOpenEndedQuestion: (questionId: number, data: UpdateOpenEndedQuestionData) => Promise<boolean>;
+  loading: boolean;
+  error: string | null;
+}
+
 // Tracking Log Types
 export interface TrackingLogEntry {
   id: number
