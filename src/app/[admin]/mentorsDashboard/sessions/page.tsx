@@ -125,11 +125,13 @@ export default function SessionsPage() {
     Record<number, true>
   >({})
 
-  const { counts } = useMyMentorSessions(
-    true,
-    "/instructor/mentor-sessions/my",
-    "all"
-  )
+  const {
+    sessions: apiSessions,
+    loading,
+    error,
+    refetchMySessions,
+    counts,
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const summaryCounts = {
     total: Number(counts.total) || 0,
@@ -138,13 +140,6 @@ export default function SessionsPage() {
     completed: Number(counts.completed) || 0,
     cancelled: Number(counts.cancelled) || 0,
   }
-
-  const {
-    sessions: apiSessions,
-    loading,
-    error,
-    refetchMySessions,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const sessions = apiSessions
 

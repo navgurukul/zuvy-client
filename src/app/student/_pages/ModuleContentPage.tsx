@@ -12,6 +12,7 @@ import ModuleContentRenderer from "@/app/student/_components/ModuleContentRender
 import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
+import { getIconColor } from "@/app/student/_utils/sidebarUtils";
 import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
@@ -332,28 +333,8 @@ useEffect(() => {
       }
     };
 
-    const getIconColor = () => {
-      switch (type) {
-        case 'live-class':
-        case 'video':
-          return status === 'completed' ? 'text-success' : 'text-primary';
-        case 'article':
-        case 'assessment':
-          return status === 'completed' ? 'text-success' : 'text-accent';
-        case 'assignment':
-          return status === 'completed' ? 'text-success' : 'text-secondary';
-        case 'quiz':
-        case 'coding-challenge':
-          return status === 'completed' ? 'text-success' : 'text-warning';
-        case 'feedback-form':
-          return status === 'completed' ? 'text-success' : 'text-info';
-        default:
-          return 'text-muted-foreground';
-      }
-    };
-
     return (
-      <div className={getIconColor()}>
+      <div className={getIconColor(type, status)}>
         {getIconComponent()}
       </div>
     );

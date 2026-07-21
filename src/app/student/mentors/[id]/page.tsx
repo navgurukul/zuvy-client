@@ -9,14 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/axios.config";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 import { getMentorBookHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
-
-const getMentorId = (idParam: string | string[] | undefined) => {
-  if (Array.isArray(idParam)) {
-    return idParam[0];
-  }
-
-  return idParam;
-};
+import { getMentorId } from "@/utils/mentorUtils";
 
 const getInitials = (label: string) =>
   label
