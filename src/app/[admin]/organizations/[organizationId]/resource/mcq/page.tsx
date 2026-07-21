@@ -93,6 +93,7 @@ interface Option {
 
 const Mcqs = (props: Props) => {
     const hasLoaded = useRef(false);
+    const lastQuizQuestionsRequestRef = useRef<string | null>(null)
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -209,7 +210,7 @@ const Mcqs = (props: Props) => {
     
         try {
             // API call to fetch quiz questions based on the query
-            const response = await api.get('Content/allQuizQuestions', {
+            const response = await api.get(`Content/${orgId}/allQuizQuestions`, {
                 params: {
                     searchTerm: query.trim(), // Remove encodeURIComponent here as axios handles it
                     // Add additional filters if needed (tags, difficulty, etc.)
@@ -277,9 +278,10 @@ const Mcqs = (props: Props) => {
                 searchTerm: query.trim(),
             };
 
-            const response = await api.get('Content/allQuizQuestions', { params: apiParams });
+            const response = await api.get(`Content/${orgId}/allQuizQuestions`, { params: apiParams });
 
             if (response && response.data) {
+                lastQuizQuestionsRequestRef.current = null
                 setStoreQuizData(response.data.data || []);
                 setTotalMCQQuestion(response.data.totalRows || 0);
                 setTotalPages(response.data.totalPages || 0);
@@ -439,12 +441,39 @@ const Mcqs = (props: Props) => {
         }
     }, []) // Empty dependency - runs only when component mounts
 
+    const getQuizQuestionsRequestKey = useCallback(
+        (requestOffset: number, searchTerm: string) =>
+            JSON.stringify({
+                orgId,
+                offset: requestOffset,
+                position,
+                searchTerm,
+                selectedOptions: selectedOptions.map((option) => option.value),
+                difficulty: difficulty.map((option) => option.value),
+            }),
+        [difficulty, orgId, position, selectedOptions]
+    )
+
     // Data fetching function को update करो
     const fetchCodingQuestions = useCallback(
-        async (offset: number, searchTerm?: string) => {
+        async (offset: number, searchTerm?: string, force = false) => {
             if (offset >= 0 && options.length > 0) { // Add options.length check
                 try {
                     const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
+                    const requestKey = getQuizQuestionsRequestKey(
+                        offset,
+                        currentSearchTerm
+                    )
+
+                    if (
+                        !force &&
+                        lastQuizQuestionsRequestRef.current === requestKey
+                    ) {
+                        return
+                    }
+
+                    lastQuizQuestionsRequestRef.current = requestKey
+
                     await filteredQuizQuestions(
                         setStoreQuizData,
                         orgId,
@@ -459,6 +488,7 @@ const Mcqs = (props: Props) => {
                     )
                     setLoading(false) 
                 } catch (error) {
+                    lastQuizQuestionsRequestRef.current = null
                     console.error('Error fetching questions:', error)
                     // Set empty data on error to prevent table crashes
                     setStoreQuizData([])
@@ -473,6 +503,7 @@ const Mcqs = (props: Props) => {
             setTotalMCQQuestion,
             setLastPage,
             setTotalPages,
+            getQuizQuestionsRequestKey,
             searchParams,
             options.length,
         ]
@@ -482,12 +513,12 @@ const Mcqs = (props: Props) => {
         // Clear search from URL when defaultFetch is called
         updateURL('', selectedOptions, difficulty);
         setmcqSearch('');
-        return fetchCodingQuestions(0, '');
+        return fetchCodingQuestions(0, '', true);
     }, [selectedOptions, difficulty, updateURL, fetchCodingQuestions]);
 
     useEffect(() => {
         if (lastQuestionsReadyEvent) {
-            fetchCodingQuestions(offset)
+            fetchCodingQuestions(offset, undefined, true)
         }
     }, [lastQuestionsReadyEvent, fetchCodingQuestions, offset])
 
@@ -531,7 +562,7 @@ const Mcqs = (props: Props) => {
         // If search is cleared manually, trigger default fetch
         if (!value || value.trim() === '') {
             updateURL('', selectedOptions, difficulty);
-            fetchCodingQuestions(0, '');
+            fetchCodingQuestions(0, '', true);
         }
     }
 
@@ -587,7 +618,7 @@ const Mcqs = (props: Props) => {
                                 // Handle the generated questions
                                 console.log('Received generated questions:', questions)
                                 // Refresh the quiz data after AI generation
-                                fetchCodingQuestions(offset)
+                                fetchCodingQuestions(offset, undefined, true)
                                 toast.success({
                                     title: 'Questions Generated',
                                     description: `Successfully generated ${questions.length} MCQ questions`,

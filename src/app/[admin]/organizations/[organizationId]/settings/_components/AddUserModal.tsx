@@ -12,7 +12,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRoles } from '@/hooks/useRoles'
-import { useUsers } from '@/hooks/useUsers'
+import { useAddUser } from '@/hooks/useAddUser'
+import { useUpdateUser } from '@/hooks/useUpdateUser'
 import { useUser } from '@/hooks/useSingleUser'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -117,7 +118,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             : currentUser?.orgId
 
     const { roles, loading: rolesLoading } = useRoles()
-    const { addUser, updateUser } = useUsers()
+    const { addUser } = useAddUser()
+    const { updateUser } = useUpdateUser()
     const shouldFetchFreshUser = isEditMode && isOpen && !!user?.id
     const {
         user: fetchedUser,

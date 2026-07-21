@@ -17,7 +17,7 @@ import { Trash2 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
-import { useUsers } from '@/hooks/useUsers'
+import { useDeleteUser } from '@/hooks/useDeleteUser'
 
 interface DeleteUserProps {
     title: string
@@ -36,7 +36,7 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
-    const { deleteUser } = useUsers()
+    const { deleteUser } = useDeleteUser()
     const [open, setOpen] = useState(false)  // ✅ Modal control
     const [isDeleting, setIsDeleting] = useState(false)  // ✅ Loading state
 

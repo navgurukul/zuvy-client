@@ -134,9 +134,6 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       newErrors.roles = 'Select maximum 5 roles';
     }
 
-    if (totalLocations === 0) {
-      newErrors.locations = 'Select at least 1 location';
-    }
     if (totalLocations > 6) {
       newErrors.locations = 'Select maximum 5 cities + Remote';
     }

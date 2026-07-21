@@ -196,7 +196,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode; mentorshipEnabl
       localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
       setIsTourCompleted(true);
     }
-  }, []);
+    // After skipping, redirect to profile page so the student can fill in their details
+    router.push('/student/profile');
+  }, [router]);
 
   const finishTour = useCallback(async () => {
     setIsOpen(false);

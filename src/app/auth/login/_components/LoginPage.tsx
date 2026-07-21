@@ -82,30 +82,6 @@ function LoginPage() {
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
 
-    type LearnerProfileStrengthResponse = {
-        percentage?: number
-        profileCompletion?: number
-        isProfileComplete?: boolean
-        level?: string
-        message?: string
-    }
-
-    const getStudentStrengthPercentage = async (): Promise<number | null> => {
-        try {
-            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
-            const completionValue =
-                typeof res.data?.profileCompletion === 'number'
-                    ? res.data.profileCompletion
-                    : typeof res.data?.percentage === 'number'
-                        ? res.data.percentage
-                        : null
-
-            return completionValue
-        } catch (error) {
-            console.error('Failed to fetch learner profile strength:', error)
-            return null
-        }
-    }
 
     const isMentorProfileComplete = (profile: MentorProfileResponse | null) => {
         if (!profile) return false
@@ -231,8 +207,10 @@ const handleGoogleSuccess = async (
                 
                 if (response.data.showTooltip) {
                     localStorage.setItem('isLoginFirst', 'true')
+                    localStorage.removeItem('skipProfileSetup')
                 } else {
                     localStorage.removeItem('isLoginFirst')
+                    localStorage.setItem('skipProfileSetup', 'true')
                 }
 
                 // Handle redirects based on user role
@@ -268,13 +246,11 @@ const handleGoogleSuccess = async (
                 } else if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    const strengthPercentage = await getStudentStrengthPercentage()
-                    if (strengthPercentage !== null && strengthPercentage > 20) {
-                        router.push('/student')
-                    } else {
+                    if (response.data.showTooltip) {
                         router.push('/student/profile')
+                    } else {
+                        router.push('/student')
                     }
-                    
                 } else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
