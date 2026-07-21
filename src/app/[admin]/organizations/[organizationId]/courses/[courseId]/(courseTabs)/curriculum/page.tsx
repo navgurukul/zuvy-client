@@ -25,7 +25,7 @@ import {
     PermissionsType,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
-
+import { convertSeconds } from '@/utils/admin'
 import {CurriculumSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 function Page() {
@@ -113,32 +113,6 @@ function Page() {
         setEditMode(true)
         setModuleId(module)
         setIsEditOpen(true)
-    }
-    // Convert seconds to months, weeks and days:-
-    const convertSeconds = (seconds: number) => {
-        // Handle negative or zero seconds
-        if (seconds <= 0) {
-            return {
-                months: 0,
-                weeks: 0,
-                days: 0,
-            }
-        }
-
-        const SECONDS_IN_A_DAY = 24 * 60 * 60 // 86400
-        const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
-        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
-        const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
-        const remainingAfterMonths = seconds % SECONDS_IN_A_MONTH
-        const weeks = Math.floor(remainingAfterMonths / SECONDS_IN_A_WEEK)
-        const remainingAfterWeeks = remainingAfterMonths % SECONDS_IN_A_WEEK
-        const days = Math.floor(remainingAfterWeeks / SECONDS_IN_A_DAY)
-
-        return {
-            months: months,
-            weeks: weeks,
-            days: days,
-        }
     }
 
     useEffect(() => {

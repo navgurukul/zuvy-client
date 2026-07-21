@@ -16,7 +16,7 @@ import useWindowSize from '@/hooks/useHeightWidth';
 import { X } from 'lucide-react';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
-
+import { normalizeLinks } from '@/utils/admin';
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -368,17 +368,6 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 };
 
 export default AssignmentContent; 
-
-const normalizeLinks = (links?: string | string[]): string[] => {
-  if (!links) return [];
-  if (Array.isArray(links)) {
-    return links.map((link) => link.trim()).filter(Boolean);
-  }
-  return links
-    .split(/\r?\n+/)
-    .map((link) => link.trim())
-    .filter(Boolean);
-};
 
 const isValidUrl = (value: string): boolean => {
   try {

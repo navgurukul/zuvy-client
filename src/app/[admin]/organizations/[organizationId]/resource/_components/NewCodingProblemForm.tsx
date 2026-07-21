@@ -34,6 +34,7 @@ import { NewCodingProblemFormProps } from './adminResourceComponentType'
 import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useParams } from 'next/navigation';
+import { getAvailableInputTypes, removeInputFromTestCases, validateCodingInputValue } from '@/utils/codingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -116,18 +117,11 @@ export default function NewCodingProblemForm({
         return parsed % 1 === 0 ? parsed.toFixed(1) : parsed
     }
 
-    const getAvailableInputTypes = (testCaseIndex: number) => {
-        const usedTypes = testCases[testCaseIndex].inputs.map(
-            (input) => input.type
-        )
-        return inputTypes.filter((type) => !usedTypes.includes(type))
-    }
-
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return
 
-        const availableTypes = getAvailableInputTypes(0) // Get all input types
+        const availableTypes = getAvailableInputTypes(inputTypes, testCases[0].inputs) // Get all input types
 
         // Create new input for first test case and propagate to all test cases
         const newInput = { id: Date.now(), type: availableTypes[0], value: '' }
@@ -143,15 +137,13 @@ export default function NewCodingProblemForm({
     }
 
     const handleRemoveInput = (testCaseId: number, inputIndex: number) => {
-        // Only allow removing inputs from the first test case
-        if (testCaseId !== testCases[0].id) return
-
-        // Remove the input at the specified index from all test cases
         setTestCases((prevTestCases) =>
-            prevTestCases.map((testCase) => ({
-                ...testCase,
-                inputs: testCase.inputs.filter((_, idx) => idx !== inputIndex),
-            }))
+            removeInputFromTestCases(
+                prevTestCases,
+                testCaseId,
+                inputIndex,
+                prevTestCases[0]?.id
+            )
         )
     }
 
@@ -176,50 +168,7 @@ export default function NewCodingProblemForm({
 
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
-        switch (type) {
-            case 'arrayOfStr':
-            case 'arrayOfnum': {
-                break
-            }
-            case 'str': {
-                break
-            }
-            case 'int': {
-                if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast.error({
-                        title: 'Invalid Integer Input',
-                        description: 'Please enter a valid integer value',
-                    })
-                    return false
-                }
-                break
-            }
-            case 'float': {
-                if (isNaN(Number(value)) && value !== '') {
-                    toast.error({
-                        title: 'Invalid Float Input',
-                        description: 'Please enter a valid float value',
-                    })
-                    return false
-                }
-                break
-            }
-            case 'bool': {
-                if (
-                    value &&
-                    !/^(true|false)$/.test(value) &&
-                    !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)
-                ) {
-                    toast.error({
-                        title: 'Invalid Boolean Input',
-                        description: "Please enter either 'true' or 'false'",
-                    })
-                    return false
-                }
-                break
-            }
-        }
-        return true
+        return validateCodingInputValue(value, type, toast.error)
     }
 
     const handleInputChange = (

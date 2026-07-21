@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
+import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
 
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
@@ -12,30 +13,11 @@ export const columns: ColumnDef<any>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePicture = student.user?.profilePicture
-            const ImageContainer = () => {
-                return profilePicture ? (
-                    <Image
-                        src={profilePicture}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={'https://avatar.iran.liara.run/public/boy?username=Ash'}
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+        cell: ({ row }) => (
+            <div className="flex items-center">
+                <ProfileImage src={row.original.profilePicture} />
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },

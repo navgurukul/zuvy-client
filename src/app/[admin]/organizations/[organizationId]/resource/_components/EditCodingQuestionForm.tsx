@@ -47,6 +47,7 @@ import { Input as PostcssInput } from 'postcss'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useEditCodingQuestion } from '@/hooks/useEditCodingQuestion'
 import { useParams } from 'next/navigation'
+import { getAvailableInputTypes, removeInputFromTestCases, validateCodingInputValue } from '@/utils/codingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -132,51 +133,7 @@ export default function EditCodingQuestionForm() {
 
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
-        switch (type) {
-            case 'arrayOfStr':
-            case 'arrayOfnum': {
-                break
-            }
-            case 'str': {
-                // Allow strings with spaces, treat the entire input as a single string
-                break
-            }
-            case 'int': {
-                if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast.error({
-                        title: 'Invalid Integer Input',
-                        description: 'Please enter a valid integer value',
-                    })
-                    return false
-                }
-                break
-            }
-            case 'float': {
-                if (isNaN(Number(value)) && value !== '') {
-                    toast.error({
-                        title: 'Invalid Float Input',
-                        description: 'Please enter a valid float value',
-                    })
-                    return false
-                }
-                break
-            }
-            case 'bool': {
-                if (
-                    value &&
-                    !/^(true|false)$/.test(value) &&
-                    !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)
-                ) {
-                    toast.error({
-                        title: 'Invalid Boolean Input',
-                        description: "Please enter either 'true' or 'false'",
-                    })
-                    return false
-                }
-                break
-            }
-        }
-        return true
+        return validateCodingInputValue(value, type, toast.error)
     }
 
     const validateOutputValue = (value: string, type: string): boolean => {
@@ -265,18 +222,11 @@ export default function EditCodingQuestionForm() {
         )
     }
 
-    const getAvailableInputTypes = (testCaseIndex: number) => {
-        const usedTypes = testCases[testCaseIndex].inputs.map(
-            (input) => input.type
-        )
-        return inputTypes.filter((type) => !usedTypes.includes(type))
-    }
-
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return
 
-        const availableTypes = getAvailableInputTypes(0) // Get all input types
+        const availableTypes = getAvailableInputTypes(inputTypes, testCases[0].inputs) // Get all input types
         if (availableTypes.length === 0) {
             toast.error({
                 title: 'Cannot Add Input',
@@ -302,15 +252,13 @@ export default function EditCodingQuestionForm() {
     }
 
     const handleRemoveInput = (testCaseId: number, inputIndex: number) => {
-        // Only allow removing inputs from the first test case
-        if (testCaseId !== testCases[0].id) return
-
-        // Remove the input at the specified index from all test cases
         setTestCases((prevTestCases) =>
-            prevTestCases.map((testCase) => ({
-                ...testCase,
-                inputs: testCase.inputs.filter((_, idx) => idx !== inputIndex),
-            }))
+            removeInputFromTestCases(
+                prevTestCases,
+                testCaseId,
+                inputIndex,
+                prevTestCases[0]?.id
+            )
         )
     }
 

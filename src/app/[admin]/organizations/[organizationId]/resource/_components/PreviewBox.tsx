@@ -9,6 +9,7 @@ import {
     PreviewBoxQuizVariantData,
     PreviewBoxQuizVariant,
 } from './adminResourceComponentType'
+import { getDifficultyColor } from '@/lib/utils'
 
 export default function DialogBox({
     show,
@@ -41,19 +42,6 @@ export default function DialogBox({
         setCodeSnippet(updatedHtml)
     }
     if (quizData) {
-    }
-
-    const difficultyColor = (difficulty: string) => {
-        switch (difficulty) {
-            case 'Easy':
-                return 'bg-green-200 text-green-800'
-            case 'Medium':
-                return 'bg-yellow-200 text-yellow-800'
-            case 'Hard':
-                return 'bg-red-200 text-red-800'
-            default:
-                return 'bg-gray-200 text-gray-800'
-        }
     }
 
     if (!quizData) return null
@@ -94,7 +82,7 @@ export default function DialogBox({
                                     {tagName}
                                 </span>
                                 <span
-                                    className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
+                                    className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${getDifficultyColor(
                                         difficulty as any
                                     )}`}
                                 >
