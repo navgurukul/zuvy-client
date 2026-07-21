@@ -11,6 +11,7 @@ import {
     Tags,
     QuizVariant,
 } from './adminResourceComponentType'
+import { getDifficultyColor } from '@/lib/utils'
 
 const PreviewMCQ = ({
     quizQuestionId,
@@ -61,19 +62,6 @@ const PreviewMCQ = ({
         setCodeSnippet(updatedHtml)
     }
 
-    const difficultyColor = (difficulty: string) => {
-        switch (difficulty) {
-            case 'Easy':
-                return 'bg-green-100 text-secondary'
-            case 'Medium':
-                return 'bg-orange-100 text-yellow-dark'
-            case 'Hard':
-                return 'bg-red-100 text-destructive'
-            default:
-                return 'bg-gray-200 text-gray-800'
-        }
-    }
-
     if (!quizData) return null
 
     const handleTabChange = (variantId: QuizVariant) => {
@@ -117,7 +105,7 @@ const PreviewMCQ = ({
                             {displayTagName}
                         </span>
                         <span
-                            className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
+                            className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${getDifficultyColor(
                                 difficulty as any
                             )}`}
                         >

@@ -1339,3 +1339,14 @@ export const getEmbedLink = (url: string) => {
         }
         return false
     }
+
+export const normalizeLinks = (links?: string | string[]): string[] => {
+    if (!links) return []
+    if (Array.isArray(links)) {
+        return links.map((link) => link.trim()).filter(Boolean)
+    }
+    return links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
+}

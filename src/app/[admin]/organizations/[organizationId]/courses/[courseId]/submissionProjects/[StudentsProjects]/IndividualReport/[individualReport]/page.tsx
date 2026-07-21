@@ -13,6 +13,7 @@ import {
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import useIndividualProjectReport from '@/hooks/useIndividualProjectReport'
+import { normalizeLinks } from '@/utils/admin'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
@@ -205,17 +206,6 @@ const Page = ({ params }: PageParams) => {
     }
 
     return null
-}
-
-const normalizeLinks = (links?: string | string[]): string[] => {
-    if (!links) return []
-    if (Array.isArray(links)) {
-        return links.map((link) => link.trim()).filter(Boolean)
-    }
-    return links
-        .split(/\r?\n+/)
-        .map((link) => link.trim())
-        .filter(Boolean)
 }
 
 export default Page

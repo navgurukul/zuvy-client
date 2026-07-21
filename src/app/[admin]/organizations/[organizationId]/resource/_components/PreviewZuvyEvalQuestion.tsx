@@ -13,6 +13,7 @@ import { Eye } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import { getDifficultyColor } from '@/lib/utils'
 
 interface PreviewZuvyEvalQuestionProps {
     questionId: number
@@ -30,19 +31,6 @@ const PreviewZuvyEvalQuestion = ({ questionId }: PreviewZuvyEvalQuestionProps) =
               ([a], [b]) => Number(a) - Number(b)
           )
         : []
-
-    const difficultyColor = (difficulty: string) => {
-        switch ((difficulty || '').toLowerCase()) {
-            case 'easy':
-                return 'bg-green-100 text-secondary'
-            case 'medium':
-                return 'bg-orange-100 text-yellow-dark'
-            case 'hard':
-                return 'bg-red-100 text-destructive'
-            default:
-                return 'bg-gray-200 text-gray-800'
-        }
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -66,7 +54,7 @@ const PreviewZuvyEvalQuestion = ({ questionId }: PreviewZuvyEvalQuestionProps) =
                                         {question.topicName || 'No Topic'}
                                     </span>
                                     <span
-                                        className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
+                                        className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${getDifficultyColor(
                                             question.difficulty
                                         )}`}
                                     >
