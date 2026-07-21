@@ -943,9 +943,6 @@ export const EditProfilePage: React.FC = () => {
       }
 
       const totalLocations = (remotePreference ? 1 : 0) + normalizedLocations.length;
-      if (totalLocations === 0) {
-        fieldErrors.push('Select at least 1 location');
-      }
       if (totalLocations > 6) {
         fieldErrors.push('Select maximum 5 cities + Remote');
       }
@@ -2101,7 +2098,13 @@ export const EditProfilePage: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Year of study</p>
-                          <p className="font-medium">{step1?.yearOfStudy || '-'}</p>
+                          <p className="font-medium">
+                            {step1?.yearOfStudy
+                              ? step1.yearOfStudy === 'passed_out'
+                                ? 'Passout'
+                                : step1.yearOfStudy
+                              : '-'}
+                          </p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Expected graduation</p>
@@ -2383,29 +2386,36 @@ export const EditProfilePage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="font-medium">Year of Study *</Label>
-                                <div className="grid grid-cols-4 gap-2 mt-2">
-                                  {['1st', '2nd', '3rd', '4th'].map((year) => (
-                                    <button
-                                      key={year}
-                                      type="button"
-                                      onClick={() =>
-                                        setEditedData((prev: any) => ({
-                                          ...prev,
-                                          step1: {
-                                            ...(prev.step1 || {}),
-                                            yearOfStudy: year,
-                                          },
-                                        }))
-                                      }
-                                      className={`py-2 px-3 rounded-lg border-2 font-medium text-sm transition-all ${
-                                        (editedData?.step1?.yearOfStudy ?? step1.yearOfStudy) === year
-                                          ? 'border-primary bg-primary text-primary-foreground'
-                                          : 'border-border bg-background hover:border-primary'
-                                      }`}
-                                    >
-                                      {year}
-                                    </button>
-                                  ))}
+                                <div className="mt-2">
+                                  <Select
+                                    value={editedData?.step1?.yearOfStudy ?? step1.yearOfStudy}
+                                    onValueChange={(value) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          yearOfStudy: value,
+                                        },
+                                      }))
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select year of study" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {[
+                                        { value: '1st', label: '1st' },
+                                        { value: '2nd', label: '2nd' },
+                                        { value: '3rd', label: '3rd' },
+                                        { value: '4th', label: '4th' },
+                                        { value: 'passed_out', label: 'Passout' },
+                                      ].map((item) => (
+                                        <SelectItem key={item.value} value={item.value}>
+                                          {item.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                               </div>
                               
@@ -3048,23 +3058,27 @@ export const EditProfilePage: React.FC = () => {
                   )}
 
                   {/* Preferred Locations */}
-                  {step4.locationPreferences && (
-                    <div className="mb-6 pb-6 border-b border-border/30">
-                      <Label className="text-xs font-medium text-muted-foreground mb-3 block">Preferred location</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {step4.locationPreferences.remote && (
-                          <Badge variant="secondary" className="bg-green-100 text-green-700">
-                            Open to Remote
-                          </Badge>
-                        )}
-                        {step4.locationPreferences.cities?.map((city) => (
-                          <Badge key={city} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
-                            {city}
-                          </Badge>
-                        ))}
-                      </div>
+                  <div className="mb-6 pb-6 border-b border-border/30">
+                    <Label className="text-xs font-medium text-muted-foreground mb-3 block">Preferred location</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {!step4.locationPreferences?.remote && (!step4.locationPreferences?.cities || step4.locationPreferences.cities.length === 0) ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <>
+                          {step4.locationPreferences?.remote && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              Open to Remote
+                            </Badge>
+                          )}
+                          {step4.locationPreferences?.cities?.map((city) => (
+                            <Badge key={city} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                              {city}
+                            </Badge>
+                          ))}
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
                   
                   {/* Salary Expectations */}
                   {step4.salaryExpectations && (step4.salaryExpectations.internship || step4.salaryExpectations.fullTime) && (

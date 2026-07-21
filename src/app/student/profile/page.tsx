@@ -18,34 +18,31 @@ export default function Page() {
     setIsClient(true);
   }, []);
 
-  // Route guard: Redirect to dashboard if profile is complete (and not in force edit mode)
+  // Route guard: redirect to dashboard only if profile is complete and not in edit mode
   useEffect(() => {
     if (!isClient || isLoading) return;
-    if (isOpen) return; // Bypass route guard if guided tour is active
+    if (isOpen) return; // don't redirect while tour is active
     if (onboardingData?.isCompleted && !forceEditMode) {
       router.push('/student');
     }
   }, [isClient, isLoading, onboardingData, forceEditMode, router, isOpen]);
 
-  // Start guided tour if necessary and profile is incomplete
+  // Start tour if isLoginFirst is set (showTooltip was true from login api)
   useEffect(() => {
     if (!isClient || isLoading) return;
-    if (onboardingData?.isCompleted && !forceEditMode) return;
-
-    if (!isTourCompleted) {
-      const isLoginFirst = localStorage.getItem('isLoginFirst');
-      if (isLoginFirst) {
-        localStorage.removeItem('isLoginFirst');
-        startTour();
-      }
+    if (isTourCompleted) return;
+    const isLoginFirst = localStorage.getItem('isLoginFirst');
+    if (isLoginFirst) {
+      localStorage.removeItem('isLoginFirst');
+      startTour();
     }
-  }, [isClient, isLoading, isTourCompleted, startTour, onboardingData, forceEditMode]);
+  }, [isClient, isLoading, isTourCompleted, startTour]);
 
   if (isLoading) {
     return null;
   }
 
-  // Prevent flashing profile page while redirecting complete profile to dashboard (bypass during tour)
+  // Prevent flashing while redirecting (bypass during active tour)
   if (!isOpen && onboardingData?.isCompleted && !forceEditMode) {
     return null;
   }

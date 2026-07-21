@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -102,6 +102,7 @@ const CodingProblems = () => {
     const [lastSearchQuery, setLastSearchQuery] = useState('')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
+    const lastCodingQuestionsRequestRef = useRef<string | null>(null)
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
@@ -303,10 +304,29 @@ const CodingProblems = () => {
     const handleDifficulty = (opt: Option) =>
         toggleOption(opt, difficulty, setDifficulty, 'None')
 
+    const getCodingQuestionsRequestKey = useCallback(
+        (requestOffset: number) =>
+            JSON.stringify({
+                orgId,
+                offset: requestOffset,
+                position,
+                selectedOptions: selectedOptions.map((option) => option.value),
+                difficulty: difficulty.map((option) => option.value),
+            }),
+        [difficulty, orgId, position, selectedOptions]
+    )
+
     const fetchCodingQuestions = useCallback(
-        async (offset: number) => {
+        async (offset: number, force = false) => {
             // Don't fetch if search is active
             if (isSearchActive) return
+
+            const requestKey = getCodingQuestionsRequestKey(offset)
+            if (!force && lastCodingQuestionsRequestRef.current === requestKey) {
+                return
+            }
+
+            lastCodingQuestionsRequestRef.current = requestKey
 
             try {
                 await filteredCodingQuestions(
@@ -323,6 +343,7 @@ const CodingProblems = () => {
                     ''
                 )
             } catch (error) {
+                lastCodingQuestionsRequestRef.current = null
                 toast({
                     title: 'Error',
                     description: 'Failed to fetch questions',
@@ -330,7 +351,15 @@ const CodingProblems = () => {
                 })
             }
         },
-        [selectedOptions, difficulty, position, isSearchActive]
+        [
+            difficulty,
+            getCodingQuestionsRequestKey,
+            isSearchActive,
+            orgId,
+            position,
+            selectedOptions,
+            setCodingQuestions,
+        ]
     )
 
     // Fetch data only after URL is initialized
@@ -593,7 +622,8 @@ const CodingProblems = () => {
                                                             if (!open) {
                                                                 // Refresh the data after creating
                                                                 fetchCodingQuestions(
-                                                                    offset
+                                                                    offset,
+                                                                    true
                                                                 )
                                                             }
                                                         }}
