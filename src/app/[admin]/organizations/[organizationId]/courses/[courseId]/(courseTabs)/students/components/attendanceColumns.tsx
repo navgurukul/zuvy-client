@@ -34,15 +34,15 @@ interface AttendanceColumnsProps {
 const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return {
-        date: date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        date: date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         }),
-        time: date.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
+        time: date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         })
     }
 }
@@ -81,19 +81,19 @@ const updateAttendanceStatus = async (
 ) => {
     try {
         const endpoint = `/bootcamp/${courseId}/attendance/${sessionId}/mark`
-        
+
         const payload = {
             userId: studentId,
             status: status
         }
-        
+
         await api.post(endpoint, payload)
 
         const response = await fetchCompletedClasses(courseId, studentId)
 
         const classes = response.data?.data?.classes || []
         setCompletedClasses(classes)
-        
+
         const stats = response.data?.data?.attendanceStats
         if (stats) {
             setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
@@ -105,34 +105,34 @@ const updateAttendanceStatus = async (
         } else {
             setAttendancePercentage(0)
         }
-        
+
         toast({
             title: 'Success',
             description: `Attendance marked as ${status}`,
         })
-        
+
         return true
     } catch (error: any) {
         console.error('Failed to update attendance:', error)
-        
+
         const errorMessage = error.response?.data?.message || error.message || 'Failed to update attendance'
-        
+
         toast({
             title: 'Error',
             description: errorMessage,
             variant: 'destructive'
         })
-        
+
         return false
     }
 }
 
 // Separate component for the update status cell
-const UpdateStatusCell = ({ 
-    classData, 
-    courseId, 
-    studentId 
-}: { 
+const UpdateStatusCell = ({
+    classData,
+    courseId,
+    studentId
+}: {
     classData: ClassData
     courseId: string
     studentId: string
@@ -143,15 +143,15 @@ const UpdateStatusCell = ({
     const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
     const { fetchCompletedClasses } = useCompletedClasses()
-    
+
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
         const newStatus = checked ? 'present' : 'absent'
         const previousStatus = currentStatus
-        
+
         // Optimistic update
         setCurrentStatus(newStatus)
-        
+
         const success = await updateAttendanceStatus(
             courseId,
             classData.id,
@@ -161,15 +161,15 @@ const UpdateStatusCell = ({
             setCompletedClasses,
             setAttendancePercentage
         )
-        
+
         if (!success) {
             // Revert on failure
             setCurrentStatus(previousStatus)
         }
-        
+
         setIsUpdating(false)
     }
-    
+
     return (
         <div className="flex items-center justify-start min-w-[100px] space-x-3">
             <div className="flex items-center space-x-2">
@@ -194,123 +194,126 @@ const UpdateStatusCell = ({
 }
 
 export const createAttendanceColumns = (
-    courseId: string, 
-    studentId: string, 
+    courseId: string,
+    studentId: string,
     onStatusUpdate?: () => void
 ): ColumnDef<ClassData>[] => [
-    {
-        accessorKey: 'title',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Live Class Name" />
-        ),
-        cell: ({ row }) => {
-            const title = row.getValue('title') as string
-            return (
-                <div className="font-medium text-start w-[300px] truncate" title={title}>
-                    {title}
-                </div>
-            )
+        {
+            accessorKey: 'title',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Live Class Name" />
+            ),
+            cell: ({ row }) => {
+                const title = row.getValue('title') as string
+                return (
+                    <div className="font-medium text-start w-[300px] truncate" title={title}>
+                        {title}
+                    </div>
+                )
+            },
+            enableSorting: true,
         },
-        enableSorting: true,
-    },
-    {
-        accessorKey: 'startTime',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Start Date & Time" />
-        ),
-        cell: ({ row }) => {
-            const startTime = row.getValue('startTime') as string
-            const { date, time } = formatDateTime(startTime)
-            
-            return (
-                <div className="flex flex-col min-w-[120px]">
-                    <span className="font-medium text-gray-800">{date}</span>
-                    <span className="text-sm text-muted-foreground">{time}</span>
-                </div>
-            )
+        {
+            accessorKey: 'startTime',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Start Date & Time" />
+            ),
+            cell: ({ row }) => {
+                const startTime = row.getValue('startTime') as string
+                const { date, time } = formatDateTime(startTime)
+
+                return (
+                    <div className="flex flex-col min-w-[120px]">
+                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="text-sm text-muted-foreground">{time}</span>
+                    </div>
+                )
+            },
+            enableSorting: true,
         },
-        enableSorting: true,
-    },
-    {
-        accessorKey: 'endTime',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="End Date & Time" />
-        ),
-        cell: ({ row }) => {
-            const endTime = row.getValue('endTime') as string
-            const { date, time } = formatDateTime(endTime)
-            
-            return (
-                <div className="flex flex-col min-w-[120px]">
-                    <span className="font-medium text-gray-800">{date}</span>
-                    <span className="text-sm text-muted-foreground">{time}</span>
-                </div>
-            )
+        {
+            accessorKey: 'endTime',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="End Date & Time" />
+            ),
+            cell: ({ row }) => {
+                const endTime = row.getValue('endTime') as string
+                const { date, time } = formatDateTime(endTime)
+
+                return (
+                    <div className="flex flex-col min-w-[120px]">
+                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="text-sm text-muted-foreground">{time}</span>
+                    </div>
+                )
+            },
+            enableSorting: true,
         },
-        enableSorting: true,
-    },
-    {
-        accessorKey: 'duration',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Duration" />
-        ),
-        cell: ({ row }) => {
-            const duration = row.getValue('duration') as number
-            
-            return (
-                <div className="flex items-center space-x-1 min-w-[80px]">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-gray-800">
-                        {duration !== null && duration !== undefined ? `${duration} mins` : 'N/A'}
-                    </span>
-                </div>
-            )
+        {
+            accessorKey: 'duration',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Duration" />
+            ),
+            cell: ({ row }) => {
+                const duration = row.getValue('duration') as number
+                const durationInMinutes = duration
+                    ? Math.round(duration / 60)
+                    : 0
+
+                return (
+                    <div className="flex items-center space-x-1 min-w-[80px]">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-gray-800">
+                            {durationInMinutes} mins
+                        </span>
+                    </div>
+                )
+            },
+            enableSorting: true,
         },
-        enableSorting: true,
-    },
-    {
-        accessorKey: 'attendanceStatus',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
-        ),
-        cell: ({ row }) => {
-            const status = row.getValue('attendanceStatus') as string
-            const statusDisplay = getAttendanceStatusDisplay(status)
-            const StatusIcon = statusDisplay.icon
-            
-            return (
-                <div className="flex items-center justify-start min-w-[100px] space-x-2">
-                    <StatusIcon className={`h-4 w-4 ${statusDisplay.className}`} />
-                    <span className={`text-sm font-medium ${statusDisplay.className}`}>
-                        {statusDisplay.text}
-                    </span>
-                </div>
-            )
+        {
+            accessorKey: 'attendanceStatus',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Status" />
+            ),
+            cell: ({ row }) => {
+                const status = row.getValue('attendanceStatus') as string
+                const statusDisplay = getAttendanceStatusDisplay(status)
+                const StatusIcon = statusDisplay.icon
+
+                return (
+                    <div className="flex items-center justify-start min-w-[100px] space-x-2">
+                        <StatusIcon className={`h-4 w-4 ${statusDisplay.className}`} />
+                        <span className={`text-sm font-medium ${statusDisplay.className}`}>
+                            {statusDisplay.text}
+                        </span>
+                    </div>
+                )
+            },
+            filterFn: (row, id, value) => {
+                const status = row.getValue(id) as string
+                return value.includes(status?.toLowerCase())
+            },
         },
-        filterFn: (row, id, value) => {
-            const status = row.getValue(id) as string
-            return value.includes(status?.toLowerCase())
+        {
+            id: 'updateStatus',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Update Status" />
+            ),
+            cell: ({ row }) => {
+                const classData = row.original
+
+                return (
+                    <UpdateStatusCell
+                        classData={classData}
+                        courseId={courseId}
+                        studentId={studentId}
+                    />
+                )
+            },
+            enableSorting: false,
         },
-    },
-    {
-        id: 'updateStatus',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Update Status" />
-        ),
-        cell: ({ row }) => {
-            const classData = row.original
-            
-            return (
-                <UpdateStatusCell 
-                    classData={classData}
-                    courseId={courseId}
-                    studentId={studentId}
-                />
-            )
-        },
-        enableSorting: false,
-    },
-]
+    ]
 
 // For backward compatibility
 export const attendanceColumns = createAttendanceColumns('', '', undefined)

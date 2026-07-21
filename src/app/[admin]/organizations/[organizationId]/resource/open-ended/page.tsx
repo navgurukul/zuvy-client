@@ -112,6 +112,14 @@ const OpenEndedQuestions = (props: Props) => {
     const [filtersInitialized, setFiltersInitialized] = useState(false)
     const [hasSetInitialTopicsFromURL, setHasSetInitialTopicsFromURL] =
         useState(false)
+    const selectedDifficulties = useMemo(
+        () =>
+            difficulty
+                .filter((d) => d.value !== 'None')
+                .map((d) => d.value),
+        [difficulty]
+    )
+    const searchTerm = searchParams.get('search') || ''
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         const response = await api.get(
@@ -132,8 +140,8 @@ const OpenEndedQuestions = (props: Props) => {
     } = useOpenEndedQuestions({
         orgId,
         selectedTopics: selectedOptions,
-        selectedDifficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
-        searchTerm: searchParams.get('search') || '',
+        selectedDifficulties,
+        searchTerm,
         offset,
         position: position as string | number,
         initialFetch: false,
@@ -242,21 +250,20 @@ const OpenEndedQuestions = (props: Props) => {
     // Fetch questions when filters change or page changes
     useEffect(() => {
         if (!filtersInitialized) return
-        const searchParam = searchParams.get('search') || ''
         fetchOpenEndedQuestions({
             topics: selectedOptions,
-            difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
-            search: searchParam,
+            difficulties: selectedDifficulties,
+            search: searchTerm,
             off: offset,
             pos: position,
         })
     }, [
-        difficulty,
+        selectedDifficulties,
         selectedOptions,
         offset,
         position,
         filtersInitialized,
-        searchParams,
+        searchTerm,
         fetchOpenEndedQuestions,
     ])
 
@@ -268,15 +275,14 @@ const OpenEndedQuestions = (props: Props) => {
 
     // Add this refresh function
     const refreshQuestions = useCallback(async () => {
-        const searchParam = searchParams.get('search') || ''
         await fetchOpenEndedQuestions({
             topics: selectedOptions,
-            difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
-            search: searchParam,
+            difficulties: selectedDifficulties,
+            search: searchTerm,
             off: offset,
             pos: position,
         })
-    }, [fetchOpenEndedQuestions, offset, position, searchParams, selectedOptions, difficulty])
+    }, [fetchOpenEndedQuestions, offset, position, searchTerm, selectedOptions, selectedDifficulties])
 
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t) => t.tagName === value) || {
@@ -554,11 +560,10 @@ const OpenEndedQuestions = (props: Props) => {
                             lastPage={lastPage}
                             pages={totalPages}
                             fetchStudentData={(newOffset: number) => {
-                                const searchParam = searchParams.get('search') || ''
                                 fetchOpenEndedQuestions({
                                     topics: selectedOptions,
-                                    difficulties: difficulty.filter((d) => d.value !== 'None').map((d) => d.value),
-                                    search: searchParam,
+                                    difficulties: selectedDifficulties,
+                                    search: searchTerm,
                                     off: newOffset,
                                     pos: position,
                                 })

@@ -7,7 +7,6 @@ import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigat
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
-import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
 import { useOnboardingStorage } from '@/hooks/use-profile'
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
 import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
@@ -17,7 +16,6 @@ const Header = () => {
     const { studentData } = useLazyLoadedStudentData()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [isClient, setIsClient] = useState(false)
-    const { strengthPercentage, loading: isStrengthLoading } = useLearnerProfileStrength()
     const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
@@ -94,11 +92,8 @@ const Header = () => {
         !isOnboardingLoading &&
         !onboardingData?.isCompleted
 
-    const showProfileOption =
-        !isInProfileSetupFlow &&
-        !isStrengthLoading &&
-        strengthPercentage !== null &&
-        strengthPercentage >= 20
+    // Show profile option in dropdown whenever the student is not in the initial onboarding flow
+    const showProfileOption = !isInProfileSetupFlow
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')

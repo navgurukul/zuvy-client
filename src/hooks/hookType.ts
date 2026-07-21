@@ -832,44 +832,12 @@ export interface UseCreateOpenEndedQuestionReturn {
   error: string | null;
 }
 
+// useUpdateOpenEndedQuestion
+export type UpdateOpenEndedQuestionData = CreateOpenEndedQuestionData;
 
-// useFetchGlobalCourses
-export interface GlobalCourseInstructorDetails {
-  id: number;
-  name: string;
-  profilePicture: string | null;
-}
-
-export interface GlobalCourseData {
-  id: number;
-  name: string;
-  description: string;
-  collaborator: string;
-  coverImage: string;
-  bootcampTopic: string;
-  startTime: string;
-  duration: number;
-  language: string;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-  batchId: number;
-  batchName: string;
-  progress: number;
-  instructorDetails: GlobalCourseInstructorDetails;
-}
-
-export interface UseFetchGlobalCoursesReturn {
-  globalCourses: GlobalCourseData[]; // Changed to array
+export interface UseUpdateOpenEndedQuestionReturn {
+  updateOpenEndedQuestion: (questionId: number, data: UpdateOpenEndedQuestionData) => Promise<boolean>;
   loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-
-export interface UseEnrollCourseReturn {
-  enrollCourse: (courseId: number) => Promise<EnrollCourseResult>;
-  isEnrolling: boolean;
   error: string | null;
 }
 

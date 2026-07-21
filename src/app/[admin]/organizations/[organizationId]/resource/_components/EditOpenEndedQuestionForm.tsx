@@ -30,13 +30,12 @@ import {
     Tag,
 } from './adminResourceComponentType'
 import { useParams } from 'next/navigation'
-
-type Props = {}
+import useUpdateOpenEndedQuestion from '@/hooks/useUpdateOpenEndedQuestion'
 
 const formSchema = z.object({
     questionDescription: z.string(),
     topics: z.number(),
-    difficulty: z.string(),
+    difficulty: z.enum(['Easy', 'Medium', 'Hard']),
 })
 
 function EditOpenEndedQuestionForm({
@@ -50,63 +49,62 @@ function EditOpenEndedQuestionForm({
     setOpenEndedQuestions: (questions: OpenEndedQuestion[]) => void
     openEndedQuestions: OpenEndedQuestion[]
 }) {
-    const { tags, setTags } = getCodingQuestionTags()
+    const { tags } = getCodingQuestionTags()
+    const { updateOpenEndedQuestion, loading } = useUpdateOpenEndedQuestion()
     
     const { organizationId } = useParams()
     const orgId = Number(organizationId)
 
     const { editOpenEndedQuestionId } = getEditOpenEndedDialogs()
+    const questionId = Number(editOpenEndedQuestionId)
 
-    const selectedQuestion = openEndedQuestions.filter((question: any) => {
-        return question.id === editOpenEndedQuestionId
+    const selectedQuestion = openEndedQuestions.find((question: any) => {
+        return question.id === questionId
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            questionDescription: selectedQuestion[0]?.questionDescription || '',
-            topics: selectedQuestion[0]?.tagId || 0,
-            difficulty: selectedQuestion[0]?.difficulty || 'Easy',
+            questionDescription:
+                selectedQuestion?.questionDescription ||
+                selectedQuestion?.question ||
+                '',
+            topics: selectedQuestion?.tagId || 0,
+            difficulty: selectedQuestion?.difficulty || 'Easy',
         },
     })
 
     useEffect(() => {
         if (selectedQuestion) {
             form.reset({
-                questionDescription: selectedQuestion[0].question,
-                difficulty: selectedQuestion[0].difficulty,
+                questionDescription:
+                    selectedQuestion.questionDescription ||
+                    selectedQuestion.question,
+                topics: selectedQuestion.tagId,
+                difficulty: selectedQuestion.difficulty,
             })
         }
-    }, [selectedQuestion[0], form])
+    }, [selectedQuestion, form])
 
-    async function editOpenEndedQuestion(data: any) {
-        try {
-            const response = await api.patch(
-                `/Content/${orgId}/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
-                data
-            )
-            setIsOpenEndDialogOpen(false)
-            toast.success({
-                title: 'Success',
-                description: response.data.message,
-            })
-        } catch (error: any) {
-            toast.error({
-                title: 'Error',
-                description:
-                    error?.response?.data?.message || 'An error occurred',
-            })
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        if (!questionId) {
+            return
         }
-    }
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
         const formattedData = {
             question: values.questionDescription,
             tagId: values.topics,
             difficulty: values.difficulty,
         }
-        editOpenEndedQuestion(formattedData)
-        getAllOpenEndedQuestions(setOpenEndedQuestions, orgId)
+        const success = await updateOpenEndedQuestion(
+            questionId,
+            formattedData
+        )
+
+        if (success) {
+            setIsOpenEndDialogOpen(false)
+            getAllOpenEndedQuestions(setOpenEndedQuestions, orgId)
+        }
     }
 
     return (
@@ -205,7 +203,7 @@ function EditOpenEndedQuestionForm({
                                             tags.find(
                                                 (tag) =>
                                                     tag.id ===
-                                                    selectedQuestion[0]?.tagId
+                                                    selectedQuestion?.tagId
                                             )?.tagName ||
                                             ''
                                         }
@@ -226,7 +224,7 @@ function EditOpenEndedQuestionForm({
                                                         tags.find(
                                                             (tag) =>
                                                                 tag.id ===
-                                                                selectedQuestion[0]
+                                                                selectedQuestion
                                                                     ?.tagId
                                                         )?.tagName ||
                                                         'Choose Topic'
@@ -257,8 +255,11 @@ function EditOpenEndedQuestionForm({
                         <Button
                             type="submit"
                             className="w-1/2 bg-primary hover:bg-primary-dark shadow-4dp"
+                            disabled={loading}
                         >
-                            Edit Open-Ended Question
+                            {loading
+                                ? 'Updating...'
+                                : 'Edit Open-Ended Question'}
                         </Button>
                     </div>
                 </form>

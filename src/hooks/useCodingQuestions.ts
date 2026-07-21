@@ -25,6 +25,8 @@ export default function useCodingQuestions({
     const [error, setError] = useState<any>(null)
 
     const lastSignatureRef = useRef<string>('')
+    const inFlightSignatureRef = useRef<string>('')
+    const latestResultRef = useRef<{ data: any[] }>({ data: [] })
 
     const buildQuery = useCallback(
         (ov?: {
@@ -87,12 +89,16 @@ export default function useCodingQuestions({
             const qs = buildQuery(opts)
             const signature = getSignature(qs)
 
-            if (signature === lastSignatureRef.current) {
+            if (
+                signature === lastSignatureRef.current ||
+                signature === inFlightSignatureRef.current
+            ) {
                 // duplicate request, skip
-                return { data: codingQuestions }
+                return latestResultRef.current
             }
 
             try {
+                inFlightSignatureRef.current = signature
                 setLoading(true)
                 setError(null)
 
@@ -101,15 +107,17 @@ export default function useCodingQuestions({
                 const data = res?.data?.data || []
                 setCodingQuestions(data)
                 lastSignatureRef.current = signature
+                latestResultRef.current = { data }
                 return { data }
             } catch (err) {
                 setError(err)
                 return { error: err }
             } finally {
+                inFlightSignatureRef.current = ''
                 setLoading(false)
             }
         },
-        [buildQuery, getSignature, orgId, codingQuestions]
+        [buildQuery, getSignature, orgId]
     )
 
     const refetch = useCallback(() => fetchCodingQuestions(), [fetchCodingQuestions])

@@ -261,7 +261,6 @@ const SettingsPage: React.FC = () => {
                                         // fetchStudentData={handlePaginationChange}
                                         fetchStudentData={(newOffset: number) => {
                                             setOffset(newOffset)
-                                            refetchUsers(newOffset)
                                         }}
                                     />
                                 )}
