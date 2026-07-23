@@ -14,13 +14,14 @@ import {
     CredentialResponse,
 } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
-import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
 import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
+import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
+import { useLogin } from '@/hooks/useLogin'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
@@ -28,6 +29,7 @@ function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
+    const { login } = useLogin()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
 
@@ -108,9 +110,7 @@ function LoginPage() {
 
     const getMentorProfileCompletion = async (): Promise<boolean | null> => {
         try {
-            const res = await api.get<MentorProfileResponse>(
-                '/instructor/mentor-slots/profile'
-            )
+            const res = await getMentorProfileApi()
             return isMentorProfileComplete(res.data)
         } catch (error) {
             const status = (error as { response?: { status?: number } })?.response?.status
@@ -187,7 +187,7 @@ const handleGoogleSuccess = async (
                 googleIdToken: credentialResponse.credential,
             }
 
-            const response = await api.post<AuthResponse>(`/auth/login`, googleData)
+            const response = await login(googleData)
 
             // Handle your backend response
             if (response.data.access_token) {

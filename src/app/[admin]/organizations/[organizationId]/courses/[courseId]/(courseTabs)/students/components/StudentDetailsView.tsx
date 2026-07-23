@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Mail } from 'lucide-react'
-import { api } from '@/utils/axios.config'
+import { useGetStudentInfo } from '@/hooks/useGetStudentInfo'
+import { useGetStudentCompletedClasses } from '@/hooks/useGetStudentCompletedClasses'
 import { toast } from '@/components/ui/use-toast'
 import { DataTable } from '../../../../../../../../_components/datatable/data-table'
 import { createAttendanceColumns } from './attendanceColumns'
@@ -57,6 +58,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
+    const { getStudentInfo } = useGetStudentInfo()
+    const { getStudentCompletedClasses } = useGetStudentCompletedClasses()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState('all')
@@ -115,7 +118,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     const fetchStudentInfo = async () => {
         try {
-            const response = await api.get(`/bootcamp/students/${courseId}?userId=${studentId}`)
+            const response = await getStudentInfo(courseId, studentId)
             const student = response.data?.modifiedStudentInfo?.find((s: any) => s.userId == studentId)
 
             if (student) {
@@ -162,8 +165,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 params.append('toDate', toDate)
             }
 
-            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
-            const response = await api.get(endpoint)
+            const response = await getStudentCompletedClasses(courseId, params)
 
             const classes = response.data?.data?.classes || []
             setCompletedClasses(classes)
@@ -193,8 +195,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         } finally {
             setLoading(false)
         }
-    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
-    
+    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm, getStudentCompletedClasses])
+
     useEffect(() => {
         const loadData = async () => {
             await fetchStudentInfo()
@@ -228,9 +230,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 params.append('toDate', toDate)
             }
 
-            const res = await api.get(
-                `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
-            )
+            const res = await getStudentCompletedClasses(courseId, params)
 
             return res.data?.data?.classes?.map((classItem: any) => ({
                 ...classItem,
@@ -240,7 +240,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             console.error('Search suggestions error:', error)
             return []
         }
-    }, [courseId, studentId, statusFilter, fromDate, toDate])
+    }, [courseId, studentId, statusFilter, fromDate, toDate, getStudentCompletedClasses])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setSearchTerm(query)

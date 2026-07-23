@@ -24,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button'
 import ToggleSwitch from './ToggleSwitch'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
+import { useEditAssessment } from '@/hooks/useEditAssessment'
 import { useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getChapterUpdateStatus } from '@/store/store'
@@ -78,6 +78,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         content?.currentState
     )
     const router = useRouter()
+    const { editAssessment } = useEditAssessment()
 
     useEffect(() => {
         setCurrentAssessmentStatus(content?.currentState)
@@ -456,8 +457,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            const response = await api.put(
-                `Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`,
+            const response = await editAssessment(
+                content.assessmentOutsourseId,
+                chapterID as string,
                 data
             )
 

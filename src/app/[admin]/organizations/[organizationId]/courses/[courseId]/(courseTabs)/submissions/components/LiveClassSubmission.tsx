@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowDownToLine, ChevronRight, Play,Eye } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, Play, Eye } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -27,7 +27,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
     const { liveClassData, totalStudents, loading, error } = useLiveClassSubmissions(courseId, {
         searchTerm: debouncedSearch,
@@ -42,36 +42,36 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             })
         }
     }, [error])
-      
+
     const handleDownloadCsv = (liveClassId: string, liveClassTitle: string) => {
         if (!liveClassId) return
-      
+
         downloadCsv({
-          endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}`,
-          fileName: liveClassTitle || 'live-class-report',
-      
-          dataPath: 'data.data',
-      
-          columns: [
-            { header: 'Name', key: 'name' },
-            { header: 'Email', key: 'email' },
-            { header: 'Status', key: 'status' },
-            { header: 'Duration (min)', key: 'duration' },
-            { header: 'Batch', key: 'batch' },
-          ],
-      
-          mapData: (record: any) => ({
-            name: record.user?.name || 'N/A',
-            email: record.user?.email || 'N/A',
-            status: record.status || 'N/A',
-            duration: ((record.duration || 0) / 60).toFixed(2),
-            batch: record.batchName || 'N/A',
-          }),
+            endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}`,
+            fileName: liveClassTitle || 'live-class-report',
+
+            dataPath: 'data.data',
+
+            columns: [
+                { header: 'Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Status', key: 'status' },
+                { header: 'Duration (min)', key: 'duration' },
+                { header: 'Batch', key: 'batch' },
+            ],
+
+            mapData: (record: any) => ({
+                name: record.user?.name || 'N/A',
+                email: record.user?.email || 'N/A',
+                status: record.status || 'N/A',
+                duration: ((record.duration || 0) / 60).toFixed(2),
+                batch: record.batchName || 'N/A',
+            }),
         })
-      }
-      
+    }
+
     if (loading) {
-         return <LiveClassSubmissionSkeleton/>
+        return <LiveClassSubmissionSkeleton />
     }
 
     // Flatten all live classes from all modules
@@ -112,54 +112,54 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
                         <div className="absolute top-2 right-2 z-10 flex items-center">
-                        {submissions > 0 ? (
-                            <button
-                                onClick={() => handleDownloadCsv(liveClass.id, liveClass.title)}
-                                className="hover:text-gray-700 cursor-pointer"
-                                title="Download Report"
-                            >
-                                <ArrowDownToLine size={20} className="text-gray-500" />
-                            </button>
-                        ) : (
-                            <div className="absolute top-2 pr-3 right-10">
-                                <div className="relative group inline-flex">
-                                    <button disabled className="cursor-not-allowed">
-                                        <ArrowDownToLine size={20} className="text-gray-400" />
-                                    </button>
+                            {submissions > 0 ? (
+                                <button
+                                    onClick={() => handleDownloadCsv(liveClass.id, liveClass.title)}
+                                    className="hover:text-gray-700 cursor-pointer"
+                                    title="Download Report"
+                                >
+                                    <ArrowDownToLine size={20} className="text-gray-500" />
+                                </button>
+                            ) : (
+                                <div className="absolute top-2 pr-3 right-10">
+                                    <div className="relative group inline-flex">
+                                        <button disabled className="cursor-not-allowed">
+                                            <ArrowDownToLine size={20} className="text-gray-400" />
+                                        </button>
 
-                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                        No submissions available   
+                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                            No submissions available
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                        {submissions > 0 ? (
-                            <Link
-                                href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
-                            >
-                                <Button
-                                    variant="ghost"
-                                    className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
+                            )}
+                            {submissions > 0 ? (
+                                <Link
+                                    href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
                                 >
-                                    <Eye size={20} />
-                                </Button>
-                            </Link>
-                        ) : (
-                            <div className="absolute top-2 pr-3 right-0">
-                                <div className="relative group inline-flex">
+                                    <Button
+                                        variant="ghost"
+                                        className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
+                                    >
+                                        <Eye size={20} />
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <div className="absolute top-2 pr-3 right-0">
+                                    <div className="relative group inline-flex">
                                         <button
                                             disabled
                                             className="cursor-not-allowed"
                                         >
-                                        <Eye size={20} className="text-gray-400" />
+                                            <Eye size={20} className="text-gray-400" />
                                         </button>
 
-                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                        No submissions to view
+                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                            No submissions to view
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                         </div>
                         <div className="flex flex-col w-full pr-24">
                             <div className="flex items-start gap-2 min-w-0">
