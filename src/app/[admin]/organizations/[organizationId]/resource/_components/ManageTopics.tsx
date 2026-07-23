@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { X, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import useManageTags from '@/hooks/useManageTags'
+import useManageTags from '@/app/[admin]/hooks/useManageTags'
 import { fetchAllTags } from '@/utils/admin'
 
 interface Topic {

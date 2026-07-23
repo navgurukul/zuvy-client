@@ -22,8 +22,8 @@ import {
     PageParams,
     IndividualStudentData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useAssignmentDetailForAUser from '@/hooks/useAssignmentDetailForAUser'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useAssignmentDetailForAUser from '@/app/[admin]/hooks/useAssignmentDetailForAUser'
 import { normalizeLinks } from '@/utils/admin'
 
 const Page = ({ params }: PageParams) => {

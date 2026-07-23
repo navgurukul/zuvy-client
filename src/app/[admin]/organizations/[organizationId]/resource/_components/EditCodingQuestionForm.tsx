@@ -45,7 +45,7 @@ import {
 } from './adminResourceComponentType'
 import { Input as PostcssInput } from 'postcss'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useEditCodingQuestion } from '@/hooks/useEditCodingQuestion'
+import { useEditCodingQuestion } from '@/app/[admin]/hooks/useEditCodingQuestion'
 import { useParams } from 'next/navigation'
 import { getAvailableInputTypes, removeInputFromTestCases, validateCodingInputValue } from '@/utils/codingQuestion'
 

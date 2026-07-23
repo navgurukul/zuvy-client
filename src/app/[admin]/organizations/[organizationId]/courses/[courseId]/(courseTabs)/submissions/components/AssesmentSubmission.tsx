@@ -2,13 +2,13 @@
 import React from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
 import Image from 'next/image'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     AssessmentSubmissions,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {AssessmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
-import useBootcampAssessments from '@/hooks/useBootcampAssessments'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
+import useBootcampAssessments from '@/app/[admin]/hooks/useBootcampAssessments'
 
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {

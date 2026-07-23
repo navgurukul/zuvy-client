@@ -31,7 +31,7 @@ import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
 import { NewCodingProblemFormProps } from './adminResourceComponentType'
-import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
+import { useCreateCodingQuestion } from '@/app/[admin]/hooks/useCreateCodingQuestion'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useParams } from 'next/navigation';
 import { getAvailableInputTypes, removeInputFromTestCases, validateCodingInputValue } from '@/utils/codingQuestion'

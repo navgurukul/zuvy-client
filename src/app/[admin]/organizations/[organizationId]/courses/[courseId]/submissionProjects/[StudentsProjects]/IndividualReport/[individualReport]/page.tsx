@@ -11,8 +11,8 @@ import {
     PageParams,
     IndividualStudentData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useIndividualProjectReport from '@/hooks/useIndividualProjectReport'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useIndividualProjectReport from '@/app/[admin]/hooks/useIndividualProjectReport'
 import { normalizeLinks } from '@/utils/admin'
 
 const Page = ({ params }: PageParams) => {

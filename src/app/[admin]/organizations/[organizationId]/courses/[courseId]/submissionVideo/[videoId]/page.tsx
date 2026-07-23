@@ -13,12 +13,12 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { useChapterStudents } from '@/hooks/useChapterStudents'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
 
 type Props = {}
 interface BatchFilter {

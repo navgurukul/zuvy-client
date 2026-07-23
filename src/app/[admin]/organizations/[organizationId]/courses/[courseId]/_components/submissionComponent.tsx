@@ -8,7 +8,7 @@ import { api } from '@/utils/axios.config'
 import { SubmissionComponentProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 

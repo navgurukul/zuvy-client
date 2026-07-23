@@ -16,7 +16,7 @@ import {
     CodingSubmission,
     ApiResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProblems/individualCodingSubbmission/CodingSubmissionType'
-import useCodingSubmissionDetails from '@/hooks/useCodingSubmissionDetails'
+import useCodingSubmissionDetails from '@/app/[admin]/hooks/useCodingSubmissionDetails'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()

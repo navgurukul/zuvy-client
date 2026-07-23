@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
 import {LiveClassSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
@@ -16,7 +16,7 @@ interface LiveClassSubmissionsProps {
     debouncedSearch: string
 }
 
-import { useLiveClassSubmissions } from '@/hooks/useLiveClassSubmissions'
+import { useLiveClassSubmissions } from '@/app/[admin]/hooks/useLiveClassSubmissions'
 
 
 const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({

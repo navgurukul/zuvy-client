@@ -66,7 +66,7 @@ import {
     EnhancedBatch,
     PermissionsType,
 } from './courseBatchesType'
-import useBatches from '@/hooks/useBatches'
+import useBatches from '@/app/[admin]/hooks/useBatches'
 import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'

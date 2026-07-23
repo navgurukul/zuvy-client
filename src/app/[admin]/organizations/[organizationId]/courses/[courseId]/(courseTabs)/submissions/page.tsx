@@ -22,7 +22,7 @@ import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
 import { CourseSubmissionSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import ProjectsComponent from './components/projectSubmissionComponent'
-import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
+import { useProjectSubmissions } from '@/app/[admin]/hooks/useProjectSubmissions'
 
 interface SearchSuggestion {
     id: string

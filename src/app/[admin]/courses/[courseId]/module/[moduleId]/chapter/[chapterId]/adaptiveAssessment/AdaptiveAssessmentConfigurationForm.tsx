@@ -13,9 +13,10 @@ import { SuccessMessage } from '../../../../_components/adaptiveAssessment/Succe
 import { FileText } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
-import { useGenerateAiAssessment, MapQuestionsResponse } from '@/hooks/useGenerateAiAssessment';
-import { GetQuestionSetsResponse, useGetQuestionSets } from '@/hooks/useGetQuestionSets';
-import { useGetAiAssessments } from '@/hooks/useGetAiAssessments';
+import { useGenerateAiAssessment } from '@/app/[admin]/hooks/useGenerateAiAssessment';
+import { useGetQuestionSets } from '@/app/[admin]/hooks/useGetQuestionSets';
+import { useGetAiAssessments } from '@/app/[admin]/hooks/useGetAiAssessments';
+import { MapQuestionsResponse, GetQuestionSetsResponse } from '@/app/[admin]/hooks/hookType';
 
 const ASSESSMENTS_HISTORY_KEY = 'zuvy_assessment_history';
 

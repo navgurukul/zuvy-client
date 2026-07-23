@@ -15,7 +15,7 @@ import AuditLogGroup from './components/AuditLogGroup';
 import AuditLogExport from './components/AuditLogExport';
 import { SearchBox } from '@/utils/searchBox';
 import { AuditLog } from './components/auditLogTypes';
-import { useTrackingLog } from '@/hooks/useTrackingLog';
+import { useTrackingLog } from '@/app/[admin]/hooks/useTrackingLog';
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic';
 import { getUser } from '@/store/store';
 

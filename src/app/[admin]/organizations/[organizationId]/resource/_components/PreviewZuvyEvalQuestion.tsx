@@ -8,7 +8,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
-import { useZuvyEvalQuestionById } from '@/hooks/useZuvyEvalQuestionById'
+import { useZuvyEvalQuestionById } from '@/app/[admin]/hooks/useZuvyEvalQuestionById'
 import { Eye } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'

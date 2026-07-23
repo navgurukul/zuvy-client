@@ -28,9 +28,9 @@ import {
     CoursesResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import CourseCard from './_components/CourseCard'
-import { useAllCourses } from '@/hooks/useAllCourses'
-import { useBootcamps } from '@/hooks/useBootcamps'
-import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
+import { useAllCourses } from '@/app/[admin]/hooks/useAllCourses'
+import { useBootcamps } from '@/app/[admin]/hooks/useBootcamps'
+import { useCreateBootcamp } from '@/app/[admin]/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { CoursesSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'

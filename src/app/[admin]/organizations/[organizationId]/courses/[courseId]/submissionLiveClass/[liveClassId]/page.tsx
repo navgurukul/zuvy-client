@@ -15,10 +15,10 @@ import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { getOffset, getUser } from '@/store/store'
 import { POSITION } from '@/utils/constant'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 
 type Props = {}
 

@@ -27,11 +27,11 @@ import {
     APIResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useFormsStatus from '@/hooks/useFormsStatus'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useFormsStatus from '@/app/[admin]/hooks/useFormsStatus'
 import useChapterDetails from '@/hooks/useChapterDetails'
 
 type Props = {}

@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/form'
 import { getChapterUpdateStatus, getFormPreviewStore, getUser } from '@/store/store'
 import { useRouter, useParams } from 'next/navigation'
-import useEditChapter from '@/hooks/useEditChapter'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import {
     AddFormProps,

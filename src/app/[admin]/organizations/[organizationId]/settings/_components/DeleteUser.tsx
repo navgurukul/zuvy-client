@@ -17,7 +17,7 @@ import { Trash2 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
-import { useDeleteUser } from '@/hooks/useDeleteUser'
+import { useDeleteUser } from '@/app/[admin]/hooks/useDeleteUser'
 
 interface DeleteUserProps {
     title: string
