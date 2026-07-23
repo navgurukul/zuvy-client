@@ -21,7 +21,7 @@ import AddStudentsModal from '../../_components/addStudentsmodal'
 import { columns } from './columns'
 import { useStudentData } from './components/useStudentData'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
-import { api } from '@/utils/axios.config'
+import { useGetCourseStudents } from '@/hooks/useGetCourseStudents'
 import AlertDialogDemo from './components/deleteModalNew'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import axios from 'axios'
@@ -71,6 +71,7 @@ const StudentsPage = ({ params }: { params: any }) => {
         setCurrentPage,
         fetchStudentData,
     } = useStudentData(params.courseId)
+    const { getCourseStudents } = useGetCourseStudents()
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -110,24 +111,24 @@ const StudentsPage = ({ params }: { params: any }) => {
             isFetching.current = true
             const currentOffset = customOffset !== undefined ? customOffset : offset
     
-            let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${currentOffset}`
+            let queryStr = `?limit=${limit}&offset=${currentOffset}`
     
             if (enrolledDateFilter !== 'all') {
                 const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-                if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
+                if (enrolledDate) queryStr += `&enrolledDate=${enrolledDate}`
             }
-            if (statusFilter !== 'all') url += `&status=${statusFilter}`
-            if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+            if (statusFilter !== 'all') queryStr += `&status=${statusFilter}`
+            if (batchFilter !== 'all') queryStr += `&batch_id=${batchFilter}`
             
             // Use debouncedAttendance here
             if (debouncedAttendance.trim() !== '') {
-                url += `&attendance=${debouncedAttendance.trim()}`
+                queryStr += `&attendance=${debouncedAttendance.trim()}`
             }
     
             const searchQuery = new URLSearchParams(window.location.search).get("search")
-            if (searchQuery) url += `&searchTerm=${searchQuery}`
+            if (searchQuery) queryStr += `&searchTerm=${searchQuery}`
     
-            const response = await api.get(url)
+            const response = await getCourseStudents(params.courseId, queryStr)
     
             setStudents(response.data.modifiedStudentInfo || [])
             setTotalStudents(response.data.totalStudents || 0)
@@ -143,7 +144,7 @@ const StudentsPage = ({ params }: { params: any }) => {
             setTimeout(() => {
                 isFetching.current = false
             }, 100) }
-    }, [params.courseId,limit,offset,enrolledDateFilter,statusFilter,batchFilter,debouncedAttendance,setStudents,setTotalStudents,setTotalPages])
+    }, [params.courseId,limit,offset,enrolledDateFilter,statusFilter,batchFilter,debouncedAttendance,setStudents,setTotalStudents,setTotalPages,getCourseStudents])
      // Update this helper function to handle new options
     // const convertLastActiveFilterToDate = (filter: string): string | null => {
     // const today = new Date()
@@ -232,14 +233,14 @@ const StudentsPage = ({ params }: { params: any }) => {
             return [];
         }
         
-        let url = `/bootcamp/students/${params.courseId}?searchTerm=${query}`
+        let queryStr = `?searchTerm=${query}`
         
         if (enrolledDateFilter && enrolledDateFilter !== 'all') {
             const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-            if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
+            if (enrolledDate) queryStr += `&enrolledDate=${enrolledDate}`
         }
-        if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
-        if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+        if (statusFilter && statusFilter !== 'all') queryStr += `&status=${statusFilter}`
+        if (batchFilter && batchFilter !== 'all') queryStr += `&batch_id=${batchFilter}`
         // if (lastActiveFilter && lastActiveFilter !== 'all') {
         // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
         // if (lastActiveDate) {
@@ -247,13 +248,13 @@ const StudentsPage = ({ params }: { params: any }) => {
         // }
         // }
         if (debouncedAttendance && debouncedAttendance.trim() !== '') {
-            url += `&attendance=${debouncedAttendance.trim()}`
+            queryStr += `&attendance=${debouncedAttendance.trim()}`
         }
         
-        const response = await api.get(url)
+        const response = await getCourseStudents(params.courseId, queryStr)
         const suggestions = (response.data.modifiedStudentInfo || []).map((student: StudentData) => ({ ...student, id: student.userId }));
         return suggestions;
-    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance]);
+    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance, getCourseStudents]);
 
     // Keep fetchSearchResultsApi with current offset for proper search functionality
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -269,19 +270,19 @@ const StudentsPage = ({ params }: { params: any }) => {
             return { modifiedStudentInfo: students }
         }
     
-        let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}&searchTerm=${query}`
+        let queryStr = `?limit=${limit}&offset=${offset}&searchTerm=${query}`
     
         if (enrolledDateFilter !== 'all') {
             const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-            if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
+            if (enrolledDate) queryStr += `&enrolledDate=${enrolledDate}`
         }
-        if (statusFilter !== 'all') url += `&status=${statusFilter}`
-        if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+        if (statusFilter !== 'all') queryStr += `&status=${statusFilter}`
+        if (batchFilter !== 'all') queryStr += `&batch_id=${batchFilter}`
         if (debouncedAttendance.trim() !== '') {
-            url += `&attendance=${debouncedAttendance.trim()}`
+            queryStr += `&attendance=${debouncedAttendance.trim()}`
         }
     
-        const response = await api.get(url)
+        const response = await getCourseStudents(params.courseId, queryStr)
     
         setStudents(response.data.modifiedStudentInfo || [])
         setTotalStudents(response.data.totalStudents || 0)
@@ -292,7 +293,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     
         return response.data
     
-    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, debouncedAttendance,fetchFilteredData,students])
+    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, debouncedAttendance,fetchFilteredData,students,getCourseStudents])
     
     const defaultFetchApi = useCallback(async () => {
         // Clear search from URL when input is cleared
@@ -314,7 +315,7 @@ const StudentsPage = ({ params }: { params: any }) => {
 
     const fetchStudentDataForBatch = useCallback(async (offsetValue: number) => {
         try {
-            const res = await api.get(`/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`)
+            const res = await getCourseStudents(params.courseId, `?limit=${limit}&offset=${offset}`)
             setSelectedRows([])
             setStudents(res.data.modifiedStudentInfo)
         } catch (error: any) {
@@ -326,7 +327,7 @@ const StudentsPage = ({ params }: { params: any }) => {
             }
             console.error(error)
         }
-    }, [params.courseId, limit, offset, setStudents, router, userRole, orgId])
+    }, [params.courseId, limit, offset, setStudents, router, userRole, orgId, getCourseStudents])
 
     const userIds = selectedRows.map((item: any) => item.userId)
 

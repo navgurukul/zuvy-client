@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, UserCheck, UserX, CheckCircle, XCircle } from 'lucide-react'
 import { DataTableColumnHeader } from '../../../../../../../../_components/datatable/data-table-column-header'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
 import { getAttendancePercentage, getCompletedClasses } from '@/store/store'
 import { useCompletedClasses } from '@/hooks/useCompletedClasses'
+import { useUpdateAttendanceStatus } from '@/hooks/useUpdateAttendanceStatus'
 
 interface ClassData {
     id: number
@@ -70,104 +70,83 @@ const getAttendanceStatusDisplay = (status: string) => {
     }
 }
 
-const updateAttendanceStatus = async (
-    courseId: string,
-    sessionId: number,
-    studentId: string,
-    status: 'present' | 'absent',
-    fetchCompletedClasses: (courseId: string | number, studentId: string | number) => Promise<any>,
-    setCompletedClasses: (classes: ClassData[]) => void,
-    setAttendancePercentage: (percentage: number) => void
-) => {
-    try {
-        const endpoint = `/bootcamp/${courseId}/attendance/${sessionId}/mark`
-
-        const payload = {
-            userId: studentId,
-            status: status
-        }
-
-        await api.post(endpoint, payload)
-
-        const response = await fetchCompletedClasses(courseId, studentId)
-
-        const classes = response.data?.data?.classes || []
-        setCompletedClasses(classes)
-
-        const stats = response.data?.data?.attendanceStats
-        if (stats) {
-            setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
-        } else if (classes.length > 0) {
-            const totalClasses = classes.length
-            const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
-            const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
-            setAttendancePercentage(percentage)
-        } else {
-            setAttendancePercentage(0)
-        }
-
-        toast({
-            title: 'Success',
-            description: `Attendance marked as ${status}`,
-        })
-
-        return true
-    } catch (error: any) {
-        console.error('Failed to update attendance:', error)
-
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to update attendance'
-
-        toast({
-            title: 'Error',
-            description: errorMessage,
-            variant: 'destructive'
-        })
-
-        return false
-    }
-}
-
 // Separate component for the update status cell
-const UpdateStatusCell = ({
-    classData,
-    courseId,
-    studentId
-}: {
+interface UpdateStatusCellProps {
     classData: ClassData
     courseId: string
     studentId: string
-}) => {
+    onStatusUpdate?: () => void
+}
+
+const UpdateStatusCell = ({
+    classData,
+    courseId,
+    studentId,
+    onStatusUpdate
+}: UpdateStatusCellProps) => {
     const [isUpdating, setIsUpdating] = useState(false)
-    const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
+    const [currentStatus, setCurrentStatus] = useState(
+        classData.attendanceStatus ? classData.attendanceStatus.toLowerCase() : ''
+    )
     const isPresent = currentStatus === 'present'
-    const { completedClasses, setCompletedClasses } = getCompletedClasses()
-    const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
-    const { fetchCompletedClasses } = useCompletedClasses()
+    const { setCompletedClasses } = getCompletedClasses()
+    const { setAttendancePercentage } = getAttendancePercentage()
+    const completedClassesHook = useCompletedClasses()
+    const { updateAttendanceStatus: postAttendanceStatus } = useUpdateAttendanceStatus()
 
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
-        const newStatus = checked ? 'present' : 'absent'
+        const newStatus: 'present' | 'absent' = checked ? 'present' : 'absent'
         const previousStatus = currentStatus
 
         // Optimistic update
         setCurrentStatus(newStatus)
 
-        const success = await updateAttendanceStatus(
-            courseId,
-            classData.id,
-            studentId,
-            newStatus,
-            fetchCompletedClasses,
-            setCompletedClasses,
-            setAttendancePercentage
-        )
+        try {
+            const res = await postAttendanceStatus(courseId, classData.id, {
+                userId: studentId,
+                status: newStatus
+            })
 
-        if (!success) {
+            if (typeof onStatusUpdate === 'function') {
+                await onStatusUpdate()
+            } else if (typeof completedClassesHook?.fetchCompletedClasses === 'function') {
+                const response = await completedClassesHook.fetchCompletedClasses(courseId, studentId)
+                if (response?.data?.data) {
+                    const classes = response.data.data.classes || []
+                    setCompletedClasses(classes)
+                    const stats = response.data.data.attendanceStats
+                    if (stats) {
+                        setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
+                    } else if (classes.length > 0) {
+                        const totalClasses = classes.length
+                        const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
+                        setAttendancePercentage(Math.round((attendedClasses / totalClasses) * 100))
+                    } else {
+                        setAttendancePercentage(0)
+                    }
+                }
+            }
+
+            toast.success({
+                title: 'Success',
+                description: res?.data?.message || `Attendance marked as ${newStatus}`,
+            })
+        } catch (error: any) {
+            console.error('Failed to update attendance:', error)
+
             // Revert on failure
             setCurrentStatus(previousStatus)
-        }
 
-        setIsUpdating(false)
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to update attendance'
+
+            toast.error({
+                title: 'Error',
+                description: errorMessage,
+            })
+        } finally {
+            setIsUpdating(false)
+        }
     }
 
     return (
@@ -308,6 +287,7 @@ export const createAttendanceColumns = (
                         classData={classData}
                         courseId={courseId}
                         studentId={studentId}
+                        onStatusUpdate={onStatusUpdate}
                     />
                 )
             },

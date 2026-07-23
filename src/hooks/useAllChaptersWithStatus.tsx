@@ -26,9 +26,9 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
       
       const response = await api.get<AllChaptersWithStatusResponse>(`/tracking/getAllChaptersWithStatus/${moduleId}`);
       
-      if (response.data.status === 'success') {
-        setTrackingData(response.data.trackingData);
-        setModuleDetails(response.data.moduleDetails);
+      if (response.data.status === 'success' || response.data.trackingData) {
+        setTrackingData(response.data.trackingData || []);
+        setModuleDetails(response.data.moduleDetails || []);
       } else {
         setError('Failed to fetch tracking data');
       }

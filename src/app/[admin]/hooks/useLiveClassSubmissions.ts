@@ -1,9 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
-import { UseLiveClassSubmissionsOptions, UseLiveClassSubmissionsResult } from './hookType'
+// import { UseLiveClassSubmissionsOptions, UseLiveClassSubmissionsResult } from './hookType'
 
 const inflightRequests = new Map<string, Promise<any>>()
 
+interface UseLiveClassSubmissionsOptions {
+  searchTerm?: string
+  enabled?: boolean
+}
+
+interface UseLiveClassSubmissionsResult {
+  liveClassData: any[]
+  totalStudents: number
+  loading: boolean
+  error: Error | null
+  refetch: () => void
+  fetchLiveClassSubmissions: (fetchBootcampId: string | number, fetchSearchTerm?: string) => Promise<any>
+}
 export const useLiveClassSubmissions = (
   bootcampId: string | number | undefined,
   options: UseLiveClassSubmissionsOptions = {}
@@ -79,5 +92,17 @@ export const useLiveClassSubmissions = (
     fetchData()
   }, [fetchData])
 
-  return { liveClassData, totalStudents, loading, error, refetch }
+  const fetchLiveClassSubmissions = useCallback(async (
+    fetchBootcampId: string | number,
+    fetchSearchTerm?: string
+  ) => {
+    let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${fetchBootcampId}`
+    if (fetchSearchTerm) {
+      url += `&searchTerm=${encodeURIComponent(fetchSearchTerm)}`
+    }
+    const res = await api.get(url)
+    return res
+  }, [])
+
+  return { liveClassData, totalStudents, loading, error, refetch, fetchLiveClassSubmissions }
 }

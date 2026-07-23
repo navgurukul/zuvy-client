@@ -15,74 +15,74 @@ export interface coursePermissions {
 
 // useAllUsers
 export interface User {
-    createdAt: any
-    id: number
-    roleId: number
-    userId: number
-    name: string
-    email: string
-    roleName: string
-    isPoc?: boolean
-    isZuvyPoc?: boolean
+  createdAt: any
+  id: number
+  roleId: number
+  userId: number
+  name: string
+  email: string
+  roleName: string
+  isPoc?: boolean
+  isZuvyPoc?: boolean
 }
 
 export interface UsersResponse {
-    status: string
-    message: string
-    code: number
-    data: User[]
-    totalRows: number
-    totalPages: number
-    permissions?: {
-        createUser: boolean
-        viewUsers: boolean
-        editUser: boolean
-        deleteUser: boolean
-    }
+  status: string
+  message: string
+  code: number
+  data: User[]
+  totalRows: number
+  totalPages: number
+  permissions?: {
+    createUser: boolean
+    viewUsers: boolean
+    editUser: boolean
+    deleteUser: boolean
+  }
 }
 
 
 // useAssessmentDetailsOfQuiz
 export interface QuizSubmissionData {
-    id?: number;
-    userId?: number;
-    chosenOption?: number | null;
-    attemptCount?: number;
-    questionId?: number;
+  id?: number;
+  userId?: number;
+  chosenOption?: number | null;
+  attemptCount?: number;
+  questionId?: number;
 }
 
 export interface QuizMcqDetail {
-    id: number;
-    quiz_id: number;
-    assessmentOutsourseId: number;
-    bootcampId: number;
-    chapterId: number;
-    correctOption: number;
-    chosenOption: number;
-    question: string;
-    options: { [key: string]: string };
-    variantId: string;
-    createdAt: string;
-    submissionsData: QuizSubmissionData;
+  id: number;
+  quiz_id: number;
+  assessmentOutsourseId: number;
+  bootcampId: number;
+  chapterId: number;
+  correctOption: number;
+  chosenOption: number;
+  question: string;
+  options: { [key: string]: string };
+  variantId: string;
+  createdAt: string;
+  submissionsData: QuizSubmissionData;
 }
 
 export interface AssessmentDetailsOfQuizData {
-    mcqs: QuizMcqDetail[];
+  mcqs: QuizMcqDetail[];
 }
 
 export interface UseAssessmentDetailsOfQuizReturn {
-    quizDetails: AssessmentDetailsOfQuizData | null;
-    loading: boolean;
-    error: string | null;
-    refetch: () => void;
+  quizDetails: AssessmentDetailsOfQuizData | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
 }
 
 
 // useAssignBatch
 export interface AssignBatchParams {
-    bootcampId?: string | number
-    batchId?: string | number
-    students?: { name: string; email: string }[]
+  bootcampId?: string | number
+  batchId?: string | number
+  students?: { name: string; email: string }[]
 }
 
 
@@ -103,74 +103,74 @@ export interface UseAssignmentSubmissionsResult {
 
 // useAssignPermissions
 export interface AssignPermissionsPayload {
-    resourceId: number
-    roleId: number
-    orgId: number
-    permissions: Record<string | number, boolean>
+  resourceId: number
+  roleId: number
+  orgId: number
+  permissions: Record<string | number, boolean>
 }
 
 export interface AssignPermissionsResponse<T = any> {
-    status?: string
-    message?: string
-    code?: number
-    data?: T
+  status?: string
+  message?: string
+  code?: number
+  data?: T
 }
 
 
 // useAssignUserRole
 export interface AssignUserRolePayload {
-    userId: number
-    roleId: number
-    orgId: number
+  userId: number
+  roleId: number
+  orgId: number
 }
 
 export interface AssignUserRoleResponse {
-    status?: string
-    message?: string
-    code?: number
-    data?: any
+  status?: string
+  message?: string
+  code?: number
+  data?: any
 }
 
 
 // useBatchList
 export type BatchListItem = {
-    id: number | string
-    name: string
+  id: number | string
+  name: string
 }
 
 export type BatchPermissions = {
-    createBatch: boolean
-    deleteBatch: boolean
-    editBatch: boolean
-    viewBatch: boolean
+  createBatch: boolean
+  deleteBatch: boolean
+  editBatch: boolean
+  viewBatch: boolean
 }
 
 
 // useBatchReassign
 export interface BatchReassignParams {
-    userId?: string | number
-    selectedValue?: string | number
-    bootcampId?: string | number
+  userId?: string | number
+  selectedValue?: string | number
+  bootcampId?: string | number
 }
 
 
 // useBootcampAssessments
 export interface BootcampAssessmentsResponse {
-    totalStudents: number
-    [moduleKey: string]: AssessmentSubmissions[] | number
+  totalStudents: number
+  [moduleKey: string]: AssessmentSubmissions[] | number
 }
 
 export interface UseBootcampAssessmentsParams {
-    courseId: string | number
-    searchTerm?: string
+  courseId: string | number
+  searchTerm?: string
 }
 
 export interface UseBootcampAssessmentsReturn {
-    assessments: BootcampAssessmentsResponse | null
-    loading: boolean
-    error: string | null
-    fetchAssessments: () => Promise<void>
-    refetch: () => Promise<void>
+  assessments: BootcampAssessmentsResponse | null
+  loading: boolean
+  error: string | null
+  fetchAssessments: () => Promise<void>
+  refetch: () => Promise<void>
 }
 
 
@@ -213,48 +213,48 @@ export interface UseChapterStudentsOptions {
 
 // useClassAnalytics
 export interface ClassAnalyticsParams {
-    classId: string | number
+  classId: string | number
 }
 
 
 // useCodingQuesions
 export interface UseCodingQuestionsProps {
-    orgId: number | string
-    selectedTopics?: Array<{ id?: number; value?: string }>
-    selectedDifficulties?: string[]
-    searchTerm?: string
-    offset?: number
-    position?: string | number
-    initialFetch?: boolean
+  orgId: number | string
+  selectedTopics?: Array<{ id?: number; value?: string }>
+  selectedDifficulties?: string[]
+  searchTerm?: string
+  offset?: number
+  position?: string | number
+  initialFetch?: boolean
 }
 
 
 // useCompleteMentorSlotSession
 export interface CompleteSessionResponse {
-    message?: string
-    completedAt?: string
-    sessionLifecycleState?: string
-    [key: string]: unknown
+  message?: string
+  completedAt?: string
+  sessionLifecycleState?: string
+  [key: string]: unknown
 }
 
 
 // useCreateClass
 export type CreateClassData = {
-    title: string
-    batchId: number
-    secondBatchId: number | null
-    moduleId: number
-    description?: string
-    startDateTime: string
-    endDateTime: string
-    timeZone: string
-    isZoomMeet: boolean
+  title: string
+  batchId: number
+  secondBatchId: number | null
+  moduleId: number
+  description?: string
+  startDateTime: string
+  endDateTime: string
+  timeZone: string
+  isZoomMeet: boolean
 }
 
 export type CreateClassResponse = {
-    status: string
-    message: string
-    data?: any
+  status: string
+  message: string
+  data?: any
 }
 
 
@@ -290,24 +290,24 @@ export interface UseCreateCodingQuestionReturn {
 
 // useCreateMentorSlot
 export interface CreateMentorSlotPayload {
-    slotStartDateTime: string
-    slotEndDateTime: string
-    durationMinutes: number
+  slotStartDateTime: string
+  slotEndDateTime: string
+  durationMinutes: number
 }
 
 export type CreateMentorSlotApiResponse =
-    | MentorAvailabilitySlot
-    | { data: MentorAvailabilitySlot }
-    | {
-          data?: MentorAvailabilitySlot | MentorAvailabilitySlot[]
-          slot?: MentorAvailabilitySlot
-      }
+  | MentorAvailabilitySlot
+  | { data: MentorAvailabilitySlot }
+  | {
+    data?: MentorAvailabilitySlot | MentorAvailabilitySlot[]
+    slot?: MentorAvailabilitySlot
+  }
 
 export interface CreateMentorSlotResult {
-    success: boolean
-    slot: MentorAvailabilitySlot | null
-    errorMessage?: string
-    statusCode?: number
+  success: boolean
+  slot: MentorAvailabilitySlot | null
+  errorMessage?: string
+  statusCode?: number
 }
 
 
@@ -335,57 +335,57 @@ export interface UseCreateOpenEndedQuestionReturn {
 
 // useCreateOrganization
 export interface CreateOrganizationPayload {
-    title: string
-    displayName: string
-    logoUrl: string
-    pocName: string
-    pocEmail: string
-    isManagedByZuvy: boolean
-    zuvyPocName: string | null
-    zuvyPocEmail: string | null
+  title: string
+  displayName: string
+  logoUrl: string
+  pocName: string
+  pocEmail: string
+  isManagedByZuvy: boolean
+  zuvyPocName: string | null
+  zuvyPocEmail: string | null
 }
 
 export interface CreateOrganizationResponse {
-    status: string
-    message: string
-    [key: string]: any
+  status: string
+  message: string
+  [key: string]: any
 }
 
 
 // useCreateTopic
 export type CreateTopicPayload = {
-    moduleId: number
-    name: string
-    description: string
+  moduleId: number
+  name: string
+  description: string
 }
 
 export type CreateTopicResponse = {
-    id?: number
-    name?: string
-    description?: string
-    message?: string
-    [key: string]: unknown
+  id?: number
+  name?: string
+  description?: string
+  message?: string
+  [key: string]: unknown
 }
 
 
 // useDeleteModule
 export interface DeleteModuleParams {
-    courseId: string | number
-    moduleId: string | number
+  courseId: string | number
+  moduleId: string | number
 }
 
 
 // useDeleteStudent
 export interface DeleteStudentOptions {
-    onSuccess?: (resData: any) => void
-    onError?: (err: any) => void
+  onSuccess?: (resData: any) => void
+  onError?: (err: any) => void
 }
 
 
 // useDeleteUser
 export type DeleteUserResponse = {
-    message?: string
-    [key: string]: unknown
+  message?: string
+  [key: string]: unknown
 }
 
 
@@ -420,82 +420,82 @@ export interface UseEditCodingQuestionReturn {
 
 // useEditQuizQuestions
 export type EditQuizPayload = {
-    id: number
-    title: string
-    difficulty: 'Easy' | 'Medium' | 'Hard'
-    tagId: number
-    content: string
-    isRandomOptions: boolean
-    variantMCQs: Array<{
-        variantNumber: number
-        question: string
-        options: Record<number, string>
-        correctOption: number
-    }>
+  id: number
+  title: string
+  difficulty: 'Easy' | 'Medium' | 'Hard'
+  tagId: number
+  content: string
+  isRandomOptions: boolean
+  variantMCQs: Array<{
+    variantNumber: number
+    question: string
+    options: Record<number, string>
+    correctOption: number
+  }>
 }
 
 
 // useGenerateAiAssessment
 export type GenerateAiAssessmentPayload = {
-    bootcampId: number
-    scope: 'domain'
-    chapterId: number
-    domainId: number
-    title: string
-    description: string
-    audience: string
-    totalNumberOfQuestions: number
+  bootcampId: number
+  scope: 'domain'
+  chapterId: number
+  domainId: number
+  title: string
+  description: string
+  audience: string
+  totalNumberOfQuestions: number
 }
 
 export type AiAssessmentData = {
-    id: number
-    bootcampId: number
-    scope: string
-    domainId: number
-    title: string
-    description: string
-    audience: string
-    totalNumberOfQuestions: number
-    totalQuestionsWithBuffer?: number
-    startDatetime?: string | null
-    endDatetime?: string | null
-    publishedAt?: string | null
-    createdAt?: string
-    updatedAt?: string
-    [key: string]: unknown
+  id: number
+  bootcampId: number
+  scope: string
+  domainId: number
+  title: string
+  description: string
+  audience: string
+  totalNumberOfQuestions: number
+  totalQuestionsWithBuffer?: number
+  startDatetime?: string | null
+  endDatetime?: string | null
+  publishedAt?: string | null
+  createdAt?: string
+  updatedAt?: string
+  [key: string]: unknown
 }
 
 export type GenerateAiAssessmentResponse = {
-    message: string
-    data: AiAssessmentData
-    totalAssignedStudents?: number
-    [key: string]: unknown
+  message: string
+  data: AiAssessmentData
+  totalAssignedStudents?: number
+  [key: string]: unknown
 }
 
 export type MapQuestionsPayload = {
-    aiAssessmentId: number
+  aiAssessmentId: number
 }
 
 export type MapQuestionsResponse = {
-    aiAssessmentId: number
-    isBaseline: boolean
-    setsCreated: number
-    totalQuestionsPerSet: number
-    commonPerSet: number
-    uniquePerSet: number
-    message?: string
-    [key: string]: unknown
+  aiAssessmentId: number
+  isBaseline: boolean
+  setsCreated: number
+  totalQuestionsPerSet: number
+  commonPerSet: number
+  uniquePerSet: number
+  message?: string
+  [key: string]: unknown
 }
 
 export type GenerateAndMapAssessmentResponse = {
-    createResponse: GenerateAiAssessmentResponse
-    mapResponse: MapQuestionsResponse
+  createResponse: GenerateAiAssessmentResponse
+  mapResponse: MapQuestionsResponse
 }
 
 export type AiGenerationPhase =
-    | 'idle'
-    | 'creating-assessment'
-    | 'mapping-questions'
+  | 'idle'
+  | 'creating-assessment'
+  | 'mapping-questions'
 
 
 
@@ -643,132 +643,132 @@ export interface UseLiveClassSubmissionsResult {
 
 // useMarkMentorSlotAttendance
 export interface MarkMentorAttendancePayload {
-    joinedAt: string
-    leftAt: string
+  joinedAt: string
+  leftAt: string
 }
 
 export interface MarkAttendanceResponse {
-    message?: string
-    joinedAt?: string
-    leftAt?: string
-    durationAttended?: number
-    [key: string]: unknown
+  message?: string
+  joinedAt?: string
+  leftAt?: string
+  durationAttended?: number
+  [key: string]: unknown
 }
 
 
 // useMentorMetrics
 export interface SessionMetrics {
-    total: string | number
-    completed: string | number
-    cancelled: string | number
-    missed: string | number
-    completionRate: string | number
-    cancellationRate: string | number
+  total: string | number
+  completed: string | number
+  cancelled: string | number
+  missed: string | number
+  completionRate: string | number
+  cancellationRate: string | number
 }
 
 export interface RatingMetrics {
-    averageRating: string | number
-    totalRatings: string | number
+  averageRating: string | number
+  totalRatings: string | number
 }
 
 export interface UtilizationMetrics {
-    totalSlots: string | number
-    usedSlots: string | number
-    utilizationRate: string | number
+  totalSlots: string | number
+  usedSlots: string | number
+  utilizationRate: string | number
 }
 
 export interface MentorMetrics {
-    sessions: SessionMetrics
-    ratings: RatingMetrics
-    upcomingSessions: string | number
-    utilization: UtilizationMetrics
+  sessions: SessionMetrics
+  ratings: RatingMetrics
+  upcomingSessions: string | number
+  utilization: UtilizationMetrics
 }
 
 
 // useMentorSlotDetails
 export interface MentorSlotDetailsSlot {
-    id: number
-    slotStartDateTime: string
-    slotEndDateTime?: string
-    [key: string]: unknown
+  id: number
+  slotStartDateTime: string
+  slotEndDateTime?: string
+  [key: string]: unknown
 }
 
 export interface MentorSlotDetailsBooking {
-    id: number
-    studentUserId: number
-    status: string
-    mentorFeedback?: {
-        notes?: string | null
-        areasOfImprovement?: string | null
-    } | null
-    mentorRating?: number | null
-    mentorFeedbackSubmittedAt?: string | null
-    mentorFeedbackLocked?: boolean | null
-    studentRating?: number | null
-    studentFeedback?: string | null
-    studentFeedbackSubmittedAt?: string | null
-    studentFeedbackLocked?: boolean | null
-    cancelledAt?: string | null
-    cancellationReason?: string | null
-    cancelledBy?: string | null
-    [key: string]: unknown
+  id: number
+  studentUserId: number
+  status: string
+  mentorFeedback?: {
+    notes?: string | null
+    areasOfImprovement?: string | null
+  } | null
+  mentorRating?: number | null
+  mentorFeedbackSubmittedAt?: string | null
+  mentorFeedbackLocked?: boolean | null
+  studentRating?: number | null
+  studentFeedback?: string | null
+  studentFeedbackSubmittedAt?: string | null
+  studentFeedbackLocked?: boolean | null
+  cancelledAt?: string | null
+  cancellationReason?: string | null
+  cancelledBy?: string | null
+  [key: string]: unknown
 }
 
 export interface MentorSlotDetailsData {
-    slot: MentorSlotDetailsSlot | null
-    bookings: MentorSlotDetailsBooking[]
+  slot: MentorSlotDetailsSlot | null
+  bookings: MentorSlotDetailsBooking[]
 }
 
 
 // useMyMentorSlots
 export interface MentorCreatedSlot {
-    id: number
-    mentorSlotManagementId: number
-    slotStartDateTime: string
-    slotEndDateTime: string
-    durationMinutes: number
-    maxCapacity: number
-    currentBookedCount: number
-    status: string
+  id: number
+  mentorSlotManagementId: number
+  slotStartDateTime: string
+  slotEndDateTime: string
+  durationMinutes: number
+  maxCapacity: number
+  currentBookedCount: number
+  status: string
 }
 
 export interface MentorSlotMetrics {
-    totalSlots: number
-    available: number
-    full: number
-    completed: number
-    closed: number
-    hours: number
+  totalSlots: number
+  available: number
+  full: number
+  completed: number
+  closed: number
+  hours: number
 }
 
 
 // useNotifications
 export interface Notification {
-    id: number
-    type: string
-    title: string
-    message: string
-    isRead: boolean
-    createdAt: string
+  id: number
+  type: string
+  title: string
+  message: string
+  isRead: boolean
+  createdAt: string
 }
 
 
 // useOpenEndedQuestions
 export interface UseOpenEndedQuestionsProps {
-    orgId: number | string
-    selectedTopics?: Array<{ id?: number; value?: string }>
-    selectedDifficulties?: string[]
-    searchTerm?: string
-    offset?: number
-    position?: string | number
-    initialFetch?: boolean
+  orgId: number | string
+  selectedTopics?: Array<{ id?: number; value?: string }>
+  selectedDifficulties?: string[]
+  searchTerm?: string
+  offset?: number
+  position?: string | number
+  initialFetch?: boolean
 }
 
 export interface FetchedData {
-    data: any[]
-    totalRows?: number
-    totalPages?: number
-    error?: any
+  data: any[]
+  totalRows?: number
+  totalPages?: number
+  error?: any
 }
 
 
@@ -797,28 +797,28 @@ export interface UseOpenEndedSolutionForStudentsReturn {
 
 // useOverallAnalysis
 export type OverallAnalysisStudent = {
-    id?: number | string
-    userId?: number | string
-    name?: string
-    email?: string
-    overAllAttendance?: number | null
-    numberOfAssessmentsAttempted?: number
-    averageAssessmentPercentage?: number | null
-    assessments?: unknown[]
-    oneOnOneSessionsCompleted?: number
-    profile?: unknown
+  id?: number | string
+  userId?: number | string
+  name?: string
+  email?: string
+  overAllAttendance?: number | null
+  numberOfAssessmentsAttempted?: number
+  averageAssessmentPercentage?: number | null
+  assessments?: unknown[]
+  oneOnOneSessionsCompleted?: number
+  profile?: unknown
 }
 
 export type OverallAnalysisPayload = {
-    courseName?: string
-    batchName?: string
-    students?: OverallAnalysisStudent[]
+  courseName?: string
+  batchName?: string
+  students?: OverallAnalysisStudent[]
 }
 
 export type UseOverallAnalysisArgs = {
-    batchId?: number | string
-    userId?: number | string
-    auto?: boolean
+  batchId?: number | string
+  userId?: number | string
+  auto?: boolean
 }
 
 
@@ -876,108 +876,108 @@ export interface UseProjectSubmissionsResult {
 
 // useQuizQuestions
 export interface UseQuizQuestionsProps {
-    orgId: number | string
-    selectedTopics?: Array<{ id?: number; value?: string }>
-    selectedDifficulties?: string[]
-    searchTerm?: string
-    initialFetch?: boolean
+  orgId: number | string
+  selectedTopics?: Array<{ id?: number; value?: string }>
+  selectedDifficulties?: string[]
+  searchTerm?: string
+  initialFetch?: boolean
 }
 
 export interface UseQuizQuestionsReturn {
-    quizQuestions: any[]
-    loading: boolean
-    error: any
-    fetchQuizQuestions: (opts?: {
-        topics?: Array<{ id?: number; value?: string }>
-        difficulties?: string[]
-        search?: string
-    }) => Promise<{ data: any[]; error?: any }>
-    refetch: () => Promise<{ data: any[]; error?: any }>
+  quizQuestions: any[]
+  loading: boolean
+  error: any
+  fetchQuizQuestions: (opts?: {
+    topics?: Array<{ id?: number; value?: string }>
+    difficulties?: string[]
+    search?: string
+  }) => Promise<{ data: any[]; error?: any }>
+  refetch: () => Promise<{ data: any[]; error?: any }>
 }
 
 
 // useRbacPermissions
 export interface PermissionsResponse {
-    status?: string
-    message?: string
-    code?: number
-    data?: Array<{ id: number; name: string }>
+  status?: string
+  message?: string
+  code?: number
+  data?: Array<{ id: number; name: string }>
 }
 
 
 // useRbacResources
 export interface RbacResource {
-    id: number
-    title: string
-    description: string
-    permissions: string[]
+  id: number
+  title: string
+  description: string
+  permissions: string[]
 }
 
 export interface RawRbacResource {
-    id?: number
-    name?: string
-    title?: string
-    description?: string
-    permissions?: string[]
-    actions?: string[]
-    resource?: string
+  id?: number
+  name?: string
+  title?: string
+  description?: string
+  permissions?: string[]
+  actions?: string[]
+  resource?: string
 }
 
 export interface RbacResourcesResponse {
-    status?: string
-    message?: string
-    code?: number
-    data?: RawRbacResource[]
+  status?: string
+  message?: string
+  code?: number
+  data?: RawRbacResource[]
 }
 
 
 // useRoles
 export interface Role {
-    id: number
-    name: string
-    description: string
+  id: number
+  name: string
+  description: string
 }
 
 export interface RolesResponse {
-    status: string
-    message: string
-    code: number
-    data: Role[]
+  status: string
+  message: string
+  code: number
+  data: Role[]
 }
 
 
 // useStudentMentorFeedbacks
 export interface StudentFeedbackEntry {
-    id: number
-    bookingId: number
-    studentName?: string | null
-    studentUserName?: string | null
-    studentFullName?: string | null
-    learnerName?: string | null
-    rating?: number
-    studentRating?: number
-    feedback?: string | null
-    notes?: string | null
-    createdAt?: string | null
-    submittedAt?: string | null
-    date?: string | null
+  id: number
+  bookingId: number
+  studentName?: string | null
+  studentUserName?: string | null
+  studentFullName?: string | null
+  learnerName?: string | null
+  rating?: number
+  studentRating?: number
+  feedback?: string | null
+  notes?: string | null
+  createdAt?: string | null
+  submittedAt?: string | null
+  date?: string | null
 }
 
 
 // useSubmitMentorSlotFeedback
 export interface MentorSessionFeedbackPayload {
-    feedback: {
-        notes: string
-        areasOfImprovement: string
-    }
-    rating: number
+  feedback: {
+    notes: string
+    areasOfImprovement: string
+  }
+  rating: number
 }
 
 export interface SubmitFeedbackResponse {
-    message?: string
-    feedbackLockedAt?: string
-    rating?: number
-    [key: string]: unknown
+  message?: string
+  feedbackLockedAt?: string
+  rating?: number
+  [key: string]: unknown
 }
 
 
@@ -1040,12 +1040,12 @@ export interface UseTrackingLogReturn {
 }
 
 export interface TrackingLogFetchResult {
-    logs: TrackingLogEntry[]
-    pagination: {
-        offset: number
-        limit: number
-        total: number
-    }
+  logs: TrackingLogEntry[]
+  pagination: {
+    offset: number
+    limit: number
+    total: number
+  }
 }
 
 
@@ -1061,15 +1061,15 @@ export interface UseUpdateOpenEndedQuestionReturn {
 
 // useUpdateStudent
 export interface UpdateStudentPayload {
-    email: string
-    name: string
-    status: string
-    batchId: number
+  email: string
+  name: string
+  status: string
+  batchId: number
 }
 
 export interface UpdateStudentOptions {
-    onSuccess?: (resData: any) => void
-    onError?: (err: any) => void
+  onSuccess?: (resData: any) => void
+  onError?: (err: any) => void
 }
 
 

@@ -54,6 +54,10 @@ const getErrorMessage = (error: unknown): string => {
   return message || 'Failed to fetch mentor profile'
 }
 
+export const getMentorProfileApi = async () => {
+  return await api.get<MentorProfileResponse>('/instructor/mentor-slots/profile')
+}
+
 export function useGetMentorProfile() {
   const [mentorProfile, setMentorProfile] =
     useState<MentorProfileResponse | null>(null)
@@ -67,9 +71,7 @@ export function useGetMentorProfile() {
       setLoading(true)
       setError(null)
 
-      const response = await api.get<MentorProfileResponse>(
-        '/instructor/mentor-slots/profile'
-      )
+      const response = await getMentorProfileApi()
       
       const profile = response.data
       setMentorProfile(profile)

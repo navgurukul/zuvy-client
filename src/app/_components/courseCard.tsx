@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 import { isPlural } from '@/lib/utils'
 import { CircularProgress } from '@nextui-org/react'
 import {
@@ -12,9 +12,9 @@ import {
     SquareCode,
 } from 'lucide-react'
 import Link from 'next/link'
-import { api } from '@/utils/axios.config'
 import { useRouter, useParams } from 'next/navigation'
-import {CourseCardProps,ChapterTrackingResponse} from "@/app/_components/componentType"
+import { CourseCardProps } from "@/app/_components/componentType"
+import useAllChaptersWithStatus from '@/hooks/useAllChaptersWithStatus'
 
 function CourseCard({
     param,
@@ -33,26 +33,10 @@ function CourseCard({
 }:CourseCardProps) {
     const router = useRouter()
     const { viewcourses, moduleID } = useParams()
-    const [chapterId, setChapterId] = useState<any>()
+    const { trackingData } = useAllChaptersWithStatus(id ? id.toString() : '')
+    const chapterId = trackingData?.[0]?.id
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
-
-    const getChapterId = useCallback(async () => {
-        try {
-            const response = await api.get<ChapterTrackingResponse>(
-                `tracking/getAllChaptersWithStatus/${id}`
-            )
-            setChapterId(response.data.trackingData[0].id)
-        } catch (error) {
-            console.error(error)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (id) {
-            getChapterId()
-        }
-    }, [id, getChapterId])
 
     const handleModuleRoute = () => {
         if (typeId === 1) {
