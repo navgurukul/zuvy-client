@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAssignUserRole } from '@/hooks/useAssignUserRole'
+import { useAssignUserRole } from '@/app/[admin]/hooks/useAssignUserRole'
 import {
     Select,
     SelectContent,

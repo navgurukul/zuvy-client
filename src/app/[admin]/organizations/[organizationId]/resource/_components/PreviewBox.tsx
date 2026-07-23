@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import useGetMCQs from '@/hooks/useGetMcq'
+import useGetMCQs from '@/app/[admin]/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'

@@ -21,13 +21,13 @@ import {
 } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/app/[admin]/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
 import { useModuleChapters } from '@/hooks/useModuleChapters';
 import AdaptiveAssessment from '../[chapterID]/AdaptiveAssessment'
-import { useGetChapterDetails } from '@/hooks/useGetChapterDetails'
+import { useGetChapterDetails } from '@/app/[admin]/hooks/useGetChapterDetails'
 import { get } from 'http'
 export default function Page({
     params,

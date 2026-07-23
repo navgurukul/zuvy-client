@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTrackingLog } from '@/hooks/useTrackingLog';
-import { TrackingLogEntry } from '@/hooks/hookType';
+import { useTrackingLog } from '@/app/[admin]/hooks/useTrackingLog';
+import { TrackingLogEntry } from '@/app/[admin]/hooks/hookType';
 
 interface AuditLogExportProps {
   orgId?: number;

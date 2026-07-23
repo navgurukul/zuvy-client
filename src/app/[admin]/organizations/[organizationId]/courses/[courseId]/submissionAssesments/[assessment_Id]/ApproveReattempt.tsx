@@ -12,7 +12,7 @@ import {
 import { Check } from 'lucide-react'
 import { getIsReattemptApproved } from '@/store/store'
 import { ReattemptData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/individualReportApproveType'
-import useApproveReattempt from '@/hooks/useApproveReattempt'
+import useApproveReattempt from '@/app/[admin]/hooks/useApproveReattempt'
 const ApproveReattempt = ({ data }: { data: ReattemptData }) => {
     const [reattemptRequested, setReattemptRequested] = useState(
         data?.reattemptRequested

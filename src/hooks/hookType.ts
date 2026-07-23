@@ -456,39 +456,6 @@ export interface FeedbackFormResponse {
 
 
 
-// useGetMCQs
-
-export interface QuizVariant {
-  id: number;
-  text: string;
-}
-
-export interface QuizData {
-  id: number;
-  question: string;
-  difficulty: string;
-  tagId: number;
-  quizVariants: QuizVariant[];
-}
-
-export interface QuizApiResponse {
-  data: QuizData[];
-}
-
-export interface Tag {
-  id: number;
-  tagName: string;
-}
-
-export interface Props {
-  id: number;
-  tags?: Tag[];
-  assesmentSide?: boolean;
-}
-
-
-
-
 // useLatestUpdatedCourse
 export interface NewChapter {
   id: number;
@@ -713,99 +680,6 @@ export interface UseUpcomingEventsReturn {
   error: string | null;
 }
 
-// useBootcampSettings.tsx
-export interface BootcampSettingsData {
-  type: string;
-  isModuleLocked: boolean;
-  mentorshipEnabled: boolean;
-  leaderboardEnabled: boolean;
-}
-
-export interface UseBootcampSettingsReturn {
-  bootcampSettings: BootcampSettingsData | null;
-  loading: boolean;
-  error: string | null;
-  updateError: string | null; // Add this
-  updateSettings: (settings: BootcampSettingsData) => Promise<void>;
-  refetch: () => Promise<void>;
-}
-
-// useBootcampDelete.tsx
-export interface UseBootcampDeleteReturn {
-  deleteBootcamp: (bootcampId: string) => Promise<void>
-  isDeleting: boolean
-  error: string | null
-}
-
-export interface coursePermissions {
-  createCourse: boolean;
-  viewCourse: boolean;
-  editCourse: boolean;
-  deleteCourse: boolean;
-  viewContent: boolean;
-  viewRolesAndPermissions: boolean;
-};
-
-
-// useCreateCodingQuestion
-export interface CreateCodingQuestionData {
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  tagId: number;
-  constraints: string;
-  testCases: Array<{
-    inputs: Array<{
-      parameterType: string;
-      parameterValue: any;
-      parameterName: string;
-    }>;
-    expectedOutput: {
-      parameterType: string;
-      parameterValue: any;
-    };
-  } | null>;
-  createdAt: string;
-  updatedAt: string;
-  content: any;
-}
-
-export interface UseCreateCodingQuestionReturn {
-  createQuestion: (data: CreateCodingQuestionData) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-}
-
-
-
-// useEditCodingQuestion
-export interface EditCodingQuestionData {
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  tagId: number;
-  constraints: string;
-  testCases: Array<{
-    inputs: Array<{
-      parameterType: string;
-      parameterValue: any;
-      parameterName: string;
-    }>;
-    expectedOutput: {
-      parameterType: string;
-      parameterValue: any;
-    };
-  } | null>;
-  updatedAt: string;
-  content: any;
-}
-
-export interface UseEditCodingQuestionReturn {
-  editQuestion: (orgId: number, questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-}
-
 
 // useCreateOpenEndedQuestion
 export interface CreateOpenEndedQuestionData {
@@ -818,73 +692,6 @@ export interface UseCreateOpenEndedQuestionReturn {
   createOpenEndedQuestion: (data: CreateOpenEndedQuestionData) => Promise<boolean>;
   loading: boolean;
   error: string | null;
-}
-
-// useUpdateOpenEndedQuestion
-export type UpdateOpenEndedQuestionData = CreateOpenEndedQuestionData;
-
-export interface UseUpdateOpenEndedQuestionReturn {
-  updateOpenEndedQuestion: (questionId: number, data: UpdateOpenEndedQuestionData) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-}
-
-// Tracking Log Types
-export interface TrackingLogEntry {
-  id: number
-  orgId: number
-  actorUserId: number
-  actorName: string
-  actorEmail: string
-  permissionId: number
-  resourceId: number
-  action: string
-  resourceType: string
-  description: string
-  createdAt: string
-  status: string
-  actorRoles: string[]
-}
-
-export interface TrackingLogPagination {
-  offset: number
-  limit: number
-  total: number
-}
-
-export interface TrackingLogData {
-  logs: TrackingLogEntry[]
-  pagination: TrackingLogPagination
-}
-
-export interface TrackingLogResponse {
-  success: boolean
-  message: string
-  data: TrackingLogData
-}
-
-export interface UseTrackingLogArgs {
-  orgId?: number
-  actorUserId?: number | string
-  action?: string
-  role?: string
-  status?: string
-  offset?: number
-  limit?: number
-  timeRange?: string
-  search?: string
-  initialFetch?: boolean
-  updateState?: boolean
-}
-
-export interface UseTrackingLogReturn {
-  trackingLogs: TrackingLogEntry[]
-  loading: boolean
-  error: unknown
-  totalRows: number
-  pagination: TrackingLogPagination
-  refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
-  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<TrackingLogEntry[]>
 }
 
 
@@ -1196,24 +1003,3 @@ export interface UseQuizSubmissionReturn {
   error: string | null;
 }
 
-// useOpenEndedSolutionForStudents
-export interface OpenEndedQuestionDetail {
-  id: number;
-  question: string;
-  difficulty: string;
-}
-
-export interface OpenEndedSubmissionData {
-  id: number;
-  openEndedQuestionId: number;
-  assessmentSubmissionId: number;
-  answer: string;
-  OpenEndedQuestion: OpenEndedQuestionDetail;
-}
-
-export interface UseOpenEndedSolutionForStudentsReturn {
-  data: OpenEndedSubmissionData[] | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}

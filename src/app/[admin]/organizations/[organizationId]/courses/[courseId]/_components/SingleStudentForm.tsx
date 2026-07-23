@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useBatchList } from '@/hooks/useBatchList'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 
 type StudentDataType = {
     name: string

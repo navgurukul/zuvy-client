@@ -20,7 +20,7 @@ import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
-import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
+import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 

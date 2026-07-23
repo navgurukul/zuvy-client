@@ -27,7 +27,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import axios from 'axios'
 import { toast } from '@/components/ui/use-toast'
 import { SearchBox } from '@/utils/searchBox'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     Select,
     SelectContent,

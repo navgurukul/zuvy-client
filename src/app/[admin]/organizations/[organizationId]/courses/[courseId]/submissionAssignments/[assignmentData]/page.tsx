@@ -12,11 +12,11 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useAssignmentStatus from '@/hooks/useAssignmentStatus'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useAssignmentStatus from '@/app/[admin]/hooks/useAssignmentStatus'
 
 type Props = {}
 

@@ -7,7 +7,7 @@ import {
     useCallback,
   } from "react";
   import { useRouter, useSearchParams } from "next/navigation";
-  import useDebounce from "@/hooks/useDebounce";
+  import useDebounce from "@/app/[admin]/hooks/useDebounce";
   import {
     Suggestion,
     UseSearchWithSuggestionsProps,

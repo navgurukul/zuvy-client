@@ -16,7 +16,7 @@ import {
     getIsRowSelected,
 } from '@/store/store'
 import { DeleteModalDialogProps } from './courseStudentComponentType'
-import { useDeleteStudent } from '@/hooks/useDeleteStudent'
+import { useDeleteStudent } from '@/app/[admin]/hooks/useDeleteStudent'
 
 export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
     title,

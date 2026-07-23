@@ -13,7 +13,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import axios from 'axios'
 import {

@@ -15,12 +15,12 @@ import {VideoSubmissionSkeleton} from '@/app/[admin]/organizations/[organization
 import { ellipsis } from '@/lib/utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
 
 
-import { useVideoSubmissions } from '@/hooks/useVideoSubmissions'
-import { useChapterStudents } from '@/hooks/useChapterStudents'
+import { useVideoSubmissions } from '@/app/[admin]/hooks/useVideoSubmissions'
+import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()

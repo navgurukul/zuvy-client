@@ -10,7 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useGenerateMcqQuestions } from '@/hooks/useGenerateMcqQuestions';
+import { useGenerateMcqQuestions } from '@/app/[admin]/hooks/useGenerateMcqQuestions';
 import {
   Form,
   FormControl,
@@ -21,9 +21,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { usePathname } from 'next/navigation';
-import { useAllCourses } from '@/hooks/useAllCourses';
-import { useAllModulesByCourse } from '@/hooks/useAllModulesByCourse';
-import { useTopics } from '@/hooks/useTopics';
+import { useAllCourses } from '@/app/[admin]/hooks/useAllCourses';
+import { useAllModulesByCourse } from '@/app/[admin]/hooks/useAllModulesByCourse';
+import { useTopics } from '@/app/[admin]/hooks/useTopics';
 
 interface CreateProblemFormProps {
   onClose: () => void;

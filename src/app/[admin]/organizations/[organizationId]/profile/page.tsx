@@ -7,9 +7,9 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Button } from '@/components/ui/button'
-import { useGetMentorProfile } from '@/hooks/useGetMentorProfile'
-import { useUpdateMentorProfile } from '@/hooks/useUpdateMentorProfile'
-import { useBootcamps } from '@/hooks/useBootcamps'
+import { useGetMentorProfile } from '@/app/[admin]/hooks/useGetMentorProfile'
+import { useUpdateMentorProfile } from '@/app/[admin]/hooks/useUpdateMentorProfile'
+import { useBootcamps } from '@/app/[admin]/hooks/useBootcamps'
 import { toast } from '@/components/ui/use-toast'
 
 type ProfileData = {

@@ -25,7 +25,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
-import { useCreateOpenEndedQuestion } from '@/hooks/useCreateOpenEndedQuestion'
+import { useCreateOpenEndedQuestion } from '@/app/[admin]/hooks/useCreateOpenEndedQuestion'
 import {
     NewOpenEndedQuestionFormProps,
     Tags,

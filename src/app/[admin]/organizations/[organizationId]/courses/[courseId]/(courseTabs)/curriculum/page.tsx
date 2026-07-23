@@ -17,8 +17,8 @@ import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
-import { useEditModuleOfBootcamp } from '@/hooks/useEditModuleOfBootcamp'
-import { useCreateModule } from '@/hooks/useCreateModule'
+import { useEditModuleOfBootcamp } from '@/app/[admin]/hooks/useEditModuleOfBootcamp'
+import { useCreateModule } from '@/app/[admin]/hooks/useCreateModule'
 import {
     CurriculumItem,
     ModuleData,

@@ -15,15 +15,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import useFormsStatus from '@/hooks/useFormsStatus'
-import useFormDetailsById from '@/hooks/useFormDetailsById'
+import useFormsStatus from '@/app/[admin]/hooks/useFormsStatus'
+import useFormDetailsById from '@/app/[admin]/hooks/useFormDetailsById'
 import useChapterDetails from '@/hooks/useChapterDetails'
 
 import {
     FormItem,
     Params,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: { params: Params }) => {
     const router = useRouter()

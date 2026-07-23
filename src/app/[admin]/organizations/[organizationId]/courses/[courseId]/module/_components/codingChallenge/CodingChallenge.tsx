@@ -8,13 +8,13 @@ import CodingTopics from '@/app/[admin]/organizations/[organizationId]/courses/[
 import SelectedProblems from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
     getUser,
 } from '@/store/store'
-import useCodingQuestions from '@/hooks/useCodingQuestions'
+import useCodingQuestions from '@/app/[admin]/hooks/useCodingQuestions'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'

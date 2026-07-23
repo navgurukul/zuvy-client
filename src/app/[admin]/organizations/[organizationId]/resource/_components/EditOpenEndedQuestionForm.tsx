@@ -30,7 +30,7 @@ import {
     Tag,
 } from './adminResourceComponentType'
 import { useParams } from 'next/navigation'
-import useUpdateOpenEndedQuestion from '@/hooks/useUpdateOpenEndedQuestion'
+import useUpdateOpenEndedQuestion from '@/app/[admin]/hooks/useUpdateOpenEndedQuestion'
 
 const formSchema = z.object({
     questionDescription: z.string(),

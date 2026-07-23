@@ -6,7 +6,7 @@ import { Calendar, Clock, Video, Users, ExternalLink, Info, CalendarIcon } from 
 import { LiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
 import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
-import { useClassAnalytics } from '@/hooks/useClassAnalytics'
+import { useClassAnalytics } from '@/app/[admin]/hooks/useClassAnalytics'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -26,7 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
-import { useUpdateLiveClassSession} from '@/hooks/useUpdateLiveClassSession'
+import { useUpdateLiveClassSession} from '@/app/[admin]/hooks/useUpdateLiveClassSession'
 
 const liveClassSchema = z
     .object({

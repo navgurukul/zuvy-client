@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 
 export interface Organization {
     // id: number

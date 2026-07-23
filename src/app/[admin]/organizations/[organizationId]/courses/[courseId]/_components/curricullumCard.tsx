@@ -5,7 +5,7 @@ import DeleteConfirmationModal from '@/app/[admin]/organizations/[organizationId
 import { useRouter, useParams } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
-import { useDeleteModule } from '@/hooks/useDeleteModule'
+import { useDeleteModule } from '@/app/[admin]/hooks/useDeleteModule'
 import { Reorder, useDragControls } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

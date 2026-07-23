@@ -44,8 +44,8 @@ import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { useParams, useRouter } from 'next/navigation'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
-import { useCreateClass } from '@/hooks/useCreateClass'
-import { useBatchList } from '@/hooks/useBatchList'
+import { useCreateClass } from '@/app/[admin]/hooks/useCreateClass'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 // Removed conflicting imported type CreateSessionDialogProps (local type declared below)
 
 const formSchema = z

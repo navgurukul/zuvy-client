@@ -30,7 +30,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { LANGUAGES } from '@/utils/constant'
-import { useCourseDetails } from '@/hooks/useCourseDetails'
+import { useCourseDetails } from '@/app/[admin]/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 import {GeneralDetailsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 

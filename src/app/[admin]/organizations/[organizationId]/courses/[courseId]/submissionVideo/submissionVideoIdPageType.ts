@@ -1,4 +1,4 @@
-import { coursePermissions } from "@/hooks/hookType";
+import { coursePermissions } from "@/app/[admin]/hooks/hookType";
 import { ReactNode } from "react";
 
 export interface PageParams{

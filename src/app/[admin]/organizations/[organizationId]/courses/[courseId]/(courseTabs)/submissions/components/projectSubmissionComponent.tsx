@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 

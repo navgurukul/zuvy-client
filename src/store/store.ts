@@ -8,7 +8,7 @@ import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
-import { fetchCourseById } from '@/hooks/useCourseExistenceCheck'
+import { fetchCourseById } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 
 type CounterStore = {
     studentData: {

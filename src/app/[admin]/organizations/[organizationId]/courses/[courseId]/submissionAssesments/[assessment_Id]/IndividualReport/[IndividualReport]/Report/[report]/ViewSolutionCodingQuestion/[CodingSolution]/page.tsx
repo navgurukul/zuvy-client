@@ -19,9 +19,9 @@ import {
     ProctoringData,
     CodingSubmissionResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/SubmissionViewPageType'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useAssessmentTracking from '@/hooks/useAssessmentTracking'
-import useCodingSubmissionDetails from '@/hooks/useCodingSubmissionDetails'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useAssessmentTracking from '@/app/[admin]/hooks/useAssessmentTracking'
+import useCodingSubmissionDetails from '@/app/[admin]/hooks/useCodingSubmissionDetails'
 
 const Page = ({ params }: { params: paramsType }) => {
     const router = useRouter()

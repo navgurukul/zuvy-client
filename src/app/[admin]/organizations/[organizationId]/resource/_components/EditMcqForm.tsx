@@ -26,9 +26,9 @@ import {
 import { useState } from 'react'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
-import useGetMCQs from '@/hooks/useGetMcq'
-import useAddQuizVariants from '@/hooks/useAddQuizVariants'
-import useDeleteQuizVariant from '@/hooks/useDeleteQuizVariant'
+import useGetMCQs from '@/app/[admin]/hooks/useGetMcq'
+import useAddQuizVariants from '@/app/[admin]/hooks/useAddQuizVariants'
+import useDeleteQuizVariant from '@/app/[admin]/hooks/useDeleteQuizVariant'
 import {
     Tooltip,
     TooltipContent,
@@ -42,7 +42,7 @@ import {
     QuizDataType,
 } from './adminResourceComponentType'
 import { useParams } from 'next/navigation';
-import useEditQuizQuestions from '@/hooks/useEditQuizQuestions'
+import useEditQuizQuestions from '@/app/[admin]/hooks/useEditQuizQuestions'
 
 type Props = {}
 

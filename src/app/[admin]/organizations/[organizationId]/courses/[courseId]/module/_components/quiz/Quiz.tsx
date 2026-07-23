@@ -26,14 +26,14 @@ import {
     QuizProps,
     ChapterDetailsResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
-import useDebounce from '@/hooks/useDebounce'
-import useQuizQuestions from '@/hooks/useQuizQuestions'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
+import useQuizQuestions from '@/app/[admin]/hooks/useQuizQuestions'
 import CodingTopics from '../codingChallenge/CodingTopics'
 
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import useEditChapter from '@/hooks/useEditChapter' 
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter' 
 import {QuizSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
