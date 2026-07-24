@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import { useSubmitStudentFeedback } from "@/hooks/useSubmitStudentFeedback"
+import { useSubmitStudentFeedback } from "@/app/student/hooks/useSubmitStudentFeedback"
 import {
   getMentorProfileHref,
   getMentorsHref,

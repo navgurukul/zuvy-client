@@ -18,7 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Calendar, Scissors } from 'lucide-react';
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
-import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
+import { useLearnerTechnicalSkills } from '@/app/student/hooks/useLearnerTechnicalSkills';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useQuizSubmission } from '@/hooks/useQuizSubmission'
+import { useQuizSubmission } from '@/app/student/hooks/useQuizSubmission'
 import {
     AlertDialog,
     AlertDialogAction,

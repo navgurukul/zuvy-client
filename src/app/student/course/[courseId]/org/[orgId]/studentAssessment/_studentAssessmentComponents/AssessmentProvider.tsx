@@ -11,13 +11,13 @@ import {
 import QuizQuestions from "./QuizQuestions";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import IDE from "./IDE";
-import { useCodingSubmissions } from "@/hooks/useCodingSubmissions";
-import useStartAssessment from "@/hooks/useStartAssessment";
-import useChapterCompletion from "@/hooks/useChapterCompletion";
-import useAssessmentQuizQuestions from "@/hooks/useAssessmentQuizQuestions";
-import useAssessmentOpenEndedQuestions from "@/hooks/useAssessmentOpenEndedQuestions";
-import useAssessmentSubmissions from "@/hooks/useAssessmentSubmissions";
-import useSubmitAssessment from "@/hooks/useSubmitAssessment";
+import { useCodingSubmissions } from "@/app/student/hooks/useCodingSubmissions";
+import useStartAssessment from "@/app/student/hooks/useStartAssessment";
+import useChapterCompletion from "@/app/student/hooks/useChapterCompletion";
+import useAssessmentQuizQuestions from "@/app/student/hooks/useAssessmentQuizQuestions";
+import useAssessmentOpenEndedQuestions from "@/app/student/hooks/useAssessmentOpenEndedQuestions";
+import useAssessmentSubmissions from "@/app/student/hooks/useAssessmentSubmissions";
+import useSubmitAssessment from "@/app/student/hooks/useSubmitAssessment";
 
 import { toast } from "@/components/ui/use-toast";
 import { usePathname, useRouter } from "next/navigation";

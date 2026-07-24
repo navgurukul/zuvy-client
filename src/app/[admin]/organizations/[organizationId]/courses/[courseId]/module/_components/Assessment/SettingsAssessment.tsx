@@ -24,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button'
 import ToggleSwitch from './ToggleSwitch'
 import { toast } from '@/components/ui/use-toast'
-import { useEditAssessment } from '@/hooks/useEditAssessment'
+import { useEditAssessment } from '@/app/[admin]/hooks/useEditAssessment'
 import { useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getChapterUpdateStatus } from '@/store/store'

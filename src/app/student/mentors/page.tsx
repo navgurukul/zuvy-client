@@ -2,16 +2,16 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Mentor, useMentors } from "@/hooks/useMentors";
+import { useMentors } from "@/app/student/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
-import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
+import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
 import { Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Toggle } from "@/components/ui/toggle";
 import MentorshipTabs from "../_components/MentorshipTabs";
 import MentorBookingDrawer from "@/app/student/_components/MentorBookingDrawer";
-
+import { Mentor } from "../hooks/hookTypes";
 
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';

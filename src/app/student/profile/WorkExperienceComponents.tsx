@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertCircle, Calendar, X, Briefcase } from 'lucide-react';
 import type { WorkExperience } from '@/lib/profile.types';
 import { MONTHS, TECH_STACK, SKILLS_BY_CATEGORY } from '@/lib/profile.mockData';
-import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
+import { useLearnerTechnicalSkills } from '@/app/student/hooks/useLearnerTechnicalSkills';
 import { format } from 'date-fns';
 
 const formatDateForInput = (dateValue?: WorkExperience['startDate']) => {

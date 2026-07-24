@@ -17,8 +17,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Image from 'next/image';
-import useAssessmentDetails from "@/hooks/useAssessmentDetails";
-import useRequestReattempt from "@/hooks/useRequestReattempt";
+import useAssessmentDetails from "@/app/student/hooks/useAssessmentDetails";
+import useRequestReattempt from "@/app/student/hooks/useRequestReattempt";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
 import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterType'

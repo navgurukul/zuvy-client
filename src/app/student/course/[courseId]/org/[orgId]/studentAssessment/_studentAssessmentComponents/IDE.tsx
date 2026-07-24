@@ -41,7 +41,7 @@ import { X } from 'lucide-react'
 
 import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
-import { useGetCodingQuestion } from '@/hooks/useGetCodingQuestion'
+import { useGetCodingQuestion } from '@/app/student/hooks/useGetCodingQuestion'
 import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 const IDE: React.FC<IDEProps> = ({

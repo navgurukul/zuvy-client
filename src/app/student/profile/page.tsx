@@ -1,7 +1,7 @@
 'use client';
 import ProfilePage from '@/app/student/_pages/ProfilePage';
 import EditProfilePage from '@/app/student/_pages/EditProfilePage';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTour } from '@/app/student/_components/guided-tour';

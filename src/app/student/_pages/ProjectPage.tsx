@@ -21,8 +21,8 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
-import useProjectDetails from "@/hooks/useProjectDetails";
-import useProjectSubmission from "@/hooks/useProjectSubmission";
+import useProjectDetails from "@/app/student/hooks/useProjectDetails";
+import useProjectSubmission from "@/app/student/hooks/useProjectSubmission";
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
 import {ProjectState,ParagraphContentItem} from '@/app/student/_pages/pageStudentType'
 

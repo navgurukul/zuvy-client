@@ -7,7 +7,7 @@ import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor"
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
 import {EditorDoc,ArticleContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 import {ArticleSkeleton} from "@/app/student/_components/Skeletons";
 

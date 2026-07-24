@@ -4,13 +4,13 @@ import { useMemo, useState } from "react";
 import { CalendarDays, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import {
   useMentorAvailability,
   type MentorAvailabilitySlot,
 } from "@/hooks/useMentorAvailability";
-import { useBookMentorSlot } from "@/hooks/useBookMentorSlot";
-import { useStudentMentorMetrics } from "@/hooks/useStudentMentorMetrics";
+import { useBookMentorSlot } from "@/app/student/hooks/useBookMentorSlot";
+import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
 import { getMentorProfileHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
 import { getMentorId } from "@/utils/mentorUtils";
 

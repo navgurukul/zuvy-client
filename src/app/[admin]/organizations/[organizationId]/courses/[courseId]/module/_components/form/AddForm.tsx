@@ -10,7 +10,7 @@ import { Pencil, PlusCircle, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
-import { useCreateAndEditForm } from '@/hooks/useCreateAndEditForm'
+import { useCreateAndEditForm } from '@/app/[admin]/hooks/useCreateAndEditForm'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {

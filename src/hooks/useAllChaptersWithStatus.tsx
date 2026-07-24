@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-import{AllChaptersWithStatusResponse,UseAllChaptersWithStatusReturn,ModuleDetail,TrackingDataItem} from '@/hooks/hookType'
+import { AllChaptersWithStatusResponse, UseAllChaptersWithStatusReturn, ModuleDetail, TrackingDataItem } from '@/hooks/hookType'
 const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusReturn => {
   const [trackingData, setTrackingData] = useState<TrackingDataItem[]>([]);
   const [moduleDetails, setModuleDetails] = useState<ModuleDetail[]>([]);
@@ -26,9 +26,9 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
       
       const response = await api.get<AllChaptersWithStatusResponse>(`/tracking/getAllChaptersWithStatus/${moduleId}`);
       
-      if (response.data.status === 'success' || response.data.trackingData) {
-        setTrackingData(response.data.trackingData || []);
-        setModuleDetails(response.data.moduleDetails || []);
+      if (response.data.status === 'success') {
+        setTrackingData(response.data.trackingData);
+        setModuleDetails(response.data.moduleDetails);
       } else {
         setError('Failed to fetch tracking data');
       }

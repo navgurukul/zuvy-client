@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
-import { useQuizResults } from '@/hooks/useQuizResults'
+import { useQuizResults } from '@/app/student/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import {MCQResult} from "@/app/student/course/[courseId]/org/[orgId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
