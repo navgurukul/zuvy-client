@@ -7,7 +7,7 @@ import { ArrowLeft, CalendarDays, Info, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/axios.config";
-import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getMentorBookHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
 import { getMentorId } from "@/utils/mentorUtils";
 

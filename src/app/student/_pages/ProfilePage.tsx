@@ -17,16 +17,16 @@ import ProfileStep1Component from '@/app/student/profile/ProfileStep1';
 import ProfileStep2Component from '@/app/student/profile/ProfileStep2';
 import ProfileStep3Component from '@/app/student/profile/ProfileStep3';
 import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Info, Sparkles, X } from 'lucide-react';
 import { MONTHS } from '@/lib/profile.mockData';
 import { toast } from '@/components/ui/use-toast';
-import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
-import useResumeParse from '@/hooks/useResumeParse';
-import useParsedResume from '@/hooks/useParsedResume';
-import useLearnerProfile from '@/hooks/useLearnerProfile';
+import useSaveLearnerProfile from '@/app/student/hooks/useSaveLearnerProfile';
+import useResumeParse from '@/app/student/hooks/useResumeParse';
+import useParsedResume from '@/app/student/hooks/useParsedResume';
+import useLearnerProfile from '@/app/student/hooks/useLearnerProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface OnboardingPageProps {

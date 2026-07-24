@@ -6,7 +6,7 @@ import { X, Edit3, CheckCircle } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import TimerDisplay from './TimerDisplay'
 import { toast } from '@/components/ui/use-toast'
-import { useOpenEndedSubmission } from '@/hooks/useOpenEndedSubmission'
+import { useOpenEndedSubmission } from '@/app/student/hooks/useOpenEndedSubmission'
 import {
     AlertDialog,
     AlertDialogAction,

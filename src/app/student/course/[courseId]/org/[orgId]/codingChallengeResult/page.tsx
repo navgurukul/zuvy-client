@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
-import { useCodingSubmissionsByQuestion } from '@/hooks/useCodingSubmissionsByQuestion';
+import { useCodingSubmissionsByQuestion } from '@/app/student/hooks/useCodingSubmissionsByQuestion';
 import { 
   ChevronLeft, 
   Code2, 

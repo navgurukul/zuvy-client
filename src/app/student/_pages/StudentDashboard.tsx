@@ -17,16 +17,16 @@ import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
-import { useFetchGlobalCourses } from "@/hooks/useFetchGlobalCourses";
-import useEnrollCourse from "@/hooks/useEnrollCourse";
+import { useFetchGlobalCourses } from "@/app/student/hooks/useFetchGlobalCourses";
+import useEnrollCourse from "@/app/student/hooks/useEnrollCourse";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bootcamp } from '@/app/student/_pages/pageStudentType';
-import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
+import { useUpcomingEvents } from "@/app/student/hooks/useUpcomingEvents";
 import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
-import useLearnerProfileStrength from "../../../hooks/useLearnerProfileStrength";
-import useLearnerProfile from "@/hooks/useLearnerProfile";
+import useLearnerProfileStrength from "../hooks/useLearnerProfileStrength";
+import useLearnerProfile from "@/app/student/hooks/useLearnerProfile";
 import { useTour } from "@/app/student/_components/guided-tour";
 
 const StudentDashboard = () => {

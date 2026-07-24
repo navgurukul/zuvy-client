@@ -7,8 +7,8 @@ import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigat
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
-import { useOnboardingStorage } from '@/hooks/use-profile'
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile'
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse'
 import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
 
 const Header = () => {

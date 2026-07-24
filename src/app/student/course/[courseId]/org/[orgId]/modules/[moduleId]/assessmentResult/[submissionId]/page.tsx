@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import useAssessmentResult from '@/hooks/useAssessmentResult'
+import useAssessmentResult from '@/app/student/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import {AssessmentParams} from "@/app/student/course/[courseId]/org/[orgId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"

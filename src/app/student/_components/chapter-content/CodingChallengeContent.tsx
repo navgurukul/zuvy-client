@@ -7,8 +7,8 @@ import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
 import { CodingChallengeContentProps, CodingQuestions } from "@/app/student/_components/chapter-content/componentChapterType";
 import { CodingContentChapterSkeleton } from "@/app/student/_components/Skeletons";
-import { useQuizAndAssignmentWithStatus } from '@/hooks/useQuizAndAssignmentWithStatus';
-import { useCodingSubmissionsByQuestion } from '@/hooks/useCodingSubmissionsByQuestion';
+import { useQuizAndAssignmentWithStatus } from '@/app/student/hooks/useQuizAndAssignmentWithStatus';
+import { useCodingSubmissionsByQuestion } from '@/app/student/hooks/useCodingSubmissionsByQuestion';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {

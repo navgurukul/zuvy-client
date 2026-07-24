@@ -43,7 +43,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import { SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import type {
   CompetitiveProfile,
@@ -59,16 +59,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import useLearnerProfile from '@/hooks/useLearnerProfile';
-import useUpdateLearnerProfile from '@/hooks/useUpdateLearnerProfile';
-import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength';
-import useLearnerTechnicalSkills from '@/hooks/useLearnerTechnicalSkills';
-import useLearnerDegreeDetails from '@/hooks/useLearnerDegreeDetails';
-import useLearnerBranchDetails from '@/hooks/useLearnerBranchDetails';
-import useLearnerBoards from '@/hooks/useLearnerBoards';
-import useLearnerRoles from '@/hooks/useLearnerRoles';
-import useLearnerRemoteLocations from '@/hooks/useLearnerRemoteLocations';
-import useCollegeSearch from '@/hooks/useCollegeSearch';
+import useLearnerProfile from '@/app/student/hooks/useLearnerProfile';
+import useUpdateLearnerProfile from '@/app/student/hooks/useUpdateLearnerProfile';
+import useLearnerProfileStrength from '@/app/student/hooks/useLearnerProfileStrength';
+import useLearnerTechnicalSkills from '@/app/student/hooks/useLearnerTechnicalSkills';
+import useLearnerDegreeDetails from '@/app/student/hooks/useLearnerDegreeDetails';
+import useLearnerBranchDetails from '@/app/student/hooks/useLearnerBranchDetails';
+import useLearnerBoards from '@/app/student/hooks/useLearnerBoards';
+import useLearnerRoles from '@/app/student/hooks/useLearnerRoles';
+import useLearnerRemoteLocations from '@/app/student/hooks/useLearnerRemoteLocations';
+import useCollegeSearch from '@/app/student/hooks/useCollegeSearch';
 import { toast } from '@/components/ui/use-toast';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
 import { WorkExperienceModal, WorkExperienceCard } from '@/app/student/profile/WorkExperienceComponents';

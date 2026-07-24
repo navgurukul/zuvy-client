@@ -4,7 +4,7 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import React, { useEffect } from 'react'
 import CodingSubmission from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/CodingSubmission'
 import { useSearchParams } from 'next/navigation'
-import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
+import { useCodingSubmissions } from '@/app/student/hooks/useCodingSubmissions'
 import {AssessmentParams} from "@/app/student/course/[courseId]/org/[orgId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
 const Page = ({ params }: { params: AssessmentParams }) => {
     const { studentData } = useLazyLoadedStudentData()

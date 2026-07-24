@@ -10,7 +10,7 @@ import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileTex
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
-import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
+import useAllChaptersWithStatus from "@/app/student/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
 import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'

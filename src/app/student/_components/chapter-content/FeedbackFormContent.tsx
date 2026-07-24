@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
+import { useFeedbackForm, formSchema } from '@/app/student/hooks/useFeedbackForm'
 import {FeedbackFormContentProps,FeedbackQuestion,QuestionItem} from '@/app/student/_components/chapter-content/componentChapterType'
 import useWindowSize from '@/hooks/useHeightWidth'
 import {FeedbackFormSkeleton} from "@/app/student/_components/Skeletons";

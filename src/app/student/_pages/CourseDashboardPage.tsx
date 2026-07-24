@@ -14,14 +14,13 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
-import { useBootcampProgress } from '@/hooks/useBootcampProgress';
-import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
-import { MentorSessionEvent, UpcomingEvent } from '@/hooks/hookType';
+import { useBootcampProgress } from '@/app/student/hooks/useBootcampProgress';
+import { useAllModulesForStudents } from '@/app/student/hooks/useAllModulesForStudents';
+import { useUpcomingEvents } from '@/app/student/hooks/useUpcomingEvents';
+import { UpcomingEvent, CompletedClass } from '@/hooks/hookType';
 import { useCompletedClasses } from '@/hooks/useCompletedClasses';
-import { CompletedClass, Module } from '@/hooks/hookType';
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
-import { useMentors } from '@/hooks/useMentors';
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/app/student/hooks/useMentors';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,6 +32,7 @@ import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/st
 import { cn } from "@/lib/utils";
 import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
+import { MentorSessionEvent, Module } from "../hooks/hookTypes";
 // import Leaderboard from '@/components/Leaderboard';
 // import { useLeaderboard } from '@/hooks/useLeaderboard';
 

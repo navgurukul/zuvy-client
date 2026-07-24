@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
-import { useOnboardingStorage } from '@/hooks/use-profile';
-import { useLearnerProfileStrength } from '@/hooks/useLearnerProfileStrength';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
+import { useLearnerProfileStrength } from '@/app/student/hooks/useLearnerProfileStrength';
 
 export interface TourStepConfig {
   id: string;

@@ -3,8 +3,8 @@
 import React from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
-import { useCodingChallenge } from '@/hooks/useCodingChallenge';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
+import { useCodingChallenge } from '@/app/student/hooks/useCodingChallenge';
 import {
     QuestionPanel,
     CodeEditorPanel,

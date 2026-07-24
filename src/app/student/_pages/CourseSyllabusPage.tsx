@@ -17,7 +17,7 @@ import {
     ArrowLeft,
     Play,
 } from 'lucide-react'
-import useCourseSyllabus from '@/hooks/useCourseSyllabus'
+import useCourseSyllabus from '@/app/student/hooks/useCourseSyllabus'
 import TruncatedDescription from '@/app/student/_components/TruncatedDescription'
 import Link from 'next/link'
 import Image from 'next/image'
