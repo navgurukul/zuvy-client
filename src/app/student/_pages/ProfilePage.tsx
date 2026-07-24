@@ -28,6 +28,7 @@ import useResumeParse from '@/app/student/hooks/useResumeParse';
 import useParsedResume from '@/app/student/hooks/useParsedResume';
 import useLearnerProfile from '@/app/student/hooks/useLearnerProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { normalizeText, normalizeEmail, normalizeOptionalUrl, normalizeGithubUrl, parseScore, formatMonthYearToDate, toMonthNumber, toMonthName, mapWorkExperiencesToPayload } from '@/app/student/_utils/profileNormalizers';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -114,63 +115,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     consentTimestamp: new Date().toISOString(),
   });
 
-  const formatMonthYearToDate = (
-    value?: { day?: string; month: string; year: string } | string
-  ) => {
-    if (!value) {
-      return undefined;
-    }
-
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      return trimmed || undefined;
-    }
-
-    if (!value.year) {
-      return undefined;
-    }
-
-    const normalizedMonth = String(value.month || '').trim();
-    const numericMonth = Number(normalizedMonth);
-    let month = '01';
-
-    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
-      month = String(Math.trunc(numericMonth)).padStart(2, '0');
-    } else {
-      const monthIndex = MONTHS.findIndex(
-        (monthName) => monthName.toLowerCase() === normalizedMonth.toLowerCase()
-      );
-      month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-    }
-
-    const numericDay = Number(String(value.day || '').trim());
-    const day =
-      Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31
-        ? String(Math.trunc(numericDay)).padStart(2, '0')
-        : '01';
-
-    return `${value.year}-${month}-${day}`;
-  };
-
-  const toMonthNumber = (month?: string) => {
-    if (!month) {
-      return undefined;
-    }
-    const monthIndex = MONTHS.indexOf(month);
-    return monthIndex >= 0 ? monthIndex + 1 : undefined;
-  };
-
-  const toMonthName = (value: string | number | null | undefined) => {
-    if (value === null || value === undefined) return '';
-    const monthNumber = Number(value);
-    if (Number.isFinite(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
-      return MONTHS[monthNumber - 1] || '';
-    }
-
-    const normalized = String(value).trim().toLowerCase();
-    const mapped = MONTHS.find((month) => month.toLowerCase() === normalized);
-    return mapped || '';
-  };
+  // formatMonthYearToDate, toMonthNumber, toMonthName moved to _utils/profileNormalizers.ts
 
   const buildLearnerProfilePayload = (
     step1Data: Step1Type,
@@ -178,44 +123,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     step3Data?: Step3Type,
     step4Data?: Step4Type
   ) => {
-    const normalizeText = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      return stringValue ? stringValue : null;
-    };
-
-    const normalizeEmail = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(stringValue) ? stringValue : null;
-    };
-
-    const normalizeOptionalUrl = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-
-      const valueWithProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(stringValue)
-        ? stringValue
-        : `https://${stringValue}`;
-
-      try {
-        return new URL(valueWithProtocol).toString();
-      } catch {
-        return null;
-      }
-    };
-
-    const normalizeGithubUrl = (value?: any) => {
-      const normalizedUrl = normalizeOptionalUrl(value);
-      if (!normalizedUrl) return null;
-
-      const host = new URL(normalizedUrl).hostname.toLowerCase();
-      return host === 'github.com' || host === 'www.github.com' ? normalizedUrl : null;
-    };
-
     const isValidOtherCollege = (value?: any) => {
       if (value === null || value === undefined || value === '') return false;
       const stringValue = String(value).trim();
@@ -250,16 +157,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     const academicPerformance = step3Data?.academicPerformance;
     const collegeScore = academicPerformance?.marksFormat === 'Percentage' ? academicPerformance.percentage : academicPerformance?.marksFormat;
 
-    const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
-      title: experience.role,
-      company: experience.companyName,
-      startDate: formatMonthYearToDate(experience.startDate),
-     isCurrentlyWorking: experience.isCurrentlyWorking,
-      endDate: experience.isCurrentlyWorking
-      ? null
-      : formatMonthYearToDate(experience.endDate),
-      description: experience.responsibilities,
-    }));
+    const workExperiences = mapWorkExperiencesToPayload(step3Data?.workExperiences || []);
 
     const leetcodeUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode')?.username;
     const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
@@ -386,12 +284,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     if (hydratedProfileIdRef.current === learnerProfile.id) {
       return;
     }
-
-    const parseScore = (value: string | number | null) => {
-      if (value === null || value === undefined || value === '') return undefined;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    };
 
     const hasText = (value?: string | null) => Boolean(String(value || '').trim());
 

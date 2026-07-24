@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import {ProjectPageSkeleton}  from "@/app/student/_components/Skeletons"
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 import { 
   X, 
   FileText, 
@@ -474,21 +475,6 @@ const normalizeLinks = (links?: string | string[]): string[] => {
     .filter(Boolean);
 };
 
-const isValidUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-    if (!url.hostname) return false;
-    if (url.hostname === 'localhost') return true;
-    if (url.hostname.endsWith('.')) return false;
-    const hostnameParts = url.hostname.split('.');
-    if (hostnameParts.length < 2) return false;
-    const tld = hostnameParts[hostnameParts.length - 1];
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
-    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
-  } catch {
-    return false;
-  }
-};
+
 
 export default ProjectPage;
