@@ -23,12 +23,12 @@ import { CourseSubmissionSkeleton } from '@/app/[admin]/organizations/[organizat
 import ProjectsComponent from './components/projectSubmissionComponent'
 import { useProjectSubmissions } from '@/app/[admin]/hooks/useProjectSubmissions'
 import { usePracticeProblemSubmissions } from '@/app/[admin]/hooks/usePracticeProblemSubmissions'
-import { useFormSubmissions } from '@/hooks/useFormSubmissions'
+import { useFormSubmissions } from '@/app/[admin]/hooks/useFormSubmissions'
 import { useLiveClassSubmissions } from '@/app/[admin]/hooks/useLiveClassSubmissions'
-import { useGetAssessmentSubmissions } from '@/hooks/useGetAssessmentSubmissions'
-import { useGetProjectSubmissions } from '@/hooks/useGetProjectSubmissions'
-import { useGetAssignmentSubmissions } from '@/hooks/useGetAssignmentSubmissions'
-import { useGetVideoSubmissions } from '@/hooks/useGetVideoSubmissions'
+import { useGetAssessmentSubmissions } from '@/app/[admin]/hooks/useGetAssessmentSubmissions'
+import { useGetProjectSubmissions } from '@/app/[admin]/hooks/useGetProjectSubmissions'
+import { useGetAssignmentSubmissions } from '@/app/[admin]/hooks/useGetAssignmentSubmissions'
+import { useGetVideoSubmissions } from '@/app/[admin]/hooks/useGetVideoSubmissions'
 interface SearchSuggestion {
     id: string
     title: string

@@ -18,7 +18,7 @@ import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useEditModuleOfBootcamp } from '@/app/[admin]/hooks/useEditModuleOfBootcamp'
 import { useCreateModule } from '@/app/[admin]/hooks/useCreateModule'
-import { useGetCourseModules } from '@/hooks/useGetCourseModules'
+import { useGetCourseModules } from '@/app/[admin]/hooks/useGetCourseModules'
 import {
     CurriculumItem,
     ModuleData,

@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
 import { getAttendancePercentage, getCompletedClasses } from '@/store/store'
 import { useCompletedClasses } from '@/hooks/useCompletedClasses'
-import { useUpdateAttendanceStatus } from '@/hooks/useUpdateAttendanceStatus'
+import { useUpdateAttendanceStatus } from '@/app/[admin]/hooks/useUpdateAttendanceStatus'
 
 interface ClassData {
     id: number

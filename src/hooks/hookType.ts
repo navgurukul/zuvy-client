@@ -1,3 +1,47 @@
+// UseAllChaptersWithStatus
+export interface ChapterTrackingDetail {
+  id: number;
+}
+
+export interface TrackingDataItem {
+  id: number;
+  title: string;
+  topicId: number;
+  chapterTrackingDetails: ChapterTrackingDetail[];
+  status: 'Pending' | 'Completed';
+}
+
+export interface ModuleDetail {
+  id: number;
+  typeId: number;
+  isLock: boolean;
+  bootcampId: number;
+  name: string;
+  description: string;
+  projectId: number | null;
+  order: number;
+  timeAlloted: number;
+  version: number | null;
+}
+
+export interface AllChaptersWithStatusResponse {
+  status: string;
+  code: number;
+  trackingData: TrackingDataItem[];
+  moduleDetails: ModuleDetail[];
+}
+
+export interface UseAllChaptersWithStatusReturn {
+  trackingData: TrackingDataItem[];
+  moduleDetails: ModuleDetail[];
+  loading: boolean;
+  isRefetching: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+
 // UseChapterDetails
 export interface LiveClassSession {
   id: number;
