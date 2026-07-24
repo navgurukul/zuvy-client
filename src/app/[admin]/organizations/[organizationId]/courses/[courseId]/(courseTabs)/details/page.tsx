@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -414,10 +415,12 @@ if (!courseData || !courseData.id) {
                                         />
                                     ) : (
                                         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
-                                            <OptimizedImageWithFallback
-                                                src={'/logo_white.png'}
-                                                alt={'Course Image'}
-                                                fallBackSrc={'/logo_white.png'}
+                                            <Image
+                                                src="/zuvy-logo-horizontal-dark.png"
+                                                alt="Course Image"
+                                                width={240}
+                                                height={80}
+                                                className="object-contain"
                                             />
                                         </div>
                                     )}
@@ -571,16 +574,12 @@ if (!courseData || !courseData.id) {
                                                         />
                                                     ) : (
                                                         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
-                                                            <OptimizedImageWithFallback
-                                                                src={
-                                                                    '/logo_white.png'
-                                                                }
-                                                                alt={
-                                                                    'Collaborator Image'
-                                                                }
-                                                                fallBackSrc={
-                                                                    '/logo_white.png'
-                                                                }
+                                                            <Image
+                                                                src="/zuvy-logo-horizontal-dark.png"
+                                                                alt="Collaborator Image"
+                                                                width={240}
+                                                                height={80}
+                                                                className="object-contain"
                                                             />
                                                         </div>
                                                     )}

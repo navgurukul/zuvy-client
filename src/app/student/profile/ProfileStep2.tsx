@@ -21,6 +21,8 @@ import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/pro
 import { useLearnerTechnicalSkills } from '@/app/student/hooks/useLearnerTechnicalSkills';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { formatDateForInput, getTodayInputValue, isEarlierThan } from '@/app/student/_utils/dateUtils';
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 
 const formatProjectDate = (dateValue?: ExternalProject['startDate']) => {
   if (!dateValue) {
@@ -73,48 +75,7 @@ export const ProjectModal: React.FC<{
     teamSize: 2,
   });
 
-  const parseMonthToIso = (monthValue: string) => {
-    const trimmedMonth = String(monthValue || '').trim();
-    if (!trimmedMonth) {
-      return '01';
-    }
-
-    const numericMonth = Number(trimmedMonth);
-    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
-      return String(Math.trunc(numericMonth)).padStart(2, '0');
-    }
-
-    const monthIndex = MONTHS.findIndex(
-      (month) => month.toLowerCase() === trimmedMonth.toLowerCase()
-    );
-    return monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-  };
-
-  const parseDayToIso = (dayValue?: string) => {
-    const numericDay = Number(String(dayValue || '').trim());
-    if (Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31) {
-      return String(Math.trunc(numericDay)).padStart(2, '0');
-    }
-    return '01';
-  };
-
-  const formatDateForInput = (dateValue?: ExternalProject['startDate']) => {
-    if (!dateValue) {
-      return '';
-    }
-
-    if (typeof dateValue === 'string') {
-      return dateValue;
-    }
-
-    if (!dateValue.year || !dateValue.month) {
-      return '';
-    }
-
-    const month = parseMonthToIso(dateValue.month);
-    const day = parseDayToIso(dateValue.day);
-    return `${dateValue.year}-${month}-${day}`;
-  };
+  // formatDateForInput, getTodayInputValue, isEarlierThan moved to _utils/dateUtils.ts
 
   const parseInputDate = (dateValue: string) => {
     const [year = '', month = '', day = '01'] = dateValue.split('-');
@@ -127,23 +88,6 @@ export const ProjectModal: React.FC<{
       month: String(Number(month)),
       day: String(Number(day || '1')),
     };
-  };
-
-  const getTodayInputValue = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  };
-
-  const isEarlierThan = (leftDate?: string, rightDate?: string) => {
-    if (!leftDate || !rightDate) {
-      return false;
-    }
-
-    return leftDate < rightDate;
   };
 
   const isLaterThan = (leftDate?: string, rightDate?: string) => {
@@ -222,14 +166,7 @@ export const ProjectModal: React.FC<{
     return newErrors;
   };
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+
   const isValidGithubUrl = (url: string) => {
     try {
       const parsed = new URL(url);

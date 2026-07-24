@@ -16,6 +16,7 @@ import useWindowSize from '@/hooks/useHeightWidth';
 import { X } from 'lucide-react';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 import { normalizeLinks } from '@/utils/admin';
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -369,19 +370,6 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
 export default AssignmentContent; 
 
-const isValidUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-    if (!url.hostname) return false;
-    if (url.hostname === 'localhost') return true;
-    if (url.hostname.endsWith('.')) return false;
-    const hostnameParts = url.hostname.split('.');
-    if (hostnameParts.length < 2) return false;
-    const tld = hostnameParts[hostnameParts.length - 1];
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
-    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
-  } catch {
-    return false;
-  }
-};
+
+
+

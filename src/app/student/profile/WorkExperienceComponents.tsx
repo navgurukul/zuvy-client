@@ -19,33 +19,7 @@ import type { WorkExperience } from '@/lib/profile.types';
 import { MONTHS, TECH_STACK, SKILLS_BY_CATEGORY } from '@/lib/profile.mockData';
 import { useLearnerTechnicalSkills } from '@/app/student/hooks/useLearnerTechnicalSkills';
 import { format } from 'date-fns';
-
-const formatDateForInput = (dateValue?: WorkExperience['startDate']) => {
-  if (!dateValue) {
-    return '';
-  }
-
-  if (typeof dateValue === 'string') {
-    return dateValue;
-  }
-
-  const year = String(dateValue.year);
-  const month = String(Number(dateValue.month)).padStart(2, '0');
-  return `${year}-${month}-01`;
-};
-
-const getTodayInputValue = () => {
-  const today = new Date();
-  return today.toISOString().split('T')[0];
-};
-
-const isEarlierThan = (leftDate?: string, rightDate?: string) => {
-  if (!leftDate || !rightDate) {
-    return false;
-  }
-
-  return leftDate < rightDate;
-};
+import { formatDateForInput, getTodayInputValue, isEarlierThan } from '@/app/student/_utils/dateUtils';
 
 const formatExperienceDate = (dateValue?: WorkExperience['startDate']) => {
   if (!dateValue) {
