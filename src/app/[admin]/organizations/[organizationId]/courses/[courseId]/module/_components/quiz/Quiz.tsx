@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/quiz/QuizLibrary'
@@ -44,6 +44,9 @@ const quizSchema = z.object({
         .max(50, 'You can enter up to 50 characters only.'),
 })
 
+let tagsRequest: Promise<PageTag[]> | null = null
+let cachedTags: PageTag[] | null = null
+
 function Quiz(props: QuizProps) {
     const canEdit = props.canEdit ?? true
     const [alertOpen, setAlertOpen] = useState(!canEdit)
@@ -63,7 +66,6 @@ function Quiz(props: QuizProps) {
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setQuizPreviewContent } = getQuizPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
-    const hasLoaded = useRef(false)
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
     const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
@@ -177,11 +179,20 @@ function Quiz(props: QuizProps) {
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
+        if (cachedTags) {
+            setTags(cachedTags)
+            return
+        }
+
         try {
-            const tagArr = await fetchAllTags()
+            tagsRequest ??= fetchAllTags()
+            const tagArr = await tagsRequest
+            cachedTags = tagArr
             setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
+        } finally {
+            tagsRequest = null
         }
     }
     const removeQuestionById = (questionId: number) => {
@@ -272,13 +283,13 @@ function Quiz(props: QuizProps) {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getAllTags()
-            if (props.chapterId && props.chapterId !== 0) {
-                applySavedQuizQuestion(props.content)
-            }
+        void getAllTags()
+    }, [])
+
+    useEffect(() => {
+        if (props.chapterId && props.chapterId !== 0) {
+            applySavedQuizQuestion(props.content)
         }
-        fetchData()
     }, [props.chapterId, props.content, applySavedQuizQuestion])
 
 

@@ -33,6 +33,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {CodingChallengeSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
+let tagsRequest: Promise<any[]> | null = null
+
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -227,11 +229,16 @@ useEffect(() => {
 
 
     async function getAllTags() {
+        if (tags.length > 0) return
+
         try {
-            const tagArr = await fetchAllTags()
+            tagsRequest ??= fetchAllTags()
+            const tagArr = await tagsRequest
             setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
+        } finally {
+            tagsRequest = null
         }
     }
 
