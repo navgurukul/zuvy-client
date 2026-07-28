@@ -26,7 +26,6 @@ import { useTopics } from '@/hooks/useGetTopicsEval'
 import { useCreateTopic } from '@/hooks/useCreateTopicEval'
 import { useGenerateQuestions } from '@/hooks/useCreateAIQuestionEval'
 import { useAllCourses } from '@/hooks/useAllCourses'
-import { useAddSubtopic } from '@/hooks/useAddSubTopicsEval'
 
 const UnportaledPopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -176,7 +175,6 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
   const { allCourses } = useAllCourses()
   const { data: evalTopics, isLoading, error, refetch } = useTopics();
   const { submitTopic, isSubmitting, submitError } = useCreateTopic();
-  const { addSubtopic, isAdding, addError } = useAddSubtopic();
 
   useEffect(() => {
     if (!isSubmitting) {
@@ -184,11 +182,13 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
     }
   }, [isSubmitting])
 
-  const totalCount = Object.values(form.difficultyCounts).reduce((s, n) => s + n, 0)
-  const selectedTopic = evalTopics?.find(t => t.name === form.topic)
-  const predefinedSubtopics = form.topicMode === 'existing' ? (selectedTopic?.subtopic ? Object.values(selectedTopic.subtopic) : []) : []
-  const customSubtopics = form.subtopics.filter(s => !predefinedSubtopics.includes(s))
 
+  const totalCount = Object.values(form.difficultyCounts).reduce((s, n) => s + n, 0)
+  const selectedTopic = evalTopics?.find(t => t.id.toString() === form.topic)
+  const predefinedSubtopics: string[] = form.topicMode === 'existing'
+    ? ((selectedTopic?.subtopic as string[] | undefined) ?? [])
+    : []
+  const customSubtopics = form.subtopics.filter(s => !predefinedSubtopics.includes(s))
   const patchCount = (d: string, val: number) =>
     patch({ difficultyCounts: { ...form.difficultyCounts, [d]: Math.max(0, Math.min(20, val)) } })
 
@@ -199,39 +199,21 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
     patch({ subtopics: sel ? form.subtopics.filter(x => x !== s) : [...form.subtopics, s] })
   }
 
-  const addCustomSubtopic = async () => {
+  const addCustomSubtopic = () => {
     const v = form.subtopicInput.trim()
     if (!v) return
-
     const existing = [...predefinedSubtopics, ...form.subtopics].find(s => normalise(s) === normalise(v))
-    if (existing) {
-      patch({ subtopicError: `"${existing}" is already in the list` })
-      return
-    }
-
-    // Existing topic selected -> persist via API
-    if (form.topicMode === 'existing' && form.topic) {
-      const result = await addSubtopic(+form.topic, { subtopic: v })
-
-      if (!result) {
-        patch({ subtopicError: addError ?? 'Failed to add subtopic' })
-        return
-      }
-
-      patch({ subtopics: [...form.subtopics, v], subtopicInput: '', subtopicError: '' })
-      refetch() // pull fresh subtopic list so the new one shows as "predefined" next time
-      return
-    }
-
-    // New/custom topic not yet created -> keep local only, will be sent on topic creation
+    if (existing) { patch({ subtopicError: `"${existing}" is already in the list` }); return }
     patch({ subtopics: [...form.subtopics, v], subtopicInput: '', subtopicError: '' })
   }
+
+
   const removeSubtopic = (s: string) => patch({ subtopics: form.subtopics.filter(x => x !== s) })
   return (
     <div className="flex flex-col gap-5">
 
       {/* Domain */}
-      <div>
+      {/* <div>
         <Label className='flex'>Domain</Label>
         <SearchableSelect
           value={form.domain}
@@ -244,7 +226,7 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
           placeholder="Select a domain..."
           searchPlaceholder="Search domains..."
         />
-      </div>
+      </div> */}
 
       {/* Topic */}
       <div>
@@ -515,7 +497,7 @@ export default function AiQuestionFormPage() {
     }
 
     const payload = {
-      domainName: form.domain || "Web Development",
+      // domainName: form.domain || "Web Development",
       topicName: activeTopic,
       topicDescription: form.topicMode === 'custom' ? form.customTopicDesc : "",
       subtopics: form.subtopics,

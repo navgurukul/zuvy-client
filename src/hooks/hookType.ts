@@ -1273,7 +1273,7 @@ export interface TopicsMap {
 }
 
 export interface GenerateQuestionsRequestBody {
-  domainName: string;
+  // domainName: string;
   topicName: string;
   topicDescription: string;
   subtopics: string[];
