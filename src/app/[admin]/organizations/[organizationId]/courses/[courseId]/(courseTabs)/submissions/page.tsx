@@ -64,7 +64,6 @@ const Page = ({ params }: { params: any }) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [formData, setFormData] = useState<any[]>([])
-    const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get('search') || '')
 
@@ -352,26 +351,10 @@ const Page = ({ params }: { params: any }) => {
         }
     }, [params.courseId, appliedSearchQuery, activeTab, getFormSubmissions])
 
-    const getLiveClassData = useCallback(async () => {
-        try {
-            const res = await fetchLiveClassSubmissions(
-                params.courseId,
-                appliedSearchQuery && activeTab === 'live' ? appliedSearchQuery : undefined
-            )
-            const trackingData = res.data?.data?.trackingData || []
-            setLiveClassData(trackingData)
-            setTotalStudents(res.data?.data?.totalStudents || 0)
-        } catch (error) {
-            setLiveClassData([])
-            setTotalStudents(0)
-        }
-    }, [params.courseId, appliedSearchQuery, activeTab, fetchLiveClassSubmissions])
-
     useEffect(() => {
         if (!params.courseId) return
         if (activeTab === 'form') getFormData()
-        if (activeTab === 'live') getLiveClassData()
-    }, [params.courseId, activeTab, appliedSearchQuery, getFormData, getLiveClassData])
+    }, [params.courseId, activeTab, appliedSearchQuery, getFormData])
 
 
     useEffect(() => {

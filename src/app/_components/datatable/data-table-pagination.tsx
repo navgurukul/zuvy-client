@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,19 +21,21 @@ export function DataTablePagination<TData>({
     lastPage,
     pages,
     fetchStudentData,
+    disableAutoFetch = false,
 }: DataTablePaginationProps<TData>) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const offset = useMemo(() => (currentPage - 1) * +position, [currentPage, position])
+    const lastFetchedPageRef = useRef<string | null>(null)
 
-    const updateURLParams = (page: number, limit: string = position) => {
+    const updateURLParams = useCallback((page: number, limit: string = position) => {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(limit))
         router.push(`?${newParams.toString()}`)
-    }
+    }, [position, router, searchParams])
 
     const prevPageHandler = () => updateURLParams(currentPage - 1)
     const nextPageHandler = () => updateURLParams(currentPage + 1)
@@ -47,10 +49,25 @@ export function DataTablePagination<TData>({
         const totalPages = Math.ceil(totalStudents / +position)
         if (totalPages > 0 && currentPage > totalPages) {
             updateURLParams(totalPages)
-        } else {
+            return
+        }
+
+        const pageKey = `${currentPage}-${position}`
+        if (lastFetchedPageRef.current === pageKey) return
+
+        lastFetchedPageRef.current = pageKey
+        if (!disableAutoFetch) {
             fetchStudentData(offset)
         }
-    }, [currentPage, position, totalStudents])
+    }, [
+        currentPage,
+        position,
+        totalStudents,
+        offset,
+        fetchStudentData,
+        disableAutoFetch,
+        updateURLParams,
+    ])
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">

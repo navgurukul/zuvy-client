@@ -28,7 +28,6 @@ import {
     CoursesResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import CourseCard from './_components/CourseCard'
-import { useAllCourses } from '@/app/[admin]/hooks/useAllCourses'
 import { useBootcamps } from '@/app/[admin]/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/app/[admin]/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
@@ -71,7 +70,6 @@ const Courses: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // === Hooks ===
-    const { allCourses, refetchAllCourses, loading: coursesLoading } = useAllCourses(true)
     const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
         useBootcamps({
             limit: position,
@@ -166,7 +164,6 @@ const Courses: React.FC = () => {
                 setNewCourseName('')
                 setNewCourseDescription('')
                 await refetchBootcamps(offset) // same page refresh
-                await refetchAllCourses() // refresh suggestions
                 router.push(`/${userRole}/organizations/${orgId}/courses/${data.bootcamp.id}/details`)
             } catch (error: any) {
                 toast.error({
@@ -221,7 +218,7 @@ const Courses: React.FC = () => {
             const perms = await getPermissions()
             setPermissions(perms)
         })()
-    }, [coursesLoading])
+    }, [])
 
     return (
         <>

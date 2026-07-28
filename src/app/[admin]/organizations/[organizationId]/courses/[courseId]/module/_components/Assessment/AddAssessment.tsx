@@ -130,6 +130,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] =
         useState<Object>({})
     const hasLoaded = useRef(false)
+    const inFlightQuestionRequest = useRef<string | null>(null)
 
     useEffect(() => {
         if (initialTab === 'setting') {
@@ -140,45 +141,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const handleCodingButtonClick = () => {
         setQuestionType('coding')
         setSearchQuestionsInAssessment('')
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'coding'
-        )
     }
 
     const handleMCQButtonClick = () => {
         setQuestionType('mcq')
         setSearchQuestionsInAssessment('')
-
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'mcq'
-        )
     }
 
     const handleOpenEndedButtonClick = () => {
         setQuestionType('open-ended')
         setSearchQuestionsInAssessment('')
-
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'open-ended'
-        )
     }
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
@@ -210,38 +182,41 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        if (questionType === 'coding') {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'coding'
-            )
-        } else if (questionType === 'mcq') {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'mcq'
-            )
-        } else {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'open-ended'
-            )
-        }
-    }, [questionType, selectedDifficulties, selectedTopics, debouncedSearch])
+        if (!['coding', 'mcq', 'open-ended'].includes(questionType)) return
+
+        const requestKey = JSON.stringify({
+            orgId,
+            questionType,
+            selectedDifficulties,
+            selectedTopics,
+            selectedLanguage,
+            debouncedSearch,
+        })
+
+        if (inFlightQuestionRequest.current === requestKey) return
+
+        inFlightQuestionRequest.current = requestKey
+        void filterQuestions(
+            setFilteredQuestions,
+            orgId,
+            selectedDifficulties,
+            selectedTopics,
+            selectedLanguage,
+            debouncedSearch,
+            questionType
+        ).finally(() => {
+            if (inFlightQuestionRequest.current === requestKey) {
+                inFlightQuestionRequest.current = null
+            }
+        })
+    }, [
+        questionType,
+        orgId,
+        selectedDifficulties,
+        selectedTopics,
+        selectedLanguage,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const difficultyCount = selectedCodingQuestions.reduce(
@@ -367,6 +342,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+
         const loadTags = async () => {
             try {
                 await getAllTagsWithoutFilter(setTags)

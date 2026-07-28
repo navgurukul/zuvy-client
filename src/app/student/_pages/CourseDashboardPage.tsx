@@ -883,7 +883,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
           <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
             <div className="max-w-[89rem] mx-auto p-6 md:p-8">
               {/* Desktop Layout */}
-              <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="flex-shrink-0">
                     <Image
                       src={validCourseCoverImage}
@@ -1660,7 +1660,7 @@ export default CourseDashboard;
 
 
 
-
+// don't remove this code, it has leaderboard's code
 
 
 

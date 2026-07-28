@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { UseQuizQuestionsProps, UseQuizQuestionsReturn } from './hookType'
 
+const pendingQuizQuestionRequests = new Map<string, Promise<any[]>>()
+
 export default function useQuizQuestions({
     orgId,
     selectedTopics = [],
@@ -66,13 +68,19 @@ export default function useQuizQuestions({
                 return { data: quizQuestions }
             }
 
+            let request = pendingQuizQuestionRequests.get(signature)
+
+            if (!request) {
+                const url = `/Content/${orgId}/allQuizQuestions${qs ? `?${qs}` : ''}`
+                request = api.get(url).then((res) => res?.data?.data || [])
+                pendingQuizQuestionRequests.set(signature, request)
+            }
+
             try {
                 setLoading(true)
                 setError(null)
 
-                const url = `/Content/${orgId}/allQuizQuestions${qs ? `?${qs}` : ''}`
-                const res = await api.get(url)
-                const data = res?.data?.data || []
+                const data = await request
                 setQuizQuestions(data)
                 lastSignatureRef.current = signature
                 return { data }
@@ -80,6 +88,9 @@ export default function useQuizQuestions({
                 setError(err)
                 return { data: [], error: err }
             } finally {
+                if (pendingQuizQuestionRequests.get(signature) === request) {
+                    pendingQuizQuestionRequests.delete(signature)
+                }
                 setLoading(false)
             }
         },
