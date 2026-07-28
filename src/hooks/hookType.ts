@@ -1208,3 +1208,107 @@ export interface UseOpenEndedSolutionForStudentsReturn {
   error: string | null;
   refetch: () => void;
 }
+
+
+export interface TopicSubtopic {
+  [key: string]: string;
+}
+
+export interface Topic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: TopicSubtopic;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TopicListResponse = Topic[];
+
+export interface NewTopicSubtopicMap {
+  [key: string]: string;
+}
+
+export interface CreatedTopic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTopicRequestBody {
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap;
+}
+
+export type CreateTopicApiResponse = CreatedTopic;
+
+export interface DifficultyDistribution {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface QuestionCounts {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicConfiguration {
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  totalQuestions: number;
+  questionCounts: QuestionCounts;
+}
+
+export interface TopicsMap {
+  [topicName: string]: number;
+}
+
+export interface GenerateQuestionsRequestBody {
+  domainName: string;
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  numberOfQuestions: number;
+  learningObjectives: string;
+  targetAudience: string;
+  focusAreas: string;
+  bloomsLevel: string;
+  questionStyle: string;
+  difficultyDistribution: DifficultyDistribution;
+  questionCounts: QuestionCounts;
+  topics: TopicsMap;
+  topicConfigurations: TopicConfiguration[];
+  levelId: number | null;
+}
+
+export type GenerateQuestionsApiResponse = GenerateQuestionsRequestBody;
+
+
+export interface AddSubtopicRequestBody {
+  subtopic: string;
+}
+
+export interface SubtopicMap {
+  [key: string]: string;
+}
+
+export interface TopicWithSubtopics {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: SubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AddSubtopicApiResponse = TopicWithSubtopics;
