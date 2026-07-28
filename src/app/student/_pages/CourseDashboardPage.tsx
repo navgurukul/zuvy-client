@@ -18,7 +18,7 @@ import { useBootcampProgress } from '@/app/student/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/app/student/hooks/useAllModulesForStudents';
 import { useUpcomingEvents } from '@/app/student/hooks/useUpcomingEvents';
 import { UpcomingEvent, CompletedClass } from '@/hooks/hookType';
-import { useCompletedClasses } from '@/hooks/useCompletedClasses';
+import { useStudentCompletedClasses } from '@/app/student/hooks/useStudentCompletedClasses';
 import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
 import { useMentors } from '@/app/student/hooks/useMentors';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
@@ -56,7 +56,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
-  const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
+  const { completedClassesData, loading: classesLoading, error: classesError } = useStudentCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
   const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0, orgId as string | undefined);
   // const { topEntries: leaderboardEntries, selfEntry: leaderboardSelfEntry, isSelfInTopFive, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard(courseId);
