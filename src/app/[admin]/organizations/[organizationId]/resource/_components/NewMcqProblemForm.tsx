@@ -504,10 +504,10 @@ export default function AiQuestionFormPage({
         hard: calcPct(counts.hard)
       },
       questionCounts: counts,
-      topics: { [activeTopic]: totalCount },
+      topics: { [activeTopicName]: totalCount },
       topicConfigurations: [
         {
-          topicName: activeTopic,
+          topicName: activeTopicName,
           topicDescription: form.topicMode === 'custom' ? form.customTopicDesc : "",
           subtopics: form.subtopics,
           totalQuestions: totalCount,
