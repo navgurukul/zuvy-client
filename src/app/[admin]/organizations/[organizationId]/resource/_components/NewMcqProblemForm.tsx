@@ -136,7 +136,7 @@ const BLOOM_CLASSES: Record<string, string> = {
 
 interface AiFormState {
   domain: string
-  topic: string; customTopic: string; customTopicDesc: string; topicMode: 'existing' | 'custom'
+  topic: string; topicName: string; customTopic: string; customTopicDesc: string; topicMode: 'existing' | 'custom'
   subtopics: string[]; subtopicInput: string; subtopicError: string
   difficultyCounts: Record<string, number>
   bloomLevel: string; objective: string; reference: string
@@ -144,7 +144,7 @@ interface AiFormState {
 
 const DEFAULT_AI_FORM: AiFormState = {
   domain: '',
-  topic: '', customTopic: '', customTopicDesc: '', topicMode: 'existing',
+  topic: '', topicName: '', customTopic: '', customTopicDesc: '', topicMode: 'existing',
   subtopics: [], subtopicInput: '', subtopicError: '',
   difficultyCounts: { easy: 0, medium: 5, hard: 0 },
   bloomLevel: 'apply', objective: '', reference: '',
@@ -192,8 +192,15 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
   const patchCount = (d: string, val: number) =>
     patch({ difficultyCounts: { ...form.difficultyCounts, [d]: Math.max(0, Math.min(20, val)) } })
 
-  const selectExistingTopic = (t: string) => patch({ topic: t, subtopics: [], subtopicError: '' })
-
+  const selectExistingTopic = (t: string) => {
+    const topicObj = evalTopics?.find(topic => topic.id.toString() === t)
+    patch({
+      topic: t,
+      topicName: topicObj?.name ?? '',
+      subtopics: [],
+      subtopicError: '',
+    })
+  }
   const togglePredefined = (s: string) => {
     const sel = form.subtopics.includes(s)
     patch({ subtopics: sel ? form.subtopics.filter(x => x !== s) : [...form.subtopics, s] })
@@ -211,24 +218,6 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
   const removeSubtopic = (s: string) => patch({ subtopics: form.subtopics.filter(x => x !== s) })
   return (
     <div className="flex flex-col gap-5">
-
-      {/* Domain */}
-      {/* <div>
-        <Label className='flex'>Domain</Label>
-        <SearchableSelect
-          value={form.domain}
-          onValueChange={(d) => patch({ domain: d })}
-          options={allCourses?.map((c: any) => ({
-            label: c.name || c.id.toString(),
-            value: c.name || c.id.toString(),
-            id: c.id
-          })) || []}
-          placeholder="Select a domain..."
-          searchPlaceholder="Search domains..."
-        />
-      </div> */}
-
-      {/* Topic */}
       <div>
         <Label className='flex'>Topic</Label>
         {form.topicMode === 'existing' ? (
@@ -271,7 +260,7 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => patch({ topicMode: 'existing', subtopics: [], subtopicError: '', customTopic: '', customTopicDesc: '' })}
+                  onClick={() => patch({ topicMode: 'existing', subtopics: [], subtopicError: '', customTopic: '', customTopicDesc: '', topicName: '' })}
                 >
                   ← Use existing
                 </Button>
@@ -474,17 +463,20 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
   )
 }
 
-// ─── Bare page wrapper ─────────────────────────────────────────────────────────
-// Just holds form state and a submit handler — no modal, no mock generation,
-// no question bank store. Wire onSubmit up to your real API call.
 
-export default function AiQuestionFormPage() {
+export default function AiQuestionFormPage({
+  onClose,
+}: {
+  onClose?: () => void
+}) {
   const [form, setForm] = useState<AiFormState>(DEFAULT_AI_FORM)
   const patch = (p: Partial<AiFormState>) => setForm(prev => ({ ...prev, ...p }))
 
   const { generateQuestions, isGenerating } = useGenerateQuestions();
 
   const activeTopic = form.topicMode === 'custom' ? form.customTopic.trim() : form.topic
+  // const activeTopicId = form.topicMode === 'custom' ? '' : form.topic
+  const activeTopicName = form.topicMode === 'custom' ? form.customTopic.trim() : form.topicName
   const totalCount = Object.values(form.difficultyCounts).reduce((s, n) => s + n, 0)
   const canSubmit = activeTopic.length > 0 && totalCount >= 1 && !isGenerating
 
@@ -497,8 +489,7 @@ export default function AiQuestionFormPage() {
     }
 
     const payload = {
-      // domainName: form.domain || "Web Development",
-      topicName: activeTopic,
+      topicName: activeTopicName,
       topicDescription: form.topicMode === 'custom' ? form.customTopicDesc : "",
       subtopics: form.subtopics,
       numberOfQuestions: totalCount,
@@ -525,11 +516,10 @@ export default function AiQuestionFormPage() {
       ],
       levelId: null,
     }
+    if (onClose) onClose()
 
-    const result = await generateQuestions(payload)
-    if (result) {
-      console.log('Generated:', result)
-    }
+    await generateQuestions(payload)
+
   }
 
   return (
@@ -544,7 +534,7 @@ export default function AiQuestionFormPage() {
 
       <div className="mt-6 flex w-full border-t pt-4">
         <Button
-          type="button"
+          type="submit"
           className=" w-full h-12 font-semibold text-white "
           disabled={!canSubmit}
           onClick={handleSubmit}
