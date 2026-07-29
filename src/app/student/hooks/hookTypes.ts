@@ -1102,3 +1102,38 @@ export interface UpdateLearnerProfilePayload {
     [key: string]: any
 }
 
+
+
+// useStudentCompletedClasses
+export interface StudentCompletedClass {
+  moduleId: any;
+  chapterId: any;
+  id: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  attendanceStatus: 'present' | 'absent';
+  duration: number;
+  s3Link: string;
+}
+
+export interface StudentAttendanceStats {
+  presentCount: number;
+  absentCount: number;
+  attendancePercentage: number;
+}
+
+export interface StudentCompletedClassesData {
+  batchId: number;
+  batchName: string;
+  classes: StudentCompletedClass[];
+  totalClasses: number;
+  totalPages: number;
+  attendanceStats: StudentAttendanceStats;
+}
+
+export interface UseStudentCompletedClassesReturn {
+  completedClassesData: StudentCompletedClassesData | null;
+  loading: boolean;
+  error: string | null;
+}
