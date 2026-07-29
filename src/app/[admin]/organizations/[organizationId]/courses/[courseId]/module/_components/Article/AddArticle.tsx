@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 // import '@\app\_components\editor\Tiptap.css'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/app/[admin]/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore, getUser } from '@/store/store'
 import { useRouter, useParams } from 'next/navigation'
 import { Label } from '@/components/ui/label'
@@ -35,9 +35,9 @@ import {
     ContentArticle,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Article/courseModuleArticleType'
 import { BookOpenText } from 'lucide-react'
-import useEditChapter from '@/hooks/useEditChapter'
-import useUploadPdf from '@/hooks/useUploadPdf'
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
+import useUploadPdf from '@/app/[admin]/hooks/useUploadPdf'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 import {ArticleSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 

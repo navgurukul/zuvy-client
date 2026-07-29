@@ -28,6 +28,7 @@ export interface DataTablePaginationProps<TData> {
     lastPage: number
     pages: number | undefined
     fetchStudentData: (offset: number) => void
+    disableAutoFetch?: boolean
 }
 
 

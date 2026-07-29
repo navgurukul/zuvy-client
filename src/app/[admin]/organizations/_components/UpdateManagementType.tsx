@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/components/ui/use-toast';
-import useOrgSettings from '@/hooks/useOrgSettings'
+import useOrgSettings from '@/app/[admin]/hooks/useOrgSettings'
 
 // Management Type Cell Component
 

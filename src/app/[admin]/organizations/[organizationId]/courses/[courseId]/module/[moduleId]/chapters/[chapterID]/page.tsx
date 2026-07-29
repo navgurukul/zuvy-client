@@ -21,14 +21,13 @@ import {
 } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/app/[admin]/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
 import { useModuleChapters } from '@/hooks/useModuleChapters';
 import AdaptiveAssessment from '../[chapterID]/AdaptiveAssessment'
-import { useGetChapterDetails } from '@/hooks/useGetChapterDetails'
-import { get } from 'http'
+import { useGetChapterDetails } from '@/app/[admin]/hooks/useGetChapterDetails'
 export default function Page({
     params,
 }: {
@@ -66,7 +65,6 @@ export default function Page({
     const fetchingChapterRef = useRef<string>('')
 
     const fetchChapterContent = useCallback(
-        
         async (chapterId: number, topicId: number) => {
             const requestKey = `${chapterId}-${courseID}-${moduleID}-${topicId}`
             if (fetchingChapterRef.current === requestKey) return
@@ -102,7 +100,7 @@ export default function Page({
                 fetchingChapterRef.current = ''
             }
         },
-        [moduleData, courseId, moduleId, getChapterDetails]
+        [courseID, moduleID, moduleData, getChapterDetails, setCurrentChapter, setChapterContent]
     )
 
     useEffect(() => {
@@ -114,9 +112,11 @@ export default function Page({
         } else {
             if (moduleData.length > 0) {
                 const firstChapterId = moduleData[0].chapterId
-                router.replace(
-                    `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
-                )
+                if (firstChapterId !== chapter_id) {
+                    router.replace(
+                        `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
+                    )
+                }
             }
             setActiveChapter(0)
             setChapterContent([])
@@ -126,12 +126,19 @@ export default function Page({
             }, 1000)
         }
     }, [
-        // chapterData,
+        chapterData,
+        moduleData,
+        chapterId,
+        chapter_id,
+        topicId,
+        userRole,
+        orgId,
+        courseId,
+        moduleId,
+        router,
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        topicId,
-        chapter_id,
     ])
 
     const renderChapterContent = () => {
@@ -150,9 +157,10 @@ export default function Page({
                             courseId={courseId}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}
-                            canEdit={canEditChapter} setIsChapterLoading={function (value: boolean): void {
-                                throw new Error('Function not implemented.')
-                            } } isChapterLoading={false}                        />
+                            canEdit={canEditChapter}
+                            setIsChapterLoading={() => {}}
+                            isChapterLoading={false}
+                        />
                     )
                 case 2:
                     return (
@@ -208,7 +216,7 @@ export default function Page({
                 case 6:
                     return (
                         <AddAssessment
-                            key={Number(chapterID)}
+                            key={chapter_id || 0}
                             chapterData={currentChapter}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}

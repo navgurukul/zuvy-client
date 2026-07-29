@@ -29,7 +29,7 @@ import {
     ClassDatas,
     DisplayAttendance,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-import { useClassAnalytics } from '@/hooks/useClassAnalytics'
+import { useClassAnalytics } from '@/app/[admin]/hooks/useClassAnalytics'
 
 function RecordingCard({
     classData,

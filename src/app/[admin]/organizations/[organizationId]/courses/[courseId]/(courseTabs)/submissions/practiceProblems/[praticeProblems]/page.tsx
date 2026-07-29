@@ -6,7 +6,7 @@ import { Search } from 'lucide-react'
 
 import { columns } from './columns'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
+import { usePracticeProblemSubmissions } from '@/app/[admin]/hooks/usePracticeProblemSubmissions'
 
 interface CodingQuestionDetails {
     id: number
@@ -31,7 +31,7 @@ interface Module {
     timeAlloted: number
     moduleChapterData: ModuleChapterData[]
 }
-import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
+import { usePracticeProblemStatus } from '@/app/[admin]/hooks/usePracticeProblemStatus'
 
 
 const PraticeProblems = ({ params }: any) => {

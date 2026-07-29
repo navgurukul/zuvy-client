@@ -6,7 +6,7 @@ import { Calendar, Clock, Video, Users, ExternalLink, Info, CalendarIcon } from 
 import { LiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
 import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
-import { useClassAnalytics } from '@/hooks/useClassAnalytics'
+import { useClassAnalytics } from '@/app/[admin]/hooks/useClassAnalytics'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -26,7 +26,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
-import { useUpdateLiveClassSession} from '@/hooks/useUpdateLiveClassSession'
+import { useUpdateLiveClassSession} from '@/app/[admin]/hooks/useUpdateLiveClassSession'
+import { useAttendanceStatus } from '@/app/[admin]/hooks/useAttendanceStatus'
 
 const liveClassSchema = z
     .object({
@@ -75,6 +76,10 @@ const LiveClass = ({
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
     const { getClassAnalytics } = useClassAnalytics()
+    const { attendanceStatus, isAttendanceReady, loading: attendanceLoading } = useAttendanceStatus(
+        session?.id,
+        { enabled: session?.status?.toLowerCase() === 'completed' }
+    )
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -127,76 +132,39 @@ const LiveClass = ({
         }
     }
 
-    const handleDownloadAttendance = async () => {
-        if (!canEdit) return
-        try {
-            const sessionId = session.id || session.meetingId || session.title
-            const data = await getClassAnalytics({ classId: sessionId })
+    const handleDownloadAttendance = () => {
+        if (!canEdit || !attendanceStatus) return
 
-            const studentRecords =
-                data?.data?.session?.studentAttendanceRecords ?? []
-            const invited = data?.data?.session?.invitedStudents ?? []
+        const records = attendanceStatus.studentAttendanceRecords ?? []
 
-            type AttendanceRecord = {
-                userId: number | string
-                duration?: number
-                status?: string
-            }
-
-            const attendanceMap = new Map(
-                studentRecords.map((r: AttendanceRecord) => [r.userId, r])
-            )
-
-            const attendanceData = invited.map((student: any) => {
-                const record = attendanceMap.get(student.userId) as
-                    | AttendanceRecord
-                    | undefined
-                return {
-                    userId: student.userId,
-                    name: student.name ?? '',
-                    email: student.email ?? '',
-                    duration:
-                        record && record.duration !== undefined
-                            ? record.duration
-                            : 0,
-                    attendance:
-                        record && record.status ? record.status : 'absent',
-                }
-            })
-
-            if (attendanceData.length === 0) {
-                toast.error({ title: 'No attendance data to download.' })
-                return
-            }
-
-
-            const headers = Object.keys(attendanceData[0])
-            const csvContent = `${headers.join(',')}\n${attendanceData
-                .map((row: any) =>
-                    headers
-                        .map((header) => `"${String(row[header] ?? '')}"`)
-                        .join(',')
-                )
-                .join('\n')}`
-
-            const encodedUri =
-                'data:text/csv;charset=utf-8,' + encodeURI(csvContent)
-            const link = document.createElement('a')
-            link.setAttribute(
-                'href',
-                encodedUri
-            )
-            link.setAttribute(
-                'download',
-                `${data?.data?.session?.title ?? 'attendance'}_attendance.csv`
-            )
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        } catch (err) {
-            console.error('Failed to download attendance', err)
-            toast.error({ title: 'Failed to download attendance' })
+        if (records.length === 0) {
+            toast.error({ title: 'No attendance data to download.' })
+            return
         }
+
+        const csvRows = records.map((r: any) => ({
+            userId: r.userId,
+            name: r.name ?? '',
+            email: r.email ?? '',
+            status: r.status ?? 'absent',
+            duration: r.duration ?? 0,
+            attendanceDate: r.attendanceDate ?? '',
+        }))
+
+        const headers = Object.keys(csvRows[0])
+        const csvContent = `${headers.join(',')}\n${csvRows
+            .map((row: any) =>
+                headers.map((h) => `"${String(row[h] ?? '')}"`).join(',')
+            )
+            .join('\n')}`
+
+        const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent)
+        const link = document.createElement('a')
+        link.setAttribute('href', encodedUri)
+        link.setAttribute('download', `${content?.title ?? 'attendance'}_attendance.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     const getStatusIcon = (status: string) => {
@@ -408,17 +376,21 @@ const LiveClass = ({
                                                 onClick={handleDownloadAttendance}
                                                 disabled={
                                                     !canEdit ||
-                                                    !session?.s3link ||
-                                                    session?.s3link === 'not found'
+                                                    attendanceLoading ||
+                                                    !isAttendanceReady
                                                 }
                                             >
-                                                Download Attendance
+                                                {attendanceLoading
+                                                    ? 'Checking...'
+                                                    : 'Download Attendance'}
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p className="text-sm">
-                                                {!session?.s3link || session?.s3link === 'not found' 
-                                                    ? 'No attendance report available' 
+                                                {attendanceLoading
+                                                    ? 'Checking attendance availability...'
+                                                    : !isAttendanceReady
+                                                    ? 'Attendance is not ready yet. Please check back later.'
                                                     : 'Click to download attendance report'}
                                             </p>
                                         </TooltipContent>

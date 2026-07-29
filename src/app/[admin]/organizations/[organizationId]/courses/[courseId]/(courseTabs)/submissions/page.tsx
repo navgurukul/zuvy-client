@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video, Eye, Search } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import { api } from '@/utils/axios.config'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
@@ -22,8 +21,14 @@ import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
 import { CourseSubmissionSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import ProjectsComponent from './components/projectSubmissionComponent'
-import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
-
+import { useProjectSubmissions } from '@/app/[admin]/hooks/useProjectSubmissions'
+import { usePracticeProblemSubmissions } from '@/app/[admin]/hooks/usePracticeProblemSubmissions'
+import { useFormSubmissions } from '@/app/[admin]/hooks/useFormSubmissions'
+import { useLiveClassSubmissions } from '@/app/[admin]/hooks/useLiveClassSubmissions'
+import { useGetAssessmentSubmissions } from '@/app/[admin]/hooks/useGetAssessmentSubmissions'
+import { useGetProjectSubmissions } from '@/app/[admin]/hooks/useGetProjectSubmissions'
+import { useGetAssignmentSubmissions } from '@/app/[admin]/hooks/useGetAssignmentSubmissions'
+import { useGetVideoSubmissions } from '@/app/[admin]/hooks/useGetVideoSubmissions'
 interface SearchSuggestion {
     id: string
     title: string
@@ -59,7 +64,6 @@ const Page = ({ params }: { params: any }) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [formData, setFormData] = useState<any[]>([])
-    const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get('search') || '')
 
@@ -70,6 +74,14 @@ const Page = ({ params }: { params: any }) => {
 
     // New state for controlling search input display vs applied search
     const [searchInputValue, setSearchInputValue] = useState(searchParams.get('search') || '')
+
+    const { getFormSubmissions } = useFormSubmissions()
+    const { fetchLiveClassSubmissions } = useLiveClassSubmissions(params.courseId, { enabled: false })
+    const { fetchSubmissions: fetchPracticeSubmissions } = usePracticeProblemSubmissions(params.courseId, { enabled: false })
+    const { getAssessmentSubmissions } = useGetAssessmentSubmissions()
+    const { getProjectSubmissions } = useGetProjectSubmissions()
+    const { getAssignmentSubmissions } = useGetAssignmentSubmissions()
+    const { getVideoSubmissions } = useGetVideoSubmissions()
 
     // Fetch suggestions API function
     const fetchSuggestionsApi = useCallback(async (searchTerm: string): Promise<SearchSuggestion[]> => {
@@ -82,11 +94,9 @@ const Page = ({ params }: { params: any }) => {
         switch (activeTab) {
             case 'practice':
                 try {
-                    const practiceRes = await api.get(
-                        `/submission/submissionsOfPractiseProblems/${params.courseId}?searchPractiseProblem=${encodeURIComponent(searchTerm)}`
-                    )
-                    if (practiceRes.data.trackingData) {
-                        practiceRes.data.trackingData.forEach((item: any) => {
+                    const practiceData = await fetchPracticeSubmissions(searchTerm)
+                    if (practiceData.trackingData) {
+                        practiceData.trackingData.forEach((item: any) => {
                             if (item.moduleChapterData) {
                                 item.moduleChapterData.forEach((chapter: any) => {
                                     if (chapter.codingQuestionDetails) {
@@ -110,9 +120,7 @@ const Page = ({ params }: { params: any }) => {
 
             case 'assessments':
                 try {
-                    const assessmentRes = await api.get(
-                        `/admin/bootcampAssessment/bootcamp_id${params.courseId}?searchAssessment=${encodeURIComponent(searchTerm)}`
-                    )
+                    const assessmentRes = await getAssessmentSubmissions(params.courseId, searchTerm)
                     if (assessmentRes.data) {
                         Object.values(assessmentRes.data).forEach((assessmentGroup: any) => {
                             if (Array.isArray(assessmentGroup)) {
@@ -135,9 +143,7 @@ const Page = ({ params }: { params: any }) => {
                 break
             case 'projects':
                 try {
-                    const projectRes = await api.get(
-                        `/submission/submissionsOfProjects/${params.courseId}?searchProject=${encodeURIComponent(searchTerm)}`
-                    )
+                    const projectRes = await getProjectSubmissions(params.courseId, searchTerm)
                     if (projectRes.data?.data?.bootcampModules) {
                         projectRes.data.data.bootcampModules.forEach((module: any) => {
                             if (module.projectData && module.projectData[0]) {
@@ -156,9 +162,7 @@ const Page = ({ params }: { params: any }) => {
                 break
             case 'form':
                 try {
-                    const formRes = await api.get(
-                        `/submission/submissionsOfForms/${params.courseId}?searchForm=${encodeURIComponent(searchTerm)}`
-                    )
+                    const formRes = await getFormSubmissions(params.courseId, searchTerm)
                     // Fix: Access the correct data structure
                     if (formRes.data?.trackingData) {
                         formRes.data.trackingData.forEach((form: any) => {
@@ -183,9 +187,7 @@ const Page = ({ params }: { params: any }) => {
 
             case 'assignments':
                 try {
-                    const assignmentRes = await api.get(
-                        `/submission/submissionsOfAssignment/${params.courseId}?searchAssignment=${encodeURIComponent(searchTerm)}`
-                    )
+                    const assignmentRes = await getAssignmentSubmissions(params.courseId, searchTerm)
                     if (assignmentRes.data && assignmentRes.data.data && assignmentRes.data.data.trackingData) {
                         assignmentRes.data.data.trackingData.forEach((module: any) => {
                             if (module.moduleChapterData && Array.isArray(module.moduleChapterData)) {
@@ -209,9 +211,7 @@ const Page = ({ params }: { params: any }) => {
 
             case 'video':
                 try {
-                    const videoRes = await api.get(
-                        `/admin/bootcampModuleCompletion/bootcamp_id${params.courseId}?searchVideos=${encodeURIComponent(searchTerm)}`
-                    )
+                    const videoRes = await getVideoSubmissions(params.courseId, searchTerm)
                     if (videoRes.data) {
                         Object.keys(videoRes.data).forEach((moduleKey) => {
                             if (moduleKey !== 'totalStudents' && moduleKey !== 'totalRows' && moduleKey !== 'message') {
@@ -238,9 +238,7 @@ const Page = ({ params }: { params: any }) => {
 
             case 'live':
                 try {
-                    const liveRes = await api.get(
-                        `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}&searchTerm=${encodeURIComponent(searchTerm)}`
-                    )
+                    const liveRes = await fetchLiveClassSubmissions(params.courseId, searchTerm)
                     if (liveRes.data?.data?.trackingData) {
                         liveRes.data.data.trackingData.forEach((module: any) => {
                             if (module.moduleChapterData && Array.isArray(module.moduleChapterData)) {
@@ -272,7 +270,7 @@ const Page = ({ params }: { params: any }) => {
 
 
         return uniqueSuggestions.slice(0, 8)
-    }, [params.courseId, activeTab])
+    }, [params.courseId, activeTab, fetchPracticeSubmissions, getAssessmentSubmissions, getProjectSubmissions, getFormSubmissions, getAssignmentSubmissions, getVideoSubmissions, fetchLiveClassSubmissions])
 
     // Modified: Only apply search when user selects suggestion or presses enter
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -335,12 +333,10 @@ const Page = ({ params }: { params: any }) => {
 
     const getFormData = useCallback(async () => {
         try {
-            let url = `/submission/submissionsOfForms/${params.courseId}`
-            if (appliedSearchQuery && activeTab === 'form') {
-                url += `?searchForm=${encodeURIComponent(appliedSearchQuery)}`
-            }
-
-            const res = await api.get(url)
+            const res = await getFormSubmissions(
+                params.courseId,
+                appliedSearchQuery && activeTab === 'form' ? appliedSearchQuery : undefined
+            )
             const formsData = res.data?.trackingData || []
             setFormData(formsData)
             setTotalStudents(res.data?.totalStudents || 0)
@@ -353,30 +349,12 @@ const Page = ({ params }: { params: any }) => {
                 variant: 'destructive',
             })
         }
-    }, [params.courseId, appliedSearchQuery, activeTab])
-
-    const getLiveClassData = useCallback(async () => {
-        try {
-            let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}`
-            if (appliedSearchQuery && activeTab === 'live') {
-                url += `&searchTerm=${encodeURIComponent(appliedSearchQuery)}`
-            }
-
-            const res = await api.get(url)
-            const trackingData = res.data?.data?.trackingData || []
-            setLiveClassData(trackingData)
-            setTotalStudents(res.data?.data?.totalStudents || 0)
-        } catch (error) {
-            setLiveClassData([])
-            setTotalStudents(0)
-        }
-    }, [params.courseId, appliedSearchQuery, activeTab])
+    }, [params.courseId, appliedSearchQuery, activeTab, getFormSubmissions])
 
     useEffect(() => {
         if (!params.courseId) return
         if (activeTab === 'form') getFormData()
-        if (activeTab === 'live') getLiveClassData()
-    }, [params.courseId, activeTab, appliedSearchQuery, getFormData, getLiveClassData])
+    }, [params.courseId, activeTab, appliedSearchQuery, getFormData])
 
 
     useEffect(() => {

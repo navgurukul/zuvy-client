@@ -27,7 +27,7 @@ import {
     EditChapterResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import { getEmbedLink, isLinkValid } from '@/utils/admin'
-import useEditChapter from '@/hooks/useEditChapter'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 

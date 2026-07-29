@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import useOrgSettings, {
     OrgResponse,
     OrgUpdatePayload,
-} from '@/hooks/useOrgSettings'
+} from '@/app/[admin]/hooks/useOrgSettings'
 
 
 export default function AdminSettingPage() {

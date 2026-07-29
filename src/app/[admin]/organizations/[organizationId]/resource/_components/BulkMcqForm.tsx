@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/use-toast'
 
 import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
-import useCreateQuizQuestions from '@/hooks/useCreateQuizQuestions'
+import useCreateQuizQuestions from '@/app/[admin]/hooks/useCreateQuizQuestions'
 import { BulkMcqProps } from './adminResourceComponentType'
 import { useParams } from 'next/navigation';
 

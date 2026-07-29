@@ -13,12 +13,13 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { getOffset, getUser } from '@/store/store'
+import { getUser } from '@/store/store'
 import { POSITION } from '@/utils/constant'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useLiveClassStudentSubmissions } from '@/app/[admin]/hooks/useLiveClassStudentSubmissions'
 
 type Props = {}
 
@@ -47,14 +48,22 @@ const Page = ({ params }: any) => {
         () => searchParams.get('limit') || POSITION,
         [searchParams]
     )
-    const { offset, setOffset } = getOffset()
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const { fetchLiveClassStudentSubmissions } =
+        useLiveClassStudentSubmissions()
+    const currentPage = useMemo(
+        () => Number(searchParams.get('page') || '1'),
+        [searchParams]
+    )
+    const offset = useMemo(
+        () => (currentPage - 1) * Number(position),
+        [currentPage, position]
+    )
     const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { organizationId } = useParams()
     const { user } = getUser()
@@ -85,22 +94,15 @@ const Page = ({ params }: any) => {
     ) => {
         try {
             setLoading(true)
-            const queryParams = new URLSearchParams()
-            queryParams.append('limit', limit.toString())
-            queryParams.append('offset', currentOffset.toString())
-            if (selectedBatch !== 'all') {
-                console.log('Batch filter:', selectedBatch)
-                queryParams.append('batchId', selectedBatch)
-            }
-            if (sortField) queryParams.append('orderBy', sortField)
-            if (sortDirection) queryParams.append('orderDirection', sortDirection)
-            if (searchQuery.trim()) {
-                queryParams.append('name', searchQuery)
-                queryParams.append('email', searchQuery)
-            }
-            const url = `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?${queryParams.toString()}`
-            const response = await api.get(url)
-            const apiData = response.data.data
+            const apiData = await fetchLiveClassStudentSubmissions({
+                liveClassId: params.liveClassId,
+                limit,
+                offset: currentOffset,
+                batchId: selectedBatch,
+                orderBy: sortField,
+                orderDirection: sortDirection,
+                searchTerm: searchQuery,
+            })
 
             const students = apiData?.data?.map((record: any) => ({
                 ...record,
@@ -117,7 +119,7 @@ const Page = ({ params }: any) => {
         } finally {
             setLoading(false)
         }
-    }, [params.liveClassId, sortField, sortDirection, selectedBatch])
+    }, [params.liveClassId, sortField, sortDirection, selectedBatch, fetchLiveClassStudentSubmissions])
     // API functions for the SearchBox hook									
     const fetchSuggestionsApi = useCallback(
         async (query: string): Promise<Suggestion[]> => {
@@ -144,12 +146,12 @@ const Page = ({ params }: any) => {
 
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        await fetchLiveClassData(query, 0, Number(position))
-    }, [fetchLiveClassData, position])
+        // SearchBox updates the URL; the page effect fetches from that URL state.
+    }, [])
 
     const defaultFetchApi = useCallback(async () => {
-        await fetchLiveClassData('', offset, Number(position))
-    }, [fetchLiveClassData, offset, position])
+        // SearchBox clears the URL search parameter; the page effect handles the fetch.
+    }, [])
 
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
@@ -190,14 +192,6 @@ const Page = ({ params }: any) => {
         })
     }, [params.liveClassId, selectedBatch, searchParams, sortField, sortDirection,])
 
-    // Handler for pagination									
-    const handlePaginationFetch = useCallback(async (newOffset: number) => {
-        if (newOffset >= 0) {
-            const currentSearchQuery = searchParams.get('search') || ''
-            await fetchLiveClassData(currentSearchQuery, newOffset, Number(position))
-        }
-    }, [fetchLiveClassData, position, searchParams])
-
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
@@ -205,8 +199,7 @@ const Page = ({ params }: any) => {
 
     const handleBatchChange = useCallback((value: string) => {
         setSelectedBatch(value)
-        setOffset(0)
-    }, [setOffset])
+    }, [])
 
     useEffect(() => {
         const currentSearchQuery = searchParams.get('search') || ''
@@ -316,7 +309,8 @@ const Page = ({ params }: any) => {
                     totalStudents={totalStudents}
                     pages={totalPages}
                     lastPage={lastPage}
-                    fetchStudentData={handlePaginationFetch}
+                    fetchStudentData={() => {}}
+                    disableAutoFetch
                 />
             </div>
         </>

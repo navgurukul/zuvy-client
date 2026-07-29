@@ -28,7 +28,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useRoles } from '@/hooks/useRoles'
+import { useRoles } from '@/app/[admin]/hooks/useRoles'
 import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
 import type { User } from '../columns'

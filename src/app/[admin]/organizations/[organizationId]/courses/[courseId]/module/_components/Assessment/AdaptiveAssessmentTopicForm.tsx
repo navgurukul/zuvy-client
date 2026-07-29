@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/dialog'
 import { ChevronDown, ChevronUp, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import { useCreateTopic } from '@/hooks/useCreateTopic'
-import { useDeleteTopic } from '@/hooks/useDeleteTopic'
-import { useTopics } from '@/hooks/useTopics'
-import { useUpdateTopic } from '@/hooks/useUpdateTopic'
+import { useCreateTopic } from '@/app/[admin]/hooks/useCreateTopic'
+import { useDeleteTopic } from '@/app/[admin]/hooks/useDeleteTopic'
+import { useTopics } from '@/app/[admin]/hooks/useTopics'
+import { useUpdateTopic } from '@/app/[admin]/hooks/useUpdateTopic'
 import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/adaptiveAssessment/AdaptiveAssessmentConfigurationForm'
 
 export type AdaptiveAssessmentTopicPayload = {

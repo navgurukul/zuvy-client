@@ -43,7 +43,7 @@ import {
     ProjectDataProject,
     ProjectData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType'
-import { useUpdateProject } from '@/hooks/useUpdateProject'
+import { useUpdateProject } from '@/app/[admin]/hooks/useUpdateProject'
 import { fetchProjectDetails as fetchProjectDetailsData } from '@/utils/admin'
 
 export default function Project() {

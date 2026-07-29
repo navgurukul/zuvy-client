@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo } from 'react'
 import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, FileText, Settings, List, Code, MessageSquare } from 'lucide-react'
-import useRoleManagement from '@/hooks/useRoleManagement'
+import useRoleManagement from '@/app/[admin]/hooks/useRoleManagement'
 import { useRouter } from 'next/navigation'
 import RoleList from './RoleList'
 import PermissionLegend from './PermissionLegend'

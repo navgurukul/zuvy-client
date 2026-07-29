@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
-import { api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -17,16 +16,17 @@ import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
-import { useEditModuleOfBootcamp } from '@/hooks/useEditModuleOfBootcamp'
-import { useCreateModule } from '@/hooks/useCreateModule'
+import { useEditModuleOfBootcamp } from '@/app/[admin]/hooks/useEditModuleOfBootcamp'
+import { useCreateModule } from '@/app/[admin]/hooks/useCreateModule'
+import { useGetCourseModules } from '@/app/[admin]/hooks/useGetCourseModules'
 import {
     CurriculumItem,
     ModuleData,
     PermissionsType,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
-
-import {CurriculumSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { convertSeconds } from '@/utils/admin'
+import { CurriculumSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 function Page() {
     const router = useRouter()
@@ -71,6 +71,7 @@ function Page() {
 
     const { editModule: editModuleApi, loading: editModuleLoading } = useEditModuleOfBootcamp()
     const { createModule: createModuleApi, loading: createModuleLoading } = useCreateModule()
+    const { getCourseModules } = useGetCourseModules()
 
     // New states for border flash functionality
     const [flashingModuleId, setFlashingModuleId] = useState<number | null>(
@@ -113,32 +114,6 @@ function Page() {
         setEditMode(true)
         setModuleId(module)
         setIsEditOpen(true)
-    }
-    // Convert seconds to months, weeks and days:-
-    const convertSeconds = (seconds: number) => {
-        // Handle negative or zero seconds
-        if (seconds <= 0) {
-            return {
-                months: 0,
-                weeks: 0,
-                days: 0,
-            }
-        }
-
-        const SECONDS_IN_A_DAY = 24 * 60 * 60 // 86400
-        const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
-        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
-        const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
-        const remainingAfterMonths = seconds % SECONDS_IN_A_MONTH
-        const weeks = Math.floor(remainingAfterMonths / SECONDS_IN_A_WEEK)
-        const remainingAfterWeeks = remainingAfterMonths % SECONDS_IN_A_WEEK
-        const days = Math.floor(remainingAfterWeeks / SECONDS_IN_A_DAY)
-
-        return {
-            months: months,
-            weeks: weeks,
-            days: days,
-        }
     }
 
     useEffect(() => {
@@ -187,7 +162,7 @@ function Page() {
 
     useEffect(() => {
         if (isEditOpen && moduleId && courseData?.id) {
-            api.get(`/content/allModules/${courseData.id}`)
+            getCourseModules(courseData.id)
                 .then((res) => {
                     const data = res?.data?.modules?.find(
                         (module: any) => module.id === moduleId
@@ -214,7 +189,7 @@ function Page() {
                     })
                 })
         }
-    }, [isEditOpen, moduleId, courseData?.id])
+    }, [isEditOpen, moduleId, courseData?.id, getCourseModules])
 
     const editModule = () => {
         if (!courseData?.id) {
@@ -226,12 +201,12 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        
+
         // Ensure no negative values
         const safeDays = Math.max(0, days || 0)
         const safeWeeks = Math.max(0, weeks || 0)
         const safeMonths = Math.max(0, months || 0)
-        
+
         const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
         const moduleDto = {
@@ -297,12 +272,12 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        
+
         // Ensure no negative values
         const safeDays = Math.max(0, days || 0)
         const safeWeeks = Math.max(0, weeks || 0)
         const safeMonths = Math.max(0, months || 0)
-        
+
         const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
 
@@ -346,9 +321,7 @@ function Page() {
         }
 
         try {
-            const response = await api.get(
-                `/content/allModules/${courseData.id}`
-            )
+            const response = await getCourseModules(courseData.id)
             const modulesWithStartedFlag = response?.data?.modules?.map(
                 (module: ModuleData) => ({
                     ...module,
@@ -427,7 +400,7 @@ function Page() {
             const response = await editModuleApi(courseData.id, draggedModuleId, {
                 reOrderDto: { newOrder: newPosition },
             })
-            
+
             const warningMsg = response.data?.[0]?.message ?? ''
 
             if (warningMsg.includes('started by')) {
@@ -548,7 +521,7 @@ function Page() {
         }
     }, [reorderTimeout, borderFlashTimeout])
 
-   
+
     if (isCourseDeleted) {
         return (
             <div className="flex flex-col justify-center items-center h-full mt-20">
@@ -572,10 +545,10 @@ function Page() {
     }
 
 
-     if (loading) {
-      return <CurriculumSkeleton />
+    if (loading) {
+        return <CurriculumSkeleton />
     }
-    
+
     return (
         <div className="w-full">
             <div className="w-full flex flex-col items-center justify-center">
@@ -691,7 +664,7 @@ function Page() {
                             />
                             <p className="text-gray-600 text-lg">
                                 Create new modules for the curriculum
-                                
+
                             </p>
                             {permissions.createModule && (
                                 <Dialog open={isOpen} onOpenChange={setIsOpen}>

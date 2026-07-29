@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from '@/components/ui/use-toast'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import { getOrganizations, type Organization, type OrganizationApiResponse } from '@/utils/organizations'
 
 export type { Organization, OrganizationApiResponse } from '@/utils/organizations'

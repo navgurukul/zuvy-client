@@ -26,7 +26,7 @@ import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
 import AdaptiveAssessmentTopicForm from './Assessment/AdaptiveAssessmentTopicForm'
 import { ChapterModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
-import { useChapterActions } from '@/hooks/useChapterActions'
+import { useChapterActions } from '@/app/[admin]/hooks/useChapterActions'
 
 function ChapterModal({
     fetchChapters,

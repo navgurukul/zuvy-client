@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useCancelMentorSlotBooking } from "@/hooks/useCancelMentorSlotBooking";
+import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 
 const getBookingIdFromParam = (

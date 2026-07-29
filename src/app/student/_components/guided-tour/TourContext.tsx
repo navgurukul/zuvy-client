@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
-import { useOnboardingStorage } from '@/hooks/use-profile';
-import { api } from '@/utils/axios.config';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
+import { useLearnerProfileStrength } from '@/app/student/hooks/useLearnerProfileStrength';
 
 export interface TourStepConfig {
   id: string;
@@ -153,6 +153,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode; mentorshipEnabl
   const pathname = usePathname();
   const { studentData } = useStudentData();
   const { onboardingData } = useOnboardingStorage();
+  const { refetchLearnerProfileStrength } = useLearnerProfileStrength(false);
 
   const [isOpen, setIsOpen] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -210,11 +211,12 @@ export const TourProvider: React.FC<{ children: React.ReactNode; mentorshipEnabl
 
     try {
       // Check actual backend profile strength to avoid stale localStorage data
-      const res = await api.get('/learner-profile/strength');
+      const data = (await refetchLearnerProfileStrength()) as any;
       const isComplete =
-        res.data?.isProfileComplete === true ||
-        res.data?.data?.isProfileComplete === true ||
-        res.data?.profileCompletion === 100;
+        data?.isProfileComplete === true ||
+        data?.data?.isProfileComplete === true ||
+        data?.profileCompletion === 100 ||
+        data?.data?.profileCompletion === 100;
 
       if (isComplete) {
         router.push('/student');

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import StudentDashboard from './_pages/StudentDashboard';
 import { useTour } from './_components/guided-tour';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 
 const Page = () => {
   const router = useRouter();
