@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Check, VideoIcon, Lock } from 'lucide-react'
-import useChapterCompletion from '@/hooks/useChapterCompletion'
-import useCourseSyllabus from '@/hooks/useCourseSyllabus'
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
+import useCourseSyllabus from '@/app/student/hooks/useCourseSyllabus'
 import { getEmbedLink } from '@/utils/students'
 import {
     LiveClassContentProps,

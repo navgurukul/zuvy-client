@@ -11,7 +11,7 @@ import {
     ReportData,
     DownloadReportProps,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType'
-import useAssessmentTracking from '@/hooks/useAssessmentTracking'
+import useAssessmentTracking from '@/app/[admin]/hooks/useAssessmentTracking'
 
 const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo

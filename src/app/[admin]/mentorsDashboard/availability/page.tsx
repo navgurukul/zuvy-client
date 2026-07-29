@@ -29,9 +29,9 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
-import { useMyMentorSlots, type MentorCreatedSlot } from "@/hooks/useMyMentorSlots"
-import { useCreateMentorSlot } from "@/hooks/useCreateMentorSlot"
-import { useDeleteMentorSlot } from "@/hooks/useDeleteMentorSlot"
+import { useMyMentorSlots, type MentorCreatedSlot } from "@/app/[admin]/hooks/useMyMentorSlots"
+import { useCreateMentorSlot } from "@/app/[admin]/hooks/useCreateMentorSlot"
+import { useDeleteMentorSlot } from "@/app/[admin]/hooks/useDeleteMentorSlot"
 import {
   AvailabilitySkeleton,
   CalendarSkeleton,

@@ -20,10 +20,10 @@ import { getIsReattemptApproved, getOffset, getUser } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { useBatchList } from '@/hooks/useBatchList'
-import useStudentAssessments from '@/hooks/useStudentAssessments'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import useStudentAssessments from '@/app/[admin]/hooks/useStudentAssessments'
 
 const assessmentRequestCache = new Map<string, Promise<any>>()
 

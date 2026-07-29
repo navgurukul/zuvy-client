@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { difficultyColor } from '@/lib/utils';
 
 interface QuestionCreationModalProps {
   isOpen: boolean;
@@ -44,12 +45,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const difficultyColors: Record<Difficulty, string> = {
-  Easy: 'bg-success/20 text-success border-success/30',
-  Medium: 'bg-warning/20 text-warning border-warning/30',
-  Hard: 'bg-destructive/20 text-destructive border-destructive/30',
-};
 
 const bloomsLevels = [
   { value: 'remember', label: 'Remember (Recall facts)' },
@@ -267,7 +262,7 @@ export function QuestionCreationModal({
                 )}
                 </Badge>
                 <span className="text-text-secondary text-sm">›</span>
-                <Badge className={difficultyColors[difficulty]}>
+                <Badge className={difficultyColor(difficulty)}>
                   {difficulty}
                 </Badge>
               </div>

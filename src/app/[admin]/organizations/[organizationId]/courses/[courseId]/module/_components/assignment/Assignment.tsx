@@ -58,9 +58,9 @@ import {
     ChapterDetailsResponse,
     EditorContent,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType'
-import useEditChapter from '@/hooks/useEditChapter'
-import useUploadPdf from '@/hooks/useUploadPdf'
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
+import useUploadPdf from '@/app/[admin]/hooks/useUploadPdf'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 import {AssignmentSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 import PermissionAlert from '@/app/_components/PermissionAlert'

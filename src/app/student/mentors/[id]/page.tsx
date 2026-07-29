@@ -7,16 +7,9 @@ import { ArrowLeft, CalendarDays, Info, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/axios.config";
-import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getMentorBookHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
-
-const getMentorId = (idParam: string | string[] | undefined) => {
-  if (Array.isArray(idParam)) {
-    return idParam[0];
-  }
-
-  return idParam;
-};
+import { getMentorId } from "@/utils/mentorUtils";
 
 const getInitials = (label: string) =>
   label

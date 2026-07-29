@@ -13,8 +13,8 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
-import { useBootcampClasses } from '@/hooks/useBootcampClasses'
-import { useAddLiveClassesAsChapters } from '@/hooks/useAddLiveClassesAsChapters'
+import { useBootcampClasses } from '@/app/[admin]/hooks/useBootcampClasses'
+import { useAddLiveClassesAsChapters } from '@/app/[admin]/hooks/useAddLiveClassesAsChapters'
 import { ExistingLiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
 
 const ExistingLiveClass = ({

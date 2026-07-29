@@ -11,13 +11,13 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { useProjectSubmissions } from '@/hooks/useProjectSubmissions'
-import useProjectStudentSubmissions from '@/hooks/useProjectStudentSubmissions'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useProjectSubmissions } from '@/app/[admin]/hooks/useProjectSubmissions'
+import useProjectStudentSubmissions from '@/app/[admin]/hooks/useProjectStudentSubmissions'
 
 type Props = {}
 

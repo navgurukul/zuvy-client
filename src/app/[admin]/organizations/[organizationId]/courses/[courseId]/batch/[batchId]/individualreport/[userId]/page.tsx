@@ -9,7 +9,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Card, CardContent } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
 import { getUser } from '@/store/store'
-import useOverallAnalysis from '@/hooks/useOverallAnalysis'
+import useOverallAnalysis from '@/app/[admin]/hooks/useOverallAnalysis'
 import ResumeView from './components/ResumeView'
 
 type PageParams = {

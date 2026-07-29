@@ -14,14 +14,13 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
-import { useBootcampProgress } from '@/hooks/useBootcampProgress';
-import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
-import { MentorSessionEvent, UpcomingEvent } from '@/hooks/hookType';
-import { useCompletedClasses } from '@/hooks/useCompletedClasses';
-import { CompletedClass, Module } from '@/hooks/hookType';
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
-import { useMentors } from '@/hooks/useMentors';
+import { useBootcampProgress } from '@/app/student/hooks/useBootcampProgress';
+import { useAllModulesForStudents } from '@/app/student/hooks/useAllModulesForStudents';
+import { useUpcomingEvents } from '@/app/student/hooks/useUpcomingEvents';
+import { UpcomingEvent, CompletedClass } from '@/hooks/hookType';
+import { useStudentCompletedClasses } from '@/app/student/hooks/useStudentCompletedClasses';
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/app/student/hooks/useMentors';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,6 +32,7 @@ import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/st
 import { cn } from "@/lib/utils";
 import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
+import { MentorSessionEvent, Module } from "../hooks/hookTypes";
 // import Leaderboard from '@/components/Leaderboard';
 // import { useLeaderboard } from '@/hooks/useLeaderboard';
 
@@ -56,7 +56,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
-  const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
+  const { completedClassesData, loading: classesLoading, error: classesError } = useStudentCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
   const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0, orgId as string | undefined);
   // const { topEntries: leaderboardEntries, selfEntry: leaderboardSelfEntry, isSelfInTopFive, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard(courseId);
@@ -883,7 +883,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
           <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
             <div className="max-w-[89rem] mx-auto p-6 md:p-8">
               {/* Desktop Layout */}
-              <div className="hidden border md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-0 rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="flex-shrink-0">
                     <Image
                       src={validCourseCoverImage}
@@ -1660,7 +1660,7 @@ export default CourseDashboard;
 
 
 
-
+// don't remove this code, it has leaderboard's code
 
 
 

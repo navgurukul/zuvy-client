@@ -12,7 +12,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 
 import { StudentData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
-import { useAssignBatch } from '@/hooks/useAssignBatch'
+import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
 
 type AssignmentMethod = 'unassigned' | 'single' | 'csv'
 

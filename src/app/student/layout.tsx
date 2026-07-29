@@ -11,8 +11,8 @@ import UnauthorizedStudent from '@/components/UnauthorizedStudent';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import ZoeBanner from '../_components/ZoeBanner';
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
-import { useMentors } from '@/hooks/useMentors';
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/app/student/hooks/useMentors';
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -56,7 +56,7 @@ import { filteredQuizQuestions, fetchAllTags } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
-import { useZuvyEvalQuestions } from '@/hooks/useZuvyEvalQuestions'
+import { useZuvyEvalQuestions } from '@/app/[admin]/hooks/useZuvyEvalQuestions'
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm').then(mod => ({ default: mod.CreateProblemForm })), {
     ssr: false,

@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { FeedbackSubmissionSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 

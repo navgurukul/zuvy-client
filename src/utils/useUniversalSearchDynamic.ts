@@ -7,13 +7,20 @@ import {
     useCallback,
   } from "react";
   import { useRouter, useSearchParams } from "next/navigation";
-  import useDebounce from "@/hooks/useDebounce";
+  import useDebounce from "@/app/[admin]/hooks/useDebounce";
   import {
     Suggestion,
     UseSearchWithSuggestionsProps,
     UseSearchWithSuggestionsReturn,
   } from "@/utils/searchType"
   
+  const NOT_FOUND_SUGGESTION: Suggestion = {
+    id: "__not_found__",
+    name: "No results found",
+    question: "No results found",
+    title:"No results found",
+  };
+
   export function useSearchWithSuggestions({
     fetchSuggestionsApi,
     fetchSearchResultsApi,
@@ -38,13 +45,6 @@ import {
     const debouncedQuery = useDebounce(searchQuery, debounceTime);
     const previousQueryRef = useRef<string>("");
     const [hasFetchedSuggestions, setHasFetchedSuggestions] = useState(false);
-
-    const NOT_FOUND_SUGGESTION: Suggestion = {
-      id: "__not_found__",
-      name: "No results found",
-      question: "No results found",
-      title:"No results found",
-    };
   
     const safeApiCall = useCallback(
       async <T,>(apiFn: () => Promise<T>, fallback: T): Promise<T> => {

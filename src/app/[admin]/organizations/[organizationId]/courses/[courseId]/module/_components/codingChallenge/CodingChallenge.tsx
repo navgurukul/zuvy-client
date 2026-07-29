@@ -8,13 +8,13 @@ import CodingTopics from '@/app/[admin]/organizations/[organizationId]/courses/[
 import SelectedProblems from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
     getUser,
 } from '@/store/store'
-import useCodingQuestions from '@/hooks/useCodingQuestions'
+import useCodingQuestions from '@/app/[admin]/hooks/useCodingQuestions'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {CodingChallengeSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
+
+let tagsRequest: Promise<any[]> | null = null
 
 function CodingChallenge({
     content,
@@ -227,11 +229,16 @@ useEffect(() => {
 
 
     async function getAllTags() {
+        if (tags.length > 0) return
+
         try {
-            const tagArr = await fetchAllTags()
+            tagsRequest ??= fetchAllTags()
+            const tagArr = await tagsRequest
             setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
+        } finally {
+            tagsRequest = null
         }
     }
 

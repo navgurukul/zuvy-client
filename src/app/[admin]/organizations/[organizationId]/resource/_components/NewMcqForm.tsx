@@ -25,7 +25,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useState } from 'react'
-import useCreateQuizQuestions from '@/hooks/useCreateQuizQuestions'
+import useCreateQuizQuestions from '@/app/[admin]/hooks/useCreateQuizQuestions'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
 import RemirrorForForm from './RemirrorForForm'

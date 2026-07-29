@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
-import { useGetRescheduleSlots } from "@/hooks/useGetRescheduleSlots";
-import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { useGetRescheduleSlots } from "@/app/student/hooks/useGetRescheduleSlots";
+import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { formatDateOnly, formatTimeRange } from "@/utils/sessionDateTime";
 

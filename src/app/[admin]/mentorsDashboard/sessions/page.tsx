@@ -11,11 +11,11 @@ import {
   type MyMentorSession,
   type SessionFilter,
 } from "@/hooks/useMyMentorSessions"
-import { useMentorSlotDetails } from "@/hooks/useMentorSlotDetails"
+import { useMentorSlotDetails } from "@/app/[admin]/hooks/useMentorSlotDetails"
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking"
-import { useMarkMentorSlotAttendance } from "@/hooks/useMarkMentorSlotAttendance"
-import { useCompleteMentorSlotSession } from "@/hooks/useCompleteMentorSlotSession"
-import { useSubmitMentorSlotFeedback } from "@/hooks/useSubmitMentorSlotFeedback"
+import { useMarkMentorSlotAttendance } from "@/app/[admin]/hooks/useMarkMentorSlotAttendance"
+import { useCompleteMentorSlotSession } from "@/app/[admin]/hooks/useCompleteMentorSlotSession"
+import { useSubmitMentorSlotFeedback } from "@/app/[admin]/hooks/useSubmitMentorSlotFeedback"
 import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
 import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
@@ -125,11 +125,13 @@ export default function SessionsPage() {
     Record<number, true>
   >({})
 
-  const { counts } = useMyMentorSessions(
-    true,
-    "/instructor/mentor-sessions/my",
-    "all"
-  )
+  const {
+    sessions: apiSessions,
+    loading,
+    error,
+    refetchMySessions,
+    counts,
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const summaryCounts = {
     total: Number(counts.total) || 0,
@@ -138,13 +140,6 @@ export default function SessionsPage() {
     completed: Number(counts.completed) || 0,
     cancelled: Number(counts.cancelled) || 0,
   }
-
-  const {
-    sessions: apiSessions,
-    loading,
-    error,
-    refetchMySessions,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
 
   const sessions = apiSessions
 

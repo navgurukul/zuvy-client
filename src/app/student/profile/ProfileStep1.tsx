@@ -13,9 +13,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap } from 'lucide-react';
 import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
-import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
-import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
-import { useCollegeSearch } from '@/hooks/useCollegeSearch';
+import { useLearnerDegreeDetails } from '@/app/student/hooks/useLearnerDegreeDetails';
+import { useLearnerBranchDetails } from '@/app/student/hooks/useLearnerBranchDetails';
+import { useCollegeSearch } from '@/app/student/hooks/useCollegeSearch';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
 

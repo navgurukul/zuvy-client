@@ -20,7 +20,7 @@ import {
 } from '@/store/store'
 import{DeleteAlertDialogProps} from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 import { useParams } from 'next/navigation'
-import { useDeleteStudent } from '@/hooks/useDeleteStudent'
+import { useDeleteStudent } from '@/app/[admin]/hooks/useDeleteStudent'
 
 export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,

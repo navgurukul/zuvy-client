@@ -11,12 +11,12 @@ import { api } from '@/utils/axios.config'
 import { columns } from './columns'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
-import { useBatchList } from '@/hooks/useBatchList'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
-import { usePracticeProblemStatus } from '@/hooks/usePracticeProblemStatus'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { usePracticeProblemSubmissions } from '@/app/[admin]/hooks/usePracticeProblemSubmissions'
+import { usePracticeProblemStatus } from '@/app/[admin]/hooks/usePracticeProblemStatus'
 
 interface BatchFilter {
     id: number

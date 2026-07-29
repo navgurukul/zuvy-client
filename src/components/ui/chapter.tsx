@@ -21,7 +21,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
-import { useEditChapter } from '@/hooks/useEditChapter'
+import { useEditChapter } from '@/app/[admin]/hooks/useEditChapter'
 import { ModuleContentSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 // Internal imports
 import QuizList from './QuizList'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
 import {
     QuizDataLibrary,

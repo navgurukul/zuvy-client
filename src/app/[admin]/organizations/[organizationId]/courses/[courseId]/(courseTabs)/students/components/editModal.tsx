@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { useUpdateStudent } from '@/hooks/useUpdateStudent'
+import { useUpdateStudent } from '@/app/[admin]/hooks/useUpdateStudent'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {

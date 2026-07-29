@@ -57,7 +57,7 @@ import {
 } from './adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
 import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useOpenEndedQuestions from '@/hooks/useOpenEndedQuestions'
+import useOpenEndedQuestions from '@/app/[admin]/hooks/useOpenEndedQuestions'
 
 type Props = {}
 
