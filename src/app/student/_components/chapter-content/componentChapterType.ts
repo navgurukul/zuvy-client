@@ -154,6 +154,7 @@ export interface Session {
   s3link: string;
   status: string;
   attendance: string;
+  attendanceMessage?: string | null;
   duration: number;
   batchId?: number;
 }

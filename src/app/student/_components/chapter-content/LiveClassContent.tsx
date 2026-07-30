@@ -243,6 +243,7 @@ if (loading) {
         hangoutLink: session.hangoutLink,
         s3link: session.s3link,
         attendance: session.attendance,
+        attendanceMessage: session.attendanceMessage,
         batchId: session.batchId,
     }
 
@@ -408,6 +409,11 @@ if (loading) {
                             {item.description ||
                                 'This live class has been completed.'}
                         </p>
+                        {item.attendance === 'N/A' && item.attendanceMessage && (
+                            <p className="text-sm text-muted-foreground text-left mb-6">
+                                {item.attendanceMessage}
+                            </p>
+                        )}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <div className="text-left">
                                 <p className="text-sm text-muted-foreground">
@@ -432,14 +438,18 @@ if (loading) {
                                     Attendance
                                 </p>
                                 <p
-                                    className={`font-medium ${
+                                    className={`font-medium text-sm ${
                                         item.attendance === 'present'
                                             ? 'text-success'
+                                            : item.attendance === 'N/A'
+                                            ? 'text-muted-foreground'
                                             : 'text-destructive'
                                     }`}
                                 >
                                     {item.attendance === 'present'
                                         ? 'Present'
+                                        : item.attendance === 'N/A'
+                                        ? 'Not Applicable'
                                         : 'Absent'}
                                 </p>
                             </div>
