@@ -20,7 +20,11 @@ export function middleware(request: NextRequest) {
     const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
     const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
-    const orgId = pathname.split('/')[3]
+    const pathSegments = pathname.split('/')
+    const orgIdFromPath = pathSegments[2] === 'organizations' && pathSegments[3] && pathSegments[3] !== 'undefined' && pathSegments[3] !== 'null' ? pathSegments[3] : undefined
+    const orgIdFromCookie = request.cookies.get('orgId')?.value
+    const validOrgIdFromCookie = orgIdFromCookie && orgIdFromCookie !== 'undefined' && orgIdFromCookie !== 'null' ? orgIdFromCookie : undefined
+    const orgId = orgIdFromPath || validOrgIdFromCookie
 
    if (user === 'false') {
       
@@ -64,7 +68,11 @@ export function middleware(request: NextRequest) {
 
             // special case: admin visiting another role’s page
             if (user === 'admin') {
-                return NextResponse.redirect(new URL(`/admin/organizations/${orgId}/courses`, request.url))
+                if (orgId) {
+                    return NextResponse.redirect(new URL(`/admin/organizations/${orgId}/courses`, request.url))
+                } else {
+                    return NextResponse.redirect(new URL(`/admin/organizations`, request.url))
+                }
             }
 
             return response
@@ -102,12 +110,16 @@ export function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/student', request.url))
             }
         } else {
-            // For any non-student role, always redirect to /${user}/courses if pathname is / or /${user}
+            // For any non-student role, redirect to courses if orgId exists, else to organizations list
             if (
                 request.nextUrl.pathname === '/' ||
                 request.nextUrl.pathname === `/${user}`
             ) {
-                return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
+                if (orgId) {
+                    return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
+                } else {
+                    return NextResponse.redirect(new URL(`/${user}/organizations`, request.url))
+                }
             }
         }
     }

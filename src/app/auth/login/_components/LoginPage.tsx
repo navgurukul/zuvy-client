@@ -237,6 +237,9 @@ const handleGoogleSuccess = async (
                 }
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+                if (organizationId) {
+                    setCookie('orgId', String(organizationId))
+                }
 
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
@@ -255,7 +258,11 @@ const handleGoogleSuccess = async (
                      router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                    if (organizationId) {
+                        router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                    } else {
+                        router.push(`/${userRole}/organizations`)
+                    }
                 }
             }
         } catch (err: any) {
