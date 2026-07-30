@@ -214,7 +214,7 @@ const IDE: React.FC<IDEProps> = ({
         }
     }, [runCodeLanguageId, runSourceCode])
 
-    useEffect(() => {
+     useEffect(() => {
         setIsSubmitted(false)
         setIsDisabled(false)
         setIsOpen(false)
@@ -223,6 +223,7 @@ const IDE: React.FC<IDEProps> = ({
         setCurrentCode('')
         setCodeResult(null)
     }, [params.editor, setCodeResult])
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
@@ -299,7 +300,7 @@ const IDE: React.FC<IDEProps> = ({
                                     size="sm"
                                     variant="outline"
                                     className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
-                                    disabled={loading || isSubmitted}
+                                    disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Run Code</span>
@@ -308,7 +309,7 @@ const IDE: React.FC<IDEProps> = ({
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
                                     className="bg-primary-dark hover:bg-primary text-primary-foreground"
-                                    disabled={loading || isSubmitted}
+                                    disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Submit Solution</span>
