@@ -419,34 +419,30 @@ if (loading) {
                                         : 'TBD'}
                                 </p>
                             </div>
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Your Attendance Duration{' '}
-                                    </p>
-                                    <p className="font-medium">
-                                        {item.duration} mins
-                                    </p>
-                                </div>
-                            )}
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Attendance
-                                    </p>
-                                    <p
-                                        className={`font-medium ${
-                                            item.attendance === 'present'
-                                                ? 'text-success'
-                                                : 'text-destructive'
-                                        }`}
-                                    >
-                                        {item.attendance === 'present'
-                                            ? 'Present'
-                                            : 'Absent'}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Your Attendance Duration{' '}
+                                </p>
+                                <p className="font-medium">
+                                    {item.duration} mins
+                                </p>
+                            </div>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Attendance
+                                </p>
+                                <p
+                                    className={`font-medium ${
+                                        item.attendance === 'present'
+                                            ? 'text-success'
+                                            : 'text-destructive'
+                                    }`}
+                                >
+                                    {item.attendance === 'present'
+                                        ? 'Present'
+                                        : 'Absent'}
+                                </p>
+                            </div>
                         </div>
                         <p className="text-success mb-2 flex items-center gap-2">
                             <Check className="w-5 h-5" />
