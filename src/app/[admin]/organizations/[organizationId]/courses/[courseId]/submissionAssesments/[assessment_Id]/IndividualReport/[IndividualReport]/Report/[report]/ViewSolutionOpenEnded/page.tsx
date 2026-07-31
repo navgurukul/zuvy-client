@@ -13,6 +13,9 @@ import useStudentAssessments from '@/app/[admin]/hooks/useStudentAssessments'
 import useOpenEndedSolutionForStudents from '@/app/[admin]/hooks/useOpenEndedSolutionForStudents'
 import type { OpenEndedSubmissionData } from '@/app/[admin]/hooks/hookType'
 import { toast } from '@/components/ui/use-toast'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export type paramsType = {
     courseId: string
@@ -32,6 +35,7 @@ const Page = ({ params }: { params: paramsType }) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
+    const router = useRouter()
 
     const crumbs = [
         {
@@ -108,7 +112,16 @@ const Page = ({ params }: { params: paramsType }) => {
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
+            <div className='text-start mt-10'>
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
             <MaxWidthWrapper className="flex flex-col gap-5">
                 <div className="flex items-center gap-x-3">
                     <div className="flex flex-col gap-x-2">

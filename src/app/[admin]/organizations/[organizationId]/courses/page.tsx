@@ -61,6 +61,7 @@ const Courses: React.FC = () => {
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
     const [previousLimit, setPreviousLimit] = useState<number>(position)
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
 
     // new course form
     const [newCourseName, setNewCourseName] = useState<string>('')
@@ -79,6 +80,12 @@ const Courses: React.FC = () => {
         })
     const { createBootcamp, creating } = useCreateBootcamp()
 
+    useEffect(() => {
+        if (!loading) {
+            setHasLoadedOnce(true)
+        }
+    }, [loading])
+
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (orgId === undefined) return []
         const response = await api.get(
@@ -89,15 +96,11 @@ const Courses: React.FC = () => {
 
     const fetchSearchResultsApi = useCallback(
         async (query: string, pageOffset: number = 0) => {
-            console.log("SEARCH API CALLED", { query, pageOffset });
-
             setCurrentSearchQuery(query);
-            setOffset(0);
-
-            await refetchBootcamps(0);
+            setOffset(pageOffset);
             return [];
         },
-        [refetchBootcamps]
+        []
     );
 
 
@@ -106,11 +109,14 @@ const Courses: React.FC = () => {
         async (offsetParam = offset) => {
             setCurrentSearchQuery('');
             setOffset(offsetParam);
-            await refetchBootcamps(offsetParam);
             return [];
         },
-        [offset, refetchBootcamps]
+        [offset]
     );
+
+    const handlePaginationFetch = useCallback((newOffset: number) => {
+        setOffset(newOffset)
+    }, [])
 
 
     // Use the search hook
@@ -222,7 +228,7 @@ const Courses: React.FC = () => {
 
     return (
         <>
-            {loading ? (
+            {loading && !hasLoadedOnce ? (
                 <CoursesSkeleton />
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">
@@ -490,26 +496,7 @@ const Courses: React.FC = () => {
                                         totalStudents={totalBootcamps}
                                         lastPage={totalPages}
                                         pages={totalPages}
-                                        fetchStudentData={(
-                                            newOffset: number
-                                        ) => {
-                                            setOffset(newOffset)
-                                            // Use currentSearchQuery for pagination
-                                            // if (currentSearchQuery.trim()) {
-                                            //     fetchSearchResultsApi(
-                                            //         currentSearchQuery,
-                                            //         newOffset
-                                            //     )
-                                            // } else {
-                                            //     defaultFetchApi(newOffset)
-                                            // }
-
-                                            if (currentSearchQuery.trim()) {
-                                                fetchSearchResultsApi(currentSearchQuery)
-                                            } else {
-                                                defaultFetchApi(newOffset)
-                                            }
-                                        }}
+                                        fetchStudentData={handlePaginationFetch}
                                     />
                                 </div>
                             )}
