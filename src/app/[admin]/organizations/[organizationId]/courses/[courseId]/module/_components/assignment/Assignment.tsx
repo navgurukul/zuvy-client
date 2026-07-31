@@ -235,17 +235,21 @@ const AddAssignent = ({
         } else {
             setDeadline(null)
         }
-       
-        const contentDetails = assignmentData.contentDetails[0]
+
+        // Newly created assignments may have an empty contentDetails array
+        const contentDetails = Array.isArray(assignmentData.contentDetails) && assignmentData.contentDetails.length > 0
+            ? assignmentData.contentDetails[0]
+            : null
+
         const fetchedTitle = assignmentData.title || assignmentData.name || ''
         // Only update title if content.id changed or initial load
         if (lastLoadedContentId.current !== content.id) {
             setTitle(fetchedTitle)
             lastLoadedContentId.current = content.id
         }
-        
+
         setIsDataLoading(false)
-        
+
         const link = contentDetails?.links?.[0]
         if (link) {
             setpdfLink(link)
@@ -266,13 +270,17 @@ const AddAssignent = ({
             }
             setIsEditorSaved(hasEditorContent)
         }
-        
+
         const data = contentDetails?.content
-        let parsedContent
-        if (typeof data?.[0] === 'string') {
+        let parsedContent: { doc: any } | undefined
+
+        if (!data || data.length === 0) {
+            // No content yet (newly created chapter) — leave editor empty
+            parsedContent = undefined
+        } else if (typeof data[0] === 'string') {
             parsedContent = JSON.parse(data[0])
         } else {
-            parsedContent = { doc: data?.[0] }
+            parsedContent = { doc: data[0] }
         }
 
         setInitialContent(parsedContent)

@@ -42,12 +42,12 @@ const Navbar = () => {
     const isMentorsDashboardRoute = pathname.includes('/mentorsDashboard')
     const pathSegments = pathname.split('/')
     const orgIdFromPath =
-        pathSegments[2] === 'organizations' && pathSegments[3]
+        pathSegments[2] === 'organizations' && pathSegments[3] && pathSegments[3] !== 'undefined' && pathSegments[3] !== 'null'
             ? pathSegments[3]
             : undefined
     const orgIdFromQuery = searchParams.get('orgId') || undefined
     const orgIdFromUser =
-        typeof user?.orgId === 'number' && Number.isFinite(user.orgId)
+        user?.orgId && String(user.orgId) !== 'undefined' && String(user.orgId) !== 'null'
             ? String(user.orgId)
             : undefined
     const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
@@ -189,7 +189,7 @@ const Navbar = () => {
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
-                    <Link href={isSuperAdmin ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
+                    <Link href={isSuperAdmin || !orgId ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
                         <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo' />
                     </Link>
 

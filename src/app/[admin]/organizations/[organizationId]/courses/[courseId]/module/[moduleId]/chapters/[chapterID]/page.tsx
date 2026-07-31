@@ -109,10 +109,23 @@ export default function Page({
             if (chapterId !== chapter_id) {
                 fetchChapterContent(chapter_id, topicId)
             }
+        } else if (topicId != null && chapter_id > 0) {
+            // topicId is already set (e.g. just created via ChapterModal) but
+            // chapterData is still stale/empty — fetch the content directly
+            // without redirecting away to a different chapter.
+            if (chapterId !== chapter_id) {
+                fetchChapterContent(chapter_id, topicId)
+            }
         } else {
             if (moduleData.length > 0) {
                 const firstChapterId = moduleData[0].chapterId
-                if (firstChapterId !== chapter_id) {
+                // Only redirect if the current chapter genuinely does not exist
+                // in the loaded module data (not just a stale-cache gap for a
+                // newly created chapter whose topicId hasn't arrived yet).
+                const chapterExistsInModule = moduleData.some(
+                    (c: any) => c.chapterId === chapter_id
+                )
+                if (!chapterExistsInModule && firstChapterId !== chapter_id) {
                     router.replace(
                         `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
                     )
