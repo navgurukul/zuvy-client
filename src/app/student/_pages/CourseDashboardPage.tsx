@@ -394,25 +394,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Badge
                         variant="outline"
                         className={
-                          classItem.s3Link === null ||
-                            classItem.s3Link ===
-                            'not found'
-                            ? 'text-warning border-warning'
-                            : classItem.s3Link &&
-                              classItem.attendanceStatus ===
-                              'absent'
-                              ? 'text-destructive border-destructive'
-                              : 'text-success border-success'
+                          classItem.attendanceStatus === 'absent'
+                            ? 'text-destructive border-destructive'
+                            : 'text-success border-success'
                         }
                       >
-                        {classItem.s3Link === null ||
-                          classItem.s3Link === 'not found'
-                          ? 'Processing'
-                          : classItem.s3Link &&
-                            classItem.attendanceStatus ===
-                            'absent'
-                            ? 'Absent'
-                            : 'Present'}
+                        {classItem.attendanceStatus === 'absent'
+                          ? 'Absent'
+                          : 'Present'}
                       </Badge>
                       <TooltipProvider>
                         <Tooltip>
@@ -549,25 +538,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Badge
                         variant="outline"
                         className={
-                          classItem.s3Link === null ||
-                            classItem.s3Link ===
-                            'not found'
-                            ? 'text-warning border-warning'
-                            : classItem.s3Link &&
-                              classItem.attendanceStatus ===
-                              'absent'
-                              ? 'text-destructive border-destructive'
-                              : 'text-success border-success'
+                          classItem.attendanceStatus === 'absent'
+                            ? 'text-destructive border-destructive'
+                            : 'text-success border-success'
                         }
                       >
-                        {classItem.s3Link === null ||
-                          classItem.s3Link === 'not found'
-                          ? 'Processing'
-                          : classItem.s3Link &&
-                            classItem.attendanceStatus ===
-                            'absent'
-                            ? 'Absent'
-                            : 'Present'}{' '}
+                        {classItem.attendanceStatus === 'absent'
+                          ? 'Absent'
+                          : 'Present'}{' '}
                       </Badge>
                       <TooltipProvider>
                         <Tooltip>
@@ -1510,28 +1488,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <Badge
                                   variant="outline"
                                   className={
-                                    classItem.s3Link ===
-                                      null ||
-                                      classItem.s3Link ===
-                                      'not found'
-                                      ? 'text-warning border-warning'
-                                      : classItem.s3Link &&
-                                        classItem.attendanceStatus ===
-                                        'absent'
-                                        ? 'text-destructive border-destructive'
-                                        : 'text-success border-success'
+                                    classItem.attendanceStatus === 'absent'
+                                      ? 'text-destructive border-destructive'
+                                      : 'text-success border-success'
                                   }
                                 >
-                                  {classItem.s3Link ===
-                                    null ||
-                                    classItem.s3Link ===
-                                    'not found'
-                                    ? 'Processing'
-                                    : classItem.s3Link &&
-                                      classItem.attendanceStatus ===
-                                      'absent'
-                                      ? 'Absent'
-                                      : 'Present'}{' '}
+                                  {classItem.attendanceStatus === 'absent'
+                                    ? 'Absent'
+                                    : 'Present'}{' '}
                                 </Badge>
                                 <TooltipProvider>
                                   <Tooltip>

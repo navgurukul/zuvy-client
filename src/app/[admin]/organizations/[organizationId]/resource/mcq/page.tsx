@@ -676,22 +676,22 @@ const Mcqs = (props: Props) => {
                         onValueChange={setMcqType}
                         className="w-full"
                     >
-                        <TabsList className="grid w-full grid-cols-3 mb-6">
+                        <TabsList className="grid w-full grid-cols-3 mb-6 bg-white">
                             <TabsTrigger 
                                 value="oneatatime" 
-                                className="text-sm font-medium"
+                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
                             >
                                 One At A Time
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="bulk" 
-                                className="text-sm font-medium"
+                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
                             >
                                 Bulk Upload
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="ai" 
-                                className="text-sm font-medium"
+                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
                             >
                                 Generate with AI
                             </TabsTrigger>
