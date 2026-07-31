@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
 import { getAttendancePercentage, getCompletedClasses } from '@/store/store'
-import { useCompletedClasses } from '@/hooks/useCompletedClasses'
+import { useGetStudentCompletedClasses } from '@/app/[admin]/hooks/useGetStudentCompletedClasses'
 import { useUpdateAttendanceStatus } from '@/app/[admin]/hooks/useUpdateAttendanceStatus'
 
 interface ClassData {
@@ -91,7 +91,7 @@ const UpdateStatusCell = ({
     const isPresent = currentStatus === 'present'
     const { setCompletedClasses } = getCompletedClasses()
     const { setAttendancePercentage } = getAttendancePercentage()
-    const completedClassesHook = useCompletedClasses()
+    const { getStudentCompletedClasses } = useGetStudentCompletedClasses()
     const { updateAttendanceStatus: postAttendanceStatus } = useUpdateAttendanceStatus()
 
     const handleStatusToggle = async (checked: boolean) => {
@@ -110,8 +110,9 @@ const UpdateStatusCell = ({
 
             if (typeof onStatusUpdate === 'function') {
                 await onStatusUpdate()
-            } else if (typeof completedClassesHook?.fetchCompletedClasses === 'function') {
-                const response = await completedClassesHook.fetchCompletedClasses(courseId, studentId)
+            } else {
+                const params = new URLSearchParams({ userId: studentId })
+                const response = await getStudentCompletedClasses(courseId, params)
                 if (response?.data?.data) {
                     const classes = response.data.data.classes || []
                     setCompletedClasses(classes)

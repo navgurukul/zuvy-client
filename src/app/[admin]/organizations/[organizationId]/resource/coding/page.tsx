@@ -318,10 +318,11 @@ const CodingProblems = () => {
 
     const fetchCodingQuestions = useCallback(
         async (offset: number, force = false) => {
-            // Don't fetch if search is active
-            if (isSearchActive) return
-
-            const requestKey = getCodingQuestionsRequestKey(offset)
+            // Pagination must retain the active search term. Previously this
+            // returned early while searching, so changing page never made an
+            // API request with the new offset.
+            const searchTerm = isSearchActive ? lastSearchQuery : ''
+            const requestKey = `${getCodingQuestionsRequestKey(offset)}|${searchTerm}`
             if (!force && lastCodingQuestionsRequestRef.current === requestKey) {
                 return
             }
@@ -339,7 +340,7 @@ const CodingProblems = () => {
                     setTotalCodingQuestion,
                     setLastPage,
                     setTotalPages,
-                    '', // Always empty for filter-based fetch
+                    searchTerm,
                     ''
                 )
             } catch (error) {
@@ -355,6 +356,7 @@ const CodingProblems = () => {
             difficulty,
             getCodingQuestionsRequestKey,
             isSearchActive,
+            lastSearchQuery,
             orgId,
             position,
             selectedOptions,
