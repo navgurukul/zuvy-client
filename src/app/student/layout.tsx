@@ -114,8 +114,8 @@ function StudentLayoutContent({
 
                 <ThemeInitializer />
                 <div className="sticky top-0 z-50">
-                    <ZoeBanner 
-                        isVisible={showZoeBanner}
+                    <ZoeBanner
+                        isVisible={showZoeBanner && !hideHeader}
                         onDismiss={handleDismissBanner}
                         onStartInterview={handleStartInterview}
                         onGiveFeedback={handleGiveFeedback}
