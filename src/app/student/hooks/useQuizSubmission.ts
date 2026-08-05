@@ -32,7 +32,7 @@ export const useQuizSubmission = (
 
       try {
         const response = await api.patch<QuizSubmissionResponse>(
-          `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${assessmentOutSourceId}`,
+          `/submission/quiz/assessmentSubmissionId/${assessmentSubmitId}?assessmentOutsourseId=${assessmentOutSourceId}`,
           payload
         );
         return response.data;

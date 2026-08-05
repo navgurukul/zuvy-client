@@ -26,7 +26,7 @@ export const useOpenEndedSubmission = (
 
       try {
         const response = await api.patch<OpenEndedSubmissionResponse>(
-          `/submission/openended/assessmentSubmissionId=${assessmentSubmitId}`,
+          `/submission/openended/assessmentSubmissionId/${assessmentSubmitId}`,
           payload
         );
         return response.data;

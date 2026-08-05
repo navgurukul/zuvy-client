@@ -94,7 +94,7 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
         
         try {
             const response = await api.get<ApiResponse<SubmissionData>>(
-                `/codingPlatform/submissions/questionId=${questionId}`
+                `/codingPlatform/submissions/questionId/${questionId}`
             );
             
             if (response.data.isSuccess && response.data.data) {
@@ -175,7 +175,7 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
 
         try {
             const response = await api.post<ApiResponse<CodeResult[]>>(
-                `codingPlatform/practicecode/questionId=${questionId}?action=${action}`,
+                `codingPlatform/practicecode/questionId/${questionId}?action=${action}`,
                 {
                     languageId: state.languageId,
                     sourceCode: b64EncodeUnicode(state.currentCode),

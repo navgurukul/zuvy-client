@@ -19,7 +19,7 @@ const useStartAssessment = (): UseStartAssessmentReturn => {
       setError(null);
       try {
         const res = await api.get<StartAssessmentResponse>(
-          `/Content/startAssessmentForStudent/assessmentOutsourseId=${assessmentOutSourceId}/newStart=${isNewStart}`
+          `/Content/startAssessmentForStudent/assessmentOutsourseId/${assessmentOutSourceId}/newStart/${isNewStart}`
         );
         setAssessmentData(res.data.data);
         return res.data.data;

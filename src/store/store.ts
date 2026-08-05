@@ -809,7 +809,7 @@ export const getProctoringDataStore = create<proctoringDataType>((set) => ({
     fetchProctoringData: async (submissionId, studentId) => {
         await api
             .get(
-                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+                `/tracking/assessment/submissionId/${submissionId}?studentId=${studentId}`
             )
             .then((res) => {
                 set({ proctoringData: res.data })
