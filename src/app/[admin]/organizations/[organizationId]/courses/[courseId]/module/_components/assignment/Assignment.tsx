@@ -371,13 +371,19 @@ const AddAssignent = ({
 
     // Keep form title in sync with state
     useEffect(() => {
-        form.setValue('title', title)
+        form.setValue('title', title, { shouldValidate: true })
+        form.trigger()
     }, [title])
 
     // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
         if (ispdfUploaded) setIsEditorSaved(false)
     }, [ispdfUploaded])
+
+    // Trigger initial form validation on mount
+    useEffect(() => {
+        form.trigger()
+    }, [])
 
     // Save button logic: editor disables after save, enables only after edit; PDF disables after save, enables after file/title/deadline edit
     useEffect(() => {
@@ -387,7 +393,7 @@ const AddAssignent = ({
             setCanSave(!!hasContent && !isSaving && hasChangedAfterSave)
         } else if (defaultValue === 'pdf') {
             // Only enable Save if a file is selected for upload or a PDF is already uploaded
-            setCanSave(((!!file || !!pdfLink) && hasChangedAfterSave && !isSaving) || (!!file && !isSaving))
+            setCanSave(((!!file || !!pdfLink) && !isSaving) || (!!file && !isSaving))
         } else {
             setCanSave(false)
         }
@@ -398,8 +404,15 @@ const AddAssignent = ({
         if (defaultValue !== 'editor') return
 
         const hasContent = initialContent && !isEditorContentEmpty(initialContent)
-        if (!hasContent || !previousContentHash) {
+        if (!hasContent) {
             setHasChangedAfterSave(false)
+            return
+        }
+
+        const emptyHash = generateContentHash(undefined)
+        if (!previousContentHash || previousContentHash === emptyHash) {
+            // For a new assignment with non-empty content, allow saving
+            setHasChangedAfterSave(true)
             return
         }
 

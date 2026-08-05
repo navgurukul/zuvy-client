@@ -411,14 +411,15 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                         !isValid ||
                                         isSubmitting
                                     }
-                                    className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
-                                        !canEdit ||
-                                        !isDirty ||
-                                        !isValid ||
-                                        isSubmitting
-                                            ? 'bg-muted/20 cursor-not-allowed opacity-70'
-                                            : 'bg-primary'
-                                    }`}
+                                    // className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                                    //     !canEdit ||
+                                    //     !isDirty ||
+                                    //     !isValid ||
+                                    //     isSubmitting
+                                    //         ? 'bg-muted/20 cursor-not-allowed opacity-70'
+                                    //         : 'bg-primary'
+                                    // }`}
+                                    
                                 >
                                     {isSubmitting
                                         ? 'Saving...'
