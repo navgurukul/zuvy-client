@@ -22,7 +22,7 @@ export const useCodingSubmissionsByQuestion = ({
 
     try {
       const response = await api.get(
-        `/codingPlatform/submissions/questionId=${questionId}`
+        `/codingPlatform/submissions/questionId/${questionId}`
       );
       if (response.data.isSuccess) {
         setSubmissionData(response.data.data);

@@ -28,7 +28,7 @@ export const useCodingSubmissions = ({
 
     try {
       const response = await api.get<CodingSubmissionsResponse>(
-        `codingPlatform/submissions/questionId=${qId}?assessmentSubmissionId=${aId}&codingOutsourseId=${cId}`
+        `codingPlatform/submissions/questionId/${qId}?assessmentSubmissionId=${aId}&codingOutsourseId=${cId}`
       );
       setData(response.data);
       return response.data;

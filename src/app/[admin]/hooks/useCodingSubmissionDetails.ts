@@ -40,7 +40,7 @@ export function useCodingSubmissionDetails() {
             }
 
             const queryString = queryParams.toString()
-            const url = `/codingPlatform/submissions/questionId=${questionId}${
+            const url = `/codingPlatform/submissions/questionId/${questionId}${
                 queryString ? `?${queryString}` : ''
             }`
 

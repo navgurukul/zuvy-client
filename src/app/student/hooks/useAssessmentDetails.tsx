@@ -25,7 +25,7 @@ const useAssessmentDetails = (
       setError(null);
       
       const response = await api.get(
-        `/Content/students/assessmentId=${assessmentId}?moduleId=${moduleId}&bootcampId=${bootcampId}&chapterId=${chapterId}`
+        `/Content/students/assessmentId/${assessmentId}?moduleId=${moduleId}&bootcampId=${bootcampId}&chapterId=${chapterId}`
       );
       
       if (response.data.status === 'success') {

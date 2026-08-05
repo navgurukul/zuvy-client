@@ -11,7 +11,7 @@ const useAssessmentResult = (submissionId: string | number | undefined) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get(`tracking/assessment/submissionId=${submissionId}`);
+      const response = await api.get(`tracking/assessment/submissionId/${submissionId}`);
       setData(response.data);
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Failed to fetch assessment result.');

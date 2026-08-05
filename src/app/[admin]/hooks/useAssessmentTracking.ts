@@ -25,7 +25,7 @@ export default function useAssessmentTracking() {
 
             try {
                 const response = await api.get<T>(
-                    `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+                    `/tracking/assessment/submissionId/${submissionId}?studentId=${studentId}`
                 )
                 setData(response.data)
                 return response.data
