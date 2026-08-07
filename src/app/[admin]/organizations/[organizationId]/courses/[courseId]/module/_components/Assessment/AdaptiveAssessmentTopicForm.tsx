@@ -12,12 +12,16 @@ interface AdaptiveAssessmentTopicFormProps {
 	onSave?: (payload: AdaptiveAssessmentTopicPayload) => void;
 	moduleId: number;
 	bootcampId: number;
+	chapterData?: any;
+	content?: any;
+	fetchChapterContent?: any;
+	courseId?: any;
+	canEdit?: boolean;
+	chapterId?: number;
+	topicId?: number;
 }
 
-export default function AdaptiveAssessmentTopicForm({
-	moduleId,
-	bootcampId,
-}: AdaptiveAssessmentTopicFormProps) {
+export default function AdaptiveAssessmentTopicForm(props: AdaptiveAssessmentTopicFormProps) {
 	// Mock baseline options
 	const dummyBaselineOptions: Chapter[] = [
 		{ id: 1012, title: 'HTML & CSS Basics', questionCount: 15 },
@@ -27,9 +31,8 @@ export default function AdaptiveAssessmentTopicForm({
 	return (
 		<div className="h-full">
 			<AssessmentBuilder
-				chapterId={0}
-				moduleId={moduleId}
 				baselineOptions={dummyBaselineOptions}
+				{...props}
 			/>
 		</div>
 	)

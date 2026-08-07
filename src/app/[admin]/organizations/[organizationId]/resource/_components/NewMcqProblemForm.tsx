@@ -110,8 +110,6 @@ function SearchableSelect({
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const
 type Difficulty = (typeof DIFFICULTIES)[number]
 
-
-
 const normalise = (s: string) => s.trim().toLowerCase().replace(/[-\s/]+/g, ' ')
 
 const BLOOMS: { id: string; label: string; hint: string }[] = [
@@ -332,7 +330,6 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
             ))}
           </div>
         )}
-
         <div className="flex items-center gap-2">
           <Input
             className="flex-1"

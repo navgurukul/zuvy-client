@@ -6,14 +6,23 @@ import AdaptiveAssessmentTopicForm from '../../../_components/Assessment/Adaptiv
 import type { AdaptiveAssessmentTopicPayload } from '../../../_components/Assessment/AdaptiveAssessmentTopicForm'
 import { toast } from '@/components/ui/use-toast'
 
-type Props = {}
+type Props = {
+  chapterData?: any;
+  content?: any;
+  fetchChapterContent?: any;
+  moduleId?: any;
+  courseId?: any;
+  canEdit?: boolean;
+  chapterId?: number;
+  topicId?: number;
+}
 
 const AdaptiveAssessment = (props: Props) => {
   const params = useParams<{ courseId: string; moduleId: string }>()
   const [formOpen, setFormOpen] = useState(true)
 
-  const bootcampId = Number(params?.courseId)
-  const moduleId = Number(params?.moduleId)
+  const bootcampId = Number(props.courseId || params?.courseId)
+  const moduleId = Number(props.moduleId || params?.moduleId)
   const isValidIds = Number.isFinite(bootcampId) && Number.isFinite(moduleId)
 
   const handleSave = (payload: AdaptiveAssessmentTopicPayload) => {
@@ -37,8 +46,9 @@ const AdaptiveAssessment = (props: Props) => {
         open={formOpen}
         onOpenChange={setFormOpen}
         onSave={handleSave}
-        moduleId={moduleId}
         bootcampId={bootcampId}
+        {...props}
+        moduleId={moduleId}
       />
     </div>
   )

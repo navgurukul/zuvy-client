@@ -43,6 +43,9 @@ interface BuilderScreenProps {
   baselineOptions: Chapter[];
   bankTopics: string[];
   bankQuestions: Question[];
+  moduleId?: number;
+  courseId?: any;
+  chapterId?: number;
 }
 
 export function BuilderScreen({
@@ -74,6 +77,9 @@ export function BuilderScreen({
   baselineOptions,
   bankTopics,
   bankQuestions,
+  moduleId,
+  courseId,
+  chapterId,
 }: BuilderScreenProps) {
   return (
     <div className="flex flex-col h-full pb-8">
@@ -127,6 +133,9 @@ export function BuilderScreen({
             baselineOptions={baselineOptions}
             bankTopics={bankTopics}
             bankQuestions={bankQuestions}
+            moduleId={moduleId}
+            courseId={courseId}
+            chapterId={chapterId}
           />
         )}
         {step === 2 && (

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { THEME, BANDS, LEVELS } from './constants';
 import { cellTarget, poolCapacity } from './helpers';
 import { useQuestionBank } from './useQuestionBank';
@@ -9,20 +9,42 @@ import { BankPickerModal } from './modals/BankPickerModal';
 import { ReplaceModal } from './modals/ReplaceModal';
 import { pickDemoQuestion } from './helpers';
 import { Chapter, Question, BuilderState, LevelId } from './types';
+import { useModuleChapters } from '@/hooks/useModuleChapters';
 
 const STEPS = ['Details', 'Topics & Baseline', 'Build Pool', 'Review', 'Settings', 'Publish'];
 
 interface AssessmentBuilderProps {
-  chapterId: number;
+  chapterId?: number;
   moduleId: number;
   baselineOptions: Chapter[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSave?: (payload: any) => void;
+  bootcampId?: number;
+  chapterData?: any;
+  content?: any;
+  fetchChapterContent?: any;
+  courseId?: any;
+  canEdit?: boolean;
+  topicId?: number;
 }
 
 export default function AssessmentBuilder({
   chapterId: _chapterId,
   moduleId: _moduleId,
-  baselineOptions,
+  baselineOptions: _dummyBaselineOptions,
+  ...restProps
 }: AssessmentBuilderProps) {
+  const { chapters } = useModuleChapters(_moduleId);
+  const quizChapters = useMemo(() => chapters.filter((chapter) => chapter.topicId === 4), [chapters]);
+  const baselineOptions = useMemo(() => {
+    return quizChapters.map((ch: any) => ({
+      id: ch.chapterId,
+      title: ch.chapterTitle,
+      questionCount: ch.questionCount || 0,
+    }));
+  }, [quizChapters]);
+
   const [screen, setScreen] = useState<'builder' | 'monitor'>('builder');
   const [step, setStep] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -40,7 +62,7 @@ export default function AssessmentBuilder({
     objective: '',
     outcomes: '',
     questionsPerForm: 10,
-    baselineChapterIds: baselineOptions.map((c) => c.id),
+    baselineChapterIds: [],
     poolTopics: [],
     poolTopicDescriptions: {},
     poolTopicOutcomes: {},
@@ -54,6 +76,14 @@ export default function AssessmentBuilder({
     scheduledTime: '',
   });
   const set = (patch: Partial<BuilderState>) => setA((prev) => ({ ...prev, ...patch }));
+
+  const hasInitializedBaseline = useRef(false);
+  useEffect(() => {
+    if (baselineOptions.length > 0 && !hasInitializedBaseline.current) {
+      set({ baselineChapterIds: baselineOptions.map((c) => c.id) });
+      hasInitializedBaseline.current = true;
+    }
+  }, [baselineOptions]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -190,7 +220,7 @@ export default function AssessmentBuilder({
 
   const stepValid = [
     !!(a.name.trim() && a.objective.trim()),
-    a.poolTopics.length > 0,
+    a.baselineChapterIds.length > 0,
     pool.length > 0,
     true,
     true,
@@ -229,6 +259,9 @@ export default function AssessmentBuilder({
     baselineOptions,
     bankTopics,
     bankQuestions,
+    moduleId: _moduleId,
+    courseId: restProps.courseId,
+    chapterId: _chapterId,
   };
 
   return (

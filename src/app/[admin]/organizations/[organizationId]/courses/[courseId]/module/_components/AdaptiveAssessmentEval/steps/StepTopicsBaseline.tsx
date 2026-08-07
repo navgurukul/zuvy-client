@@ -3,6 +3,7 @@ import { AlertTriangle, Check } from 'lucide-react';
 import { CHAPTER_TOPIC_MAP } from '../constants';
 import { BuilderState, Question, Chapter } from '../types';
 import { PoolTopicPicker } from '../components/PoolTopicPicker';
+import { useModuleChapters } from '@/hooks/useModuleChapters';
 
 interface StepTopicsBaselineProps {
   a: BuilderState;
@@ -10,6 +11,9 @@ interface StepTopicsBaselineProps {
   baselineOptions: Chapter[];
   bankTopics: string[];
   bankQuestions: Question[];
+  moduleId?: number;
+  courseId?: any;
+  chapterId?: number;
 }
 
 export function StepTopicsBaseline({
@@ -18,7 +22,14 @@ export function StepTopicsBaseline({
   baselineOptions,
   bankTopics,
   bankQuestions,
+  moduleId,
+  courseId,
+  chapterId,
 }: StepTopicsBaselineProps) {
+  const { chapters } = useModuleChapters(moduleId)
+  const quizChapters = chapters.filter((chapter) => chapter.topicId === 4)
+  console.log("quizChapters", quizChapters)
+
   const toggleBaseline = (id: number) =>
     set({
       baselineChapterIds: a.baselineChapterIds.includes(id)
@@ -26,9 +37,9 @@ export function StepTopicsBaseline({
         : [...a.baselineChapterIds, id],
     });
 
-  const totalBaselineQ = baselineOptions
-    .filter((c: Chapter) => a.baselineChapterIds.includes(c.id))
-    .reduce((s: number, c: Chapter) => s + (c.questionCount || 0), 0);
+  const totalBaselineQ = quizChapters
+    .filter((c: any) => a.baselineChapterIds.includes(c.chapterId))
+    .reduce((s: number, c: any) => s + (c.questionCount || 0), 0);
 
   const coveredByBaseline = new Set<string>(
     a.baselineChapterIds.flatMap((id: number) => CHAPTER_TOPIC_MAP[id] ?? [])
@@ -49,34 +60,34 @@ export function StepTopicsBaseline({
         </p>
 
         <div className="flex flex-col gap-2 mb-3.5">
-          {baselineOptions.length === 0 && (
+          {quizChapters.length === 0 && (
             <div className="text-[13px] text-slate-500 py-3">
               No MCQ chapters found in this module.
             </div>
           )}
-          {baselineOptions.map((ch: Chapter) => {
-            const sel = a.baselineChapterIds.includes(ch.id);
-            const covers = CHAPTER_TOPIC_MAP[ch.id] ?? [];
+          {quizChapters.map((ch: any) => {
+            const sel = a.baselineChapterIds.includes(ch.chapterId);
+            const covers = CHAPTER_TOPIC_MAP[ch.chapterId] ?? [];
             const selClass = sel ? "border-primary bg-primary-light/30" : "border-slate-200 bg-white";
             const checkClass = sel ? "border-primary bg-primary" : "border-slate-200 bg-white";
             return (
               <div
-                key={ch.id}
-                onClick={() => toggleBaseline(ch.id)}
+                key={ch.chapterId}
+                onClick={() => toggleBaseline(ch.chapterId)}
                 className={`flex items-center gap-3 py-[11px] px-[14px] border-2 rounded-lg cursor-pointer transition-all duration-150 ${selClass}`}
               >
                 <div className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 border-2 ${checkClass}`}>
                   {sel && <Check size={11} color="#fff" />}
                 </div>
                 <div className="flex-1">
-                  <div className="text-[13.5px] flex font-semibold">{ch.title}</div>
+                  <div className="text-[13.5px] flex font-semibold">{ch.chapterTitle}</div>
                   <div className="text-[13.5px] flex text-slate-500 ">
-                    {ch.questionCount || 0} questions
+                    {/* {ch.questionCount || 0} questions
                     {covers.length > 0 && (
                       <span className=" text-[13.5px]  flex text-primary">
                         · covers {covers.join(', ')}
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </div>
                 <span className="bg-secondary-light text-secondary-dark text-[11.5px] font-semibold px-[9px] py-[3px] rounded-full inline-flex items-center gap-1 whitespace-nowrap">
@@ -135,7 +146,7 @@ export function StepTopicsBaseline({
           />
           {a.poolTopics.length === 0 && (
             <div className="mt-3.5 text-[13px] text-slate-500">
-              Select at least one topic to continue.
+              Optional: Select topics to draw questions from.
             </div>
           )}
         </div>

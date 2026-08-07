@@ -39,7 +39,7 @@ export default function Page({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
     const { courseId, moduleId, chapterID } = useParams()
     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
@@ -66,7 +66,7 @@ export default function Page({
     const fetchingChapterRef = useRef<string>('')
 
     const fetchChapterContent = useCallback(
-        
+
         async (chapterId: number, topicId: number) => {
             const requestKey = `${chapterId}-${courseID}-${moduleID}-${topicId}`
             if (fetchingChapterRef.current === requestKey) return
@@ -152,7 +152,7 @@ export default function Page({
                             fetchChapterContent={fetchChapterContent}
                             canEdit={canEditChapter} setIsChapterLoading={function (value: boolean): void {
                                 throw new Error('Function not implemented.')
-                            } } isChapterLoading={false}                        />
+                            }} isChapterLoading={false} />
                     )
                 case 2:
                     return (
@@ -246,9 +246,18 @@ export default function Page({
                     )
                 case 9:
                     return (
-                        <AdaptiveAssessment />
-                    )    
-                    
+                        <AdaptiveAssessment
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                            courseId={courseId}
+                            canEdit={canEditChapter}
+                            chapterId={chapter_id}
+                            topicId={topicId}
+                        />
+                    )
+
                 default:
                     return <h1>Create New Chapter</h1>
             }
