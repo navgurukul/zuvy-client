@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useRoles } from '@/hooks/useRoles'
-import { useUsers } from '@/hooks/useUsers'
-import { useUser } from '@/hooks/useSingleUser'
+import { useRoles } from '@/app/[admin]/hooks/useRoles'
+import { useAddUser } from '@/app/[admin]/hooks/useAddUser'
+import { useUpdateUser } from '@/app/[admin]/hooks/useUpdateUser'
+import { useUser } from '@/app/[admin]/hooks/useSingleUser'
 import { toast } from '@/components/ui/use-toast'
 import {
     GraduationCap,
@@ -117,7 +118,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             : currentUser?.orgId
 
     const { roles, loading: rolesLoading } = useRoles()
-    const { addUser, updateUser } = useUsers()
+    const { addUser } = useAddUser()
+    const { updateUser } = useUpdateUser()
     const shouldFetchFreshUser = isEditMode && isOpen && !!user?.id
     const {
         user: fetchedUser,

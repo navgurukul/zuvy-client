@@ -1,6 +1,6 @@
 'use client'
 import { EditIcon, Eye, Pencil, Settings, ArrowRight, Sparkle } from 'lucide-react'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     filterQuestions,
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import SettingsAssessment from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Assessment/SettingsAssessment'
 import SelectedQuestions from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Assessment/SelectedQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import { getAssessmentPreviewStore, getUser } from '@/store/store'
 import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
@@ -26,7 +26,7 @@ import {
     McqAccumulator,
     CodingQuestiones,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
-import {AssessmentSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { AssessmentSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 
 import { useForm } from 'react-hook-form'
@@ -37,7 +37,6 @@ import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleI
 const chapterSchema = z.object({
     title: z
         .string()
-        .min(1, 'Assessment title is required')
         .max(50, 'You can enter up to 50 characters only.'),
 })
 const AddAssessment: React.FC<AddAssessmentProps> = ({
@@ -60,7 +59,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
@@ -130,6 +129,11 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] =
         useState<Object>({})
     const hasLoaded = useRef(false)
+    const inFlightQuestionRequest = useRef<string | null>(null)
+    // Track the last chapter ID whose questions were loaded from server content.
+    // This lets us reset selected questions ONLY when the chapter changes,
+    // not on every content reference update (e.g. after router.push to settings).
+    const prevChapterIdRef = useRef<number | null>(null)
 
     useEffect(() => {
         if (initialTab === 'setting') {
@@ -137,48 +141,29 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         }
     }, [initialTab])
 
+    // FIX 1: Trigger form validation on mount so that `form.formState.isValid`
+    // reflects the pre-filled `activeChapterTitle` defaultValue immediately.
+    // React Hook Form with `mode: 'onChange'` does NOT validate defaultValues on
+    // mount — `isValid` stays `false` until the user fires a change event.
+    // Without this, the "Next" button stays disabled even when the title is valid.
+    useEffect(() => {
+        form.trigger('title')
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     const handleCodingButtonClick = () => {
         setQuestionType('coding')
         setSearchQuestionsInAssessment('')
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'coding'
-        )
     }
 
     const handleMCQButtonClick = () => {
         setQuestionType('mcq')
         setSearchQuestionsInAssessment('')
-
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'mcq'
-        )
     }
 
     const handleOpenEndedButtonClick = () => {
         setQuestionType('open-ended')
         setSearchQuestionsInAssessment('')
-
-        filterQuestions(
-            setFilteredQuestions,
-            orgId,
-            selectedDifficulties,
-            selectedTopics,
-            selectedLanguage,
-            debouncedSearch,
-            'open-ended'
-        )
     }
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
@@ -188,7 +173,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     const handleAdaptiveAssessmentButtonClick = () => {
-      setQuestionType('adaptive-assessment')
+        setQuestionType('adaptive-assessment')
     }
 
     function previewAssessment() {
@@ -210,38 +195,41 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        if (questionType === 'coding') {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'coding'
-            )
-        } else if (questionType === 'mcq') {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'mcq'
-            )
-        } else {
-            filterQuestions(
-                setFilteredQuestions,
-                orgId,
-                selectedDifficulties,
-                selectedTopics,
-                selectedLanguage,
-                debouncedSearch,
-                'open-ended'
-            )
-        }
-    }, [questionType, selectedDifficulties, selectedTopics, debouncedSearch])
+        if (!['coding', 'mcq', 'open-ended'].includes(questionType)) return
+
+        const requestKey = JSON.stringify({
+            orgId,
+            questionType,
+            selectedDifficulties,
+            selectedTopics,
+            selectedLanguage,
+            debouncedSearch,
+        })
+
+        if (inFlightQuestionRequest.current === requestKey) return
+
+        inFlightQuestionRequest.current = requestKey
+        void filterQuestions(
+            setFilteredQuestions,
+            orgId,
+            selectedDifficulties,
+            selectedTopics,
+            selectedLanguage,
+            debouncedSearch,
+            questionType
+        ).finally(() => {
+            if (inFlightQuestionRequest.current === requestKey) {
+                inFlightQuestionRequest.current = null
+            }
+        })
+    }, [
+        questionType,
+        orgId,
+        selectedDifficulties,
+        selectedTopics,
+        selectedLanguage,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const difficultyCount = selectedCodingQuestions.reduce(
@@ -270,6 +258,23 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [selectedQuizQuestions])
 
     useEffect(() => {
+        // FIX 2: Guard question resets against stale content updates.
+        //
+        // Previously this effect ran on every `content` reference change, which
+        // includes re-fetches triggered by `router.push(...?tab=setting)`. That
+        // wiped any locally-selected-but-unsaved questions the moment the user
+        // navigated to the settings step and the fetch resolved.
+        //
+        // Now we only reset the selected questions when the chapter ID actually
+        // changes (i.e. the user switched to a different chapter), NOT on every
+        // incidental re-render of the same chapter's content.
+        const incomingChapterId = content?.chapterId ?? content?.id ?? null
+        if (prevChapterIdRef.current === incomingChapterId) {
+            // Same chapter — preserve the user's in-progress question selection.
+            return
+        }
+        prevChapterIdRef.current = incomingChapterId
+
         // Ensure unique coding questions
         const uniqueCodingQuestions = Array.from(
             new Set(
@@ -357,7 +362,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
             setChapterTitle(content.ModuleAssessment?.title)
             setChapterTitle(activeChapterTitle)
         }
-         setIsDataLoading(false)
+        setIsDataLoading(false)
     }, [chapterData.id, topicId, activeChapterTitle])
 
 
@@ -367,117 +372,125 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+
         const loadTags = async () => {
             try {
                 await getAllTagsWithoutFilter(setTags)
             } catch (error) {
                 console.error('Error loading tags:', error)
-            } 
-            
+            }
+
         }
         loadTags()
     }, [])
 
     useEffect(() => {
-        // if (content?.ModuleAssessment?.title) {
-        //     setChapterTitle(content.ModuleAssessment.title)
-        // }
         if (activeChapterTitle) {
             setChapterTitle(activeChapterTitle)
+            form.setValue('title', activeChapterTitle, { shouldValidate: true })
+            form.trigger('title')
         }
-    }, [content?.ModuleAssessment?.title, activeChapterTitle])
+    }, [activeChapterTitle])
 
-  
+
     if (isDataLoading) {
-        return <AssessmentSkeleton/>
+        return <AssessmentSkeleton />
     }
-    
+
     return (
-    <div className="w-full pb-2">
-        {!canEdit && (
-            <PermissionAlert
-                alertOpen={alertOpen}
-                setAlertOpen={setAlertOpen}
-            />
+        <div className="w-full pb-2">
+            {!canEdit && (
+                <PermissionAlert
+                    alertOpen={alertOpen}
+                    setAlertOpen={setAlertOpen}
+                />
             )}
             <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
-            <div className="px-5 border-b border-gray-200">
-                {questionType !== 'settings' && (
-                    <div className="flex items-center mb-5 w-full justify-between">
-                        <div className="w-2/6 relative">
-                            <Input
-                                {...form.register('title')}
-                                placeholder="Untitled Assessment"
-                                className="text-lg font-semibold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
-                            />
-                            {form.formState.errors.title && (
-                                <p className="text-destructive text-sm mt-1">
-                                    {form.formState.errors.title.message}
-                                </p>
-                            )}
-                        </div>
+                <div className="px-5 border-b border-gray-200">
+                    {questionType !== 'settings' && (
+                        <div className="flex items-center mb-5 w-full justify-between">
+                            <div className="w-2/6 relative">
+                                <Input
+                                    {...form.register('title')}
+                                    placeholder="Untitled Assessment"
+                                    className="text-lg font-semibold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
+                                />
+                                {form.formState.errors.title && (
+                                    <p className="text-destructive text-sm mt-1">
+                                        {form.formState.errors.title.message}
+                                    </p>
+                                )}
+                            </div>
 
-                        <form
-                            onSubmit={form.handleSubmit((data) => {
-                                // Save the validated title
-                                setChapterTitle(data.title)
-                                handleSettingsButtonClick()
-                            })}
-                            className="flex items-center gap-2"
-                        >
-                            <Button
-                                type="submit"
-                                disabled={
-                                    !form.formState.isValid ||
-                                    form.formState.isSubmitting
-                                }
-                                className={`flex items-center gap-1 ${
-                                    !form.formState.isValid ||
-                                    form.formState.isSubmitting
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : ''
-                                }`}
+                            <form
+                                onSubmit={form.handleSubmit((data) => {
+                                    // Save the validated title
+                                    setChapterTitle(data.title)
+                                    handleSettingsButtonClick()
+                                })}
+                                className="flex items-center gap-2"
                             >
-                                <h6 className="mx-1 text-sm">Next</h6>
-                                <ArrowRight size={20} />
+                                {/* FIX 3: Next button requires both a valid title AND at least
+                                one question selected across any question type. Previously it
+                                only checked `form.formState.isValid` (title), so question
+                                selection had no effect on the button state. */}
+                                <Button
+                                    type="submit"
+                                    disabled={
+                                        !form.formState.isValid ||
+                                        form.formState.isSubmitting ||
+                                        (selectedCodingQuestions.length === 0 &&
+                                            selectedQuizQuestions.length === 0 &&
+                                            selectedOpenEndedQuestions.length === 0)
+                                    }
+                                    className={`flex items-center gap-1 ${!form.formState.isValid ||
+                                            form.formState.isSubmitting ||
+                                            (selectedCodingQuestions.length === 0 &&
+                                                selectedQuizQuestions.length === 0 &&
+                                                selectedOpenEndedQuestions.length === 0)
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : ''
+                                        }`}
+                                >
+                                    <h6 className="mx-1 text-sm">Next</h6>
+                                    <ArrowRight size={20} />
+                                </Button>
+                            </form>
+                        </div>
+                    )}
+                    {/* select type of questions */}
+                    {questionType !== 'settings' && (
+                        <div className="flex gap-2 mb-5 border-b border-muted-light w-1/2">
+                            <Button
+                                className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'coding'
+                                        ? 'border-primary text-foreground hover:bg-transparent'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                    }`}
+                                onClick={handleCodingButtonClick}
+                            >
+                                Coding Problems ({selectedCodingQuestions.length})
                             </Button>
-                        </form>
-                    </div>
-                )}
-                {/* select type of questions */}
-                {questionType !== 'settings' && (
-                    <div className="flex gap-2 mb-5 border-b border-muted-light w-1/2">
-                        <Button
-                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
-                                questionType === 'coding'
-                                    ? 'border-primary text-foreground hover:bg-transparent'
-                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
-                            }`}
-                            onClick={handleCodingButtonClick}
-                        >
-                            Coding Problems ({selectedCodingQuestions.length})
-                        </Button>
-                        <Button
-                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
-                                questionType === 'mcq'
-                                    ? 'border-primary text-foreground hover:bg-transparent'
-                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
-                            }`}
-                            onClick={handleMCQButtonClick}
-                        >
-                            MCQs ({selectedQuizQuestions.length})
-                        </Button>
-                        <Button
-                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
-                                questionType === 'open-ended'
-                                    ? 'border-primary text-foreground hover:bg-transparent'
-                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
-                            }`}
-                            onClick={handleOpenEndedButtonClick}
-                        >
-                            Open-Ended Questions (
-                            {selectedOpenEndedQuestions.length})
-                        </Button>
+                            <Button
+                                className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'mcq'
+                                        ? 'border-primary text-foreground hover:bg-transparent'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                    }`}
+                                onClick={handleMCQButtonClick}
+                            >
+                                MCQs ({selectedQuizQuestions.length})
+                            </Button>
+                            <Button
+                                className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'open-ended'
+                                        ? 'border-primary text-foreground hover:bg-transparent'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                    }`}
+                                onClick={handleOpenEndedButtonClick}
+                            >
+                                Open-Ended Questions (
+                                {selectedOpenEndedQuestions.length})
+                            </Button>
                             {/* <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'adaptive-assessment'
@@ -489,198 +502,197 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             <Sparkle size={18} className='text-primary' />
                        Create Adaptive Assessment
                         </Button> */}
-                    </div>
-                )}
-            </div>
-            <div className="px-5 pt-4 bg-card">
-                {/* DropDown Filters for questions:- */}
-                {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
-                    <>
-                        <div className="flex mb-3">
-                            <CodingTopics
-                                searchTerm={searchQuestionsInAssessment}
-                                setSearchTerm={setSearchQuestionsInAssessment}
-                                tags={tags}
-                                selectedTopics={selectedTopics}
-                                setSelectedTopics={setSelectedTopics}
-                                selectedDifficulties={selectedDifficulties}
-                                setSelectedDifficulties={
-                                    setSelectedDifficulties
-                                }
-                                selectedQuestions={undefined}
-                                setSelectedQuestions={undefined}
-                                content={undefined}
-                                moduleId={''}
-                                chapterTitle={''}
-                            />
                         </div>
-                        <div className="flex justify-between w-2/3">
-                            <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
-                                {questionType === 'coding'
-                                    ? 'Coding Problem Library' 
-                                    : questionType === 'mcq'
-                                    ? 'MCQ Library'
-                                    : questionType === 'open-ended'
-                                    ? 'Open-Ended Question Library'
-                                    : questionType === 'adaptive-assessment'
-                                    ? 'Adaptive Assessment'
-                                    : ''}
-                            </h3>
-                            <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
-                                Selected Questions
-                            </h1>
-                        </div>
-                    </>
-                )}
+                    )}
+                </div>
+                <div className="px-5 pt-4 bg-card">
+                    {/* DropDown Filters for questions:- */}
+                    {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
+                        <>
+                            <div className="flex mb-3">
+                                <CodingTopics
+                                    searchTerm={searchQuestionsInAssessment}
+                                    setSearchTerm={setSearchQuestionsInAssessment}
+                                    tags={tags}
+                                    selectedTopics={selectedTopics}
+                                    setSelectedTopics={setSelectedTopics}
+                                    selectedDifficulties={selectedDifficulties}
+                                    setSelectedDifficulties={
+                                        setSelectedDifficulties
+                                    }
+                                    selectedQuestions={undefined}
+                                    setSelectedQuestions={undefined}
+                                    content={undefined}
+                                    moduleId={''}
+                                    chapterTitle={''}
+                                />
+                            </div>
+                            <div className="flex justify-between w-2/3">
+                                <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
+                                    {questionType === 'coding'
+                                        ? 'Coding Problem Library'
+                                        : questionType === 'mcq'
+                                            ? 'MCQ Library'
+                                            : questionType === 'open-ended'
+                                                ? 'Open-Ended Question Library'
+                                                : questionType === 'adaptive-assessment'
+                                                    ? 'Adaptive Assessment'
+                                                    : ''}
+                                </h3>
+                                <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
+                                    Selected Questions
+                                </h1>
+                            </div>
+                        </>
+                    )}
 
-                <div className="h-full">
-                    {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
-                    <div
-                        className={`${
-                            questionType == 'settings' || questionType == 'adaptive-assessment'
-                                ? 'grid grid-cols-1'
-                                : 'grid grid-cols-[1fr_2px_1fr]'
-                        } h-screen `}
-                    >
-                        <div className="h-full">
-                            {questionType === 'coding' && (
-                                <CodingQuestions
-                                    questions={filteredQuestions}
-                                    setSelectedQuestions={
-                                        setSelectedCodingQuestions
-                                    }
-                                    selectedQuestions={selectedCodingQuestions}
-                                    tags={tags}
-                                    setIsNewQuestionAdded={
-                                        setIsNewQuestionAdded
-                                    }
-                                />
-                            )}
-                            {questionType === 'mcq' && (
-                                <QuizQuestions
-                                    questions={filteredQuestions}
-                                    setSelectedQuestions={
-                                        setSelectedQuizQuestions
-                                    }
-                                    selectedQuestions={selectedQuizQuestions}
-                                    tags={tags}
-                                    setIsNewQuestionAdded={
-                                        setIsNewQuestionAdded
-                                    }
-                                    type={''}
-                                />
-                            )}
-                            {questionType === 'open-ended' && (
-                                <OpenEndedQuestions
-                                    questions={filteredQuestions}
-                                    setSelectedQuestions={
-                                        setSelectedOpenEndedQuestions
-                                    }
-                                    selectedQuestions={
-                                        selectedOpenEndedQuestions
-                                    }
-                                    tags={tags}
-                                />
-                            )}
-                         
-                            {questionType === 'settings' && (
-                                <div className="">
-                                    <SettingsAssessment
-                                        selectedCodingQuesIds={
-                                            selectedCodingQuesIds
+                    <div className="h-full">
+                        {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
+                        <div
+                            className={`${questionType == 'settings' || questionType == 'adaptive-assessment'
+                                    ? 'grid grid-cols-1'
+                                    : 'grid grid-cols-[1fr_2px_1fr]'
+                                } h-screen `}
+                        >
+                            <div className="h-full">
+                                {questionType === 'coding' && (
+                                    <CodingQuestions
+                                        questions={filteredQuestions}
+                                        setSelectedQuestions={
+                                            setSelectedCodingQuestions
                                         }
-                                        selectedQuizQuesIds={
-                                            selectedQuizQuesIds
-                                        }
-                                        selectedOpenEndedQuesIds={
-                                            selectedOpenEndedQuesIds
-                                        }
-                                        selectedCodingQuesTagIds={
-                                            selectedCodingQuesTagIds
-                                        }
-                                        selectedQuizQuesTagIds={
-                                            selectedQuizQuesTagIds
-                                        }
-                                        content={content}
-                                        fetchChapterContent={
-                                            fetchChapterContent
-                                        }
-                                        chapterTitle={chapterTitle}
-                                        setChapterTitle={setChapterTitle}
-                                        saveSettings={saveSettings}
-                                        setSaveSettings={setSaveSettings}
-                                        setQuestionType={setQuestionType}
-                                        selectCodingDifficultyCount={
-                                            selectCodingDifficultyCount
-                                        }
-                                        selectQuizDifficultyCount={
-                                            selectQuizDifficultyCount
-                                        }
-                                        topicId={topicId}
-                                        isNewQuestionAdded={isNewQuestionAdded}
+                                        selectedQuestions={selectedCodingQuestions}
+                                        tags={tags}
                                         setIsNewQuestionAdded={
                                             setIsNewQuestionAdded
                                         }
                                     />
-                                </div>
-                            )}
-                          
-                        </div>
-
-                        <Separator
-                            orientation="vertical"
-                            className="mx-4 w-[2px] h-96 ml-8 rounded bg-card"
-                        />
-
-                        {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
-                            <div className="h-screen border-l border-muted-light pl-4">
-                                <ScrollArea className="h-96 px-2 pb-4">
-                                    <ScrollBar
-                                        orientation="vertical"
-                                        className=""
+                                )}
+                                {questionType === 'mcq' && (
+                                    <QuizQuestions
+                                        questions={filteredQuestions}
+                                        setSelectedQuestions={
+                                            setSelectedQuizQuestions
+                                        }
+                                        selectedQuestions={selectedQuizQuestions}
+                                        tags={tags}
+                                        setIsNewQuestionAdded={
+                                            setIsNewQuestionAdded
+                                        }
+                                        type={''}
                                     />
+                                )}
+                                {questionType === 'open-ended' && (
+                                    <OpenEndedQuestions
+                                        questions={filteredQuestions}
+                                        setSelectedQuestions={
+                                            setSelectedOpenEndedQuestions
+                                        }
+                                        selectedQuestions={
+                                            selectedOpenEndedQuestions
+                                        }
+                                        tags={tags}
+                                    />
+                                )}
 
-                                    {selectedCodingQuesIds.length > 0 ||
-                                    selectedQuizQuesIds.length > 0 ||
-                                    selectedOpenEndedQuesIds.length > 0 ? (
-                                        <SelectedQuestions
-                                            selectedCodingQuestions={
-                                                selectedCodingQuestions
+                                {questionType === 'settings' && (
+                                    <div className="">
+                                        <SettingsAssessment
+                                            selectedCodingQuesIds={
+                                                selectedCodingQuesIds
                                             }
-                                            selectedQuizQuestions={
-                                                selectedQuizQuestions
+                                            selectedQuizQuesIds={
+                                                selectedQuizQuesIds
                                             }
-                                            selectedOpenEndedQuestions={
-                                                selectedOpenEndedQuestions
+                                            selectedOpenEndedQuesIds={
+                                                selectedOpenEndedQuesIds
                                             }
-                                            setSelectedCodingQuestions={
-                                                setSelectedCodingQuestions
+                                            selectedCodingQuesTagIds={
+                                                selectedCodingQuesTagIds
                                             }
-                                            setSelectedQuizQuestions={
-                                                setSelectedQuizQuestions
+                                            selectedQuizQuesTagIds={
+                                                selectedQuizQuesTagIds
                                             }
-                                            setSelectedOpenEndedQuestions={
-                                                setSelectedOpenEndedQuestions
+                                            content={content}
+                                            fetchChapterContent={
+                                                fetchChapterContent
                                             }
-                                            questionType={questionType}
-                                            tags={tags}
+                                            chapterTitle={chapterTitle}
+                                            setChapterTitle={setChapterTitle}
+                                            saveSettings={saveSettings}
+                                            setSaveSettings={setSaveSettings}
+                                            setQuestionType={setQuestionType}
+                                            selectCodingDifficultyCount={
+                                                selectCodingDifficultyCount
+                                            }
+                                            selectQuizDifficultyCount={
+                                                selectQuizDifficultyCount
+                                            }
+                                            topicId={topicId}
+                                            isNewQuestionAdded={isNewQuestionAdded}
                                             setIsNewQuestionAdded={
                                                 setIsNewQuestionAdded
                                             }
                                         />
-                                    ) : (
-                                        <h1 className="text-left text-muted-dark text-[18px] italic pl-5">
-                                            No Selected questions
-                                        </h1>
-                                    )}
-                                </ScrollArea>
+                                    </div>
+                                )}
+
                             </div>
-                        )}
+
+                            <Separator
+                                orientation="vertical"
+                                className="mx-4 w-[2px] h-96 ml-8 rounded bg-card"
+                            />
+
+                            {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
+                                <div className="h-screen border-l border-muted-light pl-4">
+                                    <ScrollArea className="h-96 px-2 pb-4">
+                                        <ScrollBar
+                                            orientation="vertical"
+                                            className=""
+                                        />
+
+                                        {selectedCodingQuesIds.length > 0 ||
+                                            selectedQuizQuesIds.length > 0 ||
+                                            selectedOpenEndedQuesIds.length > 0 ? (
+                                            <SelectedQuestions
+                                                selectedCodingQuestions={
+                                                    selectedCodingQuestions
+                                                }
+                                                selectedQuizQuestions={
+                                                    selectedQuizQuestions
+                                                }
+                                                selectedOpenEndedQuestions={
+                                                    selectedOpenEndedQuestions
+                                                }
+                                                setSelectedCodingQuestions={
+                                                    setSelectedCodingQuestions
+                                                }
+                                                setSelectedQuizQuestions={
+                                                    setSelectedQuizQuestions
+                                                }
+                                                setSelectedOpenEndedQuestions={
+                                                    setSelectedOpenEndedQuestions
+                                                }
+                                                questionType={questionType}
+                                                tags={tags}
+                                                setIsNewQuestionAdded={
+                                                    setIsNewQuestionAdded
+                                                }
+                                            />
+                                        ) : (
+                                            <h1 className="text-left text-muted-dark text-[18px] italic pl-5">
+                                                No Selected questions
+                                            </h1>
+                                        )}
+                                    </ScrollArea>
+                                </div>
+                            )}
+                        </div>
+
                     </div>
-                 
+
                 </div>
-                
-            </div>
             </div>
         </div>
     )

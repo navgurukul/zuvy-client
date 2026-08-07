@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
-import { useCreateOrganization } from '@/hooks/useCreateOrganization'
+import { useCreateOrganization } from '@/app/[admin]/hooks/useCreateOrganization'
 import {
     GraduationCap,
     Shield,
@@ -34,7 +34,7 @@ import {
     TrendingUp,
     Megaphone,
 } from 'lucide-react'
-import useOrgSettings from '@/hooks/useOrgSettings'
+import useOrgSettings from '@/app/[admin]/hooks/useOrgSettings'
 
 type AddUserModalProps = {
     isEditMode: boolean;

@@ -8,7 +8,7 @@ import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
-import { fetchCourseById } from '@/hooks/useCourseExistenceCheck'
+import { fetchCourseById } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 
 type CounterStore = {
     studentData: {
@@ -809,7 +809,7 @@ export const getProctoringDataStore = create<proctoringDataType>((set) => ({
     fetchProctoringData: async (submissionId, studentId) => {
         await api
             .get(
-                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+                `/tracking/assessment/submissionId/${submissionId}?studentId=${studentId}`
             )
             .then((res) => {
                 set({ proctoringData: res.data })
@@ -953,18 +953,6 @@ export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
     setIsPreviewModalOpen: (newValue: boolean) => {
         set({ isPreviewModalOpen: newValue })
     },
-}))
-
-// ------------------------- Session expire ---------------------------
-
-type SessionStore = {
-    showModal: boolean
-    setShowModal: (value: boolean) => void
-}
-
-export const useSessionModalStore = create<SessionStore>((set) => ({
-    showModal: false,
-    setShowModal: (value) => set({ showModal: value }),
 }))
 
 type QuestionsReadyEvent = {

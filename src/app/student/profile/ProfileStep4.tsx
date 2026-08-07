@@ -10,8 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle, Check, Loader2, Target, Globe, DollarSign, MessageSquare } from 'lucide-react';
 import type { OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
-import { useLearnerRoles } from '@/hooks/useLearnerRoles';
-import { useLearnerRemoteLocations } from '@/hooks/useLearnerRemoteLocations';
+import { useLearnerRoles } from '@/app/student/hooks/useLearnerRoles';
+import { useLearnerRemoteLocations } from '@/app/student/hooks/useLearnerRemoteLocations';
 import { toast } from '@/components/ui/use-toast';
 
 interface ProfileStep4Props {
@@ -134,9 +134,6 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       newErrors.roles = 'Select maximum 5 roles';
     }
 
-    if (totalLocations === 0) {
-      newErrors.locations = 'Select at least 1 location';
-    }
     if (totalLocations > 6) {
       newErrors.locations = 'Select maximum 5 cities + Remote';
     }

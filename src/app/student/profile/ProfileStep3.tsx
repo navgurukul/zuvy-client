@@ -21,7 +21,7 @@ import { AlertCircle, Plus, Code, Briefcase, GraduationCap } from 'lucide-react'
 import type { OnboardingStep3 as Step3Type, AcademicPerformance, WorkExperience, CompetitiveProfile } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, CLASS_12_BOARDS, COMPETITIVE_PLATFORMS, TECH_STACK } from '@/lib/profile.mockData';
 import { WorkExperienceModal, WorkExperienceCard } from './WorkExperienceComponents';
-import { useLearnerBoards } from '@/hooks/useLearnerBoards';
+import { useLearnerBoards } from '@/app/student/hooks/useLearnerBoards';
 import { toast } from '@/components/ui/use-toast';
 
 const DEFAULT_COMPETITIVE_PROFILES: CompetitiveProfile[] = COMPETITIVE_PLATFORMS.slice(0, 3).map((platform) => ({

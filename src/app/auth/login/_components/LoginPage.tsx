@@ -14,13 +14,14 @@ import {
     CredentialResponse,
 } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
-import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
-import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
+import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
+import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
+import { useLogin } from '@/hooks/useLogin'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
@@ -28,6 +29,7 @@ function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
+    const { login } = useLogin()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
 
@@ -82,30 +84,6 @@ function LoginPage() {
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
 
-    type LearnerProfileStrengthResponse = {
-        percentage?: number
-        profileCompletion?: number
-        isProfileComplete?: boolean
-        level?: string
-        message?: string
-    }
-
-    const getStudentStrengthPercentage = async (): Promise<number | null> => {
-        try {
-            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
-            const completionValue =
-                typeof res.data?.profileCompletion === 'number'
-                    ? res.data.profileCompletion
-                    : typeof res.data?.percentage === 'number'
-                        ? res.data.percentage
-                        : null
-
-            return completionValue
-        } catch (error) {
-            console.error('Failed to fetch learner profile strength:', error)
-            return null
-        }
-    }
 
     const isMentorProfileComplete = (profile: MentorProfileResponse | null) => {
         if (!profile) return false
@@ -132,9 +110,7 @@ function LoginPage() {
 
     const getMentorProfileCompletion = async (): Promise<boolean | null> => {
         try {
-            const res = await api.get<MentorProfileResponse>(
-                '/instructor/mentor-slots/profile'
-            )
+            const res = await getMentorProfileApi()
             return isMentorProfileComplete(res.data)
         } catch (error) {
             const status = (error as { response?: { status?: number } })?.response?.status
@@ -211,7 +187,7 @@ const handleGoogleSuccess = async (
                 googleIdToken: credentialResponse.credential,
             }
 
-            const response = await api.post<AuthResponse>(`/auth/login`, googleData)
+            const response = await login(googleData)
 
             // Handle your backend response
             if (response.data.access_token) {
@@ -231,8 +207,10 @@ const handleGoogleSuccess = async (
                 
                 if (response.data.showTooltip) {
                     localStorage.setItem('isLoginFirst', 'true')
+                    localStorage.removeItem('skipProfileSetup')
                 } else {
                     localStorage.removeItem('isLoginFirst')
+                    localStorage.setItem('skipProfileSetup', 'true')
                 }
 
                 // Handle redirects based on user role
@@ -259,6 +237,9 @@ const handleGoogleSuccess = async (
                 }
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+                if (organizationId) {
+                    setCookie('orgId', String(organizationId))
+                }
 
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
@@ -268,18 +249,20 @@ const handleGoogleSuccess = async (
                 } else if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    const strengthPercentage = await getStudentStrengthPercentage()
-                    if (strengthPercentage !== null && strengthPercentage > 20) {
-                        router.push('/student')
-                    } else {
+                    if (response.data.showTooltip) {
                         router.push('/student/profile')
+                    } else {
+                        router.push('/student')
                     }
-                    
                 } else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                    if (organizationId) {
+                        router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                    } else {
+                        router.push(`/${userRole}/organizations`)
+                    }
                 }
             }
         } catch (err: any) {

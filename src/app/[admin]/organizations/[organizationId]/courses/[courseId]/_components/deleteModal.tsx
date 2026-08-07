@@ -1,7 +1,6 @@
-// components/DeleteConfirmationModal.tsx
 'use client'
-import { Fragment, useEffect, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { useEffect, useState } from 'react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
@@ -59,37 +58,13 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     }
 
     return (
-        <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog
-                as="div"
-                className="relative z-50"
-                onClose={() => onClose?.()}
-            >
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="fixed inset-0 bg-black/5  transition-opacity" />
-
-                </Transition.Child>
-
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                            enterTo="opacity-100 translate-y-0 sm:scale-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        >
-                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left transition-all">
+        <Dialog
+            open={Boolean(isOpen)}
+            onOpenChange={(open) => {
+                if (!open) onClose?.()
+            }}
+        >
+            <DialogContent className="z-[101] max-w-md p-6 text-left">
                                 {/* Close button */}
                                 <button
                                     onClick={onClose}
@@ -107,12 +82,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <div className="flex-shrink-0">
                                             <AlertTriangle className="h-6 w-6 text-destructive" />
                                         </div>
-                                        <Dialog.Title
-                                            as="h3"
-                                            className="text-lg font-semibold text-gray-900"
-                                        >
+                                        <DialogTitle className="text-lg font-semibold text-gray-900">
                                             {input ? 'Delete Batch' : modalTitle || 'Permanent Deletion'}
-                                        </Dialog.Title>
+                                        </DialogTitle>
                                     </div>
                                     
                                     <p className="text-sm text-muted-foreground">
@@ -200,15 +172,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         </Button>
                                     )}
                                 </div>
-                            </Dialog.Panel>
-                        </Transition.Child>
-                    </div>
-                </div>
-            </Dialog>
-        </Transition.Root>
+            </DialogContent>
+        </Dialog>
     )
 }
 
 export default DeleteConfirmationModal
-
-

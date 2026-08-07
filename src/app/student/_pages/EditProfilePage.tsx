@@ -43,7 +43,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import { SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
 import type {
   CompetitiveProfile,
@@ -59,19 +59,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import useLearnerProfile from '@/hooks/useLearnerProfile';
-import useUpdateLearnerProfile from '@/hooks/useUpdateLearnerProfile';
-import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength';
-import useLearnerTechnicalSkills from '@/hooks/useLearnerTechnicalSkills';
-import useLearnerDegreeDetails from '@/hooks/useLearnerDegreeDetails';
-import useLearnerBranchDetails from '@/hooks/useLearnerBranchDetails';
-import useLearnerBoards from '@/hooks/useLearnerBoards';
-import useLearnerRoles from '@/hooks/useLearnerRoles';
-import useLearnerRemoteLocations from '@/hooks/useLearnerRemoteLocations';
-import useCollegeSearch from '@/hooks/useCollegeSearch';
+import useLearnerProfile from '@/app/student/hooks/useLearnerProfile';
+import useUpdateLearnerProfile from '@/app/student/hooks/useUpdateLearnerProfile';
+import useLearnerProfileStrength from '@/app/student/hooks/useLearnerProfileStrength';
+import useLearnerTechnicalSkills from '@/app/student/hooks/useLearnerTechnicalSkills';
+import useLearnerDegreeDetails from '@/app/student/hooks/useLearnerDegreeDetails';
+import useLearnerBranchDetails from '@/app/student/hooks/useLearnerBranchDetails';
+import useLearnerBoards from '@/app/student/hooks/useLearnerBoards';
+import useLearnerRoles from '@/app/student/hooks/useLearnerRoles';
+import useLearnerRemoteLocations from '@/app/student/hooks/useLearnerRemoteLocations';
+import useCollegeSearch from '@/app/student/hooks/useCollegeSearch';
 import { toast } from '@/components/ui/use-toast';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
 import { WorkExperienceModal, WorkExperienceCard } from '@/app/student/profile/WorkExperienceComponents';
+import { normalizeText, normalizeEmail, normalizeOptionalUrl, normalizeGithubUrl, parseScore, formatMonthYearToDate, toMonthNumber, toMonthName, mapWorkExperiencesToPayload } from '@/app/student/_utils/profileNormalizers';
 
 type TabType = 'basic-info' | 'skills-projects' | 'education' | 'career-goals';
 type EditingCard = 'personal-info' | 'skills' | 'projects' | 'academic-info' | 'academic-performance' | 'work-experience' | 'competitive-profiles' | 'career-goals' | null;
@@ -275,43 +276,7 @@ export const EditProfilePage: React.FC = () => {
     }));
   };
 
-  const formatMonthYearToDate = (
-    value?: { day?: string; month: string; year: string } | string
-  ) => {
-    if (!value) {
-      return undefined;
-    }
-
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      return trimmed || undefined;
-    }
-
-    if (!value.year) {
-      return undefined;
-    }
-
-    const normalizedMonth = String(value.month || '').trim();
-    const numericMonth = Number(normalizedMonth);
-    let month = '01';
-
-    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
-      month = String(Math.trunc(numericMonth)).padStart(2, '0');
-    } else {
-      const monthIndex = MONTHS.findIndex(
-        (monthName) => monthName.toLowerCase() === normalizedMonth.toLowerCase()
-      );
-      month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-    }
-
-    const numericDay = Number(String(value.day || '').trim());
-    const day =
-      Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31
-        ? String(Math.trunc(numericDay)).padStart(2, '0')
-        : '01';
-
-    return `${value.year}-${month}-${day}`;
-  };
+  // formatMonthYearToDate moved to _utils/profileNormalizers.ts
 
   const formatWorkExperienceDate = (value?: { month: string; year: string } | string) => {
     if (!value) {
@@ -333,11 +298,7 @@ export const EditProfilePage: React.FC = () => {
     return `${value.month} ${value.year}`;
   };
 
-  const toMonthNumber = (month?: string) => {
-    if (!month) return undefined;
-    const monthIndex = MONTHS.indexOf(month);
-    return monthIndex >= 0 ? monthIndex + 1 : undefined;
-  };
+  // toMonthNumber, toMonthName moved to _utils/profileNormalizers.ts
 
   const buildLearnerProfilePayload = (
     step1Data: Step1Type,
@@ -345,44 +306,6 @@ export const EditProfilePage: React.FC = () => {
     step3Data?: Step3Type,
     step4Data?: Step4Type
   ) => {
-    const normalizeText = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      return stringValue ? stringValue : null;
-    };
-
-    const normalizeEmail = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(stringValue) ? stringValue : null;
-    };
-
-    const normalizeOptionalUrl = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-
-      const valueWithProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(stringValue)
-        ? stringValue
-        : `https://${stringValue}`;
-
-      try {
-        return new URL(valueWithProtocol).toString();
-      } catch {
-        return null;
-      }
-    };
-
-    const normalizeGithubUrl = (value?: any) => {
-      const normalizedUrl = normalizeOptionalUrl(value);
-      if (!normalizedUrl) return null;
-
-      const host = new URL(normalizedUrl).hostname.toLowerCase();
-      return host === 'github.com' || host === 'www.github.com' ? normalizedUrl : null;
-    };
-
     const technicalSkills = Array.from(
       new Set([...(step2Data?.autoDetectedSkills || []), ...(step2Data?.additionalSkills || [])].filter(Boolean))
     );
@@ -402,16 +325,7 @@ export const EditProfilePage: React.FC = () => {
     const academicPerformance = step3Data?.academicPerformance;
     const collegeScore = academicPerformance?.percentage;
 
-    const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
-      title: experience.role,
-      company: experience.companyName,
-      startDate: formatMonthYearToDate(experience.startDate),
-      isCurrentlyWorking: experience.isCurrentlyWorking,
-      endDate: experience.isCurrentlyWorking
-      ? null
-      : formatMonthYearToDate(experience.endDate),
-      description: experience.responsibilities,
-    }));
+    const workExperiences = mapWorkExperiencesToPayload(step3Data?.workExperiences || []);
 
     const leetcodeUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode')?.username;
     const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
@@ -527,31 +441,6 @@ export const EditProfilePage: React.FC = () => {
     return true;
   };
 
-  const toMonthName = (value?: string | number | null) => {
-    if (value === null || value === undefined) return '';
-    const monthNumber = Number(value);
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    if (Number.isFinite(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
-      return monthNames[monthNumber - 1];
-    }
-    const normalized = String(value).trim().toLowerCase();
-    const mapped = monthNames.find((month) => month.toLowerCase() === normalized);
-    return mapped || '';
-  };
-
   useEffect(() => {
     if (!learnerProfile || hydratedProfileIdRef.current === learnerProfile.id) {
       return;
@@ -589,12 +478,6 @@ export const EditProfilePage: React.FC = () => {
       })),
       autoDetectedSkills: learnerProfile.technicalSkills || [],
       additionalSkills: [],
-    };
-
-    const parseScore = (value: string | number | null) => {
-      if (value === null || value === undefined || value === '') return undefined;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
     };
 
     const buildCompetitiveProfile = (
@@ -834,7 +717,7 @@ export const EditProfilePage: React.FC = () => {
   // FIX: read fresh from onboardingData at call time, not closed-over step3
   const currentStep3 = onboardingData?.step3;
 
-  if (step1 && currentStep3) {
+  if (step1) {
     const step1Edits = editedData.step1 || {};
     const shouldApplyCustomDegree =
       selectedDegreeValue === 'Other' &&
@@ -877,10 +760,14 @@ export const EditProfilePage: React.FC = () => {
 
     // FIX: build updatedStep3 from currentStep3 (fresh), not stale step3 closure
     const updatedStep3: Step3Type = {
-      ...currentStep3,
+      ...(currentStep3 || {
+        workExperiences: [],
+        competitiveProfiles: [],
+        hasInternshipExperience: false,
+      }),
       ...(editedData.step3 ? editedData.step3 : {}),
       // Always preserve fresh work experiences — never let editedData overwrite them
-          workExperiences: hasInternship ? currentStep3.workExperiences : [],
+          workExperiences: hasInternship ? (currentStep3?.workExperiences ?? []) : [],
       hasInternshipExperience: hasInternship,
     };
 
@@ -943,9 +830,6 @@ export const EditProfilePage: React.FC = () => {
       }
 
       const totalLocations = (remotePreference ? 1 : 0) + normalizedLocations.length;
-      if (totalLocations === 0) {
-        fieldErrors.push('Select at least 1 location');
-      }
       if (totalLocations > 6) {
         fieldErrors.push('Select maximum 5 cities + Remote');
       }
@@ -2060,7 +1944,7 @@ export const EditProfilePage: React.FC = () => {
                     <GraduationCap className="w-5 h-5 text-primary" />
                     <h3 className="text-base font-semibold tracking-wide">Academic Information</h3>
                   </div>
-                  {editingCard !== 'academic-info' && (step1?.collegeName || step1?.customCollege || step3?.academicPerformance) && (
+                  {editingCard !== 'academic-info' && step1 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -2101,7 +1985,13 @@ export const EditProfilePage: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Year of study</p>
-                          <p className="font-medium">{step1?.yearOfStudy || '-'}</p>
+                          <p className="font-medium">
+                            {step1?.yearOfStudy
+                              ? step1.yearOfStudy === 'passed_out'
+                                ? 'Passout'
+                                : step1.yearOfStudy
+                              : '-'}
+                          </p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium mb-1">Expected graduation</p>
@@ -2383,29 +2273,36 @@ export const EditProfilePage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="font-medium">Year of Study *</Label>
-                                <div className="grid grid-cols-4 gap-2 mt-2">
-                                  {['1st', '2nd', '3rd', '4th'].map((year) => (
-                                    <button
-                                      key={year}
-                                      type="button"
-                                      onClick={() =>
-                                        setEditedData((prev: any) => ({
-                                          ...prev,
-                                          step1: {
-                                            ...(prev.step1 || {}),
-                                            yearOfStudy: year,
-                                          },
-                                        }))
-                                      }
-                                      className={`py-2 px-3 rounded-lg border-2 font-medium text-sm transition-all ${
-                                        (editedData?.step1?.yearOfStudy ?? step1.yearOfStudy) === year
-                                          ? 'border-primary bg-primary text-primary-foreground'
-                                          : 'border-border bg-background hover:border-primary'
-                                      }`}
-                                    >
-                                      {year}
-                                    </button>
-                                  ))}
+                                <div className="mt-2">
+                                  <Select
+                                    value={editedData?.step1?.yearOfStudy ?? step1.yearOfStudy}
+                                    onValueChange={(value) =>
+                                      setEditedData((prev: any) => ({
+                                        ...prev,
+                                        step1: {
+                                          ...(prev.step1 || {}),
+                                          yearOfStudy: value,
+                                        },
+                                      }))
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select year of study" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {[
+                                        { value: '1st', label: '1st' },
+                                        { value: '2nd', label: '2nd' },
+                                        { value: '3rd', label: '3rd' },
+                                        { value: '4th', label: '4th' },
+                                        { value: 'passed_out', label: 'Passout' },
+                                      ].map((item) => (
+                                        <SelectItem key={item.value} value={item.value}>
+                                          {item.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                               </div>
                               
@@ -2477,8 +2374,7 @@ export const EditProfilePage: React.FC = () => {
                         )}
                         
                         {/* Academic Performance Section */}
-                        {step3?.academicPerformance && (
-                          <>
+                        <>
                             <div className="grid gap-4 md:grid-cols-2">
                               <div className="space-y-2">
                                 <Label htmlFor="collegeScore" className="font-medium">College Marks *</Label>
@@ -2638,7 +2534,6 @@ export const EditProfilePage: React.FC = () => {
                               </div>
                             </div>
                           </>
-                        )}
                         
                         {/* Save/Cancel Buttons */}
                         <div className="flex justify-end gap-2 pt-4">
@@ -3048,23 +2943,27 @@ export const EditProfilePage: React.FC = () => {
                   )}
 
                   {/* Preferred Locations */}
-                  {step4.locationPreferences && (
-                    <div className="mb-6 pb-6 border-b border-border/30">
-                      <Label className="text-xs font-medium text-muted-foreground mb-3 block">Preferred location</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {step4.locationPreferences.remote && (
-                          <Badge variant="secondary" className="bg-green-100 text-green-700">
-                            Open to Remote
-                          </Badge>
-                        )}
-                        {step4.locationPreferences.cities?.map((city) => (
-                          <Badge key={city} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
-                            {city}
-                          </Badge>
-                        ))}
-                      </div>
+                  <div className="mb-6 pb-6 border-b border-border/30">
+                    <Label className="text-xs font-medium text-muted-foreground mb-3 block">Preferred location</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {!step4.locationPreferences?.remote && (!step4.locationPreferences?.cities || step4.locationPreferences.cities.length === 0) ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <>
+                          {step4.locationPreferences?.remote && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              Open to Remote
+                            </Badge>
+                          )}
+                          {step4.locationPreferences?.cities?.map((city) => (
+                            <Badge key={city} variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                              {city}
+                            </Badge>
+                          ))}
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
                   
                   {/* Salary Expectations */}
                   {step4.salaryExpectations && (step4.salaryExpectations.internship || step4.salaryExpectations.fullTime) && (

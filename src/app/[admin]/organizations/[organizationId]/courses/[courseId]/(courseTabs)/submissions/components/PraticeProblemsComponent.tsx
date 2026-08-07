@@ -6,7 +6,7 @@ import {
     PractieProblemProps,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {PracticeProblemSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import { usePracticeProblemSubmissions } from '@/hooks/usePracticeProblemSubmissions'
+import { usePracticeProblemSubmissions } from '@/app/[admin]/hooks/usePracticeProblemSubmissions'
 
 const PraticeProblemsComponent = ({
     courseId,

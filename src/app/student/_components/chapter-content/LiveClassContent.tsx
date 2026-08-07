@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Check, VideoIcon, Lock } from 'lucide-react'
-import useChapterCompletion from '@/hooks/useChapterCompletion'
-import useCourseSyllabus from '@/hooks/useCourseSyllabus'
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
+import useCourseSyllabus from '@/app/student/hooks/useCourseSyllabus'
 import { getEmbedLink } from '@/utils/students'
 import {
     LiveClassContentProps,
@@ -243,6 +243,7 @@ if (loading) {
         hangoutLink: session.hangoutLink,
         s3link: session.s3link,
         attendance: session.attendance,
+        attendanceMessage: session.attendanceMessage,
         batchId: session.batchId,
     }
 
@@ -408,6 +409,11 @@ if (loading) {
                             {item.description ||
                                 'This live class has been completed.'}
                         </p>
+                        {item.attendance === 'N/A' && item.attendanceMessage && (
+                            <p className="text-sm text-muted-foreground text-left mb-6">
+                                {item.attendanceMessage}
+                            </p>
+                        )}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <div className="text-left">
                                 <p className="text-sm text-muted-foreground">
@@ -419,34 +425,34 @@ if (loading) {
                                         : 'TBD'}
                                 </p>
                             </div>
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Your Attendance Duration{' '}
-                                    </p>
-                                    <p className="font-medium">
-                                        {item.duration} mins
-                                    </p>
-                                </div>
-                            )}
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Attendance
-                                    </p>
-                                    <p
-                                        className={`font-medium ${
-                                            item.attendance === 'present'
-                                                ? 'text-success'
-                                                : 'text-destructive'
-                                        }`}
-                                    >
-                                        {item.attendance === 'present'
-                                            ? 'Present'
-                                            : 'Absent'}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Your Attendance Duration{' '}
+                                </p>
+                                <p className="font-medium">
+                                    {item.duration} mins
+                                </p>
+                            </div>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Attendance
+                                </p>
+                                <p
+                                    className={`font-medium text-sm ${
+                                        item.attendance === 'present'
+                                            ? 'text-success'
+                                            : item.attendance === 'N/A'
+                                            ? 'text-muted-foreground'
+                                            : 'text-destructive'
+                                    }`}
+                                >
+                                    {item.attendance === 'present'
+                                        ? 'Present'
+                                        : item.attendance === 'N/A'
+                                        ? 'Not Applicable'
+                                        : 'Absent'}
+                                </p>
+                            </div>
                         </div>
                         <p className="text-success mb-2 flex items-center gap-2">
                             <Check className="w-5 h-5" />

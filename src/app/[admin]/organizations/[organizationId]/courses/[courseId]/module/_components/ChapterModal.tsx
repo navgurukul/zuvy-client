@@ -25,7 +25,7 @@ import { useState } from 'react'
 import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
 import { ChapterModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
-import { useChapterActions } from '@/hooks/useChapterActions'
+import { useChapterActions } from '@/app/[admin]/hooks/useChapterActions'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
 
 function ChapterModal({

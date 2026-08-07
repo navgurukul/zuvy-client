@@ -19,8 +19,8 @@ import {
 } from '@/components/ui/popover'
 import { toast } from '@/components/ui/use-toast'
 import{ComboboxStudentProps,CourseStudentBatchItem} from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
-import { useBatchReassign } from '@/hooks/useBatchReassign'
-import { useAssignBatch } from '@/hooks/useAssignBatch'
+import { useBatchReassign } from '@/app/[admin]/hooks/useBatchReassign'
+import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
 export function ComboboxStudent({
     batchData,
     batchName,

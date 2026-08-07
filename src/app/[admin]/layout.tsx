@@ -7,8 +7,8 @@ import { getUser } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
 import '../globals.css'
 import StudentNavbar from '../_components/navbar'
-import { useRoles } from '@/hooks/useRoles'
-import { useAllCourses } from '@/hooks/useAllCourses'
+import { useRoles } from '@/app/[admin]/hooks/useRoles'
+import { useAllCourses } from './hooks/useAllCourses'
 import Notfound from '../not-found'
 
 export default function RootLayout({

@@ -8,7 +8,7 @@ export interface OnboardingStep1 {
   customCollege?: string;
   degree?: string;
   branch: string;
-  yearOfStudy: '1st' | '2nd' | '3rd' | '4th';
+  yearOfStudy: '1st' | '2nd' | '3rd' | '4th' | 'passed_out';
   graduationDate: {
     month: string;
     year: string;

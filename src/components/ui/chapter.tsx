@@ -21,7 +21,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
-import { useEditChapter } from '@/hooks/useEditChapter'
+import { useEditChapter } from '@/app/[admin]/hooks/useEditChapter'
 import { ModuleContentSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
@@ -136,18 +136,25 @@ function Chapter() {
 
         setChapterData(moduleChapters)
         setModuleData(moduleChapters)
-        
+
         const clickedChapter = moduleChapters.find(
             (item: any) => item.chapterId === chapter_id
         )
 
         if (clickedChapter?.topicId) {
+            // Found in current list — use its topicId
             setTopicId(clickedChapter.topicId)
+        } else if (chapter_id && !clickedChapter) {
+            // Chapter not in the cached list yet (e.g. just created).
+            // Keep the topicId already set in the store by ChapterModal so
+            // page.tsx can proceed to fetch the content without redirecting away.
+            // Force a refetch so the sidebar updates to include the new chapter.
+            refetch()
         }
 
         setOriginalChapterData(moduleChapters.map((item: any) => ({ ...item })))
         lastOrderRef.current = moduleChapters.map((item: any) => item.chapterId)
-    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter])
+    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter, refetch])
 
     // Update active chapter when chapter data changes
     useEffect(() => {

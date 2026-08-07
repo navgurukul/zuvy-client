@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useParams, usePathname, useSearchParams } from 'next/navigation'
-import useBatchDetail from '@/hooks/useBatchDetail'
+import useBatchDetail from '@/app/[admin]/hooks/useBatchDetail'
 import ErrorPage from 'next/error'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'

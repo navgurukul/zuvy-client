@@ -9,8 +9,9 @@ import { paramsType } from '@/app/[admin]/organizations/[organizationId]/courses
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import useAssessmentDetailsOfQuiz, { QuizMcqDetail } from '@/hooks/useAssessmentDetailsOfQuiz'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useAssessmentDetailsOfQuiz from '@/app/[admin]/hooks/useAssessmentDetailsOfQuiz'
+import { QuizMcqDetail } from '@/app/[admin]/hooks/hookType'
 
 const Page = ({ params }: { params: paramsType }) => {
     const router = useRouter()

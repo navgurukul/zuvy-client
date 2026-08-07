@@ -27,7 +27,7 @@ import {
     EditChapterResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import { getEmbedLink, isLinkValid } from '@/utils/admin'
-import useEditChapter from '@/hooks/useEditChapter'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
@@ -411,14 +411,15 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                         !isValid ||
                                         isSubmitting
                                     }
-                                    className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
-                                        !canEdit ||
-                                        !isDirty ||
-                                        !isValid ||
-                                        isSubmitting
-                                            ? 'bg-muted/20 cursor-not-allowed opacity-70'
-                                            : 'bg-primary'
-                                    }`}
+                                    // className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                                    //     !canEdit ||
+                                    //     !isDirty ||
+                                    //     !isValid ||
+                                    //     isSubmitting
+                                    //         ? 'bg-muted/20 cursor-not-allowed opacity-70'
+                                    //         : 'bg-primary'
+                                    // }`}
+                                    
                                 >
                                     {isSubmitting
                                         ? 'Saving...'

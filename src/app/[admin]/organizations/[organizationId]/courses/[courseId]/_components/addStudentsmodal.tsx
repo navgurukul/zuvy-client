@@ -22,7 +22,7 @@ import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
 import { AddStudentsModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-import { useAssignBatch } from '@/hooks/useAssignBatch'
+import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
 
 type StudentDataType = {
     name: string

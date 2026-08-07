@@ -4,7 +4,7 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { ellipsis } from '@/lib/utils'
 import { useCodingSubmissionStore } from '@/store/store'
-import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
+import { useCodingSubmissions } from '@/app/student/hooks/useCodingSubmissions'
 import {QuestionCardProps,Tag}from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const QuestionCard = ({

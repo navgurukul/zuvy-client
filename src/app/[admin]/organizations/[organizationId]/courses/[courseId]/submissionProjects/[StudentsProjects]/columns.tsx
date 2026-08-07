@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import usePathname from 'next/navigation'
 import { getUser } from '@/store/store'
+import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
@@ -18,32 +19,11 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Profile Pitcure" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+        cell: ({ row }) => (
+            <div className="flex items-center">
+                <ProfileImage src={row.original.profilePicture} />
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },

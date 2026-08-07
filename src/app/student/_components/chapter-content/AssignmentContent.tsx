@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
-import useAssignmentDetails from '@/hooks/useAssignmentDetails';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
-import useSubmitQuizAndAssignment from '@/hooks/useSubmitQuizAndAssignment';
+import useAssignmentDetails from '@/app/student/hooks/useAssignmentDetails';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
+import useSubmitQuizAndAssignment from '@/app/student/hooks/useSubmitQuizAndAssignment';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
@@ -16,7 +16,8 @@ import useWindowSize from '@/hooks/useHeightWidth';
 import { X } from 'lucide-react';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
-
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
+import { normalizeLinks } from '@/utils/admin';
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -369,30 +370,6 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
 export default AssignmentContent; 
 
-const normalizeLinks = (links?: string | string[]): string[] => {
-  if (!links) return [];
-  if (Array.isArray(links)) {
-    return links.map((link) => link.trim()).filter(Boolean);
-  }
-  return links
-    .split(/\r?\n+/)
-    .map((link) => link.trim())
-    .filter(Boolean);
-};
 
-const isValidUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-    if (!url.hostname) return false;
-    if (url.hostname === 'localhost') return true;
-    if (url.hostname.endsWith('.')) return false;
-    const hostnameParts = url.hostname.split('.');
-    if (hostnameParts.length < 2) return false;
-    const tld = hostnameParts[hostnameParts.length - 1];
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
-    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
-  } catch {
-    return false;
-  }
-};
+
+

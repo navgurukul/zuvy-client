@@ -9,7 +9,11 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
         const { organizationId } = useParams()
         const { user } = getUser()
         const role = user.rolesList[0]
-        const orgId = Number(organizationId) || user?.orgId;
+        const rawOrgId = (organizationId && organizationId !== 'undefined' ? organizationId : null) || user?.orgId;
+        const validOrgId = rawOrgId && String(rawOrgId) !== 'NaN' && String(rawOrgId) !== 'undefined' ? rawOrgId : null;
+        const homeHref = role === 'student'
+            ? '/student'
+            : (validOrgId ? `/${role}/organizations/${validOrgId}/courses` : `/${role}/organizations`);
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">
@@ -25,7 +29,7 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                     <Link
-                        href={role === 'student' ? '/student':`/${role}/organizations/${orgId}/courses`}
+                        href={homeHref}
                         className={buttonVariants({ variant: 'outline' })}
                     >
                         Home

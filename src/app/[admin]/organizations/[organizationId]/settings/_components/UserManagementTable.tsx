@@ -28,13 +28,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useRoles } from '@/hooks/useRoles'
+import { useRoles } from '@/app/[admin]/hooks/useRoles'
 import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
 import type { User } from '../columns'
 import { DataTable } from '@/app/_components/datatable/data-table'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { getUser } from '@/store/store'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
+import { POSITION } from '@/utils/constant'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -52,6 +54,7 @@ export function UserManagementTable<TData extends User, TValue>({
     onRoleIdChange,
 }: UserManagementTableProps<TData, TValue>) {
     const { organizationId } = useParams()
+    const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
@@ -61,7 +64,11 @@ export function UserManagementTable<TData extends User, TValue>({
     const [rowSelection, setRowSelection] = useState({})
     const [searchData, setSearchData] = useState<TData[]>([])
     const [isSearching, setIsSearching] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [searchTotalRows, setSearchTotalRows] = useState(0)
+    const [searchTotalPages, setSearchTotalPages] = useState(0)
     const [loading, setLoading] = useState(false)
+    const searchLimit = Number(searchParams.get('limit') || POSITION) || Number(POSITION)
     
     // Fetch roles from API
     const { roles, loading: rolesLoading } = useRoles()
@@ -133,18 +140,21 @@ export function UserManagementTable<TData extends User, TValue>({
     }, [orgId, roleId])
 
     // Fetch search results with filters applied
-    const fetchSearchResultsApi = useCallback(async (query: string) => {
+    const fetchSearchResultsApi = useCallback(async (query: string, offset = 0) => {
         setLoading(true)
         setIsSearching(true)
+        setSearchQuery(query)
         onSearchChange?.(true)
         
         try {
             const roleParam = roleId !== 'all' ? `&roleId=${encodeURIComponent(roleId)}` : ''
             const response = await api.get(
-                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}${roleParam}`
+                `/users/get/all/users/${orgId}?limit=${searchLimit}&offset=${offset}&searchTerm=${encodeURIComponent(query)}${roleParam}`
             )
 
             setSearchData(response.data.data || [])
+            setSearchTotalRows(response.data.totalRows || 0)
+            setSearchTotalPages(response.data.totalPages || 0)
             return response.data
         } catch (error) {
             console.error('Error fetching search results:', error)
@@ -152,15 +162,26 @@ export function UserManagementTable<TData extends User, TValue>({
         } finally {
             setLoading(false)
         }
-    }, [onSearchChange, orgId, roleId])
+    }, [onSearchChange, orgId, roleId, searchLimit])
 
     // Default fetch - clear search and show parent data
     const defaultFetchApi = useCallback(async () => {
         setIsSearching(false)
+        setSearchQuery('')
         setSearchData([])
+        setSearchTotalRows(0)
+        setSearchTotalPages(0)
         onSearchChange?.(false)
         return { data: propData }
     }, [propData, onSearchChange])
+
+    const fetchSearchPage = useCallback(
+        async (offset: number) => {
+            if (!searchQuery) return
+            await fetchSearchResultsApi(searchQuery, offset)
+        },
+        [fetchSearchResultsApi, searchQuery]
+    )
 
     // Load data on component mount - check if search exists in URL
     useEffect(() => {
@@ -247,6 +268,14 @@ export function UserManagementTable<TData extends User, TValue>({
                 columns={columns}
                 data={displayData}
             />
+            {isSearching && searchTotalPages > 0 && (
+                <DataTablePagination
+                    totalStudents={searchTotalRows}
+                    lastPage={searchTotalPages}
+                    pages={searchTotalPages}
+                    fetchStudentData={fetchSearchPage}
+                />
+            )}
         </div>
     )
 }

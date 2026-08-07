@@ -8,13 +8,13 @@ import CodingTopics from '@/app/[admin]/organizations/[organizationId]/courses/[
 import SelectedProblems from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
     getUser,
 } from '@/store/store'
-import useCodingQuestions from '@/hooks/useCodingQuestions'
+import useCodingQuestions from '@/app/[admin]/hooks/useCodingQuestions'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {CodingChallengeSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
+
+let tagsRequest: Promise<any[]> | null = null
 
 function CodingChallenge({
     content,
@@ -58,7 +60,7 @@ function CodingChallenge({
         resolver: zodResolver(chapterSchema),
          mode: 'onChange',
         defaultValues: {
-            title: activeChapterTitle || '',
+            title: activeChapterTitle || content?.title || content?.name || '',
         },
        
     })
@@ -90,12 +92,13 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<
         CodingChallangesQuestion[]
     >([])
-    const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
+    const [chapterTitle, setChapterTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
 
-    const [isSaved, setIsSaved] = useState<boolean>(true)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // FORCE UPDATE: Use a key to force re-render when content changes
@@ -103,8 +106,12 @@ function CodingChallenge({
         content?.codingQuestionDetails?.length || 0
     }`
 
-    const [initialTitle] = useState<string>(activeChapterTitle)
-    const [savedTitle, setSavedTitle] = useState<string>(activeChapterTitle)
+    const [initialTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
+    const [savedTitle, setSavedTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
     const [hasTitleChanged, setHasTitleChanged] = useState(false)
 
     const handleSaveClick = async (data: { title: string }) => {
@@ -122,7 +129,6 @@ function CodingChallenge({
             })
 
             setIsChapterUpdated(!isChapterUpdated)
-            setIsSaved(true)
             setSavedQuestions([...selectedQuestions])
             setSavedTitle(titleToSave)
             setHasTitleChanged(false)
@@ -141,6 +147,8 @@ function CodingChallenge({
         }
     }
 
+    const prevChapterIdRef = useRef<number | null>(null)
+
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value
         setChapterTitle(newTitle)
@@ -148,19 +156,34 @@ function CodingChallenge({
         form.setValue('title', newTitle, { shouldValidate: true })
         form.trigger('title')
     }
+
+    // Trigger form validation on mount / title sync
     useEffect(() => {
+        form.trigger('title')
+    }, [form])
+
+    // Only reset selected questions when chapter ID actually changes
+    useEffect(() => {
+        const incomingChapterId = content?.id ?? null
+        if (incomingChapterId && prevChapterIdRef.current === incomingChapterId) {
+            return
+        }
+        if (incomingChapterId) {
+            prevChapterIdRef.current = incomingChapterId
+        }
+
         const newQuestions = content?.codingQuestionDetails || []
         setSelectedQuestions(newQuestions)
         setSavedQuestions(newQuestions)
-        setIsSaved(true)
 
-        // Reset title changes when content changes
-        setChapterTitle(activeChapterTitle)
-        setSavedTitle(activeChapterTitle)
+        const initialTitleVal = content?.title || content?.name || activeChapterTitle || ''
+        setChapterTitle(initialTitleVal)
+        setSavedTitle(initialTitleVal)
         setHasTitleChanged(false)
-    }, [content?.id]) // Only depend on content.id
+        form.setValue('title', initialTitleVal, { shouldValidate: true })
+    }, [content?.id, activeChapterTitle, content?.title, content?.name])
 
-    // Function to check if current selection matches saved questions
+    // Compute isSaved directly during render to prevent stale lag
     const checkIfSaved = () => {
         if (!selectedQuestions || !savedQuestions) {
             return true
@@ -169,26 +192,14 @@ function CodingChallenge({
             return false
         }
 
-        // Check if all selected questions are in saved questions
         return selectedQuestions.every((selectedQ) =>
             savedQuestions.some((savedQ) => savedQ.id === selectedQ.id)
         )
     }
 
-    // IMMEDIATE UPDATE: React to content prop changes immediately
-    useEffect(() => {
-        const newCodingQuestions = content?.codingQuestionDetails || []
-        setSelectedQuestions(newCodingQuestions)
-        setSavedQuestions(newCodingQuestions)
-        setIsSaved(true)
-    }, [contentKey]) // Use contentKey instead of content
-
-    useEffect(() => {
-        setIsSaved(checkIfSaved())
-    }, [selectedQuestions, savedQuestions])
+    const isSaved = checkIfSaved()
 
     // Disable Save button after save, re-enable if there are unsaved changes
-    // Enable save if a coding problem is selected and title is being edited
     const isSaveButtonDisabled =
         !canEdit ||
         isSubmitting ||
@@ -227,11 +238,16 @@ useEffect(() => {
 
 
     async function getAllTags() {
+        if (tags.length > 0) return
+
         try {
-            const tagArr = await fetchAllTags()
+            tagsRequest ??= fetchAllTags()
+            const tagArr = await tagsRequest
             setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
+        } finally {
+            tagsRequest = null
         }
     }
 
@@ -241,10 +257,12 @@ useEffect(() => {
         getAllTags()
     }, [])
 
-    // Update chapter title when activeChapterTitle prop changes
+    // Update chapter title when activeChapterTitle prop or content title changes
     useEffect(() => {
-        setChapterTitle(activeChapterTitle)
-    }, [activeChapterTitle])
+        const currentTitle = activeChapterTitle || content?.title || content?.name || ''
+        setChapterTitle(currentTitle)
+        form.setValue('title', currentTitle, { shouldValidate: true })
+    }, [activeChapterTitle, content?.title, content?.name])
 
     if (isDataLoading) {
         return<CodingChallengeSkeleton/>

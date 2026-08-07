@@ -3,6 +3,8 @@ import { api } from '@/utils/axios.config';
 import { UseSwitchOrgReturn, SwitchOrgPayload, SwitchOrgResponse, SwitchOrgResult } from '@/hooks/hookType';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
+import { setCookie } from 'cookies-next';
+
 const useSwitchOrg = (): UseSwitchOrgReturn => {
     const [isSwitching, setIsSwitching] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +29,7 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
                 localStorage.setItem('AUTH', JSON.stringify(data.user))
+                setCookie('orgId', String(payload.orgId));
 
                 // Update user in store
                 setUser(data.user);

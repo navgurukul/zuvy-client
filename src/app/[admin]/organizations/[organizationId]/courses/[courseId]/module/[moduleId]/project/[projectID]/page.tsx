@@ -43,7 +43,7 @@ import {
     ProjectDataProject,
     ProjectData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType'
-import { useUpdateProject } from '@/hooks/useUpdateProject'
+import { useUpdateProject } from '@/app/[admin]/hooks/useUpdateProject'
 import { fetchProjectDetails as fetchProjectDetailsData } from '@/utils/admin'
 
 export default function Project() {
@@ -105,12 +105,13 @@ export default function Project() {
             let selectedDate: Date | undefined = undefined
             if (project.deadline) {
                 const deadlineDate = new Date(project.deadline)
+                // Deadlines are stored as UTC calendar days. Create the date
+                // for the calendar in local time so its day never shifts by
+                // the viewer's timezone.
                 selectedDate = new Date(
-                    Date.UTC(
-                        deadlineDate.getFullYear(),
-                        deadlineDate.getMonth(),
-                        deadlineDate.getDate()
-                    )
+                    deadlineDate.getUTCFullYear(),
+                    deadlineDate.getUTCMonth(),
+                    deadlineDate.getUTCDate()
                 )
             }
             // Reset form with API data
@@ -147,8 +148,12 @@ export default function Project() {
             if (!date || isNaN(date.getTime())) {
                 throw new Error('Invalid date')
             }
-            // directly convert to ISO string (UTC)
-            return date.toISOString()
+            // The calendar selects a date (not a time). Saving local midnight
+            // with toISOString() turns, for example, Jul 6 in IST into Jul 5
+            // UTC. Store the selected calendar day at UTC midnight instead.
+            return new Date(
+                Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+            ).toISOString()
         }
 
         const deadlineDate = convertToISO(data.startDate)

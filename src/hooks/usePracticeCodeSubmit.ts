@@ -27,7 +27,7 @@ export const usePracticeCodeSubmit = ({
 
       try {
         const response = await api.post<PracticeCodeSubmitResponse>(
-          `/codingPlatform/practicecode/questionId=${questionId}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
+          `/codingPlatform/practicecode/questionId/${questionId}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
           payload,
         );
         setCodeResult(response.data.data);

@@ -10,7 +10,7 @@ import { Pencil, PlusCircle, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
-import { api } from '@/utils/axios.config'
+import { useCreateAndEditForm } from '@/app/[admin]/hooks/useCreateAndEditForm'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/form'
 import { getChapterUpdateStatus, getFormPreviewStore, getUser } from '@/store/store'
 import { useRouter, useParams } from 'next/navigation'
-import useEditChapter from '@/hooks/useEditChapter'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import {
     AddFormProps,
@@ -82,6 +82,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isSaved, setIsSaved] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const { editChapter } = useEditChapter()
+    const { createAndEditForm } = useCreateAndEditForm()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const [isTitleChanged, setIsTitleChanged] = useState(false)
@@ -370,8 +371,8 @@ const AddForm: React.FC<AddFormProps> = ({
                 description,
             })
 
-            const questionsRespons = await api.post(
-                `Content/createAndEditForm/${content.id}`,
+            const questionsRespons = await createAndEditForm(
+                content.id,
                 payload
             )
             

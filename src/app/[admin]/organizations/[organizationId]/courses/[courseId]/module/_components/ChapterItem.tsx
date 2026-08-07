@@ -21,9 +21,9 @@ import { useParams, useRouter, usePathname } from 'next/navigation'
 import { Reorder, useDragControls } from 'framer-motion'
 import { ChapterItems } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
 import { LucideIcon } from 'lucide-react'
-import { useChapterActions } from '@/hooks/useChapterActions'
-import { useDeleteSession } from '@/hooks/useDeleteSession'
-import { useGetChapterDetails } from '@/hooks/useGetChapterDetails'
+import { useChapterActions } from '@/app/[admin]/hooks/useChapterActions'
+import { useDeleteSession } from '@/app/[admin]/hooks/useDeleteSession'
+import { useGetChapterDetails } from '@/app/[admin]/hooks/useGetChapterDetails'
 
 // Topic icon mapping
 const TOPIC_ICONS: Record<number, LucideIcon> = {

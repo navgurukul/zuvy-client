@@ -11,10 +11,10 @@ import {
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
-import { useAssignmentSubmissions } from '@/hooks/useAssignmentSubmissions'
+import { useAssignmentSubmissions } from '@/app/[admin]/hooks/useAssignmentSubmissions'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {

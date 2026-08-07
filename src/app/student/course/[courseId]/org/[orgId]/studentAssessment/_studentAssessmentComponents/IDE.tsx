@@ -8,7 +8,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle, Sun, Moon } from 'lucide-react'
-import { useCodingSubmissionStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store'
+import { useLazyLoadedStudentData, useThemeStore } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
@@ -41,7 +41,7 @@ import { X } from 'lucide-react'
 
 import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
-import { useGetCodingQuestion } from '@/hooks/useGetCodingQuestion'
+import { useGetCodingQuestion } from '@/app/student/hooks/useGetCodingQuestion'
 import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 const IDE: React.FC<IDEProps> = ({
@@ -63,7 +63,6 @@ const IDE: React.FC<IDEProps> = ({
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeError, setCodeError] = useState('')
-    const { codingSubmissionAction, setCodingSubmissionAction } = useCodingSubmissionStore()
 
     const editorLanguages = [
         { lang: 'java', id: 96 },
@@ -215,6 +214,17 @@ const IDE: React.FC<IDEProps> = ({
         }
     }, [runCodeLanguageId, runSourceCode])
 
+     useEffect(() => {
+        setIsSubmitted(false)
+        setIsDisabled(false)
+        setIsOpen(false)
+        setCodeError('')
+        setResult('')
+        setCurrentCode('')
+        setCodeResult(null)
+    }, [params.editor, setCodeResult])
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -290,7 +300,7 @@ const IDE: React.FC<IDEProps> = ({
                                     size="sm"
                                     variant="outline"
                                     className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
-                                    disabled={(loading || isSubmitted) || codingSubmissionAction === 'submit'}
+                                    disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Run Code</span>
@@ -299,7 +309,7 @@ const IDE: React.FC<IDEProps> = ({
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
                                     className="bg-primary-dark hover:bg-primary text-primary-foreground"
-                                    disabled={(loading || isSubmitted) || codingSubmissionAction === 'submit'}
+                                    disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Submit Solution</span>

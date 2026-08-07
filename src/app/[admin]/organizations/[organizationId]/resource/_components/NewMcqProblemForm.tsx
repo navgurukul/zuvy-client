@@ -25,7 +25,8 @@ import { cn } from '@/lib/utils'
 import { useTopics } from '@/hooks/useGetTopicsEval'
 import { useCreateTopic } from '@/hooks/useCreateTopicEval'
 import { useGenerateQuestions } from '@/hooks/useCreateAIQuestionEval'
-import { useAllCourses } from '@/hooks/useAllCourses'
+import { useAllCourses } from '@/app/[admin]/hooks/useAllCourses'
+
 
 const UnportaledPopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -109,6 +110,8 @@ function SearchableSelect({
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const
 type Difficulty = (typeof DIFFICULTIES)[number]
+
+
 
 const normalise = (s: string) => s.trim().toLowerCase().replace(/[-\s/]+/g, ' ')
 
@@ -330,6 +333,7 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
             ))}
           </div>
         )}
+
         <div className="flex items-center gap-2">
           <Input
             className="flex-1"
