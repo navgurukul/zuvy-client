@@ -176,8 +176,9 @@ export async function handleVisibilityChange(
     submitAssessment: (typeOfSubmission?: "studentSubmit" | "auto-submit") => void,
     isCurrentPageSubmitAssessment: () => boolean,
     assessmentSubmitId: any,
+    forceTabChange: boolean = false,
 ) {
-    if (document.hidden) {
+    if (document.hidden || forceTabChange) {
         try {
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount} = await getProctoringData(assessmentSubmitId);
             const newTabChangeInstance = tabChange + 1;
