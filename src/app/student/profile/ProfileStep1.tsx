@@ -18,6 +18,11 @@ import { useLearnerBranchDetails } from '@/app/student/hooks/useLearnerBranchDet
 import { useCollegeSearch } from '@/app/student/hooks/useCollegeSearch';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
+import { 
+  validateGraduationDate, 
+  getAllowedYears, 
+  getAllowedMonths
+} from '@/app/student/_utils/graduationDateValidation';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -127,7 +132,8 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const { degreeDetails, loading: isDegreeLoading } = useLearnerDegreeDetails();
   const { loading: isBranchLoading, getBranchesForDegree } = useLearnerBranchDetails();
   
-  const years = getYearsArray(1990);
+  const years = getAllowedYears(formData.yearOfStudy);
+  const allowedMonths = getAllowedMonths(formData.yearOfStudy, selectedYear);
   const degreeOptions = degreeDetails.map((item) => item.name);
   const selectedDegreeDetails = useMemo(
     () =>
@@ -421,6 +427,16 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     };
   }, [showGraduationDatePicker]);
 
+  // Sync selectedYear and selectedMonth with formData when they change
+  useEffect(() => {
+    if (formData.graduationDate.year !== selectedYear) {
+      setSelectedYear(formData.graduationDate.year);
+    }
+    if (formData.graduationDate.month !== selectedMonth) {
+      setSelectedMonth(formData.graduationDate.month);
+    }
+  }, [formData.graduationDate.year, formData.graduationDate.month, selectedYear, selectedMonth]);
+
   // Validate phone number
   const validatePhoneNumber = (phone: string): boolean => {
     const phoneRegex = /^(\+91)?[6-9]\d{9}$/;
@@ -463,12 +479,10 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       newErrors.branch = 'Branch selection is required';
     }
 
-    if (!data.graduationDate.month && !data.graduationDate.year) {
-      newErrors.graduationDate = 'Graduation month and year are required';
-    } else if (!data.graduationDate.month) {
-      newErrors.graduationDate = 'Graduation month is required';
-    } else if (!data.graduationDate.year) {
-      newErrors.graduationDate = 'Graduation year is required';
+    // Validate graduation date
+    const graduationValidation = validateGraduationDate(data.graduationDate, data.yearOfStudy);
+    if (!graduationValidation.isValid) {
+      newErrors.graduationDate = graduationValidation.error || 'Invalid graduation date';
     }
 
     setErrors(newErrors);
@@ -622,6 +636,49 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
           return next;
         });
       }
+    } else if (name === 'yearOfStudy') {
+      const currentYear = new Date().getFullYear().toString();
+      
+      if (value !== 'passed_out') {
+        // For current students (1st, 2nd, 3rd, 4th), always auto-set current year
+        setSelectedYear(currentYear);
+        setFormData((prev) => ({
+          ...prev,
+          yearOfStudy: value as Step1Type['yearOfStudy'],
+          graduationDate: {
+            ...prev.graduationDate,
+            year: currentYear,
+          },
+        }));
+        
+        // Clear any graduation date errors since we're auto-selecting valid year
+        if (errors.graduationDate) {
+          setErrors((prev) => {
+            const next = { ...prev };
+            delete next.graduationDate;
+            return next;
+          });
+        }
+      } else {
+        // For passout, validate existing date and clear if invalid
+        const currentGradDate = formData.graduationDate;
+        let newGradDate = currentGradDate;
+        
+        if (currentGradDate.month && currentGradDate.year) {
+          const validation = validateGraduationDate(currentGradDate, value);
+          if (!validation.isValid) {
+            setSelectedMonth('');
+            setSelectedYear('');
+            newGradDate = { month: '', year: '' };
+          }
+        }
+        
+        setFormData((prev) => ({
+          ...prev,
+          yearOfStudy: value as Step1Type['yearOfStudy'],
+          graduationDate: newGradDate,
+        }));
+      }
     } else if (name === 'graduationMonth' || name === 'graduationYear') {
       setFormData((prev) => ({
         ...prev,
@@ -670,6 +727,20 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleGraduationDateSave = () => {
     if (selectedMonth && selectedYear) {
+      // Validate the selected graduation date
+      const validation = validateGraduationDate(
+        { month: selectedMonth, year: selectedYear }, 
+        formData.yearOfStudy
+      );
+      
+      if (!validation.isValid) {
+        setErrors((prev) => ({
+          ...prev,
+          graduationDate: validation.error || 'Invalid graduation date',
+        }));
+        return;
+      }
+      
       setFormData((prev) => ({
         ...prev,
         graduationDate: {
@@ -677,6 +748,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
           year: selectedYear,
         },
       }));
+      
       // Clear error if exists
       if (errors.graduationDate) {
         setErrors((prev) => {
@@ -1252,8 +1324,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   </Label>
                   <div className="grid grid-cols-2 gap-4">
                     <Select
-                      value={formData.graduationDate.month}
+                      key={`month-${formData.yearOfStudy}`}
+                      value={formData.graduationDate.month || selectedMonth}
                       onValueChange={(value) => {
+                        // Validate the new month selection
+                        const newGradDate = { ...formData.graduationDate, month: value };
+                        const validation = validateGraduationDate(newGradDate, formData.yearOfStudy);
+                        
                         setFormData((prev) => ({
                           ...prev,
                           graduationDate: {
@@ -1261,7 +1338,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             month: value,
                           },
                         }));
-                        if (errors.graduationDate) {
+                        
+                        if (!validation.isValid) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            graduationDate: validation.error || 'Invalid graduation date',
+                          }));
+                        } else if (errors.graduationDate) {
                           setErrors((prev) => {
                             const next = { ...prev };
                             delete next.graduationDate;
@@ -1274,7 +1357,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                         <SelectValue placeholder="Month" />
                       </SelectTrigger>
                       <SelectContent>
-                        {MONTHS.map((month) => (
+                        {allowedMonths.map((month) => (
                           <SelectItem key={month} value={month}>
                             {month}
                           </SelectItem>
@@ -1283,8 +1366,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                     </Select>
                     
                     <Select
-                      value={formData.graduationDate.year}
+                      key={`year-${formData.yearOfStudy}`}
+                      value={formData.graduationDate.year || selectedYear}
                       onValueChange={(value) => {
+                        // Validate the new year selection
+                        const newGradDate = { ...formData.graduationDate, year: value };
+                        const validation = validateGraduationDate(newGradDate, formData.yearOfStudy);
+                        
                         setFormData((prev) => ({
                           ...prev,
                           graduationDate: {
@@ -1292,7 +1380,27 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             year: value,
                           },
                         }));
-                        if (errors.graduationDate) {
+                        
+                        // Clear month if it becomes invalid with new year
+                        if (formData.graduationDate.month) {
+                          const newAllowedMonths = getAllowedMonths(formData.yearOfStudy, value);
+                          if (!newAllowedMonths.includes(formData.graduationDate.month)) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              graduationDate: {
+                                ...prev.graduationDate,
+                                month: '',
+                              },
+                            }));
+                          }
+                        }
+                        
+                        if (!validation.isValid && newGradDate.month) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            graduationDate: validation.error || 'Invalid graduation date',
+                          }));
+                        } else if (errors.graduationDate) {
                           setErrors((prev) => {
                             const next = { ...prev };
                             delete next.graduationDate;

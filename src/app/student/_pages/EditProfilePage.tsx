@@ -45,6 +45,11 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import { SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
+import { 
+  validateGraduationDate, 
+  getAllowedYears, 
+  getAllowedMonths
+} from '@/app/student/_utils/graduationDateValidation';
 import type {
   CompetitiveProfile,
   WorkExperience,
@@ -753,6 +758,17 @@ export const EditProfilePage: React.FC = () => {
     if (!String(updatedStep1.branch || '').trim()) {
       fieldErrors.push('Branch is required');
     }
+    
+    // Validate graduation date
+    const graduationValidation = validateGraduationDate(
+      updatedStep1.graduationDate, 
+      updatedStep1.yearOfStudy
+    );
+    
+    if (!graduationValidation.isValid) {
+      fieldErrors.push(graduationValidation.error || 'Invalid graduation date');
+    }
+    
     if (fieldErrors.length > 0) {
       showRequiredFieldErrors(fieldErrors);
       return;
@@ -2276,15 +2292,39 @@ export const EditProfilePage: React.FC = () => {
                                 <div className="mt-2">
                                   <Select
                                     value={editedData?.step1?.yearOfStudy ?? step1.yearOfStudy}
-                                    onValueChange={(value) =>
-                                      setEditedData((prev: any) => ({
-                                        ...prev,
-                                        step1: {
-                                          ...(prev.step1 || {}),
-                                          yearOfStudy: value,
-                                        },
-                                      }))
-                                    }
+                                    onValueChange={(value) => {
+                                      const currentYear = new Date().getFullYear().toString();
+                                      
+                                      setEditedData((prev: any) => {
+                                        const currentGradDate = prev.step1?.graduationDate ?? step1.graduationDate;
+                                        let newGradDate = currentGradDate;
+                                        
+                                        if (value !== 'passed_out') {
+                                          // For current students (1st, 2nd, 3rd, 4th), always auto-set current year
+                                          newGradDate = {
+                                            ...currentGradDate,
+                                            year: currentYear,
+                                          };
+                                        } else {
+                                          // For passout, validate existing date and clear if invalid
+                                          if (currentGradDate?.month && currentGradDate?.year) {
+                                            const validation = validateGraduationDate(currentGradDate, value);
+                                            if (!validation.isValid) {
+                                              newGradDate = { month: '', year: '' };
+                                            }
+                                          }
+                                        }
+                                        
+                                        return {
+                                          ...prev,
+                                          step1: {
+                                            ...(prev.step1 || {}),
+                                            yearOfStudy: value,
+                                            graduationDate: newGradDate,
+                                          },
+                                        };
+                                      });
+                                    }}
                                   >
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select year of study" />
@@ -2311,7 +2351,10 @@ export const EditProfilePage: React.FC = () => {
                                 <div className="grid grid-cols-2 gap-4 mt-2">
                                   <Select
                                     value={editedData?.step1?.graduationDate?.month ?? step1.graduationDate.month}
-                                    onValueChange={(val) =>
+                                    onValueChange={(val) => {
+                                      const currentYearOfStudy = editedData?.step1?.yearOfStudy ?? step1.yearOfStudy;
+                                      const currentYear = editedData?.step1?.graduationDate?.year ?? step1.graduationDate.year;
+                                      
                                       setEditedData((prev: any) => ({
                                         ...prev,
                                         step1: {
@@ -2321,30 +2364,26 @@ export const EditProfilePage: React.FC = () => {
                                             month: val,
                                           },
                                         },
-                                      }))
-                                    }
+                                      }));
+                                    }}
                                   >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Month" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="January">January</SelectItem>
-                                      <SelectItem value="February">February</SelectItem>
-                                      <SelectItem value="March">March</SelectItem>
-                                      <SelectItem value="April">April</SelectItem>
-                                      <SelectItem value="May">May</SelectItem>
-                                      <SelectItem value="June">June</SelectItem>
-                                      <SelectItem value="July">July</SelectItem>
-                                      <SelectItem value="August">August</SelectItem>
-                                      <SelectItem value="September">September</SelectItem>
-                                      <SelectItem value="October">October</SelectItem>
-                                      <SelectItem value="November">November</SelectItem>
-                                      <SelectItem value="December">December</SelectItem>
+                                      {getAllowedMonths(
+                                        editedData?.step1?.yearOfStudy ?? step1.yearOfStudy,
+                                        editedData?.step1?.graduationDate?.year ?? step1.graduationDate.year
+                                      ).map((month) => (
+                                        <SelectItem key={month} value={month}>{month}</SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                   <Select
                                     value={editedData?.step1?.graduationDate?.year ?? step1.graduationDate.year}
-                                    onValueChange={(val) =>
+                                    onValueChange={(val) => {
+                                      const currentYearOfStudy = editedData?.step1?.yearOfStudy ?? step1.yearOfStudy;
+                                      
                                       setEditedData((prev: any) => ({
                                         ...prev,
                                         step1: {
@@ -2352,16 +2391,20 @@ export const EditProfilePage: React.FC = () => {
                                           graduationDate: {
                                             ...(prev.step1?.graduationDate || step1.graduationDate),
                                             year: val,
+                                            // Clear month if it becomes invalid with new year
+                                            month: getAllowedMonths(currentYearOfStudy, val).includes(
+                                              prev.step1?.graduationDate?.month ?? step1.graduationDate.month
+                                            ) ? (prev.step1?.graduationDate?.month ?? step1.graduationDate.month) : '',
                                           },
                                         },
-                                      }))
-                                    }
+                                      }));
+                                    }}
                                   >
                                     <SelectTrigger className="bg-muted/30">
                                       <SelectValue placeholder="Year" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {getYearsArray(1990).map((year) => (
+                                      {getAllowedYears(editedData?.step1?.yearOfStudy ?? step1.yearOfStudy).map((year) => (
                                         <SelectItem key={year} value={year}>{year}</SelectItem>
                                       ))}
                                     </SelectContent>
