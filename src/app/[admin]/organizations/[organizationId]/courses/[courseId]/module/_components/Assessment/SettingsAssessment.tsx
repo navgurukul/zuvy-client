@@ -697,36 +697,48 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 )}
                             </div>
 
-                            <Dialog
-                                open={isPublishDialogOpen}
-                                onOpenChange={setIsPublishDialogOpen}
-                            >
-                                <DialogTrigger asChild>
+                            <div className="flex gap-2">
+                                {(currentAssessmentStatus === 'PUBLISHED' ||
+                                    currentAssessmentStatus === 'ACTIVE') && (
                                     <Button
                                         type="button"
-                                        variant="default"
-                                        className="w-auto px-6 bg-primary text-primary-foreground hover:bg-primary/90"
+                                        onClick={generateStudentLink}
+                                        className="w-auto px-6"
                                     >
-                                        Publish Options
+                                        Generate Student Link
                                     </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <PublishAssessmentDialog
-                                        onSave={handleDialogSave} // Use the new handler
-                                        currentAssessmentStatus={
-                                            currentAssessmentStatus
-                                        }
-                                        initialPublishDate={
-                                            content?.publishDatetime
-                                        }
-                                        initialStartDate={
-                                            content?.startDatetime
-                                        }
-                                        initialEndDate={content?.endDatetime}
-                                        hasExistingEndDate={!!content?.endDatetime} 
-                                    />
-                                </DialogContent>
-                            </Dialog>
+                                )}
+                                <Dialog
+                                    open={isPublishDialogOpen}
+                                    onOpenChange={setIsPublishDialogOpen}
+                                >
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="default"
+                                            className="w-auto px-6 bg-primary text-primary-foreground hover:bg-primary/90"
+                                        >
+                                            Publish Options
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <PublishAssessmentDialog
+                                            onSave={handleDialogSave} // Use the new handler
+                                            currentAssessmentStatus={
+                                                currentAssessmentStatus
+                                            }
+                                            initialPublishDate={
+                                                content?.publishDatetime
+                                            }
+                                            initialStartDate={
+                                                content?.startDatetime
+                                            }
+                                            initialEndDate={content?.endDatetime}
+                                            hasExistingEndDate={!!content?.endDatetime} 
+                                        />
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
                         </div>
 
                         {(currentAssessmentStatus === 'PUBLISHED' ||
@@ -738,7 +750,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                         value={studentLink}
                                         readOnly
                                         aria-label="Student assessment link"
-                                        className="flex-1"
+                                        className="w-1/2"
                                     />
                                 )}
                                 {studentLink && (
@@ -755,13 +767,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                         {isLinkCopied ? 'Copied' : 'Copy Link'}
                                     </Button>
                                 )}
-                                <Button
-                                    type="button"
-                                    onClick={generateStudentLink}
-                                    className="ml-auto shrink-0 mt-2"
-                                >
-                                Generate Student Link
-                                </Button>
                             </div>
                             {studentLink && (
                                 <p className="mt-2 text-sm text-success">
