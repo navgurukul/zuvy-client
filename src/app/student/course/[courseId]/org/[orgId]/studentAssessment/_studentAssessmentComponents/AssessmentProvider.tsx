@@ -77,6 +77,7 @@ function Page({ params }: PageParams) {
   const [disableSubmit, setDisableSubmit] = useState(false);
   const intervalIdRef = useRef<number | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const lastTabViolationAtRef = useRef<number>(0);
 
   // -------- hooks --------
   const { startAssessment } = useStartAssessment();
@@ -201,16 +202,25 @@ function Page({ params }: PageParams) {
       startTimer(endTime);
     }
 
-    const visibilityChangeHandler = () =>
-      handleVisibilityChange(submitAssessment, isCurrentPageSubmitAssessment, assessmentSubmitId!);
+    const triggerTabViolation = (forceTabChange = false) => {
+      const now = Date.now();
+      if (now - lastTabViolationAtRef.current < 800) return;
+      lastTabViolationAtRef.current = now;
+      void handleVisibilityChange(submitAssessment, isCurrentPageSubmitAssessment, assessmentSubmitId!, forceTabChange);
+    };
+
+    const visibilityChangeHandler = () => triggerTabViolation(false);
+    const windowBlurHandler = () => triggerTabViolation(true);
     const fullscreenChangeHandler = () =>
       handleFullScreenChange(submitAssessment, isCurrentPageSubmitAssessment, setIsFullScreen, assessmentSubmitId!);
 
     if (isTabProctorOn) document.addEventListener("visibilitychange", visibilityChangeHandler);
+    if (isTabProctorOn) window.addEventListener("blur", windowBlurHandler);
     if (isFullScreenProctorOn) document.addEventListener("fullscreenchange", fullscreenChangeHandler);
 
     return () => {
       if (isTabProctorOn) document.removeEventListener("visibilitychange", visibilityChangeHandler);
+      if (isTabProctorOn) window.removeEventListener("blur", windowBlurHandler);
       if (isFullScreenProctorOn) document.removeEventListener("fullscreenchange", fullscreenChangeHandler);
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
@@ -218,6 +228,20 @@ function Page({ params }: PageParams) {
       }
     };
   }, [assessmentData, assessmentSubmitId, isCurrentPageSubmitAssessment, isFullScreenProctorOn, isTabProctorOn, startTimer, startedAt]);
+
+  useEffect(() => {
+    if (!assessmentSubmitId || !isCopyPasteProctorOn) return;
+
+    const handleClipboardEvent = () => {
+      void handleCopyPasteAttempt();
+    };
+
+    document.addEventListener("paste", handleClipboardEvent, true);
+
+    return () => {
+      document.removeEventListener("paste", handleClipboardEvent, true);
+    };
+  }, [assessmentSubmitId, isCopyPasteProctorOn]);
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
@@ -236,8 +260,12 @@ function Page({ params }: PageParams) {
   // -------- handlers --------
   const handleCopyPasteAttempt = useCallback(async () => {
     if (!assessmentSubmitId || !isCopyPasteProctorOn) return;
-    const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-    updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
+    try {
+      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+      await updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
+    } catch (error) {
+      console.error("Failed to handle paste attempt:", error);
+    }
   }, [assessmentSubmitId, isCopyPasteProctorOn]);
 
   const submitAssessment = useCallback(
@@ -374,7 +402,7 @@ function Page({ params }: PageParams) {
 
   // -------- main render --------
   return (
-    <div onPaste={handleCopyPasteAttempt} onCopy={handleCopyPasteAttempt}>
+    <div>
       <PreventBackNavigation />
       <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
         <div className="h-screen mb-24">
