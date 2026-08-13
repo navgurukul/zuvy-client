@@ -45,15 +45,15 @@ export default function Page() {
   }, [isClient, isOnboardingLoading, onboardingData, forceEditMode, router, isOpen]);
 
   // Start tour if isLoginFirst is set (showTooltip was true from login api)
-  useEffect(() => {
-    if (!isClient || isOnboardingLoading) return;
-    if (isTourCompleted) return;
-    const isLoginFirst = localStorage.getItem('isLoginFirst');
-    if (isLoginFirst) {
-      localStorage.removeItem('isLoginFirst');
-      startTour();
-    }
-  }, [isClient, isOnboardingLoading, isTourCompleted, startTour]);
+  // useEffect(() => {
+  //   if (!isClient || isOnboardingLoading) return;
+  //   if (isTourCompleted) return;
+  //   const isLoginFirst = localStorage.getItem('isLoginFirst');
+  //   if (isLoginFirst) {
+  //     localStorage.removeItem('isLoginFirst');
+  //     startTour();
+  //   }
+  // }, [isClient, isOnboardingLoading, isTourCompleted, startTour]);
 
   // Wait for both localStorage and API strength to resolve before rendering
   const isLoading = isOnboardingLoading || isStrengthLoading || !isStrengthFetched;

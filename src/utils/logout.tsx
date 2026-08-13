@@ -31,10 +31,15 @@ export const Logout = async () => {
         localStorage.clear()
         db.permissions.clear()
 
-        // Delete the cookie
+        // Delete auth and redirect cookies
         document.cookie =
             'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-        window.location.pathname = '/'
+        document.cookie =
+            'redirectedUrl=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+
+        // Reset to the app root without preserving any previous query params,
+        // such as ?chapterId=5057 from the protected route redirect flow.
+        window.location.assign(`${window.location.origin}/`)
     } catch (error) {
         console.error('Logout error:', error)
     }
