@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getUser } from '@/store/store'
 import * as z from 'zod'
-import { ChevronLeft, AlertCircle, Info } from 'lucide-react'
+import { Check, ChevronLeft, Copy, Link2, AlertCircle, Info } from 'lucide-react'
 import {
     Form,
     FormControl,
@@ -74,6 +74,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         useState(false)
     const [mcqsWeightageDisabled, setMcqsWeightageDisabled] = useState(false)
     const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false) // Added state for dialog
+    const [studentLink, setStudentLink] = useState('')
+    const [isLinkCopied, setIsLinkCopied] = useState(false)
     const [currentAssessmentStatus, setCurrentAssessmentStatus] = useState(
         content?.currentState
     )
@@ -613,6 +615,34 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         )
     }
 
+    const generateStudentLink = () => {
+        if (!organizationId || !courseId || !moduleId || !chapterID) {
+            toast.error({
+                title: 'Unable to generate link',
+                description: 'Assessment details are incomplete.',
+            })
+            return
+        }
+
+        const link = `${window.location.origin}/student/course/${courseId}/org/${organizationId}/modules/${moduleId}?chapterId=${chapterID}`
+        setStudentLink(link)
+        setIsLinkCopied(false)
+    }
+
+    const copyStudentLink = async () => {
+        if (!studentLink) return
+
+        try {
+            await navigator.clipboard.writeText(studentLink)
+            setIsLinkCopied(true)
+        } catch {
+            toast.error({
+                title: 'Unable to copy link',
+                description: 'Please copy the link manually.',
+            })
+        }
+    }
+
     return (
         <ScrollArea className="h-screen pb-24 pr-10">
             <ScrollBar orientation="vertical" className="" />
@@ -634,7 +664,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         // onSubmit={form.handleSubmit(onSubmit)} // Submission is now triggered by dialog save
                         className="mt-4 ml-1"
                     >
-                        <div className="flex justify-between w-full items-center mb-6">
+                        <div className="flex justify-between w-full items-center mb-4">
                             <div className="flex items-center">
                                 <h1 className="text-lg font-bold text-muted-dark">
                                     Manage Settings
@@ -698,6 +728,48 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 </DialogContent>
                             </Dialog>
                         </div>
+
+                        {(currentAssessmentStatus === 'PUBLISHED' ||
+                            currentAssessmentStatus === 'ACTIVE') && (
+                        <div className="mb-4 mt-0">
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                {studentLink && (
+                                    <Input
+                                        value={studentLink}
+                                        readOnly
+                                        aria-label="Student assessment link"
+                                        className="flex-1"
+                                    />
+                                )}
+                                {studentLink && (
+                                    <Button
+                                        type="button"
+                                        onClick={copyStudentLink}
+                                        className="shrink-0 mt-2"
+                                    >
+                                        {isLinkCopied ? (
+                                            <Check className="mr-2 h-4 w-4" />
+                                        ) : (
+                                            <Copy className="mr-2 h-4 w-4" />
+                                        )}
+                                        {isLinkCopied ? 'Copied' : 'Copy Link'}
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    onClick={generateStudentLink}
+                                    className="ml-auto shrink-0 mt-2"
+                                >
+                                Generate Student Link
+                                </Button>
+                            </div>
+                            {studentLink && (
+                                <p className="mt-2 text-sm text-success">
+                                    Student link generated successfully.
+                                </p>
+                            )}
+                        </div>
+                        )}
 
                         <div className="flex items-center mb-6 text-muted-dark">
                             <label

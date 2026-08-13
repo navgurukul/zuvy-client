@@ -64,6 +64,7 @@ function Chapter() {
     const lastOrderRef = useRef<number[]>([])
     const isDragActiveRef = useRef(false)
     const draggedChapterRef = useRef<number | null>(null)
+    const missingChapterRetryRef = useRef<string | null>(null)
 
     const {
         moduleName: fetchedModuleName,
@@ -144,17 +145,20 @@ function Chapter() {
         if (clickedChapter?.topicId) {
             // Found in current list — use its topicId
             setTopicId(clickedChapter.topicId)
-        } else if (chapter_id && !clickedChapter) {
-            // Chapter not in the cached list yet (e.g. just created).
-            // Keep the topicId already set in the store by ChapterModal so
-            // page.tsx can proceed to fetch the content without redirecting away.
-            // Force a refetch so the sidebar updates to include the new chapter.
-            refetch()
+            missingChapterRetryRef.current = null
+        } else if (chapter_id && moduleChapters.length > 0) {
+            // A newly created chapter can be absent from the first response.
+            // Retry once for this route, but never on every response update.
+            const retryKey = `${moduleID}-${chapter_id}`
+            if (missingChapterRetryRef.current !== retryKey) {
+                missingChapterRetryRef.current = retryKey
+                void refetch()
+            }
         }
 
         setOriginalChapterData(moduleChapters.map((item: any) => ({ ...item })))
         lastOrderRef.current = moduleChapters.map((item: any) => item.chapterId)
-    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter, refetch])
+    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, moduleID, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter, refetch])
 
     // Update active chapter when chapter data changes
     useEffect(() => {
@@ -272,6 +276,9 @@ function Chapter() {
                         }))
                         setOriginalChapterData(updatedOriginalData)
                         lastOrderRef.current = chapterData.map((c) => c.chapterId)
+
+                        // Refetch chapters to sync hook cache with latest server state
+                        refetch()
                     },
                     onError: (error: any) => {
                         console.error('Reorder error:', error)

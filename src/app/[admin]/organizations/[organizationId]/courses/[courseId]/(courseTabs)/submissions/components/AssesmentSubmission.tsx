@@ -98,6 +98,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                         qualifiedStudents={
                                                             assessment.qualifiedStudents
                                                         }
+                                                        hasReattemptRequest={
+                                                            Boolean(assessment.hasReattemptRequest)
+                                                        }
                                                         // onDownloadClick={() =>
                                                         //     handleDownloadClick(
                                                         //         assessment
