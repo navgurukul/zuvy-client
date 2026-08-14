@@ -10,6 +10,8 @@ import { getUser } from '@/store/store'
 
 const AssesmentComponent = (props: AssesmentComponentProps) => {
     const isDisabled = props.studentsSubmitted === 0
+    const areSubmissionActionsDisabled =
+        isDisabled && !props.hasReattemptRequest
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -53,7 +55,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                         </button>
                         )}
                     </div>
-                    {isDisabled ? (
+                    {areSubmissionActionsDisabled ? (
                         <div className="group relative">
                             <button
                                 className="text-gray-400 cursor-not-allowed"
