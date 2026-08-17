@@ -10,6 +10,7 @@ type LeaderboardEntry = {
 
 type UseLeaderboardReturn = {
   topEntries: LeaderboardEntry[];
+  modalEntries: LeaderboardEntry[];
   selfEntry: LeaderboardEntry | null;
   isSelfInTopFive: boolean;
   loading: boolean;
@@ -18,6 +19,7 @@ type UseLeaderboardReturn = {
 
 export function useLeaderboard(courseId: string): UseLeaderboardReturn {
   const [topEntries, setTopEntries] = useState<LeaderboardEntry[]>([]);
+  const [modalEntries, setModalEntries] = useState<LeaderboardEntry[]>([]);
   const [selfEntry, setSelfEntry] = useState<LeaderboardEntry | null>(null);
   const [isSelfInTopFive, setIsSelfInTopFive] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ export function useLeaderboard(courseId: string): UseLeaderboardReturn {
       setError(null);
       try {
         const res = await api.get(
-          `/leaderboard/student/data?bootcampId=${courseId}&limit=5`
+          `/leaderboard/student/data?bootcampId=${courseId}&limit=10`
         );
 
         const data = res.data;
@@ -58,9 +60,11 @@ export function useLeaderboard(courseId: string): UseLeaderboardReturn {
             }
           : null;
 
-        const selfInTop = mapped.some((e) => e.isYou);
+        const visibleTopFive = mapped.slice(0, 5);
+        const selfInTop = visibleTopFive.some((e) => e.isYou);
 
-        setTopEntries(mapped);
+        setTopEntries(visibleTopFive);
+        setModalEntries(mapped.slice(0, 10));
         setSelfEntry(self);
         setIsSelfInTopFive(selfInTop);
       } catch (err) {
@@ -73,5 +77,5 @@ export function useLeaderboard(courseId: string): UseLeaderboardReturn {
     fetchLeaderboard();
   }, [courseId]);
 
-  return { topEntries, selfEntry, isSelfInTopFive, loading, error };
+  return { topEntries, modalEntries, selfEntry, isSelfInTopFive, loading, error };
 }

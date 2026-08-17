@@ -22,6 +22,7 @@ import useRequestReattempt from "@/app/student/hooks/useRequestReattempt";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
 import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
+import { chapterRewardManager } from '@/app/student/_components/reward/chapterRewardManager';
 
 
 function formatToIST(dateString: string | undefined) {
@@ -226,6 +227,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 
     channel.onmessage = (event) => {
       if (event.data === 'assessment_submitted') {
+        // Mark the chapter as completed in this tab so that the reward
+        // modal is shown when trackingData re-loads on the module page.
+        if (chapterId) {
+          chapterRewardManager.markChapterCompleted(chapterId);
+        }
         refetch();
         if (typeof refetchChapter === 'function') {
           refetchChapter();

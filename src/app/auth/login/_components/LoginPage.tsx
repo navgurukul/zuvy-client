@@ -248,13 +248,15 @@ const handleGoogleSuccess = async (
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
                 } else if (redirectedUrl) {
                     router.push(redirectedUrl)
-                } else if (userRole === 'student') {
-                    if (response.data.showTooltip) {
-                        router.push('/student/profile')
-                    } else {
-                        router.push('/student')
-                    }
-                } else if (userRole === 'super_admin') {
+                } 
+                // else if (userRole === 'student') {
+                //     if (response.data.showTooltip) {
+                //         router.push('/student/profile')
+                //     } else {
+                //         router.push('/student')
+                //     }
+                // } 
+                else if (userRole === 'super_admin') {
                      router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
@@ -296,8 +298,7 @@ const handleGoogleSuccess = async (
 
         console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
         console.log('Current URL:', window.location.href)
-        if (window.location.href.includes('route')) {
-        // if (window.location.href) {
+        if (urlParams.has('route')) {
             console.log('URL has route param')
             const route = urlParams.get('route')
             console.log('Route param from URL:', route)

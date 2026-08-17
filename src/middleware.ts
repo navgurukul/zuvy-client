@@ -41,9 +41,9 @@ export function middleware(request: NextRequest) {
         const redirectUrl = new URL('/', request.url)
 
        // if course path present, add route param
-       if (hasCoursePath) {
-        redirectUrl.searchParams.set('route', pathname)
-       }
+    if (hasCoursePath) {
+     redirectUrl.searchParams.set('route', `${pathname}${request.nextUrl.search}`)
+    }
 
        return NextResponse.redirect(redirectUrl)
       }

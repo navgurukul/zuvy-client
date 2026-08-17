@@ -3,9 +3,8 @@
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Papa from 'papaparse'
-import { Upload } from 'lucide-react'
+import { Download, Upload } from 'lucide-react'
 import { X } from 'lucide-react'
-import Link from 'next/link'
 import { removeNulls, transformQuizzes } from '@/utils/admin'
 // import {DropzoneforMcqProps} from "@/app/[admin]/resource/_components/adminResourceComponentType"
 
@@ -92,13 +91,22 @@ const DropzoneforMcq = ({
                     <p className="text-muted-foreground">
                         .csv files are supported
                     </p>
+                    <a
+                        href="/sample-bulk-mcq-upload.csv"
+                        download="sample-bulk-mcq-upload.csv"
+                        onClick={(event) => event.stopPropagation()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                        <Download size={16} />
+                        Download sample CSV
+                    </a>
                 </div>
             )}
 
             {fileName && (
                 <div className="flex flex-col items-start mt-5 w-full gap-y-5 border border-border p-3 rounded-lg bg-background">
                     <div className="w-full flex items-center justify-between">
-                        <h2 className="font-bold">{fileName}</h2>
+                        <h2 className="font-bold text-lg">{fileName}</h2>
                         <X
                             size={20}
                             className="text-gray-400 cursor-pointer hover:text-destructive"
@@ -107,7 +115,7 @@ const DropzoneforMcq = ({
                     </div>
                     {mcqSide && (
                         <div className="text-start">
-                            <h3 className="mb-2 font-semibold">
+                            <h3 className="mb-2 font-semibold text-sm">
                                 Upload Status
                             </h3>
                             <div className="flex items-center justify-start space-x-2">

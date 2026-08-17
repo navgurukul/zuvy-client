@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import * as z from 'zod'
-import{UseFeedbackFormProps,FeedbackFormResponse} from './hookTypes'
-
+import { UseFeedbackFormProps, FeedbackFormResponse } from './hookTypes'
+import { chapterRewardManager } from '@/app/student/_components/reward/chapterRewardManager'
 
 export const formSchema = z.object({
     section: z.array(
@@ -74,7 +74,7 @@ export const useFeedbackForm = ({
         } catch (err: any) {
             setError(
                 err?.response?.data?.message ||
-                    'An error occurred while fetching the questions'
+                'An error occurred while fetching the questions'
             )
             toast.error({
                 title: 'Error',
@@ -84,7 +84,7 @@ export const useFeedbackForm = ({
             setLoading(false)
         }
     }, [moduleId, chapterId])
-    
+
     const submitForm = async (values: FormSchema) => {
         try {
             setLoading(true)
@@ -126,10 +126,15 @@ export const useFeedbackForm = ({
                     transformedData
                 )
 
-                toast.success({
-                    title: res.data.status,
-                    description: 'Form has been submitted successfully!',
-                })
+                if (chapterId) {
+                    // Feedback forms don't award sparks — show reward card without sparks counter
+                    chapterRewardManager.markChapterCompleted(chapterId, true)
+                }
+
+                // toast.success({
+                //     title: res.data.status,
+                //     description: 'Form has been submitted successfully!',
+                // })
 
                 onSuccess?.()
                 setStatus('Completed')

@@ -1,0 +1,704 @@
+/* ==========================================================================
+   ZUVY Mascot & Reward Animation Styles
+   ========================================================================== */
+
+/* Mascot Base */
+.zuvy-mascot {
+  --zm-size: 96px;
+  --zm-green: hsl(var(--accent, 153 91% 49%));
+  --zm-ink: hsl(var(--foreground, 150 15% 15%));
+  --zm-bubble-bg: hsl(var(--card, 0 0% 100%));
+  --zm-bubble-border: hsl(var(--border, 30 20% 90%));
+  --zm-bubble-text: hsl(var(--text-primary, 150 15% 15%));
+  --zm-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.28);
+
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 900;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(80px);
+}
+
+.zuvy-mascot.zm-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.zuvy-mascot.zm-entering {
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.zuvy-mascot.zm-leaving {
+  transition: opacity 260ms ease, transform 260ms ease;
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+/* Mascot Body & Animations */
+.zm-body-wrap {
+  position: relative;
+  width: var(--zm-size);
+  height: var(--zm-size);
+  order: 2;
+}
+
+.zm-body {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  animation: zm-float 3.6s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes zm-float {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.008);
+  }
+}
+
+.zm-body.zm-tilt {
+  animation: zm-float 3.6s ease-in-out infinite, zm-tilt 6.5s ease-in-out infinite;
+}
+
+@keyframes zm-tilt {
+
+  0%,
+  92%,
+  100% {
+    rotate: 0deg;
+  }
+
+  95% {
+    rotate: -3deg;
+  }
+
+  98% {
+    rotate: 2deg;
+  }
+}
+
+.zm-body.zm-celebrate {
+  animation: zm-celebrate 620ms cubic-bezier(0.34, 1.56, 0.64, 1) 1;
+}
+
+@keyframes zm-celebrate {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  35% {
+    transform: translateY(-10px) scale(1.08);
+  }
+
+  65% {
+    transform: translateY(-6px) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.zm-body.zm-surprised {
+  animation: zm-surprise 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 1;
+}
+
+@keyframes zm-surprise {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.12);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.zm-sprite {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  display: block;
+}
+
+.zm-sprite-current {
+  opacity: 1;
+}
+
+.zm-sprite-fade {
+  opacity: 0;
+}
+
+.zm-blink {
+  position: absolute;
+  left: 24%;
+  top: 27%;
+  width: 46%;
+  height: 16%;
+  background: var(--zm-green);
+  border-radius: 40% / 60%;
+  transform: scaleY(0);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.zm-blink.zm-blinking {
+  animation: zm-blink-anim 140ms ease-in-out 1;
+}
+
+@keyframes zm-blink-anim {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  40% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  60% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+/* Speech Bubble */
+.zm-bubble {
+  order: 1;
+  position: relative;
+  max-width: 240px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--zm-bubble-bg);
+  border: 1px solid var(--zm-bubble-border);
+  border-radius: 14px;
+  box-shadow: var(--zm-shadow);
+  color: var(--zm-bubble-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 500;
+  opacity: 0;
+  transform: scale(0.9);
+  transform-origin: 100% 100%;
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: auto;
+}
+
+.zm-bubble.zm-shown {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.zm-bubble::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  background: var(--zm-bubble-bg);
+  border-right: 1px solid var(--zm-bubble-border);
+  border-bottom: 1px solid var(--zm-bubble-border);
+  transform: rotate(45deg);
+}
+
+/* Modal Overlay */
+.reward-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(20, 24, 22, 0.58);
+  backdrop-filter: blur(3px);
+
+  padding: 1rem;
+  transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reward-popup-overlay.exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Reward Popup Container */
+.reward-popup {
+  background: var(--zm-bubble-bg, #ffffff);
+  border: 1px solid var(--zm-bubble-border, #e5e7eb);
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 2.25rem 2rem 2rem;
+  width: 360px;
+  max-width: 90vw;
+  text-align: center;
+  position: relative;
+  overflow: visible;
+  animation: popupSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reward-popup.exiting {
+  transform: scale(0.92) translateY(10px);
+  opacity: 0;
+}
+
+@keyframes popupSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(15px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Submission Modal Zoom-in Transition */
+.submission-dialog-zoom-in {
+  animation: submissionDialogZoomIn 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes submissionDialogZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Badge */
+.reward-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.1rem;
+  border-radius: 50%;
+  background: #4d9b2f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(77, 155, 47, 0.35);
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.reward-badge.animate {
+  animation: badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes badgePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reward-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+.reward-subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Spark Counter */
+.reward-spark-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin-bottom: 1.4rem;
+  position: relative;
+}
+
+.reward-spark-count {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #4d9b2f;
+  font-variant-numeric: tabular-nums;
+}
+
+.reward-spark-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Breakdown Rows */
+.reward-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.6rem;
+  text-align: left;
+}
+
+.reward-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(243, 244, 246, 0.75);
+  border-radius: 0.6rem;
+  color: #1f2937;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.reward-row.visible {
+  animation: rowIn 0.4s ease forwards;
+}
+
+@keyframes rowIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reward-row-value {
+  font-weight: 700;
+  color: #4d9b2f;
+}
+
+/* Continue Button */
+.reward-continue-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.6rem;
+  background: #286b2d;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: background 0.2s ease;
+}
+
+.reward-continue-btn.visible {
+  animation: rowIn 0.4s ease forwards;
+  pointer-events: auto;
+}
+
+.reward-continue-btn:hover {
+  background: #215a26;
+}
+
+/* Mascot Slot inside Reward Popup */
+.reward-mascot-slot {
+  position: absolute;
+
+  /*
+   * Text ke immediately baad.
+   */
+  left: 170px;
+  top: 50%;
+
+  width: 0;
+  height: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: translateY(-50%);
+
+  z-index: 5;
+
+  pointer-events: none;
+}
+
+.reward-mascot-slot .zuvy-mascot {
+  position: absolute;
+
+  left: 0;
+  top: 65%;
+
+  right: auto;
+  bottom: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* transform: translateY(-50%); */
+  transform: translateY(-50%) translateY(5px);
+
+
+  gap: 4px;
+
+  pointer-events: none;
+}
+
+.reward-mascot-slot .zuvy-mascot.zm-visible {
+  transform: translateY(-50%);
+}
+
+.reward-mascot-slot .zuvy-mascot.zm-entering {
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reward-mascot-slot .zm-body-wrap {
+  order: 1;
+}
+
+.reward-mascot-slot .zm-bubble {
+  order: 2;
+  margin-bottom: 0;
+  margin-top: 10px;
+  transform-origin: 50% 0%;
+}
+
+.reward-mascot-slot .zm-bubble::after {
+  right: auto;
+  left: 50%;
+  bottom: auto;
+  top: -7px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--zm-bubble-border);
+  border-top: 1px solid var(--zm-bubble-border);
+}
+
+
+
+/* Spark Projectile & Absorb Effects */
+.reward-spark-projectile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px 2px rgba(16, 185, 129, 0.65),
+    0 0 12px 4px rgba(16, 185, 129, 0.3);
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 10;
+}
+
+.reward-spark-count.absorb-pulse {
+  animation: sparkAbsorb 0.5s ease-out;
+}
+
+@keyframes sparkAbsorb {
+  0% {
+    transform: scale(1);
+    text-shadow: none;
+  }
+
+  35% {
+    transform: scale(1.22);
+    text-shadow: 0 0 14px rgba(16, 185, 129, 0.8);
+  }
+
+  100% {
+    transform: scale(1);
+    text-shadow: none;
+  }
+}
+
+.reward-spark-total.absorb-glow::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.35), transparent 70%);
+  opacity: 0;
+  animation: absorbGlow 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes absorbGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.reward-spark-ember {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 4px 1px rgba(16, 185, 129, 0.6);
+  pointer-events: none;
+  animation: emberScatter 0.65s ease-out forwards;
+}
+
+@keyframes emberScatter {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--px), var(--py)) scale(0.3);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .zuvy-mascot {
+    --zm-size: 76px;
+  }
+
+  .zm-bubble {
+    max-width: 190px;
+    font-size: 13px;
+  }
+
+  .reward-popup {
+    padding: 1.75rem 1.25rem 1.5rem;
+    width: 320px;
+  }
+}
+
+.reward-feedback-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.6rem;
+}
+
+.reward-feedback-mascot-slot {
+  position: relative;
+  width: 100%;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.reward-feedback-mascot-slot .zuvy-mascot {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.reward-feedback-mascot-slot .zuvy-mascot.zm-visible {
+  transform: translateX(-50%);
+}
+
+.reward-feedback-message {
+  margin: 0;
+  max-width: 280px;
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* =========================================================
+   Full Page Confetti
+========================================================= */
+
+.reward-confetti {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0.2;
+  }
+}

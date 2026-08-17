@@ -28,6 +28,7 @@ export type AssesmentComponentProps = {
     qualifiedStudents: number
     // onDownloadPdf: () => void
     onDownloadCsv: () => void
+    hasReattemptRequest: boolean
 }
 
 

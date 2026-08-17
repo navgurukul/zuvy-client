@@ -1,10 +1,12 @@
 'use client'
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
 import { useCodingChallenge } from '@/app/student/hooks/useCodingChallenge';
+import useAllChaptersWithStatus from '@/hooks/useAllChaptersWithStatus';
+import ZuvyRewardModal from '@/app/student/_components/reward/ZuvyRewardModal';
 import {
     QuestionPanel,
     CodeEditorPanel,
@@ -24,24 +26,62 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
     const moduleId = searchParams.get('moduleId');
     const orgId = params.orgId;
 
+    const { trackingData, isRefetching, refetch: refetchTrackingData } = useAllChaptersWithStatus(moduleId || '');
+    const [isWaitingForReward, setIsWaitingForReward] = useState(false);
+
+    const [rewardModalState, setRewardModalState] = useState<{
+        isOpen: boolean;
+        sparks: number;
+        chapterTitle: string;
+    }>({
+        isOpen: false,
+        sparks: 0,
+        chapterTitle: '',
+    });
+
     // Chapter completion hook
     const { isCompleting, completeChapter } = useChapterCompletion({
         courseId: params.courseId as string,
         moduleId: moduleId as string,
         chapterId: chapterId?.toString() || '',
-        onSuccess: () => {
-            if (onChapterComplete) {
-                onChapterComplete();
-            }
-        },
+        onSuccess: () => handleChapterCompletionSuccess(),
+        // The editor manages its own reward modal via isWaitingForReward state.
+        // Skipping chapterRewardManager prevents a duplicate reward on the module page.
+        skipRewardManager: true,
     });
 
     // Main coding challenge hook
-    const { state, actions, constants ,  } = useCodingChallenge({
+    const { state, actions, constants } = useCodingChallenge({
         questionId,
         onChapterComplete: completeChapter,
         orgId: orgId as string,
     });
+
+    const handleChapterCompletionSuccess = () => {
+        setIsWaitingForReward(true);
+        refetchTrackingData();
+        if (onChapterComplete) {
+            onChapterComplete();
+        }
+    };
+
+    useEffect(() => {
+        // Wait until refetch has completed (isRefetching goes false) before reading fresh sparks
+        if (isWaitingForReward && !isRefetching && trackingData && trackingData.length > 0) {
+            const currentChapter = trackingData.find(
+                (c) => String(c.id) === String(chapterId)
+            );
+            const sparks = currentChapter?.sparks ?? 0;
+            const title = currentChapter?.title || state.questionDetails?.title || 'Coding Challenge';
+
+            setRewardModalState({
+                isOpen: true,
+                sparks,
+                chapterTitle: title,
+            });
+            setIsWaitingForReward(false);
+        }
+    }, [isWaitingForReward, isRefetching, trackingData, chapterId, state.questionDetails?.title]);
 
     const handleBack = () => {
         actions.closeSolutionModal();
@@ -98,6 +138,16 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
                 codeResult={state.codeResult}
                 onViewSolution={onViewSolution}
                 onReturnToCourse={onReturnToCourse}
+            />
+
+            <ZuvyRewardModal
+                isOpen={rewardModalState.isOpen}
+                totalSparks={rewardModalState.sparks}
+                chapterTitle={rewardModalState.chapterTitle}
+                onClose={() => setRewardModalState({ isOpen: false, sparks: 0, chapterTitle: '' })}
+                onContinue={() => {
+                    actions.openSolutionModal();
+                }}
             />
 
             {/* Main Content Area */}
