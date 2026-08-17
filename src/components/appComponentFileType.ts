@@ -37,4 +37,5 @@ export interface LeaderboardProps {
   error?: string | null
   selfEntry?: Entry | null
   showSelfEntry?: boolean
+  onViewLeaderboard?: () => void
 }
