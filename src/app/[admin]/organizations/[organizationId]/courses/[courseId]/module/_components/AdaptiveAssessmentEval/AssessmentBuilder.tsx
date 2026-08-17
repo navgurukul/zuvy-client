@@ -503,6 +503,10 @@ export default function AssessmentBuilder({
           onClose={() => setReplaceModal(null)}
           showToast={showToast}
           bankQuestions={bankQuestions}
+          onReplaced={async () => {
+            if (!aiAssessmentId) return;
+            await getQuestionSets(aiAssessmentId);
+          }}
         />
       )}
 

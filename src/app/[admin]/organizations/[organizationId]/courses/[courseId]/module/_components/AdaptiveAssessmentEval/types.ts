@@ -10,6 +10,7 @@ export interface Chapter {
 
 export interface Question {
   id: string;
+  questionSetId?: number;
   qtype: string;
   topic: string;
   difficulty: string;

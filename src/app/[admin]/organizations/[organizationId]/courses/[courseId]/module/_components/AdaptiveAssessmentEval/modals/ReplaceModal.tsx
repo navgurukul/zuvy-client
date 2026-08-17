@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Loader2, X } from 'lucide-react';
 import { THEME, DIFF_LABEL } from '../constants';
 import { Btn, DiffBadge, Badge } from '../ui-primitives';
-import { pickDemoQuestion } from '../helpers';
 import { Question } from '../types';
+import { useGetReplacementQuestions } from '@/hooks/useGetReplacementQuestionEval';
+import { useReplaceQuestion } from '@/hooks/usePutReplacementQuestion';
 
 interface ReplaceModalProps {
   item: Question;
   pool: Question[];
-  setPool: (pool: Question[]) => void;
+  setPool: React.Dispatch<React.SetStateAction<Question[]>>;
   onClose: () => void;
   showToast: (msg: string) => void;
   bankQuestions: Question[];
+  onReplaced?: () => Promise<void> | void;
 }
 
 export function ReplaceModal({
@@ -21,9 +23,38 @@ export function ReplaceModal({
   onClose,
   showToast,
   bankQuestions,
+  onReplaced,
 }: ReplaceModalProps) {
-  const [genning, setGenning] = useState(false);
-  const candidates = bankQuestions.filter(
+  const { getReplacementQuestions, isFetching, fetchError, replacementQuestions } =
+    useGetReplacementQuestions();
+  const { replaceQuestion, isReplacing, replaceError } = useReplaceQuestion();
+
+  useEffect(() => {
+    getReplacementQuestions({
+      topicName: item.topic,
+      difficulty: item.difficulty as 'easy' | 'medium' | 'hard',
+    });
+  }, [getReplacementQuestions, item.topic, item.difficulty]);
+
+  const apiCandidates: Question[] = useMemo(
+    () =>
+      (replacementQuestions?.data || []).map((q) => ({
+        id: String(q.id),
+        qtype: item.qtype,
+        topic: q.topicName || item.topic,
+        difficulty: q.difficulty || item.difficulty,
+        quarantined: false,
+        text: q.question,
+        source: 'ai' as const,
+        validated: true,
+        options: q.options ? Object.values(q.options) : [],
+        correctIndex: Number(q.correctOption) > 0 ? Number(q.correctOption) - 1 : 0,
+        explanation: 'Replacement question fetched from API',
+      })),
+    [item.difficulty, item.qtype, item.topic, replacementQuestions?.data]
+  );
+
+  const bankCandidates = bankQuestions.filter(
     (q: Question) =>
       q.qtype === item.qtype &&
       q.topic === item.topic &&
@@ -32,27 +63,38 @@ export function ReplaceModal({
       !pool.some((p: Question) => p.id === q.id)
   );
 
-  const doReplace = (replacement: Question) => {
-    setPool((p: Question[]) =>
-      p.map((q) => (q.id === item.id ? { ...replacement, id: item.id } : q))
+  const candidates = useMemo(() => {
+    if (apiCandidates.length > 0) {
+      return apiCandidates;
+    }
+
+    return bankCandidates.filter(
+      (q: Question) =>
+        q.text !== item.text &&
+        !pool.some((p: Question) => p.id === q.id || p.text === q.text)
     );
+  }, [apiCandidates, bankCandidates, item.text, pool]);
+
+  const doReplace = async (replacement: Question) => {
+    if (!item.questionSetId) {
+      showToast('Question set id is missing. Unable to replace this question.');
+      return;
+    }
+
+    const response = await replaceQuestion(item.id, {
+      questionSetId: item.questionSetId,
+      replacementQuestionId: Number(replacement.id),
+    });
+
+    if (!response?.success) {
+      showToast(replaceError || response?.message || 'Failed to replace question');
+      return;
+    }
+
+    setPool(pool.map((q) => (q.id === item.id ? { ...replacement, id: item.id } : q)));
+    await onReplaced?.();
     showToast('Question replaced');
     onClose();
-  };
-
-  const generateReplacement = () => {
-    setGenning(true);
-    setTimeout(() => {
-      const q = pickDemoQuestion(item.topic, item.difficulty, [
-        item.text,
-        ...pool.map((x: Question) => x.text),
-      ]);
-      if (q) doReplace({ ...q, id: item.id });
-      else {
-        showToast('No more demo replacements for this cell');
-        setGenning(false);
-      }
-    }, 400);
   };
 
   return (
@@ -122,9 +164,24 @@ export function ReplaceModal({
           >
             {item.text}
           </div>
-          {candidates.map((c: Question) => (
+          {isFetching && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+              <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+            </div>
+          )}
+          {!isFetching && fetchError && (
+            <div style={{ marginBottom: 10, fontSize: 13, color: THEME.danger }}>
+              {fetchError}
+            </div>
+          )}
+          {!isFetching && candidates.length === 0 && (
+            <div style={{ marginBottom: 10, fontSize: 13, color: THEME.textSub }}>
+              No replacement questions found for this topic and difficulty.
+            </div>
+          )}
+          {candidates.map((c: Question, index: number) => (
             <div
-              key={c.id}
+              key={`${c.id}-${index}`}
               style={{
                 border: `1px solid ${THEME.border}`,
                 borderRadius: 8,
@@ -143,27 +200,15 @@ export function ReplaceModal({
                 <div style={{ display: 'flex', gap: 5 }}>
                   <DiffBadge d={c.difficulty} />
                   <Badge bg={THEME.infoLight} color={THEME.info}>
-                    Validated
+                    {apiCandidates.length > 0 ? 'API' : 'Validated'}
                   </Badge>
                 </div>
               </div>
-              <Btn size="sm" onClick={() => doReplace(c)}>
-                <RefreshCw size={12} /> Use this
+              <Btn size="sm" disabled={isReplacing} onClick={() => doReplace(c)}>
+                {isReplacing ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <RefreshCw size={12} />} Use this
               </Btn>
             </div>
           ))}
-          <div style={{ marginTop: 12, padding: '16px 0', textAlign: 'center' as const }}>
-            <Btn variant="secondary" disabled={genning} onClick={generateReplacement}>
-              {genning ? (
-                <>
-                  <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
-                  Generating…
-                </>
-              ) : (
-                'Generate a new replacement'
-              )}
-            </Btn>
-          </div>
         </div>
       </div>
     </div>

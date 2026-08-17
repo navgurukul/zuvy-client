@@ -42,9 +42,11 @@ export function StepReview({
   const [selectedSetIndex, setSelectedSetIndex] = useState(0);
 
   const hasQuestionSets = Boolean(questionSets?.sets?.length);
+  const selectedSet = hasQuestionSets ? questionSets!.sets[selectedSetIndex] : null;
   const activePool = hasQuestionSets
-    ? (questionSets!.sets[selectedSetIndex]?.questions ?? []).map((q) => ({
+    ? (selectedSet?.questions ?? []).map((q) => ({
         id: String(q.questionId),
+        questionSetId: selectedSet?.id,
         qtype: 'mcq',
         topic: q.topicName || 'General',
         difficulty: q.difficulty || 'medium',

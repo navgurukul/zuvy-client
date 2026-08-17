@@ -633,3 +633,41 @@ export interface AiAssessmentByChapter {
 }
 
 export type GetAiAssessmentsByChapterApiResponse = AiAssessmentByChapter[];
+
+export interface ReplaceQuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface ReplaceQuestionOption_ {
+    id: number;
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+    question: string;
+    options: ReplaceQuestionOption;
+    correctOption: number;
+    levelId: string;
+}
+
+export interface GetReplacementQuestionsApiResponse {
+    data: ReplaceQuestionOption_[];
+    total: number;
+}
+
+export interface GetReplacementQuestionsParams {
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+}
+
+export interface ReplaceQuestionRequestBody {
+    questionSetId: number;
+    replacementQuestionId: number;
+}
+
+export interface ReplaceQuestionApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
