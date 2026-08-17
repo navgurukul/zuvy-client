@@ -9,6 +9,7 @@ export interface TrackingDataItem {
   topicId: number;
   chapterTrackingDetails: ChapterTrackingDetail[];
   status: 'Pending' | 'Completed';
+  sparks?: number;
 }
 
 export interface ModuleDetail {

@@ -9,11 +9,13 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
-import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
+import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
-import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
+import { TopicItem, Topic } from '@/app/student/_pages/pageStudentType'
+import ZuvyRewardModal from "@/app/student/_components/reward/ZuvyRewardModal";
+import { chapterRewardManager } from "@/app/student/_components/reward/chapterRewardManager";
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();
@@ -27,7 +29,40 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
-  
+
+  const [rewardModalState, setRewardModalState] = useState<{
+    isOpen: boolean;
+    sparks: number;
+    chapterTitle: string;
+    hideSparks: boolean;
+  }>({
+    isOpen: false,
+    sparks: 0,
+    chapterTitle: "",
+    hideSparks: false,
+  });
+
+  useEffect(() => {
+    if (trackingData && trackingData.length > 0) {
+      const pending = chapterRewardManager.consumePendingCompletion();
+      if (pending) {
+        const { id: pendingChapterId, hideSparks } = pending;
+        const completedChapter = trackingData.find(
+          (c) => c.id.toString() === pendingChapterId.toString()
+        );
+        const sparks = hideSparks ? 0 : (completedChapter?.sparks ?? 0);
+        const title = completedChapter?.title || "Chapter";
+
+        setRewardModalState({
+          isOpen: true,
+          sparks,
+          chapterTitle: title,
+          hideSparks,
+        });
+      }
+    }
+  }, [trackingData]);
+
 
 
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -37,11 +72,11 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
 
 
-useEffect(() => {
-  if (enhancedModule) {
-    setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
-  }
-}, [trackingData, moduleDetails, loading, error]);
+  useEffect(() => {
+    if (enhancedModule) {
+      setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
+    }
+  }, [trackingData, moduleDetails, loading, error]);
 
 
 
@@ -55,7 +90,7 @@ useEffect(() => {
           behavior: 'smooth',
           block: 'center',
         });
-        hasScrolledRef.current = true;  
+        hasScrolledRef.current = true;
       }
     }
   }, [chapterId, expandedTopics]);
@@ -216,7 +251,7 @@ useEffect(() => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl text-primary font-heading font-bold mb-2">Module Not Found</h1>
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"  asChild>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
             <Link href={`/student/course/${courseId}/org/${orgId}`}>Back to Course</Link>
           </Button>
         </div>
@@ -340,7 +375,7 @@ useEffect(() => {
     );
   };
 
-  const getItemDetails = (item:TopicItem) => {
+  const getItemDetails = (item: TopicItem) => {
     if (item.type === 'live-class') {
       return 'Live Class';
     }
@@ -448,7 +483,7 @@ useEffect(() => {
                                                   item.title}
                                 </div>
                                 <div className="text-xs font-md text-muted-foreground">
-                                  {getItemDetails(item)}  
+                                  {getItemDetails(item)}
                                 </div>
                               </div>
                               {item.status === 'completed' && (
@@ -475,12 +510,12 @@ useEffect(() => {
         {isMobile && <Header />}
         <div className="flex w-full flex-start" >
 
-              <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}/org/${orgId}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
-                </Link>
-              </Button>
+          <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
+            <Link href={`/student/course/${courseId}/org/${orgId}`}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Course
+            </Link>
+          </Button>
         </div>
         <div className="flex-1 overflow-hidden">
           <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
@@ -488,7 +523,7 @@ useEffect(() => {
               selectedItemData={selectedItemData}
               onChapterComplete={refetch} getAssessmentData={function (itemId: string) {
                 throw new Error("Function not implemented.");
-              } }            />
+              }} />
           </div>
         </div>
       </div>
@@ -545,6 +580,15 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {/* Reward Modal */}
+      <ZuvyRewardModal
+        isOpen={rewardModalState.isOpen}
+        totalSparks={rewardModalState.sparks}
+        chapterTitle={rewardModalState.chapterTitle}
+        hideSparks={rewardModalState.hideSparks}
+        onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

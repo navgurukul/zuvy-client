@@ -281,8 +281,8 @@ function Page({ params }: PageParams) {
         typeOfsubmission,
       });
       if (!success) return;
-      toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
-      completeChapter();
+      // toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
+      await completeChapter();
       navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
       const channel = new BroadcastChannel("assessment_channel");
       channel.postMessage("assessment_submitted");
@@ -426,7 +426,7 @@ function Page({ params }: PageParams) {
                   assessmentData={assessmentData}
                   isMobile={isMobile}
                   assessmentSubmitId={assessmentSubmitId}
-                  setIsCodingSubmitted={() => {}}
+                  setIsCodingSubmitted={() => { }}
                   onSolve={(id, cq) => handleSolveChallenge("coding", id, cq)}
                 />
                 <McqSection

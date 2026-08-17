@@ -24,34 +24,50 @@ export function SubmissionModal({
                 onClose();
             }
         }}>
-            <DialogContent className="max-w-md">
+        <DialogContent className="
+                max-w-md
+                animate-in
+                fade-in-0
+                zoom-in-90
+                slide-in-from-bottom-2
+                duration-300
+                ease-out
+            ">
                 {modalType === 'success' ? (
                     <DialogHeader>
-                        <div className="flex items-center justify-center mb-4">
-                            <div className="w-16 h-16 bg-success-light rounded-full flex items-center justify-center">
+                        <div className="flex items-center gap-4 mb-4">
+                            {/* Success Icon */}
+                            <div className="w-16 h-16 shrink-0 bg-success-light rounded-full flex items-center justify-center">
                                 <CheckCircle className="w-8 h-8 text-success" />
                             </div>
+
+                            {/* Title */}
+                            <DialogTitle className="text-left text-xl font-bold">
+                                Submission Successful!
+                            </DialogTitle>
                         </div>
-                        <DialogTitle className="text-center text-xl">
-                            Submission Successful!
-                        </DialogTitle>
                     </DialogHeader>
                 ) : (
                     <DialogHeader>
-                        <div className="flex items-center justify-center mb-4">
-                            <div className="w-16 h-16 bg-destructive-light rounded-full flex items-center justify-center">
+                        <div className="flex items-center gap-4 mb-4">
+                            {/* Failed Icon */}
+                            <div>
                                 <X className="w-8 h-8 text-destructive" />
                             </div>
+                            <DialogTitle className="text-left text-xl font-bold">
+                                Test Cases Failed
+                            </DialogTitle>
                         </div>
-                        <DialogTitle className="text-center text-xl">
-                            Test Cases Failed
-                        </DialogTitle>
                     </DialogHeader>
                 )}
 
                 <div className="text-center space-y-4 font-manrope">
                     <p className="text-muted-foreground">
-                        Your solution for <span className="font-semibold">{questionTitle}</span> has been submitted successfully.
+                        Your solution for{' '}
+                        <span className="font-semibold">
+                            {questionTitle}
+                        </span>{' '}
+                        has been submitted successfully.
                     </p>
 
                     {codeResult && codeResult.length > 0 && (

@@ -191,33 +191,18 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
             if (action === 'submit') {
                 dispatch({ type: 'SET_SUBMITTING', payload: true });
                 dispatch({ type: 'SET_ALREADY_SUBMITTED', payload: true });
-                dispatch({ type: 'SET_SOLUTION_MODAL', payload: true });
                 dispatch({ type: 'SET_CONFIRM_MODAL', payload: false });
 
                 if (allTestCasesPassed) {
                     dispatch({ type: 'SET_MODAL_TYPE', payload: 'success' });
-                    toast({
-                        title: 'Success!',
-                        description: 'Test Cases Passed, Solution submitted',
-                    });
                 } else {
                     dispatch({ type: 'SET_MODAL_TYPE', payload: 'error' });
-                    toast({
-                        title: 'Submitted',
-                        description: 'Solution submitted but some test cases failed',
-                        variant: 'destructive',
-                    });
                 }
 
                 if (onChapterComplete) {
                     onChapterComplete();
                 }
-            } else if (allTestCasesPassed && action === 'run') {
-                toast({
-                    title: 'Success',
-                    description: 'Test Cases Passed'
-                });
-            } else {
+            } else if (!allTestCasesPassed && action === 'run') {
                 toast({
                     title: 'Failed',
                     description: 'Test Cases Failed',
@@ -249,6 +234,10 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
 
     const openConfirmModal = useCallback(() => {
         dispatch({ type: 'SET_CONFIRM_MODAL', payload: true });
+    }, []);
+
+    const openSolutionModal = useCallback(() => {
+        dispatch({ type: 'SET_SOLUTION_MODAL', payload: true });
     }, []);
 
     const closeConfirmModal = useCallback(() => {
@@ -294,6 +283,7 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
             submitCode,
             openConfirmModal,
             closeConfirmModal,
+            openSolutionModal,
             closeSolutionModal,
         },
         constants: {
