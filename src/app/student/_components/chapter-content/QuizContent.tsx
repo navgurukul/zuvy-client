@@ -97,15 +97,14 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
       await submitQuiz({ submitQuiz: mappedAnswers });
       await completeChapter();
       refetchAssignmentDetails();
-      toast({
-        title: 'Success',
-        description: 'Submitted Quiz Successfully',
-      });
+      // toast({
+      //   title: 'Success',
+      //   description: 'Submitted Quiz Successfully',
+      // });
     } catch (err: any) {
-      toast({
+      toast.error({
         title: 'Error',
         description: err.response?.data?.message || 'Failed to submit quiz.',
-        variant: 'destructive',
       });
     } finally {
       // setIsSubmitting(false);

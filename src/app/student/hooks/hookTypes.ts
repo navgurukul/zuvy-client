@@ -235,6 +235,11 @@ export interface UseChapterCompletionParams {
   moduleId: string;
   chapterId: string;
   onSuccess?: () => void;
+  /**
+   * When true, skips writing to chapterRewardManager after completion.
+   * Use this when the caller manages its own reward display (e.g. coding challenge editor).
+   */
+  skipRewardManager?: boolean;
 }
 
 export interface UseChapterCompletionReturn {
