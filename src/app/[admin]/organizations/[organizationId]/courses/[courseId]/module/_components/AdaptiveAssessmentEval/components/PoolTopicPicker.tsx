@@ -1,9 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, ChevronUp, ChevronDown, X, AlertTriangle, Link2 } from 'lucide-react';
 import { THEME, BANDS, LEVELS } from '../constants';
 import { inputStyle, Btn, Badge } from '../ui-primitives';
 import { scoreTopicMatch } from '../helpers';
 import { BuilderState, Question } from '../types';
+import { useTopicsWithDifficultyLevels } from '@/hooks/useTopicsWithDifficultiesEval';
+import useDebounce from '@/app/[admin]/hooks/useDebounce';
+import { TopicWithDifficultyLevel } from '@/hooks/hookType';
 
 interface PoolTopicPickerProps {
   a: BuilderState;
@@ -19,28 +22,35 @@ export function PoolTopicPicker({
   bankQuestions,
 }: PoolTopicPickerProps) {
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 300);
+  const { fetchTopics, data: fetchedTopics, isLoading: fetchingTopics } = useTopicsWithDifficultyLevels();
+
+  useEffect(() => {
+    fetchTopics(debouncedQuery);
+  }, [debouncedQuery, fetchTopics]);
+
   const [open, setOpen] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[] | null>(null);
+  const [suggestions, setSuggestions] = useState<TopicWithDifficultyLevel[] | null>(null);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const removeTopic = (t: string) => {
+  const removeTopic = (tName: string) => {
     const desc = { ...a.poolTopicDescriptions };
-    delete desc[t];
+    delete desc[tName];
     const out = { ...a.poolTopicOutcomes };
-    delete out[t];
+    delete out[tName];
     set({
-      poolTopics: a.poolTopics.filter((x: string) => x !== t),
+      poolTopics: a.poolTopics.filter((x) => x.name !== tName),
       poolTopicDescriptions: desc,
       poolTopicOutcomes: out,
     });
   };
 
-  const addTopic = (t: string) => {
-    const topic = t.trim();
-    if (!topic || a.poolTopics.includes(topic)) return;
-    set({ poolTopics: [...a.poolTopics, topic] });
+  const addTopic = (topicObj: { id: number; name: string }) => {
+    const name = topicObj.name.trim();
+    if (!name || a.poolTopics.some(pt => pt.name === name)) return;
+    set({ poolTopics: [...a.poolTopics, { id: topicObj.id || 0, name }] });
     setQuery('');
     setSuggestions(null);
     inputRef.current?.focus();
@@ -72,24 +82,26 @@ export function PoolTopicPicker({
     );
   };
 
-  const filtered = (bankTopics as string[]).filter(
-    (t) => !a.poolTopics.includes(t) && t.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = fetchedTopics?.filter(
+    (t) => !a.poolTopics.some(pt => pt.name === t.name)
+  ) || [];
+
   const queryIsNew =
     query.trim() !== '' &&
-    !bankTopics.includes(query.trim()) &&
-    !a.poolTopics.includes(query.trim());
-  const showDropdown = open && (filtered.length > 0 || queryIsNew);
+    !fetchedTopics?.some(t => t.name.toLowerCase() === query.trim().toLowerCase()) &&
+    !a.poolTopics.some(pt => pt.name.toLowerCase() === query.trim().toLowerCase());
+
+  const showDropdown = open && (filtered.length > 0 || queryIsNew || fetchingTopics);
 
   const suggestTopics = () => {
     setSuggesting(true);
     setTimeout(() => {
       const text = a.objective + ' ' + a.outcomes;
-      const unselected = (bankTopics as string[]).filter(
-        (t: string) => !a.poolTopics.includes(t)
+      const unselected = (fetchedTopics || []).filter(
+        (t) => !a.poolTopics.some(pt => pt.name === t.name)
       );
       const scored = unselected
-        .map((t: string) => ({ t, score: scoreTopicMatch(t, text) }))
+        .map((t) => ({ t, score: scoreTopicMatch(t.name, text) }))
         .sort((a: any, b: any) => b.score - a.score);
       setSuggestions(scored.map((x: any) => x.t));
       setSuggesting(false);
@@ -100,79 +112,59 @@ export function PoolTopicPicker({
     <div>
       {/* Suggest from objective */}
       {(a.objective.trim() || a.outcomes.trim()) && (
-        <div style={{ marginBottom: 12 }}>
+        <div className="mb-3">
           <Btn
             variant="ghost"
             size="sm"
             disabled={suggesting}
             onClick={suggestTopics}
-            style={{ padding: '5px 0', fontSize: 12.5 }}
+          // className="py-[5px] px-0 text-[12.5px]"
           >
             {suggesting ? (
-              <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader2 size={12} className="animate-spin" />
             ) : null}
             Suggest topics from objective
           </Btn>
           {suggestions !== null && (
             <div
+              className="mt-2 rounded-[7px] border px-3 py-2.5"
               style={{
-                marginTop: 8,
                 background: THEME.secondaryLight,
-                border: `1px solid ${THEME.secondary}`,
-                borderRadius: 7,
-                padding: '10px 12px',
+                borderColor: THEME.secondary,
               }}
             >
               <div
-                style={{
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  color: THEME.secondaryDark,
-                  marginBottom: 7,
-                  letterSpacing: '.04em',
-                }}
+                className="mb-[7px] text-[11.5px] font-bold tracking-[.04em]"
+                style={{ color: THEME.secondaryDark }}
               >
                 SUGGESTED FROM OBJECTIVE
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+              <div className="flex flex-wrap gap-1.5">
                 {suggestions.length === 0 ? (
-                  <span style={{ fontSize: 12.5, color: THEME.textTertiary }}>
+                  <span className="text-[12.5px]" style={{ color: THEME.textTertiary }}>
                     No matches — add topics manually.
                   </span>
                 ) : (
-                  suggestions.map((t: string) => (
+                  suggestions.map((t) => (
                     <button
-                      key={t}
-                      onMouseDown={() => addTopic(t)}
+                      key={t.name}
+                      onMouseDown={() => addTopic({ id: t.id, name: t.name })}
+                      className="cursor-pointer rounded-md border px-2.5 py-1 font-sans text-[13px] font-semibold"
                       style={{
                         background: THEME.card,
-                        border: `1px solid ${THEME.secondary}`,
-                        borderRadius: 6,
-                        padding: '4px 10px',
-                        fontSize: 13,
+                        borderColor: THEME.secondary,
                         color: THEME.secondaryDark,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'inherit',
                       }}
                     >
-                      + {t}
+                      + {t.name}
                     </button>
                   ))
                 )}
               </div>
               <button
                 onClick={() => setSuggestions(null)}
-                style={{
-                  marginTop: 8,
-                  background: 'none',
-                  border: 'none',
-                  fontSize: 11.5,
-                  color: THEME.textTertiary,
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontFamily: 'inherit',
-                }}
+                className="mt-2 cursor-pointer border-none bg-transparent p-0 font-sans text-[11.5px]"
+                style={{ color: THEME.textTertiary }}
               >
                 Dismiss
               </button>
@@ -183,18 +175,12 @@ export function PoolTopicPicker({
 
       {/* Selected chips */}
       {a.poolTopics.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column' as const,
-            gap: 6,
-            marginBottom: 14,
-          }}
-        >
-          {(a.poolTopics as string[]).map((t: string, idx: number) => {
+        <div className="mb-3.5 flex flex-col gap-1.5">
+          {a.poolTopics.map((topicObj, idx: number) => {
+            const t = topicObj.name;
             const counts = bankCounts(t);
             const inBank = counts.some((n) => n > 0);
-            const isCustom = !bankTopics.includes(t);
+            const isCustom = topicObj.id === 0 || !bankTopics.includes(t);
             const hasZeroBand = inBank && counts.some((n) => n === 0);
             const cap = topicCapacity(t, a.poolTopics.length);
             const isExpanded = expandedTopic === t;
@@ -202,67 +188,44 @@ export function PoolTopicPicker({
             return (
               <div
                 key={t}
+                className="overflow-hidden rounded-lg border-[1.5px]"
                 style={{
-                  border: `1.5px solid ${hasZeroBand || isCustom ? THEME.warning : THEME.primary}`,
-                  borderRadius: 8,
-                  overflow: 'hidden',
+                  borderColor: hasZeroBand || isCustom ? THEME.warning : THEME.primary,
                 }}
               >
                 <div
+                  className="flex items-center gap-1.5 px-2.5 py-[7px]"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    background:
-                      hasZeroBand || isCustom ? THEME.warningLight : THEME.primaryLight,
-                    padding: '7px 10px',
+                    background: hasZeroBand || isCustom ? THEME.warningLight : THEME.primaryLight,
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column' as const,
-                      gap: 1,
-                    }}
-                  >
+                  <div className="flex flex-col gap-px">
                     <button
                       onClick={() => moveTopic(idx, -1)}
                       disabled={idx === 0}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: idx === 0 ? 'default' : 'pointer',
-                        padding: 0,
-                        color: THEME.textTertiary,
-                        opacity: idx === 0 ? 0.3 : 0.7,
-                        display: 'flex',
-                      }}
+                      className={`flex border-none bg-transparent p-0 ${idx === 0 ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
+                      style={{ color: THEME.textTertiary }}
                     >
                       <ChevronUp size={11} />
                     </button>
                     <button
                       onClick={() => moveTopic(idx, 1)}
                       disabled={idx === a.poolTopics.length - 1}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor:
-                          idx === a.poolTopics.length - 1 ? 'default' : 'pointer',
-                        padding: 0,
-                        color: THEME.textTertiary,
-                        opacity: idx === a.poolTopics.length - 1 ? 0.3 : 0.7,
-                        display: 'flex',
-                      }}
+                      className={`flex border-none bg-transparent p-0 ${idx === a.poolTopics.length - 1 ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
+                      style={{ color: THEME.textTertiary }}
                     >
                       <ChevronDown size={11} />
                     </button>
                   </div>
 
-                  <span style={{ fontWeight: 700, fontSize: 13, color: THEME.text, flex: 1 }}>
+                  <span
+                    className="fontFamily-poppins flex-1 text-[13px] font-bold"
+                    style={{ color: THEME.text }}
+                  >
                     {t}
                   </span>
 
-                  {isCustom && (
+                  {/* {isCustom && (
                     <Badge
                       bg={THEME.warningLight}
                       color={THEME.warningDark}
@@ -270,10 +233,10 @@ export function PoolTopicPicker({
                     >
                       <AlertTriangle size={9} /> custom · no bank questions
                     </Badge>
-                  )}
+                  )} */}
 
                   {inBank && (
-                    <span style={{ display: 'inline-flex', gap: 5, fontSize: 11, fontWeight: 600 }}>
+                    <span className="inline-flex gap-[5px] text-[11px] font-semibold">
                       {BANDS.map((b, bi) => (
                         <span
                           key={b}
@@ -290,17 +253,14 @@ export function PoolTopicPicker({
 
                   {inBank && cap > 0 && (
                     <span
-                      style={{
-                        fontSize: 10.5,
-                        color: cap < 2 ? THEME.danger : THEME.textTertiary,
-                        fontWeight: 500,
-                      }}
+                      className="text-[10.5px] font-medium"
+                      style={{ color: cap < 2 ? THEME.danger : THEME.textTertiary }}
                     >
                       ~{cap} attempt{cap !== 1 ? 's' : ''}
                     </span>
                   )}
 
-                  <button
+                  {/* <button
                     onClick={() =>
                       setExpandedTopic(isExpanded ? null : t)
                     }
@@ -318,19 +278,12 @@ export function PoolTopicPicker({
                     ) : (
                       <ChevronDown size={13} />
                     )}
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={() => removeTopic(t)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: THEME.danger,
-                      display: 'flex',
-                      padding: 0,
-                      marginLeft: 2,
-                    }}
+                    className="ml-0.5 flex cursor-pointer border-none bg-transparent p-0"
+                    style={{ color: THEME.danger }}
                     aria-label={`Remove ${t}`}
                   >
                     <X size={12} />
@@ -339,40 +292,22 @@ export function PoolTopicPicker({
 
                 {isExpanded && (
                   <div
-                    style={{
-                      padding: '12px 14px',
-                      background: THEME.card,
-                      borderTop: `1px solid ${THEME.border}`,
-                      display: 'flex',
-                      flexDirection: 'column' as const,
-                      gap: 10,
-                    }}
+                    className="flex flex-col gap-2.5 border-t px-3.5 py-3"
+                    style={{ background: THEME.card, borderColor: THEME.border }}
                   >
                     <div>
                       <label
-                        style={{
-                          display: 'block',
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: THEME.textTertiary,
-                          marginBottom: 4,
-                          letterSpacing: '.04em',
-                        }}
+                        className="mb-1 block text-xs font-bold tracking-[.04em]"
+                        style={{ color: THEME.textTertiary }}
                       >
                         TOPIC DESCRIPTION{' '}
-                        <span
-                          style={{ fontWeight: 400, color: THEME.textMuted }}
-                        >
+                        <span className="font-normal" style={{ color: THEME.textMuted }}>
                           (fed to AI generation)
                         </span>
                       </label>
                       <textarea
-                        style={{
-                          ...inputStyle,
-                          minHeight: 56,
-                          fontSize: 12.5,
-                          resize: 'vertical' as const,
-                        }}
+                        style={inputStyle}
+                        className="min-h-[56px] resize-y text-[12.5px]"
                         value={a.poolTopicDescriptions[t] ?? ''}
                         placeholder={`e.g., ${t} — specific concepts covered in Module 102`}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -387,25 +322,18 @@ export function PoolTopicPicker({
                     </div>
                     <div>
                       <label
-                        style={{
-                          display: 'block',
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: THEME.textTertiary,
-                          marginBottom: 4,
-                          letterSpacing: '.04em',
-                        }}
+                        className="mb-1 block text-xs font-bold tracking-[.04em]"
+                        style={{ color: THEME.textTertiary }}
                       >
-                        <Link2 size={10} style={{ verticalAlign: -1, marginRight: 4 }} />
+                        <Link2 size={10} className="-mb-px mr-1 inline align-middle" />
                         LINKED LEARNING OUTCOME{' '}
-                        <span
-                          style={{ fontWeight: 400, color: THEME.textMuted }}
-                        >
+                        <span className="font-normal" style={{ color: THEME.textMuted }}>
                           (production: linked to course syllabus)
                         </span>
                       </label>
                       <input
-                        style={{ ...inputStyle, fontSize: 12.5 }}
+                        style={inputStyle}
+                        className="text-[12.5px]"
                         value={a.poolTopicOutcomes[t] ?? ''}
                         placeholder="e.g., LO-3.2 — Learner can debug layout issues using browser dev tools"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -427,7 +355,7 @@ export function PoolTopicPicker({
       )}
 
       {/* Search input + dropdown */}
-      <div style={{ position: 'relative' as const }}>
+      <div className="relative">
         <input
           ref={inputRef}
           style={inputStyle}
@@ -442,7 +370,7 @@ export function PoolTopicPicker({
           onBlur={() => setTimeout(() => setOpen(false), 160)}
           onKeyDown={(e: React.KeyboardEvent) => {
             if (e.key === 'Enter' && query.trim()) {
-              addTopic(query);
+              addTopic({ id: 0, name: query });
               setOpen(false);
             }
             if (e.key === 'Escape') {
@@ -454,95 +382,83 @@ export function PoolTopicPicker({
 
         {showDropdown && (
           <div
+            className="absolute inset-x-0 top-full z-20 mt-1 max-h-[230px] overflow-y-auto rounded-lg border"
             style={{
-              position: 'absolute' as const,
-              top: '100%',
-              left: 0,
-              right: 0,
-              marginTop: 4,
               background: THEME.card,
-              border: `1px solid ${THEME.border}`,
-              borderRadius: 8,
+              borderColor: THEME.border,
               boxShadow: THEME.shadowStrong,
-              zIndex: 20,
-              maxHeight: 230,
-              overflowY: 'auto' as const,
             }}
           >
-            {filtered.map((t: string, idx: number) => {
-              const counts = bankCounts(t);
-              return (
-                <div
-                  key={t}
-                  onMouseDown={() => addTopic(t)}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '10px 14px',
-                    cursor: 'pointer',
-                    fontSize: 13.5,
-                    borderBottom:
-                      idx < filtered.length - 1 || queryIsNew
-                        ? `1px solid ${THEME.border}`
-                        : 'none',
-                    background: 'transparent',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = THEME.muted)}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <span style={{ fontWeight: 500, color: THEME.text }}>{t}</span>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      gap: 7,
-                      fontSize: 11.5,
-                    }}
-                  >
-                    {BANDS.map((b, bi) => (
-                      <span
-                        key={b}
-                        style={{
-                          color: counts[bi] === 0 ? THEME.danger : 'inherit',
-                        }}
-                      >
-                        {counts[bi]} {b}
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              );
-            })}
-            {queryIsNew && (
+            {fetchingTopics ? (
               <div
-                onMouseDown={() => {
-                  addTopic(query);
-                  setOpen(false);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 7,
-                  padding: '10px 14px',
-                  cursor: 'pointer',
-                  fontSize: 13.5,
-                  color: THEME.secondary,
-                  background: 'transparent',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = THEME.muted)}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 text-[13px]"
+                style={{ color: THEME.textTertiary }}
               >
-                + Add &ldquo;{query.trim()}&rdquo; as custom topic
+                <Loader2 size={14} className="animate-spin" />
+                Searching topics...
               </div>
+            ) : (
+              <>
+                {filtered.map((t, idx: number) => {
+                  const counts = [
+                    t.difficultyLevel.easy,
+                    t.difficultyLevel.medium,
+                    t.difficultyLevel.hard
+                  ];
+                  return (
+                    <div
+                      key={t.id}
+                      onMouseDown={() => addTopic({ id: t.id, name: t.name })}
+                      className="flex cursor-pointer items-center justify-between px-3.5 py-2.5 text-[13.5px]"
+                      style={{
+                        borderBottom:
+                          idx < filtered.length - 1 || queryIsNew
+                            ? `1px solid ${THEME.border}`
+                            : 'none',
+                        background: 'transparent',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = THEME.muted)}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <span className="font-medium" style={{ color: THEME.text }}>{t.name}</span>
+                      <span className="inline-flex gap-[7px] text-[11.5px]">
+                        {BANDS.map((b, bi) => (
+                          <span
+                            key={b}
+                            style={{
+                              color: counts[bi] === 0 ? THEME.danger : 'inherit',
+                            }}
+                          >
+                            {counts[bi]} {b}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  );
+                })}
+                {queryIsNew && (
+                  <div
+                    onMouseDown={() => {
+                      addTopic({ id: 0, name: query });
+                      setOpen(false);
+                    }}
+                    className="flex cursor-pointer items-center gap-[7px] px-3.5 py-2.5 text-[13.5px]"
+                    style={{ color: THEME.secondary, background: 'transparent' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = THEME.muted)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    + Add &ldquo;{query.trim()}&rdquo; as custom topic
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
       </div>
 
       {bankTopics.length > 0 && a.poolTopics.length === 0 && (
-        <div style={{ marginTop: 8, fontSize: 12, color: THEME.textTertiary }}>
-          {(bankTopics as string[]).length} topic
-          {bankTopics.length !== 1 ? 's' : ''} available in the bank — type to filter,
+        <div className="mt-2 text-xs" style={{ color: THEME.textTertiary }}>
+          Search available topics in the bank,
           or use &ldquo;Suggest&rdquo; above.
         </div>
       )}

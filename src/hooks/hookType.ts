@@ -459,3 +459,176 @@ export interface TopicWithSubtopics {
 }
 
 export type AddSubtopicApiResponse = TopicWithSubtopics;
+
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+  startDatetime: string; // ISO 8601 string, e.g. "2026-04-10T09:00:00+05:30"
+  endDatetime: string;   // ISO 8601 string
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+// types/topic.ts
+
+export interface DifficultyLevel {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicWithDifficultyLevel {
+  id: number;
+  name: string;
+  difficultyLevel: DifficultyLevel;
+}
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface MapQuestionsRequestBody {
+    aiAssessmentId: number;
+}
+
+export interface MapQuestionsApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface QuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface AiAssessmentQuestion {
+    position: number;
+    isCommon: boolean;
+    questionId: number;
+    question: string;
+    difficulty: "easy" | "medium" | "hard";
+    language: string;
+    options: QuestionOption;
+    correctOption: number;
+    levelId: string;
+    topicName: string;
+    topicDescription: string;
+}
+
+export interface AiAssessmentSet {
+    id: number;
+    setIndex: number;
+    label: string;
+    levelCode: string;
+    status: string;
+    questions: AiAssessmentQuestion[];
+}
+
+export interface GetQuestionSetsApiResponse {
+    aiAssessmentId: number;
+    bootcampId: number;
+    title: string;
+    description: string | null;
+    totalNumberOfQuestions: number;
+    scope: string;
+    status: string;
+    publishedAt: string | null;
+    isPublished: boolean;
+    setCount: number;
+    sets: AiAssessmentSet[];
+}
+
+export interface PublishAssessmentRequestBody {
+    endDatetime: string;
+}
+
+export interface PublishAssessmentApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface PoolTopic {
+    id: number;
+    name: string;
+}
+
+export interface AiAssessmentByChapter {
+    id: number;
+    bootcampId: number;
+    chapterId: number;
+    scope: string;
+    status: string;
+    moduleId: number;
+    title: string;
+    description: string | null;
+    objective: string;
+    expectedOutcomes: string;
+    audience: string | null;
+    chapterIds: number[];
+    poolTopics: PoolTopic[];
+    totalNumberOfQuestions: number;
+    totalQuestionsWithBuffer: number;
+    startDatetime: string | null;
+    endDatetime: string | null;
+    publishedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type GetAiAssessmentsByChapterApiResponse = AiAssessmentByChapter[];

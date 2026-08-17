@@ -3,6 +3,7 @@ import { Eye, RefreshCw, Trash2, X, Check } from 'lucide-react';
 import { LEVELS, DIFF_LABEL, DIFF_BG, DIFF_COLOR } from '../constants';
 import { Btn } from '../ui-primitives';
 import { Question, BuilderState, LevelId } from '../types';
+import { GetQuestionSetsApiResponse } from '@/hooks/hookType';
 
 interface StepReviewProps {
   a: BuilderState;
@@ -15,6 +16,10 @@ interface StepReviewProps {
   setPreviewLevel: (level: LevelId) => void;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
+  aiAssessmentId?: number | null;
+  questionSets?: GetQuestionSetsApiResponse | null;
+  isFetchingQuestionSets?: boolean;
+  questionSetsError?: string | null;
 }
 
 export function StepReview({
@@ -28,10 +33,32 @@ export function StepReview({
   setPreviewLevel,
   showPreview,
   setShowPreview,
+  aiAssessmentId,
+  questionSets,
+  isFetchingQuestionSets,
+  questionSetsError,
 }: StepReviewProps) {
   const [filter, setFilter] = useState('all');
+  const [selectedSetIndex, setSelectedSetIndex] = useState(0);
 
-  const shown = pool.filter((q: Question) => {
+  const hasQuestionSets = Boolean(questionSets?.sets?.length);
+  const activePool = hasQuestionSets
+    ? (questionSets!.sets[selectedSetIndex]?.questions ?? []).map((q) => ({
+        id: String(q.questionId),
+        qtype: 'mcq',
+        topic: q.topicName || 'General',
+        difficulty: q.difficulty || 'medium',
+        quarantined: false,
+        text: q.question,
+        source: 'ai' as const,
+        validated: true,
+        options: q.options ? Object.values(q.options) : [],
+        correctIndex: Number(q.correctOption) > 0 ? Number(q.correctOption) - 1 : 0,
+        explanation: q.topicDescription || 'Mapped from AI assessment',
+      }))
+    : pool;
+
+  const shown = activePool.filter((q: Question) => {
     if (filter === 'ai') return q.source === 'ai';
     if (filter === 'bank') return q.source === 'bank';
     if (filter === 'fixed') return q.qtype !== 'mcq';
@@ -39,6 +66,10 @@ export function StepReview({
   });
 
   const assemblePreview = () => {
+    if (hasQuestionSets) {
+      return activePool;
+    }
+
     const lvl = LEVELS.find((l) => l.id === previewLevel)!;
     const counts = a.poolTopics.map((_, i) =>
       Math.round((a.questionsPerForm * lvl.mix[i]) / 100)
@@ -65,17 +96,27 @@ export function StepReview({
         </div>
         <div className="flex gap-[9px] items-center">
           <select
-            value={previewLevel}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setPreviewLevel(e.target.value as LevelId)
-            }
-            className="w-[115px] py-[7px] px-[10px] rounded-md border border-border text-[14px] text-foreground bg-card outline-none font-inherit box-border"
+            value={hasQuestionSets ? String(selectedSetIndex) : previewLevel}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              if (hasQuestionSets) {
+                setSelectedSetIndex(Number(e.target.value));
+                return;
+              }
+              setPreviewLevel(e.target.value as LevelId);
+            }}
+            className="w-[150px] py-[7px] px-[10px] rounded-md border border-border text-[14px] text-foreground bg-card outline-none font-inherit box-border"
           >
-            {LEVELS.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.label}
-              </option>
-            ))}
+            {hasQuestionSets
+              ? questionSets!.sets.map((set, index) => (
+                  <option key={set.id} value={String(index)}>
+                    {set.label} {set.levelCode ? `· ${set.levelCode}` : ''}
+                  </option>
+                ))
+              : LEVELS.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.label}
+                  </option>
+                ))}
           </select>
           <Btn variant="outline" onClick={() => setShowPreview(true)}>
             <Eye size={13} className="mr-1" /> Preview form
@@ -85,9 +126,9 @@ export function StepReview({
 
       <div className="flex gap-1.5 mb-[14px] flex-wrap">
         {[
-          ['all', `All (${pool.length})`],
-          ['ai', `AI (${pool.filter((q: Question) => q.source === 'ai').length})`],
-          ['bank', `Bank (${pool.filter((q: Question) => q.source === 'bank').length})`],
+          ['all', `All (${activePool.length})`],
+          ['ai', `AI (${activePool.filter((q: Question) => q.source === 'ai').length})`],
+          ['bank', `Bank (${activePool.filter((q: Question) => q.source === 'bank').length})`],
         ].map(([k, lbl]) => (
           <button
             key={k}

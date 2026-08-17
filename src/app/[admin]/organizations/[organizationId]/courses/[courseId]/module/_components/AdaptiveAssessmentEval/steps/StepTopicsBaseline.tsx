@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
 import { CHAPTER_TOPIC_MAP } from '../constants';
 import { BuilderState, Question, Chapter } from '../types';
@@ -28,25 +28,6 @@ export function StepTopicsBaseline({
 }: StepTopicsBaselineProps) {
   const { chapters } = useModuleChapters(moduleId)
   const quizChapters = chapters.filter((chapter) => chapter.topicId === 4)
-  console.log("quizChapters", quizChapters)
-
-  const toggleBaseline = (id: number) =>
-    set({
-      baselineChapterIds: a.baselineChapterIds.includes(id)
-        ? a.baselineChapterIds.filter((x: number) => x !== id)
-        : [...a.baselineChapterIds, id],
-    });
-
-  const totalBaselineQ = quizChapters
-    .filter((c: any) => a.baselineChapterIds.includes(c.chapterId))
-    .reduce((s: number, c: any) => s + (c.questionCount || 0), 0);
-
-  const coveredByBaseline = new Set<string>(
-    a.baselineChapterIds.flatMap((id: number) => CHAPTER_TOPIC_MAP[id] ?? [])
-  );
-  const uncoveredTopics = (a.poolTopics as string[]).filter(
-    (t) => !coveredByBaseline.has(t)
-  );
 
   return (
     <div className="grid grid-cols-2 gap-[18px] items-start">
@@ -66,14 +47,17 @@ export function StepTopicsBaseline({
             </div>
           )}
           {quizChapters.map((ch: any) => {
-            const sel = a.baselineChapterIds.includes(ch.chapterId);
-            const covers = CHAPTER_TOPIC_MAP[ch.chapterId] ?? [];
+            const sel = a.chapterIds.includes(ch.chapterId);
             const selClass = sel ? "border-primary bg-primary-light/30" : "border-slate-200 bg-white";
             const checkClass = sel ? "border-primary bg-primary" : "border-slate-200 bg-white";
             return (
               <div
                 key={ch.chapterId}
-                onClick={() => toggleBaseline(ch.chapterId)}
+                onClick={() => set({
+                  chapterIds: a.chapterIds.includes(ch.chapterId)
+                    ? a.chapterIds.filter(id => id !== ch.chapterId)
+                    : [...a.chapterIds, ch.chapterId]
+                })}
                 className={`flex items-center gap-3 py-[11px] px-[14px] border-2 rounded-lg cursor-pointer transition-all duration-150 ${selClass}`}
               >
                 <div className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 border-2 ${checkClass}`}>
@@ -123,12 +107,12 @@ export function StepTopicsBaseline({
           </div>
         </div>
 
-        {totalBaselineQ > 0 && (
+        {/* {totalBaselineQ > 0 && (
           <div className="mt-3 text-[13px] text-primary">
             {totalBaselineQ} questions across {a.baselineChapterIds.length} chapter
             {a.baselineChapterIds.length !== 1 ? 's' : ''} will feed the level signal
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -151,7 +135,7 @@ export function StepTopicsBaseline({
           )}
         </div>
 
-        {uncoveredTopics.length > 0 && (
+        {/* {uncoveredTopics.length > 0 && (
           <div className="bg-amber-100 border border-amber-500 rounded-lg py-[11px] px-[14px] text-[13px] text-amber-700 flex gap-2 items-start">
             <AlertTriangle size={14} className="mt-[1px] shrink-0" />
             <div>
@@ -162,7 +146,7 @@ export function StepTopicsBaseline({
               {uncoveredTopics.length === 1 ? 'this topic' : 'these topics'}.
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

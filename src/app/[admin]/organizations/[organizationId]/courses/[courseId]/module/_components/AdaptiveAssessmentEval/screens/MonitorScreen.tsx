@@ -39,7 +39,7 @@ export function MonitorScreen({
   ];
   const maxN = Math.max(...mockDist.map((d) => d.n));
   const linkedChapters = baselineOptions.filter((c) =>
-    a.baselineChapterIds.includes(c.id)
+    a.chapterIds.includes(c.id)
   );
 
   const mockAttemptLog = [

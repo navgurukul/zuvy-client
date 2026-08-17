@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { THEME } from '../constants';
 import { Badge, Btn } from '../ui-primitives';
 import { StepDetails } from '../steps/StepDetails';
@@ -16,6 +16,12 @@ interface BuilderScreenProps {
   set: (patch: Partial<BuilderState>) => void;
   step: number;
   setStep: (step: number) => void;
+  isSubmittingAssessment?: boolean;
+  onGenerateAndReview?: () => Promise<void>;
+  aiAssessmentId?: number | null;
+  questionSets?: import('@/hooks/hookType').GetQuestionSetsApiResponse | null;
+  isFetchingQuestionSets?: boolean;
+  questionSetsError?: string | null;
   STEPS: string[];
   stepValid: boolean[];
   pool: Question[];
@@ -38,7 +44,7 @@ interface BuilderScreenProps {
   setShowPreview: (show: boolean) => void;
   expanded: string | null;
   setExpanded: (id: string | null) => void;
-  publish: (status: string) => void;
+  publish: (status: string, endDatetime?: string) => void | Promise<void>;
   showToast: (msg: string) => void;
   baselineOptions: Chapter[];
   bankTopics: string[];
@@ -53,6 +59,12 @@ export function BuilderScreen({
   set,
   step,
   setStep,
+  isSubmittingAssessment = false,
+  onGenerateAndReview,
+  aiAssessmentId,
+  questionSets,
+  isFetchingQuestionSets,
+  questionSetsError,
   STEPS,
   stepValid,
   pool,
@@ -167,6 +179,10 @@ export function BuilderScreen({
             setPreviewLevel={setPreviewLevel}
             showPreview={showPreview}
             setShowPreview={setShowPreview}
+            aiAssessmentId={aiAssessmentId}
+            questionSets={questionSets}
+            isFetchingQuestionSets={isFetchingQuestionSets}
+            questionSetsError={questionSetsError}
           />
         )}
         {step === 4 && <StepSettings a={a} set={set} />}
@@ -186,8 +202,28 @@ export function BuilderScreen({
           <ChevronLeft size={14} /> Back
         </Btn>
         {step < 5 && (
-          <Button disabled={!stepValid[step]} onClick={() => setStep(step + 1)}>
-            Continue to {STEPS[step + 1]} <ChevronRight size={14} />
+          <Button
+            disabled={!stepValid[step] || isSubmittingAssessment}
+            onClick={async () => {
+              if (step === 2 && onGenerateAndReview) {
+                await onGenerateAndReview();
+                return;
+              }
+              setStep(step + 1);
+            }}
+          >
+            {step === 2 ? (
+              isSubmittingAssessment ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Creating & Mapping...
+                </>
+              ) : (
+                <>Generate Assesment and Reveiw <ChevronRight size={14} /></>
+              )
+            ) : (
+              <>Continue to {STEPS[step + 1]} <ChevronRight size={14} /></>
+            )}
           </Button>
         )}
       </div>

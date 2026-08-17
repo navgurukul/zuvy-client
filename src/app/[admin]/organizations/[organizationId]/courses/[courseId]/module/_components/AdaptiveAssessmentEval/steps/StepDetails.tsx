@@ -70,7 +70,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
       </div>
 
       <div className="mb-5 flex flex-col">
-        <label className="block flex font-semibold text-sm text-slate-900 mb-1">
+        <label className="flex font-semibold text-sm text-slate-900 mb-1">
           Number of MCQs per form
         </label>
         <input
@@ -86,7 +86,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
           }
         />
         <div className="text-[11px] flex text-slate-500 mt-1">
-          Each student's MCQ section will have this many questions, assembled
+          Each student`&apos;`s MCQ section will have this many questions, assembled
           from the pool to match their level.
         </div>
       </div>

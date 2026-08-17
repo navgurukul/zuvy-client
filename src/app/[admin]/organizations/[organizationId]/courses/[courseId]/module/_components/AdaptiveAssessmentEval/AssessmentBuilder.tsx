@@ -10,6 +10,11 @@ import { ReplaceModal } from './modals/ReplaceModal';
 import { pickDemoQuestion } from './helpers';
 import { Chapter, Question, BuilderState, LevelId } from './types';
 import { useModuleChapters } from '@/hooks/useModuleChapters';
+import { useCreateAiAssessment } from '@/hooks/createAiAssessmentEval';
+import { useMapQuestions } from '@/hooks/useAIMapAssesmentEval';
+import { useGetQuestionSets } from '@/hooks/useGetQuestionSetsEval';
+import { usePublishAssessment } from '@/hooks/usePublishingAssessmentEval';
+import { useGetAiAssessmentsByChapter } from '@/hooks/useGetAiAsssessmentEval';
 
 const STEPS = ['Details', 'Topics & Baseline', 'Build Pool', 'Review', 'Settings', 'Publish'];
 
@@ -56,13 +61,14 @@ export default function AssessmentBuilder({
   const [previewLevel, setPreviewLevel] = useState<LevelId>('C');
   const [showPreview, setShowPreview] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [aiAssessmentId, setAiAssessmentId] = useState<number | null>(null);
 
   const [a, setA] = useState<BuilderState>({
     name: '',
     objective: '',
     outcomes: '',
     questionsPerForm: 10,
-    baselineChapterIds: [],
+    chapterIds: [],
     poolTopics: [],
     poolTopicDescriptions: {},
     poolTopicOutcomes: {},
@@ -75,27 +81,198 @@ export default function AssessmentBuilder({
     scheduledDate: '',
     scheduledTime: '',
   });
-  const set = (patch: Partial<BuilderState>) => setA((prev) => ({ ...prev, ...patch }));
+  const set = useCallback((patch: Partial<BuilderState>) => {
+    setA((prev) => ({ ...prev, ...patch }));
+  }, []);
 
   const hasInitializedBaseline = useRef(false);
   useEffect(() => {
     if (baselineOptions.length > 0 && !hasInitializedBaseline.current) {
-      set({ baselineChapterIds: baselineOptions.map((c) => c.id) });
+      set({ chapterIds: baselineOptions.map((c) => c.id) });
       hasInitializedBaseline.current = true;
     }
-  }, [baselineOptions]);
+  }, [baselineOptions, set]);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3200);
-  };
+  }, []);
 
   const { questions: bankQuestions } = useQuestionBank();
   const bankTopics = Array.from(new Set(bankQuestions.map((q: Question) => q.topic)));
 
+  const { createAiAssessment, isLoading: isCreatingAssessment, error: createAssessmentError } = useCreateAiAssessment();
+  const { mapQuestions, isMapping, mapError } = useMapQuestions();
+  const { getQuestionSets, isFetching: isFetchingQuestionSets, fetchError: questionSetsError, questionSets } = useGetQuestionSets();
+  const { publishAssessment, isPublishing: isPublishingAssessment, publishError: publishAssessmentError } = usePublishAssessment();
+  const { getAiAssessmentsByChapter } = useGetAiAssessmentsByChapter();
+  const isSubmittingAssessment = isCreatingAssessment || isMapping;
+
+  const hasHydratedFromExistingAssessment = useRef(false);
+
+  useEffect(() => {
+    if (!_chapterId || hasHydratedFromExistingAssessment.current) return;
+
+    let isActive = true;
+
+    const hydrateFromExistingAssessment = async () => {
+      const response = await getAiAssessmentsByChapter(_chapterId);
+      if (!isActive || !response?.length) return;
+
+      const latestAssessment = [...response].sort((x, y) => {
+        const xTs = new Date(x.updatedAt || x.createdAt).getTime();
+        const yTs = new Date(y.updatedAt || y.createdAt).getTime();
+        return yTs - xTs;
+      })[0];
+
+      const normalizedStatus: BuilderState['status'] =
+        latestAssessment.status === 'draft' ||
+        latestAssessment.status === 'published' ||
+        latestAssessment.status === 'scheduled' ||
+        latestAssessment.status === 'editing'
+          ? latestAssessment.status
+          : 'editing';
+
+      const normalizedMode: BuilderState['mode'] =
+        latestAssessment.scope === 'summative' ? 'summative' : 'formative';
+
+      const scheduledDate = latestAssessment.endDatetime
+        ? latestAssessment.endDatetime.slice(0, 10)
+        : '';
+      const scheduledTime = latestAssessment.endDatetime
+        ? latestAssessment.endDatetime.slice(11, 16)
+        : '';
+
+      setA((prev) => ({
+        ...prev,
+        name: latestAssessment.title || prev.name,
+        objective: latestAssessment.objective || prev.objective,
+        outcomes: latestAssessment.expectedOutcomes || prev.outcomes,
+        questionsPerForm:
+          latestAssessment.totalNumberOfQuestions || prev.questionsPerForm,
+        chapterIds:
+          latestAssessment.chapterIds?.length > 0
+            ? latestAssessment.chapterIds
+            : prev.chapterIds,
+        poolTopics:
+          latestAssessment.poolTopics?.length > 0
+            ? latestAssessment.poolTopics
+            : prev.poolTopics,
+        poolTopicDescriptions: prev.poolTopicDescriptions,
+        poolTopicOutcomes: prev.poolTopicOutcomes,
+        mode: normalizedMode,
+        status: normalizedStatus,
+        scheduledDate: scheduledDate || prev.scheduledDate,
+        scheduledTime: scheduledTime || prev.scheduledTime,
+      }));
+
+      setAiAssessmentId(latestAssessment.id);
+      hasInitializedBaseline.current = true;
+      hasHydratedFromExistingAssessment.current = true;
+
+      const setsResponse = await getQuestionSets(latestAssessment.id);
+      if (!isActive || !setsResponse?.sets?.length) return;
+
+      const mappedPool = setsResponse.sets.flatMap((set) =>
+        (set.questions || []).map((q) => ({
+          id: String(q.questionId),
+          qtype: 'mcq',
+          topic: q.topicName || 'General',
+          difficulty: q.difficulty || 'medium',
+          quarantined: false,
+          text: q.question,
+          source: 'ai' as const,
+          validated: true,
+          options: q.options ? Object.values(q.options) : [],
+          correctIndex: Number(q.correctOption) > 0 ? Number(q.correctOption) - 1 : 0,
+          explanation: q.topicDescription || 'Mapped from AI assessment',
+        }))
+      );
+
+      setPool(mappedPool);
+    };
+
+    hydrateFromExistingAssessment();
+
+    return () => {
+      isActive = false;
+    };
+  }, [_chapterId, getAiAssessmentsByChapter, getQuestionSets]);
+
+  const handleGenerateAndReview = useCallback(async () => {
+    try {
+      showToast('Creating assessment and mapping questions...');
+      const result = await createAiAssessment({
+        bootcampId: Number(restProps.courseId ?? 0),
+        chapterId: Number(_chapterId ?? 0),
+        title: a.name,
+        objective: a.objective,
+        expectedOutcomes: a.outcomes,
+        totalNumberOfQuestions: a.questionsPerForm,
+        chapterIds: a.chapterIds,
+        moduleId: _moduleId,
+        poolTopics: a.poolTopics,
+      });
+
+      if (!result) {
+        const message = 'Failed to create AI assessment.';
+        setGenError(message);
+        showToast(message);
+        return;
+      }
+
+      const assessmentId = Number((result as any)?.data?.id ?? (result as any)?.id);
+      if (!assessmentId || Number.isNaN(assessmentId)) {
+        const message = 'Assessment created without a valid id.';
+        setGenError(message);
+        showToast(message);
+        return;
+      }
+
+      setAiAssessmentId(assessmentId);
+
+      const mapped = await mapQuestions({ aiAssessmentId: assessmentId });
+      if (!mapped) {
+        const message = 'Assessment created, but mapping failed.';
+        setGenError(message);
+        showToast(message);
+        return;
+      }
+
+      const setsResponse = await getQuestionSets(assessmentId);
+      if (setsResponse?.sets?.length) {
+        const mappedPool = setsResponse.sets.flatMap((set) =>
+          (set.questions || []).map((q) => ({
+            id: String(q.questionId),
+            qtype: 'mcq',
+            topic: q.topicName || 'General',
+            difficulty: q.difficulty || 'medium',
+            quarantined: false,
+            text: q.question,
+            source: 'ai' as const,
+            validated: true,
+            options: q.options ? Object.values(q.options) : [],
+            correctIndex: Number(q.correctOption) > 0 ? Number(q.correctOption) - 1 : 0,
+            explanation: q.topicDescription || 'Mapped from AI assessment',
+          }))
+        );
+        setPool(mappedPool);
+      }
+
+      setGenError(null);
+      showToast('Assessment created and mapped successfully. Moving to review.');
+      setStep(3);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong while creating the assessment.';
+      setGenError(message);
+      showToast(message);
+    }
+  }, [a, createAiAssessment, getQuestionSets, mapQuestions, _chapterId, _moduleId, restProps.courseId, showToast]);
+
   const targets = useMemo(() => {
     const t: Record<string, Record<string, number>> = {};
-    a.poolTopics.forEach((topic) => {
+    a.poolTopics.forEach((topicObj) => {
+      const topic = topicObj.name;
       t[topic] = {};
       BANDS.forEach((b) => {
         t[topic][b] = cellTarget(a.questionsPerForm, a.poolTopics.length, b);
@@ -108,7 +285,8 @@ export default function AssessmentBuilder({
     let met = 0,
       total = 0,
       missing = 0;
-    a.poolTopics.forEach((topic) =>
+    a.poolTopics.forEach((topicObj) => {
+      const topic = topicObj.name;
       BANDS.forEach((b) => {
         total++;
         const have = pool.filter(
@@ -121,8 +299,8 @@ export default function AssessmentBuilder({
         const need = targets[topic]?.[b] ?? 0;
         if (have >= need) met++;
         else missing += need - have;
-      })
-    );
+      });
+    });
     return { met, total, missing, complete: total > 0 && met === total };
   }, [a.poolTopics, pool, targets]);
 
@@ -155,21 +333,22 @@ export default function AssessmentBuilder({
         else setGenError(`No more demo questions for ${topic} · ${band}.`);
       }, 380);
     },
-    [pool, a.objective, a.outcomes, a.poolTopicDescriptions]
+    [pool, a.objective, a.outcomes, a.poolTopicDescriptions, showToast]
   );
 
   const fillAllGaps = useCallback(() => {
     setGenerating('bulk');
     setGenError(null);
     console.log('[Bulk generation context → production API]', {
-      topics: a.poolTopics,
+      topics: a.poolTopics.map(t => t.name),
       objective: a.objective,
       outcomes: a.outcomes,
       topicDescriptions: a.poolTopicDescriptions,
     });
     let added = 0;
     const next = [...pool];
-    a.poolTopics.forEach((topic) =>
+    a.poolTopics.forEach((topicObj) => {
+      const topic = topicObj.name;
       BANDS.forEach((b) => {
         const need =
           (targets[topic]?.[b] ?? 0) -
@@ -192,36 +371,57 @@ export default function AssessmentBuilder({
             added++;
           }
         }
-      })
-    );
+      });
+    });
     setPool(next);
     setTimeout(() => {
       setGenerating(null);
       showToast(`Filled ${added} gap${added !== 1 ? 's' : ''} with demo questions`);
     }, 250);
-  }, [a.poolTopics, a.objective, a.outcomes, a.poolTopicDescriptions, pool, targets]);
+  }, [a.poolTopics, a.objective, a.outcomes, a.poolTopicDescriptions, pool, showToast, targets]);
 
-  const publish = (status: string) => {
-    set({ status: status as any });
+  const publish = useCallback(async (status: string, endDatetime?: string) => {
+    const normalizedStatus = status as any;
+
+    if (status === 'published' || status === 'scheduled') {
+      const assessmentId = aiAssessmentId ?? Number(restProps.courseId ?? 0);
+      if (!assessmentId || Number.isNaN(assessmentId)) {
+        const msg = 'Assessment is not ready to publish yet.';
+        setGenError(msg);
+        showToast(msg);
+        return;
+      }
+
+      const finalEndDatetime = endDatetime || `${a.scheduledDate || new Date().toISOString().slice(0, 10)}T${a.scheduledTime || '09:00'}:00+05:30`;
+      const response = await publishAssessment(assessmentId, { endDatetime: finalEndDatetime });
+      if (!response) {
+        const msg = 'Failed to publish assessment.';
+        setGenError(msg);
+        showToast(msg);
+        return;
+      }
+    }
+
+    set({ status: normalizedStatus });
     setScreen('monitor');
     showToast(
       status === 'published'
         ? 'Published — learners will see this assessment.'
         : status === 'scheduled'
-          ? `Scheduled for ${a.scheduledDate}`
+          ? `Scheduled for ${endDatetime || `${a.scheduledDate || ''} ${a.scheduledTime || ''}`}`
           : 'Saved as draft.'
     );
-  };
+  }, [a.scheduledDate, a.scheduledTime, aiAssessmentId, publishAssessment, restProps.courseId, set, showToast]);
 
   const capacity = useMemo(
-    () => poolCapacity(pool, a.poolTopics, a.questionsPerForm),
+    () => poolCapacity(pool, a.poolTopics.map(t => t.name), a.questionsPerForm),
     [pool, a.poolTopics, a.questionsPerForm]
   );
 
   const stepValid = [
     !!(a.name.trim() && a.objective.trim()),
-    a.baselineChapterIds.length > 0,
-    pool.length > 0,
+    a.chapterIds.length > 0,
+    true,
     true,
     true,
     true,
@@ -232,6 +432,12 @@ export default function AssessmentBuilder({
     set,
     step,
     setStep,
+    isSubmittingAssessment,
+    onGenerateAndReview: handleGenerateAndReview,
+    aiAssessmentId,
+    questionSets,
+    isFetchingQuestionSets,
+    questionSetsError,
     STEPS,
     stepValid,
     pool,

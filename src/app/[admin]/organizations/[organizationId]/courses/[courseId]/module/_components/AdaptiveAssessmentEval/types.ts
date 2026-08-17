@@ -27,8 +27,8 @@ export interface BuilderState {
   objective: string;
   outcomes: string;
   questionsPerForm: number;
-  baselineChapterIds: number[];
-  poolTopics: string[];
+  chapterIds: number[];
+  poolTopics: { id: number; name: string }[];
   poolTopicDescriptions: Record<string, string>;
   poolTopicOutcomes: Record<string, string>;
   mode: 'formative' | 'summative';
