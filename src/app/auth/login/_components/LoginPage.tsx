@@ -263,7 +263,7 @@ const handleGoogleSuccess = async (
                     if (organizationId) {
                         router.push(`/${userRole}/organizations/${organizationId}/courses`) 
                     } else {
-                        router.push(`/${userRole}/organizations`)
+                        router.push(`/${userRole}`)
                     }
                 }
             }
