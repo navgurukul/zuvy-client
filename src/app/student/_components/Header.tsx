@@ -23,12 +23,15 @@ const Header = () => {
     const params = useParams()
     const orgId = params.orgId
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
+    const orgIdMatch = pathname.match(/\/org\/([^\/]+)/)
     const courseIdFromPath = courseIdMatch?.[1]
+    const orgIdFromPath = orgIdMatch?.[1] || (orgId as string | undefined)
     const courseIdFromQuery = searchParams.get('courseId')
     const orgIdFromQuery = searchParams.get('orgId')
-    const currentOrgId = (orgId as string | undefined) || orgIdFromQuery || ''
     const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
     const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
+    const fallbackOrgId = studentData?.orgId
+    const currentOrgId = orgIdFromPath || orgIdFromQuery || (fallbackOrgId ? String(fallbackOrgId) : '')
     const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
 
     // Ensure client-side rendering for hydration

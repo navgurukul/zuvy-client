@@ -7,7 +7,7 @@ declare global {
 }
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { setCookie } from 'cookies-next'
+import { setCookie, deleteCookie } from 'cookies-next'
 import {
     GoogleLogin,
     GoogleOAuthProvider,
@@ -17,13 +17,12 @@ import { jwtDecode } from 'jwt-decode'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { getUser } from '@/store/store'
+import { getUser, useThemeStore, useStudentData } from '@/store/store'
 import Image from 'next/image'
 import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
 import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
 import { useLogin } from '@/hooks/useLogin'
-import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
-import { useThemeStore } from '@/store/store'
+import { DecodedGoogleToken, AuthResponse } from "@/app/auth/login/_components/componentLogin"
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -162,7 +161,7 @@ function LoginPage() {
     )
 
     // Handle successful Google Sign-In
-const handleGoogleSuccess = async (
+    const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
     ) => {
         if (!credentialResponse.credential) {
@@ -198,13 +197,16 @@ const handleGoogleSuccess = async (
                 )
 
                 setUser(response.data.user)
+                // useStudentData.setState({ studentData: response.data.user as any })
+                useStudentData.setState({ studentData: response.data.user as any })
+
                 localStorage.setItem('AUTH', JSON.stringify(response.data.user))
 
                 toast.success({
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
                 })
-                
+
                 if (response.data.showTooltip) {
                     localStorage.setItem('isLoginFirst', 'true')
                     localStorage.removeItem('skipProfileSetup')
@@ -217,9 +219,11 @@ const handleGoogleSuccess = async (
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const normalizedRoles = Array.isArray(response.data.user.rolesList)
+                    // ? response.data.user.rolesList.map((role: any) =>
                     ? response.data.user.rolesList.map((role) =>
-                          String(role).toLowerCase()
-                      )
+
+                        String(role).toLowerCase()
+                    )
                     : []
                 const userRole = normalizedRoles[0] || ''
                 const organizationId = response.data.user.orgId || null
@@ -241,6 +245,13 @@ const handleGoogleSuccess = async (
                     setCookie('orgId', String(organizationId))
                 }
 
+                // Clear redirectedUrl so subsequent header navigation isn't trapped by middleware
+                localStorage.removeItem('redirectedUrl')
+                deleteCookie('redirectedUrl', { path: '/' })
+                deleteCookie('redirectedUrl')
+                document.cookie =
+                    'redirectedUrl=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
 
@@ -248,7 +259,7 @@ const handleGoogleSuccess = async (
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
                 } else if (redirectedUrl) {
                     router.push(redirectedUrl)
-                } 
+                }
                 // else if (userRole === 'student') {
                 //     if (response.data.showTooltip) {
                 //         router.push('/student/profile')
@@ -257,11 +268,11 @@ const handleGoogleSuccess = async (
                 //     }
                 // } 
                 else if (userRole === 'super_admin') {
-                     router.push(`/${userRole}/organizations`)
+                    router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
                     if (organizationId) {
-                        router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                        router.push(`/${userRole}/organizations/${organizationId}/courses`)
                     } else {
                         router.push(`/${userRole}`)
                     }
@@ -305,7 +316,9 @@ const handleGoogleSuccess = async (
             redirectedUrl = route ?? ''
             console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
-            setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
+            setCookie('redirectedUrl', btoa(redirectedUrl))
+            // setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
+
         }
     }, [router])
 
@@ -364,17 +377,17 @@ const handleGoogleSuccess = async (
                                             src={'/zuvy-logo-horizontal-dark.png'}
                                             alt="Zuvy Logo"
                                             className="mx-auto"
-                                            width={48}  
+                                            width={48}
                                             height={48}
                                         />
                                     ) : (
-                                    <Image
-                                        src={'/zuvy-logo-horizontal.png'}
-                                        alt="Zuvy Logo"
-                                        className="mx-auto"
-                                        width={48}
-                                        height={48}
-                                    />
+                                        <Image
+                                            src={'/zuvy-logo-horizontal.png'}
+                                            alt="Zuvy Logo"
+                                            className="mx-auto"
+                                            width={48}
+                                            height={48}
+                                        />
                                     )
                                 }
                             </div>
