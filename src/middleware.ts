@@ -15,7 +15,17 @@ export function middleware(request: NextRequest) {
         console.error(e)
     }
     const matcher = ['/', '/student', '/admin', '/instructor']
-    const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
+    let decodedUrl: string | null = null
+    if (redirectedUrl) {
+        try {
+            const cleanCookie = redirectedUrl.replace(/^"|"$/g, '')
+            decodedUrl = atob(cleanCookie)
+        } catch (e) {
+            console.error('Error decoding redirectedUrl cookie:', e)
+        }
+    }
+    // const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
+
     const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
     const pathSegments = pathname.split('/')
@@ -24,29 +34,29 @@ export function middleware(request: NextRequest) {
     const validOrgIdFromCookie = orgIdFromCookie && orgIdFromCookie !== 'undefined' && orgIdFromCookie !== 'null' ? orgIdFromCookie : undefined
     const orgId = orgIdFromPath || validOrgIdFromCookie
 
-   if (user === 'false') {
-      
-      const isProtectedRoute =
-         pathname.startsWith('/student') ||
-         pathname.startsWith('/admin') ||
-         pathname.startsWith('/instructor')
+    if (user === 'false') {
 
-       if (isProtectedRoute) {
-        const hasCoursePath =
-            pathname.startsWith('/student/') ||
-            pathname.startsWith('/admin/') ||
-            pathname.startsWith('/super_admin/') ||
-            pathname.startsWith('/instructor/')
+        const isProtectedRoute =
+            pathname.startsWith('/student') ||
+            pathname.startsWith('/admin') ||
+            pathname.startsWith('/instructor')
 
-        const redirectUrl = new URL('/', request.url)
+        if (isProtectedRoute) {
+            const hasCoursePath =
+                pathname.startsWith('/student/') ||
+                pathname.startsWith('/admin/') ||
+                pathname.startsWith('/super_admin/') ||
+                pathname.startsWith('/instructor/')
 
-       // if course path present, add route param
-    if (hasCoursePath) {
-     redirectUrl.searchParams.set('route', `${pathname}${request.nextUrl.search}`)
-    }
+            const redirectUrl = new URL('/', request.url)
 
-       return NextResponse.redirect(redirectUrl)
-      }
+            // if course path present, add route param
+            if (hasCoursePath) {
+                redirectUrl.searchParams.set('route', `${pathname}${request.nextUrl.search}`)
+            }
+
+            return NextResponse.redirect(redirectUrl)
+        }
     }
 
     // ─── Student route whitelist ───────────────────────────────────────────────
