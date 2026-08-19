@@ -4,7 +4,7 @@
  * Dependency-free, reusable mascot widget.
  */
 
-type ExpressionKey = 'idle' | 'thinking' | 'happy' | 'celebrate' | 'surprise' | 'talk';
+type ExpressionKey = 'idle' | 'thinking' | 'happy' | 'celebrate' | 'surprise' | 'talk' | 'sad';
 
 const EXPRESSIONS: Record<ExpressionKey, string | string[]> = {
   idle: "idle.png",
@@ -13,6 +13,7 @@ const EXPRESSIONS: Record<ExpressionKey, string | string[]> = {
   celebrate: "celebrate.png",
   surprise: "surprise.png",
   talk: ["talk-c.png", "talk-a.png", "talk-b.png"], // closed -> open -> open-wide
+  sad: "sad.png",
 };
 
 const DEFAULT_MESSAGES = [
@@ -290,6 +291,19 @@ export class ZuvyMascot {
       this.bodyEl.classList.remove("zm-surprised");
       if (this._state === "surprise") this.idle();
     }, 900);
+    return this;
+  }
+
+  sad() {
+    this._state = "sad";
+    this._setSprite("sad");
+    this.bodyEl.classList.remove("zm-celebrate", "zm-surprised", "zm-sad");
+    void this.bodyEl.offsetWidth;
+    this.bodyEl.classList.add("zm-sad");
+    clearTimeout(this._talkTimeout);
+    this._talkTimeout = setTimeout(() => {
+      this.bodyEl.classList.remove("zm-sad");
+    }, 1000);
     return this;
   }
 

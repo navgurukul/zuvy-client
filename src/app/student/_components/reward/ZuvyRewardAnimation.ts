@@ -55,6 +55,27 @@ export const mascotInteraction = {
     return mascot;
   },
 
+  enterAndSad(
+    slotEl: HTMLElement,
+    message?: string,
+    onSpoken?: () => void
+  ) {
+    const mascot = this._ensureMascot(slotEl);
+
+    mascot.show();
+    mascot.sad();
+
+    setTimeout(() => {
+      mascot.talk(message || "Keep practicing! You'll get it next time! 💪");
+
+      if (onSpoken) {
+        onSpoken();
+      }
+    }, 600);
+
+    return mascot;
+  },
+
   cleanup() {
     if (!this._mascot) return;
 
@@ -359,18 +380,23 @@ export function playRewardAnimation(
 
   setTimeout(() => {
     _revealRows(rowArray, () => {
-      mascotInteraction.enterAndCelebrate(
+      const isZeroSparks = totalSparks === 0 && Boolean(sparkCountEl);
+      const mascotAction = isZeroSparks
+        ? mascotInteraction.enterAndSad.bind(mascotInteraction)
+        : mascotInteraction.enterAndCelebrate.bind(mascotInteraction);
+
+      mascotAction(
         mascotSlotEl,
         message,
         () => {
           // ===================================================
           // 4. Spark throw
           //
-          // Only throw sparks when target exists.
-          // Feedback modal has no spark counter.
+          // Only throw sparks when target exists and totalSparks > 0.
+          // Feedback modal and zero-sparks modal have no spark throw.
           // ===================================================
 
-          if (sparkCountEl) {
+          if (sparkCountEl && !isZeroSparks) {
             sparkParticleSystem.throwSparks(
               popupEl,
               mascotSlotEl,
@@ -382,8 +408,6 @@ export function playRewardAnimation(
               }
             );
           } else {
-            // Feedback modal
-            // No spark animation required.
             if (onComplete) {
               onComplete();
             }
