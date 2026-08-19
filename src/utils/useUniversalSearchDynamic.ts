@@ -166,11 +166,12 @@ import {
         if (e.key === "Enter") {
           e.preventDefault();
           const trimmed = searchQuery.trim();
-          updateURL(trimmed);
           if (trimmed && trimmed !== previousQueryRef.current) {
             previousQueryRef.current = trimmed;
+            updateURL(trimmed);
             await safeApiCall(() => fetchSearchResultsApi(trimmed), []);
-          } else {
+          } else if (!trimmed) {
+            updateURL("");
             await safeApiCall(() => defaultFetchApi?.() ?? Promise.resolve([]), []);
           }
         }
@@ -200,14 +201,16 @@ import {
             await handleSuggestionClick(filteredSuggestions[selectedIndex]);
           } else {
             const trimmed = searchQuery.trim();
-            updateURL(trimmed);
             setShowSuggestions(false);
             if (trimmed && trimmed !== previousQueryRef.current) {
               previousQueryRef.current = trimmed;
+              updateURL(trimmed);
               await safeApiCall(() => fetchSearchResultsApi(trimmed), []);
-            } else {
+            } else if (!trimmed) {
+              updateURL("");
               await safeApiCall(() => defaultFetchApi?.() ?? Promise.resolve([]), []);
             }
+            // Same query pressed again → no-op
           }
           break;
         case "Escape":
