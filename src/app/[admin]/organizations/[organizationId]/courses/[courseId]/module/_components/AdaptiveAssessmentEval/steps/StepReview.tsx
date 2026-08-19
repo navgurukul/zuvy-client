@@ -189,13 +189,13 @@ export function StepReview({
               <Btn size="sm" variant="outline" onClick={() => setReplaceModal(item)}>
                 <RefreshCw size={12} className="mr-1" /> Replace
               </Btn>
-              <Btn
+              {/* <Btn
                 size="sm"
                 variant="danger"
                 onClick={() => setPool((p: Question[]) => p.filter((q) => q.id !== item.id))}
               >
                 <Trash2 size={12} />
-              </Btn>
+              </Btn> */}
             </div>
           </div>
           {expanded === item.id && item.options && (
