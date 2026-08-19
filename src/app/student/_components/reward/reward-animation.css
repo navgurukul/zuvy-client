@@ -129,6 +129,28 @@
   }
 }
 
+.zm-body.zm-sad {
+  animation: zm-sad-anim 800ms ease-in-out 1;
+}
+
+@keyframes zm-sad-anim {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  30% {
+    transform: translateY(4px) rotate(-4deg);
+  }
+
+  65% {
+    transform: translateY(2px) rotate(3deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
 .zm-sprite {
   position: absolute;
   inset: 0;
@@ -438,6 +460,32 @@
 
 .reward-continue-btn:hover {
   background: #215a26;
+}
+
+/* Zero Sparks / Failed / Retry Theme */
+.reward-popup.is-zero-sparks .reward-badge {
+  background: #64748b;
+  box-shadow: 0 6px 18px rgba(100, 116, 139, 0.35);
+}
+
+.reward-popup.is-zero-sparks .reward-title {
+  color: #374151;
+}
+
+.reward-popup.is-zero-sparks .reward-spark-count {
+  color: #6b7280;
+}
+
+.reward-popup.is-zero-sparks .reward-row-value {
+  color: #6b7280;
+}
+
+.reward-popup.is-zero-sparks .reward-continue-btn {
+  background: #4b5563;
+}
+
+.reward-popup.is-zero-sparks .reward-continue-btn:hover {
+  background: #374151;
 }
 
 /* Mascot Slot inside Reward Popup */

@@ -62,6 +62,8 @@ export const ZuvyRewardModal: React.FC<
     const [isExiting, setIsExiting] =
       useState(false);
 
+    const isZeroSparks = !hideSparks && totalSparks === 0;
+
     // =========================================================
     // Confetti
     // =========================================================
@@ -175,12 +177,12 @@ export const ZuvyRewardModal: React.FC<
       let isSubscribed = true;
 
       // ---------------------------------------------------------
-      // Start confetti only for actual reward
+      // Start confetti only for actual positive rewards.
       //
-      // Feedback modal should NOT show confetti.
+      // Feedback modal & zero spark modal should NOT show confetti.
       // ---------------------------------------------------------
 
-      if (!hideSparks) {
+      if (!hideSparks && totalSparks > 0) {
         spawnConfetti();
       }
 
@@ -283,7 +285,7 @@ export const ZuvyRewardModal: React.FC<
                 ? 'Thank you! 🎉'
                 : totalSparks > 0
                   ? 'Good job! 🎉'
-                  : 'Great work! 🎉',
+                  : "Don't give up! Try again 💪",
 
             // ===================================================
             // Animation complete
@@ -370,35 +372,49 @@ export const ZuvyRewardModal: React.FC<
         onClick={handleClose}
       >
         <div
-          className={`reward-popup ${isExiting
-              ? 'exiting'
-              : ''
-            }`}
+          className={`reward-popup ${isExiting ? 'exiting' : ''} ${
+            isZeroSparks ? 'is-zero-sparks' : ''
+          }`}
           ref={popupRef}
           onClick={(e) =>
             e.stopPropagation()
           }
         >
           {/* ===================================================
-            1. Success Badge
+            1. Success / Zero-Sparks Badge
         =================================================== */}
 
           <div
             className="reward-badge"
             ref={badgeRef}
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="30"
-              height="30"
-              fill="none"
-              stroke="white"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="4 12 9.5 17.5 20 6" />
-            </svg>
+            {isZeroSparks ? (
+              <svg
+                viewBox="0 0 24 24"
+                width="30"
+                height="30"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                width="30"
+                height="30"
+                fill="none"
+                stroke="white"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="4 12 9.5 17.5 20 6" />
+              </svg>
+            )}
           </div>
 
           {/* ===================================================
@@ -406,7 +422,7 @@ export const ZuvyRewardModal: React.FC<
         =================================================== */}
 
           <h3 className="reward-title">
-            Chapter Completed!
+            {isZeroSparks ? 'Keep Trying!' : 'Chapter Completed!'}
           </h3>
 
           <p className="reward-subtitle">
@@ -502,7 +518,7 @@ export const ZuvyRewardModal: React.FC<
             ref={continueBtnRef}
             onClick={handleClose}
           >
-            Continue →
+            {isZeroSparks ? 'Try Again →' : 'Continue →'}
           </Button>
         </div>
       </div>
