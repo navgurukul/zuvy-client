@@ -659,6 +659,8 @@ export interface GetReplacementQuestionsApiResponse {
 export interface GetReplacementQuestionsParams {
     topicName: string;
     difficulty: "easy" | "medium" | "hard";
+  questionSetId: number;
+  excludeId: number;
 }
 
 export interface ReplaceQuestionRequestBody {
@@ -667,7 +669,11 @@ export interface ReplaceQuestionRequestBody {
 }
 
 export interface ReplaceQuestionApiResponse {
-    success: boolean;
     message?: string;
     // add actual response fields once you confirm the API shape
+}
+
+export interface ReplaceQuestionResult {
+  data: ReplaceQuestionApiResponse;
+  status: number;
 }

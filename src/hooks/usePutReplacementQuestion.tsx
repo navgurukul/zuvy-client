@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import {
     ReplaceQuestionApiResponse,
     ReplaceQuestionRequestBody,
+    ReplaceQuestionResult,
 } from "./hookType";
 import { api } from "@/utils/axios.config";
 
@@ -9,15 +10,15 @@ interface UseReplaceQuestionResult {
     replaceQuestion: (
         questionId: string | number,
         body: ReplaceQuestionRequestBody
-    ) => Promise<ReplaceQuestionApiResponse | null>;
+    ) => Promise<ReplaceQuestionResult | null>;
     isReplacing: boolean;
     replaceError: string | null;
-    replacedResult: ReplaceQuestionApiResponse | null;
+    replacedResult: ReplaceQuestionResult | null;
 }
 
 export function useReplaceQuestion(): UseReplaceQuestionResult {
     const [replacedResult, setReplacedResult] =
-        useState<ReplaceQuestionApiResponse | null>(null);
+        useState<ReplaceQuestionResult | null>(null);
     const [isReplacing, setIsReplacing] = useState<boolean>(false);
     const [replaceError, setReplaceError] = useState<string | null>(null);
 
@@ -25,7 +26,7 @@ export function useReplaceQuestion(): UseReplaceQuestionResult {
         async (
             questionId: string | number,
             body: ReplaceQuestionRequestBody
-        ): Promise<ReplaceQuestionApiResponse | null> => {
+        ): Promise<ReplaceQuestionResult | null> => {
             setIsReplacing(true);
             setReplaceError(null);
             try {
@@ -33,8 +34,9 @@ export function useReplaceQuestion(): UseReplaceQuestionResult {
                     `${process.env.NEXT_PUBLIC_EVAL_URL}/questions/${questionId}/replace`,
                     body
                 );
-                setReplacedResult(response.data);
-                return response.data;
+                const result = { data: response.data, status: response.status };
+                setReplacedResult(result);
+                return result;
             } catch (err) {
                 setReplaceError(
                     err instanceof Error ? err.message : "Failed to replace question"

@@ -30,11 +30,15 @@ export function ReplaceModal({
   const { replaceQuestion, isReplacing, replaceError } = useReplaceQuestion();
 
   useEffect(() => {
+    if (!item.questionSetId) return;
+
     getReplacementQuestions({
       topicName: item.topic,
       difficulty: item.difficulty as 'easy' | 'medium' | 'hard',
+      questionSetId: item.questionSetId,
+      excludeId: Number(item.id),
     });
-  }, [getReplacementQuestions, item.topic, item.difficulty]);
+  }, [getReplacementQuestions, item.id, item.questionSetId, item.topic, item.difficulty]);
 
   const apiCandidates: Question[] = useMemo(
     () =>
@@ -86,8 +90,8 @@ export function ReplaceModal({
       replacementQuestionId: Number(replacement.id),
     });
 
-    if (!response?.success) {
-      showToast(replaceError || response?.message || 'Failed to replace question');
+    if (!response || response.status < 200 || response.status >= 300) {
+      showToast(replaceError || response?.data.message || 'Failed to replace question');
       return;
     }
 
