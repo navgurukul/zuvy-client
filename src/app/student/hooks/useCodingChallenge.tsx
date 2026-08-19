@@ -85,7 +85,7 @@ function codingChallengeReducer(
             return state;
     }
 }
-export function useCodingChallenge({ questionId, onChapterComplete, orgId }: UseCodingChallengeProps) {
+export function useCodingChallenge({ questionId, onChapterComplete, orgId, chapterId }: UseCodingChallengeProps) {
     const [state, dispatch] = useReducer(codingChallengeReducer, initialState);
     const { toast } = useToast();
 
@@ -174,8 +174,9 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
         dispatch({ type: 'RESET_ERRORS' });
 
         try {
+            const chapterIdParam = chapterId ? `&chapter_id=${chapterId}` : '';
             const response = await api.post<ApiResponse<CodeResult[]>>(
-                `codingPlatform/practicecode/questionId/${questionId}?action=${action}`,
+                `codingPlatform/practicecode/questionId/${questionId}?action=${action}${chapterIdParam}`,
                 {
                     languageId: state.languageId,
                     sourceCode: b64EncodeUnicode(state.currentCode),
@@ -230,7 +231,7 @@ export function useCodingChallenge({ questionId, onChapterComplete, orgId }: Use
                 dispatch({ type: 'SET_SUBMITTING', payload: false });
             }
         }
-    }, [questionId, state.languageId, state.currentCode, toast, onChapterComplete]);
+    }, [questionId, state.languageId, state.currentCode, toast, onChapterComplete, chapterId]);
 
     const openConfirmModal = useCallback(() => {
         dispatch({ type: 'SET_CONFIRM_MODAL', payload: true });
