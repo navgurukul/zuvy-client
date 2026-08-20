@@ -903,7 +903,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             <div className="space-y-4 min-w-0">
               {/* Course Header Card - Desktop only, matches module cards width */}
               <div className="hidden md:block">
-                <div className="rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="rounded-lg bg-card p-6 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-start gap-6">
                     <div className="flex-shrink-0">
                       <Image
@@ -944,7 +944,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>
 
               {/* Progress Stats Card - Full width on desktop, matches course header width */}
-              <div className="w-full rounded-lg bg-white p-4 md:p-5 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-full rounded-lg bg-card p-4 md:p-5 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 w-full">
                     <div className="relative bg-primary-light rounded-full h-1.5 flex-1">
@@ -1235,7 +1235,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               />
 
               {/* What's Next Section */}
-              <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <Card className="w-full shadow-4dp text-left rounded-lg bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
                   {/* <p className="text-sm text-muted-foreground">
