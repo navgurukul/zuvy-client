@@ -750,3 +750,95 @@
     opacity: 0.2;
   }
 }
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+/* Overlay */
+.dark .reward-popup-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Popup Card */
+.dark .reward-popup {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Title & Subtitle */
+.dark .reward-title {
+  color: #f1f5f9;
+}
+
+.dark .reward-subtitle {
+  color: #94a3b8;
+}
+
+/* Spark Counter */
+.dark .reward-spark-count {
+  color: #34d399;
+}
+
+.dark .reward-spark-label {
+  color: #94a3b8;
+}
+
+/* Breakdown Rows */
+.dark .reward-row {
+  background: rgba(51, 65, 85, 0.6);
+  color: #e2e8f0;
+}
+
+.dark .reward-row-value {
+  color: #34d399;
+}
+
+/* Continue Button */
+.dark .reward-continue-btn {
+  background: #166534;
+  color: #f0fdf4;
+}
+
+.dark .reward-continue-btn:hover {
+  background: #15803d;
+}
+
+/* Mascot Bubble inside reward popup (dark) */
+.dark .reward-mascot-slot .zm-bubble {
+  background: #334155;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+/* Feedback Message */
+.dark .reward-feedback-message {
+  color: #94a3b8;
+}
+
+/* ---- Zero Sparks variant in dark mode ---- */
+.dark .reward-popup.is-zero-sparks .reward-badge {
+  background: #475569;
+  box-shadow: 0 6px 18px rgba(71, 85, 105, 0.4);
+}
+
+.dark .reward-popup.is-zero-sparks .reward-title {
+  color: #cbd5e1;
+}
+
+.dark .reward-popup.is-zero-sparks .reward-spark-count {
+  color: #94a3b8;
+}
+
+.dark .reward-popup.is-zero-sparks .reward-row-value {
+  color: #94a3b8;
+}
+
+.dark .reward-popup.is-zero-sparks .reward-continue-btn {
+  background: #475569;
+}
+
+.dark .reward-popup.is-zero-sparks .reward-continue-btn:hover {
+  background: #64748b;
+}

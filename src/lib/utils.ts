@@ -248,11 +248,15 @@ export const stopPolling = (pollIntervalRef: React.MutableRefObject<NodeJS.Timeo
 };
 
 export const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy': return 'bg-success-light text-success';
-      case 'Medium': return 'bg-warning-light text-warning';
-      case 'Hard': return 'bg-destructive-light text-destructive';
-      default: return 'bg-muted text-muted-foreground';
+    switch (difficulty?.toLowerCase()) {
+      case 'easy':
+        return 'bg-success-light text-success dark:bg-emerald-950/80 dark:text-emerald-300 dark:border dark:border-emerald-700/60'
+      case 'medium':
+        return 'bg-warning-light text-warning dark:bg-amber-950/80 dark:text-amber-300 dark:border dark:border-amber-700/60'
+      case 'hard':
+        return 'bg-destructive-light text-destructive dark:bg-rose-950/80 dark:text-rose-300 dark:border dark:border-rose-700/60'
+      default:
+        return 'bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-200'
     }
-  };
+}
   
