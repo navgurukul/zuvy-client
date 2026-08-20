@@ -344,26 +344,26 @@ export const columns: ColumnDef<quiz>[] = [
 ]
 
 export const zuvyEvalColumns: ColumnDef<any>[] = [
-    {
-        accessorKey: 'domainName',
-        header: ({ column }) => (
-            <DataTableColumnHeader
-                className="flex text-left"
-                column={column}
-                title="Domain Name"
-            />
-        ),
-        cell: ({ row }) => {
-            return (
-                <div className="flex text-left">
-                    <span className="text-foreground rounded-md text-sm font-medium">
-                        {row.original.domainName || 'No Domain'}
-                    </span>
-                </div>
-            )
-        },
-        enableSorting: true,
-    },
+    // {
+    //     accessorKey: 'domainName',
+    //     header: ({ column }) => (
+    //         <DataTableColumnHeader
+    //             className="flex text-left"
+    //             column={column}
+    //             title="Domain Name"
+    //         />
+    //     ),
+    //     cell: ({ row }) => {
+    //         return (
+    //             <div className="flex text-left">
+    //                 <span className="text-foreground rounded-md text-sm font-medium">
+    //                     {row.original.domainName || 'No Domain'}
+    //                 </span>
+    //             </div>
+    //         )
+    //     },
+    //     enableSorting: true,
+    // },
     {
         accessorKey: 'question',
         header: ({ column }) => (
