@@ -304,7 +304,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                         value={link}
                         onChange={(e) => handleSubmissionChange(index, e.target.value)}
                         disabled={isCompleted || isSubmitting || isCompleting}
-                        className={`text-base text-left ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'} ${validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}`}
+                        className={`text-base text-left dark:bg-slate-900 dark:text-slate-100 dark:disabled:text-slate-200 dark:disabled:opacity-85 ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'} ${validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}`}
                       />
                       {!isCompleted && submissionLinks.length > 1 && (
                         <Button
