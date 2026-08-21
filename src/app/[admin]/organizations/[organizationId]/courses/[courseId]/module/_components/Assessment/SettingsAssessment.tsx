@@ -152,7 +152,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [totalSelectedCodingQues, setTotalSelectedCodingQues] = useState(0)
     const [totalSelectedQuizQues, setTotalSelectedQuizQues] = useState(0)
     const [editingFields, setEditingFields] = useState<any>({})
-    const hours = Array.from({ length: 5 }, (_, i) => i + 1)
+    // Allow 0-5 hours (including 0) so admins can create sub-hour assessments (e.g., 30 minutes)
+    const hours = Array.from({ length: 6 }, (_, i) => i) // 0, 1, 2, 3, 4, 5
     const minutes = [0, 15, 30, 45]
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [description, setDescription] = useState(
@@ -171,49 +172,43 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsEasy || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsEasy || 0
+                        }`,
                 }),
             codingProblemsMedium: z
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsMedium || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsMedium || 0
+                        }`,
                 }),
             codingProblemsHard: z
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsHard || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsHard || 0
+                        }`,
                 }),
             mcqsEasy: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsEasy || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsEasy || 0
+                        }`,
                 }),
             mcqsMedium: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsMedium || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsMedium || 0
+                        }`,
                 }),
             mcqsHard: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsHard || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsHard || 0
+                        }`,
                 }),
             codingProblemsWeightage: z.number().min(0),
             mcqsWeightage: z.number().min(0),
@@ -303,10 +298,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             eyeTracking: false,
             hour: content.timeLimit
                 ? String(Math.floor(content.timeLimit / 3600))
-                : '2',
+                : '0',
             minute: content.timeLimit
                 ? String(Math.floor((content.timeLimit % 3600) / 60))
-                : '15',
+                : '30',
             passPercentage: 70,
         },
     })
@@ -408,7 +403,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             (Number(values.mcqsHard) || 0)
 
         const data: any = {
-            title: chapterTitle,
+            title: chapterTitle?.trim() || content?.ModuleAssessment?.title || content?.title || 'Untitled Assessment',
             description: description,
             codingProblemIds: selectedCodingQuesIds,
             mcqIds: selectedQuizQuesIds,
@@ -497,40 +492,40 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 codingMax > 0 && mcqMax > 0
                     ? content?.weightageCodingQuestions || 50
                     : codingMax > 0
-                    ? 100
-                    : 0,
+                        ? 100
+                        : 0,
             mcqsWeightage:
                 codingMax > 0 && mcqMax > 0
                     ? content?.weightageMcqQuestions || 50
                     : mcqMax > 0
-                    ? 100
-                    : 0,
+                        ? 100
+                        : 0,
             canCopyPaste:
                 content?.canCopyPaste !== null &&
-                content?.canCopyPaste !== undefined
+                    content?.canCopyPaste !== undefined
                     ? content.canCopyPaste
                     : true,
             tabSwitch:
                 content?.canTabChange !== null &&
-                content?.canTabChange !== undefined
+                    content?.canTabChange !== undefined
                     ? content.canTabChange
                     : true,
             screenExit:
                 content?.canScreenExit !== null &&
-                content?.canScreenExit !== undefined
+                    content?.canScreenExit !== undefined
                     ? content.canScreenExit
                     : true,
             eyeTracking:
                 content?.canEyeTrack !== null &&
-                content?.canEyeTrack !== undefined
+                    content?.canEyeTrack !== undefined
                     ? content.canEyeTrack
                     : true,
             hour: content.timeLimit
                 ? String(Math.floor(content.timeLimit / 3600))
-                : '2',
+                : '0',
             minute: content.timeLimit
                 ? String(Math.floor((Number(content.timeLimit) % 3600) / 60))
-                : '15',
+                : '30',
             passPercentage: content?.passPercentage || 70,
         })
         // Apply weightage disabling logic
@@ -675,15 +670,15 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             currentAssessmentStatus === 'ACTIVE'
                                                 ? 'secondary'
                                                 : currentAssessmentStatus ===
-                                                  'PUBLISHED'
-                                                ? 'default'
-                                                : currentAssessmentStatus ===
-                                                  'DRAFT'
-                                                ? 'yellow'
-                                                : currentAssessmentStatus ===
-                                                  'CLOSED'
-                                                ? 'default'
-                                                : 'destructive'
+                                                    'PUBLISHED'
+                                                    ? 'default'
+                                                    : currentAssessmentStatus ===
+                                                        'DRAFT'
+                                                        ? 'yellow'
+                                                        : currentAssessmentStatus ===
+                                                            'CLOSED'
+                                                            ? 'default'
+                                                            : 'destructive'
                                         }
                                         className="ml-3 text-sm"
                                     >
@@ -700,14 +695,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             <div className="flex gap-2">
                                 {(currentAssessmentStatus === 'PUBLISHED' ||
                                     currentAssessmentStatus === 'ACTIVE') && (
-                                    <Button
-                                        type="button"
-                                        onClick={generateStudentLink}
-                                        className="w-auto px-6"
-                                    >
-                                        Generate Student Link
-                                    </Button>
-                                )}
+                                        <Button
+                                            type="button"
+                                            onClick={generateStudentLink}
+                                            className="w-auto px-6"
+                                        >
+                                            Generate Student Link
+                                        </Button>
+                                    )}
                                 <Dialog
                                     open={isPublishDialogOpen}
                                     onOpenChange={setIsPublishDialogOpen}
@@ -734,7 +729,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 content?.startDatetime
                                             }
                                             initialEndDate={content?.endDatetime}
-                                            hasExistingEndDate={!!content?.endDatetime} 
+                                            hasExistingEndDate={!!content?.endDatetime}
                                         />
                                     </DialogContent>
                                 </Dialog>
@@ -743,38 +738,38 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                         {(currentAssessmentStatus === 'PUBLISHED' ||
                             currentAssessmentStatus === 'ACTIVE') && (
-                        <div className="mb-4 mt-0">
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                {studentLink && (
-                                    <Input
-                                        value={studentLink}
-                                        readOnly
-                                        aria-label="Student assessment link"
-                                        className="w-1/2"
-                                    />
-                                )}
-                                {studentLink && (
-                                    <Button
-                                        type="button"
-                                        onClick={copyStudentLink}
-                                        className="shrink-0 mt-2"
-                                    >
-                                        {isLinkCopied ? (
-                                            <Check className="mr-2 h-4 w-4" />
-                                        ) : (
-                                            <Copy className="mr-2 h-4 w-4" />
+                                <div className="mb-4 mt-0">
+                                    <div className="flex flex-col gap-2 sm:flex-row">
+                                        {studentLink && (
+                                            <Input
+                                                value={studentLink}
+                                                readOnly
+                                                aria-label="Student assessment link"
+                                                className="w-1/2"
+                                            />
                                         )}
-                                        {isLinkCopied ? 'Copied' : 'Copy Link'}
-                                    </Button>
-                                )}
-                            </div>
-                            {studentLink && (
-                                <p className="mt-2 text-sm text-success">
-                                    Student link generated successfully.
-                                </p>
+                                        {studentLink && (
+                                            <Button
+                                                type="button"
+                                                onClick={copyStudentLink}
+                                                className="shrink-0 mt-2"
+                                            >
+                                                {isLinkCopied ? (
+                                                    <Check className="mr-2 h-4 w-4" />
+                                                ) : (
+                                                    <Copy className="mr-2 h-4 w-4" />
+                                                )}
+                                                {isLinkCopied ? 'Copied' : 'Copy Link'}
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {studentLink && (
+                                        <p className="mt-2 text-sm text-success">
+                                            Student link generated successfully.
+                                        </p>
+                                    )}
+                                </div>
                             )}
-                        </div>
-                        )}
 
                         <div className="flex items-center mb-6 text-muted-dark">
                             <label
@@ -842,7 +837,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 render={({ field }) => {
                                                     const isError = Boolean(
                                                         form.formState.errors[
-                                                            field.name
+                                                        field.name
                                                         ]
                                                     )
                                                     return (
@@ -851,8 +846,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 <Input
                                                                     {...field}
                                                                     type="number"
-                                                                    className={`w-16 mr-2 no-spinners ${
-                                                                        form
+                                                                    className={`w-16 mr-2 no-spinners ${form
                                                                             .formState
                                                                             .errors[
                                                                             field
@@ -860,7 +854,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                         ]
                                                                             ? 'border-destructive outline-destructive text-destructive'
                                                                             : 'border-gray-300'
-                                                                    }`}
+                                                                        }`}
                                                                     onChange={(
                                                                         e
                                                                     ) => {
@@ -913,62 +907,60 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                                 'Medium',
                                                                                 'Hard',
                                                                             ][
-                                                                                idx
+                                                                            idx
                                                                             ]
                                                                         }{' '}
                                                                         question(s)
                                                                         out of{' '}
                                                                         {category.title ===
-                                                                        'Coding Problems'
+                                                                            'Coding Problems'
                                                                             ? (category.counts &&
-                                                                                  category
-                                                                                      .counts[
-                                                                                      `codingProblems${
-                                                                                          [
-                                                                                              'Easy',
-                                                                                              'Medium',
-                                                                                              'Hard',
-                                                                                          ][
-                                                                                              idx
-                                                                                          ]
-                                                                                      }`
-                                                                                  ]) ||
-                                                                              0
+                                                                                category
+                                                                                    .counts[
+                                                                                `codingProblems${[
+                                                                                    'Easy',
+                                                                                    'Medium',
+                                                                                    'Hard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0
                                                                             : (category.mcqCounts &&
-                                                                                  category
-                                                                                      .mcqCounts[
-                                                                                      `${
-                                                                                          [
-                                                                                              'mcqsEasy',
-                                                                                              'mcqsMedium',
-                                                                                              'mcqsHard',
-                                                                                          ][
-                                                                                              idx
-                                                                                          ]
-                                                                                      }`
-                                                                                  ]) ||
-                                                                              0}
+                                                                                category
+                                                                                    .mcqCounts[
+                                                                                `${[
+                                                                                    'mcqsEasy',
+                                                                                    'mcqsMedium',
+                                                                                    'mcqsHard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0}
                                                                     </FormLabel>
                                                                 )}
                                                                 {form.formState
                                                                     .errors[
                                                                     field.name
                                                                 ] && (
-                                                                    <div className="flex items-center gap-1 mt-1 text-destructive">
-                                                                        <AlertCircle color="#db3939" />
-                                                                        <FormMessage className="text-sm">
-                                                                            {
-                                                                                form
-                                                                                    .formState
-                                                                                    .errors[
-                                                                                    field
-                                                                                        .name
-                                                                                ]
-                                                                                    ?.message
-                                                                            }
-                                                                        </FormMessage>
-                                                                    </div>
-                                                                )}
+                                                                        <div className="flex items-center gap-1 mt-1 text-destructive">
+                                                                            <AlertCircle color="#db3939" />
+                                                                            <FormMessage className="text-sm">
+                                                                                {
+                                                                                    form
+                                                                                        .formState
+                                                                                        .errors[
+                                                                                        field
+                                                                                            .name
+                                                                                    ]
+                                                                                        ?.message
+                                                                                }
+                                                                            </FormMessage>
+                                                                        </div>
+                                                                    )}
                                                             </div>
                                                         </FormItem>
                                                     )
@@ -987,29 +979,27 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             <span className="text-sm font-bold">
                                                 Coding:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedCodingQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedCodingQues
+                                            )
                                                     ? 0
                                                     : totalQuestions.codingProblemsEasy +
-                                                      totalQuestions.codingProblemsMedium +
-                                                      totalQuestions.codingProblemsHard
-                                            } out of ${codingMax}`}
+                                                    totalQuestions.codingProblemsMedium +
+                                                    totalQuestions.codingProblemsHard
+                                                } out of ${codingMax}`}
                                         </p>
                                         <p className="text-sm ml-2">
                                             <span className="text-sm font-bold ">
                                                 Quiz:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedQuizQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedQuizQues
+                                            )
                                                     ? 0
                                                     : totalQuestions.mcqsEasy +
-                                                      totalQuestions.mcqsMedium +
-                                                      totalQuestions.mcqsHard
-                                            } out of ${mcqMax}`}
+                                                    totalQuestions.mcqsMedium +
+                                                    totalQuestions.mcqsHard
+                                                } out of ${mcqMax}`}
                                         </p>
                                     </div>
                                 </div>
@@ -1055,11 +1045,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         <Input
                                                             {...field}
                                                             type="number"
-                                                            className={`w-16 mr-2 no-spinners ${
-                                                                isError
+                                                            className={`w-16 mr-2 no-spinners ${isError
                                                                     ? 'border-destructive outline-destructive text-destructive'
                                                                     : 'border-gray-300'
-                                                            }`}
+                                                                }`}
                                                             disabled={
                                                                 category.disabled
                                                             }
@@ -1074,11 +1063,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         />
                                                     </FormControl>
                                                     <FormLabel
-                                                        className={`text-sm ${
-                                                            isError
+                                                        className={`text-sm ${isError
                                                                 ? 'text-destructive'
                                                                 : 'text-muted-dark'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {category.title}
                                                     </FormLabel>
@@ -1090,17 +1078,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 {/* Display error messages if any */}
                                 {form.formState.errors
                                     .codingProblemsWeightage && (
-                                    <div className="flex gap-2">
-                                        <AlertCircle color="#db3939" />
-                                        <FormMessage className="text-destructive text-sm mt-1">
-                                            {
-                                                form.formState.errors
-                                                    .codingProblemsWeightage
-                                                    .message
-                                            }
-                                        </FormMessage>
-                                    </div>
-                                )}
+                                        <div className="flex gap-2">
+                                            <AlertCircle color="#db3939" />
+                                            <FormMessage className="text-destructive text-sm mt-1">
+                                                {
+                                                    form.formState.errors
+                                                        .codingProblemsWeightage
+                                                        .message
+                                                }
+                                            </FormMessage>
+                                        </div>
+                                    )}
                                 {form.formState.errors.mcqsWeightage && (
                                     <div className="flex gap-2">
                                         <AlertCircle color="#db3939" />
@@ -1127,12 +1115,11 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                         render={({ field }) => (
                                             <FormItem>
                                                 <div
-                                                    className={`flex items-center justify-between mb-4 w-3/4 ${
-                                                        option.name ===
-                                                        'screenExit'
+                                                    className={`flex items-center justify-between mb-4 w-3/4 ${option.name ===
+                                                            'screenExit'
                                                             ? 'hidden'
                                                             : ''
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div className="flex items-center justify-between space-x-2 w-1/3">
                                                         <div>
@@ -1226,10 +1213,11 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             }
                                                                             value={hour.toString()}
                                                                         >
-                                                                            {hour >
-                                                                            1
-                                                                                ? `${hour} Hours`
-                                                                                : `${hour} Hour`}
+                                                                            {hour === 0
+                                                                                ? '0 Hours'
+                                                                                : hour > 1
+                                                                                    ? `${hour} Hours`
+                                                                                    : `${hour} Hour`}
                                                                         </SelectItem>
                                                                     )
                                                                 )}
@@ -1304,13 +1292,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     <Input
                                                         {...field}
                                                         type="number"
-                                                        className={`w-16 mr-2 no-spinners ${
-                                                            form.formState
+                                                        className={`w-16 mr-2 no-spinners ${form.formState
                                                                 .errors
                                                                 .passPercentage
                                                                 ? 'border-destructive outline-destructive text-destructive'
                                                                 : 'border-muted-light'
-                                                        }`}
+                                                            }`}
                                                         onChange={(e) => {
                                                             const value =
                                                                 e.target.value
@@ -1318,37 +1305,36 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 value === ''
                                                                     ? null
                                                                     : Number(
-                                                                          value
-                                                                      )
+                                                                        value
+                                                                    )
                                                             )
                                                         }}
                                                     />
                                                 </FormControl>
                                                 <div
-                                                    className={`text-md ${
-                                                        form.formState.errors
+                                                    className={`text-md ${form.formState.errors
                                                             .passPercentage
                                                             ? 'border-destructive outline-destructive text-destructive'
                                                             : 'border-muted-light'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     %
                                                 </div>
                                             </div>
                                             {form.formState.errors
                                                 .passPercentage && (
-                                                <div className="flex items-center gap-2 mt-1 text-destructive">
-                                                    <AlertCircle color="#db3939" />
-                                                    <FormMessage className="text-sm">
-                                                        {
-                                                            form.formState
-                                                                .errors
-                                                                .passPercentage
-                                                                .message
-                                                        }
-                                                    </FormMessage>
-                                                </div>
-                                            )}
+                                                    <div className="flex items-center gap-2 mt-1 text-destructive">
+                                                        <AlertCircle color="#db3939" />
+                                                        <FormMessage className="text-sm">
+                                                            {
+                                                                form.formState
+                                                                    .errors
+                                                                    .passPercentage
+                                                                    .message
+                                                            }
+                                                        </FormMessage>
+                                                    </div>
+                                                )}
                                         </FormItem>
                                     )}
                                 />
