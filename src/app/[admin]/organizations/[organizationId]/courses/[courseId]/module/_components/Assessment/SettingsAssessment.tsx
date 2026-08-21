@@ -403,7 +403,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             (Number(values.mcqsHard) || 0)
 
         const data: any = {
-            title: chapterTitle,
+            title: chapterTitle?.trim() || content?.ModuleAssessment?.title || content?.title || 'Untitled Assessment',
             description: description,
             codingProblemIds: selectedCodingQuesIds,
             mcqIds: selectedQuizQuesIds,
