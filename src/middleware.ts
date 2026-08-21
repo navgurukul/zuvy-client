@@ -164,7 +164,9 @@ export function middleware(request: NextRequest) {
                 request.nextUrl.pathname === '/' ||
                 request.nextUrl.pathname === `/${user}`
             ) {
-                if (orgId) {
+                if (user === 'super_admin') {
+                    return NextResponse.redirect(new URL(`/${user}/organizations?page=1&limit=10`, request.url))
+                } else if (orgId) {
                     return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
                 } else {
                     return NextResponse.redirect(new URL(`/${user}/organizations`, request.url))

@@ -255,11 +255,13 @@ function LoginPage() {
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
 
+                const isRedirectValid = redirectedUrl && (userRole !== 'super_admin' || redirectedUrl.startsWith('/super_admin'));
+
                 if (shouldForceProfilePage && organizationId) {
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
-                } else if (redirectedUrl) {
+                } else if (isRedirectValid) {
                     router.push(redirectedUrl)
-                }
+                } else if (userRole === 'super_admin') {
                 // else if (userRole === 'student') {
                 //     if (response.data.showTooltip) {
                 //         router.push('/student/profile')
@@ -267,8 +269,7 @@ function LoginPage() {
                 //         router.push('/student')
                 //     }
                 // } 
-                else if (userRole === 'super_admin') {
-                    router.push(`/${userRole}/organizations`)
+                    router.push(`/${userRole}/organizations?page=1&limit=10`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
                     if (organizationId) {
