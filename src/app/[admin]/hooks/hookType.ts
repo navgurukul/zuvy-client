@@ -445,6 +445,7 @@ export type GenerateAiAssessmentPayload = {
   description: string
   audience: string
   totalNumberOfQuestions: number
+  durationMinutes?: number
 }
 
 export type AiAssessmentData = {

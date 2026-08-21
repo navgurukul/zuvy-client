@@ -152,7 +152,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [totalSelectedCodingQues, setTotalSelectedCodingQues] = useState(0)
     const [totalSelectedQuizQues, setTotalSelectedQuizQues] = useState(0)
     const [editingFields, setEditingFields] = useState<any>({})
-    const hours = Array.from({ length: 5 }, (_, i) => i + 1)
+    const hours = Array.from({ length: 6 }, (_, i) => i) // 0, 1, 2, 3, 4, 5
     const minutes = [0, 15, 30, 45]
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [description, setDescription] = useState(
@@ -303,10 +303,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             eyeTracking: false,
             hour: content.timeLimit
                 ? String(Math.floor(content.timeLimit / 3600))
-                : '2',
+                : '0',
             minute: content.timeLimit
                 ? String(Math.floor((content.timeLimit % 3600) / 60))
-                : '15',
+                : '30',
             passPercentage: 70,
         },
     })
@@ -527,10 +527,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     : true,
             hour: content.timeLimit
                 ? String(Math.floor(content.timeLimit / 3600))
-                : '2',
+                : '0',
             minute: content.timeLimit
                 ? String(Math.floor((Number(content.timeLimit) % 3600) / 60))
-                : '15',
+                : '30',
             passPercentage: content?.passPercentage || 70,
         })
         // Apply weightage disabling logic
@@ -1226,8 +1226,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             }
                                                                             value={hour.toString()}
                                                                         >
-                                                                            {hour >
-                                                                            1
+                                                                            {hour === 0
+                                                                                ? '0 Hours'
+                                                                                : hour > 1
                                                                                 ? `${hour} Hours`
                                                                                 : `${hour} Hour`}
                                                                         </SelectItem>

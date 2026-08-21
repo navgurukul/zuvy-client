@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Sparkles, AlertCircle, FileText, Upload, X } from 'lucide-react';
+import { Clock, Plus, Sparkles, AlertCircle, FileText, Upload, X } from 'lucide-react';
 import { AssessmentCriteria } from '../../[moduleId]/chapter/[chapterId]/adaptiveAssessment/types';
 import { mockDomains } from '../../[moduleId]/chapter/[chapterId]/adaptiveAssessment/mockData';
 import { CriteriaRow } from './CriteriaRow';
@@ -17,10 +17,12 @@ interface ConfigurationFormProps {
   assessmentDescription?: string;
   assessmentAudience?: string;
   assessmentQuestionCount?: string;
+  assessmentDuration?: string;
   onNameChange?: (name: string) => void;
   onDescriptionChange?: (description: string) => void;
   onAudienceChange?: (audience: string) => void;
   onQuestionCountChange?: (count: string) => void;
+  onDurationChange?: (duration: string) => void;
   syllabusFile?: File | null;
   onSyllabusChange?: (file: File | null) => void;
 }
@@ -34,10 +36,12 @@ export function ConfigurationForm({
   assessmentDescription = '',
   assessmentAudience = '',
   assessmentQuestionCount = '',
+  assessmentDuration = '30',
   onNameChange,
   onDescriptionChange,
   onAudienceChange,
   onQuestionCountChange,
+  onDurationChange,
   syllabusFile,
   onSyllabusChange,
 }: ConfigurationFormProps) {
@@ -46,6 +50,7 @@ export function ConfigurationForm({
     description: false,
     audience: false,
     questionCount: false,
+    duration: false,
   });
   const [internalSyllabus, setInternalSyllabus] = useState<File | null>(null);
   const [syllabusError, setSyllabusError] = useState<string | null>(null);
@@ -79,6 +84,9 @@ export function ConfigurationForm({
   const parsedQuestionCount = Number.parseInt(assessmentQuestionCount, 10);
   const isQuestionCountValid =
     Number.isInteger(parsedQuestionCount) && parsedQuestionCount > 0;
+  const parsedDuration = Number.parseInt(assessmentDuration, 10);
+  const isDurationValid =
+    Number.isInteger(parsedDuration) && parsedDuration > 0;
 
   const hasValidTopicConfig = (c: AssessmentCriteria): boolean => {
     const topics = c.topics || [];
@@ -104,7 +112,8 @@ export function ConfigurationForm({
     isNameValid && 
     isDescriptionValid && 
     isAudienceValid &&
-    isQuestionCountValid;
+    isQuestionCountValid &&
+    isDurationValid;
 
   const totalQuestions = criteria.reduce((sum, c) => {
     const topics = c.topics || [];
@@ -250,6 +259,37 @@ export function ConfigurationForm({
             <div className="flex items-center gap-1.5 mt-2 text-destructive text-sm">
               <AlertCircle className="h-4 w-4" />
               <span>Please enter a valid number greater than 0</span>
+            </div>
+          )}
+        </div>
+
+        {/* Duration Field */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm font-medium text-foreground">
+              Duration (minutes) <span className="text-destructive">*</span>
+            </label>
+            <HelpTooltip content="Set the time limit for this assessment in minutes. Students will have this much time to complete it." />
+          </div>
+          <div className="relative">
+            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="number"
+              min={1}
+              step={1}
+              value={assessmentDuration}
+              onChange={(e) => onDurationChange?.(e.target.value)}
+              onBlur={() => setTouched(prev => ({ ...prev, duration: true }))}
+              placeholder="e.g., 30"
+              className={`pl-9 bg-background/50 border-border/50 rounded-xl h-11 ${
+                touched.duration && !isDurationValid ? 'border-destructive' : ''
+              }`}
+            />
+          </div>
+          {touched.duration && !isDurationValid && (
+            <div className="flex items-center gap-1.5 mt-2 text-destructive text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>Please enter a valid duration greater than 0</span>
             </div>
           )}
         </div>

@@ -27,6 +27,7 @@ interface WizardState {
   assessmentDescription: string;
   assessmentAudience: string;
   assessmentQuestionCount: string;
+  assessmentDuration: string;
   criteria: AssessmentCriteria[];
   selectedPreviousIds: string[];
   weights: SelectedAssessmentWithWeight[];
@@ -58,6 +59,7 @@ const initialState: WizardState = {
   assessmentDescription: '',
   assessmentAudience: '',
   assessmentQuestionCount: '',
+  assessmentDuration: '30',
   criteria: [createEmptyCriteria()],
   selectedPreviousIds: [],
   weights: [],
@@ -297,6 +299,7 @@ const AdaptiveAssessment = (props: any) => {
         description: state.assessmentDescription.trim(),
         audience: state.assessmentAudience.trim(),
         totalNumberOfQuestions,
+        durationMinutes: Number.parseInt(state.assessmentDuration, 10) || 30,
       });
 
       const mappingResponse = response.mapResponse as MapQuestionsResponse;
@@ -477,10 +480,12 @@ const AdaptiveAssessment = (props: any) => {
                 assessmentDescription={state.assessmentDescription}
                 assessmentAudience={state.assessmentAudience}
                 assessmentQuestionCount={state.assessmentQuestionCount}
+                assessmentDuration={state.assessmentDuration}
                 onNameChange={(name) => updateState({ assessmentName: name })}
                 onDescriptionChange={(description) => updateState({ assessmentDescription: description })}
                 onAudienceChange={(audience) => updateState({ assessmentAudience: audience })}
                 onQuestionCountChange={(count) => updateState({ assessmentQuestionCount: count })}
+                onDurationChange={(duration) => updateState({ assessmentDuration: duration })}
               />
             </section>
           )}
