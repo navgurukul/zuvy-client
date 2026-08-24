@@ -130,7 +130,7 @@ export function StepReview({
         {[
           ['all', `All (${activePool.length})`],
           ['ai', `AI (${activePool.filter((q: Question) => q.source === 'ai').length})`],
-          ['bank', `Bank (${activePool.filter((q: Question) => q.source === 'bank').length})`],
+          // ['bank', `Bank (${activePool.filter((q: Question) => q.source === 'bank').length})`],
         ].map(([k, lbl]) => (
           <button
             key={k}

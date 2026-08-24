@@ -7,8 +7,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { ExplanationDialog } from '@/components/ExplanationDialog'
-import { Flag, Bookmark, ArrowLeft, ArrowRight, Loader2, CheckCircle, XCircle, Sparkles, Volume2, VolumeX } from 'lucide-react'
+import { Flag, Bookmark, ArrowLeft, ArrowRight, Loader2, CheckCircle, XCircle, Sparkles, Volume2, VolumeX, Download } from 'lucide-react'
 import { api } from '@/utils/axios.config'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { toast } from '@/components/ui/use-toast'
 import { useGetStudentAiAssessmentQuestions } from '@/hooks/useGetAiAssessmentQuestionEval'
 import { useGetStudentAiAssessmentResult } from '@/hooks/useAiAssessmentResultsEval'
@@ -55,6 +57,46 @@ const AssessmentQuestionsPage = () => {
 
   const { fetchExplanation, isLoading: isExplanationLoading, error: explanationError } = useGetQuestionExplanation()
   const { getExplanation } = useExplanationStore()
+
+  const handleDownloadPDF = () => {
+    if (!result) return
+
+    const doc = new jsPDF()
+
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(96, 144, 130)
+    doc.setFontSize(16)
+    doc.text(`AI Assessment Report`, 105, 15, { align: 'center' })
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(0, 0, 0)
+    doc.text(`Score: ${result.score} / ${result.totalQuestions}`, 15, 30)
+    doc.text(`Percentage: ${result.percentage}%`, 15, 35)
+    doc.text(`Grade: ${result.level.grade} (${result.level.meaning})`, 15, 40)
+    // doc.text(`Difficulty: ${result.level.hardship}`, 15, 45)
+
+    const tableData = result.questions.map((q, index) => [
+      `Q${index + 1}`,
+      q.isCorrect ? 'Correct' : 'Incorrect'
+    ])
+
+    autoTable(doc, {
+      head: [['Question', 'Status']],
+      body: tableData,
+      startY: 55,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [96, 144, 130],
+        textColor: [255, 255, 255],
+      },
+      bodyStyles: {
+        textColor: [0, 0, 0],
+      },
+    })
+
+    doc.save(`Assessment_Report.pdf`)
+  }
 
   useEffect(() => {
     if (!Number.isNaN(assessmentId) && assessmentId > 0) {
@@ -530,13 +572,15 @@ const AssessmentQuestionsPage = () => {
                           <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Grade</p>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-border/30">
-                          <div className="text-center">
-                            <p className="text-xs font-semibold text-foreground">{result.level.meaning}</p>
-                            <p className="text-xs text-primary font-semibold mt-1">{result.level.hardship}</p>
+                        <button
+                          onClick={handleDownloadPDF}
+                          className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-border/30 hover:bg-white/80 transition-all cursor-pointer group"
+                        >
+                          <div className="p-2 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors">
+                            <Download className="w-5 h-5 text-primary" />
                           </div>
-                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Status</p>
-                        </div>
+                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold group-hover:text-primary transition-colors">Download PDF</p>
+                        </button>
                       </div>
                     </CardContent>
                   </Card>
