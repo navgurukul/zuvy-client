@@ -37,6 +37,7 @@ import AdaptiveAssessment from '@/app/[admin]/courses/[courseId]/module/[moduleI
 const chapterSchema = z.object({
     title: z
         .string()
+        .min(1, 'Assessment title is required.')
         .max(50, 'You can enter up to 50 characters only.'),
 })
 const AddAssessment: React.FC<AddAssessmentProps> = ({
@@ -359,8 +360,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     useEffect(() => {
         if (chapterData.id && topicId > 0) {
             fetchChapterContent(chapterData.id, topicId)
-            setChapterTitle(content.ModuleAssessment?.title)
-            setChapterTitle(activeChapterTitle)
+            // Use the saved assessment title from the API if available,
+            // otherwise fall back to the chapter title.
+            const savedTitle = content.ModuleAssessment?.title
+            const resolvedTitle = savedTitle || activeChapterTitle || ''
+            setChapterTitle(resolvedTitle)
+            form.setValue('title', resolvedTitle, { shouldValidate: true })
         }
         setIsDataLoading(false)
     }, [chapterData.id, topicId, activeChapterTitle])
