@@ -55,6 +55,7 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
         questionId,
         onChapterComplete: completeChapter,
         orgId: orgId as string,
+        chapterId,
     });
 
     const handleChapterCompletionSuccess = () => {

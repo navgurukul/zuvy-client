@@ -253,6 +253,7 @@ export interface UseCodingChallengeProps {
   questionId: string;
   onChapterComplete?: () => void;
   orgId?: string | null;
+  chapterId?: string | null;
 }
 
 

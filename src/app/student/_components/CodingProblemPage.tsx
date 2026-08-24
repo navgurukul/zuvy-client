@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
-import{CodingProblemPageProps} from '@/app/student/_components/componentStudentType'
+import { CodingProblemPageProps } from '@/app/student/_components/componentStudentType'
+import { getDifficultyColor } from '@/lib/utils'
 
 
 const CodingProblemPage = ({ problem, onClose }: CodingProblemPageProps) => {
@@ -55,11 +56,7 @@ function findPairs(nums, target) {
           <div className="mb-4">
             <h1 className="text-2xl font-heading font-bold mb-2">{problem.title}</h1>
             <div className="flex gap-2 mb-4">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                problem.difficulty === 'Easy' ? 'bg-success-light text-success' :
-                problem.difficulty === 'Medium' ? 'bg-warning-light text-black' :
-                'bg-destructive-light text-destructive'
-              }`}>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
                 {problem.difficulty}
               </span>
               <span className="px-2 py-1 rounded text-xs font-medium bg-muted text-muted-foreground">
