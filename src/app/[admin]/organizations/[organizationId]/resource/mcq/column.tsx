@@ -42,6 +42,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import PreviewZuvyEvalQuestion from '../_components/PreviewZuvyEvalQuestion'
+import EditZuvyEvalQuestion from '../_components/EditEvalQuestion'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -446,6 +447,19 @@ export const zuvyEvalColumns: ColumnDef<any>[] = [
         ),
         cell: ({ row }) => {
             return <PreviewZuvyEvalQuestion questionId={row.original.id} />
+        },
+    },
+        {
+        id: 'actions-edit',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Edit"
+            />
+        ),
+        cell: ({ row }) => {
+            return <EditZuvyEvalQuestion questionId={row.original.id} />
         },
     },
 ]

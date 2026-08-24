@@ -677,3 +677,115 @@ export interface ReplaceQuestionResult {
   data: ReplaceQuestionApiResponse;
   status: number;
 }
+
+export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
+}
+
+// export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
+}
