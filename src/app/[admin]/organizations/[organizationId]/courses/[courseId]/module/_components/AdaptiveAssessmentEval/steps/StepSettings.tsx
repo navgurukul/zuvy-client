@@ -82,7 +82,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
             </SelectContent>
           </Select>
           <p className="text-xs mt-1" style={{ color: THEME.textTertiary }}>
-            Shown alongside the learner's result.
+            Shown alongside the learner&apos;s result.
           </p>
         </div>
       )}
