@@ -15,6 +15,7 @@ import { useMapQuestions } from '@/hooks/useAIMapAssesmentEval';
 import { useGetQuestionSets } from '@/hooks/useGetQuestionSetsEval';
 import { usePublishAssessment } from '@/hooks/usePublishingAssessmentEval';
 import { useGetAiAssessmentsByChapter } from '@/hooks/useGetAiAsssessmentEval';
+import { toast } from '@/components/ui/use-toast';
 
 const STEPS = ['Details', 'Topics & Baseline', 'Build Pool', 'Review', 'Settings', 'Publish'];
 
@@ -52,7 +53,6 @@ export default function AssessmentBuilder({
 
   const [screen, setScreen] = useState<'builder' | 'monitor'>('builder');
   const [step, setStep] = useState(0);
-  const [toast, setToast] = useState<string | null>(null);
   const [pool, setPool] = useState<Question[]>([]);
   const [generating, setGenerating] = useState<any>(null);
   const [genError, setGenError] = useState<string | null>(null);
@@ -94,8 +94,7 @@ export default function AssessmentBuilder({
   }, [baselineOptions, set]);
 
   const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3200);
+    toast({ description: msg, duration: 3200 , variant: 'success'});
   }, []);
 
   const { questions: bankQuestions } = useQuestionBank();
@@ -403,7 +402,6 @@ export default function AssessmentBuilder({
     }
 
     set({ status: normalizedStatus });
-    setScreen('monitor');
     showToast(
       status === 'published'
         ? 'Published — learners will see this assessment.'
@@ -514,12 +512,6 @@ export default function AssessmentBuilder({
         />
       )}
 
-      {toast && (
-        <div className="fixed bottom-[76px] left-1/2 -translate-x-1/2 text-white px-[18px] py-2.5 rounded-lg text-[13.5px] z-[99] bg-primary shadow-md">
-          {toast}
-        </div>
-      )}
     </div>
   );
 }
-
