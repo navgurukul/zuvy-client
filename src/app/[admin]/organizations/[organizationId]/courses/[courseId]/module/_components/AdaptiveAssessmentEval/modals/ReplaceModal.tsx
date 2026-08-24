@@ -13,7 +13,8 @@ interface ReplaceModalProps {
   onClose: () => void;
   showToast: (msg: string) => void;
   bankQuestions: Question[];
-  onReplaced?: () => Promise<void> | void;
+  levelCode?: string;
+  onReplaced?: (levelCode?: string) => Promise<void> | void;
 }
 
 export function ReplaceModal({
@@ -23,6 +24,7 @@ export function ReplaceModal({
   onClose,
   showToast,
   bankQuestions,
+  levelCode,
   onReplaced,
 }: ReplaceModalProps) {
   const { getReplacementQuestions, isFetching, fetchError, replacementQuestions } =
@@ -96,7 +98,7 @@ export function ReplaceModal({
     }
 
     setPool(pool.map((q) => (q.id === item.id ? { ...replacement, id: item.id } : q)));
-    await onReplaced?.();
+    await onReplaced?.(levelCode);
     showToast('Question replaced');
     onClose();
   };

@@ -158,7 +158,7 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
                   </div>
 
                   <div className="flex items-center justify-end md:justify-start">
-                    {assessment.studentStatus === 1 && <Link href={`/student/course/${bootcampId}/aiAssessment/${assessment.id}?domainId=${domainId}&chapterId=${chapterId}`}>  <Button
+                    {assessment.studentStatus === 1 && <Link href={`/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessment.id}?domainId=${domainId}&chapterId=${chapterId}`}>  <Button
                         type="button"
                         className="h-9 rounded-lg px-4 mx-1  text-xs disabled:"
                         

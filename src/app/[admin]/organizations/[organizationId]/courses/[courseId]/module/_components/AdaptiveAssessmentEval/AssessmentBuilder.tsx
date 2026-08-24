@@ -503,9 +503,13 @@ export default function AssessmentBuilder({
           onClose={() => setReplaceModal(null)}
           showToast={showToast}
           bankQuestions={bankQuestions}
+          levelCode={questionSets?.sets.find((set) => set.id === replaceModal.questionSetId)?.levelCode}
           onReplaced={async () => {
             if (!aiAssessmentId) return;
-            await getQuestionSets(aiAssessmentId);
+            const levelCode = questionSets?.sets.find(
+              (set) => set.id === replaceModal.questionSetId
+            )?.levelCode;
+            await getQuestionSets(aiAssessmentId, levelCode);
           }}
         />
       )}
