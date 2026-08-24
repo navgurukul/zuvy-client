@@ -181,7 +181,7 @@ function AiFormFields({ form, patch }: { form: AiFormState; patch: (p: Partial<A
     if (!isSubmitting) {
       refetch()
     }
-  }, [isSubmitting])
+  }, [isSubmitting, refetch])
 
 
   const totalCount = Object.values(form.difficultyCounts).reduce((s, n) => s + n, 0)

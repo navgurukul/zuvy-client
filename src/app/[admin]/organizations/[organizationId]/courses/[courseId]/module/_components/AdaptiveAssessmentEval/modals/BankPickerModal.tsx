@@ -8,7 +8,7 @@ interface BankPickerModalProps {
   topic: string;
   band: string;
   pool: Question[];
-  setPool: (pool: Question[]) => void;
+  setPool: React.Dispatch<React.SetStateAction<Question[]>>;
   onClose: () => void;
   showToast: (msg: string) => void;
   bankQuestions: Question[];

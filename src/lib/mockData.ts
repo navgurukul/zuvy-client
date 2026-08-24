@@ -888,7 +888,16 @@ export interface Student {
 // This file is the single source of truth for all demo content.
 // Replace each export with a real API call when wiring to a backend.
 
-import type { Course, Module, Chapter, Question, Level, Student, BatchStats, LevelId } from '@/types'
+import type {
+  Course as EvalCourse,
+  Module as EvalModule,
+  Chapter,
+  Question,
+  Level,
+  Student as EvalStudent,
+  BatchStats,
+  LevelId,
+} from '@/app/[admin]/organizations/[organizationId]/resource/_components/aiquestiontypes'
 
 // ─── ADAPTIVE LEVEL MODEL ─────────────────────────────────────────────────────
 // Six levels from E (weakest) to A+ (strongest).
@@ -923,7 +932,7 @@ export const POOL_MULTIPLIER = 2.5  // pool target = 2.5× the largest draw any 
 
 // ─── COURSES ─────────────────────────────────────────────────────────────────
 
-export const COURSES: Course[] = [
+export const COURSES: EvalCourse[] = [
   { id: 1, name: 'Web Development Fundamentals', description: 'HTML, CSS, and JavaScript from the ground up.', language: 'English', duration: '12 weeks', startDate: '2026-07-01', coverColor: '#2C5F2D' },
   { id: 2, name: 'Python for Data Science',       description: 'Python, Pandas, and data visualisation.', language: 'English', duration: '10 weeks', startDate: '2026-07-15', coverColor: '#1976D2' },
   { id: 3, name: 'Finance & Wealth Building',     description: 'Personal finance, investing, and credit.', language: 'Hindi',   duration: '8 weeks',  startDate: '2026-08-01', coverColor: '#EB7E2E' },
@@ -931,7 +940,7 @@ export const COURSES: Course[] = [
 
 // ─── MODULES ──────────────────────────────────────────────────────────────────
 
-export const MODULES: Record<number, Module[]> = {
+export const MODULES: Record<number, EvalModule[]> = {
   1: [
     { id: 101, courseId: 1, name: 'HTML & CSS',          description: 'Markup, selectors, box model, and layouts.', order: 1 },
     { id: 102, courseId: 1, name: 'JavaScript Essentials', description: 'Variables, functions, closures, and async.', order: 2 },
@@ -1062,7 +1071,7 @@ export const QUESTION_BANK: Question[] = [
 
 // ─── STUDENTS ─────────────────────────────────────────────────────────────────
 
-export const STUDENTS: Student[] = [
+export const STUDENTS: EvalStudent[] = [
   { id: 1,  name: 'Priya Sharma',   email: 'priya.s@example.com',   batchName: 'Cohort 4', currentLevel: 'B',  attemptsCompleted: 3 },
   { id: 2,  name: 'Ravi Kumar',     email: 'ravi.k@example.com',    batchName: 'Cohort 4', currentLevel: 'C',  attemptsCompleted: 2 },
   { id: 3,  name: 'Ananya Singh',   email: 'ananya.s@example.com',  batchName: 'Cohort 4', currentLevel: 'A',  attemptsCompleted: 4 },
