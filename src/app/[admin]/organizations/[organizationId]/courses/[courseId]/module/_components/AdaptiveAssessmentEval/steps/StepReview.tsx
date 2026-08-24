@@ -172,14 +172,14 @@ export function StepReview({
                 >
                   {DIFF_LABEL[item.difficulty]}
                 </span>
-                <span
+                {/* <span
                   className={`text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap ${item.source === 'ai'
                     ? 'bg-secondary-light text-secondary-dark'
                     : 'bg-info-light text-info-dark'
                     }`}
                 >
                   {item.source === 'ai' ? 'AI · provisional' : 'Bank · validated'}
-                </span>
+                </span> */}
               </div>
               <div className="text-[14px] flex font-medium leading-relaxed">
                 {item.text}
@@ -215,7 +215,7 @@ export function StepReview({
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span
-                      className={`text-[13.5px] flex-1 ${correct ? 'text-success-dark font-semibold' : 'text-foreground font-normal'
+                      className={`text-[13.5px] flex ${correct ? 'text-success-dark font-semibold' : 'text-foreground font-normal'
                         }`}
                     >
                       {opt}
@@ -224,10 +224,10 @@ export function StepReview({
                   </div>
                 );
               })}
-              <div className="mt-2 bg-muted rounded-md py-2 px-3 text-[13px] text-muted-foreground">
+              {/* <div className="mt-2 bg-muted rounded-md py-2 px-3 text-[13px] text-muted-foreground">
                 <strong className="text-foreground">Explanation:</strong>{' '}
                 {item.explanation}
-              </div>
+              </div> */}
             </div>
           )}
         </div>

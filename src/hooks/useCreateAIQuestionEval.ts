@@ -2,7 +2,8 @@ import { useState, useCallback } from "react";
 import { GenerateQuestionsApiResponse, GenerateQuestionsRequestBody } from "./hookType";
 import { api } from "@/utils/axios.config";
 import { useParams } from "next/navigation";
-import { getSocketConnectionStore, getUser } from "@/store/store";
+import { getUser } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
 
 
 interface UseGenerateQuestionsResult {
@@ -23,7 +24,6 @@ export function useGenerateQuestions(): UseGenerateQuestionsResult {
 
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
     const [generateError, setGenerateError] = useState<string | null>(null);
-    const { startGeneratingQuestions, stopGeneratingQuestions } = getSocketConnectionStore();
 
     const generateQuestions = useCallback(
         async (
@@ -37,26 +37,28 @@ export function useGenerateQuestions(): UseGenerateQuestionsResult {
                     body
                 );
                 
-                const data: any = response.data;
-                startGeneratingQuestions({
-                    message: data?.message || '',
-                    totalJobs: data?.totalJobs || 1,
-                    jobIds: Array.isArray(data?.jobIds) ? data.jobIds : [],
-                });
-
                 setGeneratedResult(response.data);
+                toast({
+                    title: "Questions will be generated check after a few minutes",
+                    description: "Your AI questions were queued successfully.",
+                    variant: "success",
+                });
                 return response.data;
             } catch (err) {
-                stopGeneratingQuestions();
-                setGenerateError(
-                    err instanceof Error ? err.message : "Failed to generate questions"
-                );
+                const message =
+                    err instanceof Error ? err.message : "Failed to generate questions";
+                setGenerateError(message);
+                toast({
+                    title: "Question generation failed",
+                    description: message,
+                    variant: "error",
+                });
                 return null;
             } finally {
                 setIsGenerating(false);
             }
         },
-        []
+        [orgId]
     );
 
     return { generateQuestions, isGenerating, generateError, generatedResult };
