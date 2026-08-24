@@ -234,7 +234,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Academic Performance Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <GraduationCap className="w-5 h-5 text-primary" />
@@ -516,7 +516,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
       </Card>
 
       {/* Work Experience Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Briefcase className="w-5 h-5 text-primary" />
@@ -621,7 +621,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
       </Card>
 
       {/* Competitive Profiles Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Code className="w-5 h-5 text-primary" />

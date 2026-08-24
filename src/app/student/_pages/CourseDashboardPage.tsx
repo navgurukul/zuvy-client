@@ -1173,12 +1173,12 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
                       >
                         {/* Icon */}
                         <div
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] transition-colors duration-200 group-hover:bg-[#DDF3E2]"
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] dark:bg-gray-400 transition-colors duration-200 group-hover:bg-[#DDF3E2] dark:group-hover:bg-gray-500"
                           )}
                         >
                           <a.icon className="h-4 w-4 text-[#2F6F3E]" />
@@ -1186,11 +1186,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
                         {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold leading-5 text-[#1F2937]">
+                          <p className="text-sm font-semibold leading-5 text-[#1F2937] dark:text-gray-100">
                             {a.label}
                           </p>
 
-                          <p className="text-xs leading-4 text-[#6B7280]">
+                          <p className="text-xs leading-4 text-[#6B7280] dark:text-gray-400">
                             {a.sub}
                           </p>
                         </div>
@@ -1204,7 +1204,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
               {/* Leaderboard - All screens when enabled */}
               {latestCourseData?.leaderboardEnabled && (
-                <Card className="w-full shadow-4dp text-left rounded-lg bg-white dark:bg-gray-800 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                <Card className="w-full shadow-4dp text-left rounded-lg bg-card border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">

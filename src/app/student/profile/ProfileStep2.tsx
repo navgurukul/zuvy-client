@@ -934,7 +934,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Technical Skills Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center justify-between mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <div className="flex items-center gap-2">
@@ -1039,7 +1039,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
       </Card>
 
       {/* Projects Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Briefcase className="w-5 h-5 text-primary" />

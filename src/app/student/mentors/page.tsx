@@ -149,7 +149,7 @@ export default function MentorsPage() {
             {!metricsLoading && metrics && (
                 <div className={`mb-6 rounded-2xl border px-4 py-3 ${
                     metrics.canBook
-                        ? 'bg-green-50 border-green-200'
+                        ? 'bg-green-50 dark:bg-card border-green-200'
                         : 'bg-yellow-50 border-yellow-200'
                 }`}>
                     <div className="flex items-center justify-between gap-4">
@@ -167,7 +167,7 @@ export default function MentorsPage() {
                         </div>
                         <span className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-xs font-semibold ${
                             metrics.canBook
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-green-100  text-green-800 dark:bg-green-800 dark:text-green-100'
                                 : 'bg-yellow-100 text-yellow-800'
                         }`}>
                             Remaining Credits: {metrics.remainingCredits}
@@ -207,6 +207,8 @@ export default function MentorsPage() {
                             items-center
                             gap-2
                             bg-white
+                            dark:bg-card
+                            dark:hover:bg-card
                             mt-2
                             border-gray-300
                             text-gray-700
@@ -291,15 +293,15 @@ export default function MentorsPage() {
                                             <p className="truncate text-left text-base font-semibold">
                                                 {mentor.name}
                                             </p>
-                                            <p className="truncate text-left text-xs text-gray-500">
+                                            <p className="truncate text-left text-xs text-gray-500 dark:text-gray-300">
                                                 {mentor.email}
                                             </p>
                                             <div className="flex min-w-0 flex-wrap gap-2 pt-1">
-                                                <span className="inline-flex max-w-full items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600">
+                                                <span className="inline-flex max-w-full items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-100">
                                                     {mentor.orgName || 'Unknown org'}
                                                 </span>
                                             </div>
-                                            <p className="truncate text-left text-sm text-gray-500">
+                                            <p className="truncate text-left text-sm text-gray-500 dark:text-gray-300">
                                                 {mentor.title || mentor.role}
                                             </p>
                                             {/* <p className="truncate text-left text-xs text-gray-500">
@@ -313,7 +315,7 @@ export default function MentorsPage() {
                                         </div>
                                     </div>
                                     {showAllMentors && !isAvailable && (
-                                        <span className="inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium bg-gray-100 text-gray-500">
+                                        <span className="inline-flex shrink-0 items-center rounded-full px-5 h-7 text-xs font-medium bg-gray-100 dark:bg-gray-600 dark:text-gray-100 text-gray-500">
                                             Unavailable
                                         </span>
                                     )}
@@ -332,7 +334,7 @@ export default function MentorsPage() {
                                             {expertise.map((skill) => (
                                                 <span
                                                     key={skill}
-                                                    className="text-xs bg-gray-200 px-2 py-1 rounded-md"
+                                                    className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-md"
                                                 >
                                                     {skill}
                                                 </span>

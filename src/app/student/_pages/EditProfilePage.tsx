@@ -1355,7 +1355,7 @@ export const EditProfilePage: React.FC = () => {
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-4xl">
         
         {/* Profile Header Card */}
-        <Card className="border-border/50 bg-white dark:bg-slate-950 backdrop-blur mb-6">
+        <Card className="border-border/50 bg-white dark:bg-card backdrop-blur mb-6">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -1384,7 +1384,7 @@ export const EditProfilePage: React.FC = () => {
         </Card>
 
         {/* Tab Navigation */}
-        <Card className="border-border/50 bg-white dark:bg-slate-950 backdrop-blur mb-6">
+        <Card className="border-border/50 bg-white dark:bg-card backdrop-blur mb-6">
           <div className="flex items-center border-b border-border/50">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -1428,7 +1428,7 @@ export const EditProfilePage: React.FC = () => {
 
         {/* Tab Content */}
         {activeTab === 'basic-info' && step1 && (
-          <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+          <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
             <div className="bg-muted p-4 flex items-center justify-between">
               <h3 className="text-base font-semibold tracking-wide">Personal Information</h3>
               {editingCard !== 'personal-info' && (
@@ -1540,7 +1540,7 @@ export const EditProfilePage: React.FC = () => {
         {activeTab === 'skills-projects' && (
           <div className="space-y-6">
             {/* Technical Skills */}
-            <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+            <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Code className="w-5 h-5 text-primary" />
@@ -1700,7 +1700,7 @@ export const EditProfilePage: React.FC = () => {
             </Card>
 
             {/* Projects */}
-            <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+            <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-5 h-5 text-primary" />
@@ -1954,7 +1954,7 @@ export const EditProfilePage: React.FC = () => {
         {activeTab === 'education' && (
           <div className="space-y-6">
             {/* Academic Information - Merged Card */}
-            <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+            <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
                 <div className="bg-muted p-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <GraduationCap className="w-5 h-5 text-primary" />
@@ -2603,7 +2603,7 @@ export const EditProfilePage: React.FC = () => {
               </Card>
 
             {/* Work Experience */}
-            <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+            <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <h3 className="text-base font-semibold tracking-wide">Work Experience</h3>
                 {editingCard !== 'work-experience' && (
@@ -2820,7 +2820,7 @@ export const EditProfilePage: React.FC = () => {
               </Card>
             
             {/* Competitive Profiles */}
-            <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+            <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-primary" />
@@ -2925,7 +2925,7 @@ export const EditProfilePage: React.FC = () => {
         )}
 
         {activeTab === 'career-goals' && (
-          <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+          <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
             <div className="bg-muted p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-primary" />
