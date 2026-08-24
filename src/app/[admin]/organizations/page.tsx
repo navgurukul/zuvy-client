@@ -16,6 +16,8 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import MultiSelector from '@/components/ui/multi-selector'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { getOrganizations } from '@/utils/organizations'
+import { getUser } from '@/store/store'
+import Notfound from '@/app/not-found'
 
 // Add interface for filter options
 interface FilterOption {
@@ -24,6 +26,9 @@ interface FilterOption {
 }
 
 export default function OrganizationsPage() {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+
     const router = useRouter()
     const searchParams = useSearchParams()
     const prev = useRef<any>();
@@ -120,10 +125,11 @@ export default function OrganizationsPage() {
     // Update URL when filters change
     useEffect(() => {
         if (!urlInitialized) return
+        if (user.email.length > 0 && userRole !== 'super_admin') return
 
         const filterQuery = getFilterQuery()
         updateURLParams(currentPage, limit, filterQuery)
-    }, [managementTypeFilter, urlInitialized, updateURLParams, currentPage, limit])
+    }, [managementTypeFilter, urlInitialized, updateURLParams, currentPage, limit, user.email, userRole])
 
     // Search API functions for SearchBox - ADD FILTER TO SUGGESTIONS
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -177,10 +183,11 @@ export default function OrganizationsPage() {
     useEffect(() => {
 
         if (!urlInitialized) return
+        if (user.email.length > 0 && userRole !== 'super_admin') return
 
         const filterQuery = getFilterQuery()
         fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
-    }, [currentPage, limit, urlInitialized, managementTypeFilter, fetchOrganizations])
+    }, [currentPage, limit, urlInitialized, managementTypeFilter, fetchOrganizations, user.email, userRole])
 
     // Transform API data to match your existing interface
     const transformedOrganizations = useMemo(() => {
@@ -263,6 +270,15 @@ export default function OrganizationsPage() {
                     </Button>
                 </div>
             </div>
+        )
+    }
+
+    if (user.email.length > 0 && userRole !== 'super_admin') {
+        return (
+            <Notfound
+                error={new Error('Unauthorized access')}
+                reset={() => console.error('URL Not Found')}
+            />
         )
     }
 
