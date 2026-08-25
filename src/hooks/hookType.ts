@@ -309,3 +309,483 @@ export interface UsePracticeCodeSubmitParams {
   assessmentSubmitId: number | null | undefined;
   selectedCodingOutsourseId: number | null | undefined;
 }
+
+
+// useQuizSubmission
+export interface QuizAnswerDto {
+  questionId: number;
+  variantId: number;
+  attemptCount: number;
+  chosenOption: number;
+}
+
+export interface QuizSubmissionPayload {
+  quizSubmissionDto: QuizAnswerDto[];
+}
+
+export interface QuizSubmissionResponse {
+  status?: string;
+  message?: string;
+  data?: any;
+}
+
+export interface UseQuizSubmissionReturn {
+  submitQuiz: (payload: QuizSubmissionPayload) => Promise<QuizSubmissionResponse | null>;
+  isSubmitting: boolean;
+  error: string | null;
+}
+
+// useOpenEndedSolutionForStudents
+export interface OpenEndedQuestionDetail {
+  id: number;
+  question: string;
+  difficulty: string;
+}
+
+export interface OpenEndedSubmissionData {
+  id: number;
+  openEndedQuestionId: number;
+  assessmentSubmissionId: number;
+  answer: string;
+  OpenEndedQuestion: OpenEndedQuestionDetail;
+}
+
+export interface UseOpenEndedSolutionForStudentsReturn {
+  data: OpenEndedSubmissionData[] | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+export interface TopicSubtopic {
+  [key: string]: string;
+}
+
+export interface Topic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: TopicSubtopic;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TopicListResponse = Topic[];
+
+export interface NewTopicSubtopicMap {
+  [key: string]: string;
+}
+
+export interface CreatedTopic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTopicRequestBody {
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap;
+}
+
+export type CreateTopicApiResponse = CreatedTopic;
+
+export interface DifficultyDistribution {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface QuestionCounts {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicConfiguration {
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  totalQuestions: number;
+  questionCounts: QuestionCounts;
+}
+
+export interface TopicsMap {
+  [topicName: string]: number;
+}
+
+export interface GenerateQuestionsRequestBody {
+  // domainName: string;
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  numberOfQuestions: number;
+  learningObjectives: string;
+  targetAudience: string;
+  focusAreas: string;
+  bloomsLevel: string;
+  questionStyle: string;
+  difficultyDistribution: DifficultyDistribution;
+  questionCounts: QuestionCounts;
+  topics: TopicsMap;
+  topicConfigurations: TopicConfiguration[];
+  levelId: number | null;
+}
+
+export type GenerateQuestionsApiResponse = GenerateQuestionsRequestBody;
+
+
+export interface AddSubtopicRequestBody {
+  subtopic: string;
+}
+
+export interface SubtopicMap {
+  [key: string]: string;
+}
+
+export interface TopicWithSubtopics {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: SubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AddSubtopicApiResponse = TopicWithSubtopics;
+
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+  startDatetime: string; // ISO 8601 string, e.g. "2026-04-10T09:00:00+05:30"
+  endDatetime: string;   // ISO 8601 string
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+// types/topic.ts
+
+export interface DifficultyLevel {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicWithDifficultyLevel {
+  id: number;
+  name: string;
+  difficultyLevel: DifficultyLevel;
+}
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface MapQuestionsRequestBody {
+    aiAssessmentId: number;
+}
+
+export interface MapQuestionsApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface QuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface AiAssessmentQuestion {
+    position: number;
+    isCommon: boolean;
+    questionId: number;
+    question: string;
+    difficulty: "easy" | "medium" | "hard";
+    language: string;
+    options: QuestionOption;
+    correctOption: number;
+    levelId: string;
+    topicName: string;
+    topicDescription: string;
+}
+
+export interface AiAssessmentSet {
+    id: number;
+    setIndex: number;
+    label: string;
+    levelCode: string;
+    status: string;
+    questions: AiAssessmentQuestion[];
+}
+
+export interface GetQuestionSetsApiResponse {
+    aiAssessmentId: number;
+    bootcampId: number;
+    title: string;
+    description: string | null;
+    totalNumberOfQuestions: number;
+    scope: string;
+    status: string;
+    publishedAt: string | null;
+    isPublished: boolean;
+    setCount: number;
+    sets: AiAssessmentSet[];
+}
+
+export interface PublishAssessmentRequestBody {
+    endDatetime: string;
+}
+
+export interface PublishAssessmentApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface PoolTopic {
+    id: number;
+    name: string;
+}
+
+export interface AiAssessmentByChapter {
+    id: number;
+    bootcampId: number;
+    chapterId: number;
+    scope: string;
+    status: string;
+    moduleId: number;
+    title: string;
+    description: string | null;
+    objective: string;
+    expectedOutcomes: string;
+    audience: string | null;
+    chapterIds: number[];
+    poolTopics: PoolTopic[];
+    totalNumberOfQuestions: number;
+    totalQuestionsWithBuffer: number;
+    startDatetime: string | null;
+    endDatetime: string | null;
+    publishedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type GetAiAssessmentsByChapterApiResponse = AiAssessmentByChapter[];
+
+export interface ReplaceQuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface ReplaceQuestionOption_ {
+    id: number;
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+    question: string;
+    options: ReplaceQuestionOption;
+    correctOption: number;
+    levelId: string;
+}
+
+export interface GetReplacementQuestionsApiResponse {
+    data: ReplaceQuestionOption_[];
+    total: number;
+}
+
+export interface GetReplacementQuestionsParams {
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+  questionSetId: number;
+  excludeId: number;
+}
+
+export interface ReplaceQuestionRequestBody {
+    questionSetId: number;
+    replacementQuestionId: number;
+}
+
+export interface ReplaceQuestionApiResponse {
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface ReplaceQuestionResult {
+  data: ReplaceQuestionApiResponse;
+  status: number;
+}
+
+export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
+}
+
+// export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
+}

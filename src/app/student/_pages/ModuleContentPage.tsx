@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
+import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
@@ -119,6 +119,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         case 6: return 'assessment';
         case 7: return 'feedback-form';
         case 8: return 'live-class';
+        case 9: return 'adaptive-assessment';
         default: return 'video';
       }
     };
@@ -133,6 +134,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         case 6: return 'Assessment';
         case 7: return 'Feedback Form';
         case 8: return 'Live Class';
+        case 9: return 'adaptive-assessment';
         default: return 'Video';
       }
     };
@@ -363,6 +365,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
           return <User className="w-4 h-4" />;
         case 'coding-challenge':
           return <BookOpen className="w-4 h-4" />;
+        case 'adaptive-assessment':
+          return <SparkleIcon className="w-4 h-4" />;
         default:
           return <Circle className="w-4 h-4" />;
       }
@@ -480,6 +484,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                                             item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
                                               item.type === 'quiz' ? `Quiz: ${item.title}` :
                                                 item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
+                                                 item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}`:
                                                   item.title}
                                 </div>
                                 <div className="text-xs font-md text-muted-foreground">

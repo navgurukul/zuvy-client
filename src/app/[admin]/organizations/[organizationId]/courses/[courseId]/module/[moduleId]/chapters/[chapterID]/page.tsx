@@ -38,7 +38,7 @@ export default function Page({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
     const { courseId, moduleId, chapterID } = useParams()
     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
@@ -171,7 +171,7 @@ export default function Page({
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}
                             canEdit={canEditChapter}
-                            setIsChapterLoading={() => {}}
+                            setIsChapterLoading={() => { }}
                             isChapterLoading={false}
                         />
                     )
@@ -267,9 +267,18 @@ export default function Page({
                     )
                 case 9:
                     return (
-                        <AdaptiveAssessment />
-                    )    
-                    
+                        <AdaptiveAssessment
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                            courseId={courseId}
+                            canEdit={canEditChapter}
+                            chapterId={chapter_id}
+                            topicId={topicId}
+                        />
+                    )
+
                 default:
                     return <h1>Create New Chapter</h1>
             }
