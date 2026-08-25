@@ -8,9 +8,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { ExplanationDialog } from '@/components/ExplanationDialog'
 import { Flag, Bookmark, ArrowLeft, ArrowRight, Loader2, CheckCircle, XCircle, Sparkles, Volume2, VolumeX, Download } from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useGetStudentAiAssessmentQuestions } from '@/hooks/useGetAiAssessmentQuestionEval'
 import { useGetStudentAiAssessmentResult } from '@/hooks/useAiAssessmentResultsEval'
@@ -414,6 +414,61 @@ const AssessmentQuestionsPage = () => {
     handleSpeak(explanationText, 'explanation')
   }
 
+  const handleDownloadReport = () => {
+    if (!result || !assessmentMeta) return
+
+    const doc = new jsPDF()
+
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(96, 144, 130)
+    doc.setFontSize(16)
+    doc.text(`AI Assessment Report`, 105, 10, { align: 'center' })
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(0, 0, 0)
+    
+    doc.text(`Assessment ID: ${assessmentMeta.aiAssessmentId || 'N/A'}`, 15, 25)
+    doc.text(`Set #: ${assessmentMeta.questionSetId || 'N/A'}`, 15, 30)
+    doc.text(`Total Marks: ${result.totalQuestions}`, 15, 40)
+    doc.text(`Score: ${result.score}`, 15, 45)
+    doc.text(`Percentage: ${result.percentage}%`, 15, 50)
+    doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 55)
+
+    autoTable(doc, {
+        head: [['Question', 'Status', 'Your Answer', 'Correct Answer']],
+        body: result.questions.map((q, index) => {
+          const originalQuestion = questions.find(oq => oq.questionId === q.questionId)
+          const selectedOptionLabel = q.selectedOption ? originalQuestion?.options[q.selectedOption] || `Option ${q.selectedOption}` : 'Not answered'
+          const correctOptionLabel = originalQuestion?.options[q.correctOption] || `Option ${q.correctOption}`
+          
+          return [
+            `Q${index + 1}. ${originalQuestion?.question || ''}`,
+            q.isCorrect ? 'Correct' : 'Incorrect',
+            selectedOptionLabel,
+            correctOptionLabel
+          ]
+        }),
+        startY: 65,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [96, 144, 130],
+            textColor: [255, 255, 255],
+        },
+        bodyStyles: {
+            textColor: [0, 0, 0],
+        },
+        columnStyles: {
+            0: { cellWidth: 70 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 45 },
+            3: { cellWidth: 45 },
+        },
+    })
+
+    doc.save(`Assessment_${assessmentMeta.aiAssessmentId}_Report.pdf`)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation Bar */}
@@ -436,11 +491,6 @@ const AssessmentQuestionsPage = () => {
             </div>
           </div>
         </div>
-        {/* <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-lg border border-border">
-            <span className="text-xs font-semibold text-foreground">⏱ 45:12</span>
-          </div>
-        </div> */}
       </header>
 
       {/* Main Layout */}
