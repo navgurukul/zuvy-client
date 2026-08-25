@@ -823,7 +823,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     <>
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Personal Details Card */}
-        <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+        <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
           <CardContent className="pb-6">
             <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
               <User className="w-5 h-5 text-primary" />
@@ -938,7 +938,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         </Card>
 
         {/* Education Card */}
-        <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+        <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
           <CardContent className="pb-6">
             <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
               <GraduationCap className="w-5 h-5 text-primary" />

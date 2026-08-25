@@ -11,9 +11,12 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
         const role = user.rolesList[0]
         const rawOrgId = (organizationId && organizationId !== 'undefined' ? organizationId : null) || user?.orgId;
         const validOrgId = rawOrgId && String(rawOrgId) !== 'NaN' && String(rawOrgId) !== 'undefined' ? rawOrgId : null;
-        const homeHref = role === 'student'
+        const roleNormalized = role?.toLowerCase() || '';
+        const homeHref = roleNormalized === 'student'
             ? '/student'
-            : (validOrgId ? `/${role}/organizations/${validOrgId}/courses` : `/${role}/organizations`);
+            : (roleNormalized === 'super_admin'
+                ? `/${role}/organizations`
+                : (validOrgId ? `/${role}/organizations/${validOrgId}/courses` : '/'));
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">

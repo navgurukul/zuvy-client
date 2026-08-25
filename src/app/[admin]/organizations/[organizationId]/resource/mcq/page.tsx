@@ -40,15 +40,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {McqSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { McqSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
-import { 
-    Dialog, 
+import {
+    Dialog,
     DialogOverlay,
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
-    DialogTrigger 
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
 } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
@@ -57,8 +57,9 @@ import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
 import { useZuvyEvalQuestions } from '@/app/[admin]/hooks/useZuvyEvalQuestions'
+import { useTopics } from '@/hooks/useGetTopicsEval'
 
-const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm').then(mod => ({ default: mod.CreateProblemForm })), {
+const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
     ssr: false,
     loading: () => <div className="flex justify-center"><Spinner /></div>
 })
@@ -119,6 +120,14 @@ const Mcqs = (props: Props) => {
         const normalized = zuvyEvalDifficulty.toLowerCase()
         return normalized === 'all' ? undefined : normalized
     }, [zuvyEvalDifficulty])
+
+    const { data: topics, isLoading: topicsLoading } = useTopics()
+    const [zuvyEvalTopicName, setZuvyEvalTopicName] = useState('all')
+    const normalizedZuvyEvalTopicName = useMemo(() => {
+        const normalized = zuvyEvalTopicName?.trim() || ''
+        return normalized === 'all' || normalized === '' ? undefined : normalized
+    }, [zuvyEvalTopicName])
+
     const {
         questions: zuvyEvalQuestions,
         loading: zuvyEvalLoading,
@@ -128,6 +137,7 @@ const Mcqs = (props: Props) => {
         page: zuvyEvalPage,
         limit: parseInt(zuvyEvalLimit),
         difficulty: normalizedZuvyEvalDifficulty,
+        topicName: normalizedZuvyEvalTopicName,
         enabled: showZuvyEvalOnly,
     })
 
@@ -207,7 +217,7 @@ const Mcqs = (props: Props) => {
         if (!query || query.trim().length === 0) {
             return []
         }
-    
+
         try {
             // API call to fetch quiz questions based on the query
             const response = await api.get(`Content/${orgId}/allQuizQuestions`, {
@@ -216,24 +226,24 @@ const Mcqs = (props: Props) => {
                     // Add additional filters if needed (tags, difficulty, etc.)
                 }
             })
-    
+
             if (response && response.data && response.data.data) {
                 const questionSuggestions = response.data.data
                     .map((item: any) => {
                         // Directly use the clean question returned from the backend
                         const question = item.quizVariants?.[0]?.question || item.title || ''
                         const plainText = question.replace(/<[^>]+>/g, '').trim() // Simple HTML clean-up if needed, but ideally this should be done in the backend
-    
+
                         if (!plainText) return null // Skip empty questions
-    
+
                         // Truncate the question for display purposes
                         // const truncatedText = plainText.length > 100 ? plainText.substring(0, 15) + '...' : plainText
                         const truncatedText = plainText.length > 45
-                        ? plainText.split(' ').slice(0, 6).join(' ') + '...'
-                        : plainText                        // Get topic name from tags (backend should ideally return topic name too)
+                            ? plainText.split(' ').slice(0, 6).join(' ') + '...'
+                            : plainText                        // Get topic name from tags (backend should ideally return topic name too)
 
                         const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
-    
+
                         return {
                             id: item.id?.toString() || Math.random().toString(),
                             question: truncatedText,
@@ -243,7 +253,7 @@ const Mcqs = (props: Props) => {
                         }
                     })
                     .filter((item: any) => item !== null) // Filter out null items (empty questions)
-    
+
                 // Topic suggestions from backend should be handled similarly
                 const topicSuggestions = tags
                     .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))
@@ -254,10 +264,10 @@ const Mcqs = (props: Props) => {
                         topic: tag.tagName,
                         type: 'topic',
                     }))
-    
+
                 return [...questionSuggestions, ...topicSuggestions]
             }
-    
+
             return []
         } catch (error) {
             console.error('Error fetching suggestions:', error)
@@ -486,7 +496,7 @@ const Mcqs = (props: Props) => {
                         setTotalPages,
                         currentSearchTerm
                     )
-                    setLoading(false) 
+                    setLoading(false)
                 } catch (error) {
                     lastQuizQuestionsRequestRef.current = null
                     console.error('Error fetching questions:', error)
@@ -528,7 +538,7 @@ const Mcqs = (props: Props) => {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
         }
-    }, [ difficulty, selectedOptions, options])
+    }, [difficulty, selectedOptions, options])
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -614,16 +624,16 @@ const Mcqs = (props: Props) => {
                     <div className="flex items-start justify-center w-full">
                         <NewMcqProblemForm
                             onClose={() => setIsCreateMcqDialogOpen(false)}
-                            onSaveQuestions={(questions) => {
-                                // Handle the generated questions
-                                console.log('Received generated questions:', questions)
-                                // Refresh the quiz data after AI generation
-                                fetchCodingQuestions(offset, undefined, true)
-                                toast.success({
-                                    title: 'Questions Generated',
-                                    description: `Successfully generated ${questions.length} MCQ questions`,
-                                })
-                            }}
+                        // onSaveQuestions={(questions) => {
+                        //     // Handle the generated questions
+                        //     console.log('Received generated questions:', questions)
+                        //     // Refresh the quiz data after AI generation
+                        //     fetchCodingQuestions(offset)
+                        //     toast.success({
+                        //         title: 'Questions Generated',
+                        //         description: `Successfully generated ${questions.length} MCQ questions`,
+                        //     })
+                        // }}
                         />
                     </div>
                 )
@@ -641,318 +651,346 @@ const Mcqs = (props: Props) => {
                 )
         }
     }
-   
+
     return (
         <>
-         {loading ? (
-                    <McqSkeleton/>
-                    ) : (
+            {loading ? (
+                <McqSkeleton />
+            ) : (
                 <>
-            {/* Edit Modal */}
+                    {/* Edit Modal */}
 
-            <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Edit MCQ Question</DialogTitle>
-                    </DialogHeader>
-                    <EditMcqForm
-                        tags={tags}
-                        closeModal={() => setIsEditModalOpen(false)}
-                        setStoreQuizData={setStoreQuizData}
-                        getAllQuizQuesiton={filteredQuizQuestions}
-                    />
-                </DialogContent>
-            </Dialog>
-
-            {/* Create MCQ Modal with Tabs */}
-            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
-                <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Create New MCQ</DialogTitle>
-                    </DialogHeader>
-                    
-                    <Tabs 
-                        value={mcqType} 
-                        onValueChange={setMcqType}
-                        className="w-full"
-                    >
-                        <TabsList className="grid w-full grid-cols-3 mb-6 bg-white">
-                            <TabsTrigger 
-                                value="oneatatime" 
-                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
-                            >
-                                One At A Time
-                            </TabsTrigger>
-                            <TabsTrigger 
-                                value="bulk" 
-                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
-                            >
-                                Bulk Upload
-                            </TabsTrigger>
-                            <TabsTrigger 
-                                value="ai" 
-                                className="text-sm font-medium bg-white text-black data-[state=active]:bg-primary data-[state=active]:text-white"
-                            >
-                                Generate with AI
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="oneatatime" className="mt-0">
-                            {renderTabContent('oneatatime')}
-                        </TabsContent>
-
-                        <TabsContent value="bulk" className="mt-0">
-                            {renderTabContent('bulk')}
-                        </TabsContent>
-
-                        <TabsContent value="ai" className="mt-0">
-                            {renderTabContent('ai')}
-                        </TabsContent>
-                    </Tabs>
-                </DialogContent>
-            </Dialog>
-
-            {/* Remove the old edit page logic and keep only the main content */}
-            {!isMcqModalOpen && (
-                <MaxWidthWrapper className="h-screen">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-left font-heading font-bold text-3xl text-foreground">
-                                Content Bank - MCQ Questions
-                            </h1>
-                            {/* Socket Connection Status Indicator */}
-                            {isSocketConnected && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-full">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                                        Live
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex flex-row items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="lg:max-w-[150px] w-full shadow-4dp mt-5"
-                                onClick={() => setIsManageTopicsOpen(true)}
-                            >
-                                <p>Manage Topics</p>
-                            </Button>                            
-                            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
-                                        + Create MCQ
-                                    </Button>
-                                </DialogTrigger>
-                            </Dialog>
-                        </div>
-                    </div>
-                 
-                    <div className="flex items-center gap-4 mb-6">
-                        {!showZuvyEvalOnly && (
-                            <>
-                                <div className="relative [&_input]:pl-10">
-                                    <SearchBox
-                                        placeholder="Search for Question"
-                                        fetchSuggestionsApi={fetchSuggestionsApi}
-                                        fetchSearchResultsApi={fetchSearchResultsApi}
-                                        defaultFetchApi={defaultFetchApi}
-                                        getSuggestionLabel={(suggestion) => suggestion.question}
-                                        getSuggestionValue={(suggestion) => suggestion.question}
-                                        inputWidth="w-[350px]"
-                                        onSearchChange={handleSearchChange}
-                                    />
-                                </div>
-
-                                <div className="w-[180px] flex-shrink-0">
-                                    <MultiSelector
-                                        selectedCount={difficultyCount}
-                                        options={difficultyOptions}
-                                        selectedOptions={difficulty}
-                                        handleOptionClick={handleDifficulty}
-                                        type={
-                                            difficultyCount > 1
-                                                ? 'Difficulties'
-                                                : 'Difficulty'
-                                        }
-                                    />
-                                </div>
-                                <div className="w-[180px] flex-shrink-0">
-                                    <MultiSelector
-                                        selectedCount={selectedTagCount}
-                                        options={options}
-                                        selectedOptions={selectedOptions}
-                                        handleOptionClick={handleTagOption}
-                                        type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
-                                    />
-                                </div>
-                            </>
-                        )}
-
-                        {showZuvyEvalOnly && (
-                            <div className="w-[220px] flex-shrink-0">
-                                {/* <p className="text-xs text-muted-foreground mb-1">Filter by difficulty</p> */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-between">
-                                            {zuvyEvalDifficulty === 'all' ? 'All Difficulty' : zuvyEvalDifficulty}
-                                            <ChevronDown className="ml-2" size={15} />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-[220px]" align="start">
-                                        <DropdownMenuRadioGroup
-                                            value={zuvyEvalDifficulty}
-                                            onValueChange={(value) => {
-                                                setZuvyEvalDifficulty(value)
-                                                setZuvyEvalPage(1)
-                                            }}
-                                        >
-                                            <DropdownMenuRadioItem value="all">All Difficulty</DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="easy">Easy</DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="hard">Hard</DropdownMenuRadioItem>
-                                        </DropdownMenuRadioGroup>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        )}
-
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                            <Switch
-                                id="zuvy-eval-toggle"
-                                checked={showZuvyEvalOnly}
-                                onCheckedChange={handleZuvyEvalToggle}
+                    <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
+                        <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Edit MCQ Question</DialogTitle>
+                            </DialogHeader>
+                            <EditMcqForm
+                                tags={tags}
+                                closeModal={() => setIsEditModalOpen(false)}
+                                setStoreQuizData={setStoreQuizData}
+                                getAllQuizQuesiton={filteredQuizQuestions}
                             />
-                            <Label htmlFor="zuvy-eval-toggle" className="text-sm font-medium cursor-pointer mt-4">
-                                Show Zuvy Eval Questions
-                            </Label>
-                        </div>
-                        <div className="ml-auto">
-                            {!showZuvyEvalOnly && logSelectedRowsFunction && tableInstance && (
-                                <McqDeleteVaiarntComp
-                                    table={tableInstance}
-                                    logSelectedRows={logSelectedRowsFunction}
-                                />
-                            )}
-                        </div> 
-                    </div>
-                    {showZuvyEvalOnly && zuvyEvalLoading && (
-                        <div className="flex justify-center py-4">
-                            <Spinner />
-                        </div>
-                    )}
-                    {showZuvyEvalOnly && zuvyEvalError && (
-                        <p className="text-sm text-destructive mb-3">{zuvyEvalError}</p>
-                    )}
-                    
+                        </DialogContent>
+                    </Dialog>
 
-                    <DataTable
-                        data={tableData}
-                        columns={tableColumns as any}
-                        mcqSide={true}
-                        getSelectedRowsFunction={
-                            showZuvyEvalOnly ? undefined : handleGetSelectedRowsFunction
-                        }
-                    />
+                    {/* Create MCQ Modal with Tabs */}
+                    <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
+                        <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Create New MCQ</DialogTitle>
+                            </DialogHeader>
 
-
-                    {!showZuvyEvalOnly && totalMCQQuestion > 0 && (
-                        <div className='py-4 flex justify-end'>
-                            <DataTablePagination
-                                totalStudents={totalMCQQuestion}
-                                lastPage={lastPage}
-                                pages={totalPages}
-                                fetchStudentData={fetchCodingQuestions}
-                            />
-                        </div>
-                    )}
-                    
-                    {showZuvyEvalOnly && zuvyEvalTotalPages > 0 && (
-                        <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">
-                            <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button className='border border-input bg-background-secondary text-gray-600 hover:text-primary-foreground'>
-                                        {zuvyEvalLimit} <ChevronDown className="ml-2" size={15} />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-full" align="start">
-                                    <DropdownMenuLabel>Rows</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup
-                                        value={zuvyEvalLimit}
-                                        onValueChange={(newLimit) => {
-                                            setZuvyEvalLimit(newLimit)
-                                            setZuvyEvalPage(1)
-                                        }}
+                            <Tabs
+                                value={mcqType}
+                                onValueChange={setMcqType}
+                                className="w-full"
+                            >
+                                <TabsList className="grid w-full grid-cols-3 mb-6">
+                                    <TabsTrigger
+                                        value="oneatatime"
+                                        className="text-sm font-medium"
                                     >
-                                        {ROWS_PER_PAGE.map((rows) => (
-                                            <DropdownMenuRadioItem key={rows} value={rows}>
-                                                {rows}
-                                            </DropdownMenuRadioItem>
-                                        ))}
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <div className="flex items-center space-x-6 lg:space-x-8">
-                                <div className="flex w-[100px] items-center text-gray-600 justify-center text-sm font-medium">
-                                    Page {zuvyEvalPage} of {zuvyEvalTotalPages}
+                                        One At A Time
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="bulk"
+                                        className="text-sm font-medium"
+                                    >
+                                        Bulk Upload
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="ai"
+                                        className="text-sm font-medium"
+                                    >
+                                        Generate with AI
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="oneatatime" className="mt-0">
+                                    {renderTabContent('oneatatime')}
+                                </TabsContent>
+
+                                <TabsContent value="bulk" className="mt-0">
+                                    {renderTabContent('bulk')}
+                                </TabsContent>
+
+                                <TabsContent value="ai" className="mt-0">
+                                    {renderTabContent('ai')}
+                                </TabsContent>
+                            </Tabs>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Remove the old edit page logic and keep only the main content */}
+                    {!isMcqModalOpen && (
+                        <MaxWidthWrapper className="h-screen">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-left font-heading font-bold text-3xl text-foreground">
+                                        Content Bank - MCQ Questions
+                                    </h1>
+                                    {/* Socket Connection Status Indicator */}
+                                    {isSocketConnected && (
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-full">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                            <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                                                Live
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex flex-row items-center gap-2">
                                     <Button
                                         variant="outline"
-                                        className="hidden h-8 w-8 p-0 lg:flex"
-                                        onClick={() => setZuvyEvalPage(1)}
-                                        disabled={zuvyEvalPage === 1}
+                                        className="lg:max-w-[150px] w-full shadow-4dp mt-5"
+                                        onClick={() => setIsManageTopicsOpen(true)}
                                     >
-                                        <span className="sr-only">Go to first page</span>
-                                        <ArrowLeft className="h-4 w-4" />
+                                        <p>Manage Topics</p>
                                     </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="h-8 w-8 p-0"
-                                        onClick={() => setZuvyEvalPage((prev) => Math.max(prev - 1, 1))}
-                                        disabled={zuvyEvalPage === 1}
-                                    >
-                                        <span className="sr-only">Go to previous page</span>
-                                        <ArrowLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="h-8 w-8 p-0"
-                                        onClick={() => setZuvyEvalPage((prev) => Math.min(prev + 1, zuvyEvalTotalPages))}
-                                        disabled={zuvyEvalPage === zuvyEvalTotalPages}
-                                    >
-                                        <span className="sr-only">Go to next page</span>
-                                        <ArrowRight className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="hidden h-8 w-8 p-0 lg:flex"
-                                        onClick={() => setZuvyEvalPage(zuvyEvalTotalPages)}
-                                        disabled={zuvyEvalPage === zuvyEvalTotalPages}
-                                    >
-                                        <span className="sr-only">Go to last page</span>
-                                        <ArrowRight className="h-4 w-4" />
-                                    </Button>
+                                    <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
+                                                + Create MCQ
+                                            </Button>
+                                        </DialogTrigger>
+                                    </Dialog>
                                 </div>
                             </div>
-                        </div>
+
+                            <div className="flex items-center gap-4 mb-6">
+                                {!showZuvyEvalOnly && (
+                                    <>
+                                        <div className="relative [&_input]:pl-10">
+                                            <SearchBox
+                                                placeholder="Search for Question"
+                                                fetchSuggestionsApi={fetchSuggestionsApi}
+                                                fetchSearchResultsApi={fetchSearchResultsApi}
+                                                defaultFetchApi={defaultFetchApi}
+                                                getSuggestionLabel={(suggestion) => suggestion.question}
+                                                getSuggestionValue={(suggestion) => suggestion.question}
+                                                inputWidth="w-[350px]"
+                                                onSearchChange={handleSearchChange}
+                                            />
+                                        </div>
+
+                                        <div className="w-[180px] flex-shrink-0">
+                                            <MultiSelector
+                                                selectedCount={difficultyCount}
+                                                options={difficultyOptions}
+                                                selectedOptions={difficulty}
+                                                handleOptionClick={handleDifficulty}
+                                                type={
+                                                    difficultyCount > 1
+                                                        ? 'Difficulties'
+                                                        : 'Difficulty'
+                                                }
+                                            />
+                                        </div>
+                                        <div className="w-[180px] flex-shrink-0">
+                                            <MultiSelector
+                                                selectedCount={selectedTagCount}
+                                                options={options}
+                                                selectedOptions={selectedOptions}
+                                                handleOptionClick={handleTagOption}
+                                                type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                {showZuvyEvalOnly && (
+                                    <div className="flex gap-4">
+                                        <div className="w-[220px] flex-shrink-0">
+                                            {/* <p className="text-xs text-muted-foreground mb-1">Filter by difficulty</p> */}
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" className="w-full justify-between">
+                                                        {zuvyEvalDifficulty === 'all' ? 'All Difficulty' : zuvyEvalDifficulty}
+                                                        <ChevronDown className="ml-2" size={15} />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-[220px]" align="start">
+                                                    <DropdownMenuRadioGroup
+                                                        value={zuvyEvalDifficulty}
+                                                        onValueChange={(value) => {
+                                                            setZuvyEvalDifficulty(value)
+                                                            setZuvyEvalPage(1)
+                                                        }}
+                                                    >
+                                                        <DropdownMenuRadioItem value="all">All Difficulty</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="easy">Easy</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="hard">Hard</DropdownMenuRadioItem>
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                        <div className="w-[220px] flex-shrink-0">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" className="w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap">
+                                                        {zuvyEvalTopicName === 'all' ? 'All Topics' : (zuvyEvalTopicName?.length > 20 ? zuvyEvalTopicName.slice(0, 20) + '...' : (zuvyEvalTopicName || 'Select Topic'))}
+                                                        <ChevronDown className="ml-2 flex-shrink-0" size={15} />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-[220px] max-h-[300px] overflow-y-auto" align="start">
+                                                    <DropdownMenuRadioGroup
+                                                        value={zuvyEvalTopicName}
+                                                        onValueChange={(value) => {
+                                                            setZuvyEvalTopicName(value)
+                                                            setZuvyEvalPage(1)
+                                                        }}
+                                                    >
+                                                        <DropdownMenuRadioItem value="all">All Topics</DropdownMenuRadioItem>
+                                                        {topics?.map((topic) => (
+                                                            <DropdownMenuRadioItem key={topic.id} value={topic.name}>
+                                                                {topic.name}
+                                                            </DropdownMenuRadioItem>
+                                                        ))}
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    <Switch
+                                        id="zuvy-eval-toggle"
+                                        checked={showZuvyEvalOnly}
+                                        onCheckedChange={handleZuvyEvalToggle}
+                                    />
+                                    <Label htmlFor="zuvy-eval-toggle" className="text-sm font-medium cursor-pointer mt-4">
+                                        Show Zuvy Eval Questions
+                                    </Label>
+                                </div>
+                                <div className="ml-auto">
+                                    {!showZuvyEvalOnly && logSelectedRowsFunction && tableInstance && (
+                                        <McqDeleteVaiarntComp
+                                            table={tableInstance}
+                                            logSelectedRows={logSelectedRowsFunction}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                            {showZuvyEvalOnly && zuvyEvalLoading && (
+                                <div className="flex justify-center py-4">
+                                    <Spinner />
+                                </div>
+                            )}
+                            {showZuvyEvalOnly && zuvyEvalError && (
+                                <p className="text-sm text-destructive mb-3">{zuvyEvalError}</p>
+                            )}
+
+
+                            <DataTable
+                                data={tableData}
+                                columns={tableColumns as any}
+                                mcqSide={true}
+                                getSelectedRowsFunction={
+                                    showZuvyEvalOnly ? undefined : handleGetSelectedRowsFunction
+                                }
+                            />
+
+
+                            {!showZuvyEvalOnly && totalMCQQuestion > 0 && (
+                                <div className='py-4 flex justify-end'>
+                                    <DataTablePagination
+                                        totalStudents={totalMCQQuestion}
+                                        lastPage={lastPage}
+                                        pages={totalPages}
+                                        fetchStudentData={fetchCodingQuestions}
+                                    />
+                                </div>
+                            )}
+
+                            {showZuvyEvalOnly && zuvyEvalTotalPages > 0 && (
+                                <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">
+                                    <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button className='border border-input bg-background-secondary text-gray-600 hover:text-primary-foreground'>
+                                                {zuvyEvalLimit} <ChevronDown className="ml-2" size={15} />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-full" align="start">
+                                            <DropdownMenuLabel>Rows</DropdownMenuLabel>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuRadioGroup
+                                                value={zuvyEvalLimit}
+                                                onValueChange={(newLimit) => {
+                                                    setZuvyEvalLimit(newLimit)
+                                                    setZuvyEvalPage(1)
+                                                }}
+                                            >
+                                                {ROWS_PER_PAGE.map((rows) => (
+                                                    <DropdownMenuRadioItem key={rows} value={rows}>
+                                                        {rows}
+                                                    </DropdownMenuRadioItem>
+                                                ))}
+                                            </DropdownMenuRadioGroup>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <div className="flex items-center space-x-6 lg:space-x-8">
+                                        <div className="flex w-[100px] items-center text-gray-600 justify-center text-sm font-medium">
+                                            Page {zuvyEvalPage} of {zuvyEvalTotalPages}
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Button
+                                                variant="outline"
+                                                className="hidden h-8 w-8 p-0 lg:flex"
+                                                onClick={() => setZuvyEvalPage(1)}
+                                                disabled={zuvyEvalPage === 1}
+                                            >
+                                                <span className="sr-only">Go to first page</span>
+                                                <ArrowLeft className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setZuvyEvalPage((prev) => Math.max(prev - 1, 1))}
+                                                disabled={zuvyEvalPage === 1}
+                                            >
+                                                <span className="sr-only">Go to previous page</span>
+                                                <ArrowLeft className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setZuvyEvalPage((prev) => Math.min(prev + 1, zuvyEvalTotalPages))}
+                                                disabled={zuvyEvalPage === zuvyEvalTotalPages}
+                                            >
+                                                <span className="sr-only">Go to next page</span>
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="hidden h-8 w-8 p-0 lg:flex"
+                                                onClick={() => setZuvyEvalPage(zuvyEvalTotalPages)}
+                                                disabled={zuvyEvalPage === zuvyEvalTotalPages}
+                                            >
+                                                <span className="sr-only">Go to last page</span>
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </MaxWidthWrapper>
                     )}
-                </MaxWidthWrapper>
+                </>
             )}
-      </>
-    )}
-        {/* Manage Topics Dialog */}
-        <ManageTopics
-            isOpen={isManageTopicsOpen}
-            onClose={() => setIsManageTopicsOpen(false)}
-            onTopicCreated={() => {
-                getAllTags() // Refresh the topics list
-                setIsManageTopicsOpen(false)
-            }}
-        />
-    </>
+            {/* Manage Topics Dialog */}
+            <ManageTopics
+                isOpen={isManageTopicsOpen}
+                onClose={() => setIsManageTopicsOpen(false)}
+                onTopicCreated={() => {
+                    getAllTags() // Refresh the topics list
+                    setIsManageTopicsOpen(false)
+                }}
+            />
+        </>
     )
 }
 export default Mcqs

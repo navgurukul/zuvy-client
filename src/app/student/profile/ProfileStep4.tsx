@@ -325,7 +325,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Career Goals Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Target className="w-5 h-5 text-primary" />
@@ -450,7 +450,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       </Card>
 
       {/* Salary Expectations Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <DollarSign className="w-5 h-5 text-primary" />
@@ -495,7 +495,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       </Card>
 
       {/* Communication & Consent Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <MessageSquare className="w-5 h-5 text-primary" />
@@ -565,7 +565,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
       </Card>
 
       {/* Profile Sharing Consent */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="py-4">
           <div className="space-y-3">
             <Label htmlFor="terms-demo" className="font-medium text-sm tracking-wide text-left block">

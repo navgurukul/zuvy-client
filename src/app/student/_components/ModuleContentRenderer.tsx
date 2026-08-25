@@ -28,6 +28,8 @@ import { Play, Check, Calendar as CalendarIcon, Clock } from "lucide-react";
 import AssessmentView from "./AssessmentView";
 import CodingProblemPage from "./CodingProblemPage";
 import {ModuleContentRendererProps} from "@/app/student/_components/componentStudentType"
+import AdaptiveAssessementStudentView from "./chapter-content/AdaptiveAssessmentStudentView";
+import { useParams } from "next/navigation";
 
 const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleContentRendererProps) => {
   // States for fallback functionality
@@ -44,12 +46,17 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
   });
   const [assignmentLink, setAssignmentLink] = useState('');
   const [assignmentSubmitted, setAssignmentSubmitted] = useState(false);
-
   // Get the chapter ID from selectedItemData
   const chapterId = selectedItemData?.item?.id || null;
+  const { courseId, moduleId } = useParams();
+  const parsedCourseId = Number(courseId);
+  const parsedModuleId = Number(moduleId);
+  const parsedChapterId = chapterId ? Number(chapterId) : null;
+  
   
   // Fetch chapter details using the new hook
   const { chapterDetails, loading, error , refetch} = useChapterDetails(chapterId);
+  
 
 
   if (!selectedItemData) {
@@ -104,6 +111,18 @@ if (loading) {
         return <FeedbackFormContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete}/>;
       case 8:
         return <LiveClassContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} refetch={refetch} />;
+      case 9:
+        return (
+          <AdaptiveAssessementStudentView
+            chapterDetails={chapterDetails}
+            onChapterComplete={onChapterComplete}
+            details={{
+              chapterId: Number.isNaN(parsedChapterId) ? null : parsedChapterId,
+              moduleId: Number.isNaN(parsedModuleId) ? null : parsedModuleId,
+              courseId: Number.isNaN(parsedCourseId) ? null : parsedCourseId,
+            }}
+          />
+        )  
       default:
     return (
       <div className="max-w-4xl mx-auto ">
