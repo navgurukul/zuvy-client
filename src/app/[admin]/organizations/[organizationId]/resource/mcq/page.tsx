@@ -57,6 +57,7 @@ import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
 import { useZuvyEvalQuestions } from '@/app/[admin]/hooks/useZuvyEvalQuestions'
+import { useTopics } from '@/hooks/useGetTopicsEval'
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
     ssr: false,
@@ -119,6 +120,14 @@ const Mcqs = (props: Props) => {
         const normalized = zuvyEvalDifficulty.toLowerCase()
         return normalized === 'all' ? undefined : normalized
     }, [zuvyEvalDifficulty])
+
+    const { data: topics, isLoading: topicsLoading } = useTopics()
+    const [zuvyEvalTopicName, setZuvyEvalTopicName] = useState('all')
+    const normalizedZuvyEvalTopicName = useMemo(() => {
+        const normalized = zuvyEvalTopicName?.trim() || ''
+        return normalized === 'all' || normalized === '' ? undefined : normalized
+    }, [zuvyEvalTopicName])
+
     const {
         questions: zuvyEvalQuestions,
         loading: zuvyEvalLoading,
@@ -128,6 +137,7 @@ const Mcqs = (props: Props) => {
         page: zuvyEvalPage,
         limit: parseInt(zuvyEvalLimit),
         difficulty: normalizedZuvyEvalDifficulty,
+        topicName: normalizedZuvyEvalTopicName,
         enabled: showZuvyEvalOnly,
     })
 
@@ -790,30 +800,58 @@ const Mcqs = (props: Props) => {
                                 )}
 
                                 {showZuvyEvalOnly && (
-                                    <div className="w-[220px] flex-shrink-0">
-                                        {/* <p className="text-xs text-muted-foreground mb-1">Filter by difficulty</p> */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" className="w-full justify-between">
-                                                    {zuvyEvalDifficulty === 'all' ? 'All Difficulty' : zuvyEvalDifficulty}
-                                                    <ChevronDown className="ml-2" size={15} />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent className="w-[220px]" align="start">
-                                                <DropdownMenuRadioGroup
-                                                    value={zuvyEvalDifficulty}
-                                                    onValueChange={(value) => {
-                                                        setZuvyEvalDifficulty(value)
-                                                        setZuvyEvalPage(1)
-                                                    }}
-                                                >
-                                                    <DropdownMenuRadioItem value="all">All Difficulty</DropdownMenuRadioItem>
-                                                    <DropdownMenuRadioItem value="easy">Easy</DropdownMenuRadioItem>
-                                                    <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
-                                                    <DropdownMenuRadioItem value="hard">Hard</DropdownMenuRadioItem>
-                                                </DropdownMenuRadioGroup>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                    <div className="flex gap-4">
+                                        <div className="w-[220px] flex-shrink-0">
+                                            {/* <p className="text-xs text-muted-foreground mb-1">Filter by difficulty</p> */}
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" className="w-full justify-between">
+                                                        {zuvyEvalDifficulty === 'all' ? 'All Difficulty' : zuvyEvalDifficulty}
+                                                        <ChevronDown className="ml-2" size={15} />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-[220px]" align="start">
+                                                    <DropdownMenuRadioGroup
+                                                        value={zuvyEvalDifficulty}
+                                                        onValueChange={(value) => {
+                                                            setZuvyEvalDifficulty(value)
+                                                            setZuvyEvalPage(1)
+                                                        }}
+                                                    >
+                                                        <DropdownMenuRadioItem value="all">All Difficulty</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="easy">Easy</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="hard">Hard</DropdownMenuRadioItem>
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                        <div className="w-[220px] flex-shrink-0">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" className="w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap">
+                                                        {zuvyEvalTopicName === 'all' ? 'All Topics' : (zuvyEvalTopicName?.length > 20 ? zuvyEvalTopicName.slice(0, 20) + '...' : (zuvyEvalTopicName || 'Select Topic'))}
+                                                        <ChevronDown className="ml-2 flex-shrink-0" size={15} />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-[220px] max-h-[300px] overflow-y-auto" align="start">
+                                                    <DropdownMenuRadioGroup
+                                                        value={zuvyEvalTopicName}
+                                                        onValueChange={(value) => {
+                                                            setZuvyEvalTopicName(value)
+                                                            setZuvyEvalPage(1)
+                                                        }}
+                                                    >
+                                                        <DropdownMenuRadioItem value="all">All Topics</DropdownMenuRadioItem>
+                                                        {topics?.map((topic) => (
+                                                            <DropdownMenuRadioItem key={topic.id} value={topic.name}>
+                                                                {topic.name}
+                                                            </DropdownMenuRadioItem>
+                                                        ))}
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </div>
                                 )}
 

@@ -19,8 +19,12 @@ export function useTopics(): UseTopicsReturn {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await api.get<TopicListResponse>(`${process.env.NEXT_PUBLIC_EVAL_URL}/topic`);
-            setData(response.data);
+            const baseUrl = process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000';
+            const response = await api.get(`${baseUrl.replace(/\/$/, '')}/topic`);
+            const topicsData = Array.isArray(response.data) ? response.data : 
+                               Array.isArray(response.data?.data) ? response.data.data : 
+                               Array.isArray(response.data?.topics) ? response.data.topics : [];
+            setData(topicsData);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to fetch topics");
         } finally {

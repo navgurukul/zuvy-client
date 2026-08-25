@@ -23,11 +23,11 @@ const AssessmentQuestionsPage = () => {
   const searchParams = new URLSearchParams(window.location.search)
   const domainId = searchParams.get('domainId')
   const chapterId = searchParams.get('chapterId')
-  
+
 
   const assessmentIdParam = params?.assessmentId
   const assessmentId = Number(assessmentIdParam)
-  
+
 
   const {
     questions,
@@ -310,7 +310,7 @@ const AssessmentQuestionsPage = () => {
         assessmentId: assessmentId,
         courseId: +params?.courseId || null,
         domainId: domainId ? +domainId : null,
-        chapterId: chapterId ? +chapterId : null,   
+        chapterId: chapterId ? +chapterId : null,
         questions: questions.map((question) => ({
           ...question,
           correctOptionSelectedByStudents: +selectedAnswers[question.questionId] || null,
@@ -348,15 +348,15 @@ const AssessmentQuestionsPage = () => {
     if (isCurrentQuestion) {
       return 'aspect-square bg-primary shadow-soft rounded-md flex items-center justify-center font-semibold text-xs font-bold text-white border border-primary hover:bg-primary-dark'
     }
-    
+
     if (isFlagged) {
       return 'aspect-square bg-destructive/10 text-destructive rounded-md flex items-center justify-center font-semibold text-xs font-bold relative border border-destructive/30'
     }
-    
+
     if (isBookmarked) {
       return 'aspect-square bg-primary-light text-primary rounded-md flex items-center justify-center font-semibold text-xs font-bold relative border border-primary/20'
     }
-    
+
     if (isAnswered) {
       return 'aspect-square bg-success-light text-success rounded-md flex items-center justify-center font-semibold text-xs font-bold border border-success/30'
     }
@@ -390,7 +390,7 @@ const AssessmentQuestionsPage = () => {
   const handleExplainWithAi = async (questionId: number) => {
     setSelectedQuestionForExplanation(questionId)
     setIsExplanationDialogOpen(true)
-    
+
     // Fetch explanation async
     await fetchExplanation(assessmentId, questionId)
   }
@@ -427,7 +427,7 @@ const AssessmentQuestionsPage = () => {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(11)
     doc.setTextColor(0, 0, 0)
-    
+
     doc.text(`Assessment ID: ${assessmentMeta.aiAssessmentId || 'N/A'}`, 15, 25)
     doc.text(`Set #: ${assessmentMeta.questionSetId || 'N/A'}`, 15, 30)
     doc.text(`Total Marks: ${result.totalQuestions}`, 15, 40)
@@ -436,34 +436,34 @@ const AssessmentQuestionsPage = () => {
     doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 55)
 
     autoTable(doc, {
-        head: [['Question', 'Status', 'Your Answer', 'Correct Answer']],
-        body: result.questions.map((q, index) => {
-          const originalQuestion = questions.find(oq => oq.questionId === q.questionId)
-          const selectedOptionLabel = q.selectedOption ? originalQuestion?.options[q.selectedOption] || `Option ${q.selectedOption}` : 'Not answered'
-          const correctOptionLabel = originalQuestion?.options[q.correctOption] || `Option ${q.correctOption}`
-          
-          return [
-            `Q${index + 1}. ${originalQuestion?.question || ''}`,
-            q.isCorrect ? 'Correct' : 'Incorrect',
-            selectedOptionLabel,
-            correctOptionLabel
-          ]
-        }),
-        startY: 65,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [96, 144, 130],
-            textColor: [255, 255, 255],
-        },
-        bodyStyles: {
-            textColor: [0, 0, 0],
-        },
-        columnStyles: {
-            0: { cellWidth: 70 },
-            1: { cellWidth: 20 },
-            2: { cellWidth: 45 },
-            3: { cellWidth: 45 },
-        },
+      head: [['Question', 'Status', 'Your Answer', 'Correct Answer']],
+      body: result.questions.map((q, index) => {
+        const originalQuestion = questions.find(oq => oq.questionId === q.questionId)
+        const selectedOptionLabel = q.selectedOption ? originalQuestion?.options[q.selectedOption] || `Option ${q.selectedOption}` : 'Not answered'
+        const correctOptionLabel = originalQuestion?.options[q.correctOption] || `Option ${q.correctOption}`
+
+        return [
+          `Q${index + 1}. ${originalQuestion?.question || ''}`,
+          q.isCorrect ? 'Correct' : 'Incorrect',
+          selectedOptionLabel,
+          correctOptionLabel
+        ]
+      }),
+      startY: 65,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [96, 144, 130],
+        textColor: [255, 255, 255],
+      },
+      bodyStyles: {
+        textColor: [0, 0, 0],
+      },
+      columnStyles: {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 45 },
+        3: { cellWidth: 45 },
+      },
     })
 
     doc.save(`Assessment_${assessmentMeta.aiAssessmentId}_Report.pdf`)
@@ -472,20 +472,25 @@ const AssessmentQuestionsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation Bar */}
-      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-lg shadow-soft h-16 flex justify-between items-center px-8 border-b border-border">
+      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl shadow-soft h-16 flex justify-between items-center px-8 border-b border-border/60">
         <div className="flex items-center gap-6">
-          <h1 className="font-bold text-base text-primary">AI Assessment</h1>
-          <div className="h-5 w-px bg-border hidden md:block"></div>
-          <div className="hidden md:flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Assessment</span>
-            <div className="flex items-center gap-2">
-              <div className="w-24 h-1.5 bg-border rounded-full overflow-hidden">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent/80 flex items-center justify-center shadow-soft">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="font-heading font-bold text-lg text-foreground tracking-tight">AI Assessment</h1>
+          </div>
+          <div className="h-6 w-px bg-border/60 hidden md:block"></div>
+          <div className="hidden md:flex flex-col gap-1.5">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Progress</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-28 h-2 bg-border/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-accent transition-all"
+                  className="h-full bg-gradient-to-r from-primary via-primary to-accent rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${totalQuestions > 0 ? (attemptedQuestionsCount / totalQuestions) * 100 : 0}%` }}
                 ></div>
               </div>
-              <span className="text-xs font-semibold text-primary">
+              <span className="text-xs font-bold text-primary font-body tabular-nums">
                 {totalQuestions > 0 ? Math.round((attemptedQuestionsCount / totalQuestions) * 100) : 0}%
               </span>
             </div>
@@ -496,20 +501,20 @@ const AssessmentQuestionsPage = () => {
       {/* Main Layout */}
       <div className="pt-16 flex min-h-screen">
         {/* Left Sidebar */}
-        <aside className="h-[calc(100vh-4rem)] w-72 fixed left-0 top-16 bg-card overflow-y-auto border-r border-border flex flex-col p-5 space-y-5">
+        <aside className="h-[calc(100vh-4rem)] w-72 fixed left-0 top-16 bg-card overflow-y-auto border-r border-border/60 flex flex-col p-5 space-y-5">
           {showResults && result ? (
             // Results Sidebar
             <>
               <div>
-                <h3 className="font-bold text-sm text-primary">Results Summary</h3>
-                <p className="text-xs text-text-secondary mt-1">Score: {result.score}/{result.totalQuestions}</p>
+                <h3 className="font-heading font-bold text-base text-foreground tracking-tight">Results Summary</h3>
+                <p className="text-xs text-text-secondary mt-1.5 font-body">Score: <span className="font-semibold text-primary">{result.score}</span>/{result.totalQuestions}</p>
               </div>
 
               <ScrollArea className="flex-1">
                 <div className="space-y-3 pr-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">Question Review</span>
-                    <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.12em] font-body">Question Review</span>
+                    <span className="text-[11px] bg-primary-light text-primary px-2.5 py-1 rounded-full font-bold font-body tabular-nums">
                       {resultCurrentQuestionIndex + 1} / {result.questions.length}
                     </span>
                   </div>
@@ -533,15 +538,15 @@ const AssessmentQuestionsPage = () => {
             // Questions Sidebar
             <>
               <div>
-                <h3 className="font-bold text-sm text-primary">Assessment {assessmentMeta?.aiAssessmentId}</h3>
-                <p className="text-xs text-text-secondary mt-1">Set #{assessmentMeta?.questionSetId}</p>
+                <h3 className="font-heading font-bold text-base text-foreground tracking-tight">Assessment {assessmentMeta?.aiAssessmentId}</h3>
+                <p className="text-xs text-text-secondary mt-1.5 font-body">Set <span className="font-semibold">#{assessmentMeta?.questionSetId}</span></p>
               </div>
 
               <ScrollArea className="flex-1">
                 <div className="space-y-3 pr-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">Navigator</span>
-                    <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.12em] font-body">Navigator</span>
+                    <span className="text-[11px] bg-primary-light text-primary px-2.5 py-1 rounded-full font-bold font-body tabular-nums">
                       {currentQuestionIndex + 1} / {totalQuestions}
                     </span>
                   </div>
@@ -568,7 +573,7 @@ const AssessmentQuestionsPage = () => {
               </ScrollArea>
 
               <div className="pt-4 space-y-2 border-t border-border">
-                <button 
+                <button
                   onClick={handleSubmitAssessment}
                   disabled={isSubmitting}
                   className="w-full flex items-center justify-center gap-2 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
@@ -596,40 +601,45 @@ const AssessmentQuestionsPage = () => {
                 {/* Results Header */}
                 <div className="space-y-6">
                   <div className="text-center space-y-3">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Assessment Complete</h1>
-                    <p className="text-sm text-text-secondary font-medium">Heres your detailed performance analysis</p>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-light border border-primary/10 mb-2">
+                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[11px] font-bold text-primary uppercase tracking-[0.12em] font-body">Completed</span>
+                    </div>
+                    <h1 className="font-heading text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent tracking-tight leading-tight">Assessment Complete</h1>
+                    <p className="text-sm text-text-secondary font-body font-medium leading-relaxed">Here&apos;s your detailed performance analysis</p>
                   </div>
 
                   {/* Score Card */}
-                  <Card className="border-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background shadow-sm">
+                  <Card className="border-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background shadow-soft overflow-hidden relative">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary"></div>
                     <CardContent className="p-6">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-border/30">
-                          <div className="text-xl font-bold text-primary">
+                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
+                          <div className="font-heading text-2xl font-bold text-primary tracking-tight">
                             {result.score}
-                            <span className="text-xs text-text-secondary font-normal">/{result.totalQuestions}</span>
+                            <span className="text-xs text-text-secondary font-body font-normal">/{result.totalQuestions}</span>
                           </div>
-                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Correct Answers</p>
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Correct Answers</p>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-border/30">
-                          <div className="text-xl font-bold">{result.percentage}%</div>
-                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Score Percentage</p>
+                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
+                          <div className="font-heading text-2xl font-bold text-foreground tracking-tight">{result.percentage}<span className="text-lg">%</span></div>
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Score Percentage</p>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                          <div className="text-xl font-bold text-primary">{result.level.grade}</div>
-                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold">Grade</p>
+                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:shadow-soft transition-shadow">
+                          <div className="font-heading text-2xl font-bold text-primary tracking-tight">{result.level.grade}</div>
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Grade</p>
                         </div>
 
                         <button
                           onClick={handleDownloadPDF}
-                          className="flex flex-col items-center justify-center space-y-2 p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-border/30 hover:bg-white/80 transition-all cursor-pointer group"
+                          className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:bg-white/90 hover:shadow-soft transition-all cursor-pointer group"
                         >
-                          <div className="p-2 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors">
+                          <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-110 transition-all">
                             <Download className="w-5 h-5 text-primary" />
                           </div>
-                          <p className="text-xs uppercase tracking-widest text-text-secondary font-semibold group-hover:text-primary transition-colors">Download PDF</p>
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body group-hover:text-primary transition-colors">Download Report</p>
                         </button>
                       </div>
                     </CardContent>
@@ -639,14 +649,14 @@ const AssessmentQuestionsPage = () => {
                 {/* Question Review */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-foreground">Question-by-Question Review</h2>
-                    <div className="text-xs font-semibold text-text-secondary px-3 py-1.5 bg-background rounded-full border border-border/30">
+                    <h2 className="font-heading text-xl font-bold text-foreground tracking-tight">Question Review</h2>
+                    <div className="text-[11px] font-bold text-text-secondary px-3.5 py-1.5 bg-background rounded-full border border-border/30 font-body tabular-nums">
                       {resultCurrentQuestionIndex + 1} of {result.questions.length}
                     </div>
                   </div>
 
                   {!isFetchingResult && result.questions.length > 0 && (
-                    <Card className="border-border/40 bg-gradient-to-br from-background via-white/30 to-background shadow-sm">
+                    <Card className="border-border/40 bg-gradient-to-br from-background via-white/30 to-background shadow-soft rounded-xl overflow-hidden">
                       <CardContent className="p-8">
                         {(() => {
                           const resultQuestion = result.questions[resultCurrentQuestionIndex]
@@ -663,35 +673,75 @@ const AssessmentQuestionsPage = () => {
                           return (
                             <div className="space-y-6">
                               {/* Question Header */}
-                              <div className="space-y-4 pb-4 border-b border-border/20">
+                              <div className="space-y-4 pb-5 border-b border-border/20">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-3">
-                                    {/* <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${
-                                      resultQuestion.isCorrect
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white ${resultQuestion.isCorrect
                                         ? 'bg-gradient-to-br from-success to-success/80'
                                         : 'bg-gradient-to-br from-destructive to-destructive/80'
-                                    }`}>
-                                      {resultQuestion.isCorrect ? '✓' : '✕'}
-                                    </div> */}
-                                    <div>
-                                      <p className="text-xs text-text-secondary font-semibold uppercase tracking-wide">Question {resultCurrentQuestionIndex + 1}</p>
-                                      {/* <p className={`text-sm font-semibold ${
-                                        resultQuestion.isCorrect ? 'text-success' : 'text-destructive'
                                       }`}>
-                                        {resultQuestion.isCorrect ? 'Correct Answer' : 'Incorrect Answer'}
-                                      </p> */}
+                                      {resultQuestion.isCorrect ? '✓' : '✕'}
                                     </div>
+                                    <div>
+                                      <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-[0.12em] font-body">Question {resultCurrentQuestionIndex + 1}</p>
+                                      <p className={`text-xs font-semibold font-body ${resultQuestion.isCorrect ? 'text-success' : 'text-destructive'
+                                        }`}>
+                                        {resultQuestion.isCorrect ? 'Correct' : 'Incorrect'}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* AI Actions — repositioned here for better UX */}
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      className="flex items-center gap-1.5 text-xs h-8 px-3 rounded-lg border-primary/20 text-primary hover:bg-primary-light hover:border-primary/30 transition-all font-body font-semibold"
+                                      onClick={() => handleExplainWithAi(resultQuestion.questionId)}
+                                      disabled={isExplanationLoading}
+                                    >
+                                      {isExplanationLoading ? (
+                                        <>
+                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                          Generating...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Sparkles className="w-3.5 h-3.5" />
+                                          Explain with AI
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      className="flex items-center gap-1.5 text-xs h-8 px-3 rounded-lg border-border/50 hover:bg-muted/50 transition-all font-body font-semibold"
+                                      onClick={() => handleSpeakExplanation(resultQuestion.questionId)}
+                                      disabled={isExplanationLoading}
+                                    >
+                                      {activeSpeechTarget === 'explanation' ? (
+                                        <>
+                                          <VolumeX className="w-3.5 h-3.5" />
+                                          Stop
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Volume2 className="w-3.5 h-3.5" />
+                                          Voice
+                                        </>
+                                      )}
+                                    </Button>
                                   </div>
                                 </div>
 
-                                <h3 className="text-base font-semibold text-foreground leading-relaxed">
+                                <h3 className="text-[15px] font-semibold text-foreground leading-relaxed font-body">
                                   {originalQuestion.question}
                                 </h3>
                               </div>
 
                               {/* Options with Comparison */}
                               <div className="space-y-2">
-                                <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary mb-3">Answer Options</p>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary mb-3 font-body">Answer Options</p>
                                 {Object.entries(originalQuestion.options)
                                   .sort(([left], [right]) => Number(left) - Number(right))
                                   .map(([optionKey, optionLabel]) => {
@@ -705,32 +755,30 @@ const AssessmentQuestionsPage = () => {
                                     return (
                                       <div
                                         key={`result-${resultQuestion.questionId}-${optionKey}`}
-                                        className={`relative p-4 rounded-lg border transition-all ${
-                                          showAsCorrect
+                                        className={`relative p-4 rounded-lg border transition-all ${showAsCorrect
                                             ? 'bg-success/5 border-success/30 shadow-sm'
                                             : showAsIncorrect
-                                            ? 'bg-destructive/5 border-destructive/30 shadow-sm'
-                                            : showAsCorrectAnswer
-                                            ? 'bg-success/5 border-success/30'
-                                            : 'bg-background border-border/30'
-                                        }`}
+                                              ? 'bg-destructive/5 border-destructive/30 shadow-sm'
+                                              : showAsCorrectAnswer
+                                                ? 'bg-success/5 border-success/30'
+                                                : 'bg-background border-border/30'
+                                          }`}
                                       >
                                         <div className="flex items-start justify-between gap-3">
                                           <div className="flex items-start gap-3 flex-1">
                                             <div
-                                              className={`min-w-fit w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs flex-shrink-0 ${
-                                                showAsCorrect
+                                              className={`min-w-fit w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs flex-shrink-0 ${showAsCorrect
                                                   ? 'bg-success/20 text-success'
                                                   : showAsIncorrect
-                                                  ? 'bg-destructive/20 text-destructive'
-                                                  : showAsCorrectAnswer
-                                                  ? 'bg-success/20 text-success'
-                                                  : 'bg-muted text-text-secondary'
-                                              }`}
+                                                    ? 'bg-destructive/20 text-destructive'
+                                                    : showAsCorrectAnswer
+                                                      ? 'bg-success/20 text-success'
+                                                      : 'bg-muted text-text-secondary'
+                                                }`}
                                             >
                                               {optionKey}
                                             </div>
-                                            <span className="text-sm text-foreground pt-0.5">
+                                            <span className="text-sm text-foreground pt-0.5 font-body leading-relaxed">
                                               {optionLabel}
                                             </span>
                                           </div>
@@ -761,70 +809,29 @@ const AssessmentQuestionsPage = () => {
                               </div>
 
                               {/* Answer Summary */}
-                              <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-                                <p className="text-sm font-semibold text-foreground">Answer Summary</p>
-                                <div className="text-xs space-y-1 text-text-secondary">
-                                  <p>
+                              <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
+                                <p className="text-xs font-bold text-foreground font-heading tracking-tight">Answer Summary</p>
+                                <div className="text-xs space-y-2 text-text-secondary font-body">
+                                  <p className="leading-relaxed">
                                     Your Answer:{' '}
                                     <span className="font-semibold text-foreground">
                                       {resultQuestion.selectedOption
-                                        ? `Option ${resultQuestion.selectedOption} - ${getOptionLabelFromQuestion(
-                                            resultQuestion.questionId,
-                                            resultQuestion.selectedOption
-                                          )}`
+                                        ? `Option ${resultQuestion.selectedOption} — ${getOptionLabelFromQuestion(
+                                          resultQuestion.questionId,
+                                          resultQuestion.selectedOption
+                                        )}`
                                         : 'Not answered'}
                                     </span>
                                   </p>
-                                  <p>
+                                  <p className="leading-relaxed">
                                     Correct Answer:{' '}
                                     <span className="font-semibold text-success">
-                                      Option {resultQuestion.correctOption} - {getOptionLabelFromQuestion(
+                                      Option {resultQuestion.correctOption} — {getOptionLabelFromQuestion(
                                         resultQuestion.questionId,
                                         resultQuestion.correctOption
                                       )}
                                     </span>
                                   </p>
-                                </div>
-
-                                <div className="flex gap-2 pt-2">
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="flex items-center gap-1.5 text-xs h-8 px-3"
-                                    onClick={() => handleExplainWithAi(resultQuestion.questionId)}
-                                    disabled={isExplanationLoading}
-                                  >
-                                    {isExplanationLoading ? (
-                                      <>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        Generating...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                        Explain with AI
-                                      </>
-                                    )}
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="flex items-center gap-1.5 text-xs h-8 px-3"
-                                    onClick={() => handleSpeakExplanation(resultQuestion.questionId)}
-                                    disabled={isExplanationLoading}
-                                  >
-                                    {activeSpeechTarget === 'explanation' ? (
-                                      <>
-                                        <VolumeX className="w-3.5 h-3.5" />
-                                        Stop
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Volume2 className="w-3.5 h-3.5" />
-                                        Voice
-                                      </>
-                                    )}
-                                  </Button>
                                 </div>
                               </div>
                             </div>
@@ -860,21 +867,20 @@ const AssessmentQuestionsPage = () => {
               {!isFetchingQuestions && !error && currentQuestion && (
                 <div className="space-y-6">
                   {/* Question Header */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="px-3 py-1.5 bg-primary-light rounded-full">
-                        <span className="text-xs font-bold text-primary tracking-wide uppercase">
+                      <div className="px-3.5 py-1.5 bg-primary-light rounded-full border border-primary/10">
+                        <span className="text-[11px] font-bold text-primary tracking-[0.1em] uppercase font-body tabular-nums">
                           Question {currentQuestionIndex + 1} / {totalQuestions}
                         </span>
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleSpeak(currentQuestionSpeechText, 'question')}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${
-                            activeSpeechTarget === 'question'
-                              ? 'bg-primary-light text-primary'
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${activeSpeechTarget === 'question'
+                              ? 'bg-primary-light text-primary shadow-soft'
                               : 'text-text-secondary hover:text-primary hover:bg-primary-light'
-                          }`}
+                            }`}
                           title={activeSpeechTarget === 'question' ? 'Stop voice' : 'Voice question'}
                         >
                           {activeSpeechTarget === 'question' ? (
@@ -886,22 +892,20 @@ const AssessmentQuestionsPage = () => {
                         </button>
                         <button
                           onClick={() => toggleFlag(currentQuestion.questionId)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${
-                            flaggedQuestions.has(currentQuestion.questionId)
-                              ? 'bg-destructive/10 text-destructive'
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${flaggedQuestions.has(currentQuestion.questionId)
+                              ? 'bg-destructive/10 text-destructive shadow-soft'
                               : 'text-text-secondary hover:text-destructive hover:bg-destructive/5'
-                          }`}
+                            }`}
                         >
                           <Flag className="w-4 h-4" fill={flaggedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
                           Flag
                         </button>
                         <button
                           onClick={() => toggleBookmark(currentQuestion.questionId)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${
-                            bookmarkedQuestions.has(currentQuestion.questionId)
-                              ? 'bg-primary-light text-primary'
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${bookmarkedQuestions.has(currentQuestion.questionId)
+                              ? 'bg-primary-light text-primary shadow-soft'
                               : 'text-text-secondary hover:text-primary hover:bg-primary-light'
-                          }`}
+                            }`}
                         >
                           <Bookmark className="w-4 h-4" fill={bookmarkedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
                           Save
@@ -909,7 +913,7 @@ const AssessmentQuestionsPage = () => {
                       </div>
                     </div>
 
-                    <h2 className="text-lg font-bold flex text-foreground leading-relaxed">
+                    <h2 className="text-lg font-body font-semibold text-foreground leading-relaxed">
                       {currentQuestion.question}
                     </h2>
                   </div>
@@ -917,14 +921,13 @@ const AssessmentQuestionsPage = () => {
                   {/* Options */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary">Answer Options</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary font-body">Answer Options</p>
                       <button
                         onClick={() => handleSpeak(currentOptionsSpeechText, 'options')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${
-                          activeSpeechTarget === 'options'
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${activeSpeechTarget === 'options'
                             ? 'bg-primary-light text-primary'
                             : 'text-text-secondary hover:text-primary hover:bg-primary-light'
-                        }`}
+                          }`}
                         title={activeSpeechTarget === 'options' ? 'Stop voice' : 'Voice options'}
                       >
                         {activeSpeechTarget === 'options' ? (
@@ -947,22 +950,20 @@ const AssessmentQuestionsPage = () => {
                               key={`${currentQuestion.questionId}-${optionKey}`}
                               type="button"
                               onClick={() => handleSelectAnswer(currentQuestion.questionId, optionKey)}
-                              className={`group relative flex items-center p-4 rounded-lg text-left border transition-all duration-200 ${
-                                isSelected
+                              className={`group relative flex items-center p-4 rounded-xl text-left border transition-all duration-200 ${isSelected
                                   ? 'bg-success-light border-success shadow-soft'
                                   : 'bg-card border-border hover:border-primary/30 hover:shadow-soft'
-                              }`}
+                                }`}
                             >
                               <div
-                                className={`min-w-fit w-9 h-9 rounded-md flex items-center justify-center font-bold text-sm mr-4 transition-colors flex-shrink-0 ${
-                                  isSelected
+                                className={`min-w-fit w-9 h-9 rounded-md flex items-center justify-center font-bold text-sm mr-4 transition-colors flex-shrink-0 ${isSelected
                                     ? 'bg-success text-white'
                                     : 'bg-muted text-primary group-hover:bg-primary group-hover:text-white'
-                                }`}
+                                  }`}
                               >
                                 {optionKey}
                               </div>
-                              <span className={`text-sm font-medium ${isSelected ? 'text-foreground font-semibold' : 'text-foreground'}`}>
+                              <span className={`text-sm font-body leading-relaxed ${isSelected ? 'text-foreground font-semibold' : 'text-foreground font-medium'}`}>
                                 {optionLabel}
                               </span>
                               {isSelected && (
@@ -983,14 +984,14 @@ const AssessmentQuestionsPage = () => {
       </div>
 
       {/* Bottom Action Bar */}
-      <footer className="fixed bottom-0 left-72 right-0 h-20 bg-card/80 backdrop-blur-lg border-t border-border px-8 flex items-center justify-between z-40">
+      <footer className="fixed bottom-0 left-72 right-0 h-20 bg-card/80 backdrop-blur-xl border-t border-border/60 px-8 flex items-center justify-between z-40">
         {showResults && result ? (
           // Results Navigation
           <>
             <Button
               type="button"
               variant="outline"
-              className="flex items-center gap-2 text-xs h-9"
+              className="flex items-center gap-2 text-xs h-9 font-body font-semibold rounded-lg"
               onClick={() => {
                 if (resultCurrentQuestionIndex > 0) {
                   setResultCurrentQuestionIndex((prev) => prev - 1)
@@ -1002,7 +1003,7 @@ const AssessmentQuestionsPage = () => {
               Previous
             </Button>
 
-            <div className="text-xs font-semibold text-text-secondary">
+            <div className="text-[11px] font-bold text-text-secondary font-body tabular-nums">
               Question {resultCurrentQuestionIndex + 1} / {result.questions.length}
             </div>
 
@@ -1010,14 +1011,14 @@ const AssessmentQuestionsPage = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs h-9"
+                className="text-xs h-9 font-body font-semibold rounded-lg"
                 onClick={handleCloseTab}
               >
                 Back to Chapter
               </Button>
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground text-xs h-9 font-semibold shadow-soft"
+                className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground text-xs h-9 font-semibold shadow-soft font-body rounded-lg"
                 onClick={() => {
                   if (resultCurrentQuestionIndex < result.questions.length - 1) {
                     setResultCurrentQuestionIndex((prev) => prev + 1)
@@ -1036,7 +1037,7 @@ const AssessmentQuestionsPage = () => {
             <Button
               type="button"
               variant="outline"
-              className="flex items-center gap-2 text-xs h-9"
+              className="flex items-center gap-2 text-xs h-9 font-body font-semibold rounded-lg"
               onClick={handlePrevious}
               disabled={currentQuestionIndex === 0}
             >
@@ -1047,22 +1048,20 @@ const AssessmentQuestionsPage = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => currentQuestion && toggleFlag(currentQuestion.questionId)}
-                className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
-                  currentQuestion && flaggedQuestions.has(currentQuestion.questionId)
+                className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && flaggedQuestions.has(currentQuestion.questionId)
                     ? 'bg-destructive/10 text-destructive'
                     : 'bg-muted text-text-secondary hover:bg-destructive/10 hover:text-destructive'
-                }`}
+                  }`}
                 title="Flag for Review"
               >
                 <Flag className="w-4 h-4" fill={currentQuestion && flaggedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
               </button>
               <button
                 onClick={() => currentQuestion && toggleBookmark(currentQuestion.questionId)}
-                className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
-                  currentQuestion && bookmarkedQuestions.has(currentQuestion.questionId)
+                className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && bookmarkedQuestions.has(currentQuestion.questionId)
                     ? 'bg-primary-light text-primary'
                     : 'bg-muted text-text-secondary hover:bg-primary-light hover:text-primary'
-                }`}
+                  }`}
                 title="Bookmark Question"
               >
                 <Bookmark className="w-4 h-4" fill={currentQuestion && bookmarkedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
@@ -1071,7 +1070,7 @@ const AssessmentQuestionsPage = () => {
 
             <Button
               type="button"
-              className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground text-xs h-9 font-semibold shadow-soft"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground text-xs h-9 font-semibold shadow-soft font-body rounded-lg"
               onClick={handleNext}
               disabled={currentQuestionIndex === totalQuestions - 1}
             >
