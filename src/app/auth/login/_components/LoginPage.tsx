@@ -23,6 +23,7 @@ import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
 import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
 import { useLogin } from '@/hooks/useLogin'
 import { DecodedGoogleToken, AuthResponse } from "@/app/auth/login/_components/componentLogin"
+import { isRedirectAllowed } from '@/utils/redirectValidation'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -255,20 +256,13 @@ function LoginPage() {
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
 
-                const isRedirectValid = redirectedUrl && (userRole !== 'super_admin' || redirectedUrl.startsWith('/super_admin'));
+                const isRedirectValid = isRedirectAllowed(userRole, redirectedUrl)
 
                 if (shouldForceProfilePage && organizationId) {
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
                 } else if (isRedirectValid) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'super_admin') {
-                // else if (userRole === 'student') {
-                //     if (response.data.showTooltip) {
-                //         router.push('/student/profile')
-                //     } else {
-                //         router.push('/student')
-                //     }
-                // } 
                     router.push(`/${userRole}/organizations?page=1&limit=10`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
@@ -308,18 +302,11 @@ function LoginPage() {
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
-        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
-        console.log('Current URL:', window.location.href)
         if (urlParams.has('route')) {
-            console.log('URL has route param')
             const route = urlParams.get('route')
-            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
-            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', btoa(redirectedUrl))
-            // setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
-
         }
     }, [router])
 

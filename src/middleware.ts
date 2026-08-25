@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isRedirectAllowed } from './utils/redirectValidation'
 
 export function middleware(request: NextRequest) {
     // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
     // const user = userData === "false" ? "false" : atob(userData);
 
     const redirectedUrl = request.cookies.get('redirectedUrl')?.value ?? null
-    console.log('redirectedUrl cookie:', redirectedUrl)
     const userData = request.cookies.get('secure_typeuser')?.value ?? 'false'
     let user = 'false'
     try {
@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
             console.error('Error decoding redirectedUrl cookie:', e)
         }
     }
-    // const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
+
 
     const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
@@ -101,9 +101,12 @@ export function middleware(request: NextRequest) {
                     return response
                 }
 
-                const response = NextResponse.redirect(new URL(decodedUrl, request.url))
-                response.cookies.set('redirectedUrl', '', { path: '/', maxAge: 60 })
-                return response
+                if (isRedirectAllowed(user, decodedUrl)) {
+                    const response = NextResponse.redirect(new URL(decodedUrl, request.url))
+                    response.cookies.set('redirectedUrl', '', { path: '/', maxAge: 60 })
+                    return response
+                }
+                // decodedUrl failed validation — fall through to own-home redirect below
             }
 
             // No redirect cookie — bounce them straight to their own role's home.
@@ -143,7 +146,7 @@ export function middleware(request: NextRequest) {
             if (['/student', '/admin'].some(role => request.nextUrl.pathname.startsWith(role))) {
                 return NextResponse.redirect(new URL('/', request.url));
             }
-        } else if (decodedUrl && user !== 'admin') {
+        } else if (isRedirectAllowed(user, decodedUrl) && user !== 'admin') {
             const absoluteUrl = new URL(decodedUrl, request.url)
             const response = NextResponse.redirect(absoluteUrl)
             response.cookies.set('redirectedUrl', '', {
