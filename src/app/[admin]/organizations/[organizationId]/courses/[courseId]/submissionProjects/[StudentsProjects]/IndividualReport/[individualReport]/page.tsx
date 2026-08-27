@@ -86,20 +86,6 @@ const Page = ({ params }: PageParams) => {
     if (indiviDualStudentData) {
         return (
             <div className="min-h-screen font-semibold bg-background">
-                {/* Back Button */}
-                {/* <MaxWidthWrapper>
-                    <div className="flex items-center gap-4 mb-8">
-                        <Button
-                            variant="ghost"
-                            onClick={() => router.back()}
-                            className="hover:bg-transparent hover:text-primary transition-colors"
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back to Projects Submission
-                        </Button>
-                    </div>
-                </MaxWidthWrapper> */}
-
                 <MaxWidthWrapper className='container mx-auto px-2 pt-2 pb-2 max-w-7xl'>
                     <div className="flex items-center gap-4 mb-8">
                         <Button

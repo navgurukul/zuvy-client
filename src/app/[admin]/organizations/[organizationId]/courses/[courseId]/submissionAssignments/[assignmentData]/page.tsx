@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -85,7 +84,7 @@ const Page = ({ params }: { params: any }) => {
             })
             setAssignmentData(assignmentData.data)
             setSubmittedStudents(assignmentData.data.length)
-            setTotalSubmissions(assignmentData.totalSubmissions)
+            setTotalSubmissions(assignmentData.totalStudentsCount || 0)
             if (assignmentData.chapterName) {
                 setAssignmentTitle(assignmentData.chapterName)
             }

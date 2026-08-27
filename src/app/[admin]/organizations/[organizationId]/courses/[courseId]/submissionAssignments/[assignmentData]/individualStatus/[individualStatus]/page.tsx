@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PageParams,
@@ -120,7 +119,6 @@ const Page = ({ params }: PageParams) => {
     const year = date.getUTCFullYear()
 
     const formattedDate = `${dayOfWeek} ${day} ${month} ${year}`
-    // const url = individualStudentData?.user?.studentAssignmentStatus?.projectUrl
 
     return (
         <>
