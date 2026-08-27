@@ -41,7 +41,7 @@ const Page = ({ params }: { params: any }) => {
     const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
     const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
 
 
@@ -84,7 +84,7 @@ const Page = ({ params }: { params: any }) => {
             })
             setAssignmentData(assignmentData.data)
             setSubmittedStudents(assignmentData.data.length)
-            setTotalSubmissions(assignmentData.totalStudentsCount || 0)
+            setTotalSubmissions(assignmentData.data.length)
             if (assignmentData.chapterName) {
                 setAssignmentTitle(assignmentData.chapterName)
             }
@@ -109,7 +109,7 @@ const Page = ({ params }: { params: any }) => {
                 data.chapterId = chapterId
             })
             setAssignmentData(assignmentData.data)
-            setTotalSubmissions(assignmentData.totalStudentsCount || 0)
+            setTotalSubmissions(assignmentData.data.length)
             setSubmittedStudents(assignmentData.data.length)
             setAssignmentTitle(assignmentData.chapterName)
         }
@@ -122,8 +122,8 @@ const Page = ({ params }: { params: any }) => {
     }, [defaultFetchApi, sortField, sortDirection]);
 
 
-     // Handle sorting change
-     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+    // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
     }, [])
@@ -195,7 +195,7 @@ const Page = ({ params }: { params: any }) => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className="text-left">
                             <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">{totalSubmissions|| 0}</div>
+                            <div className="text-lg font-semibold">{totalSubmissions || 0}</div>
                         </div>
 
                         <div className="text-left">
