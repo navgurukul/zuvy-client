@@ -38,7 +38,7 @@ export const createColumns = (
     {
         id: 'select',
         header: ({ table }) => (
-            <div className="ml-5">
+            <div className="flex items-center justify-center">
                 <Checkbox
                     checked={
                         table.getIsAllPageRowsSelected() ||
@@ -48,17 +48,17 @@ export const createColumns = (
                         table.toggleAllPageRowsSelected(!!value)
                     }
                     aria-label="Select all"
-                    className="translate-y-[2px]"
                 />
             </div>
         ),
         cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="translate-y-[2px]"
-            />
+            <div className="flex items-center justify-center">
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                />
+            </div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -69,11 +69,11 @@ export const createColumns = (
             <DataTableColumnHeader
                 column={column}
                 title="Profile Pitcure"
-                className="w-full"
+                className="w-full text-center"
             />
         ),
         cell: ({ row }) => (
-                    <div className="flex items-center">
+                    <div className="flex w-full justify-center items-center">
                         <ProfileImage src={row.original.profilePicture} />
                     </div>
                 ),
@@ -164,7 +164,7 @@ export const createColumns = (
             <DataTableColumnHeader
                 column={column}
                 title="Progress"
-                className="w-full justify-center"
+                className="w-full text-center"
             />
         ),
         cell: ({ row }) => {
@@ -179,39 +179,41 @@ export const createColumns = (
             // }
 
             return (
-                <div className="relative mx-auto size-9">
-                    <svg
-                        className="size-full"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 36 36"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <circle
-                            cx="18"
-                            cy="18"
-                            r="16"
-                            fill="none"
-                            className="stroke-current text-gray-200 dark:text-gray-700"
-                            strokeWidth="2"
-                        ></circle>
-                        <g className="origin-center -rotate-90 transform">
+                <div className="flex w-full items-center justify-center">
+                    <div className="relative size-9">
+                        <svg
+                            className="size-full"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 36 36"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
                             <circle
                                 cx="18"
                                 cy="18"
                                 r="16"
                                 fill="none"
-                                className={`stroke-current ${circleColorClass}`}
+                                className="stroke-current text-gray-200 dark:text-gray-700"
                                 strokeWidth="2"
-                                strokeDasharray="100"
-                                strokeDashoffset={`${100 - progress}`}
                             ></circle>
-                        </g>
-                    </svg>
-                    <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
-                        <span className="text-center text-md font-bold text-gray-800 dark:text-white">
-                            {progress}
-                        </span>
+                            <g className="origin-center -rotate-90 transform">
+                                <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="16"
+                                    fill="none"
+                                    className={`stroke-current ${circleColorClass}`}
+                                    strokeWidth="2"
+                                    strokeDasharray="100"
+                                    strokeDashoffset={`${100 - progress}`}
+                                ></circle>
+                            </g>
+                        </svg>
+                        <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
+                            <span className="text-center text-md font-bold text-gray-800 dark:text-white">
+                                {progress}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )
@@ -226,7 +228,7 @@ export const createColumns = (
             <DataTableColumnHeader
                 column={column}
                 title="Attendance"
-                className="w-full justify-center"
+                className="w-ful text-center"
             />
         ),
         cell: ({ row }) => {
@@ -237,39 +239,41 @@ export const createColumns = (
             const circleColorClass = getAttendanceColorClass(attendance)
 
             return (
-                <div className="relative mx-auto size-9">
-                    <svg
-                        className="size-full"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 36 36"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <circle
-                            cx="18"
-                            cy="18"
-                            r="16"
-                            fill="none"
-                            className="stroke-current text-gray-200 dark:text-gray-700"
-                            strokeWidth="2"
-                        ></circle>
-                        <g className="origin-center -rotate-90 transform">
+                <div className="flex w-full justify-center items-center">
+                    <div className="relative size-9">
+                        <svg
+                            className="size-full"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 36 36"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
                             <circle
                                 cx="18"
                                 cy="18"
                                 r="16"
                                 fill="none"
-                                className={`stroke-current ${circleColorClass}`}
+                                className="stroke-current text-gray-200 dark:text-gray-700"
                                 strokeWidth="2"
-                                strokeDasharray="100"
-                                strokeDashoffset={`${100 - attendance}`}
                             ></circle>
-                        </g>
-                    </svg>
-                    <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
-                        <span className="text-center text-md font-bold text-gray-800 dark:text-white">
-                            {attendance}
-                        </span>
+                            <g className="origin-center -rotate-90 transform">
+                                <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="16"
+                                    fill="none"
+                                    className={`stroke-current ${circleColorClass}`}
+                                    strokeWidth="2"
+                                    strokeDasharray="100"
+                                    strokeDashoffset={`${100 - attendance}`}
+                                ></circle>
+                            </g>
+                        </svg>
+                        <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
+                            <span className="text-center text-md font-bold text-gray-800 dark:text-white">
+                                {attendance}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )
@@ -300,34 +304,32 @@ export const createColumns = (
     },
     {
         id: 'actions2',
-        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        header: () => <div className="w-full text-center">Actions</div>,
         cell: ({ row }) => {
             const student = row.original
             const { userId, bootcampId } = student
 
             return (
-                <>
-                    <div>
-                        <AlertDialogDemo
-                            userId={[userId]}
-                            bootcampId={bootcampId}
-                            title="Are you absolutely sure?"
-                            description="This action cannot be undone. This will permanently the student from the bootcamp"
-                        />
-                    </div>
-                </>
+                <div className="flex w-full justify-center items-center">
+                    <AlertDialogDemo
+                        userId={[userId]}
+                        bootcampId={bootcampId}
+                        title="Are you absolutely sure?"
+                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                    />
+                </div>
             )
         },
     },
     {
         id: 'actions3',
-        header: () => <div className="w-full min-w-[120px] text-left">Report</div>,
+        header: () => <div className="w-full min-w-[120px] text-center">Report</div>,
         cell: ({ row }) => {
             const student = row.original as Record<string, any>
             const { userId } = student
 
             return (
-                <div className="flex w-full items-center justify-start">
+                <div className="flex w-full items-center justify-center">
                     <Link
                         href={`/${options.userRole}/organizations/${options.orgId}/courses/${options.courseId}/batch/${options.batchId}/individualreport/${userId}`}
                         className="text-primary hover:underline font-medium"

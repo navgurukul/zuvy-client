@@ -291,8 +291,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
 
                 {/* Performance Summary Section */}
                 <section className="mb-8">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <TrendingUp size={20} className="text-blue-600" />
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <TrendingUp size={18} className="text-blue-600" />
                         Performance Summary
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -336,8 +336,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Assessments Section */}
                 {student?.assessments && student.assessments.length > 0 && (
                     <section className="mb-8">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <Award size={20} className="text-blue-600" />
+                        <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <Award size={18} className="text-blue-600" />
                             Assessment Results
                         </h2>
                         <div className="space-y-3">
@@ -349,7 +349,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-800 mb-1 text-lg">
+                                                <h3 className="font-semibold text-gray-800 mb-1 text-sm text-left">
                                                     {assessment?.name || `Assessment ${index + 1}`}
                                                 </h3>
                                                 <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-600">
@@ -375,7 +375,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                                 </div>
                                             </div>
                                             <div className="text-right ml-4">
-                                                <p className="text-2xl font-bold text-blue-600">
+                                                <p className="text-lg font-bold text-blue-600">
                                                     {assessment?.percentage ?? 'N/A'}
                                                     {typeof assessment?.percentage === 'number' && '%'}
                                                 </p>
@@ -408,8 +408,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
 
                 {/* Professional Development Section */}
                 <section className="mb-8">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <Users size={20} className="text-blue-600" />
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <Users size={18} className="text-blue-600" />
                         Professional Development
                     </h2>
                     <div className="space-y-3">
