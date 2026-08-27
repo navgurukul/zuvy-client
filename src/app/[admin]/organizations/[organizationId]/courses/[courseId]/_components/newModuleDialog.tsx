@@ -157,6 +157,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
+                    </DialogHeader>
                         <div className="main_container flex items-center align-middle text-center">
                             <div className="flex items-center">
                                 <div>
@@ -262,7 +263,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label htmlFor="desc">
                                 {typeId === 2
                                     ? 'Project Description'
@@ -298,7 +299,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label>Time Alotted:</Label>
                             <div className="flex gap-2">
                                 <div>
@@ -429,7 +430,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 </p>
                             )}
                         </div>
-                    </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
                             <Button

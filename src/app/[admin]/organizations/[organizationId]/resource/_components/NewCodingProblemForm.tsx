@@ -759,7 +759,7 @@ export default function NewCodingProblemForm({
                                         <FormControl>
                                             <Textarea
                                                 placeholder="Write the Detailed Description Here"
-                                                className=" border-none outline-none h-[150px]"
+                                                className="h-[150px]"
                                                 {...field}
                                             />
                                         </FormControl>
