@@ -430,7 +430,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 </p>
                             )}
                         </div>
-                    {/* </DialogHeader> */}
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
                             <Button

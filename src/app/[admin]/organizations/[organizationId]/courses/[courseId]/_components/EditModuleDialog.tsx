@@ -244,7 +244,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                 </div>
                             </div>
                         </div>
-                    {/* </DialogHeader> */}
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
                             <Button
