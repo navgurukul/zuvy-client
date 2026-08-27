@@ -42,7 +42,7 @@ const PracticeProblems = ({ params }: any) => {
     const orgId = Number(organizationId) || user?.orgId;
 
     const [appliedSearchQuery, setAppliedSearchQuery] = useState('')
-    const { studentDetails, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
+    const { studentDetails, totalStudentsCount, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
         chapterId: matchingData?.moduleChapterData?.[0]?.id,
         questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
         searchStudent: appliedSearchQuery,
@@ -181,16 +181,16 @@ const PracticeProblems = ({ params }: any) => {
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className='text-left'>
-                            <div className="font-medium text-muted-foreground">Total Students</div>
-                            <div className="text-lg font-semibold">{totalStudents}</div>
+                            <div className="font-medium text-muted-foreground">Total Submission</div>
+                            <div className="text-lg font-semibold">{totalStudentsCount || 0}</div>
                         </div>
                         <div className='text-left'>
-                            <div className="text-sm text-gray-600 mb-1">Submission Type</div>
-                            <div className="text-xl font-semibold text-gray-900">Coding</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type</div>
+                            <div className="text-lg font-semibold">Coding</div>
                         </div>
 
                         <div className='text-left'>
-                            <div className="font-medium text-muted-foreground">Course ID</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID</div>
                             <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className='text-left'>
@@ -200,7 +200,7 @@ const PracticeProblems = ({ params }: any) => {
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}

@@ -19,6 +19,7 @@ export const usePracticeProblemStatus = (
   } = options
 
   const [studentDetails, setStudentDetails] = useState<any[]>([])
+  const [totalStudentsCount, setTotalStudentsCount] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<Error | null>(null)
   const mountedRef = useRef(true)
@@ -98,6 +99,7 @@ export const usePracticeProblemStatus = (
 
       if (mountedRef.current) {
         setStudentDetails(res?.data || [])
+        setTotalStudentsCount(res?.totalStudentsCount || 0)
       }
     } catch (err: any) {
       if (mountedRef.current) {
@@ -119,5 +121,5 @@ export const usePracticeProblemStatus = (
     fetchData()
   }, [fetchData])
 
-  return { studentDetails, loading, error, refetch, fetchStatus }
+  return { studentDetails, totalStudentsCount, loading, error, refetch, fetchStatus }
 }
