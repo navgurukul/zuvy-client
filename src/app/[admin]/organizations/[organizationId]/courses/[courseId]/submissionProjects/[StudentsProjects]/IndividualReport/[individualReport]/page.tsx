@@ -87,7 +87,7 @@ const Page = ({ params }: PageParams) => {
         return (
             <div className="min-h-screen font-semibold bg-background">
                 {/* Back Button */}
-                <MaxWidthWrapper>
+                {/* <MaxWidthWrapper>
                     <div className="flex items-center gap-4 mb-8">
                         <Button
                             variant="ghost"
@@ -98,9 +98,19 @@ const Page = ({ params }: PageParams) => {
                             Back to Projects Submission
                         </Button>
                     </div>
-                </MaxWidthWrapper>
+                </MaxWidthWrapper> */}
 
-                <MaxWidthWrapper>
+                <MaxWidthWrapper className='container mx-auto px-2 pt-2 pb-2 max-w-7xl'>
+                    <div className="flex items-center gap-4 mb-8">
+                        <Button
+                            variant="ghost"
+                            onClick={() => router.back()}
+                            className="hover:bg-transparent hover:text-primary transition-colors"
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to Projects Submission
+                        </Button>
+                    </div>
                     <div className="space-y-8">
                         {/* Student Info Card */}
                         <div className="bg-card border border-border rounded-lg p-8">
@@ -116,7 +126,7 @@ const Page = ({ params }: PageParams) => {
                                 </Avatar>
                                 <div className="flex-1 space-y-4">
                                     <div>
-                                        <h1 className="text-2xl text-left font-heading font-bold text-foreground">
+                                        <h1 className="text-2xl text-left font-bold">
                                             {
                                                 indiviDualStudentData
                                                     ?.projectSubmissionDetails
@@ -124,7 +134,7 @@ const Page = ({ params }: PageParams) => {
                                                     .userDetails.name
                                             }
                                         </h1>
-                                        <p className="text-left text-muted-foreground font-semibold text-lg mt-2">
+                                        <p className="text-left text-muted-foreground font-semibold text-lg mt-0">
                                             Individual Report
                                         </p>
                                     </div>
