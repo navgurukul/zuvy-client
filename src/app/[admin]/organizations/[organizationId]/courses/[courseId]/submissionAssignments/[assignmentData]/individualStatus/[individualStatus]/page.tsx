@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PageParams,
@@ -120,7 +119,6 @@ const Page = ({ params }: PageParams) => {
     const year = date.getUTCFullYear()
 
     const formattedDate = `${dayOfWeek} ${day} ${month} ${year}`
-    // const url = individualStudentData?.user?.studentAssignmentStatus?.projectUrl
 
     return (
         <>
@@ -133,8 +131,8 @@ const Page = ({ params }: PageParams) => {
                     </div>
                 </div>
             )}
-            <MaxWidthWrapper className="flex flex-col gap-5 text-gray-600">
-                <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col gap-5 text-gray-600 container mx-auto max-w-7xl px-20">
+                <div className="flex items-center gap-4 mb-0 mt-10">
                     <Button
                         variant="ghost"
                         onClick={() => router.back()}
@@ -162,7 +160,7 @@ const Page = ({ params }: PageParams) => {
                                     ? individualStudentData?.user?.name
                                     : ''}{' '}
                             </CardTitle>
-                            <p className="text-muted-foreground text-sm">
+                            <p className="break-all  text-muted-foreground text-sm ">
                                 {' '}
                                 {individualStudentData
                                     ? individualStudentData?.user?.email
@@ -273,7 +271,7 @@ const Page = ({ params }: PageParams) => {
                         </div>
                     </div>
                 </div>
-            </MaxWidthWrapper>
+            </div>
         </>
     )
 }

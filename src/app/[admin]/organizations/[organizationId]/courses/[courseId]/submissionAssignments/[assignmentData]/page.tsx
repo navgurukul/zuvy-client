@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -42,7 +41,9 @@ const Page = ({ params }: { params: any }) => {
     const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
+    const [totalSubmissions, setTotalSubmissions] = useState<number>(0)
+
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -83,6 +84,7 @@ const Page = ({ params }: { params: any }) => {
             })
             setAssignmentData(assignmentData.data)
             setSubmittedStudents(assignmentData.data.length)
+            setTotalSubmissions(assignmentData.data.length)
             if (assignmentData.chapterName) {
                 setAssignmentTitle(assignmentData.chapterName)
             }
@@ -107,6 +109,7 @@ const Page = ({ params }: { params: any }) => {
                 data.chapterId = chapterId
             })
             setAssignmentData(assignmentData.data)
+            setTotalSubmissions(assignmentData.data.length)
             setSubmittedStudents(assignmentData.data.length)
             setAssignmentTitle(assignmentData.chapterName)
         }
@@ -119,8 +122,8 @@ const Page = ({ params }: { params: any }) => {
     }, [defaultFetchApi, sortField, sortDirection]);
 
 
-     // Handle sorting change
-     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+    // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
     }, [])
@@ -166,9 +169,6 @@ const Page = ({ params }: { params: any }) => {
         })
     }, [params.assignmentData, selectedBatch, searchParams, sortField, sortDirection, assignmentTitle])
 
-    const totalStudents =
-        (bootcampData?.students_in_bootcamp || 0) -
-        (bootcampData?.unassigned_students || 0)
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-5">
@@ -195,17 +195,17 @@ const Page = ({ params }: { params: any }) => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className="text-left">
                             <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">{totalStudents || 0}</div>
+                            <div className="text-lg font-semibold">{totalSubmissions || 0}</div>
                         </div>
 
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Assignments</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                            <div className="text-lg font-semibold">Assignments</div>
                         </div>
 
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                            <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                            <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className="text-left">
                             <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -217,7 +217,7 @@ const Page = ({ params }: { params: any }) => {
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}

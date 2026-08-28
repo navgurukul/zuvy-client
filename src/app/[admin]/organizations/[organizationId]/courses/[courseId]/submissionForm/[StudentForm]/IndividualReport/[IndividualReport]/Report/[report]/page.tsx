@@ -104,8 +104,7 @@ const Page = ({ params }: { params: Params }) => {
 
     return (
         <div className="min-h-screen font-semibold bg-background">
-            {/* Back Button */}
-            <MaxWidthWrapper>
+            <MaxWidthWrapper className='container mx-auto px-2 pt-2 pb-2 max-w-7xl'>
                 <div className="flex items-center gap-4 mb-8">
                     <Button
                         variant="ghost"
@@ -116,8 +115,6 @@ const Page = ({ params }: { params: Params }) => {
                         Back to Form
                     </Button>
                 </div>
-            </MaxWidthWrapper>
-            <MaxWidthWrapper>
                 <div className="space-y-8 pb-8">
                     {/* Form Info Card */}
                     <div className="bg-card border border-border rounded-lg p-8">
@@ -139,11 +136,11 @@ const Page = ({ params }: { params: Params }) => {
                                             Submitted Date
                                         </p>
                                         <p className="text-left text-foreground text-lg mt-1">
-                                            {formatDate(
-                                                individualFormData?.[0]
-                                                    .formTrackingData[0]
-                                                    .updatedAt
-                                            )}
+                                            {individualFormData?.[0]?.formTrackingData?.[0]?.updatedAt
+                                                ? formatDate(
+                                                    individualFormData[0].formTrackingData[0].updatedAt
+                                                )
+                                                : 'N/A'}
                                         </p>
                                     </div>
                                 )}
@@ -168,19 +165,21 @@ const Page = ({ params }: { params: Params }) => {
                                                 </div>
                                                 <div className="space-y-3 text-start">
                                                     <RadioGroup
+                                                        // value={
+                                                        //     item
+                                                        //         .formTrackingData[0]
+                                                        //         .chosenOptions[0]
+                                                        // }
                                                         value={
-                                                            item
-                                                                .formTrackingData[0]
-                                                                .chosenOptions[0]
+                                                            item.formTrackingData?.[0]?.chosenOptions?.[0] ?? ''
                                                         }
+
                                                     >
                                                         {Object.keys(
                                                             item.options
                                                         ).map((option) => {
                                                             const answer =
-                                                                item
-                                                                    .formTrackingData[0]
-                                                                    .chosenOptions[0]
+                                                                item.formTrackingData?.[0]?.chosenOptions?.[0] ?? ''
                                                             return (
                                                                 <div
                                                                     key={option}

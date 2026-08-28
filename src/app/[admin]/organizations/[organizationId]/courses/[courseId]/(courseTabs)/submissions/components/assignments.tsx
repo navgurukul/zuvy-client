@@ -160,7 +160,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         {/* Content */}
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="p-2 bg-gray-100 rounded-md">
+                                                                <div className="p-2">
                                                                     <FileText className="w-4 h-4 text-gray-600" />
                                                                 </div>
                                                                 <h3 className="font-medium text-base text-gray-900">

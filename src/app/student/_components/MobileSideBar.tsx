@@ -16,9 +16,12 @@ import {
 } from "lucide-react";
 import { Topic, ModuleSidebarProps, TopicItem } from '@/app/student/_components/componentStudentType'
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
+import { useParams } from "next/navigation";
 
 const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect }: ModuleSidebarProps) => {
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
+  const params = useParams();
+  const orgId = params.orgId;
 
   // Auto-expand the topic that contains the selected item
   useEffect(() => {
@@ -103,7 +106,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     <div className="w-full lg:w-80 h-full bg-background border-r border-border shadow-4dp flex flex-col">
       <div className="p-4 lg:p-6 text-left border-b border-border">
         <Button variant="link" size="sm" asChild className="mb-4 font-semibold p-0 h-auto text-foreground hover:text-foreground hover:no-underline">
-          <Link href={`/student/course/${courseId}`}>
+          <Link href={`/student/course/${courseId}/org/${orgId}`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Course
           </Link>

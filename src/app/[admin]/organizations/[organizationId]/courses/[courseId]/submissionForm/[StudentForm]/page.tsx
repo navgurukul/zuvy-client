@@ -422,19 +422,19 @@ const Page = ({ params }: any) => {
                                 </div>
                             </div>
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">
+                                <div className="font-medium text-muted-foreground mb-1">
                                     Submission Type:
                                 </div>
-                                <div className="text-xl font-semibold text-gray-900">
+                                <div className="text-lg font-semibold">
                                     Feedback
                                 </div>
                             </div>
 
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">
+                                <div className="font-medium text-muted-foreground mb-1">
                                     Course ID:
                                 </div>
-                                <div className="text-xl font-semibold text-gray-900">
+                                <div className="text-lg font-semibold">
                                     {params.courseId}
                                 </div>
                             </div>
@@ -451,7 +451,7 @@ const Page = ({ params }: any) => {
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">
+                                        <SelectItem value="all" className='text-lg font-semibold'>
                                             All Batches
                                         </SelectItem>
                                         {batches.map((batch) => (

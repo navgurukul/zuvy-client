@@ -364,13 +364,13 @@ const Page = ({ params }: any) => {
                             </div>
 
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                                <div className="text-xl font-semibold text-gray-900">Assessments</div>
+                                <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                                <div className="text-lg font-semibold">Assessments</div>
                             </div>
 
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                                <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                                <div className="text-lg font-semibold">{params.courseId}</div>
                             </div>
                             <div className="text-left">
                                 <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -383,7 +383,7 @@ const Page = ({ params }: any) => {
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Batches</SelectItem>
+                                        <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                         {batches.map((batch) => (
                                             <SelectItem key={batch.id} value={batch.id.toString()}>
                                                 {batch.name}

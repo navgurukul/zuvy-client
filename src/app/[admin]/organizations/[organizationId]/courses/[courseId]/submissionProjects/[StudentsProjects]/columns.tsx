@@ -77,12 +77,12 @@ export const columns: ColumnDef<Task>[] = [
 
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-black border-black">
                         {batchName}
                     </Badge>
                 </div>
@@ -91,6 +91,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
+        header: () => <div className="text-left w-full">Actions</div>,
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
 

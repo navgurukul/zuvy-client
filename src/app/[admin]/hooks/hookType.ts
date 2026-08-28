@@ -835,6 +835,7 @@ export interface UsePracticeProblemStatusOptions {
 
 export interface UsePracticeProblemStatusResult {
   studentDetails: any[]
+  totalStudentsCount: number
   loading: boolean
   error: Error | null
   refetch: () => void

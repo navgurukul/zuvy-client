@@ -106,7 +106,11 @@ export const createColumns = (
             const userId = row.original.userId
             const roleId = row.original.roleId
             const userEmail = row.original.email
-            return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} userEmail={userEmail} roleId={roleId} onRoleUpdate={refreshData} />
+            return (
+                <div className="flex justify-start">
+                  <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} userEmail={userEmail} roleId={roleId} onRoleUpdate={refreshData} />
+                </div>
+            )
         },
     },
    {
