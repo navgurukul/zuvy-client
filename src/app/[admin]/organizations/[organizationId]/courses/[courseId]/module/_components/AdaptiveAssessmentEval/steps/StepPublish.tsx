@@ -152,7 +152,7 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
             <DialogDescription className="text-wrap">
               Select the end date and time in IST before submitting.
               <span className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-500">
-                You won't be able to edit the assessment questions after publishing.
+                You wont be able to edit the assessment questions after publishing.
               </span>
             </DialogDescription>
           </DialogHeader>
