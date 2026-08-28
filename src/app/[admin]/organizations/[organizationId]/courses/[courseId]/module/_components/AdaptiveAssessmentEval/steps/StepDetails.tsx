@@ -91,7 +91,7 @@ export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
           }
         />
         <div className="text-[11px] flex text-slate-500 mt-1">
-          Each student`&apos;`s MCQ section will have this many questions, assembled
+          Each students MCQ section will have this many questions, assembled
           from the pool to match their level.
         </div>
       </div>

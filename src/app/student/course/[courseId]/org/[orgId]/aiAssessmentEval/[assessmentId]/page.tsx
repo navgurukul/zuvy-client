@@ -677,8 +677,8 @@ const AssessmentQuestionsPage = () => {
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-3">
                                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white ${resultQuestion.isCorrect
-                                        ? 'bg-gradient-to-br from-success to-success/80'
-                                        : 'bg-gradient-to-br from-destructive to-destructive/80'
+                                      ? 'bg-gradient-to-br from-success to-success/80'
+                                      : 'bg-gradient-to-br from-destructive to-destructive/80'
                                       }`}>
                                       {resultQuestion.isCorrect ? '✓' : '✕'}
                                     </div>
@@ -708,7 +708,7 @@ const AssessmentQuestionsPage = () => {
                                       ) : (
                                         <>
                                           <Sparkles className="w-3.5 h-3.5" />
-                                          Explain with AI
+                                          Explain
                                         </>
                                       )}
                                     </Button>
@@ -756,24 +756,24 @@ const AssessmentQuestionsPage = () => {
                                       <div
                                         key={`result-${resultQuestion.questionId}-${optionKey}`}
                                         className={`relative p-4 rounded-lg border transition-all ${showAsCorrect
-                                            ? 'bg-success/5 border-success/30 shadow-sm'
-                                            : showAsIncorrect
-                                              ? 'bg-destructive/5 border-destructive/30 shadow-sm'
-                                              : showAsCorrectAnswer
-                                                ? 'bg-success/5 border-success/30'
-                                                : 'bg-background border-border/30'
+                                          ? 'bg-success/5 border-success/30 shadow-sm'
+                                          : showAsIncorrect
+                                            ? 'bg-destructive/5 border-destructive/30 shadow-sm'
+                                            : showAsCorrectAnswer
+                                              ? 'bg-success/5 border-success/30'
+                                              : 'bg-background border-border/30'
                                           }`}
                                       >
                                         <div className="flex items-start justify-between gap-3">
                                           <div className="flex items-start gap-3 flex-1">
                                             <div
                                               className={`min-w-fit w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs flex-shrink-0 ${showAsCorrect
-                                                  ? 'bg-success/20 text-success'
-                                                  : showAsIncorrect
-                                                    ? 'bg-destructive/20 text-destructive'
-                                                    : showAsCorrectAnswer
-                                                      ? 'bg-success/20 text-success'
-                                                      : 'bg-muted text-text-secondary'
+                                                ? 'bg-success/20 text-success'
+                                                : showAsIncorrect
+                                                  ? 'bg-destructive/20 text-destructive'
+                                                  : showAsCorrectAnswer
+                                                    ? 'bg-success/20 text-success'
+                                                    : 'bg-muted text-text-secondary'
                                                 }`}
                                             >
                                               {optionKey}
@@ -878,8 +878,8 @@ const AssessmentQuestionsPage = () => {
                         <button
                           onClick={() => handleSpeak(currentQuestionSpeechText, 'question')}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${activeSpeechTarget === 'question'
-                              ? 'bg-primary-light text-primary shadow-soft'
-                              : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+                            ? 'bg-primary-light text-primary shadow-soft'
+                            : 'text-text-secondary hover:text-primary hover:bg-primary-light'
                             }`}
                           title={activeSpeechTarget === 'question' ? 'Stop voice' : 'Voice question'}
                         >
@@ -893,8 +893,8 @@ const AssessmentQuestionsPage = () => {
                         <button
                           onClick={() => toggleFlag(currentQuestion.questionId)}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${flaggedQuestions.has(currentQuestion.questionId)
-                              ? 'bg-destructive/10 text-destructive shadow-soft'
-                              : 'text-text-secondary hover:text-destructive hover:bg-destructive/5'
+                            ? 'bg-destructive/10 text-destructive shadow-soft'
+                            : 'text-text-secondary hover:text-destructive hover:bg-destructive/5'
                             }`}
                         >
                           <Flag className="w-4 h-4" fill={flaggedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
@@ -903,8 +903,8 @@ const AssessmentQuestionsPage = () => {
                         <button
                           onClick={() => toggleBookmark(currentQuestion.questionId)}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${bookmarkedQuestions.has(currentQuestion.questionId)
-                              ? 'bg-primary-light text-primary shadow-soft'
-                              : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+                            ? 'bg-primary-light text-primary shadow-soft'
+                            : 'text-text-secondary hover:text-primary hover:bg-primary-light'
                             }`}
                         >
                           <Bookmark className="w-4 h-4" fill={bookmarkedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
@@ -925,8 +925,8 @@ const AssessmentQuestionsPage = () => {
                       <button
                         onClick={() => handleSpeak(currentOptionsSpeechText, 'options')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${activeSpeechTarget === 'options'
-                            ? 'bg-primary-light text-primary'
-                            : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+                          ? 'bg-primary-light text-primary'
+                          : 'text-text-secondary hover:text-primary hover:bg-primary-light'
                           }`}
                         title={activeSpeechTarget === 'options' ? 'Stop voice' : 'Voice options'}
                       >
@@ -951,14 +951,14 @@ const AssessmentQuestionsPage = () => {
                               type="button"
                               onClick={() => handleSelectAnswer(currentQuestion.questionId, optionKey)}
                               className={`group relative flex items-center p-4 rounded-xl text-left border transition-all duration-200 ${isSelected
-                                  ? 'bg-success-light border-success shadow-soft'
-                                  : 'bg-card border-border hover:border-primary/30 hover:shadow-soft'
+                                ? 'bg-success-light border-success shadow-soft'
+                                : 'bg-card border-border hover:border-primary/30 hover:shadow-soft'
                                 }`}
                             >
                               <div
                                 className={`min-w-fit w-9 h-9 rounded-md flex items-center justify-center font-bold text-sm mr-4 transition-colors flex-shrink-0 ${isSelected
-                                    ? 'bg-success text-white'
-                                    : 'bg-muted text-primary group-hover:bg-primary group-hover:text-white'
+                                  ? 'bg-success text-white'
+                                  : 'bg-muted text-primary group-hover:bg-primary group-hover:text-white'
                                   }`}
                               >
                                 {optionKey}
@@ -1049,8 +1049,8 @@ const AssessmentQuestionsPage = () => {
               <button
                 onClick={() => currentQuestion && toggleFlag(currentQuestion.questionId)}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && flaggedQuestions.has(currentQuestion.questionId)
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-muted text-text-secondary hover:bg-destructive/10 hover:text-destructive'
+                  ? 'bg-destructive/10 text-destructive'
+                  : 'bg-muted text-text-secondary hover:bg-destructive/10 hover:text-destructive'
                   }`}
                 title="Flag for Review"
               >
@@ -1059,8 +1059,8 @@ const AssessmentQuestionsPage = () => {
               <button
                 onClick={() => currentQuestion && toggleBookmark(currentQuestion.questionId)}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && bookmarkedQuestions.has(currentQuestion.questionId)
-                    ? 'bg-primary-light text-primary'
-                    : 'bg-muted text-text-secondary hover:bg-primary-light hover:text-primary'
+                  ? 'bg-primary-light text-primary'
+                  : 'bg-muted text-text-secondary hover:bg-primary-light hover:text-primary'
                   }`}
                 title="Bookmark Question"
               >

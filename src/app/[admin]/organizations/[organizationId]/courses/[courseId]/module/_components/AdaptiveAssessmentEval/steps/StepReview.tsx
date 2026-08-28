@@ -84,6 +84,8 @@ export function StepReview({
     return picked;
   };
 
+  const isLocked = a.status === 'published' || a.status === 'scheduled';
+
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap gap-3 mb-4">
@@ -92,8 +94,7 @@ export function StepReview({
             Review the pool
           </h4>
           <p className="text-[13px] text-muted-foreground m-0">
-            Replace or remove any question. Preview shows how a form assembles for a
-            given level.
+            {isLocked ? 'Assessment is locked. You can view the pool but cannot replace questions.' : 'Replace or remove any question. Preview shows how a form assembles for a given level.'}
           </p>
         </div>
         <div className="flex gap-[9px] items-center">
@@ -172,23 +173,18 @@ export function StepReview({
                 >
                   {DIFF_LABEL[item.difficulty]}
                 </span>
-                {/* <span
-                  className={`text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap ${item.source === 'ai'
-                    ? 'bg-secondary-light text-secondary-dark'
-                    : 'bg-info-light text-info-dark'
-                    }`}
-                >
-                  {item.source === 'ai' ? 'AI · provisional' : 'Bank · validated'}
-                </span> */}
               </div>
               <div className="text-[14px] flex font-medium leading-relaxed">
                 {item.text}
               </div>
             </div>
             <div className="flex gap-[5px] shrink-0">
-              <Btn size="sm" variant="outline" onClick={() => setReplaceModal(item)}>
-                <RefreshCw size={12} className="mr-1" /> Replace
-              </Btn>
+              {!isLocked && (
+                <Btn size="sm" variant="outline" onClick={() => setReplaceModal(item)}>
+                  <RefreshCw size={12} className="mr-1" /> Replace
+                </Btn>
+              )}
+
               {/* <Btn
                 size="sm"
                 variant="danger"

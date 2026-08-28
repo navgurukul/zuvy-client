@@ -122,7 +122,8 @@ export function BuilderScreen({
 
         <div className="flex gap-0.5 mb-3 border-b border-slate-200">
           {STEPS.map((s: string, i: number) => {
-            const done = i < step || (!!aiAssessmentId && i <= 2);
+            const isPublished = a.status === 'published' || a.status === 'scheduled';
+            const done = i < step || (!!aiAssessmentId && i <= 2) || isPublished;
             const active = i === step;
             const reachable = (i <= step || stepValid.slice(0, i).every(Boolean)) && (i < 3 || !!aiAssessmentId);
 
@@ -245,8 +246,8 @@ export function BuilderScreen({
         <AlertDialogContent>
           <AlertDialogHeader className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
-                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
               <AlertDialogTitle className="text-lg">Generate Assessment</AlertDialogTitle>
             </div>
