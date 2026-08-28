@@ -19,6 +19,8 @@ interface StepSettingsProps {
 }
 
 export function StepSettings({ a, set }: StepSettingsProps) {
+  const isLocked = a.status === 'published' || a.status === 'scheduled';
+
   return (
     <Card className="p-[26px] max-w-[680px]">
       <h4 className="text-lg flex font-bold m-0 mb-[18px]">Settings</h4>
@@ -42,8 +44,8 @@ export function StepSettings({ a, set }: StepSettingsProps) {
           ].map((m) => (
             <div
               key={m.id}
-              onClick={() => set({ mode: m.id as any })}
-              className="rounded-lg p-[15px] cursor-pointer border-2"
+              onClick={() => { if (!isLocked) set({ mode: m.id as any }) }}
+              className={`rounded-lg p-[15px] border-2 ${isLocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
               style={{
                 borderColor: a.mode === m.id ? THEME.primary : THEME.border,
                 background: a.mode === m.id ? THEME.primaryLight : THEME.card,
@@ -69,6 +71,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
           <Select
             value={a.gateLevel}
             onValueChange={(value) => set({ gateLevel: value as any })}
+            disabled={isLocked}
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select level" />
@@ -92,6 +95,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
         <Select
           value={a.timeLimit}
           onValueChange={(value) => set({ timeLimit: value })}
+          disabled={isLocked}
         >
           <SelectTrigger className="w-[170px]">
             <SelectValue placeholder="Select time limit" />
@@ -127,6 +131,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
             </div>
             <Switch
               checked={a[k]}
+              disabled={isLocked}
               onCheckedChange={(checked) => set({ [k]: checked } as Partial<BuilderState>)}
             />
           </div>

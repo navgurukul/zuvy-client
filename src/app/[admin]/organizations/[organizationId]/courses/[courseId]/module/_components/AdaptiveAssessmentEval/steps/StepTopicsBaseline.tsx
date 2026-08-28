@@ -14,6 +14,7 @@ interface StepTopicsBaselineProps {
   moduleId?: number;
   courseId?: any;
   chapterId?: number;
+  isGenerated?: boolean;
 }
 
 export function StepTopicsBaseline({
@@ -25,6 +26,7 @@ export function StepTopicsBaseline({
   moduleId,
   courseId,
   chapterId,
+  isGenerated,
 }: StepTopicsBaselineProps) {
   const { chapters } = useModuleChapters(moduleId)
   const quizChapters = chapters.filter((chapter) => chapter.topicId === 4)
@@ -53,12 +55,15 @@ export function StepTopicsBaseline({
             return (
               <div
                 key={ch.chapterId}
-                onClick={() => set({
-                  chapterIds: a.chapterIds.includes(ch.chapterId)
-                    ? a.chapterIds.filter(id => id !== ch.chapterId)
-                    : [...a.chapterIds, ch.chapterId]
-                })}
-                className={`flex items-center gap-3 py-[11px] px-[14px] border-2 rounded-lg cursor-pointer transition-all duration-150 ${selClass}`}
+                onClick={() => {
+                  if (isGenerated) return;
+                  set({
+                    chapterIds: a.chapterIds.includes(ch.chapterId)
+                      ? a.chapterIds.filter(id => id !== ch.chapterId)
+                      : [...a.chapterIds, ch.chapterId]
+                  })
+                }}
+                className={`flex items-center gap-3 py-[11px] px-[14px] border-2 rounded-lg transition-all duration-150 ${selClass} ${isGenerated ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
               >
                 <div className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 border-2 ${checkClass}`}>
                   {sel && <Check size={11} color="#fff" />}
@@ -127,10 +132,11 @@ export function StepTopicsBaseline({
             set={set}
             bankTopics={bankTopics}
             bankQuestions={bankQuestions}
+            isGenerated={isGenerated}
           />
           {a.poolTopics.length === 0 && (
             <div className="mt-3.5 text-[13px] text-slate-500">
-              Optional: Select topics to draw questions from.
+              Select topics to draw questions from.
             </div>
           )}
         </div>

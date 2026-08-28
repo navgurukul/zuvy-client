@@ -6,11 +6,12 @@ import { BuilderState } from '../types';
 interface StepDetailsProps {
   a: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
+  isGenerated?: boolean;
 }
 
-const inputClasses = "w-full px-3 py-2.5 rounded-md border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none font-[inherit] box-border";
+const inputClasses = "w-full px-3 py-2.5 rounded-md border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none font-[inherit] box-border disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed";
 
-export function StepDetails({ a, set }: StepDetailsProps) {
+export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 max-w-[680px]">
       <h4 className="text-base font-bold flex  mb-0.5 mt-0">
@@ -28,6 +29,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
         <input
           className={inputClasses}
           value={a.name}
+          disabled={isGenerated}
           placeholder="e.g., HTML & CSS — Module checkpoint"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             set({ name: e.target.value })
@@ -42,6 +44,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
         <textarea
           className={`${inputClasses} min-h-[56px] resize-y`}
           value={a.objective}
+          disabled={isGenerated}
           placeholder="e.g., Verify learners can apply CSS layout and specificity concepts to solve small practical problems."
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             set({ objective: e.target.value })
@@ -59,6 +62,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
         <textarea
           className={`${inputClasses} min-h-[56px] resize-y`}
           value={a.outcomes}
+          disabled={isGenerated}
           placeholder="e.g., Correctly predict layout behaviour, choose the right positioning model for a described UI."
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             set({ outcomes: e.target.value })
@@ -79,6 +83,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
           max={30}
           className={`${inputClasses} !w-[100px]`}
           value={a.questionsPerForm}
+          disabled={isGenerated}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             set({
               questionsPerForm: Math.max(5, Math.min(30, Number(e.target.value) || 10)),
@@ -86,7 +91,7 @@ export function StepDetails({ a, set }: StepDetailsProps) {
           }
         />
         <div className="text-[11px] flex text-slate-500 mt-1">
-          Each student`&apos;`s MCQ section will have this many questions, assembled
+          Each students MCQ section will have this many questions, assembled
           from the pool to match their level.
         </div>
       </div>

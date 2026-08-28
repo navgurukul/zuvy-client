@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, AlertTriangleIcon } from 'lucide-react';
 import { THEME } from '../constants';
 import { Card } from '../ui-primitives';
 import { BuilderState, Question } from '../types';
@@ -43,11 +43,16 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
     setDialogOpen(false);
   };
 
+  const isLocked = a.status === 'published' || a.status === 'scheduled';
+
   return (
     <Card className="p-[26px] max-w-[720px]">
-      <h4 className="text-lg flex font-bold m-0 mb-1">Publish</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-lg flex font-bold m-0 pb-1">Publish assessment</h4>
+      </div>
+
       <p className="text-[13.5px] flex m-0 mb-[18px]" style={{ color: THEME.textSub }}>
-        Publishing is final. Each learner`&apos;`s form assembles from the pool at attempt time.
+        {isLocked ? 'This assessment is already published or scheduled. No further changes can be made.' : 'Publishing is final. Each learner\'s form assembles from the pool at attempt time.'}
       </p>
 
       {/* {blocked && (
@@ -89,8 +94,8 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
         ].map((opt) => (
           <div
             key={opt.id}
-            onClick={() => setChoice(opt.id)}
-            className="rounded-[9px] p-4 cursor-pointer border-2"
+            onClick={() => { if (!isLocked) setChoice(opt.id) }}
+            className={`rounded-[9px] p-4 border-2 ${isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
             style={{
               background: opt.bg,
               borderColor: choice === opt.id ? THEME.primary : 'transparent',
@@ -118,19 +123,21 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
         )}
       </div>
 
-      <div className="flex justify-end">
-        <Button
-          size="lg"
-          disabled={!choice}
-          onClick={openDialog}
-        >
-          {choice === 'published'
-            ? 'Publish assessment'
-            : choice === 'draft'
-              ? 'Save as draft'
-              : 'Schedule'}
-        </Button>
-      </div>
+      {!isLocked && (
+        <div className="flex justify-end">
+          <Button
+            size="lg"
+            disabled={!choice}
+            onClick={openDialog}
+          >
+            {choice === 'published'
+              ? 'Publish assessment'
+              : choice === 'draft'
+                ? 'Save as draft'
+                : 'Schedule'}
+          </Button>
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -142,8 +149,11 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
                   ? 'Save as draft'
                   : 'Schedule assessment'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-wrap">
               Select the end date and time in IST before submitting.
+              <span className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-500">
+                You wont be able to edit the assessment questions after publishing.
+              </span>
             </DialogDescription>
           </DialogHeader>
 
