@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
 import { THEME } from '../constants';
 import { Badge, Btn } from '../ui-primitives';
 import { StepDetails } from '../steps/StepDetails';
@@ -10,6 +10,16 @@ import { StepSettings } from '../steps/StepSettings';
 import { StepPublish } from '../steps/StepPublish';
 import { BuilderState, Question, Chapter } from '../types';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface BuilderScreenProps {
   a: BuilderState;
@@ -93,6 +103,7 @@ export function BuilderScreen({
   courseId,
   chapterId,
 }: BuilderScreenProps) {
+  const [showConfirmGenerate, setShowConfirmGenerate] = useState(false);
   return (
     <div className="flex flex-col h-full pb-8">
       <div className="flex-1 overflow-y-auto px-5 pt-3 pb-3">
@@ -111,9 +122,9 @@ export function BuilderScreen({
 
         <div className="flex gap-0.5 mb-3 border-b border-slate-200">
           {STEPS.map((s: string, i: number) => {
-            const done = i < step;
+            const done = i < step || (!!aiAssessmentId && i <= 2);
             const active = i === step;
-            const reachable = i <= step || stepValid.slice(0, i).every(Boolean);
+            const reachable = (i <= step || stepValid.slice(0, i).every(Boolean)) && (i < 3 || !!aiAssessmentId);
 
             // Determine Tailwind classes for dynamic styles
             const cursorClass = reachable ? 'cursor-pointer' : 'cursor-not-allowed';
@@ -137,11 +148,12 @@ export function BuilderScreen({
           })}
         </div>
 
-        {step === 0 && <StepDetails a={a} set={set} />}
+        {step === 0 && <StepDetails a={a} set={set} isGenerated={!!aiAssessmentId} />}
         {step === 1 && (
           <StepTopicsBaseline
             a={a}
             set={set}
+            isGenerated={!!aiAssessmentId}
             baselineOptions={baselineOptions}
             bankTopics={bankTopics}
             bankQuestions={bankQuestions}
@@ -154,6 +166,7 @@ export function BuilderScreen({
           <StepPool
             a={a}
             pool={pool}
+            isGenerated={!!aiAssessmentId}
             targets={targets}
             coverage={coverage}
             capacity={capacity}
@@ -205,21 +218,21 @@ export function BuilderScreen({
           <Button
             disabled={!stepValid[step] || isSubmittingAssessment}
             onClick={async () => {
-              if (step === 2 && onGenerateAndReview) {
-                await onGenerateAndReview();
+              if (step === 2 && onGenerateAndReview && !aiAssessmentId) {
+                setShowConfirmGenerate(true);
                 return;
               }
               setStep(step + 1);
             }}
           >
-            {step === 2 ? (
+            {step === 2 && !aiAssessmentId ? (
               isSubmittingAssessment ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
                   Creating & Mapping...
                 </>
               ) : (
-                <>Generate Assesment and Reveiw <ChevronRight size={14} /></>
+                <>Generate Assesment and Review <ChevronRight size={14} /></>
               )
             ) : (
               <>Continue to {STEPS[step + 1]} <ChevronRight size={14} /></>
@@ -227,6 +240,42 @@ export function BuilderScreen({
           </Button>
         )}
       </div>
+
+      <AlertDialog open={showConfirmGenerate} onOpenChange={setShowConfirmGenerate}>
+        <AlertDialogContent>
+          <AlertDialogHeader className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <AlertDialogTitle className="text-lg">Generate Assessment</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              Are you sure you want to generate the assessment? Once generated, you
+              will not be able to come back and edit the configuration.
+              <span className="mt-2 block font-medium text-foreground">
+                Please ensure all details are final before proceeding.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="mt-2 gap-2 sm:gap-2">
+            <AlertDialogCancel onClick={() => setShowConfirmGenerate(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setShowConfirmGenerate(false);
+                if (onGenerateAndReview) {
+                  await onGenerateAndReview();
+                }
+              }}
+            >
+              Proceed
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
