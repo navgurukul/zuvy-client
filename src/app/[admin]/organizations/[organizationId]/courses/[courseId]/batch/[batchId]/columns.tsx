@@ -228,7 +228,7 @@ export const createColumns = (
             <DataTableColumnHeader
                 column={column}
                 title="Attendance"
-                className="w-ful text-center"
+                className="w-full text-center"
             />
         ),
         cell: ({ row }) => {
