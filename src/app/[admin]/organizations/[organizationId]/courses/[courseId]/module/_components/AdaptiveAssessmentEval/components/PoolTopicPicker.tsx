@@ -7,12 +7,14 @@ import { BuilderState, Question } from '../types';
 import { useTopicsWithDifficultyLevels } from '@/hooks/useTopicsWithDifficultiesEval';
 import useDebounce from '@/app/[admin]/hooks/useDebounce';
 import { TopicWithDifficultyLevel } from '@/hooks/hookType';
+import { useToast } from "@/components/ui/use-toast";
 
 interface PoolTopicPickerProps {
   a: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
   bankTopics: string[];
   bankQuestions: Question[];
+  isGenerated?: boolean;
 }
 
 export function PoolTopicPicker({
@@ -20,7 +22,9 @@ export function PoolTopicPicker({
   set,
   bankTopics,
   bankQuestions,
+  isGenerated,
 }: PoolTopicPickerProps) {
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 300);
   const { fetchTopics, data: fetchedTopics, isLoading: fetchingTopics } = useTopicsWithDifficultyLevels();
@@ -36,6 +40,7 @@ export function PoolTopicPicker({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const removeTopic = (tName: string) => {
+    if (isGenerated) return;
     const desc = { ...a.poolTopicDescriptions };
     delete desc[tName];
     const out = { ...a.poolTopicOutcomes };
@@ -47,9 +52,37 @@ export function PoolTopicPicker({
     });
   };
 
+  const bankCounts = (topic: string) => {
+    const qs = (bankQuestions as Question[]).filter(
+      (q) => q.qtype === 'mcq' && q.topic === topic
+    );
+    return BANDS.map((b) => qs.filter((x) => x.difficulty === b).length);
+  };
+
   const addTopic = (topicObj: { id: number; name: string }) => {
+    if (isGenerated) return;
     const name = topicObj.name.trim();
     if (!name || a.poolTopics.some(pt => pt.name === name)) return;
+    
+    let totalQuestions = 0;
+    const topicFromApi = fetchedTopics?.find(t => t.name.toLowerCase() === name.toLowerCase());
+    
+    if (topicFromApi) {
+      totalQuestions = topicFromApi.difficultyLevel.easy + topicFromApi.difficultyLevel.medium + topicFromApi.difficultyLevel.hard;
+    } else {
+      const counts = bankCounts(name);
+      totalQuestions = counts.reduce((acc, curr) => acc + curr, 0);
+    }
+
+    if (totalQuestions === 0) {
+      toast({
+        title: "Cannot select topic",
+        description: `Please create a question first for ${name}.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     set({ poolTopics: [...a.poolTopics, { id: topicObj.id || 0, name }] });
     setQuery('');
     setSuggestions(null);
@@ -57,18 +90,12 @@ export function PoolTopicPicker({
   };
 
   const moveTopic = (idx: number, dir: -1 | 1) => {
+    if (isGenerated) return;
     const arr = [...a.poolTopics];
     const swap = idx + dir;
     if (swap < 0 || swap >= arr.length) return;
     [arr[idx], arr[swap]] = [arr[swap], arr[idx]];
     set({ poolTopics: arr });
-  };
-
-  const bankCounts = (topic: string) => {
-    const qs = (bankQuestions as Question[]).filter(
-      (q) => q.qtype === 'mcq' && q.topic === topic
-    );
-    return BANDS.map((b) => qs.filter((x) => x.difficulty === b).length);
   };
 
   const topicCapacity = (topic: string, topicCount: number): number => {
@@ -111,9 +138,9 @@ export function PoolTopicPicker({
   return (
     <div>
       {/* Suggest from objective */}
-      {(a.objective.trim() || a.outcomes.trim()) && (
+      {!isGenerated && (a.objective.trim() || a.outcomes.trim()) && (
         <div className="mb-3">
-          <Btn
+          {/* <Btn
             variant="ghost"
             size="sm"
             disabled={suggesting}
@@ -124,7 +151,7 @@ export function PoolTopicPicker({
               <Loader2 size={12} className="animate-spin" />
             ) : null}
             Suggest topics from objective
-          </Btn>
+          </Btn> */}
           {suggestions !== null && (
             <div
               className="mt-2 rounded-[7px] border px-3 py-2.5"
@@ -202,16 +229,16 @@ export function PoolTopicPicker({
                   <div className="flex flex-col gap-px">
                     <button
                       onClick={() => moveTopic(idx, -1)}
-                      disabled={idx === 0}
-                      className={`flex border-none bg-transparent p-0 ${idx === 0 ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
+                      disabled={idx === 0 || isGenerated}
+                      className={`flex border-none bg-transparent p-0 ${idx === 0 || isGenerated ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
                       style={{ color: THEME.textTertiary }}
                     >
                       <ChevronUp size={11} />
                     </button>
                     <button
                       onClick={() => moveTopic(idx, 1)}
-                      disabled={idx === a.poolTopics.length - 1}
-                      className={`flex border-none bg-transparent p-0 ${idx === a.poolTopics.length - 1 ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
+                      disabled={idx === a.poolTopics.length - 1 || isGenerated}
+                      className={`flex border-none bg-transparent p-0 ${idx === a.poolTopics.length - 1 || isGenerated ? 'cursor-default opacity-30' : 'cursor-pointer opacity-70'}`}
                       style={{ color: THEME.textTertiary }}
                     >
                       <ChevronDown size={11} />
@@ -280,14 +307,16 @@ export function PoolTopicPicker({
                     )}
                   </button> */}
 
-                  <button
-                    onClick={() => removeTopic(t)}
-                    className="ml-0.5 flex cursor-pointer border-none bg-transparent p-0"
-                    style={{ color: THEME.danger }}
-                    aria-label={`Remove ${t}`}
-                  >
-                    <X size={12} />
-                  </button>
+                  {!isGenerated && (
+                    <button
+                      onClick={() => removeTopic(t)}
+                      className="ml-0.5 flex cursor-pointer border-none bg-transparent p-0"
+                      style={{ color: THEME.danger }}
+                      aria-label={`Remove ${t}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
                 </div>
 
                 {isExpanded && (
@@ -306,9 +335,10 @@ export function PoolTopicPicker({
                         </span>
                       </label>
                       <textarea
-                        style={inputStyle}
-                        className="min-h-[56px] resize-y text-[12.5px]"
+                        style={{ ...inputStyle, opacity: isGenerated ? 0.6 : 1 }}
+                        className={`min-h-[56px] resize-y text-[12.5px] ${isGenerated ? 'cursor-not-allowed' : ''}`}
                         value={a.poolTopicDescriptions[t] ?? ''}
+                        disabled={isGenerated}
                         placeholder={`e.g., ${t} — specific concepts covered in Module 102`}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                           set({
@@ -332,9 +362,10 @@ export function PoolTopicPicker({
                         </span>
                       </label>
                       <input
-                        style={inputStyle}
-                        className="text-[12.5px]"
+                        style={{ ...inputStyle, opacity: isGenerated ? 0.6 : 1 }}
+                        className={`text-[12.5px] ${isGenerated ? 'cursor-not-allowed' : ''}`}
                         value={a.poolTopicOutcomes[t] ?? ''}
+                        disabled={isGenerated}
                         placeholder="e.g., LO-3.2 — Learner can debug layout issues using browser dev tools"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           set({
@@ -355,12 +386,13 @@ export function PoolTopicPicker({
       )}
 
       {/* Search input + dropdown */}
-      <div className="relative">
-        <input
-          ref={inputRef}
-          style={inputStyle}
-          value={query}
-          placeholder="Search topics from bank, or type to add a custom one…"
+      {!isGenerated && (
+        <div className="relative">
+          <input
+            ref={inputRef}
+            style={inputStyle}
+            value={query}
+            placeholder="Search topics from bank, or type to add a custom one…"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setQuery(e.target.value);
             setOpen(true);
@@ -455,13 +487,14 @@ export function PoolTopicPicker({
           </div>
         )}
       </div>
+      )}
 
-      {bankTopics.length > 0 && a.poolTopics.length === 0 && (
+      {/* {bankTopics.length > 0 && a.poolTopics.length === 0 && (
         <div className="mt-2 text-xs" style={{ color: THEME.textTertiary }}>
           Search available topics in the bank,
           or use &ldquo;Suggest&rdquo; above.
         </div>
-      )}
+      )} */}
     </div>
   );
 }
