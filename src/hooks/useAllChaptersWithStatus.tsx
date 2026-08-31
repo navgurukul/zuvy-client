@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import { AllChaptersWithStatusResponse, UseAllChaptersWithStatusReturn, ModuleDetail, TrackingDataItem } from '@/hooks/hookType'
-const useAllChaptersWithStatus = (moduleId: number): UseAllChaptersWithStatusReturn => {
+const useAllChaptersWithStatus = (moduleId: any): UseAllChaptersWithStatusReturn => {
   const [trackingData, setTrackingData] = useState<TrackingDataItem[]>([]);
   const [moduleDetails, setModuleDetails] = useState<ModuleDetail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
