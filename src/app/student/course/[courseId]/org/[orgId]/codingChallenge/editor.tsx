@@ -15,8 +15,8 @@ import {
     ConfirmationModal,
     HeaderBar
 } from './components';
-import{CodeEditorProps} from '@/app/student/course/[courseId]/org/[orgId]/codingChallenge/courseCodingType'
-import  {CodingChallengeSkeleton} from "@/app/student/_components/Skeletons";
+import { CodeEditorProps } from '@/app/student/course/[courseId]/org/[orgId]/codingChallenge/courseCodingType'
+import { CodingChallengeSkeleton } from "@/app/student/_components/Skeletons";
 
 const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps) => {
     const router = useRouter();
@@ -108,7 +108,7 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
     };
 
     if (!state.questionDetails) {
-         return <CodingChallengeSkeleton/>;
+        return <CodingChallengeSkeleton />;
     }
 
 
@@ -153,22 +153,22 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
 
             {/* Main Content Area */}
             <div className="w-full" style={{ height: 'calc(100vh - 80px)' }}>
-                    <ResizablePanelGroup
-                        direction="horizontal"
-                        className="w-full h-full"
-                    >
-                        {/* Left Panel: Problem Description */}
-                        <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
+                <ResizablePanelGroup
+                    direction="horizontal"
+                    className="w-full h-full"
+                >
+                    {/* Left Panel: Problem Description */}
+                    <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
                         <QuestionPanel questionDetails={state.questionDetails} />
-                        </ResizablePanel>
+                    </ResizablePanel>
 
-                        <ResizableHandle withHandle />
+                    <ResizableHandle withHandle />
 
-                        {/* Right Panel: Code Editor and Output */}
-                        <ResizablePanel defaultSize={50}>
-                            <ResizablePanelGroup direction="vertical">
-                                {/* Code Editor Panel */}
-                                <ResizablePanel defaultSize={65} minSize={30}>
+                    {/* Right Panel: Code Editor and Output */}
+                    <ResizablePanel defaultSize={50}>
+                        <ResizablePanelGroup direction="vertical">
+                            {/* Code Editor Panel */}
+                            <ResizablePanel defaultSize={65} minSize={30}>
                                 <CodeEditorPanel
                                     currentCode={state.currentCode}
                                     language={state.language}
@@ -177,21 +177,21 @@ const CodeEditorComponent = ({ questionId, onChapterComplete, }: CodeEditorProps
                                     onCodeChange={actions.handleCodeChange}
                                     onLanguageChange={actions.handleLanguageChange}
                                 />
-                                </ResizablePanel>
+                            </ResizablePanel>
 
-                                <ResizableHandle withHandle />
+                            <ResizableHandle withHandle />
 
-                                {/* Output Panel */}
-                                <ResizablePanel defaultSize={35} minSize={20}>
+                            {/* Output Panel */}
+                            <ResizablePanel defaultSize={35} minSize={20}>
                                 <OutputPanel
                                     loading={state.loading}
                                     codeError={state.codeError}
                                     codeResult={state.codeResult}
                                 />
-                                </ResizablePanel>
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </ResizablePanel>
+                </ResizablePanelGroup>
             </div>
         </div>
     );

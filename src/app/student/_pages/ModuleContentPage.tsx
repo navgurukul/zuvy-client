@@ -25,7 +25,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const orgId = params.orgId;
 
   // Move hooks before conditional return
-  const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
+  const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(+moduleId);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
@@ -484,8 +484,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                                             item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
                                               item.type === 'quiz' ? `Quiz: ${item.title}` :
                                                 item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
-                                                 item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}`:
-                                                  item.title}
+                                                  item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
+                                                    item.title}
                                 </div>
                                 <div className="text-xs font-md text-muted-foreground">
                                   {getItemDetails(item)}

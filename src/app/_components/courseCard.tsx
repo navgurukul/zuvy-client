@@ -30,10 +30,10 @@ function CourseCard({
     quizCount,
     typeId,
     projectId,
-}:CourseCardProps) {
+}: CourseCardProps) {
     const router = useRouter()
     const { viewcourses, moduleID } = useParams()
-    const { trackingData } = useAllChaptersWithStatus(id ? id.toString() : '')
+    const { trackingData } = useAllChaptersWithStatus(id)
     const chapterId = trackingData?.[0]?.id
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
@@ -54,15 +54,14 @@ function CourseCard({
         <div
             key={id}
             onClick={handleModuleRoute}
-            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row cursor-pointer ${
-                typeId === 1
-                    ? !isLock
-                        ? 'from-blue-50 to-violet-50'
-                        : 'from-blue-50 to-violet-50 pointer-events-none opacity-50'
-                    : isLock
+            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row cursor-pointer ${typeId === 1
+                ? !isLock
+                    ? 'from-blue-50 to-violet-50'
+                    : 'from-blue-50 to-violet-50 pointer-events-none opacity-50'
+                : isLock
                     ? 'bg-yellow/30'
                     : 'bg-yellow/50'
-            }`}
+                }`}
         >
             <div className="flex flex-col justify-between w-full p-5">
                 <div className="flex-grow text-start">
@@ -100,14 +99,12 @@ function CourseCard({
                         />
                         <span>
                             {timeAllotedInWeeks < 1
-                                ? `${timeAllotedInDays} ${
-                                      timeAllotedInDays === 1 ? 'day' : 'days'
-                                  }`
-                                : `${timeAllotedInWeeks} ${
-                                      timeAllotedInWeeks === 1
-                                          ? 'week'
-                                          : 'weeks'
-                                  }`}
+                                ? `${timeAllotedInDays} ${timeAllotedInDays === 1 ? 'day' : 'days'
+                                }`
+                                : `${timeAllotedInWeeks} ${timeAllotedInWeeks === 1
+                                    ? 'week'
+                                    : 'weeks'
+                                }`}
                         </span>
                     </div>
                     {articlesCount > 0 && (
