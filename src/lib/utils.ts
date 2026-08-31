@@ -28,7 +28,7 @@ export function isPlural(count: number): boolean {
 }
 
 export const formattedRole = (role: string) => {
-     return role
+    return role
         .toLowerCase()
         .replace('_', ' ')
         .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -89,21 +89,21 @@ export function statusColor(status: string): string {
 }
 
 export const COLOR_PALETTE = [
-  { bg: 'bg-orange-500', text: 'text-orange-500', border: 'border-orange-500', hex: '#f97316' },
-  { bg: 'bg-blue-500', text: 'text-blue-500', border: 'border-blue-500', hex: '#3b82f6' },
-  { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500', hex: '#22c55e' },
-  { bg: 'bg-purple-500', text: 'text-purple-500', border: 'border-purple-500', hex: '#a855f7' },
-  { bg: 'bg-pink-500', text: 'text-pink-500', border: 'border-pink-500', hex: '#ec4899' },
-  { bg: 'bg-indigo-500', text: 'text-indigo-500', border: 'border-indigo-500', hex: '#6366f1' },
-  { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500', hex: '#ef4444' },
-  { bg: 'bg-teal-500', text: 'text-teal-500', border: 'border-teal-500', hex: '#14b8a6' },
-  { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500', hex: '#eab308' },
-  { bg: 'bg-cyan-500', text: 'text-cyan-500', border: 'border-cyan-500', hex: '#06b6d4' },
-  { bg: 'bg-emerald-500', text: 'text-emerald-500', border: 'border-emerald-500', hex: '#10b981' },
-  { bg: 'bg-violet-500', text: 'text-violet-500', border: 'border-violet-500', hex: '#8b5cf6' },
-  { bg: 'bg-fuchsia-500', text: 'text-fuchsia-500', border: 'border-fuchsia-500', hex: '#d946ef' },
-  { bg: 'bg-rose-500', text: 'text-rose-500', border: 'border-rose-500', hex: '#f43f5e' },
-  { bg: 'bg-lime-500', text: 'text-lime-500', border: 'border-lime-500', hex: '#84cc16' },
+    { bg: 'bg-orange-500', text: 'text-orange-500', border: 'border-orange-500', hex: '#f97316' },
+    { bg: 'bg-blue-500', text: 'text-blue-500', border: 'border-blue-500', hex: '#3b82f6' },
+    { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500', hex: '#22c55e' },
+    { bg: 'bg-purple-500', text: 'text-purple-500', border: 'border-purple-500', hex: '#a855f7' },
+    { bg: 'bg-pink-500', text: 'text-pink-500', border: 'border-pink-500', hex: '#ec4899' },
+    { bg: 'bg-indigo-500', text: 'text-indigo-500', border: 'border-indigo-500', hex: '#6366f1' },
+    { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500', hex: '#ef4444' },
+    { bg: 'bg-teal-500', text: 'text-teal-500', border: 'border-teal-500', hex: '#14b8a6' },
+    { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500', hex: '#eab308' },
+    { bg: 'bg-cyan-500', text: 'text-cyan-500', border: 'border-cyan-500', hex: '#06b6d4' },
+    { bg: 'bg-emerald-500', text: 'text-emerald-500', border: 'border-emerald-500', hex: '#10b981' },
+    { bg: 'bg-violet-500', text: 'text-violet-500', border: 'border-violet-500', hex: '#8b5cf6' },
+    { bg: 'bg-fuchsia-500', text: 'text-fuchsia-500', border: 'border-fuchsia-500', hex: '#d946ef' },
+    { bg: 'bg-rose-500', text: 'text-rose-500', border: 'border-rose-500', hex: '#f43f5e' },
+    { bg: 'bg-lime-500', text: 'text-lime-500', border: 'border-lime-500', hex: '#84cc16' },
 ];
 
 export const getAttendanceColorClass = (attendance: any) => {
@@ -194,7 +194,7 @@ export const formatToIST = (dateString: string | null | undefined) => {
 export const formatTimeLimit = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
         return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
     } else {
@@ -249,14 +249,69 @@ export const stopPolling = (pollIntervalRef: React.MutableRefObject<NodeJS.Timeo
 
 export const getDifficultyColor = (difficulty: string) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy':
-        return 'bg-success-light text-success dark:bg-emerald-950/80 dark:text-emerald-300 dark:border dark:border-emerald-700/60'
-      case 'medium':
-        return 'bg-warning-light text-warning dark:bg-amber-950/80 dark:text-amber-300 dark:border dark:border-amber-700/60'
-      case 'hard':
-        return 'bg-destructive-light text-destructive dark:bg-rose-950/80 dark:text-rose-300 dark:border dark:border-rose-700/60'
-      default:
-        return 'bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-200'
+        case 'easy':
+            return 'bg-success-light text-success dark:bg-emerald-950/80 dark:text-emerald-300 dark:border dark:border-emerald-700/60'
+        case 'medium':
+            return 'bg-warning-light text-warning dark:bg-amber-950/80 dark:text-amber-300 dark:border dark:border-amber-700/60'
+        case 'hard':
+            return 'bg-destructive-light text-destructive dark:bg-rose-950/80 dark:text-rose-300 dark:border dark:border-rose-700/60'
+        default:
+            return 'bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-200'
     }
 }
-  
+
+
+interface ChapterTrackingDetail {
+    // define fields as needed
+}
+
+interface ChapterData {
+    id: number;
+    title: string;
+    topicId: number;
+    chapterTrackingDetails: ChapterTrackingDetail[];
+    status: string; // "Pending" | "Completed"
+    sparks?: number;
+}
+
+export function isAllSelectedChaptersCompleted(
+    selectedChapterIds: any[],
+    trackingData: ChapterData[]
+): boolean {
+    if (!selectedChapterIds || selectedChapterIds.length === 0) {
+        return false;
+    }
+    if (!trackingData || trackingData.length === 0) {
+        return false;
+    }
+
+    // Convert selected IDs to strings for robust comparison
+    const selectedIds = selectedChapterIds.map(id => String(id));
+
+    // Find all elements in trackingData that match the selected chapter IDs
+    const matchedChapters = trackingData.filter(chapter =>
+        selectedIds.includes(String(chapter.id))
+    );
+
+    // If no matching chapters were found in the tracking data, we can't confirm completion
+    if (matchedChapters.length === 0) {
+        return false;
+    }
+
+    // If ANY of the matched chapters are Pending (or not completed), return false
+    const hasPending = matchedChapters.some(chapter =>
+        chapter.status?.toLowerCase() === "pending" ||
+        chapter.status?.toLowerCase() !== "completed"
+    );
+
+
+
+    if (hasPending) {
+        return false;
+    }
+
+    // Return true only if ALL matched chapters are "Completed"
+    return matchedChapters.every(chapter =>
+        chapter.status?.toLowerCase() === "completed"
+    );
+}
