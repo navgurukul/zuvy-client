@@ -658,7 +658,7 @@ const BatchesInfo = ({
                             </div>
                         </div>
                         <div className="flex w-full justify-between items-center mt-4">
-                            <div className="w-1/2">
+                            <div className="w-full max-w-md">
                                 <SearchBox
                                     placeholder="Search by name or email..."
                                     fetchSuggestionsApi={
@@ -899,34 +899,30 @@ const BatchesInfo = ({
                                 </Dialog>
                             </div>
                         </div>
-                        <div className="flex">
-                            <div className="flex items-center mx-4 text-sm">
-                                {selectedRows.length > 0 && (
-                                    <>
-                                        <AlertDialogDemo
-                                            userId={userIds}
-                                            batchId={(params.batchId)}
-                                            bootcampId={parseInt(
-                                                params.courseId
-                                            )}
-                                            title="Are you absolutely sure?"
-                                            description={`This action cannot be undone. This will permanently remove the ${
-                                                selectedRows.length > 1
-                                                    ? 'students'
-                                                    : 'student'
-                                            } from the bootcamp`}
-                                            fetchStudentData={fetchStudentData}
-                                        />
-                                        <ComboboxStudent
-                                            batchData={allBatches}
-                                            bootcampId={params.courseId}
-                                            selectedRows={selectedRows}
-                                            fetchStudentData={fetchStudentData}
-                                        />
-                                    </>
-                                )}
+                        {selectedRows.length > 0 && (
+                            <div className="flex items-center mt-2 text-sm">
+                                <AlertDialogDemo
+                                    userId={userIds}
+                                    batchId={(params.batchId)}
+                                    bootcampId={parseInt(
+                                        params.courseId
+                                    )}
+                                    title="Are you absolutely sure?"
+                                    description={`This action cannot be undone. This will permanently remove the ${
+                                        selectedRows.length > 1
+                                            ? 'students'
+                                            : 'student'
+                                    } from the bootcamp`}
+                                    fetchStudentData={fetchStudentData}
+                                />
+                                <ComboboxStudent
+                                    batchData={allBatches}
+                                    bootcampId={params.courseId}
+                                    selectedRows={selectedRows}
+                                    fetchStudentData={fetchStudentData}
+                                />
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
                 {loading ? (
