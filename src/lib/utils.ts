@@ -262,7 +262,7 @@ export const getDifficultyColor = (difficulty: string) => {
 
 
 interface ChapterTrackingDetail {
-    // define fields as needed
+    id: number
 }
 
 interface ChapterData {
@@ -275,7 +275,7 @@ interface ChapterData {
 }
 
 export function isAllSelectedChaptersCompleted(
-    selectedChapterIds: any[],
+    selectedChapterIds: number[],
     trackingData: ChapterData[]
 ): boolean {
     if (!selectedChapterIds || selectedChapterIds.length === 0) {
