@@ -71,12 +71,12 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         id: 'batchName',
-        header: 'Batch',
+        header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-black border-black">
                         {batchName}
                     </Badge>
                 </div>
@@ -91,7 +91,13 @@ export const columns: ColumnDef<any>[] = [
         ),
         cell: ({ row }) => {
             const startTime = row.original.startTime
-            if (!startTime) return <span>N/A</span>
+            if (!startTime) return (
+                <div className="flex space-x-2">
+                    <span className="font-medium">
+                        N/A
+                    </span>
+                </div>
+            )
             
             const formattedTime = new Date(startTime)
                 .toLocaleString('en-IN', {
@@ -119,7 +125,13 @@ export const columns: ColumnDef<any>[] = [
         ),
         cell: ({ row }) => {
             const endTime = row.original.endTime
-            if (!endTime) return <span>N/A</span>
+            if (!endTime) return (
+                <div className="flex space-x-2">
+                    <span className="font-medium">
+                        N/A
+                    </span>
+                </div>
+            )
             
             const formattedTime = new Date(endTime)
                 .toLocaleString('en-IN', {

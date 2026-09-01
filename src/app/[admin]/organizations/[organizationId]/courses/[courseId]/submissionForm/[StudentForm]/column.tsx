@@ -80,7 +80,7 @@ export const columns: ColumnDef<Task>[] = [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-black border-black">
                         {batchName}
                     </Badge>
                 </div>
@@ -111,6 +111,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
+        header: () => <div className="flex w-full items-center justify-start text-left">Actions</div>,
         cell: ({ row }) => {
             const { bootcampId, moduleId, userId, chapterId } = row.original
             const isSubmitted = row.original.status !== 'Submitted'
@@ -121,10 +122,10 @@ export const columns: ColumnDef<Task>[] = [
             const orgId = Number(organizationId) || user?.orgId; 
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex w-full items-center justify-start">
                     <Button
                         variant={'ghost'}
-                        className="text-lg font-bold  hover:bg-muted/30"
+                        className="flex items-center justify-start p-0 text-left text-lg font-bold hover:bg-muted/30"
                         disabled={isSubmitted}
                     >
                         <Link

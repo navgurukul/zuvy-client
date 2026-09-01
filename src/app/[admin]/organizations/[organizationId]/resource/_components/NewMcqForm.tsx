@@ -257,7 +257,7 @@ export default function NewMcqForm({
                                             }
                                         }}
                                     >
-                                        <FormControl className="w-[190px]">
+                                        <FormControl className="w-[200px]">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
@@ -267,6 +267,7 @@ export default function NewMcqForm({
                                                 .filter((tag) => tag.id !== -1) // Filter out "All Topics"
                                                 .map((tag) => (
                                                     <SelectItem
+                                                        className="w-[200px]"
                                                         key={tag.id}
                                                         value={tag.tagName}
                                                     >
@@ -429,7 +430,7 @@ export default function NewMcqForm({
                                                             <Button
                                                                 type="button"
                                                                 variant="outline"
-                                                                className="text-destructive"
+                                                                className="text-destructive mt-2"
                                                                 onClick={() =>
                                                                     removeOption(
                                                                         optionIndex

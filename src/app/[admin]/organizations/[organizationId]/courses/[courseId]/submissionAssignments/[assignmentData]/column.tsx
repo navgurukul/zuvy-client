@@ -38,9 +38,9 @@ export const columns: ColumnDef<Task>[] = [
         />
       ),
       cell: ({ row }) => (
-        <div className="flex space-x-2">
-            <span className="max-w-[500px] truncate font-medium">
-              {row.original.name}
+        <div className="flex w-full items-center justify-start text-left">
+            <span className="max-w-[500px] truncate font-medium text-black">
+                {row.original.name}
             </span>
         </div>
       ),
@@ -59,8 +59,8 @@ export const columns: ColumnDef<Task>[] = [
         />
       ),
       cell: ({ row }) => (
-        <div className="flex space-x-2">
-          <span className="max-w-[500px] truncate font-medium">
+        <div className="flex w-full items-center justify-start text-left">
+          <span className="max-w-[500px] truncate font-medium text-black">
             {row.original.emailId}
           </span>
         </div>
@@ -68,11 +68,12 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="text-left w-full">Batch</div>,
+        // header: 'Batch',
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
-                <div className="flex items-center justify-start">
+                <div className="flex items-center justify-start text-left">
                     <Badge variant="outline" className="text-black border-black-200">
                         {batchName}
                     </Badge>
@@ -83,13 +84,13 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'status',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Submission Status" />
+                <DataTableColumnHeader column={column} title="Submission Status" />
         ),
         cell: ({ row }) => {
             const status = row.original.status
             return (
-                <div className="flex space-x-2">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
+                <div className="flex w-full items-center justify-start text-left">
+                    <div className="truncate font-medium">
                         {status}
                     </div>
                 </div>
@@ -98,6 +99,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
+        header: () => <div className="text-left w-full">Actions</div>,
         cell: ({ row }) => {
             const { bootcampId, chapterId, id } = row.original
 
@@ -108,13 +110,13 @@ export const columns: ColumnDef<Task>[] = [
             const orgId = Number(organizationId) || user?.orgId; 
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex w-full items-center justify-start text-left">
                     <Link
                         href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />
-                        <p className="text-[15px]"> View Report</p>
+                        <p className="text-[15px] font-medium"> View Report</p>
                     </Link>
                 </div>
             )

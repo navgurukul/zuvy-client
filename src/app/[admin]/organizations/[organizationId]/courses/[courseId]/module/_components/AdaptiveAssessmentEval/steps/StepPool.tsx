@@ -5,6 +5,7 @@ import { Question, Chapter, BuilderState } from '../types';
 interface StepPoolProps {
   a: BuilderState;
   pool: Question[];
+  isGenerated: boolean;
   targets: Record<string, Record<string, number>>;
   coverage: { met: number; total: number; missing: number; complete: boolean };
   capacity: number;
@@ -55,8 +56,7 @@ export function StepPool({
         </div>
         <div className="text-[12.5px] flex text-muted-foreground leading-relaxed">
           When a learner opens this assessment, the system reads their MCQ history and
-          maps it to a level (E → A+). The pool below serves the right difficulty mix
-          for that level.
+          maps it to a level (E → A+).
         </div>
       </div>
 

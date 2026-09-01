@@ -9,13 +9,15 @@ export type StudentAiAssessment = {
   chapterId: number
   domainId: number
   title: string
-  description: string
+  description: string | null
   totalNumberOfQuestions: number
   startDatetime: string | null
   endDatetime: string | null
   assessmentStatus: string
   studentStatus: number
   questionSetId: number
+  selectedChapterids?: number[]
+  selectedChapterIds?: number[]
 }
 
 export function useGetStudentAiAssessments(

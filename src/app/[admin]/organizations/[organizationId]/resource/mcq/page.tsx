@@ -855,7 +855,7 @@ const Mcqs = (props: Props) => {
                                     </div>
                                 )}
 
-                                <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className="flex items-center gap-2 flex-shrink-0 mt-2">
                                     <Switch
                                         id="zuvy-eval-toggle"
                                         checked={showZuvyEvalOnly}

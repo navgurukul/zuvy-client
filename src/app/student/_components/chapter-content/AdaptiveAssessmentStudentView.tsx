@@ -8,6 +8,10 @@ import Link from 'next/link'
 import { useGetStudentAiAssessments } from '../../hooks/useGetStudentsAiAssessmentsEval'
 import { AdaptiveAssessementStudentViewProps } from '../componentStudentType'
 import { useParams } from 'next/navigation'
+import useAllChaptersWithStatus from '@/hooks/useAllChaptersWithStatus'
+import { isAllSelectedChaptersCompleted } from '@/lib/utils'
+import { toast } from '@/components/ui/use-toast'
+
 
 const formatDateTime = (value: string | null) => {
   if (!value) return 'Not scheduled'
@@ -28,7 +32,8 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
   const bootcampId = details?.courseId ?? null
   const chapterId = details?.chapterId ?? chapterDetails.id ?? null
   const domainId = details?.moduleId ?? chapterDetails.moduleId ?? null
-  const {orgId} = useParams()
+  const { orgId } = useParams()
+  const { trackingData } = useAllChaptersWithStatus(domainId)
 
 
   const {
@@ -39,7 +44,8 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
   } = useGetStudentAiAssessments(bootcampId, chapterId, domainId)
 
   const hasRequiredIds = Boolean(bootcampId && chapterId && domainId)
-
+  const filteredChapters = trackingData.filter((chapterData) => chapterData.topicId === 4)
+  const isCompleted = isAllSelectedChaptersCompleted(assessments[0]?.selectedChapterids ?? [], filteredChapters)
   // Refetch assessments when the page becomes visible (user returns from assessment submission)
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -67,9 +73,20 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
   const handleStartAssessment = (assessmentId: number) => {
     if (!bootcampId) return
 
+    if (!isCompleted) {
+      toast({
+        title: "Action Required",
+        description: "You need to complete the quiz before starting the assessment.",
+        variant: "destructive"
+      })
+      return
+    }
+
     const assessmentRoute = `/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessmentId}?domainId=${domainId}&chapterId=${chapterId}`
     window.open(assessmentRoute, '_blank')?.focus()
   }
+
+  console.log(isCompleted)
 
   return (
     <section className="relative w-full overflow-y-auto overflow-x-hidden h-full rounded-2xl border border-border/60 bg-gradient-to-br from-[#f8fbff] via-background to-[#f4f8ff] p-4 md:p-5">
@@ -159,29 +176,29 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
 
                   <div className="flex items-center justify-end md:justify-start">
                     {assessment.studentStatus === 1 && <Link href={`/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessment.id}?domainId=${domainId}&chapterId=${chapterId}`}>  <Button
-                        type="button"
-                        className="h-9 rounded-lg px-4 mx-1  text-xs disabled:"
-                        
-                      >
-                         View Results
-                      </Button></Link>}
+                      type="button"
+                      className="h-9 rounded-lg px-4 mx-1  text-xs disabled:"
+
+                    >
+                      View Results
+                    </Button></Link>}
                     {assessment.studentStatus === 1 ? (
                       <Button
                         type="button"
                         className="h-9 rounded-lg px-4 text-xs disabled:"
                         disabled
                       >
-                         Assessment Submitted 
+                        Assessment Submitted
                       </Button>
                     ) : (
                       <Button
                         type="button"
                         className="h-9 rounded-lg px-4 text-xs"
                         onClick={() => handleStartAssessment(assessment.id)}
-                        
-                    >
-                      Start Assessment
-                    </Button>)}
+
+                      >
+                        Start Assessment
+                      </Button>)}
                   </div>
                 </div>
 

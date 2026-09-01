@@ -38,7 +38,7 @@ export const columns: ColumnDef<Task>[] = [
             />
         ),
         cell: ({ row }) => (
-            <div className="w-[150px] text-left">{row.getValue('name')}</div>
+            <div className="w-[150px] text-left font-medium">{row.getValue('name')}</div>
         ),
         enableHiding: false,
     }
@@ -64,12 +64,13 @@ export const columns: ColumnDef<Task>[] = [
 ,
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="flex w-full items-center justify-start text-left">Batch</div>,
+        // header: 'Batch',
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-black border-black">
                         {batchName}
                     </Badge>
                 </div>
