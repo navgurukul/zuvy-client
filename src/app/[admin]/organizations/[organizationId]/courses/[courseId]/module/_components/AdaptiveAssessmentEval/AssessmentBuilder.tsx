@@ -93,8 +93,8 @@ export default function AssessmentBuilder({
     }
   }, [baselineOptions, set]);
 
-  const showToast = useCallback((msg: string) => {
-    toast({ description: msg, duration: 3200 , variant: 'success'});
+  const showToast = useCallback((msg: string, variant: 'default' | 'success' | 'destructive' = 'success') => {
+    toast({ description: msg, duration: 3200 , variant });
   }, []);
 
   const { questions: bankQuestions } = useQuestionBank();
@@ -216,7 +216,7 @@ export default function AssessmentBuilder({
       if (!result) {
         const message = 'Failed to create AI assessment.';
         setGenError(message);
-        showToast(message);
+        showToast(message, 'destructive');
         return;
       }
 
@@ -224,7 +224,7 @@ export default function AssessmentBuilder({
       if (!assessmentId || Number.isNaN(assessmentId)) {
         const message = 'Assessment created without a valid id.';
         setGenError(message);
-        showToast(message);
+        showToast(message, 'destructive');
         return;
       }
 
@@ -234,7 +234,7 @@ export default function AssessmentBuilder({
       if (!mapped) {
         const message = 'Assessment created, but mapping failed.';
         setGenError(message);
-        showToast(message);
+        showToast(message, 'destructive');
         return;
       }
 
@@ -264,7 +264,7 @@ export default function AssessmentBuilder({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Something went wrong while creating the assessment.';
       setGenError(message);
-      showToast(message);
+      showToast(message, 'destructive');
     }
   }, [a, createAiAssessment, getQuestionSets, mapQuestions, _chapterId, _moduleId, restProps.courseId, showToast]);
 
@@ -387,7 +387,7 @@ export default function AssessmentBuilder({
       if (!assessmentId || Number.isNaN(assessmentId)) {
         const msg = 'Assessment is not ready to publish yet.';
         setGenError(msg);
-        showToast(msg);
+        showToast(msg, 'destructive');
         return;
       }
 
@@ -396,7 +396,7 @@ export default function AssessmentBuilder({
       if (!response) {
         const msg = 'Failed to publish assessment.';
         setGenError(msg);
-        showToast(msg);
+        showToast(msg, 'destructive');
         return;
       }
     }
