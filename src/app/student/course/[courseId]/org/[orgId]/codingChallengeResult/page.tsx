@@ -204,8 +204,8 @@ const CodingResultContent = () => {
 
       </div>
       <div className="max-w-7xl mx-auto">
-        <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
-          <div className="flex items-start justify-between mb-6">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 mb-8 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
             <div className="flex items-center space-x-4">
               {/* <div className={`p-4 rounded-2xl ${overallSuccess ? 'bg-success/10' : 'bg-destructive/10'}`}>
                 <Code2 size={32} className={overallSuccess ? 'text-success' : 'text-destructive'} />
@@ -215,7 +215,7 @@ const CodingResultContent = () => {
                 <p className="text-muted-foreground text-left">Detailed analysis of your solution</p>
               </div>
             </div>
-            <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${overallSuccess ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
+            <div className={`flex items-center gap-2 self-start px-3 py-1.5 rounded-full flex-shrink-0 ${overallSuccess ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
               <span className={`text-md font-bold ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{passedTestCases}/{totalTestCases}</span>
               <span className="text-sm text-muted-foreground">tests passed</span>
             </div>
@@ -304,13 +304,13 @@ const CodingResultContent = () => {
                   {TestCasesSubmission.map((testCase, index) => {
                     const isPassed = testCase.status === 'passed' || testCase.status === 'Accepted' || testCase.status === 'AC';
                     return (
-                      <div key={index} className={`border-2 rounded-xl p-6 transition-all duration-300 hover:shadow-lg ${isPassed ? 'border-success/30 bg-gradient-to-r from-success/5 to-success/10' : 'border-destructive/30 bg-gradient-to-r from-destructive/5 to-destructive/10'}`}>
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-xl ${isPassed ? 'bg-success/20' : 'bg-destructive/20'}`}><Play size={16} className={isPassed ? 'text-success' : 'text-destructive'} /></div>
+                      <div key={index} className={`border-2 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:shadow-lg ${isPassed ? 'border-success/30 bg-gradient-to-r from-success/5 to-success/10' : 'border-destructive/30 bg-gradient-to-r from-destructive/5 to-destructive/10'}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl flex-shrink-0 ${isPassed ? 'bg-success/20' : 'bg-destructive/20'}`}><Play size={16} className={isPassed ? 'text-success' : 'text-destructive'} /></div>
                             <h3 className="font-bold text-foreground text-lg">Test Case {index + 1}</h3>
                           </div>
-                          <div className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold ${isPassed ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
+                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold flex-shrink-0 ${isPassed ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
                             {isPassed ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                             <span>{isPassed ? 'PASSED' : 'FAILED'}</span>
                           </div>
@@ -322,11 +322,11 @@ const CodingResultContent = () => {
                           </div>
                           <div>
                             <div className="flex items-center space-x-2 mb-2"><CheckCircle2 size={16} className="text-muted-foreground" /><p className="font-semibold text-foreground">Expected Output</p></div>
-                            <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm">{formatValue(testCase.testCases.expectedOutput.parameterValue)}</div>
+                            <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm text-left">{formatValue(testCase.testCases.expectedOutput.parameterValue)}</div>
                           </div>
                           <div>
                             <div className="flex items-center space-x-2 mb-2"><Terminal size={16} className="text-muted-foreground" /><p className="font-semibold text-foreground">Your Output</p></div>
-                            <div className={`rounded-lg p-4 border font-mono text-sm ${testCase.stdout ? 'bg-muted/50 border-border/50 text-foreground' : 'bg-muted/30 border-border/30 text-muted-foreground italic'}`}>{testCase.stdout || 'No output generated'}</div>
+                            <div className={`rounded-lg p-4 border font-mono text-sm text-left ${testCase.stdout ? 'bg-muted/50 border-border/50 text-foreground' : 'bg-muted/30 border-border/30 text-muted-foreground italic'}`}>{testCase.stdout || 'No output generated'}</div>
                           </div>
                           {testCase.stderr && (
                             <div>

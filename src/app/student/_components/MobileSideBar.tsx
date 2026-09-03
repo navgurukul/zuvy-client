@@ -39,9 +39,9 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     const getIconComponent = () => {
       switch (type) {
         case 'live-class':
-          return <Video className="w-6 h-6" />;
-        case 'video':
           return <Play className="w-6 h-6" />;
+        case 'video':
+          return <Video className="w-6 h-6" />;
         case 'article':
           return <FileText className="w-6 h-6" />;
         case 'assignment':

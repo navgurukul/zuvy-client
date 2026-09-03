@@ -24,7 +24,7 @@ import { CodingSubmissionData, TestCase } from '@/app/student/course/[courseId]/
 import { Button } from '@/components/ui/button'
 import { useThemeStore } from '@/store/store'
 import useWindowSize from '@/hooks/useHeightWidth'
-import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
+import { CodingSubmissionSkeleton } from "@/app/student/_components/Skeletons"
 
 const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmissionsData: CodingSubmissionData | null, loading: boolean }) => {
   const router = useRouter()
@@ -33,7 +33,7 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
- if (loading) return <CodingSubmissionSkeleton/>
+  if (loading) return <CodingSubmissionSkeleton />
 
 
   if (codingSubmissionsData?.status === 'error') {
@@ -149,15 +149,15 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
       {/* Header Section with Back Button */}
       <div className='flex items-center justify-between' >
 
-      <div
-        onClick={() => router.back()}
-        className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
-      >
-        
-        {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+        <div
+          onClick={() => router.back()}
+          className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
+        >
+
+          {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
         <span className="font-medium">Back to Results</span> */}
-        <X className="w-5 h-5" />
-      </div>
+          <X className="w-5 h-5" />
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -175,8 +175,8 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
       <div className="max-w-7xl mx-auto">
 
         {/* Header Card with Status */}
-        <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
-          <div className="flex items-start justify-between mb-6">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 mb-8 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
             <div className="flex items-center space-x-4">
               {/* <div className={`p-4 rounded-2xl ${overallSuccess ? 'bg-success/10' : 'bg-destructive/10'}`}>
                 <Code2 size={isMobile ? 24 : 32} className={overallSuccess ? 'text-success' : 'text-destructive'} />
@@ -189,9 +189,9 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
 
 
             {/* Score Badge */}
-            <div className={`flex items-center space-x-2 px-1 py-1 rounded-full ${overallSuccess
-                ? 'bg-success/10 border border-success/20'
-                : 'bg-destructive/10 border border-destructive/20'
+            <div className={`flex items-center gap-2 self-start px-3 py-1.5 rounded-full flex-shrink-0 ${overallSuccess
+              ? 'bg-success/10 border border-success/20'
+              : 'bg-destructive/10 border border-destructive/20'
               }`}>
               <span className={`text-sm font-bold ${overallSuccess ? 'text-success' : 'text-destructive'}`}>
                 {passedTestCases}/{totalTestCases}
@@ -202,8 +202,8 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
 
           {/* Overall Status Banner */}
           <div className={`rounded-xl p-6 border-2 ${overallSuccess
-              ? 'bg-gradient-to-r from-success/5 to-success/10 border-success/20'
-              : 'bg-gradient-to-r from-destructive/5 to-destructive/10 border-destructive/20'
+            ? 'bg-gradient-to-r from-success/5 to-success/10 border-success/20'
+            : 'bg-gradient-to-r from-destructive/5 to-destructive/10 border-destructive/20'
             }`}>
             <div className="flex items-center space-x-4">
               {/* <div className={`p-3 rounded-full ${overallSuccess ? 'bg-success/20' : 'bg-destructive/20'}`}>
@@ -334,21 +334,21 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
                       <div
                         key={index}
                         className={`border-2 rounded-xl p-6 transition-all duration-300 hover:shadow-lg ${isPassed
-                            ? 'border-success/30 bg-gradient-to-r from-success/5 to-success/10'
-                            : 'border-destructive/30 bg-gradient-to-r from-destructive/5 to-destructive/10'
+                          ? 'border-success/30 bg-gradient-to-r from-success/5 to-success/10'
+                          : 'border-destructive/30 bg-gradient-to-r from-destructive/5 to-destructive/10'
                           }`}
                       >
                         {/* Test Case Header */}
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-xl ${isPassed ? 'bg-success/20' : 'bg-destructive/20'}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl flex-shrink-0 ${isPassed ? 'bg-success/20' : 'bg-destructive/20'}`}>
                               <Play size={16} className={isPassed ? 'text-success' : 'text-destructive'} />
                             </div>
                             <h3 className="font-bold text-foreground text-lg">Test Case {index + 1}</h3>
                           </div>
-                          <div className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold ${isPassed
-                              ? 'bg-success/20 text-success border border-success/30'
-                              : 'bg-destructive/20 text-destructive border border-destructive/30'
+                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold flex-shrink-0 ${isPassed
+                            ? 'bg-success/20 text-success border border-success/30'
+                            : 'bg-destructive/20 text-destructive border border-destructive/30'
                             }`}>
                             {isPassed ? (
                               <CheckCircle2 size={16} />
@@ -376,7 +376,7 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
                               <CheckCircle2 size={16} className="text-muted-foreground" />
                               <p className="font-semibold text-foreground">Expected Output</p>
                             </div>
-                            <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm">
+                            <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm text-left">
                               {formatValue(testCase.testCases.expectedOutput.parameterValue)}
                             </div>
                           </div>
@@ -386,9 +386,9 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
                               <Terminal size={16} className="text-muted-foreground" />
                               <p className="font-semibold text-foreground">Your Output</p>
                             </div>
-                            <div className={`rounded-lg p-4 border font-mono text-sm ${testCase.stdout
-                                ? 'bg-muted/50 border-border/50 text-foreground'
-                                : 'bg-muted/30 border-border/30 text-muted-foreground italic'
+                            <div className={`rounded-lg p-4 border font-mono text-sm text-left ${testCase.stdout
+                              ? 'bg-muted/50 border-border/50 text-foreground'
+                              : 'bg-muted/30 border-border/30 text-muted-foreground italic'
                               }`}>
                               {testCase.stdout || 'No output generated'}
                             </div>
