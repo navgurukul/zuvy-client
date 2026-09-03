@@ -496,7 +496,7 @@ export default function AiQuestionFormPage({
       numberOfQuestions: totalCount,
       learningObjectives: form.objective,
       targetAudience: "Beginner students",
-      focusAreas: form.reference || "Focus on calling REST APIs",
+      focusAreas: form.reference,
       bloomsLevel: form.bloomLevel,
       questionStyle: "practical",
       difficultyDistribution: {
