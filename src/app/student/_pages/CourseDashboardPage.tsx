@@ -25,7 +25,7 @@ import TruncatedDescription from "@/app/student/_components/TruncatedDescription
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
-import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
+import { useIsStudentEnrolledInOneCourseStore, useThemeStore } from "@/store/store";
 import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudentType'
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
@@ -69,6 +69,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     error: leaderboardError,
   } = useLeaderboard(courseId);
   const { width } = useWindowSize();
+  const { isDark } = useThemeStore();
   const isMobile = width < 768;
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
 
@@ -138,7 +139,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const courseName = progressData?.data?.bootcampTracking?.name || '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';
   const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
-  const validCourseCoverImage = isValidImageUrl(courseCoverImage) ? courseCoverImage : '/logo.PNG';
+  const validCourseCoverImage = isValidImageUrl(courseCoverImage)
+    ? courseCoverImage
+    : isDark
+      ? '/zuvy-logo-horizontal-dark.png'
+      : '/zuvy-logo-horizontal.png';
   const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
   const validCollaborator = isValidImageUrl(collaborator) ? collaborator : '';
   const duration = progressData?.data?.bootcampTracking?.duration || 0;
@@ -905,7 +910,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               <div className="hidden md:block">
                 <div className="rounded-lg bg-card p-6 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-start gap-6">
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 self-center">
                       <Image
                         src={validCourseCoverImage}
                         alt={courseName}
@@ -959,7 +964,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div className="flex items-center gap-2.5 text-foreground/80">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                         <BookOpen size={16} className="text-foreground/60" />
@@ -1163,7 +1168,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {/* Mentorship Card - All screens */}
               {latestCourseData?.mentorshipEnabled && (
                 <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
-                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-border px-4 pb-3">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
                         MENTORSHIP
                       </p>
@@ -1173,7 +1178,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
                       >
                         {/* Icon */}
                         <div

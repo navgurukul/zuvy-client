@@ -93,7 +93,7 @@ export default function MentorProfilePage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-6">
-        <p className="text-sm text-gray-500">Loading mentor profile...</p>
+        <p className="text-sm text-muted-foreground">Loading mentor profile...</p>
       </div>
     );
   }
@@ -103,13 +103,13 @@ export default function MentorProfilePage() {
       <div className="max-w-7xl mx-auto p-6 space-y-4">
         <Link
           href={getMentorsHref(routeContext)}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={16} />
           Back to Find Mentors
         </Link>
 
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       </div>
     );
   }
@@ -120,23 +120,23 @@ export default function MentorProfilePage() {
       {/* Back button */}
       <Link
         href={getMentorsHref(routeContext)}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft size={16} />
         Back to Find Mentors
       </Link>
 
       {/* Top Card */}
-      <div className="flex items-center justify-between border rounded-2xl p-6 bg-white">
+      <div className="flex items-center justify-between rounded-2xl border bg-card p-6">
 
         <div className="flex items-center gap-4">
-          <div className="h-20 w-20 flex items-center justify-center rounded-full bg-green-800 text-white font-bold">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
             {initials}
           </div>
 
           <div>
             <h2 className="text-lg font-semibold text-left">{mentorDisplayName}</h2>
-            <p className="text-sm text-gray-700 text-left">
+            <p className="text-left text-sm text-muted-foreground">
               {mentorProfile?.title || "Mentor"}
             </p>
 
@@ -154,8 +154,8 @@ export default function MentorProfilePage() {
         <span
           className={`px-3 py-1 rounded-full text-sm ${
             acceptsNewMentees
-              ? "text-green-700 bg-green-100"
-              : "text-gray-600 bg-gray-100"
+              ? "bg-success-light text-success-dark dark:bg-primary-light dark:text-primary-foreground"
+              : "bg-muted text-muted-foreground"
           }`}
         >
           ● {acceptsNewMentees ? "Accepting sessions" : "Not accepting sessions"}
@@ -170,25 +170,25 @@ export default function MentorProfilePage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* About */}
-          <div className="border rounded-2xl p-6 bg-white text-left">
-            <p className="text-sm font-semibold text-gray-500 mb-2">
+          <div className="rounded-2xl border bg-card p-6 text-left">
+            <p className="mb-2 text-sm font-semibold text-muted-foreground">
               ABOUT
             </p>
 
             {mentorProfile?.bio ? (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+              <p className="text-sm text-foreground whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                 {mentorProfile.bio}
               </p>
             ) : (
-              <p className="text-sm text-gray-400 italic">
+              <p className="text-sm italic text-muted-foreground">
                 This mentor has not added a bio yet.
               </p>
             )}
           </div>
 
           {/* Expertise */}
-          <div className="border rounded-2xl p-6 bg-white text-left">
-            <p className="text-sm font-semibold text-gray-500 mb-2">
+          <div className="rounded-2xl border bg-card p-6 text-left">
+            <p className="mb-2 text-sm font-semibold text-muted-foreground">
               AREAS OF EXPERTISE
             </p>
 
@@ -197,31 +197,31 @@ export default function MentorProfilePage() {
                 {expertise.map((skill) => (
                   <span
                     key={skill}
-                    className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md"
+                    className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
                   >
                     {skill}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-400 italic">
+              <p className="text-sm italic text-muted-foreground">
                 No expertise areas listed.
               </p>
             )}
           </div>
 
           {/* Past Experiences */}
-          <div className="border rounded-2xl p-6 bg-white text-left">
-            <p className="text-sm font-semibold text-gray-500 mb-2">
+          <div className="rounded-2xl border bg-card p-6 text-left">
+            <p className="mb-2 text-sm font-semibold text-muted-foreground">
               PAST EXPERIENCES
             </p>
 
             {mentorProfile?.pastExperiences ? (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+              <p className="text-sm text-foreground whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                 {mentorProfile.pastExperiences}
               </p>
             ) : (
-              <p className="text-sm text-gray-400 italic">
+              <p className="text-sm italic text-muted-foreground">
                 This mentor has not added past experiences yet.
               </p>
             )}
@@ -230,15 +230,15 @@ export default function MentorProfilePage() {
         </div>
 
         {/* Right */}
-        <div className="border rounded-2xl p-6 bg-white space-y-6 h-fit self-start sticky top-6">
+        <div className="sticky top-6 h-fit self-start space-y-6 rounded-2xl border bg-card p-6">
           <div className="text-left">
-            <p className="text-sm font-semibold text-gray-500 mb-3">
+            <p className="mb-3 text-sm font-semibold text-muted-foreground">
               BOOK A SESSION
             </p>
 
             <div className="mb-4 flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${acceptsNewMentees ? "bg-green-500" : "bg-gray-400"}`}></span>
-              <p className={`text-sm ${acceptsNewMentees ? "text-green-700 font-medium" : "text-gray-600"}`}>
+              <span className={`h-2 w-2 rounded-full ${acceptsNewMentees ? "bg-success" : "bg-muted-foreground"}`}></span>
+              <p className={`text-sm ${acceptsNewMentees ? "font-medium text-success-dark" : "text-muted-foreground"}`}>
                 {acceptsNewMentees ? "Accepting new sessions" : "Not accepting new sessions"}
               </p>
             </div>
@@ -248,8 +248,8 @@ export default function MentorProfilePage() {
             href={mentorId ? getMentorBookHref(mentorId, routeContext) : getMentorsHref(routeContext)}
             className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all ${
               acceptsNewMentees
-                ? "bg-green-800 text-white hover:bg-green-900"
-                : "bg-gray-200 text-gray-600 cursor-not-allowed"
+                ? "bg-primary text-primary-foreground hover:bg-primary-dark"
+                : "cursor-not-allowed bg-muted text-muted-foreground"
             }`}
             onClick={(e) => !acceptsNewMentees && e.preventDefault()}
           >

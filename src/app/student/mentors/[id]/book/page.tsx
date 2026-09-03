@@ -117,21 +117,21 @@ export default function BookSessionPage() {
       {/* Back */}
       <Link
         href={mentorId ? getMentorProfileHref(mentorId, routeContext) : getMentorsHref(routeContext)}
-        className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+        className="flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft size={16} className="mr-1" />
         Back to profile
       </Link>
 
       {/* Mentor Header */}
-      <div className="border rounded-3xl p-4 flex items-center gap-3 bg-white">
-        <div className="h-12 w-12 rounded-full bg-green-800 text-white flex items-center justify-center font-semibold">
+      <div className="flex items-center gap-3 rounded-3xl border bg-card p-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
           {initials}
         </div>
 
         <div>
           <p className="font-semibold text-lg text-left">{mentorDisplayName}</p>
-          <p className="text-sm text-gray-500 text-left">
+          <p className="text-left text-sm text-muted-foreground">
             {mentorProfile?.title || "Mentor"}
           </p>
         </div>
@@ -144,18 +144,18 @@ export default function BookSessionPage() {
 
           <div className="text-left">
             <p className="font-semibold text-lg">Select a time slot</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               All times shown are in your local timezone.
             </p>
           </div>
 
           {slotsLoading ? (
-            <div className="border rounded-3xl h-[260px] flex items-center justify-center text-sm text-gray-500 bg-white">
+            <div className="flex h-[260px] items-center justify-center rounded-3xl border bg-card text-sm text-muted-foreground">
               Loading available slots...
             </div>
           ) : slotsError ? (
-            <div className="border rounded-3xl h-[260px] flex flex-col items-center justify-center text-center bg-white p-4 gap-3">
-              <p className="text-sm text-red-500">{slotsError}</p>
+            <div className="flex h-[260px] flex-col items-center justify-center gap-3 rounded-3xl border bg-card p-4 text-center">
+              <p className="text-sm text-destructive">{slotsError}</p>
               <button
                 onClick={refetchMentorAvailability}
                 className="text-xs border px-3 py-1.5 rounded-full"
@@ -165,7 +165,7 @@ export default function BookSessionPage() {
 
               <p className="font-medium mt-3">No available slots right now</p>
 
-              <p className="text-sm text-gray-500 max-w-sm">
+              <p className="max-w-sm text-sm text-muted-foreground">
                 This mentor hasn&apos;t added upcoming availability yet.
                 Check back soon or explore other mentors.
               </p>
@@ -183,28 +183,28 @@ export default function BookSessionPage() {
                     onClick={() => setSelectedSlotId(slot.id)}
                     className={`w-full border rounded-2xl p-4 text-left transition ${
                       isSelected
-                        ? "border-green-700 bg-green-50"
-                        : "border-gray-200 bg-white hover:border-green-300"
+                        ? "border-primary bg-primary-light"
+                        : "border-border bg-card hover:border-primary"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">
+                        <p className="text-sm font-semibold text-foreground">
                           {slot.topic || "Mentoring Session"}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           Slot ID: {slot.id}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {formatSlotDate(slot.slotStartDateTime)}
                         </p>
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <p className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock size={14} />
                           {formatSlotTimeRange(slot)}
                         </p>
                       </div>
 
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md whitespace-nowrap">
+                      <span className="whitespace-nowrap rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                         {availableCapacity} spot{availableCapacity === 1 ? "" : "s"} left
                       </span>
                     </div>
@@ -217,15 +217,15 @@ export default function BookSessionPage() {
         </div>
 
         {/* Right Side */}
-        <div className="border rounded-3xl p-5 space-y-4 h-fit bg-white">
+        <div className="h-fit space-y-4 rounded-3xl border bg-card p-5">
 
-          <p className="text-sm font-semibold text-gray-600 text-left">
+          <p className="text-left text-sm font-semibold text-muted-foreground">
             YOUR SELECTION
           </p>
 
           <div className="border-t pt-6 text-center">
 
-            <div className="mx-auto mb-2 bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
               <CalendarDays size={18} />
             </div>
 
@@ -234,26 +234,26 @@ export default function BookSessionPage() {
             </p>
 
             {selectedSlot ? (
-              <div className="text-xs text-gray-500 space-y-1 mt-2">
+              <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                 <p>{selectedSlot.topic || "Mentoring Session"}</p>
                 <p>Slot ID: {selectedSlot.id}</p>
                 <p>{formatSlotDate(selectedSlot.slotStartDateTime)}</p>
                 <p>{formatSlotTimeRange(selectedSlot)}</p>
               </div>
             ) : (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Choose an available time from the list to continue
               </p>
             )}
 
             {!acceptsNewMentees && (
-              <p className="text-xs text-red-500 mt-2">
+              <p className="mt-2 text-xs text-destructive">
                 This mentor is not accepting new mentees.
               </p>
             )}
             <div className="mt-4 space-y-2">
               {isQuotaExhausted && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+                <div className="rounded-lg border border-destructive/30 bg-destructive-light p-2 text-xs text-destructive-dark dark:bg-destructive-dark dark:text-destructive-foreground">
                   <p className="font-medium">Limit reached</p>
                   <p className="mt-0.5">Book from {formatEligibleDate(metrics?.nextEligible || null)}</p>
                 </div>
@@ -262,21 +262,21 @@ export default function BookSessionPage() {
               <button
                 onClick={handleBookSlot}
                 disabled={!selectedSlot || isBooking || !acceptsNewMentees || isQuotaExhausted}
-                className="w-full bg-green-800 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isBooking ? "Booking..." : "Book Selected Slot"}
               </button>
             </div>
 
             {booking && (
-              <div className="mt-3 text-left text-xs p-3 rounded-lg bg-green-50 text-green-700 border border-green-100">
+              <div className="mt-3 rounded-lg border border-success/30 bg-success-light p-3 text-left text-xs text-success-dark dark:bg-success-dark dark:text-success-foreground">
                 <p className="font-semibold">Booking confirmed</p>
                 <p>Status: {booking.status}</p>
               </div>
             )}
 
             {bookingError && (
-              <p className="text-xs text-red-500 mt-3 text-left">{bookingError}</p>
+              <p className="mt-3 text-left text-xs text-destructive">{bookingError}</p>
             )}
 
           </div>

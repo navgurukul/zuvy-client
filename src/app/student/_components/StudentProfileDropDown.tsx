@@ -51,7 +51,7 @@ const StudentProfileDropDown = ({
                     </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    className="w-[300px] rounded-lg border border-zinc-200 bg-white p-0 text-left text-zinc-800 shadow-md"
+                    className="w-[300px] rounded-lg border border-zinc-200 bg-white p-0 text-left text-zinc-800 shadow-md dark:border-border dark:bg-card dark:text-card-foreground"
                     align="end"
                     sideOffset={12}
                 >
@@ -60,27 +60,27 @@ const StudentProfileDropDown = ({
                             <p className="text-foreground font-semibold">
                                 {studentData?.name}
                             </p>
-                            <p className="text-[14px] leading-none text-[#78908a]">
+                            <p className="text-[14px] leading-none text-[#78908a] dark:text-muted-foreground">
                                 {studentData?.email}
                             </p>
                         </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200" />
+                    <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200 dark:bg-border" />
                     {showProfileOption && (
                         <>
                             <DropdownMenuItem
                                 onClick={onProfileClick}
-                                className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-zinc-800 focus:bg-zinc-50"
+                                className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-zinc-800 focus:bg-zinc-50 dark:text-card-foreground dark:focus:bg-muted"
                             >
                                 <UserRound className="h-5 w-5" />
                                 <span>View/Edit Profile</span>
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200" />
+                            <DropdownMenuSeparator className="-mx-0 my-0 bg-zinc-200 dark:bg-border" />
                         </>
                     )}
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
-                        className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-red-500 focus:bg-red-50 focus:text-red-600"
+                        className="cursor-pointer gap-3 rounded-none px-4 py-4 text-[1.08rem] text-red-500 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950/40 dark:focus:text-destructive"
                     >
                         <LogOut className="h-5 w-5" />
                         <span>Logout</span>

@@ -189,7 +189,8 @@ export default function MySessions() {
       <MentorshipTabs courseId={courseId} orgId={orgId} />
       {/* TABS */}
 
-      <div className="flex items-center  rounded-full p-1 w-fit gap-3">
+      <div className="-mx-6 overflow-x-auto px-6 pb-2 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0">
+        <div className="flex w-max items-center gap-3 rounded-full p-1">
 
         <TabButton
           id="tour-all-sessions"
@@ -226,6 +227,7 @@ export default function MySessions() {
           onClick={() => setActiveTab("cancelled")}
         />
 
+        </div>
       </div>
 
       {/* SESSION CARD */}
@@ -897,7 +899,7 @@ function TabButton({
       id={id}
       onClick={onClick}
       className={cn(
-        "flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+        "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
         active
           ? "bg-[#2F6B2F] text-white border-[#2F6B2F]"
           : "bg-white text-[#5F6D5F] border-[#D9DED9] hover:bg-[#F8F9F8]"
