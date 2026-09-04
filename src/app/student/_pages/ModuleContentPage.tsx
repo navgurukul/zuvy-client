@@ -507,7 +507,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       {/* Main Content Area */}
       <div className={`flex-1 h-full flex flex-col overflow-hidden ${!isMobile ? '' : 'pb-20'}`}>
         {isMobile && (
-          <div className="flex w-full flex-start p-4 border-b border-border">
+          <div className="flex w-full justify-start p-4 border-b border-border">
             <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline p-0 h-auto">
               <Link href={`/student/course/${courseId}/org/${orgId}`}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
