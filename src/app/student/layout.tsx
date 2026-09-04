@@ -41,7 +41,6 @@ function StudentLayoutContent({
 }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const chapterId = searchParams.get('chapterId');
     const hideHeader = pathname.includes('/assessmentResult/') || pathname.includes('/codingChallenge') || pathname.includes('/projects');
     // const { roles, loading } = useRoles()
     const { user } = getUser()
