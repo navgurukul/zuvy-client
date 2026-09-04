@@ -337,7 +337,7 @@ const CourseSyllabusPage = () => {
                                                                                 href={`/student/course/${courseId}/org/${orgId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}`}
                                                                                 className="hover:text-primary"
                                                                             >
-                                                                                <h4 className="font-medium text-sm text-left">
+                                                                                <h4 className="font-medium font-body text-sm text-left">
                                                                                     {chapter.chapterName ||
                                                                                         `Chapter ${chapter.chapterOrder}`}
                                                                                 </h4>

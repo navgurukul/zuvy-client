@@ -232,7 +232,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         {/* Header Section */}
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h1 className={`font-bold text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-xl'}`}>
+            <h1 className={`font-bold font-body text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-xl'}`}>
               {chapterDetails.title}
             </h1>
             <p className={`text-muted-foreground text-left ${isMobile ? 'text-sm' : 'text-base'}`}>

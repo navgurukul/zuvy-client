@@ -204,7 +204,7 @@ if (loading) {
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 max-w-3xl ">
-          <h5 className=" font-bold text-foreground ml-5">{chapterDetails.title}</h5>
+          <h5 className="font-bold font-body text-foreground ml-5">{chapterDetails.title}</h5>
           <Badge 
             variant="outline" 
             className={cn(

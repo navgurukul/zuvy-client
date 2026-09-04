@@ -43,7 +43,6 @@ function StudentLayoutContent({
     const searchParams = useSearchParams();
     const chapterId = searchParams.get('chapterId');
     const hideHeader = pathname.includes('/assessmentResult/') || pathname.includes('/codingChallenge') || pathname.includes('/projects');
-    const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
     // const { roles, loading } = useRoles()
     const { user } = getUser()
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
@@ -120,7 +119,7 @@ function StudentLayoutContent({
                         onStartInterview={handleStartInterview}
                         onGiveFeedback={handleGiveFeedback}
                     />
-                    {!hideHeader && !isOnCourseModulePage && <Header />}
+                    {!hideHeader && <Header />}
                 </div>
                 <main id="main-scroll-container" className="flex-1 overflow-y-auto">
                     {children}
