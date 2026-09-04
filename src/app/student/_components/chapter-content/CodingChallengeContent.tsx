@@ -120,7 +120,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className='flex justify-between items-center w-full' >
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-body text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
