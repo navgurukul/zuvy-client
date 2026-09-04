@@ -575,7 +575,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-red-500 bg-primary-light text-sm border-primary"
+                                className="text-red-500 text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -592,7 +592,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-primary bg-primary-light text-sm border-primary"
+                                className="text-primary text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -1163,7 +1163,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {/* Mentorship Card - All screens */}
               {latestCourseData?.mentorshipEnabled && (
                 <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
-                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-border px-4 pb-3">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
                         MENTORSHIP
                       </p>
@@ -1173,7 +1173,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
                       >
                         {/* Icon */}
                         <div
