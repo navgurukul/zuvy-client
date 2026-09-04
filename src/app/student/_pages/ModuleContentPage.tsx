@@ -482,7 +482,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                                                 item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
                                                   item.title}
                               </div>
-                              <div className="text-xs font-md text-muted-foreground">
+                              <div className="text-xs font-medium text-muted-foreground">
                                 {getItemDetails(item)}
                               </div>
                             </div>
