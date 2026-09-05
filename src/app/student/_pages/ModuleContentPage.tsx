@@ -11,7 +11,6 @@ import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
-import Header from "../_components/Header";
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
 import { TopicItem, Topic } from '@/app/student/_pages/pageStudentType'
 import ZuvyRewardModal from "@/app/student/_components/reward/ZuvyRewardModal";
@@ -408,122 +407,117 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   };
 
   return (
-    <div className="h-screen flex">
+    <div className="h-full min-h-0 flex overflow-hidden">
 
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <div>
-
-          <div className="w-80 h-screen bg-background border-r border-border flex flex-col">
-            <Header />
-            <div className="p-4 border-b text-left border-border flex-shrink-0">
-              <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}/org/${orgId}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
-                </Link>
-              </Button>
-              <h2 className="text-base font-heading font-semibold">{enhancedModule.name}</h2>
-              {/* <p className="text-xs text-muted-foreground mt-1 break-words"></p> */}
-            </div>
-
-            <div className="border-t border-border flex-shrink-0"></div>
-
-            <ScrollArea className="flex-1">
-              <div className="p-3 space-y-3">
-                {enhancedModule.topics.map((topic) => (
-                  <div key={topic.id} className="space-y-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-left h-auto p-2 hover:bg-primary-light hover:text-charcoal"
-                      onClick={() => toggleTopic(topic.id)}
-                    >
-                      <div className="flex w-full justify-between items-start gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-xs break-words leading-relaxed whitespace-normal">
-                            {topic.name}
-                          </div>
-                        </div>
-                        <div className="flex-shrink-0 mt-0.5">
-                          {expandedTopics.includes(topic.id) ? (
-                            <ChevronDown className="w-3 h-3" />
-                          ) : (
-                            <ChevronRight className="w-3 h-3" />
-                          )}
-                        </div>
-                      </div>
-                    </Button>
-
-                    {expandedTopics.includes(topic.id) && (
-                      <div className="space-y-1 pl-0">
-                        {topic.items.map((item) => (
-                          <Button
-                            key={item.id}
-                            variant="ghost"
-                            size="sm"
-                            className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
-                              ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
-                              : "hover:bg-primary-light hover:text-charcoal"
-                              }`}
-                            onClick={() => handleItemSelect(item.id)}
-                            ref={(el) => {
-                              if (el) itemRefs.current[item.id] = el;
-                            }}
-                          >
-                            <div className="flex items-start gap-2 w-full">
-                              <div className="flex-shrink-0 mt-1">
-                                {getItemIcon(item.type, item.status)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-sm break-words whitespace-normal text-left mb-1">
-                                  {item.type === 'live-class' ? `Live Class: ${item.title}` :
-                                    item.type === 'video' ? `Video: ${item.title}` :
-                                      item.type === 'article' ? `Article: ${item.title}` :
-                                        item.type === 'assignment' ? `Assignment: ${item.title}` :
-                                          item.type === 'assessment' ? `Assessment: ${item.title}` :
-                                            item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
-                                              item.type === 'quiz' ? `Quiz: ${item.title}` :
-                                                item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
-                                                  item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
-                                                    item.title}
-                                </div>
-                                <div className="text-xs font-md text-muted-foreground">
-                                  {getItemDetails(item)}
-                                </div>
-                              </div>
-                              {item.status === 'completed' && (
-                                <div className="flex-shrink-0">
-                                  <Check className="w-4 h-4 mt-1 text-success" />
-                                </div>
-                              )}
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <ScrollBar />
-            </ScrollArea>
+        <div className="w-80 h-full bg-background border-r border-border flex flex-col flex-shrink-0">
+          <div className="p-4 border-b text-left border-border flex-shrink-0">
+            <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
+              <Link href={`/student/course/${courseId}/org/${orgId}`}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Course
+              </Link>
+            </Button>
+            <h2 className="text-base font-heading font-semibold">{enhancedModule.name}</h2>
           </div>
+
+          <div className="border-t border-border flex-shrink-0"></div>
+
+          <ScrollArea className="flex-1">
+            <div className="p-3 space-y-3">
+              {enhancedModule.topics.map((topic) => (
+                <div key={topic.id} className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left h-auto p-2 hover:bg-primary-light hover:text-charcoal"
+                    onClick={() => toggleTopic(topic.id)}
+                  >
+                    <div className="flex w-full justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-xs break-words leading-relaxed whitespace-normal">
+                          {topic.name}
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 mt-0.5">
+                        {expandedTopics.includes(topic.id) ? (
+                          <ChevronDown className="w-3 h-3" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3" />
+                        )}
+                      </div>
+                    </div>
+                  </Button>
+
+                  {expandedTopics.includes(topic.id) && (
+                    <div className="space-y-1 pl-0">
+                      {topic.items.map((item) => (
+                        <Button
+                          key={item.id}
+                          variant="ghost"
+                          size="sm"
+                          className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
+                            ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
+                            : "hover:bg-primary-light hover:text-charcoal"
+                            }`}
+                          onClick={() => handleItemSelect(item.id)}
+                          ref={(el) => {
+                            if (el) itemRefs.current[item.id] = el;
+                          }}
+                        >
+                          <div className="flex items-start gap-2 w-full">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getItemIcon(item.type, item.status)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm font-body break-words whitespace-normal text-left mb-1">
+                                {item.type === 'live-class' ? `Live Class: ${item.title}` :
+                                  item.type === 'video' ? `Video: ${item.title}` :
+                                    item.type === 'article' ? `Article: ${item.title}` :
+                                      item.type === 'assignment' ? `Assignment: ${item.title}` :
+                                        item.type === 'assessment' ? `Assessment: ${item.title}` :
+                                          item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
+                                            item.type === 'quiz' ? `Quiz: ${item.title}` :
+                                              item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
+                                                item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
+                                                  item.title}
+                              </div>
+                              <div className="text-xs font-medium text-muted-foreground">
+                                {getItemDetails(item)}
+                              </div>
+                            </div>
+                            {item.status === 'completed' && (
+                              <div className="flex-shrink-0">
+                                <Check className="w-4 h-4 mt-1 text-success" />
+                              </div>
+                            )}
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <ScrollBar />
+          </ScrollArea>
         </div>
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 h-screen flex flex-col ${!isMobile ? '' : 'pb-20'}`}>
-        {isMobile && <Header />}
-        <div className="flex w-full flex-start" >
-
-          <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
-            <Link href={`/student/course/${courseId}/org/${orgId}`}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Course
-            </Link>
-          </Button>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
+      <div className={`flex-1 h-full flex flex-col overflow-hidden ${!isMobile ? '' : 'pb-20'}`}>
+        {isMobile && (
+          <div className="flex w-full justify-start p-4 border-b border-border">
+            <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline p-0 h-auto">
+              <Link href={`/student/course/${courseId}/org/${orgId}`}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Course
+              </Link>
+            </Button>
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto">
+          <div className={`h-full ${isMobile ? 'p-2.5' : 'p-10'}`}>
             <ModuleContentRenderer
               selectedItemData={selectedItemData}
               onChapterComplete={refetch} getAssessmentData={function (itemId: string) {

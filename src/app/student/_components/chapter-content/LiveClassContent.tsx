@@ -263,7 +263,7 @@ if (loading) {
             return (
                 <div className="max-w-4xl mx-auto p-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-heading font-bold">
+                        <h1 className="text-3xl font-body font-bold text-left">
                             {item.title}
                         </h1>
                         <Badge

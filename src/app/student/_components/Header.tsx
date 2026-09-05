@@ -128,10 +128,10 @@ const Header = () => {
                 {/* Left - Logo */}
                 <div className="flex items-center gap-2 sm:gap-4">
                     <div
-                        className="flex items-center cursor-pointer flex-shrink-0"
+                        className="flex items-center cursor-pointer mb-1 flex-shrink-0"
                         onClick={handleLogoClick}
                     >
-                        <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
+                        <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
                     </div>
 
                     {/* Desktop nav links (md and above) */}

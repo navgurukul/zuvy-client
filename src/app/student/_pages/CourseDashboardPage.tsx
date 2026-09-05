@@ -580,7 +580,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-red-500 bg-primary-light text-sm border-primary"
+                                className="text-red-500 text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -597,7 +597,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-primary bg-primary-light text-sm border-primary"
+                                className="text-primary text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
