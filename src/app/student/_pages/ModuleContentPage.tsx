@@ -407,7 +407,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   };
 
   return (
-    <div className="h-full min-h-0 flex overflow-hidden">
+    <div className="h-[calc(100vh-4rem)] flex overflow-hidden">
 
       {/* Desktop Sidebar */}
       {!isMobile && (
