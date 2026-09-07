@@ -39,33 +39,52 @@ const api = axios.create({
     headers,
 })
 
-if (typeof window !== 'undefined') {
-    api.interceptors.request.use((config) => {
-        // const token = localStorage.getItem('token')
-        // if (token) {
-        //     config.headers.Authorization = `Bearer ${token}`
-        // }
-        const access_token = localStorage.getItem('access_token')
-        if (access_token) {
-            config.headers.Authorization = `Bearer ${access_token}`
-        }
-        return config
-    })
-}
-
 const apiMeraki = axios.create({
     baseURL: apiURL,
     headers,
 })
 
+/**
+ * Helper to update access token in localStorage and default headers of Axios instances.
+ */
+export const setApiAuthToken = (token: string | null) => {
+    if (typeof window !== 'undefined') {
+        if (token) {
+            localStorage.setItem('access_token', token)
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            apiMeraki.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        } else {
+            localStorage.removeItem('access_token')
+            delete api.defaults.headers.common['Authorization']
+            delete apiMeraki.defaults.headers.common['Authorization']
+        }
+    }
+}
+
+api.interceptors.request.use((config) => {
+    if (typeof window !== 'undefined') {
+        const access_token = localStorage.getItem('access_token')
+        if (access_token) {
+            if (config.headers && typeof (config.headers as any).set === 'function') {
+                ;(config.headers as any).set('Authorization', `Bearer ${access_token}`)
+            } else if (config.headers) {
+                config.headers.Authorization = `Bearer ${access_token}`
+            }
+        }
+    }
+    return config
+})
+
 apiMeraki.interceptors.request.use((config) => {
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //     config.headers.Authorization = `Bearer ${token}`
-    // }
-    const access_token = localStorage.getItem('access_token')
-    if (access_token) {
-        config.headers.Authorization = `Bearer ${access_token}`
+    if (typeof window !== 'undefined') {
+        const access_token = localStorage.getItem('access_token')
+        if (access_token) {
+            if (config.headers && typeof (config.headers as any).set === 'function') {
+                ;(config.headers as any).set('Authorization', `Bearer ${access_token}`)
+            } else if (config.headers) {
+                config.headers.Authorization = `Bearer ${access_token}`
+            }
+        }
     }
     return config
 })
@@ -95,7 +114,7 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
-        // :no_entry_sign: Skip token refresh if on login route or calling login/refresh endpoints
+        // 🚫 Skip token refresh if on login route or calling login/refresh endpoints
         const isLoginOrRefresh =
             originalRequest.url.includes('/auth/login') ||
             originalRequest.url.includes('/auth/refresh')
@@ -110,7 +129,11 @@ api.interceptors.response.use(
                     failedQueue.push({ resolve, reject })
                 })
                     .then((access_token) => {
-                        originalRequest.headers.Authorization = `Bearer ${access_token}`
+                        if (originalRequest.headers && typeof (originalRequest.headers as any).set === 'function') {
+                            ;(originalRequest.headers as any).set('Authorization', `Bearer ${access_token}`)
+                        } else if (originalRequest.headers) {
+                            originalRequest.headers.Authorization = `Bearer ${access_token}`
+                        }
                         return api(originalRequest)
                     })
                     .catch((err) => Promise.reject(err))
@@ -126,15 +149,11 @@ api.interceptors.response.use(
                 })
 
                 const newAccessToken = response.data.access_token
-                localStorage.setItem('access_token', newAccessToken)
-                localStorage.setItem(
-                    'refresh_token',
-                    response?.data?.refresh_token
-                )
+                setApiAuthToken(newAccessToken)
+                if (response?.data?.refresh_token) {
+                    localStorage.setItem('refresh_token', response.data.refresh_token)
+                }
 
-                api.defaults.headers.common[
-                    'Authorization'
-                ] = `Bearer ${newAccessToken}`
                 processQueue(null, newAccessToken)
                 return api(originalRequest)
             } catch (err) {
@@ -155,10 +174,6 @@ api.interceptors.response.use(
             unauthorizedMessageStore.setMessage(error.response.data.message || 'You do not have permission to access this resource.')
         }
 
-
-
-        // Suppress default error toast by returning a handled error object
-        // return Promise.reject({ ...error, __handled: true })
         return Promise.reject(error)
     }
 )
