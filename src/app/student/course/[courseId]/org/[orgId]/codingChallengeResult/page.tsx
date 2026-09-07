@@ -331,7 +331,7 @@ const CodingResultContent = () => {
                           {testCase.stderr && (
                             <div>
                               <div className="flex items-center space-x-2 mb-2"><AlertTriangle size={16} className="text-destructive" /><p className="font-semibold text-destructive">Error Output</p></div>
-                              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 font-mono text-sm text-destructive">{testCase.stderr}</div>
+                              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 font-mono text-sm text-destructive text-start">{testCase.stderr}</div>
                             </div>
                           )}
                           {(testCase.memory || testCase.time) && (

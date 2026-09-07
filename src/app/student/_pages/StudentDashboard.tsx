@@ -11,10 +11,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen, Sparkles, Plus } from "lucide-react";
+import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
+import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useFetchGlobalCourses } from "@/app/student/hooks/useFetchGlobalCourses";
@@ -28,6 +28,7 @@ import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_compo
 import useLearnerProfileStrength from "../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/app/student/hooks/useLearnerProfile";
 import { useTour } from "@/app/student/_components/guided-tour";
+import ProfileStrengthCard from "@/app/student/_components/ProfileStrengthCard";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -44,6 +45,7 @@ const StudentDashboard = () => {
   const access_token = localStorage.getItem('access_token');
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore();
+  const { isDark } = useThemeStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const stayOnDashboard = searchParams.get('stay') === 'dashboard';
@@ -54,6 +56,9 @@ const StudentDashboard = () => {
 
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
   const displayProgress = strengthPercentage ?? 0;
+  const defaultCourseCoverImage = isDark
+    ? '/zuvy-logo-horizontal-dark.png'
+    : '/zuvy-logo-horizontal.png';
 
   const { isOpen: isTourOpen } = useTour();
 
@@ -295,6 +300,21 @@ const StudentDashboard = () => {
 
 
             <div className="mb-6">
+              <div className="mb-8 lg:hidden">
+                <ProfileStrengthCard
+                  displayProgress={displayProgress}
+                  profileLevel={profileLevel}
+                  profileLevelColor={profileLevelColor}
+                  profileMessage={profileMessage}
+                  isProfileComplete={isProfileComplete ?? false}
+                  remainingProfilePercentage={remainingProfilePercentage}
+                  remainingProfileMessage={remainingProfileMessage}
+                  onProfileClick={async () => {
+                    await refetchLearnerProfile();
+                    router.push('/student/profile?mode=edit');
+                  }}
+                />
+              </div>
               <h2 className="text-2xl font-heading text-left font-semibold mb-6" id="tour-courses">My Courses</h2>
 
               <div className="flex gap-3 mb-6">
@@ -329,9 +349,9 @@ const StudentDashboard = () => {
                 <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
-                      <div className="mt-2">
+                      <div className="mt-2 md:self-center">
                         <Image
-                          src={bootcamp.coverImage || '/logo.PNG'}
+                          src={bootcamp.coverImage || defaultCourseCoverImage}
                           alt={bootcamp.name}
                           width={128}
                           height={128}
@@ -499,9 +519,9 @@ const StudentDashboard = () => {
                         <CardContent className="p-6">
                           <div className="flex flex-col md:flex-row gap-6">
                             {/* Course Image */}
-                            <div className="mt-2">
+                            <div className="mt-2 md:self-center">
                               <Image
-                                src={course.coverImage || '/logo.PNG'}
+                                src={course.coverImage || defaultCourseCoverImage}
                                 alt={course.name}
                                 width={128}
                                 height={128}
@@ -587,80 +607,20 @@ const StudentDashboard = () => {
             )}
           </div>
 
-          <div className="lg:col-span-1 space-y-4">
-            <Card className="shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-heading font-bold">Profile Strength</h3>
-                  <span className="text-xl font-semibold text-primary bg-primary-light px-3 py-1 rounded-lg">
-                    {Math.round(displayProgress)}%
-                  </span>
-                </div>
-
-                <div className="flex justify-center mb-8">
-                  <div className="relative w-32 h-32">
-                    <svg className="transform -rotate-90 w-32 h-32">
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="currentColor"
-                        strokeWidth="12"
-                        fill="none"
-                        className="text-muted"
-                      />
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="currentColor"
-                        strokeWidth="12"
-                        fill="none"
-                        strokeDasharray={`${2 * Math.PI * 56}`}
-                        strokeDashoffset={`${2 * Math.PI * 56 * (1 - displayProgress / 100)}`}
-                        className="text-primary transition-all duration-500"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-accent" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center mb-8">
-                  <p className="text-base mb-1">
-                    Your profile is <span className={`font-semibold ${profileLevelColor}`}>{profileLevel}</span>.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {profileMessage}
-                  </p>
-                </div>
-
-                <button
-                  onClick={async () => {
-                    await refetchLearnerProfile();
-                    router.push('/student/profile?mode=edit');
-                  }}
-                  className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary-light hover:bg-primary-light/80 transition-all group border border-transparent hover:border-primary"
-                >
-                  <div className="w-12 h-12 rounded-full bg-card flex items-center justify-center shadow-sm flex-shrink-0">
-                    <Plus className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-left flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {isProfileComplete ? 'Review profile' : 'Complete profile'}
-                    </p>
-                    <p className="text-xs text-primary font-medium">
-                      {isProfileComplete ? 'All key details are filled out' : `${remainingProfilePercentage}% remaining`}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {isProfileComplete ? 'Your profile is complete.' : remainingProfileMessage}
-                    </p>
-                  </div>
-                </button>
-              </CardContent>
-            </Card>
+          <div className="hidden lg:block lg:col-span-1 space-y-4">
+            <ProfileStrengthCard
+              displayProgress={displayProgress}
+              profileLevel={profileLevel}
+              profileLevelColor={profileLevelColor}
+              profileMessage={profileMessage}
+              isProfileComplete={isProfileComplete ?? false}
+              remainingProfilePercentage={remainingProfilePercentage}
+              remainingProfileMessage={remainingProfileMessage}
+              onProfileClick={async () => {
+                await refetchLearnerProfile();
+                router.push('/student/profile?mode=edit');
+              }}
+            />
           </div>
         </div>
       </div>

@@ -29,7 +29,7 @@ const TruncatedDescription = ({
       >
         {isExpanded ? (
           <>
-            Show less
+            View less
             <ChevronUp className="w-3 h-3" />
           </>
         ) : (
