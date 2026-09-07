@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser, useThemeStore, useStudentData } from '@/store/store'
+import { setApiAuthToken } from '@/utils/axios.config'
 import Image from 'next/image'
 import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
 import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
@@ -191,7 +192,7 @@ function LoginPage() {
 
             // Handle your backend response
             if (response.data.access_token) {
-                localStorage.setItem('access_token', response.data.access_token)
+                setApiAuthToken(response.data.access_token)
                 localStorage.setItem(
                     'refresh_token',
                     response.data.refresh_token
