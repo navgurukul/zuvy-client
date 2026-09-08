@@ -344,26 +344,28 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
                   <p className="text-sm text-muted-foreground mt-2">Loading available roles...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
-                  {(visibleRoleOptions.includes('Other') ? visibleRoleOptions : [...visibleRoleOptions, 'Other']).map((role) => (
-                    <label
-                      key={role}
-                      className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
-                        selectedRoles.includes(role)
-                          ? 'bg-primary/5'
-                          : 'bg-muted/30'
-                      } ${!selectedRoles.includes(role) && totalRoles >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedRoles.includes(role)}
-                        onChange={() => handleToggleRole(role)}
-                        disabled={!selectedRoles.includes(role) && totalRoles >= 5}
-                        className="w-4 h-4 rounded accent-green-600"
-                      />
-                      <span className="text-sm font-medium text-muted-foreground">{role}</span>
-                    </label>
-                  ))}
+                <div className="max-h-[400px] overflow-y-auto pr-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {(visibleRoleOptions.includes('Other') ? visibleRoleOptions : [...visibleRoleOptions, 'Other']).map((role) => (
+                      <label
+                        key={role}
+                        className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+                          selectedRoles.includes(role)
+                            ? 'bg-primary/5'
+                            : 'bg-muted/30'
+                        } ${!selectedRoles.includes(role) && totalRoles >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRoles.includes(role)}
+                          onChange={() => handleToggleRole(role)}
+                          disabled={!selectedRoles.includes(role) && totalRoles >= 5}
+                          className="w-4 h-4 rounded accent-green-600"
+                        />
+                        <span className="text-sm font-medium text-muted-foreground">{role}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -409,22 +411,24 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
               </div>
 
               {/* Cities Grid */}
-              <div className="grid grid-cols-3 gap-3">
-                {(visibleCityOptions.includes('Other') ? visibleCityOptions : [...visibleCityOptions, 'Other']).map((city) => (
-                  <button
-                    key={city}
-                    type="button"
-                    onClick={() => handleToggleCity(city)}
-                    disabled={!selectedCities.includes(city) && selectedCities.filter((c) => c !== 'Other').length >= 5}
-                    className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                      selectedCities.includes(city)
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border text-muted-foreground hover:border-primary/50'
-                    }`}
-                  >
-                    {city}
-                  </button>
-                ))}
+              <div className="max-h-[400px] overflow-y-auto pr-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {(visibleCityOptions.includes('Other') ? visibleCityOptions : [...visibleCityOptions, 'Other']).map((city) => (
+                    <button
+                      key={city}
+                      type="button"
+                      onClick={() => handleToggleCity(city)}
+                      disabled={!selectedCities.includes(city) && selectedCities.filter((c) => c !== 'Other').length >= 5}
+                      className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                        selectedCities.includes(city)
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border text-muted-foreground hover:border-primary/50'
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {selectedCities.includes('Other') && (

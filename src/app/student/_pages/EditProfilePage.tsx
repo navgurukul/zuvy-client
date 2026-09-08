@@ -152,7 +152,13 @@ export const EditProfilePage: React.FC = () => {
     },
     [remoteLocations]
   );
-  const [activeTab, setActiveTab] = useState<TabType>('basic-info');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['basic-info', 'skills-projects', 'education', 'career-goals'].includes(tabParam)) {
+      return tabParam as TabType;
+    }
+    return 'basic-info';
+  });
   const [editingCard, setEditingCard] = useState<EditingCard>(null);
   
   // Handle tab from URL parameter
@@ -162,6 +168,14 @@ export const EditProfilePage: React.FC = () => {
       setActiveTab(tabParam as TabType);
     }
   }, [searchParams]);
+  
+  // Update URL when tab changes to persist tab selection across re-renders
+  const handleTabChange = (newTab: TabType) => {
+    setActiveTab(newTab);
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('tab', newTab);
+    window.history.replaceState({}, '', currentUrl.toString());
+  };
   
   // State for managing edits
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -1385,14 +1399,14 @@ export const EditProfilePage: React.FC = () => {
 
         {/* Tab Navigation */}
         <Card className="border-border/50 bg-white dark:bg-card backdrop-blur mb-6">
-          <div className="flex items-center border-b border-border/50">
+          <div className="flex items-center border-b border-border/50 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors relative ${
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors relative min-w-fit ${
                     activeTab === tab.id
                       ? 'text-primary'
                       : 'text-muted-foreground hover:text-foreground'
@@ -1538,7 +1552,7 @@ export const EditProfilePage: React.FC = () => {
 
 
         {activeTab === 'skills-projects' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Technical Skills */}
             <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
               <div className="bg-muted p-4 flex items-center justify-between">
@@ -1567,7 +1581,7 @@ export const EditProfilePage: React.FC = () => {
                   </p>
                 </div>
               )}
-              <CardContent className="pb-6 pt-6">
+              <CardContent className="pb-8 pt-6">
                 {editingCard !== 'skills' ? (
                   <>
                     {(step2?.autoDetectedSkills?.length || 0) > 0 || (step2?.additionalSkills?.length || 0) > 0 ? (
@@ -1633,7 +1647,7 @@ export const EditProfilePage: React.FC = () => {
                       )}
                       
                       {/* Input field with dropdown */}
-                      <div className="relative" ref={skillDropdownRef}>
+                      <div className="relative mb-2" ref={skillDropdownRef}>
                         <Input 
                           placeholder="Type a skill and press Enter (e.g. React)..."
                           className="bg-muted/30"
@@ -1649,15 +1663,15 @@ export const EditProfilePage: React.FC = () => {
                           disabled={(editableAutoDetectedSkills.length + skills.length) >= 20}
                         />
                         
-                        {/* Dropdown with skill suggestions */}
+                        {/* Dropdown with skill suggestions - Scrollable (2 rows) */}
                         {showSkillDropdown && filteredSkills.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[120px] overflow-y-auto overflow-x-hidden">
                             <div className="flex flex-wrap gap-2 p-3">
-                              {filteredSkills.slice(0, 30).map((skill) => (
+                              {filteredSkills.slice(0, 50).map((skill) => (
                                 <Badge
                                   key={skill}
                                   variant="outline"
-                                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors shrink-0"
                                   onClick={() => handleAddSkill(skill)}
                                 >
                                   {skill}
@@ -2705,7 +2719,7 @@ export const EditProfilePage: React.FC = () => {
                                          if (isWorkingStatus) return;
                                         setHasInternship(false);
                                         }}
-                                        className="h-10 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="h-10 w-full disabled:cursor-not-allowed disabled:opacity-50 text-xs sm:text-sm md:text-base px-2 sm:px-4"
                                         >
                                         No, I&apos;m a Fresher
                                        </Button>
@@ -2723,7 +2737,7 @@ export const EditProfilePage: React.FC = () => {
                                           type="button"
                                          variant={hasInternship ? 'default' : 'outline'}
                                           onClick={() => setHasInternship(true)}
-                                        className="h-10"
+                                        className="h-10 text-xs sm:text-sm md:text-base px-2 sm:px-4"
                                            >
                                            Yes, I have experience
                                       </Button>
@@ -3076,41 +3090,43 @@ export const EditProfilePage: React.FC = () => {
                       <div>
                         <Label className="font-medium text-sm tracking-wide">Target roles <span className="text-destructive">*</span></Label>
                       </div>
-                      <div className="grid grid-cols-3 gap-3">
-                        {isLoadingRoles ? (
-                          <p className="col-span-3 text-sm text-muted-foreground">Loading roles...</p>
-                        ) : roleOptions.length > 0 ? (
-                          roleOptions.map((role) => (
-                            <label
-                              key={role}
-                              className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
-                                selectedRoles.includes(role)
-                                  ? 'bg-primary/5'
-                                  : 'bg-muted/30'
-                              } ${!selectedRoles.includes(role) && selectedRoles.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedRoles.includes(role)}
-                                onChange={() => {
-                                  if (selectedRoles.includes(role)) {
-                                    setSelectedRoles(selectedRoles.filter(r => r !== role));
-                                    if (role === 'Other') {
-                                      setCustomTargetRole('');
+                      <div className="max-h-[400px] overflow-y-auto pr-2">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {isLoadingRoles ? (
+                            <p className="col-span-2 md:col-span-3 text-sm text-muted-foreground">Loading roles...</p>
+                          ) : roleOptions.length > 0 ? (
+                            roleOptions.map((role) => (
+                              <label
+                                key={role}
+                                className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+                                  selectedRoles.includes(role)
+                                    ? 'bg-primary/5'
+                                    : 'bg-muted/30'
+                                } ${!selectedRoles.includes(role) && selectedRoles.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRoles.includes(role)}
+                                  onChange={() => {
+                                    if (selectedRoles.includes(role)) {
+                                      setSelectedRoles(selectedRoles.filter(r => r !== role));
+                                      if (role === 'Other') {
+                                        setCustomTargetRole('');
+                                      }
+                                    } else if (selectedRoles.length < 5) {
+                                      setSelectedRoles([...selectedRoles, role]);
                                     }
-                                  } else if (selectedRoles.length < 5) {
-                                    setSelectedRoles([...selectedRoles, role]);
-                                  }
-                                }}
-                                disabled={!selectedRoles.includes(role) && selectedRoles.length >= 5}
-                                className="w-4 h-4 rounded accent-green-600"
-                              />
-                              <span className="text-sm font-medium text-muted-foreground">{role}</span>
-                            </label>
-                          ))
-                        ) : (
-                          <p className="col-span-3 text-sm text-muted-foreground">No role options available</p>
-                        )}
+                                  }}
+                                  disabled={!selectedRoles.includes(role) && selectedRoles.length >= 5}
+                                  className="w-4 h-4 rounded accent-green-600"
+                                />
+                                <span className="text-sm font-medium text-muted-foreground">{role}</span>
+                              </label>
+                            ))
+                          ) : (
+                            <p className="col-span-2 md:col-span-3 text-sm text-muted-foreground">No role options available</p>
+                          )}
+                        </div>
                       </div>
                       {selectedRoles.includes('Other') && (
                         <Input
@@ -3144,37 +3160,39 @@ export const EditProfilePage: React.FC = () => {
                       </div>
 
                       {/* Cities Grid */}
-                      <div className="grid grid-cols-3 gap-3">
-                        {isLoadingRemoteLocations ? (
-                          <p className="col-span-3 text-sm text-muted-foreground">Loading locations...</p>
-                        ) : locationOptions.length > 0 ? (
-                          locationOptions.map((city) => (
-                            <button
-                              key={city}
-                              type="button"
-                              onClick={() => {
-                                if (selectedCities.includes(city)) {
-                                  setSelectedCities(selectedCities.filter(c => c !== city));
-                                  if (city === 'Other') {
-                                    setCustomLocation('');
+                      <div className="max-h-[400px] overflow-y-auto pr-2">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {isLoadingRemoteLocations ? (
+                            <p className="col-span-2 md:col-span-3 text-sm text-muted-foreground">Loading locations...</p>
+                          ) : locationOptions.length > 0 ? (
+                            locationOptions.map((city) => (
+                              <button
+                                key={city}
+                                type="button"
+                                onClick={() => {
+                                  if (selectedCities.includes(city)) {
+                                    setSelectedCities(selectedCities.filter(c => c !== city));
+                                    if (city === 'Other') {
+                                      setCustomLocation('');
+                                    }
+                                  } else if (selectedCities.length < 5) {
+                                    setSelectedCities([...selectedCities, city]);
                                   }
-                                } else if (selectedCities.length < 5) {
-                                  setSelectedCities([...selectedCities, city]);
-                                }
-                              }}
-                              disabled={!selectedCities.includes(city) && selectedCities.length >= 5}
-                              className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                                selectedCities.includes(city)
-                                  ? 'border-primary bg-primary text-primary-foreground'
-                                  : 'border-border text-muted-foreground hover:border-primary/50'
-                              }`}
-                            >
-                              {city}
-                            </button>
-                          ))
-                        ) : (
-                          <p className="col-span-3 text-sm text-muted-foreground">No location options available</p>
-                        )}
+                                }}
+                                disabled={!selectedCities.includes(city) && selectedCities.length >= 5}
+                                className={`py-3 px-4 rounded-lg border font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                                  selectedCities.includes(city)
+                                    ? 'border-primary bg-primary text-primary-foreground'
+                                    : 'border-border text-muted-foreground hover:border-primary/50'
+                                }`}
+                              >
+                                {city}
+                              </button>
+                            ))
+                          ) : (
+                            <p className="col-span-2 md:col-span-3 text-sm text-muted-foreground">No location options available</p>
+                          )}
+                        </div>
                       </div>
                       {selectedCities.includes('Other') && (
                         <Input

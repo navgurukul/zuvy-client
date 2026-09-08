@@ -113,7 +113,7 @@ useEffect(() => {
         {/* Header with Badge */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-left">{chapterDetails?.title}</h1>
+            <h1 className="text-xl font-extrabold font-body text-left">{chapterDetails?.title}</h1>
             {chapterDetails?.description && (
               <p className="text-muted-foreground text-base mt-6 text-start">
                 {chapterDetails?.description}

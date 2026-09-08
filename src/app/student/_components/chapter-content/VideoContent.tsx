@@ -127,7 +127,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     <div className="flex flex-col space-y-2 mb-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-xl text-left font-extrabold">
+                                <h1 className="text-xl text-left font-extrabold font-body">
                                     {chapterDetails.title}
                                 </h1>
                                 {chapterDetails.description && (

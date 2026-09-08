@@ -1578,7 +1578,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 <p className="text-xs text-muted-foreground">Auto-fill details using either method.</p>
               </div>
 
-              <div className="flex items-stretch gap-3">
+              <div className="flex flex-col md:flex-row items-stretch gap-3">
                 {/* Upload Resume Card */}
                 <div className="flex-1">
                   <Input
@@ -1612,7 +1612,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 </div>
 
                 {/* OR Divider */}
-                <div className="flex flex-col items-center justify-center px-2">
+                <div className="flex md:flex-col flex-row items-center justify-center md:px-2 py-2 md:py-0">
                   <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border border-border">
                     <span className="text-xs font-medium text-muted-foreground">OR</span>
                   </div>

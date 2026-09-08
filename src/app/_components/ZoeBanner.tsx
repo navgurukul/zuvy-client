@@ -46,7 +46,8 @@ const ZoeBanner = ({ isVisible, onDismiss, onGiveFeedback, onStartInterview }: Z
         >
           <div className="bg-primary text-primary-foreground">
             <div className="container max-w-7xl mx-auto px-4 py-3">
-              <div className="flex items-center justify-between gap-4">
+              {/* Desktop Layout - unchanged */}
+              <div className="hidden sm:flex items-center justify-between gap-4">
                 {/* Main content */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <motion.div
@@ -83,7 +84,7 @@ const ZoeBanner = ({ isVisible, onDismiss, onGiveFeedback, onStartInterview }: Z
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="hidden sm:flex items-center gap-2"
+                      className="flex items-center gap-2"
                     >
                       <Button
                         size="sm"
@@ -123,6 +124,74 @@ const ZoeBanner = ({ isVisible, onDismiss, onGiveFeedback, onStartInterview }: Z
                     <X className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* Mobile Layout - new stacked design */}
+              <div className="sm:hidden flex flex-col gap-2">
+                {/* Top row: Icon, Text, Close button */}
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                  >
+                    <Sparkles className="w-4 h-4 text-zuvy-gold shrink-0" />
+                  </motion.div>
+                  
+                  <p className="text-xs font-medium flex-1">
+                    {canClose ? (
+                      <>Try AI interviews now!</>
+                    ) : (
+                      <>
+                        <span className="font-bold">Zoe Beta is live!</span> Practice AI interviews!
+                      </>
+                    )}
+                  </p>
+
+                  {/* Close button */}
+                  <button
+                    onClick={canClose ? onDismiss : undefined}
+                    disabled={!canClose}
+                    className={`relative p-1 rounded-full transition-all shrink-0 ${
+                      canClose
+                        ? "hover:bg-primary-foreground/20 cursor-pointer"
+                        : "opacity-50 cursor-not-allowed"
+                    }`}
+                    aria-label={canClose ? "Close banner" : `Close available in ${countdown}s`}
+                  >
+                    {!canClose && countdown > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-gray-900 text-[10px] font-bold rounded-full flex items-center justify-center z-10 shadow-lg border border-gray-900">
+                        {countdown}
+                      </span>
+                    )}
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Bottom row: Buttons */}
+                {canClose && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2 w-full"
+                  >
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={onGiveFeedback}
+                      className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground border-0 text-xs font-semibold flex-1"
+                    >
+                      Give Feedback
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={onStartInterview}
+                      className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-xs font-semibold flex-1"
+                    >
+                      Start Interview
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </Button>
+                  </motion.div>
+                )}
               </div>
             </div>
           </div>

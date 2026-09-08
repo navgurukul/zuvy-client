@@ -39,9 +39,9 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     const getIconComponent = () => {
       switch (type) {
         case 'live-class':
-          return <Video className="w-6 h-6" />;
-        case 'video':
           return <Play className="w-6 h-6" />;
+        case 'video':
+          return <Video className="w-6 h-6" />;
         case 'article':
           return <FileText className="w-6 h-6" />;
         case 'assignment':
@@ -164,11 +164,11 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                         onClick={() => onItemSelect(item.id)}
                       >
                         <div className="flex items-start gap-2 lg:gap-3 w-full">
-                          <div className="flex-shrink-0 mt-1">
+                          <div className="flex-shrink-0 mt-0.5">
                             {getItemIcon(item.type, item.status)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium break-words whitespace-normal text-left mb-1">
+                            <div className="font-medium font-body break-words whitespace-normal text-left mb-1">
                               {item.type === 'live-class' ? `Live Class: ${item.title}` :
                                item.type === 'video' ? `Video: ${item.title}` :
                                item.type === 'article' ? `Article: ${item.title}` :

@@ -263,7 +263,7 @@ if (loading) {
             return (
                 <div className="max-w-4xl mx-auto p-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-heading font-bold">
+                        <h1 className="text-3xl font-body font-bold text-left">
                             {item.title}
                         </h1>
                         <Badge
@@ -608,8 +608,8 @@ if (loading) {
                                     )}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center w-full h-[70vh] bg-card">
-                                <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
+                            <div className="flex h-[25vh] w-full flex-col items-center justify-center bg-card sm:h-[55vh]">
+                                <VideoIcon className="mb-2 h-12 w-12 opacity-60 sm:h-16 sm:w-16" />
                                 <p>Recording Not Found</p>
                             </div>
                         )}

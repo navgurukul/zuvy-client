@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { api } from '@/utils/axios.config';
+import { api, setApiAuthToken } from '@/utils/axios.config';
 import { UseSwitchOrgReturn, SwitchOrgPayload, SwitchOrgResponse, SwitchOrgResult } from '@/hooks/hookType';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
@@ -25,8 +25,8 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
             const data = response.data;
 
             if (data.access_token) {
-                // Update tokens in localStorage
-                localStorage.setItem('access_token', data.access_token);
+                // Update tokens in localStorage & axios headers
+                setApiAuthToken(data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
                 localStorage.setItem('AUTH', JSON.stringify(data.user))
                 setCookie('orgId', String(payload.orgId));
