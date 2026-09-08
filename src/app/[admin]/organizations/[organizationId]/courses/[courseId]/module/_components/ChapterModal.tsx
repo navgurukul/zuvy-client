@@ -47,21 +47,21 @@ function ChapterModal({
 
 
 
-    function checkIsAdaptiveAssessmentValid() {
-        const isQuizExists = chapters.some((chapter) => chapter.topicId === 4);
-        if (isQuizExists) {
-            createChapter(9)
-            return true
-        }
-        else {
-            toast({
-                title: "No quiz exists",
-                description: "You can create Adaptive Assessment only after creating quiz",
-                variant: "destructive",
-            })
-            return false
-        }
-    }
+    // function checkIsAdaptiveAssessmentValid() {
+    //     const isQuizExists = chapters.some((chapter) => chapter.topicId === 4);
+    //     if (isQuizExists) {
+    //         createChapter(9)
+    //         return true
+    //     }
+    //     else {
+    //         toast({
+    //             title: "No quiz exists",
+    //             description: "You can create Adaptive Assessment only after creating quiz",
+    //             variant: "destructive",
+    //         })
+    //         return false
+    //     }
+    // }
 
     const handleAdaptiveAssessmentSave = ({
         topic,
@@ -170,7 +170,7 @@ function ChapterModal({
                     </div>
                     <div
                         className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
-                        onClick={() => checkIsAdaptiveAssessmentValid()}
+                        onClick={() => createChapter(9)}
                     >
                         <Sparkle className="mr-2 h-6 w-6" />
                         <span>Adaptive Assessment</span>
