@@ -567,11 +567,9 @@ export default function SessionsPage() {
       {showGlobalEmptyState ? (
         <div className="flex h-full justify-center pt-20 px-6 text-center">
           <div className="max-w-sm">
-            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-[#d1d5db] bg-[#fafafa">
-              <Calendar size={16} className="text-[#9ca3af]" />
+           <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center text-3xl">
+              📋
             </div>
-
-
             <p className="text-sm text-gray-400 sm:whitespace-nowrap">
               No sessions yet. Sessions will appear here once students book your open slots.
             </p>
