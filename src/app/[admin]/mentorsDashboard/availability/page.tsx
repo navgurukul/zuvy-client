@@ -49,8 +49,8 @@ const durationOptions = [30, 45, 60, 90]
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
 
-const START_HOUR = 7
-const END_HOUR = 22
+const START_HOUR = 0
+const END_HOUR = 24
 const HOURS_COUNT = END_HOUR - START_HOUR
 const HOUR_HEIGHT = 56
 const TOTAL_HEIGHT = HOURS_COUNT * HOUR_HEIGHT
