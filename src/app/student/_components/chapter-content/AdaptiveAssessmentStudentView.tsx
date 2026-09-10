@@ -73,20 +73,19 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
   const handleStartAssessment = (assessmentId: number) => {
     if (!bootcampId) return
 
-    if (!isCompleted) {
-      toast({
-        title: "Action Required",
-        description: "You need to complete the quiz before starting the assessment.",
-        variant: "destructive"
-      })
-      return
-    }
+    // if (!isCompleted) {
+    //   toast({
+    //     title: "Action Required",
+    //     description: "You need to complete the quiz before starting the assessment.",
+    //     variant: "destructive"
+    //   })
+    //   return
+    // }
 
     const assessmentRoute = `/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessmentId}?domainId=${domainId}&chapterId=${chapterId}`
     window.open(assessmentRoute, '_blank')?.focus()
   }
 
-  console.log(isCompleted)
 
   return (
     <section className="relative w-full overflow-y-auto overflow-x-hidden h-full rounded-2xl border border-border/60 bg-gradient-to-br from-[#f8fbff] via-background to-[#f4f8ff] p-4 md:p-5">
