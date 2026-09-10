@@ -117,27 +117,18 @@ export default function PerformanceMetrics() {
             onClick={() =>
               setFeedbackFilter(item.value as "30days" | "3months" | "all")
             }
-            //       className={`
-            //   h-10 rounded-full px-5 text-sm
-            //   ${feedbackFilter === item.value
-            //           ? "border-slate-900 bg-white text-slate-900 font-semibold"
-            //           : "border-slate-200 text-slate-500 hover:text-slate-900"
-            //         }
-            // `}
             className={`
-  h-10 rounded-full px-5 text-sm
-  ${feedbackFilter === item.value
-                ? "border-slate-900 bg-white text-slate-900 font-semibold hover:bg-white hover:text-slate-900"
-                : "border-slate-200 bg-white text-slate-500 hover:bg-white hover:text-slate-500"
-              }
-`}
+                h-10 rounded-full px-5 text-sm
+                ${feedbackFilter === item.value
+                  ? "border-slate-900 bg-white text-slate-900 font-semibold hover:bg-white hover:text-slate-900"
+                  : "border-slate-200 bg-white text-slate-500 hover:bg-white hover:text-slate-500"
+                }
+            `}
           >
             {item.label}
           </Button>
         ))}
       </div>
-
-      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"> */}
       <div className="grid gap-5 md:grid-cols-3 mb-8">
         <Card className='rounded-lg'>
           <CardContent className="p-6 text-left">
@@ -159,7 +150,6 @@ export default function PerformanceMetrics() {
             </p>
 
             <p className="text-3xl font-semibold">{averageRating ? averageRating : "—"}</p>
-            {/* <p className="text-sm font-medium">Average Rating</p> */}
             <p className="text-xs text-muted-foreground">
               {averageRating
                 ? "Across completed sessions with rating"
