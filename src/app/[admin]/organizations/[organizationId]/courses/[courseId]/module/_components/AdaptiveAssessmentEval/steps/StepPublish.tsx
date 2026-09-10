@@ -8,21 +8,37 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
+const getLocalDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface StepPublishProps {
   a: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
   coverage: { met: number; total: number; complete: boolean };
   pool: Question[];
   publish: (status: string, endDatetime?: string) => void | Promise<void>;
+  schedule: (startDatetime: string, endDatetime: string) => void | Promise<void>;
+  saveDraft: () => void | Promise<void>;
 }
 
-export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProps) {
+export function StepPublish({ a, set, coverage, pool, publish, schedule, saveDraft }: StepPublishProps) {
   const [choice, setChoice] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(
-    a.scheduledDate || new Date().toISOString().slice(0, 10)
+  const now = new Date();
+  const today = getLocalDate(now);
+  const currentTime = now.toTimeString().slice(0, 5);
+  const [selectedStartDate, setSelectedStartDate] = useState(
+    getLocalDate(now)
   );
-  const [selectedTime, setSelectedTime] = useState(a.scheduledTime || '09:00');
+  const [selectedStartTime, setSelectedStartTime] = useState(currentTime);
+  const [selectedDate, setSelectedDate] = useState(
+    a.scheduledDate || getLocalDate(now)
+  );
+  const [selectedTime, setSelectedTime] = useState(a.scheduledTime || '10:00');
   const unreviewed = pool.filter((q: Question) => q.source === 'ai' && !q.validated).length;
 
   useEffect(() => {
@@ -32,18 +48,61 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
 
   const openDialog = () => {
     if (!choice) return;
+
+    if (choice === 'scheduled') {
+      if (selectedStartDate < today) setSelectedStartDate(today);
+      if (selectedStartDate === today && selectedStartTime < currentTime) {
+        setSelectedStartTime(currentTime);
+      }
+      if (selectedDate < today) setSelectedDate(today);
+      if (selectedDate === today && selectedTime < currentTime) {
+        setSelectedTime(currentTime);
+      }
+    } else if (selectedDate < today) {
+      setSelectedDate(today);
+      setSelectedTime(currentTime);
+    } else if (selectedDate === today && selectedTime < currentTime) {
+      setSelectedTime(currentTime);
+    }
+
     setDialogOpen(true);
   };
 
   const handleSubmit = async () => {
     if (!choice) return;
+    if (choice === 'draft') {
+      await saveDraft();
+      return;
+    }
+
     const endDatetime = `${selectedDate}T${selectedTime}:00+05:30`;
     set({ scheduledDate: selectedDate, scheduledTime: selectedTime });
-    await publish(choice, endDatetime);
+    if (choice === 'scheduled') {
+      const startDatetime = `${selectedStartDate}T${selectedStartTime}:00+05:30`;
+      await schedule(startDatetime, endDatetime);
+    } else {
+      await publish(choice, endDatetime);
+    }
     setDialogOpen(false);
   };
 
   const isLocked = a.status === 'published' || a.status === 'scheduled';
+  const invalidSchedule =
+    choice === 'scheduled' &&
+    (!selectedStartDate ||
+      !selectedStartTime ||
+      !selectedDate ||
+      !selectedTime ||
+      `${selectedStartDate}T${selectedStartTime}` >= `${selectedDate}T${selectedTime}`);
+  const startDateMin = today;
+  const startTimeMin = selectedStartDate === today ? currentTime : undefined;
+  const endDateMin = choice === 'scheduled' ? selectedStartDate || today : today;
+  const endTimeMin =
+    selectedDate === today && choice !== 'scheduled'
+      ? currentTime
+      : choice === 'scheduled' && selectedDate === selectedStartDate
+        ? selectedStartTime
+        : undefined;
 
   return (
     <Card className="p-[26px] max-w-[720px]">
@@ -128,7 +187,7 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
           <Button
             size="lg"
             disabled={!choice}
-            onClick={openDialog}
+            onClick={choice === 'draft' ? handleSubmit : openDialog}
           >
             {choice === 'published'
               ? 'Publish assessment'
@@ -150,7 +209,9 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
                   : 'Schedule assessment'}
             </DialogTitle>
             <DialogDescription className="text-wrap">
-              Select the end date and time in IST before submitting.
+              {choice === 'scheduled'
+                ? 'Select the publish and end date and time in IST before submitting.'
+                : 'Select the end date and time in IST before submitting.'}
               <span className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-500">
                 You wont be able to edit the assessment questions after publishing.
               </span>
@@ -158,11 +219,34 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-3 py-2">
+            {choice === 'scheduled' && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Publish date</label>
+                  <Input
+                    type="date"
+                    value={selectedStartDate}
+                    min={startDateMin}
+                    onChange={(e) => setSelectedStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Publish time</label>
+                  <Input
+                    type="time"
+                    value={selectedStartTime}
+                    min={startTimeMin}
+                    onChange={(e) => setSelectedStartTime(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <label className="text-sm font-medium">End date</label>
               <Input
                 type="date"
                 value={selectedDate}
+                min={endDateMin}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
             </div>
@@ -171,16 +255,23 @@ export function StepPublish({ a, set, coverage, pool, publish }: StepPublishProp
               <Input
                 type="time"
                 value={selectedTime}
+                min={endTimeMin}
                 onChange={(e) => setSelectedTime(e.target.value)}
               />
             </div>
           </div>
 
+          {invalidSchedule && (
+            <p className="text-sm text-destructive">
+              The end date and time must be after the publish date and time.
+            </p>
+          )}
+
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime}>
+            <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime || invalidSchedule}>
               {choice === 'published'
                 ? 'Confirm publish'
                 : choice === 'draft'

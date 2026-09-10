@@ -14,6 +14,8 @@ import { useCreateAiAssessment } from '@/hooks/createAiAssessmentEval';
 import { useMapQuestions } from '@/hooks/useAIMapAssesmentEval';
 import { useGetQuestionSets } from '@/hooks/useGetQuestionSetsEval';
 import { usePublishAssessment } from '@/hooks/usePublishingAssessmentEval';
+import { useScheduleAssessment } from '@/hooks/useScheduleAssessmentEval';
+import { useSaveAssessmentDraft } from '@/hooks/useSaveAssessmentDraftEval';
 import { useGetAiAssessmentsByChapter } from '@/hooks/useGetAiAsssessmentEval';
 import { toast } from '@/components/ui/use-toast';
 
@@ -104,6 +106,8 @@ export default function AssessmentBuilder({
   const { mapQuestions, isMapping, mapError } = useMapQuestions();
   const { getQuestionSets, isFetching: isFetchingQuestionSets, fetchError: questionSetsError, questionSets } = useGetQuestionSets();
   const { publishAssessment, isPublishing: isPublishingAssessment, publishError: publishAssessmentError } = usePublishAssessment();
+  const { scheduleAssessment, isScheduling: isSchedulingAssessment } = useScheduleAssessment();
+  const { saveAssessmentDraft } = useSaveAssessmentDraft();
   const { getAiAssessmentsByChapter } = useGetAiAssessmentsByChapter();
   const isSubmittingAssessment = isCreatingAssessment || isMapping;
 
@@ -411,6 +415,46 @@ export default function AssessmentBuilder({
     );
   }, [a.scheduledDate, a.scheduledTime, aiAssessmentId, publishAssessment, restProps.courseId, set, showToast]);
 
+  const schedule = useCallback(async (startDatetime: string, endDatetime: string) => {
+    if (!aiAssessmentId) {
+      const msg = 'Assessment is not ready to schedule yet.';
+      setGenError(msg);
+      showToast(msg, 'destructive');
+      return;
+    }
+
+    const response = await scheduleAssessment(aiAssessmentId, { startDatetime, endDatetime });
+    if (!response) {
+      const msg = 'Failed to schedule assessment.';
+      setGenError(msg);
+      showToast(msg, 'destructive');
+      return;
+    }
+
+    set({ status: 'scheduled' });
+    showToast('Assessment scheduled.');
+  }, [aiAssessmentId, scheduleAssessment, set, setGenError, showToast]);
+
+  const saveDraft = useCallback(async () => {
+    if (!aiAssessmentId) {
+      const msg = 'Assessment is not ready to save as draft yet.';
+      setGenError(msg);
+      showToast(msg, 'destructive');
+      return;
+    }
+
+    const response = await saveAssessmentDraft(aiAssessmentId);
+    if (!response) {
+      const msg = 'Failed to save assessment draft.';
+      setGenError(msg);
+      showToast(msg, 'destructive');
+      return;
+    }
+
+    set({ status: 'draft' });
+    showToast('Saved as draft.');
+  }, [aiAssessmentId, saveAssessmentDraft, set, setGenError, showToast]);
+
   const capacity = useMemo(
     () => poolCapacity(pool, a.poolTopics.map(t => t.name), a.questionsPerForm),
     [pool, a.poolTopics, a.questionsPerForm]
@@ -431,6 +475,8 @@ export default function AssessmentBuilder({
     step,
     setStep,
     isSubmittingAssessment,
+    isCreatingAssessment,
+    isMapping,
     onGenerateAndReview: handleGenerateAndReview,
     aiAssessmentId,
     questionSets,
@@ -459,6 +505,8 @@ export default function AssessmentBuilder({
     expanded,
     setExpanded,
     publish,
+    schedule,
+    saveDraft,
     showToast,
     baselineOptions,
     bankTopics,

@@ -598,6 +598,11 @@ export interface PublishAssessmentRequestBody {
     endDatetime: string;
 }
 
+export interface ScheduleAssessmentRequestBody {
+  startDatetime: string;
+  endDatetime: string;
+}
+
 export interface PublishAssessmentApiResponse {
     success: boolean;
     message?: string;
