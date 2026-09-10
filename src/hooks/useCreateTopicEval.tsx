@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { CreateTopicApiResponse, CreateTopicRequestBody } from "./hookType";
 import { api } from "@/utils/axios.config";
+import { toast } from '@/components/ui/use-toast';
 
 
 interface UseCreateTopicResult {
@@ -22,10 +23,22 @@ export function useCreateTopic(): UseCreateTopicResult {
             setSubmitError(null);
             try {
                 const response = await api.post<CreateTopicApiResponse>(`${process.env.NEXT_PUBLIC_EVAL_URL}/topic`, body);
+                
                 setCreatedTopic(response.data);
+                toast({
+                    title: "Topic created",
+                    description: "The topic was created successfully.",
+                    variant: "success",
+                });
                 return response.data;
             } catch (err) {
-                setSubmitError(err instanceof Error ? err.message : "Failed to create topic");
+                const message = err instanceof Error ? err.message : "Failed to create topic";
+                setSubmitError(message);
+                toast({
+                    title: "Topic creation failed",
+                    description: message,
+                    variant: "error",
+                });
                 return null;
             } finally {
                 setIsSubmitting(false);

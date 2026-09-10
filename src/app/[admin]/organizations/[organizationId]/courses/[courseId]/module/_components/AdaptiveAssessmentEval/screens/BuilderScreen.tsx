@@ -27,6 +27,8 @@ interface BuilderScreenProps {
   step: number;
   setStep: (step: number) => void;
   isSubmittingAssessment?: boolean;
+  isCreatingAssessment?: boolean;
+  isMapping?: boolean;
   onGenerateAndReview?: () => Promise<void>;
   aiAssessmentId?: number | null;
   questionSets?: import('@/hooks/hookType').GetQuestionSetsApiResponse | null;
@@ -55,6 +57,8 @@ interface BuilderScreenProps {
   expanded: string | null;
   setExpanded: (id: string | null) => void;
   publish: (status: string, endDatetime?: string) => void | Promise<void>;
+  schedule: (startDatetime: string, endDatetime: string) => void | Promise<void>;
+  saveDraft: () => void | Promise<void>;
   showToast: (msg: string) => void;
   baselineOptions: Chapter[];
   bankTopics: string[];
@@ -70,6 +74,8 @@ export function BuilderScreen({
   step,
   setStep,
   isSubmittingAssessment = false,
+  isCreatingAssessment = false,
+  isMapping = false,
   onGenerateAndReview,
   aiAssessmentId,
   questionSets,
@@ -96,6 +102,8 @@ export function BuilderScreen({
   expanded,
   setExpanded,
   publish,
+  schedule,
+  saveDraft,
   baselineOptions,
   bankTopics,
   bankQuestions,
@@ -207,6 +215,8 @@ export function BuilderScreen({
             coverage={coverage}
             pool={pool}
             publish={publish}
+            schedule={schedule}
+            saveDraft={saveDraft}
           />
         )}
       </div>
@@ -230,10 +240,14 @@ export function BuilderScreen({
               isSubmittingAssessment ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
-                  Creating & Mapping...
+                  {isCreatingAssessment
+                    ? 'Generating assessment...'
+                    : isMapping
+                      ? 'Mapping questions...'
+                      : 'Generating & mapping...'}
                 </>
               ) : (
-                <>Generate Assesment and Review <ChevronRight size={14} /></>
+                <>Generate Assessment and Review <ChevronRight size={14} /></>
               )
             ) : (
               <>Continue to {STEPS[step + 1]} <ChevronRight size={14} /></>
