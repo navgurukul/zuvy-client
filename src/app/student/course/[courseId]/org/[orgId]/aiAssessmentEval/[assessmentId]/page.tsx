@@ -537,10 +537,10 @@ const AssessmentQuestionsPage = () => {
           ) : (
             // Questions Sidebar
             <>
-              <div>
+              {/* <div>
                 <h3 className="font-heading font-bold text-base text-foreground tracking-tight">Assessment {assessmentMeta?.aiAssessmentId}</h3>
                 <p className="text-xs text-text-secondary mt-1.5 font-body">Set <span className="font-semibold">#{assessmentMeta?.questionSetId}</span></p>
-              </div>
+              </div> */}
 
               <ScrollArea className="flex-1">
                 <div className="space-y-3 pr-4">
