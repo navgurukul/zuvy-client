@@ -242,7 +242,7 @@ export function UserManagementTable<TData extends User, TValue>({
                             onRoleIdChange?.(value)
                         }}
                     >
-                        <SelectTrigger className="w-48 bg-white">
+                        <SelectTrigger className="w-48 bg-card">
                             <SelectValue placeholder="All Roles" />
                         </SelectTrigger>
                         <SelectContent>

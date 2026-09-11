@@ -45,8 +45,8 @@ const PermissionButtons: React.FC<PermissionButtonsProps> = ({ resourceId, isChi
                                 'min-w-0 relative group',
                                 (isAdminRole || isDisabledByParent || isOwnRole) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                                 isActive
-                                    ? cn('border-2', tier.borderColorClass, tier.backgroundColor, tier.textColorClass)
-                                    : cn(isChild ? 'bg-white hover:bg-gray-100' : 'bg-muted-light hover:bg-gray-200', tier.textColorClass)
+                                    ? cn('border-2', tier.borderColorClass, tier.backgroundColor, tier.darkBackgroundColor, tier.textColorClass)
+                                    : cn(isChild ? 'bg-card hover:bg-foreground/10' : 'bg-muted-light hover:bg-foreground/20', tier.textColorClass)
                             )}
                         >
                             {showLabel ? (

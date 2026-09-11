@@ -137,7 +137,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                                className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 dark:hover:bg-card border-none"
                             >
                                 <div className="flex items-center gap-3">
                                     {selected ? (
@@ -146,7 +146,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                                 {/* {getInitials(selected)} */}
                                                 {selected.code}
                                             </div>
-                                            <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                            <span className="text-muted-dark font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
                                                 {selected.title}
                                             </span>
                                         </>
@@ -194,11 +194,11 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                 ) : (
                                     organizations
                                         .map(org => (
-                                            <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50 cursor-pointer">
+                                            <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-muted-foreground/10 cursor-pointer">
                                                 <div
                                                     key={org.id}
                                                     onClick={() => switchOrganization(org)}
-                                                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
+                                                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-muted-foreground/10 ${selected?.id === org.id ? 'bg-green-50 dark:bg-success/10' : ''
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                                             {/* {getInitials(org)} */}
                                                             {org.code}
                                                         </div>
-                                                        <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
+                                                        <span className={`text-sm ${selected?.id === org.id ? 'text-foreground font-medium' : 'text-foreground/70'}`}>
                                                             {org.title}
                                                         </span>
                                                     </div>

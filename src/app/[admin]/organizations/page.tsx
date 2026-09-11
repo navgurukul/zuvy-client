@@ -287,10 +287,10 @@ export default function OrganizationsPage() {
             <div className="mx-auto">
                 <div className="flex justify-between items-start mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-start">
+                        <h1 className="text-3xl font-bold text-foreground mb-2 text-start">
                             Organisations ({loading ? '...' : totalCount})
                         </h1>
-                        <p className="text-gray-600">Manage organisations onboarded on the platform</p>
+                        <p className="text-muted-foreground">Manage organisations onboarded on the platform</p>
                     </div>
 
                     {/* Add Organization Dialog */}

@@ -3,7 +3,13 @@ import { Clock, ChevronRight } from 'lucide-react';
 import { AuditLog, AuditLogGroupProps } from './auditLogTypes';
 
 const getInitialsBgColor = (initials: string) => {
-  const colors = ['bg-blue-100', 'bg-purple-100', 'bg-green-100', 'bg-yellow-100', 'bg-pink-100'];
+  const colors = [
+    'bg-blue-100 dark:bg-blue-500/20',
+    'bg-purple-100 dark:bg-purple-500/20',
+    'bg-green-100 dark:bg-green-500/20',
+    'bg-yellow-100 dark:bg-yellow-500/20',
+    'bg-pink-100 dark:bg-pink-500/20',
+  ];
   const charCode = initials.charCodeAt(0);
   return colors[charCode % colors.length];
 };
@@ -14,21 +20,20 @@ export default function AuditLogGroup({ title, logs, groupKey, count }: AuditLog
   return (
     <div key={groupKey}>
       <div
-        className="px-6 py-4 text-sm font-semibold text-slate-600"
-        style={{ backgroundColor: 'hsl(48, 30%, 90%)', borderBottom: '2px solid hsl(48, 23%, 90%)' }}
+        className="px-6 py-4 text-sm font-semibold text-muted-foreground bg-muted"
       >
         <span>{title} ({count})</span>
       </div>
 
-      <div className="divide-y divide-slate-50 text-start">
+      <div className="text-start">
         {logs.map((log, index) => (
           <React.Fragment key={log.id}>
-            <div className="px-6 py-5 hover:bg-slate-50 transition-colors">
+            <div className="px-6 py-5 hover:bg-muted-foreground/10 transition-colors">
               <div className="space-y-3">
                 {/* Main Entry Row */}
                 <div className="flex gap-5 items-start group">
                   {/* Avatar */}
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-full ${getInitialsBgColor(log.user.initials)} flex items-center justify-center border-2 border-slate-200 shadow-sm`}>
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full ${getInitialsBgColor(log.user.initials)} flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 shadow-sm`}>
                     <span className="text-xs font-bold text-foreground">
                       {log.user.initials}
                     </span>
@@ -92,7 +97,7 @@ export default function AuditLogGroup({ title, logs, groupKey, count }: AuditLog
                       
                       {/* Time Badge */}
                       <div className="flex-shrink-0">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 rounded-md border border-border/40">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md border border-border/40">
                           <Clock className="w-3 h-3 text-muted-foreground" />
                           <span className="text-[11px] text-muted-foreground whitespace-nowrap">
                             {showDate && log.dateLabel ? `${log.dateLabel}, ${log.timestamp}` : log.timestamp}
