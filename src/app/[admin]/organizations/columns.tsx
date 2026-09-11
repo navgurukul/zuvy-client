@@ -37,7 +37,7 @@ export const createColumns = (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href={`/${userRole}/organizations/${organizationId}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                <Link href={`/${userRole}/organizations/${organizationId}/courses`} className="max-w-[180px] cursor-pointer text-left text-foreground">
                   <p className='text-start'>
                     {name.length > limit
                       ? name.substring(0, limit) + '...'
@@ -83,8 +83,8 @@ export const createColumns = (
 
         return (
           <div>
-            <div className="font-medium text-gray-900 text-start">{poc.name}</div>
-            <div className="text-gray-500 text-xs text-start">{poc.email}</div>
+            <div className="font-medium text-foreground text-start">{poc.name}</div>
+            <div className="text-muted-foreground text-xs text-start">{poc.email}</div>
           </div>
           //   <TooltipProvider delayDuration={200}>
           //     <Tooltip>
@@ -115,8 +115,8 @@ export const createColumns = (
         const assignee = row.original.assignee
         return (
           <div>
-            <div className="font-medium text-gray-900 text-start">{assignee.name}</div>
-            <div className="text-gray-500 text-xs text-start">{assignee.email}</div>
+            <div className="font-medium text-foreground text-start">{assignee.name}</div>
+            <div className="text-muted-foreground text-xs text-start">{assignee.email}</div>
           </div>
           //   <TooltipProvider delayDuration={200}>
           //     <Tooltip>
@@ -152,7 +152,7 @@ export const createColumns = (
         })
         return (
           // <div className="text-left text-gray-600">{formatDate(createdAt)}</div>
-          <div className="text-left text-gray-600">{createdAt}</div>
+          <div className="text-left text-muted-foreground">{createdAt}</div>
         )
       },
     },

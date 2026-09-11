@@ -813,11 +813,11 @@ export default function EditCodingQuestionForm() {
                         onValueChange={setActiveTab}
                         className="w-full"
                     >
-                        <TabsList className="grid w-full grid-cols-2 bg-white">
+                        <TabsList className="grid w-full grid-cols-2 bg-card">
                             <TabsTrigger
                               value="details"
                               className="
-                                bg-white text-black
+                                bg-card text-foreground
                                 data-[state=active]:bg-primary
                                 data-[state=active]:text-white
                               "
@@ -828,7 +828,7 @@ export default function EditCodingQuestionForm() {
                             <TabsTrigger
                               value="testcases"
                               className="
-                                bg-white text-black
+                                bg-card text-foreground
                                 data-[state=active]:bg-primary
                                 data-[state=active]:text-white
                               "
@@ -1005,7 +1005,7 @@ export default function EditCodingQuestionForm() {
                                 {testCases.map((testCase, testCaseIndex) => (
                                     <div
                                         key={testCase.id}
-                                        className="my-4 p-4 border rounded-lg border-green-100 bg-muted-light"
+                                        className="my-4 p-4 border rounded-lg border-border bg-muted-light"
                                     >
                                         <h3 className="text-lg font-semibold mb-3 text-foreground">
                                             Test Case {testCaseIndex + 1}
@@ -1131,7 +1131,7 @@ export default function EditCodingQuestionForm() {
                                                                 testCase.id
                                                             )
                                                         }
-                                                        className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+                                                        className="mt-2 text-muted-foreground border border-input bg-background hover:border-[rgb(81,134,114)]"
                                                         disabled={
                                                             testCase.inputs
                                                                 .length >=
