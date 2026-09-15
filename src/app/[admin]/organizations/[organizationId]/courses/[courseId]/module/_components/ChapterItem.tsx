@@ -76,7 +76,7 @@ function ChapterItem({
     const isActive = activeChapter === chapterId
     const activeChapterClasses = isActive
         ? 'bg-primary-light border border-primary text-primary'
-        : 'bg-white hover:bg-gray-50 border border-gray-200'
+        : 'bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700'
 
     const handleClick = () => {
         if (isDragging) return
@@ -215,7 +215,7 @@ function ChapterItem({
                     )}
                     onClick={handleClick}
                 >
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center dark:text-muted-foreground">
                         <div className="flex gap-2 items-center">
                             <span className="text-sm">{getTopicIcon(topicId)}</span>
                             <h5 className="font-medium text-sm">{title}</h5>

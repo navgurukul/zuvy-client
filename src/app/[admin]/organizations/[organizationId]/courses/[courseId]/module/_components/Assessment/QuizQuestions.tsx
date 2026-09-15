@@ -53,14 +53,14 @@ const QuizQuestions = ({
                 return (
                     <div
                         key={question.id}
-                        className={`py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white mb-4`}
+                        className={`py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-600 mb-4`}
                     >
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
                                 <div className="flex items-center  justify-between gap-2">
-                                    <h2 className="font-bold text-[1rem] text-gray-600">
+                                    <h2 className="font-bold text-[1rem] text-gray-600 dark:text-muted-foreground">
                                         <div
-                                            className="text-[#4A4A4A] mt-1 overflow-hidden text-ellipsis font-semibold"
+                                            className="text-[#4A4A4A] dark:text-muted-foreground mt-1 overflow-hidden text-ellipsis font-semibold"
                                             style={{
                                                 display: '-webkit-box',
                                                 WebkitLineClamp: 3,
@@ -76,7 +76,7 @@ const QuizQuestions = ({
                                     <div className="flex items-center gap-x-2">
                                         <div className="space-x-2">
                                             {tag && (
-                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] p-1 rounded-[100px] px-[8px]">
+                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-gray-600 p-1 rounded-[100px] px-[8px]">
                                                     {tag?.tagName}
                                                 </span>
                                             )}

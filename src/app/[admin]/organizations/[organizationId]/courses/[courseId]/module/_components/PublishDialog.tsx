@@ -336,7 +336,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
     return (
         <>
             <DialogHeader>
-                <DialogTitle className="text-lg font-semibold text-gray-600">
+                <DialogTitle className="text-lg font-semibold text-gray-600 dark:text-gray-200">
                     Publish
                 </DialogTitle>
             </DialogHeader>
@@ -347,14 +347,14 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                 } // Added 'draft' to cast
                 className={`mt-4 text-left`}
             >
-                <TabsList className="flex bg-white border-b-2 justify-start border-gray-300">
+                <TabsList className="flex bg-white dark:bg-gray-800 border-b-2 justify-start border-gray-300 dark:border-gray-600">
                     <div>
                         <TabsTrigger
                             value="schedule"
                             className={`flex-1 mt-1 ${
                                 tab === 'schedule'
                                     ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold'
-                                    : '!text-[#6E6E6E]'
+                                    : '!text-gray-600 dark:!text-gray-400'
                             }`}
                         >
                             Schedule for Future
@@ -366,7 +366,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                             className={`flex-1 mt-1 ${
                                 tab === 'now'
                                     ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold'
-                                    : '!text-[#6E6E6E]'
+                                    : '!text-gray-600 dark:!text-gray-400'
                             }`}
                         >
                             Publish Now
@@ -378,7 +378,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                             className={`flex-1 mt-1 ${
                                 tab === 'draft'
                                     ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold'
-                                    : '!text-[#6E6E6E]'
+                                    : '!text-gray-600 dark:!text-gray-400'
                             }`}
                         >
                             Move To Draft
@@ -417,7 +417,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                         ({ label, date, setDate, time, setTime, error, showClear }, i) => (
                             <div key={i} className="space-y-1">
                                 <div className="flex items-center justify-between mb-2">
-                                    <label className="text-sm text-[#6E6E6E] font-medium block">
+                                    <label className="text-sm text-gray-600 dark:text-gray-300 font-medium block">
                                         {label}
                                     </label>
                                     {showClear && time && (
@@ -459,7 +459,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                             }
                                         >
                                             <DialogTrigger asChild>
-                                                <Button variant='default' className="border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 w-full justify-start text-left font-normal">
+                                                <Button variant='default' className="border border-input bg-background hover:bg-accent hover:border-[rgb(81,134,114)] hover:text-accent-foreground text-foreground w-full justify-start text-left font-normal">
                                                     {/* CHANGED: Only show date if it's actually set */}
                                                     {date ? (
                                                         format(
@@ -531,7 +531,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     )}
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
+                            <Button className="border border-input bg-background hover:bg-accent hover:border-[rgb(81,134,114)] text-foreground hover:text-accent-foreground">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -545,13 +545,13 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                 </TabsContent>
 
                 <TabsContent value="now" className="mt-4 space-y-4">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">
                         The assessment will be published and start immediately.
                         End date and time are optional.
                     </p>
                     <div className="space-y-1">
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-medium block text-gray-600">
+                            <label className="text-sm font-medium block text-gray-600 dark:text-gray-300">
                                 End Date and Time (Optional)
                             </label>
                             {/*Clear button only shows when time is set */}
@@ -584,12 +584,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                     onOpenChange={setEndNowCalendarOpen}
                                 >
                                     <DialogTrigger asChild>
-                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 justify-start">
+                                        <Button className="w-full text-left font-normal border border-input bg-background hover:bg-accent hover:border-[rgb(81,134,114)] hover:text-accent-foreground text-foreground justify-start">
                                             {/*Only show date if it's actually set */}
                                             {endNowDate ? (
                                                 format(endNowDate, 'dd/MM/yyyy')
                                             ) : (
-                                                <span className="text-muted-foreground group-hover:text-white">
+                                                <span className="text-muted-foreground">
                                                     DD/MM/YYYY
                                                 </span>
                                             )}
@@ -645,7 +645,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
+                            <Button className="border border-input bg-background hover:bg-accent hover:border-[rgb(81,134,114)] text-foreground hover:text-accent-foreground">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -659,7 +659,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                 </TabsContent>
 
                 <TabsContent value="draft" className="mt-4 space-y-4">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">
                         Moving this assessment to draft will unpublish it and
                         remove any scheduled dates.
                         {currentAssessmentStatus &&
@@ -667,14 +667,14 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                         Students will no longer be able to access or submit it
                         once it is in a draft state.
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                         Clicking the button below will clear its current
                         publish, start, and end dates, reverting it to a draft
                         state.
                     </p>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
+                            <Button className="border border-input bg-background hover:bg-accent hover:border-[rgb(81,134,114)] text-foreground hover:text-accent-foreground">
                                 Cancel
                             </Button>
                         </DialogClose>

@@ -110,8 +110,8 @@ export const EditModal: React.FC<EditModalProps> = ({
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="name" className="text-left mb-1">
                             Name
                         </Label>
                         <Input
@@ -119,12 +119,11 @@ export const EditModal: React.FC<EditModalProps> = ({
                             name="name"
                             value={studentData.name}
                             onChange={handleInputChange}
-                            className="col-span-3"
                             placeholder="Enter student name"
                         />
                     </div>
-                    <div className="grid grid-cols-4 gap-4">
-                        <Label htmlFor="email" className="col-span-1 h-full flex items-center justify-end">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="email" className="text-left mb-1">
                             Email
                         </Label>
                         <Input
@@ -133,20 +132,18 @@ export const EditModal: React.FC<EditModalProps> = ({
                             type="email"
                             value={studentData.email}
                             onChange={handleInputChange}
-                            className="col-span-3"
                             placeholder="Enter student email"
                         />
                     </div>
-                    {/* Status Dropdown */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="status" className="text-right">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="status" className="text-left mb-1">
                             Status
                         </Label>
                         <Select
                             value={studentData.status}
                             onValueChange={handleStatusChange}
                         >
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                             <SelectContent>

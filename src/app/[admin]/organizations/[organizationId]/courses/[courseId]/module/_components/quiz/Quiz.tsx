@@ -518,7 +518,7 @@ function Quiz(props: QuizProps) {
                                 <div>
                                     <div className="flex flex-col items-center justify-between">
                                         <div className="flex justify-between w-full">
-                                            <h2 className="text-left text-muted-dark text-[15px] w-full font-semibold">
+                                            <h2 className="text-left text-muted-dark text-[15px] w-full font-semibold mb-6">
                                                 Selected Question
                                             </h2>
                                         </div>

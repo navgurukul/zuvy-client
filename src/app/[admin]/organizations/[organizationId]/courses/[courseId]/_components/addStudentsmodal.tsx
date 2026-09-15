@@ -119,7 +119,7 @@ const AddStudentsModal = ({
     }
 
     return (
-        <DialogContent className="text-black">
+        <DialogContent className="text-black dark:text-white">
             <DialogHeader>
                 <DialogTitle>
                     {message

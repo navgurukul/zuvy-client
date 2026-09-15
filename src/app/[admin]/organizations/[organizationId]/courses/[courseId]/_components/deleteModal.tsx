@@ -82,7 +82,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <div className="flex-shrink-0">
                                             <AlertTriangle className="h-6 w-6 text-destructive" />
                                         </div>
-                                        <DialogTitle className="text-lg font-semibold text-gray-900">
+                                        <DialogTitle className="text-lg font-semibold text-foreground">
                                             {input ? 'Delete Batch' : modalTitle || 'Permanent Deletion'}
                                         </DialogTitle>
                                     </div>
@@ -92,8 +92,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </p>
 
                                     {(modalText2 || instructorInfo?.name) && (
-                                        <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
-                                            <p className="text-gray-600 font-normal">
+                                        <div className="text-sm flex gap-x-2 text-foreground font-semibold mt-3">
+                                            <p className="text-muted-foreground font-normal">
                                                 {modalText2}
                                             </p>
                                             {instructorInfo?.name}
