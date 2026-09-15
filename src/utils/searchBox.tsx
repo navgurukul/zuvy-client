@@ -105,19 +105,19 @@ export function SearchBox(props: SearchBoxProps) {
         >
           <div
             ref={suggestionsRef}
-            className="bg-white border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
+            className="bg-background dark:bg-zinc-900 border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
           >
             {filteredSuggestions.map((suggestion, index) => (
               <div
                 key={suggestion.id || index}
                 className={cn(
-                  "px-3 py-2.5 text-sm text-left",
+                  "px-3 py-2.5 text-sm text-left text-foreground",
                   suggestion.id === "__not_found__"
-                    ? "text-gray-400 cursor-default"
-                    : "cursor-pointer hover:bg-muted/50",
+                    ? "text-muted-foreground cursor-default"
+                    : "cursor-pointer hover:bg-muted/50 dark:hover:bg-zinc-800",
                   index === selectedIndex &&
                     suggestion.id !== "__not_found__" &&
-                    "bg-muted"
+                    "bg-muted dark:bg-zinc-800"
                 )}
                 onClick={() =>
                   suggestion.id !== "__not_found__" &&

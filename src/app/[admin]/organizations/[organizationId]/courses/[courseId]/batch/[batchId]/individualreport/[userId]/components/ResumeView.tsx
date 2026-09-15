@@ -57,7 +57,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                         href={profile.resumeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium dark:bg-card dark:text-muted-foreground text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     >
                         <ExternalLink size={16} />
                         View Resume
@@ -73,13 +73,13 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
             </div>
 
             {/* Resume Container */}
-            <div className="bg-white rounded-lg shadow-lg p-8 print:shadow-none">
+            <div className="bg-white dark:bg-card rounded-lg shadow-lg p-8 print:shadow-none">
                 {/* Header Section */}
                 <div className="border-b-2 border-gray-300 pb-6 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-1 text-left">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-muted-foreground mb-1 text-left">
                         {profile?.fullName || student?.name || 'Student'}
                     </h1>
-                    <div className="flex flex-col md:flex-row md:items-center md:gap-6 text-sm text-gray-600 mt-3">
+                    <div className="flex flex-col md:flex-row md:items-center md:gap-6 text-sm text-gray-600 dark:text-muted-foreground mt-3">
                         {student?.email && (
                             <div className="flex items-center gap-2">
                                 <Mail size={16} />
@@ -105,18 +105,18 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
 
                 {/* Batch and Course Information Card */}
                 {(courseName || batchName) && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6 dark:bg-gradient-to-r dark:bg-card dark:from-gray-800 dark:to-gray-700 dark:border-gray-600">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {courseName && (
                                 <div>
-                                    <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-1">Course Name</p>
-                                    <p className="text-lg font-semibold text-gray-900">{courseName}</p>
+                                    <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-1">Course Name</p>
+                                    <p className="text-lg font-semibold text-gray-900 dark:text-muted-foreground">{courseName}</p>
                                 </div>
                             )}
                             {batchName && (
                                 <div>
-                                    <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-1">Batch Name</p>
-                                    <p className="text-lg font-semibold text-gray-900">{batchName}</p>
+                                    <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-1">Batch Name</p>
+                                    <p className="text-lg font-semibold text-gray-900 dark:text-muted-foreground">{batchName}</p>
                                 </div>
                             )}
                         </div>
@@ -126,21 +126,21 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Education Section */}
                 {profile && (profile.degree || profile.collegeName || profile.otherCollegeName) && (
                     <section className="mb-6">
-                        <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            <GraduationCap size={18} className="text-blue-600" />
+                        <h2 className="text-base font-semibold text-gray-800 dark:text-muted-foreground mb-3 flex items-center gap-2">
+                            <GraduationCap size={18} className="text-blue-600 dark:text-blue-400" />
                             Education
                         </h2>
                         <div className="border-l-3 border-blue-500 pl-3 py-1">
                             <div className="flex items-start justify-between gap-2">
                                 <div>
-                                    <h3 className="text-sm font-semibold text-gray-800">
+                                    <h3 className="text-sm font-semibold text-gray-800 dark:text-muted-foreground">
                                         {profile.degree || 'N/A'} in {profile.branch || profile.collegeStream || 'N/A'}
                                     </h3>
-                                    <p className="text-xs text-gray-600 mt-1">
+                                    <p className="text-xs text-gray-600 mt-1 dark:text-muted-foreground">
                                         {profile.collegeName || profile.otherCollegeName || 'N/A'}
                                     </p>
                                 </div>
-                                <div className="text-right text-xs text-gray-600 whitespace-nowrap">
+                                <div className="text-right text-xs text-gray-600 whitespace-nowrap dark:text-muted-foreground">
                                     {profile.graduationYear && (
                                         <p>
                                             {profile.graduationMonth ? `${new Date(0, profile.graduationMonth - 1).toLocaleString('default', { month: 'long' })} ` : ''}
@@ -151,7 +151,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                 </div>
                             </div>
                             {profile.collegeScore && (
-                                <p className="text-xs text-gray-600 mt-2">
+                                <p className="text-xs text-gray-600 dark:text-muted-foreground mt-2">
                                     <span className="font-semibold">GPA:</span> {profile.collegeScore} {profile.collegeScoreType ? `(${profile.collegeScoreType})` : ''}
                                 </p>
                             )}
@@ -162,8 +162,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Technical Skills Section */}
                 {profile?.technicalSkills && Array.isArray(profile.technicalSkills) && profile.technicalSkills.length > 0 && (
                     <section className="mb-8">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <Code size={20} className="text-blue-600" />
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                            <Code size={20} className="text-blue-600 dark:text-blue-400" />
                             Technical Skills
                         </h2>
                         <div className="flex flex-wrap gap-2">
@@ -182,8 +182,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Projects Section */}
                 {profile?.projects && Array.isArray(profile.projects) && profile.projects.length > 0 && (
                     <section className="mb-6">
-                        <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            <Award size={18} className="text-blue-600" />
+                        <h2 className="text-base font-semibold text-gray-800 dark:text-muted-foreground mb-3 flex items-center gap-2">
+                            <Award size={18} className="text-blue-600 dark:text-blue-400" />
                             Projects
                         </h2>
                         <div className="space-y-3">
@@ -209,8 +209,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Work Experience Section */}
                 {profile?.workExperiences && Array.isArray(profile.workExperiences) && profile.workExperiences.length > 0 && (
                     <section className="mb-8">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <Briefcase size={20} className="text-blue-600" />
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                            <Briefcase size={20} className="text-blue-600 dark:text-blue-400" />
                             Work Experience
                         </h2>
                         <div className="space-y-4">
@@ -237,8 +237,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Competitive Programming Section */}
                 {(profile?.leetcodeProfiles?.length > 0 || profile?.codechefProfiles?.length > 0 || profile?.codeforcesProfiles?.length > 0) && (
                     <section className="mb-8">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <Code size={20} className="text-blue-600" />
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                            <Code size={20} className="text-blue-600 dark:text-blue-400" />
                             Competitive Programming
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -282,17 +282,17 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Current Status Section */}
                 {profile?.currentStatus && (
                     <section className="mb-8">
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <p className="text-sm text-gray-600 mb-1">Current Status</p>
-                            <p className="font-semibold text-gray-800">{profile.currentStatus}</p>
+                        <div className="bg-gray-50 dark:bg-gradient-to-r dark:bg-card dark:from-gray-800 dark:to-gray-700 dark:border-gray-600 p-4 rounded-lg border border-gray-200">
+                            <p className="text-sm text-gray-600 dark:text-muted-foreground mb-1">Current Status</p>
+                            <p className="font-semibold text-gray-800 dark:text-muted-foreground">{profile.currentStatus}</p>
                         </div>
                     </section>
                 )}
 
                 {/* Performance Summary Section */}
                 <section className="mb-8">
-                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <TrendingUp size={18} className="text-blue-600" />
+                    <h2 className="text-base font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                        <TrendingUp size={18} className="text-blue-600 dark:text-blue-400" />
                         Performance Summary
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -336,8 +336,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                 {/* Assessments Section */}
                 {student?.assessments && student.assessments.length > 0 && (
                     <section className="mb-8">
-                        <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <Award size={18} className="text-blue-600" />
+                        <h2 className="text-base font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                            <Award size={18} className="text-blue-600 dark:text-blue-400" />
                             Assessment Results
                         </h2>
                         <div className="space-y-3">
@@ -349,7 +349,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-800 mb-1 text-sm text-left">
+                                                <h3 className="font-semibold text-gray-800 dark:text-muted-foreground mb-1 text-sm text-left">
                                                     {assessment?.name || `Assessment ${index + 1}`}
                                                 </h3>
                                                 <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-600">
@@ -408,20 +408,20 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
 
                 {/* Professional Development Section */}
                 <section className="mb-8">
-                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <Users size={18} className="text-blue-600" />
+                    <h2 className="text-base font-bold text-gray-800 dark:text-muted-foreground mb-4 flex items-center gap-2">
+                        <Users size={18} className="text-blue-600 dark:text-blue-400" />
                         Professional Development
                     </h2>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-700">One-on-One Mentoring Sessions</span>
-                            <span className="font-semibold text-gray-900">
+                            <span className="text-gray-700 dark:text-muted-foreground">One-on-One Mentoring Sessions</span>
+                            <span className="font-semibold text-gray-900 dark:text-muted-foreground">
                                 {student?.oneOnOneSessionsCompleted ?? 0} Completed
                             </span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-700">Course Attendance</span>
-                            <span className="font-semibold text-gray-900">
+                            <span className="text-gray-700 dark:text-muted-foreground">Course Attendance</span>
+                            <span className="font-semibold text-gray-900 dark:text-muted-foreground">
                                 {student?.overAllAttendance == null ? 'N/A' : `${student.overAllAttendance}%`}
                             </span>
                         </div>

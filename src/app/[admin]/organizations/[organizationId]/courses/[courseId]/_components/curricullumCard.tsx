@@ -186,7 +186,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                                             e.stopPropagation()
                                             editHandle(moduleId)
                                         }}
-                                        className="hover:text-muted-foreground hover:bg-gray-200"
+                                        className="hover:text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700 dark:hover:text-muted-foreground"
                                     >
                                         <Edit className="h-4 w-4" />
                                     </Button>

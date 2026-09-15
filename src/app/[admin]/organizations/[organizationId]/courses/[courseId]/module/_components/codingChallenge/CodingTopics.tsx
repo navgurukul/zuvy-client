@@ -145,7 +145,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                             onClick={() =>
                                                 handleTopicChange(tag)
                                             }
-                                            className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                            className={`flex items-center px-3 py-2 cursor-pointer hover:bg-slate-200 dark:hover:bg-gray-600
                                             ${isSelected && 'text-primary'}`}
                                         >
                                             <Check
@@ -189,7 +189,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                                     difficulty
                                                 )
                                             }
-                                            className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                            className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600
                                             ${isSelected && 'text-primary'}`}
                                         >
                                             <Check

@@ -33,25 +33,25 @@ export function StepTopicsBaseline({
 
   return (
     <div className="grid grid-cols-2 gap-[18px] items-start">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-[22px]">
+      <div className="bg-white dark:bg-card rounded-lg border border-slate-200 dark:border-gray-600 shadow-sm p-[22px]">
         <h4 className="text-base flex font-bold mb-1.5 mt-0">
           Baseline signal
         </h4>
-        <p className="text-[13px] text-slate-600 mb-4 mt-0 leading-relaxed">
+        <p className="text-[13px] text-slate-600 dark:text-muted-foreground mb-4 mt-0 leading-relaxed">
           MCQ chapters in this module. Learner performance is used to assign a
           starting level. <strong>No separate baseline test is needed.</strong>
         </p>
 
         <div className="flex flex-col gap-2 mb-3.5">
           {quizChapters.length === 0 && (
-            <div className="text-[13px] text-slate-500 py-3">
+            <div className="text-[13px] text-slate-500 dark:text-muted-foreground py-3">
               No MCQ chapters found in this module.
             </div>
           )}
           {quizChapters.map((ch: any) => {
             const sel = a.chapterIds.includes(ch.chapterId);
-            const selClass = sel ? "border-primary bg-primary-light/30" : "border-slate-200 bg-white";
-            const checkClass = sel ? "border-primary bg-primary" : "border-slate-200 bg-white";
+            const selClass = sel ? "border-primary bg-primary-light/30" : "border-slate-200 dark:border-gray-600 bg-white dark:bg-card";
+            const checkClass = sel ? "border-primary bg-primary" : "border-slate-200 dark:border-gray-600 bg-white dark:bg-card";
             return (
               <div
                 key={ch.chapterId}
@@ -70,7 +70,7 @@ export function StepTopicsBaseline({
                 </div>
                 <div className="flex-1">
                   <div className="text-[13.5px] flex font-semibold">{ch.chapterTitle}</div>
-                  <div className="text-[13.5px] flex text-slate-500 ">
+                  <div className="text-[13.5px] flex text-slate-500 dark:text-muted-foreground ">
                     {/* {ch.questionCount || 0} questions
                     {covers.length > 0 && (
                       <span className=" text-[13.5px]  flex text-primary">
@@ -87,8 +87,8 @@ export function StepTopicsBaseline({
           })}
         </div>
 
-        <div className="bg-slate-100 rounded-lg py-3 px-3.5">
-          <div className="text-[11.5px] flex font-bold text-slate-500 tracking-wider mb-2">
+        <div className="bg-slate-100 dark:bg-muted rounded-lg py-3 px-3.5">
+          <div className="text-[11.5px] flex font-bold text-slate-500 dark:text-muted-foreground tracking-wider mb-2">
             HOW LEVEL IS ASSIGNED
           </div>
           {[
@@ -101,13 +101,13 @@ export function StepTopicsBaseline({
           ].map(([range, level]) => (
             <div
               key={range}
-              className="flex justify-between text-xs text-slate-600 py-0.5"
+              className="flex justify-between text-xs text-slate-600 dark:text-muted-foreground py-0.5"
             >
               <span className='text-[13px] flex'>{range} correct across baseline MCQs</span>
               <strong className='text-[13px] flex'>{level}</strong>
             </div>
           ))}
-          <div className="text-[11.5px] text-slate-500 mt-[7px]">
+          <div className="text-[11.5px] text-slate-500 dark:text-muted-foreground mt-[7px]">
             Learners with no MCQ attempts start at Level C.
           </div>
         </div>
@@ -121,9 +121,9 @@ export function StepTopicsBaseline({
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-[22px]">
+        <div className="bg-white dark:bg-card rounded-lg border border-slate-200 dark:border-gray-600 shadow-sm p-[22px]">
           <h4 className="text-base flex font-bold mb-1.5 mt-0">Pool topics</h4>
-          <p className="text-[13px] text-slate-600 mb-3.5 mt-0 leading-relaxed">
+          <p className="text-[13px] text-slate-600 dark:text-muted-foreground mb-3.5 mt-0 leading-relaxed">
             Choose the topics to draw questions from. Questions are assembled per
             student based on their level.
           </p>
@@ -135,7 +135,7 @@ export function StepTopicsBaseline({
             isGenerated={isGenerated}
           />
           {a.poolTopics.length === 0 && (
-            <div className="mt-3.5 text-[13px] text-slate-500">
+            <div className="mt-3.5 text-[13px] text-slate-500 dark:text-muted-foreground">
               Select topics to draw questions from.
             </div>
           )}

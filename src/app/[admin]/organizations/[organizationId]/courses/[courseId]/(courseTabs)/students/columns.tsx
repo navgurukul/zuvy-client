@@ -51,7 +51,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
                 />
             ) : (
                 <div 
-                    className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
+                    className="w-[150px] text-left text-gray-800 dark:text-muted-foreground cursor-pointer hover:text-blue-600 hover:underline"
                     onClick={handleStudentClick}
                 >
                     {row.getValue('name')}
@@ -131,7 +131,7 @@ export const columns: ColumnDef<Task>[] = [
                         />
                     ) : (
                         <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium text-gray-800">
+                            <span className="max-w-[500px] truncate font-medium text-gray-800 dark:text-muted-foreground">
                                 {row.getValue('email')}
                             </span>
                         </div>
@@ -194,7 +194,7 @@ export const columns: ColumnDef<Task>[] = [
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
-                <div className="flex w-full justify-center items-center text-gray-800">
+                <div className="flex w-full justify-center items-center text-gray-800 dark:text-muted-foreground">
                     <span className="text-sm">{formattedDate}</span>
                 </div>
             )
@@ -216,7 +216,7 @@ export const columns: ColumnDef<Task>[] = [
                             style={{ width: `${progress}%` }}
                         />
                     </div> */}
-                    <div className="text-sm text-gray-800">{progress}%</div>
+                    <div className="text-sm text-gray-800 dark:text-muted-foreground">{progress}%</div>
                 </div>
             )
         },

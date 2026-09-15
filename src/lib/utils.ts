@@ -65,13 +65,13 @@ export function difficultyQuestionBgColor(difficulty: string): string {
 export function difficultyBgColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-green-100'
+            return 'bg-green-100 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border dark:border-emerald-700/60'
         case 'medium':
-            return 'bg-orange-100'
+            return 'bg-orange-100 dark:bg-amber-950/80 dark:text-amber-300 dark:border dark:border-amber-700/60'
         case 'hard':
-            return 'bg-red-100'
+            return 'bg-red-100 dark:bg-red-950/80 dark:text-red-300 dark:border dark:border-red-700/60'
         default:
-            return 'bg-gray-100'
+            return 'bg-gray-100 dark:bg-slate-800 dark:text-slate-200'
     }
 }
 

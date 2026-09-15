@@ -204,7 +204,7 @@ export const createAttendanceColumns = (
 
                 return (
                     <div className="flex flex-col min-w-[120px]">
-                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="font-medium text-gray-800 dark:text-muted-foreground">{date}</span>
                         <span className="text-sm text-muted-foreground">{time}</span>
                     </div>
                 )
@@ -222,7 +222,7 @@ export const createAttendanceColumns = (
 
                 return (
                     <div className="flex flex-col min-w-[120px]">
-                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="font-medium text-gray-800 dark:text-muted-foreground">{date}</span>
                         <span className="text-sm text-muted-foreground">{time}</span>
                     </div>
                 )
@@ -243,7 +243,7 @@ export const createAttendanceColumns = (
                 return (
                     <div className="flex items-center space-x-1 min-w-[80px]">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-gray-800">
+                        <span className="text-sm text-gray-800 dark:text-muted-foreground">
                             {durationInMinutes} mins
                         </span>
                     </div>

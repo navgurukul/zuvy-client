@@ -113,22 +113,22 @@ export function BuilderScreen({
 }: BuilderScreenProps) {
   const [showConfirmGenerate, setShowConfirmGenerate] = useState(false);
   return (
-    <div className="flex flex-col h-full pb-8">
+    <div className="flex flex-col h-full pb-8 dark:bg-card">
       <div className="flex-1 overflow-y-auto px-5 pt-3 pb-3">
         <div className="flex items-baseline justify-between mb-0.5">
-          <h2 className="text-lg font-bold m-0">
+          <h2 className="text-lg font-bold m-0 dark:text-muted-foreground">
             {a.name.trim() || 'New adaptive assessment'}
           </h2>
           <Badge bg={THEME.muted} color={THEME.textSub}>
             {a.status === 'editing' ? 'Unsaved' : a.status}
           </Badge>
         </div>
-        <p className="text-xs flex m-0 mb-3 text-slate-600">
+        <p className="text-xs flex m-0 mb-3 text-slate-600 dark:text-muted-foreground">
           One pool, assembled per student at attempt time. Level is inferred from their
           MCQ history — no separate baseline test needed.
         </p>
 
-        <div className="flex gap-0.5 mb-3 border-b border-slate-200">
+        <div className="flex gap-0.5 mb-3 border-b border-slate-200 dark:border-gray-600">
           {STEPS.map((s: string, i: number) => {
             const isPublished = a.status === 'published' || a.status === 'scheduled';
             const done = i < step || (!!aiAssessmentId && i <= 2) || isPublished;
@@ -221,7 +221,7 @@ export function BuilderScreen({
         )}
       </div>
 
-      <div className="shrink-0 flex justify-between px-5  z-10 bg-white border-t border-slate-200">
+      <div className="shrink-0 flex justify-between px-5  z-10 bg-white dark:bg-card border-t border-slate-200 dark:border-gray-600">
         <Btn variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>
           <ChevronLeft size={14} /> Back
         </Btn>

@@ -471,7 +471,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             <Button
                                 className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'coding'
                                         ? 'border-primary text-foreground hover:bg-transparent'
-                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-600'
                                     }`}
                                 onClick={handleCodingButtonClick}
                             >
@@ -480,7 +480,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             <Button
                                 className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'mcq'
                                         ? 'border-primary text-foreground hover:bg-transparent'
-                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-600'
                                     }`}
                                 onClick={handleMCQButtonClick}
                             >
@@ -489,7 +489,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             <Button
                                 className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${questionType === 'open-ended'
                                         ? 'border-primary text-foreground hover:bg-transparent'
-                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
+                                        : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-600'
                                     }`}
                                 onClick={handleOpenEndedButtonClick}
                             >

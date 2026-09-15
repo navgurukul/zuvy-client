@@ -112,7 +112,9 @@ export const createColumns = (
                             />
                         </div>
                     ) : (
-                        <div className="w-full min-w-0 text-left">{row.getValue('name')}</div>
+                        <div className="w-full min-w-0 text-left dark:text-muted-foreground">
+                            {row.getValue('name')}
+                        </div>
                     )}
                 </>
             )
@@ -149,7 +151,7 @@ export const createColumns = (
                         </div>
                     ) : (
                         <div className="flex w-full min-w-0 space-x-2">
-                            <span className="block max-w-[500px] truncate text-left font-medium">
+                            <span className="block max-w-[500px] truncate text-left font-medium dark:text-muted-foreground">
                                 {row.getValue('email')}
                             </span>
                         </div>

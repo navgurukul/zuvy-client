@@ -517,7 +517,7 @@ export default function AssessmentBuilder({
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-50 w-full">
+    <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-background w-full">
       {screen === 'builder' ? (
         <BuilderScreen {...P} />
       ) : (
