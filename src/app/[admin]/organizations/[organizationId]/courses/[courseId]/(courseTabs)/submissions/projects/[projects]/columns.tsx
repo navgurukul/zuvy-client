@@ -11,7 +11,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
                     <div className="flex items-center">

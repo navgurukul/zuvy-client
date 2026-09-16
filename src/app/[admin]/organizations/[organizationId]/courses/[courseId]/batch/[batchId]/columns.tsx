@@ -68,7 +68,7 @@ export const createColumns = (
         header: ({ column }) => (
             <DataTableColumnHeader
                 column={column}
-                title="Profile Pitcure"
+                title="Profile Picture"
                 className="w-full text-center"
             />
         ),

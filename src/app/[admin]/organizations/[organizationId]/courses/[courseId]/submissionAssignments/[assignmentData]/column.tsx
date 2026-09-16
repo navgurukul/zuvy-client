@@ -16,7 +16,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
                     <div className="flex items-center">
@@ -39,7 +39,7 @@ export const columns: ColumnDef<Task>[] = [
       ),
       cell: ({ row }) => (
         <div className="flex w-full items-center justify-start text-left">
-            <span className="max-w-[500px] truncate font-medium text-black">
+            <span className="max-w-[500px] truncate font-medium text-foreground">
                 {row.original.name}
             </span>
         </div>
@@ -60,7 +60,7 @@ export const columns: ColumnDef<Task>[] = [
       ),
       cell: ({ row }) => (
         <div className="flex w-full items-center justify-start text-left">
-          <span className="max-w-[500px] truncate font-medium text-black">
+          <span className="max-w-[500px] truncate font-medium text-foreground">
             {row.original.emailId}
           </span>
         </div>
@@ -74,7 +74,7 @@ export const columns: ColumnDef<Task>[] = [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start text-left">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-foreground border-border">
                         {batchName}
                     </Badge>
                 </div>
@@ -89,7 +89,7 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const status = row.original.status
             return (
-                <div className="flex w-full items-center justify-start text-left">
+                <div className="flex w-full items-center justify-start text-left text-foreground">
                     <div className="truncate font-medium">
                         {status}
                     </div>

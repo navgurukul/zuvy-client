@@ -137,7 +137,7 @@ const TestCaseResults = ({ testCases }: any) => {
                                                                         key={i}
                                                                         className="my-1 text-[15px] max-w-full"
                                                                     >
-                                                                        <div className="bg-gray-100 p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono">
+                                                                        <div className="bg-gray-100 dark:bg-muted p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono">
                                                                             {JSON.stringify(
                                                                                 input.parameterValue
                                                                             )}
@@ -161,7 +161,7 @@ const TestCaseResults = ({ testCases }: any) => {
                                                         </p>
                                                     </div>
                                                     <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm overflow-x-auto">
-                                                        <div className="bg-gray-100 p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-left">
+                                                        <div className="bg-gray-100 dark:bg-muted p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-left">
                                                             {testCase.testCases
                                                                 .expectedOutput
                                                                 .parameterType ===
@@ -197,7 +197,7 @@ const TestCaseResults = ({ testCases }: any) => {
                                                             </p>
                                                         </div>
                                                         <div className="bg-muted/50 rounded-lg p-4 border border-border/50 font-mono text-sm overflow-x-auto">
-                                                            <div className="bg-gray-100 p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-left">
+                                                            <div className="bg-gray-100 dark:bg-muted p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-left">
                                                                 {Array.isArray(
                                                                     testCase.stdout
                                                                 ) ||
@@ -229,7 +229,7 @@ const TestCaseResults = ({ testCases }: any) => {
                                                             </p>
                                                         </div>
                                                         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 font-mono text-sm text-destructive overflow-x-auto">
-                                                            <div className="bg-gray-100 p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-destructive">
+                                                            <div className="bg-gray-100 dark:bg-muted p-2 rounded-md break-all word-break overflow-hidden text-sm font-mono text-destructive">
                                                                 {Array.isArray(
                                                                     testCase.stderr
                                                                 ) ||

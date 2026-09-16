@@ -17,7 +17,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
             <div className="flex items-center">
@@ -70,7 +70,7 @@ export const columns: ColumnDef<Task>[] = [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>
