@@ -5,6 +5,7 @@ import { api } from '@/utils/axios.config'
 
 export type LiveClassStudentSubmissionParams = {
     liveClassId: string | number
+    bootcampId: string | number
     limit?: number
     offset?: number
     batchId?: string
@@ -22,6 +23,7 @@ export function useLiveClassStudentSubmissions() {
     const fetchLiveClassStudentSubmissions = useCallback(
         async ({
             liveClassId,
+            bootcampId,
             limit = 10,
             offset = 0,
             batchId,
@@ -30,6 +32,7 @@ export function useLiveClassStudentSubmissions() {
             searchTerm,
         }: LiveClassStudentSubmissionParams) => {
             const queryParams = new URLSearchParams({
+                bootcampId: String(bootcampId),
                 limit: String(limit),
                 offset: String(offset),
             })

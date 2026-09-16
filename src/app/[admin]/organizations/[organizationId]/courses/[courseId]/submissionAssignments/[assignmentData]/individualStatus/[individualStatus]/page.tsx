@@ -261,7 +261,7 @@ const Page = ({ params }: PageParams) => {
                             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wide">
                                 Assignment Description
                             </h3>
-                            <div className="bg-white rounded-md shadow-sm border border-border">
+                            <div className="bg-background rounded-md shadow-sm border border-border">
                                 <RemirrorTextEditor
                                     initialContent={initialContent}
                                     setInitialContent={setInitialContent}

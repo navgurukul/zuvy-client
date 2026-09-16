@@ -9,6 +9,7 @@ export const usePracticeProblemStatus = (
   options: UsePracticeProblemStatusOptions = {}
 ): UsePracticeProblemStatusResult => {
   const {
+    bootcampId,
     chapterId,
     questionId,
     searchStudent = '',
@@ -20,6 +21,7 @@ export const usePracticeProblemStatus = (
 
   const [studentDetails, setStudentDetails] = useState<any[]>([])
   const [totalStudentsCount, setTotalStudentsCount] = useState<number>(0)
+  const [totalSubmittedStudents, setTotalSubmittedStudents] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<Error | null>(null)
   const mountedRef = useRef(true)
@@ -33,6 +35,7 @@ export const usePracticeProblemStatus = (
 
   const buildUrl = useCallback((params: Partial<UsePracticeProblemStatusOptions>) => {
     if (!moduleId) return ''
+    const currentBootcampId = params.bootcampId ?? bootcampId
     const currentChapterId = params.chapterId ?? chapterId
     const currentQuestionId = params.questionId ?? questionId
     const currentSearchStudent = params.searchStudent ?? searchStudent
@@ -43,6 +46,9 @@ export const usePracticeProblemStatus = (
     let url = `/submission/practiseProblemStatus/${moduleId}`
     const queryParams = new URLSearchParams()
 
+    if (currentBootcampId !== undefined) {
+      queryParams.append('bootcampId', currentBootcampId.toString())
+    }
     if (currentChapterId !== undefined) {
       queryParams.append('chapterId', currentChapterId.toString())
     }
@@ -64,7 +70,7 @@ export const usePracticeProblemStatus = (
 
     const queryString = queryParams.toString()
     return queryString ? `${url}?${queryString}` : url
-  }, [moduleId, chapterId, questionId, searchStudent, batchId, orderBy, orderDirection])
+  }, [moduleId, bootcampId, chapterId, questionId, searchStudent, batchId, orderBy, orderDirection])
 
   const fetchStatus = useCallback(async (customParams?: Partial<UsePracticeProblemStatusOptions>) => {
     const url = buildUrl(customParams || {})
@@ -121,5 +127,5 @@ export const usePracticeProblemStatus = (
     fetchData()
   }, [fetchData])
 
-  return { studentDetails, totalStudentsCount, loading, error, refetch, fetchStatus }
+  return { studentDetails, totalStudentsCount, totalSubmittedStudents, loading, error, refetch, fetchStatus }
 }

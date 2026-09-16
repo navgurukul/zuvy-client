@@ -68,10 +68,10 @@ const OverviewComponent = (props: OverviewComponentProps) => {
                 {!props?.proctoringData?.canCopyPaste &&
                 !props?.proctoringData?.canTabChange &&
                 !props?.proctoringData?.canScreenExit ? (
-                    <Card className="border-red-200 bg-red-50">
+                    <Card className="border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-950/30">
                         <CardContent className="p-4 text-center">
-                            <AlertTriangle className="h-5 w-5 mx-auto mb-2 text-red-600" />
-                            <p className="text-base font-semibold text-red-600">
+                            <AlertTriangle className="h-5 w-5 mx-auto mb-2 text-red-600 dark:text-red-400" />
+                            <p className="text-base font-semibold text-red-600 dark:text-red-400">
                                 No Proctoring Enabled By the Admin
                             </p>
                         </CardContent>
@@ -79,16 +79,16 @@ const OverviewComponent = (props: OverviewComponentProps) => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {props?.proctoringData?.canCopyPaste && (
-                            <Card className="border-yellow-200 bg-yellow-50">
+                            <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800/50 dark:bg-yellow-950/30">
                                 <CardContent className="p-4 text-center">
-                                    <Copy className="h-5 w-5 mx-auto mb-2 text-yellow-600" />
-                                    <p className="text-xl font-bold text-yellow-700">
+                                    <Copy className="h-5 w-5 mx-auto mb-2 text-yellow-600 dark:text-yellow-400" />
+                                    <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300">
                                         {props.copyPaste ||
                                         props.copyPaste === 0
                                             ? props.copyPaste
                                             : 'None'}
                                     </p>
-                                    <p className="text-sm text-yellow-600">
+                                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
                                         Copy Paste
                                     </p>
                                 </CardContent>
@@ -96,16 +96,16 @@ const OverviewComponent = (props: OverviewComponentProps) => {
                         )}
 
                         {props?.proctoringData?.canTabChange && (
-                            <Card className="border-orange-200 bg-orange-50">
+                            <Card className="border-orange-200 bg-orange-50 dark:border-orange-800/50 dark:bg-orange-950/30">
                                 <CardContent className="p-4 text-center">
-                                    <Monitor className="h-5 w-5 mx-auto mb-2 text-orange-600" />
-                                    <p className="text-xl font-bold text-orange-700">
+                                    <Monitor className="h-5 w-5 mx-auto mb-2 text-orange-600 dark:text-orange-400" />
+                                    <p className="text-xl font-bold text-orange-700 dark:text-orange-300">
                                         {props.tabchanges ||
                                         props.tabchanges === 0
                                             ? props.tabchanges
                                             : 'None'}
                                     </p>
-                                    <p className="text-sm text-orange-600">
+                                    <p className="text-sm text-orange-600 dark:text-orange-400">
                                         Tab Changes
                                     </p>
                                 </CardContent>
@@ -113,16 +113,16 @@ const OverviewComponent = (props: OverviewComponentProps) => {
                         )}
 
                         {props?.proctoringData?.canScreenExit && (
-                            <Card className="border-red-200 bg-red-50">
+                            <Card className="border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-950/30">
                                 <CardContent className="p-4 text-center">
-                                    <AlertTriangle className="h-5 w-5 mx-auto mb-2 text-red-600" />
-                                    <p className="text-xl font-bold text-red-700">
+                                    <AlertTriangle className="h-5 w-5 mx-auto mb-2 text-red-600 dark:text-red-400" />
+                                    <p className="text-xl font-bold text-red-700 dark:text-red-300">
                                         {props.fullScreenExit ||
                                         props.fullScreenExit === 0
                                             ? props.fullScreenExit
                                             : 'None'}
                                     </p>
-                                    <p className="text-sm text-red-600">
+                                    <p className="text-sm text-red-600 dark:text-red-400">
                                         Full Screen Exits
                                     </p>
                                 </CardContent>
