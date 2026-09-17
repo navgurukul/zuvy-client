@@ -1156,7 +1156,7 @@ export const MentorDashboardSkeleton: React.FC = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, index) => (
-          <Card key={index} className="rounded-3xl border-slate-200 shadow-sm">
+          <Card key={index} className="rounded-3xl border-border shadow-sm">
             <CardContent className="p-5 flex justify-between items-start">
               <div className="space-y-3 w-full">
                 <Skeleton className="h-12 w-12 rounded-full" />
@@ -1174,7 +1174,7 @@ export const MentorDashboardSkeleton: React.FC = () => {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="rounded-3xl shadow-sm border-slate-200">
+          <Card className="rounded-3xl shadow-sm border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-8 w-20" />
@@ -1195,7 +1195,7 @@ export const MentorDashboardSkeleton: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl shadow-sm border-slate-200">
+          <Card className="rounded-3xl shadow-sm border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <Skeleton className="h-6 w-28" />
               <Skeleton className="h-8 w-20" />
@@ -1217,7 +1217,7 @@ export const MentorDashboardSkeleton: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl shadow-sm border-slate-200">
+          <Card className="rounded-3xl shadow-sm border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <Skeleton className="h-6 w-40" />
               <Skeleton className="h-8 w-24" />
@@ -1235,14 +1235,14 @@ export const MentorDashboardSkeleton: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <Card className="rounded-3xl shadow-sm border-slate-200">
+          <Card className="rounded-3xl shadow-sm border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-5 w-5 rounded-full" />
             </CardHeader>
             <CardContent className="space-y-3">
               {[...Array(4)].map((_, index) => (
-                <div key={index} className="rounded-xl border bg-slate-50 p-3 space-y-2">
+                <div key={index} className="rounded-xl border bg-slate-50 dark:bg-muted p-3 space-y-2">
                   <Skeleton className="h-4 w-32" />
                   <Skeleton className="h-3 w-full" />
                   <Skeleton className="h-3 w-24" />
@@ -1251,7 +1251,7 @@ export const MentorDashboardSkeleton: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl shadow-sm border-slate-200">
+          <Card className="rounded-3xl shadow-sm border-border">
             <CardHeader>
               <Skeleton className="h-6 w-28" />
             </CardHeader>

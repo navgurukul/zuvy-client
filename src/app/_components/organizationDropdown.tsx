@@ -112,7 +112,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                 !shouldShowDropdown ? (
                     <Button
                         variant="ghost"
-                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 dark:hover:bg-card border-none"
                     >
                         <div className="flex items-center gap-3">
                             {selected ? (
@@ -121,7 +121,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                         {/* {getInitials(selected)} */}
                                         {selected.code}
                                     </div>
-                                    <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                    <span className="text-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
                                         {selected.title}
                                     </span>
                                 </>
