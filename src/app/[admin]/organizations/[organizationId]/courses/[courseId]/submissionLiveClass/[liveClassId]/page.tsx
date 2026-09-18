@@ -96,6 +96,7 @@ const Page = ({ params }: any) => {
             setLoading(true)
             const apiData = await fetchLiveClassStudentSubmissions({
                 liveClassId: params.liveClassId,
+                bootcampId: params.courseId,
                 limit,
                 offset: currentOffset,
                 batchId: selectedBatch,
@@ -104,14 +105,20 @@ const Page = ({ params }: any) => {
                 searchTerm: searchQuery,
             })
 
-            const students = apiData?.data?.map((record: any) => ({
+            const submissions = apiData?.data || []
+            const students = submissions.map((record: any) => ({
                 ...record,
                 id: record.userId,
                 name: record.user?.name,
                 email: record.user?.email
-            })) || []
+            }))
             setDataTableLiveClass(students)
-            setTotalStudents(apiData?.totalCount || 0)
+            setLiveClassData(
+                submissions[0]
+                    ? { title: submissions[0].sessionTitle }
+                    : undefined
+            )
+            setTotalStudents(apiData?.totalSubmittedStudents || 0)
             setTotalPages(apiData?.totalPages || 0)
             setLastPage(apiData?.totalPages || 0)
         } catch (error) {
@@ -126,7 +133,7 @@ const Page = ({ params }: any) => {
             if (!query.trim()) return []
             try {
                 const res = await api.get(
-                    `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?limit=5&offset=0&name=${encodeURIComponent(query)}&email=${encodeURIComponent(query)}`
+                    `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?bootcampId=${params.courseId}&limit=5&offset=0&name=${encodeURIComponent(query)}&email=${encodeURIComponent(query)}`
                 )
                 const students = res.data.data?.data || []
                 return students
@@ -155,6 +162,8 @@ const Page = ({ params }: any) => {
 
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
+
+        queryParams.append('bootcampId', params.courseId)
 
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
@@ -219,9 +228,9 @@ const Page = ({ params }: any) => {
                     </Button>
                 </Link>
             </div>
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {liveClassData?.title || 'Loading...'}
                     </CardTitle>
                 </CardHeader>
@@ -267,7 +276,7 @@ const Page = ({ params }: any) => {
             <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button

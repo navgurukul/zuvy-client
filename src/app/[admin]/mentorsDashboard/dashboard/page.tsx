@@ -346,7 +346,7 @@ function DashboardPageContent() {
   if (isEmptyDashboard) {
     return (
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <Card className="border-slate-200">
+        <Card className="border-border">
           <CardContent className="flex flex-col items-center justify-center text-center py-24">
             <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
               <Calendar className="h-7 w-7 text-emerald-700" />
@@ -388,8 +388,8 @@ function DashboardPageContent() {
               className={cn(
                 "flex items-center justify-between rounded-lg border px-4 py-3 shadow-sm",
                 alert.type === "reschedule"
-                  ? "border-amber-200 bg-amber-50 text-amber-900"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-950"
+                  ? "border-amber-200 bg-amber-50 dark:bg-amber-100/30 text-amber-900 dark:text-amber-500"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-950 dark:bg-emerald-100/30 dark:text-emerald-500"
               )}
             >
               <div className="flex items-center gap-2">
@@ -426,8 +426,8 @@ function DashboardPageContent() {
                   className={cn(
                     "text-xs font-semibold hover:underline px-2 py-1 flex items-center gap-0.5",
                     alert.type === "reschedule"
-                      ? "text-amber-700 hover:text-amber-900"
-                      : "text-emerald-700 hover:text-emerald-900"
+                      ? "text-amber-700 hover:text-amber-900 dark:text-amber-500"
+                      : "text-emerald-700 hover:text-emerald-900 dark:text-emerald-500"
                   )}
                 >
                   Dismiss &times;
@@ -549,7 +549,7 @@ function DashboardPageContent() {
                 upcomingSessions.slice(0, 5).map((session) => (
                   <div key={session.id} className=" border-b p-3 flex items-center justify-between gap-3 mb-0">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-600">
                         {getLearnerLabel(session)
                           .replace(/\s+/g, "")
                           .slice(0, 2)
@@ -557,7 +557,7 @@ function DashboardPageContent() {
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900 text-start">
+                        <p className="truncate text-sm font-semibold text-foreground text-start">
                           {getLearnerLabel(session)}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
@@ -574,19 +574,19 @@ function DashboardPageContent() {
 
 
         <div className="space-y-6">
-          <Card className='rounded-lg shadow-sm border-slate-200 hover:shadow-md transition-shadow'>
+          <Card className='rounded-lg shadow-sm border-border hover:shadow-md transition-shadow'>
             <CardHeader className='text-left pb-3'>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-2 space-y-1">
               <Link
                 href={`/${role}/mentorsDashboard/availability`}
-                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-muted rounded-lg group transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-50 rounded-full"><Calendar className="w-4 h-4 text-emerald-700" /></div>
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-800/30 rounded-full"><Calendar className="w-4 h-4 text-emerald-700" /></div>
                   <div className="text-left">
-                    <p className="text-xs font-bold text-slate-800">Manage Availability</p>
+                    <p className="text-xs font-bold text-foreground">Manage Availability</p>
                     <p className="text-[10px] text-slate-400">Set your open slots</p>
                   </div>
                 </div>
@@ -595,12 +595,12 @@ function DashboardPageContent() {
 
               <Link
                 href={`/${role}/mentorsDashboard/sessions`}
-                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-muted rounded-lg group transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-50 rounded-full"><BookOpen className="w-4 h-4 text-orange-600" /></div>
+                  <div className="p-2 bg-orange-50 dark:bg-emerald-800/30 rounded-full"><BookOpen className="w-4 h-4 text-orange-600" /></div>
                   <div className="text-left">
-                    <p className="text-xs font-bold text-slate-800">View All Sessions</p>
+                    <p className="text-xs font-bold text-foreground">View All Sessions</p>
                     <p className="text-[10px] text-slate-400">Upcoming & past sessions</p>
                   </div>
                 </div>
@@ -609,12 +609,12 @@ function DashboardPageContent() {
 
               <Link
                 href={`/${role}/mentorsDashboard/performance`}
-                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 rounded-lg group transition-colors"
+                className="w-full p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-muted rounded-lg group transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-50 rounded-full"><BarChart3 className="w-4 h-4 text-emerald-500" /></div>
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-800/30 rounded-full"><BarChart3 className="w-4 h-4 text-emerald-500" /></div>
                   <div className="text-left">
-                    <p className="text-xs font-bold text-slate-800">Performance Metrics</p>
+                    <p className="text-xs font-bold text-foreground">Performance Metrics</p>
                     <p className="text-[10px] text-slate-400">Ratings & session stats</p>
                   </div>
                 </div>

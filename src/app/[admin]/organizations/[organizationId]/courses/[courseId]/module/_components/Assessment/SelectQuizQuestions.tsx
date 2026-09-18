@@ -55,11 +55,11 @@ const SelectQuizQuestions = ({
 
                     return (
                         <React.Fragment key={question.id}>
-                            <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
+                            <div className="py-4 px-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-card mb-4">
                                 <div className="flex justify-between items-start w-full">
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">
-                                            <h2 className="font-bold text-[15px] text-gray-600">
+                                            <h2 className="font-bold text-[15px] text-gray-600 dark:text-muted-foreground">
                                                 {renderQuestionPreview(
                                                     questionText,
                                                     { textLength: 40 }
@@ -84,7 +84,7 @@ const SelectQuizQuestions = ({
                                     </div>
                                     <div className="flex items-center gap-1">
                                         {tag && (
-                                            <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] px-[8px]">
+                                            <span className="text-[12px] text-[#518672] bg-[#DCE7E3] dark:bg-gray-700 rounded-[100px] px-[8px]">
                                                 {tag?.tagName}
                                             </span>
                                         )}

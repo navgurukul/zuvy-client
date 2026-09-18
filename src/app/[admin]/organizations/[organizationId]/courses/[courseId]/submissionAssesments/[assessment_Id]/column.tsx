@@ -27,7 +27,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             return (
                 <div className="flex gap-3">
                     <div>
-                        <div className="text-left font-medium text-black">
+                        <div className="text-left font-medium text-foreground">
                             {name}
                         </div>
                         <div className="truncate max-w-[100px] font-mono text-left text-sm text-muted-foreground">
@@ -45,7 +45,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="text-left w-full">
-                    <Badge variant="outline" className="text-black border-black">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>
@@ -59,7 +59,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const startedAt = row.original.startedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium text-black">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {startedAt
                             ? (() => {
                                   const date = new Date(startedAt)
@@ -106,7 +106,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const submitedAt = row.original.submitedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium text-black">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
                         {submitedAt
                             ? (() => {
@@ -155,7 +155,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             }
 
             return (
-                <div className="flex items-center gap-2 font-medium text-black">
+                <div className="flex items-center gap-2 font-medium text-foreground">
                     {timeTaken}
                 </div>
             )
@@ -175,7 +175,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                     : 'N/A'
             return (
                 <div className='flex w-full items-center justify-start'>
-                    <Badge variant="outline" className="text-black border-black">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {label}
                     </Badge>
                 </div>
@@ -240,7 +240,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
         cell: ({ row }) => {
             const attempts = (row.original.reattemptCount ?? 0) + 1
             return (
-            <div className="flex w-full items-center justify-start text-left">
+            <div className="flex w-full items-center justify-start text-left text-foreground">
                 <span className="font-medium">
                     {attempts}
                 </span>
@@ -272,7 +272,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                         }
                         className={
                             submitedAt
-                                ? 'text-black hover:text-blue-600'
+                                ? 'text-foreground hover:text-blue-600'
                                 : 'opacity-50 cursor-not-allowed'
                         }
                     >

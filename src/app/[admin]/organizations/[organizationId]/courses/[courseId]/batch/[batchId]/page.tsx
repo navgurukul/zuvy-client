@@ -457,7 +457,7 @@ const BatchesInfo = ({
                     Back to Batches
                 </p>
             </Link>
-            <MaxWidthWrapper className="p-4 text-gray-600">
+            <MaxWidthWrapper className="p-4 text-gray-600 dark:text-muted-foreground">
                 <div className="flex justify-between">
                     <div className="w-full flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -679,7 +679,7 @@ const BatchesInfo = ({
                                     inputWidth="w-full"
                                 />
                             </div>
-                            <div className="flex items-center gap-x-4 text-sm">
+                            <div className="flex items-center gap-x-4 text-sm dark:text-muted-foreground">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -837,7 +837,7 @@ const BatchesInfo = ({
                                 )}
                                 {permissions.deleteBatch && (
                                     <>
-                                    <div  className="flex items-center gap-1 cursor-pointer">
+                                    <div  className="flex items-center gap-1 cursor-pointer dark:text-muted-foreground">
                                         <Trash2
                                             onClick={() =>
                                                 setDeleteModalOpen(true)

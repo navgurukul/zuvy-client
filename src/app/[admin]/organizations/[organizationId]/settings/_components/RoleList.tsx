@@ -28,8 +28,8 @@ const RoleList: React.FC<RoleListProps> = ({ roles, selectedRole, onRoleChange }
                                 className={cn(
                                     'w-full text-left px-4 py-4 transition-all duration-200 flex items-center justify-between gap-2',
                                     isSelected
-                                        ? 'bg-success-light border-l-4 border-l-success'
-                                        : 'bg-white hover:bg-muted border-l-4 border-l-transparent'
+                                        ? 'bg-success-light dark:bg-success-light/40 border-l-4 border-l-success'
+                                        : 'bg-card hover:bg-muted border-l-4 border-l-transparent'
                                 )}
                             >
                                 <div className={cn('text-sm font-medium truncate', isSelected ? 'text-success-dark' : 'text-foreground')}>

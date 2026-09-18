@@ -24,16 +24,18 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
   textColorClass: string
   borderColorClass: string
   backgroundColor: string
+  darkBackgroundColor: string
   dotColorClass: string
 }> = {
   0: {
     tier: 0,
     label: 'NO ACCESS',
     description: 'No visibility',
-    colorClass: 'text-slate-600',
-    textColorClass: 'text-slate-700',
+    colorClass: 'text-muted-dark/80',
+    textColorClass: 'text-muted-dark/90',
     borderColorClass: 'border-slate-400',
     backgroundColor: 'bg-slate-100',
+    darkBackgroundColor: 'dark:bg-muted/50',
     dotColorClass: 'bg-slate-400',
   },
   1: {
@@ -44,6 +46,7 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
     textColorClass: 'text-info',
     borderColorClass: 'border-info',
     backgroundColor: 'bg-info-light',
+    darkBackgroundColor: 'dark:bg-info/20',
     dotColorClass: 'bg-info',
   },
   2: {
@@ -54,6 +57,7 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
     textColorClass: 'text-warning',
     borderColorClass: 'border-warning',
     backgroundColor: 'bg-warning-light',
+    darkBackgroundColor: 'dark:bg-warning/20',
     dotColorClass: 'bg-warning',
   },
   3: {
@@ -64,6 +68,7 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
     textColorClass: 'text-secondary-dark',
     borderColorClass: 'border-secondary-dark',
     backgroundColor: 'bg-secondary-light',
+    darkBackgroundColor: 'dark:bg-secondary/20',
     dotColorClass: 'bg-secondary-dark',
   },
   4: {
@@ -74,6 +79,7 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
     textColorClass: 'text-success',
     borderColorClass: 'border-success',
     backgroundColor: 'bg-success-light',
+    darkBackgroundColor: 'dark:bg-success/20',
     dotColorClass: 'bg-success',
   },
 }

@@ -376,12 +376,12 @@ useEffect(() => {
                                         return (
                                             <div
                                                 key={question.id}
-                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-500 mb-4"
                                             >
                                                 <div className="flex justify-between text-start items-center w-full">
                                                     <div className="w-full">
                                                         <div className="flex items-center gap-2 justify-between">
-                                                            <h2 className="font-bold text-[16px] text-gray-600">
+                                                            <h2 className="font-bold text-[16px] text-gray-600 dark:text-muted-foreground">
                                                                 {ellipsis(
                                                                     question.title,
                                                                     30
@@ -389,7 +389,7 @@ useEffect(() => {
                                                             </h2>
 
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
+                                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-gray-600 py-1 rounded-2xl px-2">
                                                                     {
                                                                         selectedTagName[0]
                                                                             ?.tagName
@@ -465,7 +465,7 @@ useEffect(() => {
                                                             </div>
                                                         </div>
                                                         <div className="w-full">
-                                                            <p className="text-gray-600 text-[15px] mt-1">
+                                                            <p className="text-gray-600 dark:text-muted-foreground text-[15px] mt-1">
                                                                 {ellipsis(
                                                                     question.description,
                                                                     60

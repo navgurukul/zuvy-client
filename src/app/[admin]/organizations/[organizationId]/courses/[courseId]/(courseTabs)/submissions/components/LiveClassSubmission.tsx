@@ -47,7 +47,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
         if (!liveClassId) return
 
         downloadCsv({
-            endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}`,
+            endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}?bootcampId=${courseId}`,
             fileName: liveClassTitle || 'live-class-report',
 
             dataPath: 'data.data',
@@ -109,7 +109,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                 return (
                     <div
                         key={liveClass.id}
-                        className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
+                        className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
                         <div className="absolute top-2 right-2 z-10 flex items-center">
                             {submissions > 0 ? (
@@ -118,13 +118,13 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                     className="hover:text-gray-700 cursor-pointer"
                                     title="Download Report"
                                 >
-                                    <ArrowDownToLine size={20} className="text-gray-500" />
+                                    <ArrowDownToLine size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
                                 </button>
                             ) : (
                                 <div className="absolute top-2 pr-3 right-10">
                                     <div className="relative group inline-flex">
                                         <button disabled className="cursor-not-allowed">
-                                            <ArrowDownToLine size={20} className="text-gray-400" />
+                                            <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                                         </button>
 
                                         <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
@@ -141,7 +141,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                         variant="ghost"
                                         className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
                                     >
-                                        <Eye size={20} />
+                                        <Eye size={20} className="hover:text-gray-700 text-gray-500 dark:text-gray-400 dark:hover:text-gray-300" />
                                     </Button>
                                 </Link>
                             ) : (
@@ -151,7 +151,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                             disabled
                                             className="cursor-not-allowed"
                                         >
-                                            <Eye size={20} className="text-gray-400" />
+                                            <Eye size={20} className="text-gray-400 dark:text-gray-500" />
                                         </button>
 
                                         <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">

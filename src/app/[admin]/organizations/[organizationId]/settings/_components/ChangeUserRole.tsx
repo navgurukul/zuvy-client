@@ -82,7 +82,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
                             onValueChange={handleRoleChange}
                             disabled={loading || isCurrentUser}
                         >
-                            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
+                            <SelectTrigger className="w-auto min-w-28 bg-card border-border h-8 text-sm capitalize">
                                 <SelectValue />
                             </SelectTrigger>
 

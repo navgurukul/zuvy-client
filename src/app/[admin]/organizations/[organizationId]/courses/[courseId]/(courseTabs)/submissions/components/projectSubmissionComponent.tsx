@@ -79,13 +79,13 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                 return (
                     <div
                         key={item.id}
-                        className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                        className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
                     >
                         <div className="absolute top-2 right-2 z-10 flex items-center gap-[2px]">
                             {submissions > 0 ? (
                                 <button
                                     onClick={() => handleDownloadCsv(projectId, projectTitle)}
-                                    className="cursor-pointer text-gray-500 hover:text-gray-700 px-1"
+                                    className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-1"
                                     title="Download Report"
                                 >
                                     <ArrowDownToLine size={20} />
@@ -93,7 +93,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                             ) : (
                                 <div className="relative group inline-flex">
                                         <button disabled className="cursor-not-allowed px-1 text-gray-400 mt-2">
-                                            <ArrowDownToLine size={20} className="text-gray-400" />
+                                            <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                                         </button>
 
                                         <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
@@ -107,7 +107,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                         variant="ghost"
                                         className="hover:bg-white-500  px-1 hover:text-gray-700 transition-colors"
                                     >
-                                        <Eye className="text-gray-500" size={20} />
+                                        <Eye className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" size={20} />
                                     </Button>
                                 </Link>
                             ) : (
@@ -116,7 +116,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                             disabled
                                             className="cursor-not-allowed px-1 mt-2"
                                         >
-                                            <Eye className="text-gray-400" size={20} />
+                                            <Eye className="text-gray-400 dark:text-gray-500" size={20} />
                                         </button>
                                     <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
                                         No submissions to view

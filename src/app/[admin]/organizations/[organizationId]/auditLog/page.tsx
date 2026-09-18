@@ -480,7 +480,7 @@ export default function AuditLogPage() {
       {/* Main Content - Audit Log with API Data */}
       <div className={`space-y-6 ${loading && !isInitialLoad ? 'opacity-75' : ''} transition-opacity`}>
         {groupedLogs.today.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
               title="Today"
               logs={groupedLogs.today}
@@ -490,7 +490,7 @@ export default function AuditLogPage() {
           </div>
         )}
         {groupedLogs.thisWeek.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
               title="This Week"
               logs={groupedLogs.thisWeek}
@@ -500,7 +500,7 @@ export default function AuditLogPage() {
           </div>
         )}
         {groupedLogs.older.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
               title="Older"
               logs={groupedLogs.older}
@@ -523,7 +523,7 @@ export default function AuditLogPage() {
         )}
 
         {transformedLogs.length === 0 && !loading && (
-          <div className="rounded-lg border border-slate-200 bg-white px-6 py-12 text-center text-slate-600">
+          <div className="rounded-lg border border-border bg-card px-6 py-12 text-center text-foreground/70">
             <p>No audit logs found for the selected filters</p>
           </div>
         )}

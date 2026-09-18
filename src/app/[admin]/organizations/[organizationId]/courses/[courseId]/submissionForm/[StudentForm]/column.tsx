@@ -42,7 +42,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {name}
                     </span>
                 </div>
@@ -66,7 +66,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {email}
                     </span>
                 </div>
@@ -80,7 +80,7 @@ export const columns: ColumnDef<Task>[] = [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>
@@ -97,7 +97,7 @@ export const columns: ColumnDef<Task>[] = [
             const isSubmitted = row.original.status === 'Submitted'
             return (
                 <div className="flex space-x-2">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
+                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium text-foreground">
                         {isSubmitted ? (
                             <div className="bg-green-600 h-3 w-3 rounded-full" />
                         ) : (

@@ -824,6 +824,7 @@ export type UseOverallAnalysisArgs = {
 
 // usePracticeProblemStatus
 export interface UsePracticeProblemStatusOptions {
+  bootcampId?: string | number
   chapterId?: string | number
   questionId?: string | number
   searchStudent?: string
@@ -836,6 +837,7 @@ export interface UsePracticeProblemStatusOptions {
 export interface UsePracticeProblemStatusResult {
   studentDetails: any[]
   totalStudentsCount: number
+  totalSubmittedStudents: number
   loading: boolean
   error: Error | null
   refetch: () => void

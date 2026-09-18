@@ -49,7 +49,7 @@ const ProfileDropDown = ({
                             src={studentData?.profile_picture}
                             alt="Student"
                         />
-                        <AvatarFallback className="bg-gray-200 text-muted-foreground text-md font-medium">
+                        <AvatarFallback className="bg-muted text-muted-foreground text-md font-medium">
                             {getUserInitials(studentData?.name)}
                         </AvatarFallback>
                     </Avatar>

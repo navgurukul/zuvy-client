@@ -107,40 +107,40 @@ function ChapterModal({
     return (
         <Dialog open={true} onOpenChange={onClose}>
             <DialogContent className="max-w-max">
-                <DialogTitle className="mb-3 text-left text-gray-600 text-[16px]">
+                <DialogTitle className="mb-3 text-left text-gray-600 dark:text-muted-foreground text-[16px]">
                     New Chapter
                 </DialogTitle>
                 <div className="grid grid-cols-3 p-3 gap-y-6 gap-x-2 ">
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(1)}
                     >
                         <Video className="mr-2 h-6 w-6" />
                         <span>Video</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(2)}
                     >
                         <BookOpenText className="mr-2 h-6 w-6" />
                         <span>Article</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(3)}
                     >
                         <SquareCode className="mr-2 h-6 w-6" />
                         <span>Coding Problem</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(4)}
                     >
                         <FileQuestion className="mr-2 h-6 w-6" />
                         <span>Quiz</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(5)}
                     >
                         <PencilLine className="mr-2 h-6 w-6" />
@@ -148,28 +148,28 @@ function ChapterModal({
                     </div>
 
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(6)}
                     >
                         <BookOpenCheck className="mr-2 h-6 w-6" />
                         <span>Assessment</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(7)}
                     >
                         <Newspaper className="mr-2 h-6 w-6" />
                         <span>Form</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => setLiveDialogOpen(true)}
                     >
                         <Play className="mr-2 h-6 w-6" />
                         <span>Live Classes</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(9)}
                     >
                         <Sparkle className="mr-2 h-6 w-6" />

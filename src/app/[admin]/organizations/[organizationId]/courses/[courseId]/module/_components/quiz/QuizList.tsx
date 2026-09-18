@@ -55,13 +55,13 @@ function QuizList({
 
                 return (
                     <div
-                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
+                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-600 mt-4"
                         key={question.id}
                     >
                         <div className="flex items-center justify-between w-full">
                             <div className="w-full space-y-2 ">
                                 <div className="flex justify-between items-center gap-x-2">
-                                    <h1 className="scroll-m-20 text-base text-gray-600 font-semibold tracking-tight lg:text-lg">
+                                    <h1 className="scroll-m-20 text-base text-gray-600 dark:text-muted-foreground font-semibold tracking-tight lg:text-lg">
                                         {renderQuestionPreview(
                                             question.quizVariants[0]?.question,
                                             { textLength: 40 }
@@ -69,12 +69,12 @@ function QuizList({
                                     </h1>
                                     <div className="flex mr-4">
                                         <div className="space-x-2 mr-4">
-                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] p-1 rounded-[100px] px-[8px]">
+                                            <span className="text-sm text-[#518672] bg-[#DCE7E3]  dark:bg-gray-700 p-1 rounded-[100px] px-[8px]">
                                                 {newTagName[0]?.tagName}
                                             </span>
                                             <span
                                                 className={cn(
-                                                    `text-sm rounded-xl px-2 py-1 mt-5 mr-3 `,
+                                                    `text-sm rounded-xl px-2 py-1 mt-5 mr-3 dark:bg-slate-600 `,
                                                     difficultyColor(
                                                         question.difficulty
                                                     ), // Text color

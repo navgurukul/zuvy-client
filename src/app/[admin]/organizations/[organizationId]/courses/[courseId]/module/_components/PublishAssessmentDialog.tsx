@@ -122,11 +122,11 @@ const PublishAssessmentDialog = () => {
                 </DialogHeader>
                 <Tabs value={tab} onValueChange={(val) => setTab(val as 'schedule' | 'now')}
                     className={`mt-4 text-left`}>
-                    <TabsList className="flex bg-white border-b-2 justify-start border-gray-300">
+                    <TabsList className="flex bg-white dark:bg-gray-800 border-b-2 justify-start border-gray-300 dark:border-gray-600">
                         <div>
                             <TabsTrigger
                                 value="schedule"
-                                className={`flex-1 mt-1 ${tab === 'schedule' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
+                                className={`flex-1 mt-1 ${tab === 'schedule' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-gray-600 dark:!text-gray-400'}`}
                             >
                                 Schedule for Future
                             </TabsTrigger>
@@ -134,7 +134,7 @@ const PublishAssessmentDialog = () => {
                         <div>
                             <TabsTrigger
                                 value="now"
-                                className={`flex-1 mt-1 ${tab === 'now' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
+                                className={`flex-1 mt-1 ${tab === 'now' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-gray-600 dark:!text-gray-400'}`}
                             >
                                 Publish Now
                             </TabsTrigger>
@@ -170,7 +170,7 @@ const PublishAssessmentDialog = () => {
                             },
                         ].map(({ label, date, setDate, time, setTime, error }, i) => (
                             <div key={i} className="space-y-1">
-                                <label className="text-sm font-medium block">{label}</label>
+                                <label className="text-sm font-medium block dark:text-gray-200">{label}</label>
                                 <div className="flex items-center justify-start gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -212,11 +212,11 @@ const PublishAssessmentDialog = () => {
                     </TabsContent>
 
                     <TabsContent value="now" className="mt-4 space-y-4">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground dark:text-gray-400">
                             The assessment will be published and start immediately. Please enter an end time.
                         </p>
                         <div className="space-y-1">
-                            <label className="text-sm font-medium block">Assessment End Date and Time</label>
+                            <label className="text-sm font-medium block dark:text-gray-200">Assessment End Date and Time</label>
                             <div className="flex justify-start items-center  gap-2">
                                 <Dialog open={isCalendarOpen} onOpenChange={setCalendarOpen}>
                                     <DialogTrigger asChild>

@@ -9,21 +9,21 @@ interface StepDetailsProps {
   isGenerated?: boolean;
 }
 
-const inputClasses = "w-full px-3 py-2.5 rounded-md border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none font-[inherit] box-border disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed";
+const inputClasses = "w-full px-3 py-2.5 rounded-md border border-slate-200 text-sm text-slate-900 bg-white dark:bg-card dark:border-gray-600 dark:text-muted-foreground focus:outline-none font-[inherit] box-border disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-muted disabled:cursor-not-allowed";
 
 export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 max-w-[680px]">
+    <div className="bg-white dark:bg-card rounded-lg border border-slate-200 dark:border-gray-600 shadow-sm p-5 max-w-[680px]">
       <h4 className="text-base font-bold flex  mb-0.5 mt-0">
         Assessment details
       </h4>
-      <p className="text-[12.5px] flex text-slate-600 mb-3.5 mt-0">
+      <p className="text-[12.5px] flex text-slate-600 dark:text-muted-foreground mb-3.5 mt-0">
         Objective and outcomes are used to guide AI question generation — be
         specific.
       </p>
 
       <div className="mb-5">
-        <label className="block flex font-semibold text-sm text-slate-900 mb-1">
+        <label className="block flex font-semibold text-sm dark:text-muted-foreground text-slate-900 mb-1">
           Assessment name <span className="text-red-500">*</span>
         </label>
         <input
@@ -38,7 +38,7 @@ export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
       </div>
 
       <div className="mb-5">
-        <label className="block flex font-semibold text-sm text-slate-900 mb-1">
+        <label className="block flex font-semibold text-sm text-slate-900 dark:text-muted-foreground mb-1">
           Objective <span className="text-red-500">*</span>
         </label>
         <textarea
@@ -50,13 +50,13 @@ export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
             set({ objective: e.target.value })
           }
         />
-        <div className="text-xs flex text-slate-500 mt-1">
+        <div className="text-xs flex text-slate-500 dark:text-muted-foreground mt-1">
           What this assessment measures — one or two sentences. This is sent to the AI generation API.
         </div>
       </div>
 
       <div className="mb-5">
-        <label className="block flex font-semibold text-sm text-slate-900 mb-1">
+        <label className="block flex font-semibold text-sm text-slate-900 dark:text-muted-foreground mb-1">
           Expected outcomes
         </label>
         <textarea
@@ -68,13 +68,13 @@ export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
             set({ outcomes: e.target.value })
           }
         />
-        <div className="text-xs flex text-slate-500 mt-1">
+        <div className="text-xs flex text-slate-500 dark:text-muted-foreground mt-1">
           What a passing learner should demonstrate. Also sent to AI generation for question relevance.
         </div>
       </div>
 
       <div className="mb-5 flex flex-col">
-        <label className="flex font-semibold text-sm text-slate-900 mb-1">
+        <label className="flex font-semibold text-sm text-slate-900 dark:text-muted-foreground mb-1">
           Number of MCQs per form
         </label>
         <input
@@ -90,7 +90,7 @@ export function StepDetails({ a, set, isGenerated }: StepDetailsProps) {
             })
           }
         />
-        <div className="text-[11px] flex text-slate-500 mt-1">
+        <div className="text-[11px] flex text-slate-500 dark:text-muted-foreground mt-1">
           Each students MCQ section will have this many questions, assembled
           from the pool to match their level.
         </div>

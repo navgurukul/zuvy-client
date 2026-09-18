@@ -79,7 +79,7 @@ const CourseDeleteModal: React.FC<CourseDeleteModalProps> = ({
                         leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                         leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     >
-                        <div className="w-[550px] inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:p-6 relative">
+                        <div className="w-[550px] inline-block align-bottom bg-white dark:bg-card rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:p-6 relative">
                             {/* X Close Button */}
                             <button
                                 onClick={onClose}
@@ -96,7 +96,7 @@ const CourseDeleteModal: React.FC<CourseDeleteModalProps> = ({
                                     <div>
                                         <Dialog.Title
                                             as="h3"
-                                            className="text-lg font-semibold leading-6 text-black"
+                                            className="text-lg font-semibold leading-6 text-black dark:text-muted-foreground"
                                         >
                                             Are you absolutely sure?
                                         </Dialog.Title>
@@ -112,7 +112,7 @@ const CourseDeleteModal: React.FC<CourseDeleteModalProps> = ({
                                         
                                         {/* Course name confirmation */}
                                         <div className="mt-8 mb-4">
-                                            <p className="text-sm font-medium text-gray-900 mb-2">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-muted-foreground mb-2">
                                                 Type <span>&quot;{confirmationText}&quot;</span> to confirm:
                                             </p>
                                             <Input
@@ -139,7 +139,7 @@ const CourseDeleteModal: React.FC<CourseDeleteModalProps> = ({
                                     // variant="outline"
                                     onClick={onClose}
                                     disabled={loading}
-                                    className="p-2 inline-flex justify-center rounded-md text-black border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                    className="p-2 inline-flex justify-center rounded-md text-black dark:text-muted-foreground border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                 >
                                     Cancel
                                 </Button>

@@ -113,7 +113,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                     if (filteredVideos.length === 0) return null
                     return (
                         <div key={key}>
-                            <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
+                            <h2 className="text-lg text-start font-bold text-foreground">
                                 Module - {key}
                             </h2>
                             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -128,7 +128,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 : 0
                                         return (
                                             <div
-                                                className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                 key={video.id}
                                             >
                                                 {/* Content */}
@@ -145,7 +145,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         <div className="flex items-center gap-1">
                                                         <Button
                                                             variant="ghost"
-                                                            className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
+                                                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
                                                             onClick={() =>
                                                             handleVideoDownloadCsv(Number(video.id), video.title)
                                                             }
@@ -157,7 +157,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         >
                                                             <Button
                                                             variant="ghost"
-                                                            className="flex items-center text-gray-500 hover:text-gray-700 hover:bg-transparent px-1"
+                                                            className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-transparent px-1"
                                                             >
                                                             <Eye size={20} />
                                                             </Button>
@@ -170,7 +170,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                     disabled
                                                                     className="cursor-not-allowed px-1 text-gray-400"
                                                                 >
-                                                                    <ArrowDownToLine size={20} className="text-gray-400" />
+                                                                    <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                                                                 </button>
 
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
@@ -184,7 +184,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                     disabled
                                                                     className="cursor-not-allowed px-1 text-gray-400"
                                                                 >
-                                                                    <Eye size={20} className="text-gray-400" />
+                                                                    <Eye size={20} className="text-gray-400 dark:text-gray-500" />
                                                                 </button>
 
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block

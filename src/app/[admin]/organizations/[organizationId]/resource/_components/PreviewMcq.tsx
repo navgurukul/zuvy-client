@@ -120,7 +120,7 @@ const PreviewMCQ = ({
                 className="w-full mt-5 flex flex-col flex-1 min-h-0"
                 onValueChange={(value) => setActiveTab(value)}
             >
-                <TabsList className="flex justify-start bg-white flex-shrink-0">
+                <TabsList className="flex justify-start bg-card flex-shrink-0">
                     {quizData.quizVariants.map((variant: any) => (
                         <TabsTrigger
                             key={variant.id}
@@ -169,7 +169,7 @@ const PreviewMCQ = ({
                                                             parseInt(key) ===
                                                             variant.correctOption
                                                                 ? 'border-2 border-[rgb(81,134,114)] text-[rgb(81,134,114)]'
-                                                                : 'border-gray-300'
+                                                                : 'border-border'
                                                         }
                                                     />
                                                 </li>

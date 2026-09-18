@@ -77,14 +77,14 @@ const RoleCard: React.FC<RoleCardProps> = ({
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
                 ? 'border-primary bg-primary-light'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-border hover:border-gray-300'
                 }`}
         >
             <div className="flex items-start gap-3">
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
                         ? 'bg-blue-100 text-primary'
-                        : 'bg-gray-100 text-foreground'
+                        : 'bg-muted/50 text-foreground'
                         }`}
                 >
                     {icon}
@@ -446,7 +446,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                         </div>
                     </div>
                     <div>
-                        <Label className="block text-sm font-medium text-gray-900 mb-4 text-start">
+                        <Label className="block text-sm font-medium text-foreground mb-4 text-start">
                             Point of Contact <span className="text-red-500">*</span>
                         </Label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -483,7 +483,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                         </div>
                         {isZuvyManaged && (
                             <>
-                                <Label className="block text-sm font-medium text-gray-900 my-4 text-start">
+                                <Label className="block text-sm font-medium text-foreground my-4 text-start">
                                     Zuvy Assignee
                                 </Label>
 
@@ -523,7 +523,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline" className="bg-white">
+                    <Button variant="outline">
                         Cancel
                     </Button>
                 </DialogClose>

@@ -106,7 +106,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         : 0
                                                 return (
                                                     <div
-                                                        className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
+                                                        className="relative bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full"
                                                         key={moduleData.id}
                                                     >
                                                    
@@ -116,7 +116,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             <div className="relative group inline-flex">
                                                                 <button
                                                                     disabled
-                                                                    className="ml-2 cursor-not-allowed text-gray-400"
+                                                                    className="ml-2 cursor-not-allowed text-gray-400 dark:text-gray-500"
                                                                     aria-label="Download full report"
                                                                 >
                                                                     <ArrowDownToLine size={20} />
@@ -127,7 +127,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             </div>
                                                             ) : (
                                                             <button
-                                                                className="ml-2 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                                className="ml-2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                                                                 onClick={() => handleDownloadCsv(Number(chapterId))}
                                                                 aria-label="Download full report"
                                                             >
@@ -141,7 +141,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             {isDisabled ? (
                                                             <div className="relative group inline-flex">
                                                                 <span className="cursor-not-allowed">
-                                                                <Eye size={20} className="text-gray-400 mb-1" />
+                                                                <Eye size={20} className="text-gray-400 dark:text-gray-500 mb-1" />
                                                                 </span>
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
                                                                     No submissions to view
@@ -151,7 +151,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             <Link
                                                                 href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
                                                             >
-                                                                <Eye size={20} className="text-gray-500 hover:text-gray-700 mb-1" />
+                                                                <Eye size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-1" />
                                                             </Link>
                                                             )}
                                                         </div>
@@ -161,9 +161,9 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="p-2">
-                                                                    <FileText className="w-4 h-4 text-gray-600" />
+                                                                    <FileText className="w-4 h-4 text-foreground" />
                                                                 </div>
-                                                                <h3 className="font-medium text-base text-gray-900">
+                                                                <h3 className="font-medium text-base text-foreground">
                                                                     {
                                                                         moduleData.title
                                                                     }
