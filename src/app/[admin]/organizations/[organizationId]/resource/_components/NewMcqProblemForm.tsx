@@ -37,6 +37,7 @@ import { useTopics } from '@/hooks/useGetTopicsEval'
 import { useCreateTopic } from '@/hooks/useCreateTopicEval'
 import { useGenerateQuestions } from '@/hooks/useCreateAIQuestionEval'
 import { useAllCourses } from '@/app/[admin]/hooks/useAllCourses'
+import { useParams, usePathname, useSearchParams } from 'next/navigation'
 
 const UnportaledPopoverContent = React.forwardRef<
     React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -221,9 +222,12 @@ function AiFormFields({
     form: AiFormState
     patch: (p: Partial<AiFormState>) => void
 }) {
+    const pathname = usePathname(); 
+    const orgId = +pathname.split('/')[3];
+
     const { allCourses } = useAllCourses()
-    const { data: evalTopics, isLoading, error, refetch } = useTopics()
-    const { submitTopic, isSubmitting, submitError } = useCreateTopic()
+    const { data: evalTopics, isLoading, error, refetch } = useTopics(orgId)
+    const { submitTopic, isSubmitting, submitError  } = useCreateTopic(orgId)
 
     useEffect(() => {
         if (!isSubmitting) {
@@ -654,6 +658,8 @@ export default function AiQuestionFormPage({
 }: {
     onClose?: () => void
 }) {
+    const pathname = usePathname(); 
+    const orgId = +pathname.split('/')[3];
     const [form, setForm] = useState<AiFormState>(DEFAULT_AI_FORM)
     const patch = (p: Partial<AiFormState>) =>
         setForm((prev) => ({ ...prev, ...p }))

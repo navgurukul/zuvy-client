@@ -18,6 +18,7 @@ import { useScheduleAssessment } from '@/hooks/useScheduleAssessmentEval';
 import { useSaveAssessmentDraft } from '@/hooks/useSaveAssessmentDraftEval';
 import { useGetAiAssessmentsByChapter } from '@/hooks/useGetAiAsssessmentEval';
 import { toast } from '@/components/ui/use-toast';
+import { usePathname } from 'next/navigation';
 
 const STEPS = ['Details', 'Topics & Baseline', 'Build Pool', 'Review', 'Settings', 'Publish'];
 
@@ -98,17 +99,19 @@ export default function AssessmentBuilder({
   const showToast = useCallback((msg: string, variant: 'default' | 'success' | 'destructive' = 'success') => {
     toast({ description: msg, duration: 3200 , variant });
   }, []);
+  const pathname = usePathname(); 
+    const orgId = +pathname.split('/')[3];
 
   const { questions: bankQuestions } = useQuestionBank();
   const bankTopics = Array.from(new Set(bankQuestions.map((q: Question) => q.topic)));
 
-  const { createAiAssessment, isLoading: isCreatingAssessment, error: createAssessmentError } = useCreateAiAssessment();
-  const { mapQuestions, isMapping, mapError } = useMapQuestions();
-  const { getQuestionSets, isFetching: isFetchingQuestionSets, fetchError: questionSetsError, questionSets } = useGetQuestionSets();
+  const { createAiAssessment, isLoading: isCreatingAssessment, error: createAssessmentError } = useCreateAiAssessment({ org: orgId });
+  const { mapQuestions, isMapping, mapError } = useMapQuestions({ org: orgId });
+  const { getQuestionSets, isFetching: isFetchingQuestionSets, fetchError: questionSetsError, questionSets } = useGetQuestionSets({ org: orgId });
   const { publishAssessment, isPublishing: isPublishingAssessment, publishError: publishAssessmentError } = usePublishAssessment();
   const { scheduleAssessment, isScheduling: isSchedulingAssessment } = useScheduleAssessment();
   const { saveAssessmentDraft } = useSaveAssessmentDraft();
-  const { getAiAssessmentsByChapter } = useGetAiAssessmentsByChapter();
+  const { getAiAssessmentsByChapter } = useGetAiAssessmentsByChapter({ org: orgId });
   const isSubmittingAssessment = isCreatingAssessment || isMapping;
 
   const hasHydratedFromExistingAssessment = useRef(false);

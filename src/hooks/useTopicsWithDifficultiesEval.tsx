@@ -12,8 +12,12 @@ interface UseTopicsWithDifficultyLevelsReturn {
     error: string | null;
 }
 
+interface UseTopicsWithDifficultyLevelsOptions {
+    org?: number;
+}
+
 export const useTopicsWithDifficultyLevels =
-    (): UseTopicsWithDifficultyLevelsReturn => {
+    (options: UseTopicsWithDifficultyLevelsOptions = {}): UseTopicsWithDifficultyLevelsReturn => {
         const [data, setData] = useState<TopicWithDifficultyLevel[]>([]);
         const [isLoading, setIsLoading] = useState(false);
         const [error, setError] = useState<string | null>(null);
@@ -25,7 +29,7 @@ export const useTopicsWithDifficultyLevels =
 
                 try {
                     const response = await api.get<TopicWithDifficultyLevel[]>(
-                        `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/with-difficulty-levels`,
+                        `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/with-difficulty-levels?orgId=${options.org}`,
                         {
                             params: search ? { search } : undefined,
                         }

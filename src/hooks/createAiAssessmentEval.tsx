@@ -14,7 +14,7 @@ interface UseCreateAiAssessmentReturn {
     error: string | null;
 }
 
-export const useCreateAiAssessment = (): UseCreateAiAssessmentReturn => {
+export const useCreateAiAssessment = ({ org }: { org: number }): UseCreateAiAssessmentReturn => {
     const [data, setData] = useState<CreateAiAssessmentResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export const useCreateAiAssessment = (): UseCreateAiAssessmentReturn => {
 
             try {
                 const response = await api.post<CreateAiAssessmentResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment`,
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment?orgId=${org}`,
                     payload
                 );
                 setData(response.data);
@@ -42,7 +42,7 @@ export const useCreateAiAssessment = (): UseCreateAiAssessmentReturn => {
                 setIsLoading(false);
             }
         },
-        []
+        [org]
     );
 
     return { createAiAssessment, data, isLoading, error };

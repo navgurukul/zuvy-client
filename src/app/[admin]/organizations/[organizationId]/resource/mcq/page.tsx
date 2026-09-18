@@ -2,7 +2,7 @@
 // External imports
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ChevronLeft, Search, ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -93,6 +93,8 @@ interface Option {
 }
 
 const Mcqs = (props: Props) => {
+    const pathname = usePathname(); 
+    const orgID = +pathname.split('/')[3];
     const hasLoaded = useRef(false);
     const lastQuizQuestionsRequestRef = useRef<string | null>(null)
     const router = useRouter()
@@ -121,7 +123,7 @@ const Mcqs = (props: Props) => {
         return normalized === 'all' ? undefined : normalized
     }, [zuvyEvalDifficulty])
 
-    const { data: topics, isLoading: topicsLoading } = useTopics()
+    const { data: topics, isLoading: topicsLoading } = useTopics(orgID) 
     const [zuvyEvalTopicName, setZuvyEvalTopicName] = useState('all')
     const normalizedZuvyEvalTopicName = useMemo(() => {
         const normalized = zuvyEvalTopicName?.trim() || ''
@@ -139,6 +141,7 @@ const Mcqs = (props: Props) => {
         difficulty: normalizedZuvyEvalDifficulty,
         topicName: normalizedZuvyEvalTopicName,
         enabled: showZuvyEvalOnly,
+        org: orgID,
     })
 
     const { isConnected: isSocketConnected, lastQuestionsReadyEvent } =

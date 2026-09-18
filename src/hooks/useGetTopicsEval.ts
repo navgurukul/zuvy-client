@@ -10,7 +10,7 @@ interface UseTopicsReturn {
     refetch: () => Promise<void>;
 }
 
-export function useTopics(): UseTopicsReturn {
+export function useTopics(orgId: number): UseTopicsReturn {
     const [data, setData] = useState<Topic[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,7 +20,7 @@ export function useTopics(): UseTopicsReturn {
         setError(null);
         try {
             const baseUrl = process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000';
-            const response = await api.get(`${baseUrl.replace(/\/$/, '')}/topic`);
+            const response = await api.get(`${baseUrl.replace(/\/$/, '')}/topic?orgId=${orgId}`);
             const topicsData = Array.isArray(response.data) ? response.data : 
                                Array.isArray(response.data?.data) ? response.data.data : 
                                Array.isArray(response.data?.topics) ? response.data.topics : [];

@@ -12,7 +12,7 @@ interface UseMapQuestionsResult {
     mappedResult: MapQuestionsApiResponse | null;
 }
 
-export function useMapQuestions(): UseMapQuestionsResult {
+export function useMapQuestions({ org }: { org: number }): UseMapQuestionsResult {
     const [mappedResult, setMappedResult] =
         useState<MapQuestionsApiResponse | null>(null);
     const [isMapping, setIsMapping] = useState<boolean>(false);
@@ -26,7 +26,7 @@ export function useMapQuestions(): UseMapQuestionsResult {
             setMapError(null);
             try {
                 const response = await api.post<MapQuestionsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/map-questions`,
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/map-questions?orgId=${org}   `,
                     body
                 );
                 setMappedResult(response.data);
@@ -40,7 +40,7 @@ export function useMapQuestions(): UseMapQuestionsResult {
                 setIsMapping(false);
             }
         },
-        []
+        [org]
     );
 
     return { mapQuestions, isMapping, mapError, mappedResult };

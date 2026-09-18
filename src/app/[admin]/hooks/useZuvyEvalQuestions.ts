@@ -16,6 +16,7 @@ interface UseZuvyEvalQuestionsOptions {
     difficulty?: string
     topicName?: string
     enabled?: boolean
+    org?: number
 }
 
 export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) {
@@ -68,7 +69,7 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
 
             const baseUrl =
                 process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000'
-            const requestUrl = `${baseUrl.replace(/\/$/, '')}/questions?${params.toString()}`
+            const requestUrl = `${baseUrl.replace(/\/$/, '')}/questions?orgId=${options.org}&${params.toString()}`
 
             const accessToken =
                 typeof window !== 'undefined'
