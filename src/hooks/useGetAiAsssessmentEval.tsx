@@ -11,7 +11,7 @@ interface UseGetAiAssessmentsByChapterResult {
     aiAssessments: GetAiAssessmentsByChapterApiResponse | null;
 }
 
-export function useGetAiAssessmentsByChapter(): UseGetAiAssessmentsByChapterResult {
+export function useGetAiAssessmentsByChapter({ org }: { org: number }): UseGetAiAssessmentsByChapterResult {
     const [aiAssessments, setAiAssessments] =
         useState<GetAiAssessmentsByChapterApiResponse | null>(null);
     const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -25,7 +25,7 @@ export function useGetAiAssessmentsByChapter(): UseGetAiAssessmentsByChapterResu
             setFetchError(null);
             try {
                 const response = await api.get<GetAiAssessmentsByChapterApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment`,
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment?orgId=${org}`,
                     { params: { chapterId } }
                 );
                 setAiAssessments(response.data);
@@ -41,7 +41,7 @@ export function useGetAiAssessmentsByChapter(): UseGetAiAssessmentsByChapterResu
                 setIsFetching(false);
             }
         },
-        []
+        [org]
     );
 
     return {

@@ -8,6 +8,7 @@ import { useTopicsWithDifficultyLevels } from '@/hooks/useTopicsWithDifficulties
 import useDebounce from '@/app/[admin]/hooks/useDebounce';
 import { TopicWithDifficultyLevel } from '@/hooks/hookType';
 import { useToast } from "@/components/ui/use-toast";
+import { usePathname } from 'next/navigation';
 
 interface PoolTopicPickerProps {
   a: BuilderState;
@@ -24,10 +25,12 @@ export function PoolTopicPicker({
   bankQuestions,
   isGenerated,
 }: PoolTopicPickerProps) {
+  const pathname = usePathname(); 
+  const orgId = +pathname.split('/')[3];
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 300);
-  const { fetchTopics, data: fetchedTopics, isLoading: fetchingTopics } = useTopicsWithDifficultyLevels();
+  const { fetchTopics, data: fetchedTopics, isLoading: fetchingTopics } = useTopicsWithDifficultyLevels({ org: orgId });
 
   useEffect(() => {
     fetchTopics(debouncedQuery);

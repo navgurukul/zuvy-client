@@ -11,7 +11,7 @@ interface UseCreateTopicResult {
     createdTopic: CreateTopicApiResponse | null;
 }
 
-export function useCreateTopic(): UseCreateTopicResult {
+export function useCreateTopic(orgId: number): UseCreateTopicResult {
 
     const [createdTopic, setCreatedTopic] = useState<CreateTopicApiResponse | null>(null);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -22,7 +22,7 @@ export function useCreateTopic(): UseCreateTopicResult {
             setIsSubmitting(true);
             setSubmitError(null);
             try {
-                const response = await api.post<CreateTopicApiResponse>(`${process.env.NEXT_PUBLIC_EVAL_URL}/topic`, body);
+                const response = await api.post<CreateTopicApiResponse>(`${process.env.NEXT_PUBLIC_EVAL_URL}/topic?orgId=${orgId}`, body);
                 
                 setCreatedTopic(response.data);
                 toast({
@@ -44,7 +44,7 @@ export function useCreateTopic(): UseCreateTopicResult {
                 setIsSubmitting(false);
             }
         },
-        []
+        [orgId]
     );
 
     return { submitTopic, isSubmitting, submitError, createdTopic };

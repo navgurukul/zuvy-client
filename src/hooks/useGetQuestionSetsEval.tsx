@@ -12,7 +12,7 @@ interface UseGetQuestionSetsResult {
     questionSets: GetQuestionSetsApiResponse | null;
 }
 
-export function useGetQuestionSets(): UseGetQuestionSetsResult {
+export function useGetQuestionSets({ org }: { org: number }): UseGetQuestionSetsResult {
     const [questionSets, setQuestionSets] =
         useState<GetQuestionSetsApiResponse | null>(null);
     const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -27,7 +27,7 @@ export function useGetQuestionSets(): UseGetQuestionSetsResult {
             setFetchError(null);
             try {
                 const response = await api.get<GetQuestionSetsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${aiAssessmentId}/question-sets`,
+                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${aiAssessmentId}/question-sets?orgId=${org}`,
                     { params: levelCode ? { levelCode } : undefined }
                 );
                 setQuestionSets((previousQuestionSets) => {
@@ -56,7 +56,7 @@ export function useGetQuestionSets(): UseGetQuestionSetsResult {
                 setIsFetching(false);
             }
         },
-        []
+        [org]
     );
 
     return { getQuestionSets, isFetching, fetchError, questionSets };
