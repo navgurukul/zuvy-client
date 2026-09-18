@@ -57,7 +57,7 @@ const DialogHeader = ({
     ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn('flex items-center justify-between text-left', className)}
+        className={cn('flex items-start justify-between text-left', className)}
         {...props}
     >
         <div className="flex flex-col space-y-1.5">

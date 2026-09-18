@@ -143,7 +143,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'batchName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Batch" className="w-full text-center" />
+            <DataTableColumnHeader column={column} title="Batch" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const { batchName, userId, bootcampId, batchId } = row.original
@@ -156,7 +156,7 @@ export const columns: ColumnDef<Task>[] = [
             })
 
             return (
-                <div className="flex text-gray-800 w-full justify-center items-center">
+                <div className="flex text-gray-800 w-full justify-start items-center">
                     <ComboboxStudent
                         batchData={newBatchData || []}
                         batchName={batchName}

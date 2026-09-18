@@ -158,16 +158,16 @@ export const columns: ColumnDef<any>[] = [
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const status = row.original.status || 'absent'
-            const isPresent = status.toLowerCase() === 'present'
-            
+            const status = row.original.status || 'Not Viewed'
+            const isViewed = status.toLowerCase() === 'viewed'
+
             return (
                 <div className="flex space-x-2">
-                    <Badge 
+                    <Badge
                         className={
-                            isPresent 
-                                ? "text-success bg-green-100" 
-                                : "text-destructive bg-red-100"
+                            isViewed
+                                ? "text-success bg-green-100 hover:bg-green-100"
+                                : "text-destructive bg-red-100 hover:bg-red-100"
                         }
                     >
                         {status}
