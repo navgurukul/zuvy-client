@@ -88,7 +88,7 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
 
 
   return (
-    <section className="relative w-full overflow-y-auto overflow-x-hidden h-full rounded-2xl border border-border/60 bg-gradient-to-br from-[#f8fbff] via-background to-[#f4f8ff] p-4 md:p-5">
+    <section className="relative w-full overflow-y-auto overflow-x-hidden h-full rounded-2xl border border-border/60 bg-gradient-to-br from-[#f8fbff] via-background to-[#f4f8ff] dark:from-background dark:via-background dark:to-background p-4 md:p-5">
       <div className="pointer-events-none absolute -left-16 -top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-secondary/10 blur-3xl" />
 
@@ -129,7 +129,7 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
           {assessments.map((assessment) => (
             <Card
               key={assessment.id}
-              className="group overflow-hidden border-border/50 bg-white/85 shadow-sm backdrop-blur-sm "
+              className="group overflow-hidden border-border/50 bg-white/85 dark:bg-card shadow-sm backdrop-blur-sm "
             >
               <CardHeader className="relative overflow-hidden space-y-3 border-b border-border/40 bg-gradient-to-br from-primary/90 via-primary to-primary/80 pb-4 text-primary-foreground">
                 <div className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 18% 24%, rgba(255,255,255,0.28), transparent 34%), radial-gradient(circle at 86% 16%, rgba(255,255,255,0.2), transparent 30%)' }} />

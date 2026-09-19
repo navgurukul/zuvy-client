@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Loader2, X } from 'lucide-react';
-import { THEME, DIFF_LABEL } from '../constants';
+import { THEME, THEME_DARK, DIFF_LABEL } from '../constants';
 import { Btn, DiffBadge, Badge } from '../ui-primitives';
 import { Question } from '../types';
 import { useGetReplacementQuestions } from '@/hooks/useGetReplacementQuestionEval';
 import { useReplaceQuestion } from '@/hooks/usePutReplacementQuestion';
+import { useThemeStore } from '@/store/store';
 
 interface ReplaceModalProps {
   item: Question;
@@ -30,6 +31,7 @@ export function ReplaceModal({
   const { getReplacementQuestions, isFetching, fetchError, replacementQuestions } =
     useGetReplacementQuestions();
   const { replaceQuestion, isReplacing, replaceError } = useReplaceQuestion();
+  const { isDark } = useThemeStore();
 
   useEffect(() => {
     if (!item.questionSetId) return;
@@ -199,13 +201,16 @@ export function ReplaceModal({
                 alignItems: 'flex-start',
               }}
             >
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, textAlign: 'left' }}>
                 <div style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 5 }}>
                   {c.text}
                 </div>
                 <div style={{ display: 'flex', gap: 5 }}>
                   <DiffBadge d={c.difficulty} />
-                  <Badge bg={THEME.infoLight} color={THEME.info}>
+                  <Badge 
+                    bg={isDark ? THEME_DARK.infoLight : THEME.infoLight} 
+                    color={isDark ? THEME_DARK.info : THEME.info}
+                  >
                     {apiCandidates.length > 0 ? 'API' : 'Validated'}
                   </Badge>
                 </div>

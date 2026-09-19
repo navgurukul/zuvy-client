@@ -40,15 +40,15 @@ export function StepPool({
 
   return (
     <div>
-      <div className="bg-primary-light border border-primary rounded-[10px] py-[14px] px-[18px] mb-5">
-        <div className="font-bold flex text-[14px] text-primary-dark mb-1">
+      <div className="bg-primary-light dark:bg-primary/20 border border-primary dark:border-primary/50 rounded-[10px] py-[14px] px-[18px] mb-5">
+        <div className="font-bold flex text-[14px] text-primary-dark dark:text-primary mb-1">
           Baseline signal — {selectedChapters.length} MCQ chapter{selectedChapters.length !== 1 ? 's' : ''} selected
         </div>
         <div className="flex gap-[7px] flex-wrap mb-2">
           {selectedChapters.map((c: Chapter) => (
             <span
               key={c.id}
-              className="bg-card border border-primary text-primary-dark text-[12px] font-semibold py-[3px] px-[10px] rounded-full"
+              className="bg-card border border-primary dark:border-primary/60 text-primary-dark dark:text-primary text-[12px] font-semibold py-[3px] px-[10px] rounded-full"
             >
               {c.title} · {c.questionCount}Q
             </span>

@@ -136,32 +136,34 @@ export function StepPublish({ a, set, coverage, pool, publish, schedule, saveDra
             id: 'published',
             title: 'Publish now',
             desc: 'Available to learners immediately',
-            bg: '#E8F5E9',
+            bgClass: 'bg-green-50 dark:bg-green-950/30',
+            textClass: 'text-green-900 dark:text-green-100',
           },
           {
             id: 'draft',
             title: 'Save as draft',
             desc: 'Edit freely, publish later',
-            bg: '#E3F2FD',
+            bgClass: 'bg-blue-50 dark:bg-blue-950/30',
+            textClass: 'text-blue-900 dark:text-blue-100',
           },
           {
             id: 'scheduled',
             title: 'Schedule',
             desc: 'Goes live at a set date and time',
-            bg: '#F3E5F5',
+            bgClass: 'bg-purple-50 dark:bg-purple-950/30',
+            textClass: 'text-purple-900 dark:text-purple-100',
           },
         ].map((opt) => (
           <div
             key={opt.id}
             onClick={() => { if (!isLocked) setChoice(opt.id) }}
-            className={`rounded-[9px] p-4 border-2 ${isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+            className={`rounded-[9px] p-4 border-2 ${opt.bgClass} ${isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
             style={{
-              background: opt.bg,
               borderColor: choice === opt.id ? THEME.primary : 'transparent',
             }}
           >
-            <div className="font-bold text-sm mb-0.5">{opt.title}</div>
-            <div className="text-xs" style={{ color: THEME.textSub }}>
+            <div className={`font-bold text-sm mb-0.5 ${opt.textClass}`}>{opt.title}</div>
+            <div className={`text-xs ${opt.textClass} opacity-80`}>
               {opt.desc}
             </div>
           </div>
@@ -222,41 +224,45 @@ export function StepPublish({ a, set, coverage, pool, publish, schedule, saveDra
             {choice === 'scheduled' && (
               <>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Publish date</label>
+                  <label className="text-sm font-medium text-left block">Publish date</label>
                   <Input
                     type="date"
                     value={selectedStartDate}
                     min={startDateMin}
                     onChange={(e) => setSelectedStartDate(e.target.value)}
+                    className="text-left [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Publish time</label>
+                  <label className="text-sm font-medium text-left block">Publish time</label>
                   <Input
                     type="time"
                     value={selectedStartTime}
                     min={startTimeMin}
                     onChange={(e) => setSelectedStartTime(e.target.value)}
+                    className="text-left [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">End date</label>
+              <label className="text-sm font-medium text-left block">End date</label>
               <Input
                 type="date"
                 value={selectedDate}
                 min={endDateMin}
                 onChange={(e) => setSelectedDate(e.target.value)}
+                className="text-left [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">End time</label>
+              <label className="text-sm font-medium text-left block">End time</label>
               <Input
                 type="time"
                 value={selectedTime}
                 min={endTimeMin}
                 onChange={(e) => setSelectedTime(e.target.value)}
+                className="text-left [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
           </div>
