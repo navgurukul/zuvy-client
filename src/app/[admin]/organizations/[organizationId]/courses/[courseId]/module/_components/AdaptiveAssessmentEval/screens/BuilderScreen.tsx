@@ -221,7 +221,7 @@ export function BuilderScreen({
         )}
       </div>
 
-      <div className="shrink-0 flex justify-between px-5  z-10 bg-white dark:bg-card border-t border-slate-200 dark:border-gray-600">
+      <div className="shrink-0 flex justify-between px-5 py-3 z-10 bg-white dark:bg-card border-t border-slate-200 dark:border-gray-600">
         <Btn variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>
           <ChevronLeft size={14} /> Back
         </Btn>
@@ -260,7 +260,7 @@ export function BuilderScreen({
         <AlertDialogContent>
           <AlertDialogHeader className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
                 <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
               <AlertDialogTitle className="text-lg">Generate Assessment</AlertDialogTitle>

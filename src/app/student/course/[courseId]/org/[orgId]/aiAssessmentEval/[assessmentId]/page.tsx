@@ -346,22 +346,22 @@ const AssessmentQuestionsPage = () => {
     const isBookmarked = bookmarkedQuestions.has(questions[index].questionId)
 
     if (isCurrentQuestion) {
-      return 'aspect-square bg-primary shadow-soft rounded-md flex items-center justify-center font-semibold text-xs font-bold text-white border border-primary hover:bg-primary-dark'
+      return 'aspect-square bg-primary shadow-soft rounded-md flex items-center justify-center font-bold text-xs text-white border border-primary hover:bg-primary-dark p-2'
     }
 
     if (isFlagged) {
-      return 'aspect-square bg-destructive/10 text-destructive rounded-md flex items-center justify-center font-semibold text-xs font-bold relative border border-destructive/30'
+      return 'aspect-square bg-destructive/10 text-destructive rounded-md flex items-center justify-center font-bold text-xs relative border border-destructive/30 p-2'
     }
 
     if (isBookmarked) {
-      return 'aspect-square bg-primary-light text-primary rounded-md flex items-center justify-center font-semibold text-xs font-bold relative border border-primary/20'
+      return 'aspect-square bg-primary-light text-primary rounded-md flex items-center justify-center font-bold text-xs relative border border-primary/20 p-2'
     }
 
     if (isAnswered) {
-      return 'aspect-square bg-success-light text-success rounded-md flex items-center justify-center font-semibold text-xs font-bold border border-success/30'
+      return 'aspect-square bg-success/20 dark:bg-success/30 text-success dark:text-success-light rounded-md flex items-center justify-center font-bold text-xs border border-success/30 dark:border-success/40 p-2'
     }
 
-    return 'aspect-square bg-muted text-text-secondary rounded-md flex items-center justify-center font-semibold text-xs font-bold border border-border hover:bg-border'
+    return 'aspect-square bg-muted text-foreground rounded-md flex items-center justify-center font-bold text-xs border border-border hover:bg-border p-2'
   }
 
   const getResultQuestionButtonClass = (index: number) => {
@@ -371,14 +371,14 @@ const AssessmentQuestionsPage = () => {
     const isCorrect = resultQuestion?.isCorrect
 
     if (isCurrentQuestion) {
-      return 'aspect-square bg-primary shadow-soft rounded-md flex items-center justify-center font-semibold text-xs font-bold text-white border border-primary hover:bg-primary-dark'
+      return 'aspect-square bg-primary shadow-soft rounded-md flex items-center justify-center font-bold text-xs text-white border border-primary hover:bg-primary-dark p-2'
     }
 
     if (isCorrect) {
-      return 'aspect-square bg-success-light text-success rounded-md flex items-center justify-center font-semibold text-xs font-bold border border-success/30'
+      return 'aspect-square bg-success/20 dark:bg-success/30 text-success dark:text-success-light rounded-md flex items-center justify-center font-bold text-xs border border-success/30 dark:border-success/40 p-2'
     }
 
-    return 'aspect-square bg-destructive/10 text-destructive rounded-md flex items-center justify-center font-semibold text-xs font-bold border border-destructive/30'
+    return 'aspect-square bg-destructive/10 text-destructive rounded-md flex items-center justify-center font-bold text-xs border border-destructive/30 p-2'
   }
 
   const getOptionLabelFromQuestion = (questionId: number, optionKey: number | string): string | null => {
@@ -505,9 +505,9 @@ const AssessmentQuestionsPage = () => {
           {showResults && result ? (
             // Results Sidebar
             <>
-              <div>
-                <h3 className="font-heading font-bold text-base text-foreground tracking-tight">Results Summary</h3>
-                <p className="text-xs text-text-secondary mt-1.5 font-body">Score: <span className="font-semibold text-primary">{result.score}</span>/{result.totalQuestions}</p>
+              <div className="pt-2">
+                <h3 className="font-heading font-bold text-base text-foreground tracking-tight leading-tight">Results Summary</h3>
+                <p className="text-xs text-text-secondary mt-3 font-body leading-relaxed">Score: <span className="font-semibold text-primary">{result.score}</span>/{result.totalQuestions}</p>
               </div>
 
               <ScrollArea className="flex-1">
@@ -614,7 +614,7 @@ const AssessmentQuestionsPage = () => {
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary"></div>
                     <CardContent className="p-6">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
+                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-card backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
                           <div className="font-heading text-2xl font-bold text-primary tracking-tight">
                             {result.score}
                             <span className="text-xs text-text-secondary font-body font-normal">/{result.totalQuestions}</span>
@@ -622,7 +622,7 @@ const AssessmentQuestionsPage = () => {
                           <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Correct Answers</p>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
+                        <div className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-card backdrop-blur-sm border border-border/30 hover:shadow-soft transition-shadow">
                           <div className="font-heading text-2xl font-bold text-foreground tracking-tight">{result.percentage}<span className="text-lg">%</span></div>
                           <p className="text-[10px] uppercase tracking-[0.15em] text-text-secondary font-semibold font-body">Score Percentage</p>
                         </div>
@@ -634,7 +634,7 @@ const AssessmentQuestionsPage = () => {
 
                         <button
                           onClick={handleDownloadPDF}
-                          className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-border/30 hover:bg-white/90 hover:shadow-soft transition-all cursor-pointer group"
+                          className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-card backdrop-blur-sm border border-border/30 hover:bg-muted hover:shadow-soft transition-all cursor-pointer group"
                         >
                           <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-110 transition-all">
                             <Download className="w-5 h-5 text-primary" />
@@ -656,7 +656,7 @@ const AssessmentQuestionsPage = () => {
                   </div>
 
                   {!isFetchingResult && result.questions.length > 0 && (
-                    <Card className="border-border/40 bg-gradient-to-br from-background via-white/30 to-background shadow-soft rounded-xl overflow-hidden">
+                    <Card className="border-border/40 bg-card shadow-soft rounded-xl overflow-hidden">
                       <CardContent className="p-8">
                         {(() => {
                           const resultQuestion = result.questions[resultCurrentQuestionIndex]
@@ -894,7 +894,7 @@ const AssessmentQuestionsPage = () => {
                           onClick={() => toggleFlag(currentQuestion.questionId)}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${flaggedQuestions.has(currentQuestion.questionId)
                             ? 'bg-destructive/10 text-destructive shadow-soft'
-                            : 'text-text-secondary hover:text-destructive hover:bg-destructive/5'
+                            : 'text-text-secondary dark:text-gray-300 hover:text-destructive hover:bg-destructive/5'
                             }`}
                         >
                           <Flag className="w-4 h-4" fill={flaggedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
@@ -904,7 +904,7 @@ const AssessmentQuestionsPage = () => {
                           onClick={() => toggleBookmark(currentQuestion.questionId)}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all text-xs font-semibold font-body ${bookmarkedQuestions.has(currentQuestion.questionId)
                             ? 'bg-primary-light text-primary shadow-soft'
-                            : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+                            : 'text-text-secondary dark:text-gray-300 hover:text-primary hover:bg-primary-light'
                             }`}
                         >
                           <Bookmark className="w-4 h-4" fill={bookmarkedQuestions.has(currentQuestion.questionId) ? 'currentColor' : 'none'} />
@@ -926,7 +926,7 @@ const AssessmentQuestionsPage = () => {
                         onClick={() => handleSpeak(currentOptionsSpeechText, 'options')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-semibold ${activeSpeechTarget === 'options'
                           ? 'bg-primary-light text-primary'
-                          : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+                          : 'text-text-secondary dark:text-gray-300 hover:text-primary hover:bg-primary-light'
                           }`}
                         title={activeSpeechTarget === 'options' ? 'Stop voice' : 'Voice options'}
                       >
@@ -951,7 +951,7 @@ const AssessmentQuestionsPage = () => {
                               type="button"
                               onClick={() => handleSelectAnswer(currentQuestion.questionId, optionKey)}
                               className={`group relative flex items-center p-4 rounded-xl text-left border transition-all duration-200 ${isSelected
-                                ? 'bg-success-light border-success shadow-soft'
+                                ? 'bg-success/10 border-success shadow-soft dark:bg-transparent dark:border-success'
                                 : 'bg-card border-border hover:border-primary/30 hover:shadow-soft'
                                 }`}
                             >
@@ -1050,7 +1050,7 @@ const AssessmentQuestionsPage = () => {
                 onClick={() => currentQuestion && toggleFlag(currentQuestion.questionId)}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && flaggedQuestions.has(currentQuestion.questionId)
                   ? 'bg-destructive/10 text-destructive'
-                  : 'bg-muted text-text-secondary hover:bg-destructive/10 hover:text-destructive'
+                  : 'bg-muted text-text-secondary dark:text-gray-300 hover:bg-destructive/10 hover:text-destructive'
                   }`}
                 title="Flag for Review"
               >
@@ -1060,7 +1060,7 @@ const AssessmentQuestionsPage = () => {
                 onClick={() => currentQuestion && toggleBookmark(currentQuestion.questionId)}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${currentQuestion && bookmarkedQuestions.has(currentQuestion.questionId)
                   ? 'bg-primary-light text-primary'
-                  : 'bg-muted text-text-secondary hover:bg-primary-light hover:text-primary'
+                  : 'bg-muted text-text-secondary dark:text-gray-300 hover:bg-primary-light hover:text-primary'
                   }`}
                 title="Bookmark Question"
               >

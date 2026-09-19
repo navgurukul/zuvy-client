@@ -79,7 +79,7 @@ export function StepTopicsBaseline({
                     )} */}
                   </div>
                 </div>
-                <span className="bg-secondary-light text-secondary-dark text-[11.5px] font-semibold px-[9px] py-[3px] rounded-full inline-flex items-center gap-1 whitespace-nowrap">
+                <span className="bg-secondary-light text-secondary-dark dark:text-foreground text-[11.5px] font-semibold px-[9px] py-[3px] rounded-full inline-flex items-center gap-1 whitespace-nowrap">
                   MCQ
                 </span>
               </div>

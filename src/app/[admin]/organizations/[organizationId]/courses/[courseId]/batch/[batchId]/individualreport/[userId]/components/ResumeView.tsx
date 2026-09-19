@@ -296,24 +296,24 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                         Performance Summary
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-2">
+                        <div className="bg-blue-50 dark:bg-blue-600/20 dark:border-blue-950 p-4 rounded-lg border border-blue-200">
+                            <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-2">
                                 Attendance Rate
                             </p>
                             <p className="text-2xl font-bold text-blue-600">
                                 {student?.overAllAttendance == null ? 'N/A' : `${student.overAllAttendance}%`}
                             </p>
                         </div>
-                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-2">
+                        <div className="bg-green-50 dark:bg-green-600/20 dark:border-green-950 p-4 rounded-lg border border-green-200">
+                            <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-2">
                                 Assessments Completed
                             </p>
                             <p className="text-2xl font-bold text-green-600">
                                 {student?.numberOfAssessmentsAttempted ?? 0}
                             </p>
                         </div>
-                        <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-2">
+                        <div className="bg-purple-50 dark:bg-purple-600/20 dark:border-purple-950 p-4 rounded-lg border border-purple-200">
+                            <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-2">
                                 Avg Performance
                             </p>
                             <p className="text-2xl font-bold text-purple-600">
@@ -322,8 +322,8 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                     : `${student.averageAssessmentPercentage}%`}
                             </p>
                         </div>
-                        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-2">
+                        <div className="bg-orange-50 dark:bg-orange-600/20 dark:border-orange-950 p-4 rounded-lg border border-orange-200">
+                            <p className="text-xs text-gray-600 dark:text-muted-foreground font-semibold uppercase tracking-wide mb-2">
                                 1:1 Sessions
                             </p>
                             <p className="text-2xl font-bold text-orange-600">
@@ -366,7 +366,7 @@ const ResumeView: React.FC<ResumeViewProps> = ({ student, courseName, batchName 
                                                                     ? 'bg-green-100 text-green-800'
                                                                     : assessment.status === 'pending'
                                                                     ? 'bg-yellow-100 text-yellow-800'
-                                                                    : 'bg-gray-100 text-gray-800'
+                                                                    : 'bg-gray-100 text-gray-800 dark:bg-slate-400 dark:text-slate-900'
                                                             }`}
                                                         >
                                                             {assessment.status}

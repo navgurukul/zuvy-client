@@ -49,6 +49,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
               style={{
                 borderColor: a.mode === m.id ? THEME.primary : THEME.border,
                 background: a.mode === m.id ? THEME.primaryLight : THEME.card,
+                opacity: a.mode === m.id ? 0.9 : 1,
               }}
             >
               <div className="flex justify-between items-center mb-[5px]">
@@ -57,7 +58,7 @@ export function StepSettings({ a, set }: StepSettingsProps) {
                 </span>
                 {a.mode === m.id && <Check size={14} color={THEME.primary} />}
               </div>
-              <div className="text-[12.5px] leading-[1.5]" style={{ color: THEME.textSub }}>
+              <div className="text-[12.5px] leading-[1.5] text-left" style={{ color: THEME.textSub }}>
                 {m.desc}
               </div>
             </div>
@@ -123,9 +124,9 @@ export function StepSettings({ a, set }: StepSettingsProps) {
             className="flex justify-between items-center py-2.5 border-b"
             style={{ borderColor: THEME.border }}
           >
-            <div>
+            <div className="text-left">
               <div className="font-semibold text-[13.5px]">{lbl}</div>
-              <div className="text-xs" style={{ color: THEME.textTertiary }}>
+              <div className="text-xs text-left" style={{ color: THEME.textTertiary }}>
                 {desc}
               </div>
             </div>
