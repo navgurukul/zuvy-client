@@ -288,7 +288,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
 
     return (
         <div className="w-full ">
-            <div className="text-lg text-left font-semibold mb-4 text-gray-600">
+            <div className="text-lg text-left font-semibold mb-4 text-foreground/80">
                 Live Classes Chapter
             </div>
             {/* Removed stray baseSelectClass constant that was rendering as text */}
@@ -302,7 +302,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                         control={form.control}
                         name="sessionTitle"
                         render={({ field }) => (
-                            <FormItem className="text-left text-gray-600">
+                            <FormItem className="text-left text-foreground/80">
                                 <FormLabel>
                                     Session Title
                                     <span className="text-red-500">*</span>
@@ -328,7 +328,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left text-gray-600">
+                                <FormItem className="flex flex-col text-left text-foreground/80">
                                     <FormLabel className="p-0 my-2">
                                         Classes start date
                                         <span className="text-red-500">*</span>
@@ -340,7 +340,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:bg-background hover:border-primary ${
+                                                    className={`w-full text-left font-normal text-foreground/80 border border-input bg-background hover:bg-background hover:border-primary ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -389,7 +389,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                 control={form.control}
                                 name="startTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left text-gray-600">
+                                    <FormItem className="flex flex-col text-left text-foreground/80">
                                         <FormLabel className="p-0 my-2">
                                             Start Time
                                             <span className="text-red-500">
@@ -449,7 +449,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                 control={form.control}
                                 name="endTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left text-gray-600">
+                                    <FormItem className="flex flex-col text-left text-foreground/80">
                                         <FormLabel className="p-0 my-2">
                                             End Time
                                             <span className="text-red-500">
@@ -475,7 +475,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="batch"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Batches{' '}
                                         <span className="text-red-500">*</span>
@@ -505,13 +505,14 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                             }}
                                             aria-busy={isLoading}
                                         >
-                                            <option value="">
+                                            <option value="" className='text-muted-foreground'>
                                                 Select batch...
                                             </option>
                                             {bootcampData.map((b: any) => (
                                                 <option
                                                     key={b.value}
                                                     value={b.value}
+                                                    className='text-muted-foreground'
                                                 >
                                                     {b.label}
                                                 </option>
@@ -526,7 +527,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="secondBatch"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Second Batch (optional)
                                     </FormLabel>
@@ -544,7 +545,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         >
                                             {batch ? (
                                                 <>
-                                                    <option value="">
+                                                    <option value="" className='text-muted-foreground'>
                                                         None
                                                     </option>
                                                     {bootcampData
@@ -559,6 +560,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                                             <option
                                                                 key={b.value}
                                                                 value={b.value}
+                                                                className='text-muted-foreground'
                                                             >
                                                                 {b.label}
                                                             </option>
@@ -579,7 +581,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="platform"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Platform{' '}
                                         <span className="text-red-500">*</span>
@@ -589,7 +591,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                             baseSelectClass,
                                             "flex items-center"
                                         )}>
-                                            <span>Zoom</span>
+                                            <span className='text-muted-foreground'>Zoom</span>
                                         </div>
                                     </FormControl>
                                     {/* <FormControl>

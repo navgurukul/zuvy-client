@@ -161,8 +161,8 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                 </div>
                             )}
                         </div>
-                        <div className="flex flex-col w-full pr-24">
-                            <div className="flex items-start gap-2 min-w-0">
+                        <div className="flex flex-col w-full">
+                            <div className="flex items-start gap-2 min-w-0 pr-24">
                                 <div className="p-2 rounded-md">
                                     <Play className="w-4 h-4" />
                                 </div>
@@ -170,7 +170,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                     {liveClass.title || 'Untitled Live Class'}
                                 </h3>
                             </div>
-                            <div className="flex items-center justify-between mt-4 text-sm">
+                            <div className="flex w-full items-center justify-between mt-4 text-sm">
                                 <div className="flex items-center gap-1">
                                     <Badge
                                         variant="outline"

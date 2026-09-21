@@ -23,14 +23,14 @@ import {
 
 type roleCellProps = {
   role: string;
-  roles: any; 
+  roles: any[];
   rolesLoading: boolean;
   onRoleUpdate?: () => void;
-  roleId?: number;
+  roleId: number;
   userEmail: string;
 };
 
-export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, onRoleUpdate }: roleCellProps & { userId: number }) => {
+export const ChangeUserRole = ({ role, roleId, roles, rolesLoading, userId, userEmail, onRoleUpdate }: roleCellProps & { userId: number }) => {
     const { organizationId } = useParams()
     const { user } = getUser()
     const orgId = Number(organizationId) || user?.orgId;
@@ -38,15 +38,14 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
     const [originalRole, setOriginalRole] = useState(role)
     const isCurrentUser = user?.email?.trim().toLowerCase() === userEmail?.trim().toLowerCase()
 
-    const handleRoleChange = async (newRoleName: string) => {
+    const handleRoleChange = async (newRoleId: string) => {
         // Only save if the role actually changed
-        if (newRoleName === originalRole) {
+        if (newRoleId === String(roleId)) {
             return // No change, don't call API
         }
 
         try {
-            // Find the roleId from the roles array based on the selected role name
-            const selectedRole = roles.find((r: any) => r.name.toLowerCase() === newRoleName.toLowerCase())
+            const selectedRole = roles.find((r: any) => String(r.id) === newRoleId)
             if (!selectedRole) return
 
             await assignUserRole({
@@ -55,8 +54,6 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
                 orgId: orgId
             })
 
-            // Update original role after successful save
-            setOriginalRole(newRoleName)
             onRoleUpdate?.()
 
             toast.success({
@@ -78,7 +75,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
                 <TooltipTrigger asChild>
                     <span className="inline-block">
                         <Select
-                            value={role}
+                            value={String(roleId)}
                             onValueChange={handleRoleChange}
                             disabled={loading || isCurrentUser}
                         >
@@ -95,7 +92,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, userEmail, o
                                     roles.map((roleOption: any) => (
                                         <SelectItem
                                             key={roleOption.id}
-                                            value={roleOption.name}
+                                            value={String(roleOption.id)}
                                             className="capitalize"
                                         >
                                             {roleOption.name}

@@ -131,7 +131,7 @@ const Page = ({ params }: PageParams) => {
                     </div>
                 </div>
             )}
-            <div className="flex flex-col gap-5 text-gray-600 container mx-auto max-w-7xl px-20">
+            <div className="flex flex-col gap-5 container mx-auto max-w-7xl px-20">
                 <div className="flex items-center gap-4 mb-0 mt-10">
                     <Button
                         variant="ghost"

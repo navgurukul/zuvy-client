@@ -188,13 +188,13 @@ function ChapterModal({
                     <DialogContent className="max-w-2xl w-full">
                         <RadioGroup
                             value={classType}
-                            className="flex flex-row items-center text-gray-600"
+                            className="flex flex-row items-center text-foreground/80"
                             onValueChange={setClassType}
                             defaultValue="createLiveClass"
                         >
                             <div className="flex  space-x-2">
                                 <RadioGroupItem
-                                    className="!border-black !text-black"
+                                    className="!border-foreground !text-foreground"
                                     value="createLiveClass"
                                     id="r1"
                                 />
@@ -202,7 +202,7 @@ function ChapterModal({
                             </div>
                             <div className="flex space-x-2 ">
                                 <RadioGroupItem
-                                    className="!border-black !text-black"
+                                    className="!border-foreground !text-foreground"
                                     value="existingLiveClass"
                                     id="r2"
                                 />
