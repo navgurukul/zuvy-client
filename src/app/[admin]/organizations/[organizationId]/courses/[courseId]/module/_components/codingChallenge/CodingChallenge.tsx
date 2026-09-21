@@ -360,7 +360,7 @@ useEffect(() => {
                         chapterTitle={''}
                         canEdit={canEdit}
                     />
-                    <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
+                    <h1 className="text-left text-[15px] text-foreground/80 font-bold mt-5 pb-3">
                         Coding Library
                     </h1>
 

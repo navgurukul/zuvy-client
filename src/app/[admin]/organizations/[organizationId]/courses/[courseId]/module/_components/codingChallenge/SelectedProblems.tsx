@@ -46,7 +46,7 @@ const SelectedProblems = ({
         <div className="flex w-full">
             <Separator orientation="vertical" className="w-0.5 h-screen mx-2" />
             <div className="text-start w-full">
-                <h2 className="font-bold mb-5 text-[15px] text-gray-600">
+                <h2 className="font-bold mb-5 text-[15px] text-foreground/80">
                     Selected Coding Problems
                 </h2>
                 {selectedQuestions?.length > 0 ? (
@@ -105,7 +105,7 @@ const SelectedProblems = ({
                                                 />
                                             </div>
                                         </div>
-                                        <p className=" text-gray-600 mt-1 mb-2 text-[15px]">
+                                        <p className=" text-foreground/70 mt-1 mb-2 text-[15px]">
                                             {ellipsis(
                                                 selectedQuestion.description,
                                                 60

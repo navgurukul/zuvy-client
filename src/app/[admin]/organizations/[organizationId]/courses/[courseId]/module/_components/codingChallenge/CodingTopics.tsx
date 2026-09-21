@@ -126,7 +126,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
-                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-foreground/80 hover:bg-transparent]"
                                 disabled={!canEdit}
                             >
                                 {getTopicsButtonText()}
@@ -167,7 +167,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
-                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-foreground/80 hover:bg-transparent]"
                                 disabled={!canEdit}
                             >
                                 {getDifficultiesButtonText()}

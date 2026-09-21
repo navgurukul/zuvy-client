@@ -195,7 +195,7 @@ const Dropzone = ({
                                                     )}
                                                 </span>
                                             </div>
-                                            <span className="text-black ">
+                                            <span className="text-foreground ">
                                                 {previewPdfLink && (
                                                     <div>
                                                         <Link
