@@ -1,5 +1,6 @@
 import React from 'react';
-import { THEME, DIFF_BG, DIFF_COLOR, DIFF_LABEL } from './constants';
+import { THEME, DIFF_BG, DIFF_COLOR, DIFF_LABEL, DIFF_BG_DARK, DIFF_COLOR_DARK } from './constants';
+import { useThemeStore } from '@/store/store';
 
 export const Card = ({
   children,
@@ -54,11 +55,18 @@ export const Badge = ({
   </span>
 );
 
-export const DiffBadge = ({ d }: { d: string }) => (
-  <Badge bg={DIFF_BG[d]} color={DIFF_COLOR[d]}>
-    {DIFF_LABEL[d]}
-  </Badge>
-);
+export const DiffBadge = ({ d }: { d: string }) => {
+  const { isDark } = useThemeStore();
+  
+  return (
+    <Badge 
+      bg={isDark ? DIFF_BG_DARK[d] : DIFF_BG[d]} 
+      color={isDark ? DIFF_COLOR_DARK[d] : DIFF_COLOR[d]}
+    >
+      {DIFF_LABEL[d]}
+    </Badge>
+  );
+};
 
 export function Btn({
   children,

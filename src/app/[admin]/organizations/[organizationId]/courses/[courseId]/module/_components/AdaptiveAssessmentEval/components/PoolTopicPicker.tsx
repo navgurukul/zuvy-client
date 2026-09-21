@@ -224,7 +224,7 @@ export function PoolTopicPicker({
                 }}
               >
                 <div
-                  className="flex items-center gap-1.5 px-2.5 py-[7px]"
+                  className="flex items-center gap-1.5 px-2.5 py-[7px] dark:!bg-orange-500/20"
                   style={{
                     background: hasZeroBand || isCustom ? THEME.warningLight : THEME.primaryLight,
                   }}
@@ -313,8 +313,8 @@ export function PoolTopicPicker({
                   {!isGenerated && (
                     <button
                       onClick={() => removeTopic(t)}
-                      className="ml-0.5 flex cursor-pointer border-none bg-transparent p-0"
-                      style={{ color: THEME.danger }}
+                      className="ml-0.5 flex cursor-pointer border-none p-0 hover:opacity-80"
+                      style={{ background: 'transparent', color: hasZeroBand || isCustom ? '#dc2626' : '#fff' }}
                       aria-label={`Remove ${t}`}
                     >
                       <X size={12} />

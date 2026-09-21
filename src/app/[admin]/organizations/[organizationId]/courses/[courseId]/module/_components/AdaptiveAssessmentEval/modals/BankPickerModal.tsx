@@ -1,8 +1,9 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { THEME, DIFF_LABEL } from '../constants';
+import { THEME, THEME_DARK, DIFF_LABEL } from '../constants';
 import { Btn, DiffBadge, Badge } from '../ui-primitives';
 import { Question } from '../types';
+import { useThemeStore } from '@/store/store';
 
 interface BankPickerModalProps {
   topic: string;
@@ -23,6 +24,8 @@ export function BankPickerModal({
   showToast,
   bankQuestions,
 }: BankPickerModalProps) {
+  const { isDark } = useThemeStore();
+  
   const candidates = bankQuestions.filter(
     (q: Question) =>
       q.validated &&
@@ -135,13 +138,16 @@ export function BankPickerModal({
                   gap: 12,
                 }}
               >
-                <div>
+                <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 5 }}>
                     {c.text}
                   </div>
                   <div style={{ display: 'flex', gap: 5 }}>
                     <DiffBadge d={c.difficulty} />
-                    <Badge bg={THEME.infoLight} color={THEME.info}>
+                    <Badge 
+                      bg={isDark ? THEME_DARK.infoLight : THEME.infoLight} 
+                      color={isDark ? THEME_DARK.info : THEME.info}
+                    >
                       Validated
                     </Badge>
                   </div>

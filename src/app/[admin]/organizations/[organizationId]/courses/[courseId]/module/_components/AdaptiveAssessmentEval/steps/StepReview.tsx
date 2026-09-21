@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Eye, RefreshCw, Trash2, X, Check } from 'lucide-react';
-import { LEVELS, DIFF_LABEL, DIFF_BG, DIFF_COLOR } from '../constants';
+import { LEVELS, DIFF_LABEL, DIFF_BG, DIFF_COLOR, DIFF_BG_DARK, DIFF_COLOR_DARK } from '../constants';
 import { Btn } from '../ui-primitives';
 import { Question, BuilderState, LevelId } from '../types';
 import { GetQuestionSetsApiResponse } from '@/hooks/hookType';
+import { useThemeStore } from '@/store/store';
 
 interface StepReviewProps {
   a: BuilderState;
@@ -40,6 +41,7 @@ export function StepReview({
 }: StepReviewProps) {
   const [filter, setFilter] = useState('all');
   const [selectedSetIndex, setSelectedSetIndex] = useState(0);
+  const { isDark } = useThemeStore();
 
   const hasQuestionSets = Boolean(questionSets?.sets?.length);
   const selectedSet = hasQuestionSets ? questionSets!.sets[selectedSetIndex] : null;
@@ -168,13 +170,16 @@ export function StepReview({
                   {item.topic}
                 </span>
                 <span
-                  style={{ background: DIFF_BG[item.difficulty], color: DIFF_COLOR[item.difficulty] }}
+                  style={{ 
+                    background: isDark ? DIFF_BG_DARK[item.difficulty] : DIFF_BG[item.difficulty], 
+                    color: isDark ? DIFF_COLOR_DARK[item.difficulty] : DIFF_COLOR[item.difficulty] 
+                  }}
                   className="text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap"
                 >
                   {DIFF_LABEL[item.difficulty]}
                 </span>
               </div>
-              <div className="text-[14px] flex font-medium leading-relaxed">
+              <div className="text-[14px] dark:text-muted-foreground flex font-medium leading-relaxed">
                 {item.text}
               </div>
             </div>
@@ -260,14 +265,17 @@ export function StepReview({
                 {preview.map((q, i) => (
                   <div
                     key={q.id}
-                    className="flex gap-[10px] py-[9px] px-[12px] border border-border rounded-lg mb-1.5 items-center"
+                    className="flex gap-[10px] py-[9px] px-[12px] border border-border rounded-lg mb-1.5 items-start"
                   >
                     <span className="font-bold text-muted-foreground w-[17px] text-[13px]">
                       {i + 1}
                     </span>
-                    <span className="flex-1 text-[13.5px]">{q.text}</span>
+                    <span className="flex-1 text-[13.5px] text-left">{q.text}</span>
                     <span
-                      style={{ background: DIFF_BG[q.difficulty], color: DIFF_COLOR[q.difficulty] }}
+                      style={{ 
+                        background: isDark ? DIFF_BG_DARK[q.difficulty] : DIFF_BG[q.difficulty], 
+                        color: isDark ? DIFF_COLOR_DARK[q.difficulty] : DIFF_COLOR[q.difficulty] 
+                      }}
                       className="text-[11.5px] font-semibold py-[3px] px-[9px] rounded-full inline-flex items-center whitespace-nowrap"
                     >
                       {DIFF_LABEL[q.difficulty]}
