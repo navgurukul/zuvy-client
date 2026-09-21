@@ -256,7 +256,7 @@ const AdaptiveAssessment = (props: any) => {
     }
   };
 
-  // Step handlers
+  // Step handlers...
   const handleConfigSubmit = async () => {
     const bootcampId = routeBootcampId;
     const domainId = routeDomainId ?? toPositiveInt(state.criteria.find((c) => c.domainId)?.domainId);
