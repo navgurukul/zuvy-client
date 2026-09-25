@@ -12,6 +12,18 @@ export function useCreateClass() {
         setError(null)
         try {
             const res = await api.post<CreateClassResponse>('/classes', classData)
+
+            const responseStatus = String(res.data?.status || '').trim().toLowerCase()
+            const isSuccessful = ['success', 'created', 'ok'].includes(responseStatus)
+
+            if (!isSuccessful) {
+                const businessError = new Error(
+                    res.data?.message 
+                )
+                ;(businessError as Error & { response?: unknown }).response = res
+                throw businessError
+            }
+
             return res.data
         } catch (err) {
             setError(err)
