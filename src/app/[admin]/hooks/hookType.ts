@@ -252,8 +252,8 @@ export type CreateClassData = {
 }
 
 export type CreateClassResponse = {
-  status: string
-  message: string
+  status?: string
+  message?: string
   data?: any
 }
 

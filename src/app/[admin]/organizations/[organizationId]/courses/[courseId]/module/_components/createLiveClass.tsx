@@ -265,7 +265,10 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         } catch (error:any) {
             toast.error({
                 title: 'Error',
-                description: error.response?.data?.message || 'Class not created',
+                description:
+                    error.response?.data?.message ||
+                    error.message ||
+                    'Class not created',
             })
         }
     }

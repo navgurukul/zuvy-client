@@ -11,7 +11,7 @@ import {
 } from "@/hooks/useMentorAvailability";
 import { useBookMentorSlot } from "@/app/student/hooks/useBookMentorSlot";
 import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
-import { getMentorProfileHref, getMentorsHref } from "@/utils/studentMentorshipRoutes";
+import { getMentorsHref } from "@/utils/studentMentorshipRoutes";
 import { getMentorId } from "@/utils/mentorUtils";
 
 const getInitials = (label: string) =>
@@ -116,7 +116,7 @@ export default function BookSessionPage() {
 
       {/* Back */}
       <Link
-        href={mentorId ? getMentorProfileHref(mentorId, routeContext) : getMentorsHref(routeContext)}
+        href={getMentorsHref(routeContext)}
         className="flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft size={16} className="mr-1" />

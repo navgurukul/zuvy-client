@@ -88,16 +88,16 @@ export default function RescheduleBookingPage() {
 		<div className="max-w-3xl mx-auto p-6 space-y-6">
 			<Link
 				href={getSessionsHref({ courseId, orgId })}
-				className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+				className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft size={16} />
 				Back to Sessions
 			</Link>
 
-			<div className="border rounded-2xl bg-white p-6 space-y-4">
+			<div className="border border-border rounded-2xl bg-card p-6 space-y-4">
 				<h1 className="text-xl font-semibold text-left">Propose Reschedule</h1>
-				<p className="text-sm text-gray-500 text-left">Booking ID: {bookingId ?? "-"}</p>
-				<p className="text-sm text-gray-500 text-left">Mentor: {mentorDisplayName}</p>
+				<p className="text-sm text-muted-foreground text-left">Booking ID: {bookingId ?? "-"}</p>
+				<p className="text-sm text-muted-foreground text-left">Mentor: {mentorDisplayName}</p>
 
 				<div className="space-y-2">
 					<label className="text-sm font-medium block text-left">Select New Slot</label>
@@ -108,10 +108,10 @@ export default function RescheduleBookingPage() {
 
 					{!slotsLoading && slotsError && (
 						<div className="space-y-2">
-							<p className="text-sm text-red-500 text-left">{slotsError}</p>
+							<p className="text-sm text-destructive text-left">{slotsError}</p>
 							<button
 								onClick={refetchSlots}
-								className="text-xs border px-3 py-1.5 rounded-full"
+								className="text-xs border border-border px-3 py-1.5 rounded-full hover:bg-muted"
 							>
 								Retry slots
 							</button>
@@ -137,8 +137,8 @@ export default function RescheduleBookingPage() {
 										disabled={!isSelectable}
 										className={`w-full border rounded-xl p-3 text-left ${
 											isSelected
-												? "border-green-700 bg-green-50"
-												: "border-gray-200 bg-white"
+												? "border-primary bg-primary/10"
+												: "border-border bg-card hover:bg-muted/60"
 										} ${!isSelectable ? "opacity-60 cursor-not-allowed" : ""}`}
 									>
 										{/* Slot id removed from UI for students */}
@@ -172,15 +172,15 @@ export default function RescheduleBookingPage() {
 						value={reason}
 						onChange={(event) => setReason(event.target.value)}
 						placeholder="Need to move to another time"
-						className="w-full min-h-[120px] border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-green-200"
+						className="w-full min-h-[120px] border border-border bg-background text-foreground placeholder:text-muted-foreground rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
 					/>
 				</div>
 
-				{validationError && <p className="text-sm text-red-500 text-left">{validationError}</p>}
-				{error && <p className="text-sm text-red-500 text-left">{error}</p>}
+				{validationError && <p className="text-sm text-destructive text-left">{validationError}</p>}
+				{error && <p className="text-sm text-destructive text-left">{error}</p>}
 
 				{responseData && (
-					<div className="text-sm text-left rounded-xl border border-green-100 bg-green-50 text-green-700 p-3">
+					<div className="text-sm text-left rounded-xl border border-success/30 bg-success/10 text-success-dark p-3">
 						<p className="font-semibold">{responseData.message || "Reschedule request submitted."}</p>
 						<p>
 							Reschedule status: {responseData.rescheduleStatus || "pending"}
@@ -191,7 +191,7 @@ export default function RescheduleBookingPage() {
 				<button
 					onClick={handleProposeReschedule}
 					disabled={isRescheduling}
-					className="bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+					className="bg-primary text-primary-foreground hover:bg-primary-dark px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{isRescheduling ? "Submitting..." : "Submit Reschedule Request"}
 				</button>

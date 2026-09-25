@@ -33,18 +33,13 @@ const appendQuery = (
 export const getMentorsHref = (context: MentorshipRouteContext = {}) =>
   appendQuery("/student/mentors", context)
 
+export const getMentorDrawerHref = (
+  mentorId: string | number,
+  context: MentorshipRouteContext = {}
+) => appendQuery("/student/mentors", context, { mentorId })
+
 export const getSessionsHref = (context: MentorshipRouteContext = {}) =>
   appendQuery("/student/sessions", context)
-
-export const getMentorProfileHref = (
-  mentorId: string | number,
-  context: MentorshipRouteContext = {}
-) => appendQuery(`/student/mentors/${mentorId}`, context)
-
-export const getMentorBookHref = (
-  mentorId: string | number,
-  context: MentorshipRouteContext = {}
-) => appendQuery(`/student/mentors/${mentorId}/book`, context)
 
 export const getSessionJoinHref = (
   sessionId: string | number,

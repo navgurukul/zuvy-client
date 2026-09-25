@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMentors } from "@/app/student/hooks/useMentors";
 import { api } from "@/utils/axios.config";
@@ -49,6 +49,7 @@ export default function MentorsPage() {
     const searchQuery = searchParams.get("search")?.trim() || ""
     const courseId = searchParams.get("courseId") || ""
     const orgId = searchParams.get("orgId") || ""
+    const mentorIdToOpen = searchParams.get("mentorId") || ""
     const [showAllMentors, setShowAllMentors] = useState(false)
     const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null)
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -74,6 +75,19 @@ export default function MentorsPage() {
             return mentor.availabilityStatus?.trim().toLowerCase() === "available"
         })
     }, [availableMentorPool])
+
+    useEffect(() => {
+        if (!mentorIdToOpen || availableMentorPoolLoading) return
+
+        const mentorToOpen = availableMentorPool.find(
+            (mentor) => String(mentor.userId) === mentorIdToOpen
+        )
+
+        if (mentorToOpen) {
+            setSelectedMentor(mentorToOpen)
+            setIsDrawerOpen(true)
+        }
+    }, [availableMentorPool, availableMentorPoolLoading, mentorIdToOpen])
 
     const totalForPagination = showAllMentors ? total : availableMentors.length
     const totalPages = Math.max(1, Math.ceil(totalForPagination / limit))
@@ -149,16 +163,16 @@ export default function MentorsPage() {
             {!metricsLoading && metrics && (
                 <div className={`mb-6 rounded-2xl border px-4 py-3 ${
                     metrics.canBook
-                        ? 'bg-green-50 dark:bg-card border-green-200'
-                        : 'bg-yellow-50 border-yellow-200'
+                        ? 'bg-green-50 border-green-200 dark:bg-success/5 dark:border-success/20'
+                        : 'bg-yellow-50 border-yellow-200 dark:bg-warning/5 dark:border-warning/20'
                 }`}>
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex min-w-0 items-center gap-3 text-left">
                             <Calendar className={`w-5 h-5 flex-shrink-0 ${
-                                metrics.canBook ? 'text-green-700' : 'text-yellow-700'
+                                metrics.canBook ? 'text-green-700 dark:text-success-dark' : 'text-yellow-700 dark:text-warning-dark'
                             }`} />
                             <p className={`truncate text-sm font-medium ${
-                                metrics.canBook ? 'text-green-900' : 'text-yellow-900'
+                                metrics.canBook ? 'text-green-900 dark:text-success-dark' : 'text-yellow-900 dark:text-warning-dark'
                             }`}>
                                 {metrics.canBook
                                     ? 'You can book a session now!'
@@ -167,8 +181,8 @@ export default function MentorsPage() {
                         </div>
                         <span className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-xs font-semibold ${
                             metrics.canBook
-                                ? 'bg-green-100  text-green-800 dark:bg-green-800 dark:text-green-100'
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-800 dark:bg-success/10 dark:text-success-dark'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-warning/10 dark:text-warning-dark'
                         }`}>
                             Remaining Credits: {metrics.remainingCredits}
                         </span>
