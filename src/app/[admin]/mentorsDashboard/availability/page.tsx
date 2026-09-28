@@ -429,7 +429,7 @@ function AddSlotPanel({
   const dateLabel = slotDate
     ? new Date(slotDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
     : ""
-
+  
   return (
     <Card className="rounded-lg border border-border bg-card shadow-sm">
       <CardContent className="space-y-4 p-5">
@@ -445,7 +445,7 @@ function AddSlotPanel({
               type="date"
               value={slotDate}
               onChange={(e) => setSlotDate(e.target.value)}
-              className="w-full text-sm font-medium"
+              className="w-full  text-sm font-medium [color-scheme:light] dark:[color-scheme:dark]"
             />
           </div>
           {dateLabel && <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>}
@@ -467,7 +467,7 @@ function AddSlotPanel({
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="text-sm font-medium"
+                className="text-sm font-medium [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
           </div>
@@ -489,9 +489,9 @@ function AddSlotPanel({
         </div>
         {/* Conflict */}
         {overlappingSlot && (
-          <div className="border border-red-200 bg-red-50 rounded-lg p-3 space-y-1">
-            <p className="text-left text-xs font-semibold text-red-500">CONFLICT DETECTED</p>
-            <div className="flex items-center gap-2 text-xs text-red-600">
+          <div className="border border-red-200 bg-red-50 rounded-lg p-3 space-y-1 dark:border-red-900/50 dark:bg-red-950/30">
+            <p className="text-left text-xs font-semibold text-red-500 dark:text-red-400">CONFLICT DETECTED</p>
+            <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
               <Clock size={12} />
               {formatLocalTimeRange(overlappingSlot.slotStartDateTime, overlappingSlot.slotEndDateTime)}
             </div>

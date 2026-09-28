@@ -54,15 +54,15 @@ export default function CancelBookingPage() {
 		<div className="max-w-3xl mx-auto p-6 space-y-6">
 			<Link
 				href={getSessionsHref({ courseId, orgId })}
-				className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+				className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft size={16} />
 				Back to Sessions
 			</Link>
 
-			<div className="border rounded-2xl bg-white p-6 space-y-4">
+			<div className="border border-border rounded-2xl bg-card p-6 space-y-4">
 				<h1 className="text-xl font-semibold text-left">Cancel Booking</h1>
-				<p className="text-sm text-gray-500 text-left">
+				<p className="text-sm text-muted-foreground text-left">
 					Booking ID: {bookingId ?? "-"}
 				</p>
 
@@ -72,16 +72,16 @@ export default function CancelBookingPage() {
 						value={reason}
 						onChange={(event) => setReason(event.target.value)}
 						placeholder="Unable to attend due to schedule conflict"
-						className="w-full min-h-[120px] border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-green-200"
+						className="w-full min-h-[120px] border border-border bg-background text-foreground placeholder:text-muted-foreground rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
 					/>
-					<p className="text-xs text-gray-500 text-left">Minimum 10 characters required.</p>
+					<p className="text-xs text-muted-foreground text-left">Minimum 10 characters required.</p>
 				</div>
 
-				{validationError && <p className="text-sm text-red-500 text-left">{validationError}</p>}
-				{error && <p className="text-sm text-red-500 text-left">{error}</p>}
+				{validationError && <p className="text-sm text-destructive text-left">{validationError}</p>}
+				{error && <p className="text-sm text-destructive text-left">{error}</p>}
 
 				{message && (
-					<div className="text-sm text-left rounded-xl border border-green-100 bg-green-50 text-green-700 p-3">
+					<div className="text-sm text-left rounded-xl border border-success/30 bg-success/10 text-success-dark p-3">
 						<p className="font-semibold">{message}</p>
 						<p>Status: cancelled</p>
 					</div>
@@ -90,7 +90,7 @@ export default function CancelBookingPage() {
 				<button
 					onClick={handleCancelBooking}
 					disabled={isCancelling || !!message}
-					className="bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+					className="bg-primary text-primary-foreground hover:bg-primary-dark px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{isCancelling ? "Cancelling..." : "Confirm Cancel Booking"}
 				</button>

@@ -80,34 +80,34 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
   if (isCancelledValue(status) || isCancelledValue(lifecycle)) {
     return {
       label: "Cancelled",
-      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
+      className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
   if (isMissedValue(status) || isMissedValue(lifecycle)) {
     return {
       label: "Missed",
-      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
+      className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
   if (lifecycle === "completed") {
     return {
       label: "Completed",
-      className: "border-green-600/30 bg-green-50 text-green-700 hover:border-green-600/30 hover:bg-green-50 hover:text-green-700 hover:opacity-100",
+      className: "border-success/30 bg-success/5 text-success-dark hover:border-success/30 hover:bg-success/5 hover:text-success-dark hover:opacity-100",
     }
   }
 
   if (hasReschedule) {
     return {
       label: "Action needed",
-      className: "border-orange-500/30 bg-orange-50 text-orange-600 hover:border-orange-500/30 hover:bg-orange-50 hover:text-orange-600 hover:opacity-100",
+      className: "border-warning/40 bg-warning/5 text-warning-dark hover:border-warning/40 hover:bg-warning/5 hover:text-warning-dark hover:opacity-100",
     }
   }
 
   return {
     label: "Upcoming",
-    className: "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 hover:opacity-100",
+    className: "border-info/30 bg-info/5 text-info-dark hover:border-info/30 hover:bg-info/5 hover:text-info-dark hover:opacity-100",
   }
 }
 
@@ -517,7 +517,7 @@ export default function SessionsPage() {
             }`}
         >
           <span>Action Needed</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f59e0b] px-1.5 text-[11px] font-medium text-white">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-warning px-1.5 text-[11px] font-medium text-warning-foreground">
             {Number(summaryCounts.reschedule) || 0}
           </span>
           {activeTab === "reschedule" && (

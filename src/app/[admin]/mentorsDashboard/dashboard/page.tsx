@@ -539,7 +539,7 @@ function DashboardPageContent() {
               {!upcomingSessionsLoading && upcomingSessionsError && <p className="text-sm text-red-500">{upcomingSessionsError}</p>}
               {!upcomingSessionsLoading && !upcomingSessionsError && upcomingSessions.length === 0 && (
                 <div className='flex flex-col items-center justify-center text-center mt-10'>
-                  <CalendarX className="h-10 w-10 text-muted-foreground" />
+                  <CalendarX className="h-8 w-8 text-muted-foreground" />
                   <p className="text-sm font-semibold text-text-primary">No upcoming sessions</p>
                   <p className="text-xs text-text-muted mt-0.5">Update your availability to let learners book sessions</p>
                 </div>

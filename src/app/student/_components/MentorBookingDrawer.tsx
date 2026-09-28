@@ -133,44 +133,44 @@ export default function MentorBookingDrawer({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" 
-      className="w-full !max-w-[500px] overflow-y-auto p-0"
+      className="w-full !max-w-[500px] overflow-y-auto bg-background p-0 text-foreground"
       >
         {!mentor ? null : (
           <div className="relative flex h-full flex-col">
             {/* Header with mentor info - Hidden when booking success */}
             {!bookingSuccess && (
-              <SheetHeader className="border-b border-gray-200 px-6 py-5">
+              <SheetHeader className="border-b border-border px-6 py-5">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12 shrink-0 border border-gray-300">
+                  <Avatar className="h-12 w-12 shrink-0 border border-border">
                     <AvatarFallback className="bg-green-800 text-xs font-semibold text-white">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="min-w-0 flex-1">
-                    <SheetTitle className="text-left text-base font-semibold text-gray-900 leading-tight">
+                    <SheetTitle className="text-left text-base font-semibold leading-tight text-foreground">
                       {mentor.name}
                     </SheetTitle>
                     <div className="mt-2 flex flex-col gap-1">
                       {mentor.email ? (
-                        <p className="text-left text-xs text-gray-600">
+                        <p className="text-left text-xs text-muted-foreground">
                           {mentor.email}
                         </p>
                       ) : null}
                       {mentor.orgName ? (
-                        <p className="text-left text-xs text-gray-500">{mentor.orgName}</p>
+                        <p className="text-left text-xs text-muted-foreground">{mentor.orgName}</p>
                       ) : null}
                     </div>
 
-                    <p className="text-left text-xs text-gray-600 mt-0.5">
+                    <p className="text-left text-xs text-muted-foreground mt-0.5">
                       {mentor.title || mentor.role || "Mentor"}
                     </p>
                     <div className="mt-2">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           isAvailable
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300"
+                            : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {isAvailable ? "Accepting sessions" : "Not available"}
@@ -187,17 +187,17 @@ export default function MentorBookingDrawer({
               <div className="space-y-5">
                 {/* Available Slots */}
                 <section>
-                  <h3 className="text-left text-sm font-semibold text-gray-900 mb-2">Available Slots</h3>
-                  <p className="text-left text-xs text-gray-500 mb-3">Select one slot to continue.</p>
+                  <h3 className="text-left text-sm font-semibold text-foreground mb-2">Available Slots</h3>
+                  <p className="text-left text-xs text-muted-foreground mb-3">Select one slot to continue.</p>
 
                   {loading ? (
-                    <p className="text-xs text-gray-500">Loading slots...</p>
+                    <p className="text-xs text-muted-foreground">Loading slots...</p>
                   ) : error ? (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-600">
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-600 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300">
                       {error}
                     </div>
                   ) : availableSlots.length === 0 ? (
-                    <p className="text-xs text-gray-500">No available slots.</p>
+                    <p className="text-xs text-muted-foreground">No available slots.</p>
                   ) : (
                     <div className="space-y-2">
                       {availableSlots.map((slot) => {
@@ -207,8 +207,8 @@ export default function MentorBookingDrawer({
                             key={slot.id}
                             className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
                               selected
-                                ? "border-green-600 bg-green-50 shadow-sm"
-                                : "border-gray-200 bg-white hover:bg-gray-50"
+                                ? "border-green-600 bg-green-50 shadow-sm dark:border-green-500/70 dark:bg-green-950/30"
+                                : "border-border bg-card hover:bg-muted/60"
                             }`}
                           >
                             <input
@@ -217,19 +217,19 @@ export default function MentorBookingDrawer({
                               value={slot.id}
                               checked={selected}
                               onChange={() => setSelectedSlotId(slot.id)}
-                              className="mt-0.5 h-5 w-5 shrink-0"
+                              className="mt-0.5 h-5 w-5 shrink-0 dark:appearance-none dark:rounded-full dark:border-2 dark:border-green-500 dark:bg-transparent dark:checked:border-green-500 dark:checked:bg-green-500 dark:focus-visible:outline-none dark:focus-visible:ring-2 dark:focus-visible:ring-green-500 dark:focus-visible:ring-offset-2 dark:focus-visible:ring-offset-background"
                             />
                             <div className="min-w-0 text-left">
-                              <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                                <Calendar className="h-4 w-4 text-gray-500" />
+                              <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
                                 {formatSlotDate(slot.slotStartDateTime)}
                               </p>
-                              <p className="mt-1.5 flex items-center gap-2 text-sm text-gray-600">
-                                <Clock className="h-4 w-4 text-gray-500" />
+                              <p className="mt-1.5 flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
                                 {formatSlotRange(slot.slotStartDateTime, slot.slotEndDateTime)}
                               </p>
                               {slot.topic ? (
-                                <p className="mt-2 text-sm text-gray-500">Topic: {slot.topic}</p>
+                                <p className="mt-2 text-sm text-muted-foreground">Topic: {slot.topic}</p>
                               ) : null}
                             </div>
                           </label>
@@ -240,36 +240,36 @@ export default function MentorBookingDrawer({
                 </section>
 
                 {/* About */}
-                <section className="border-b border-gray-200 ">
-                  <h3 className="text-left text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">About</h3>
-                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-gray-700 mb-4">
+                <section className="border-b border-border ">
+                  <h3 className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">About</h3>
+                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-foreground/80 mb-4">
                     {aboutText || "No bio added."}
                   </p>
                 </section>
 
                 {/* Expertise */}
-                <section className="border-b border-gray-200">
-                  <h3 className="text-left text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Areas of Expertise</h3>
+                <section className="border-b border-border">
+                  <h3 className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Areas of Expertise</h3>
                   {expertise.length ? (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {expertise.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center rounded-md bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700 border border-gray-200 shadow-sm"
+                          className="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-medium text-foreground/80 shadow-sm"
                         >
                           {skill}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-left text-sm text-gray-500 mb-4">No expertise listed.</p>
+                    <p className="text-left text-sm text-muted-foreground mb-4">No expertise listed.</p>
                   )}
                 </section>
 
                 {/* Past Experiences */}
                 <section>
-                  <h3 className="text-left text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Past Experiences</h3>
-                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-gray-700">
+                  <h3 className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Past Experiences</h3>
+                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-foreground/80">
                     {pastExperiences.length > 0 ? pastExperiences : "No experiences added."}
                   </p>
                 </section>
@@ -279,11 +279,11 @@ export default function MentorBookingDrawer({
             {/* Success view - Absolute positioned overlay */}
             {bookingSuccess && (
               <div
-                className="absolute inset-0 bg-white"
+                className="absolute inset-0 bg-background"
               >
                 <div className="flex h-full flex-col">
                   {/* HEADER */}
-                  <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                  <div className="flex items-center justify-between border-b border-border px-6 py-5">
                     <p className="truncate text-left text-base font-semibold">
                       Session Booked
                     </p>
@@ -292,22 +292,22 @@ export default function MentorBookingDrawer({
                   {/* CONTENT */}
                   <div className="flex flex-1 flex-col items-center justify-center px-7">
                     {/* SUCCESS ICON */}
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e7f5eb]">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50">
                       <Check
-                        className="h-11 w-11 text-[#16a34a]"
+                        className="h-11 w-11 text-green-600 dark:text-green-400"
                         strokeWidth={2.5}
                       />
                     </div>
 
                     {/* TEXT */}
                     <div className="mt-8 text-center">
-                      <h6 className="text-1xl font-semibold tracking-[-0.02em] text-gray-900">
+                      <h6 className="text-1xl font-semibold tracking-[-0.02em] text-foreground">
                         You&apos;re booked!
                       </h6>
 
-                      <p className="mt-4 text-sm leading-8 text-gray-600">
+                      <p className="mt-4 text-sm leading-8 text-muted-foreground">
                         Your session with{" "}
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-foreground">
                           {mentor.name}
                         </span>{" "}
                         is confirmed. You&apos;ll get a reminder
@@ -316,21 +316,21 @@ export default function MentorBookingDrawer({
                     </div>
 
                     {/* SUMMARY CARD */}
-                    <div className="mt-10 w-full rounded-2xl bg-[#eef7ee] px-6 py-5 space-y-3">
-                      <div className="flex items-center gap-3 border-b border-[#d7e8d7] pb-3">
-                        <p className="text-xs font-medium text-gray-600">
+                    <div className="mt-10 w-full space-y-3 rounded-2xl bg-green-50 px-6 py-5 dark:bg-green-950/30">
+                      <div className="flex items-center gap-3 border-b border-green-200 pb-3 dark:border-green-800">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Mentor
                         </p>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {mentor.name}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 border-b border-[#d7e8d7] pb-3">
-                        <p className="text-xs font-medium text-gray-600">
+                      <div className="flex items-center gap-3 border-b border-green-200 pb-3 dark:border-green-800">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Date
                         </p>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {bookedSlotDetails
                             ? formatSlotDate(
                                 bookedSlotDetails.slotStartDateTime
@@ -340,10 +340,10 @@ export default function MentorBookingDrawer({
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <p className="text-xs font-medium text-gray-600">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Time
                         </p>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {bookedSlotDetails
                             ? formatSlotRange(
                                 bookedSlotDetails.slotStartDateTime,
@@ -365,10 +365,10 @@ export default function MentorBookingDrawer({
                           h-14
                           w-full
                           rounded-xl
-                          border-gray-200
+                          border-border
                           text-sm
                           font-semibold
-                          hover:bg-gray-50
+                          hover:bg-muted
                         "
                       >
                         View in My Sessions →
@@ -381,26 +381,26 @@ export default function MentorBookingDrawer({
 
             {/* Footer CTA - Hidden when booking success */}
             {!bookingSuccess && (
-              <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
+              <div className="sticky bottom-0 border-t border-border bg-background px-6 py-4">
                 <div className="space-y-2">
-                  {bookingError ? <p className="text-xs text-red-500">{bookingError}</p> : null}
+                  {bookingError ? <p className="text-xs text-red-500 dark:text-red-300">{bookingError}</p> : null}
 
                   {/* Validation message when user cannot book */}
                   {selectedSlotId !== null && (bookingEligibilityBlocked || bookingNotYetEligible) && (
-                    <div className="rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
+                    <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-dark dark:border-warning/50 dark:bg-warning/20 dark:text-warning-dark">
                       {bookingEligibilityBlocked ? (
                         <>
                           You have already booked a session. {metrics?.nextEligible ? `Your next booking will be available on ${formatEligibleDate(metrics.nextEligible)}.` : null}
                         </>
                       ) : bookingNotYetEligible ? (
-                        <>You can book your next session from {formatEligibleDate(metrics?.nextEligible || null)}.</>
+                        <>You can book your next session from  {formatEligibleDate(metrics?.nextEligible || null)}.</>
                       ) : null}
                     </div>
                   )}
                   <Button
                       onClick={handleBook}
                       disabled={!canBook}
-                      className="h-10 w-full bg-green-800 text-white text-sm font-medium cursor-pointer hover:bg-green-900 disabled:cursor-not-allowed  disabled:hover:bg-green-800"
+                      className="h-10 w-full bg-green-800 text-white text-sm font-medium cursor-pointer hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-500 disabled:cursor-not-allowed disabled:hover:bg-green-800 dark:disabled:hover:bg-green-600"
                     >
                       {isBooking ? "Booking..." : "Book this Session"}
                     </Button>
