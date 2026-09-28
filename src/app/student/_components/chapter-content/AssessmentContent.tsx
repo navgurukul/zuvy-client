@@ -507,13 +507,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             </div>
             )}                     {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all [transition-duration:1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all [transition-duration:1500ms] ease-in-out text-sm sm:text-base shadow-error dark:bg-rose-950/30 dark:border-rose-700/50 dark:text-rose-100 ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
               
               <div className='flex flex-col items-center space-y-5' >
-                <span className=" text-destructive flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive' />Assessment expired and cannot be submitted.</span>
-                <span className='text-destructive font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
+                <span className="text-destructive dark:text-rose-200 flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive dark:text-rose-300' />Assessment expired and cannot be submitted.</span>
+                <span className='text-destructive dark:text-rose-200 font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
               </div>
             </div>
           )}
