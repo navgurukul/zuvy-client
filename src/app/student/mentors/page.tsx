@@ -12,6 +12,7 @@ import { Toggle } from "@/components/ui/toggle";
 import MentorshipTabs from "../_components/MentorshipTabs";
 import MentorBookingDrawer from "@/app/student/_components/MentorBookingDrawer";
 import { Mentor } from "../hooks/hookTypes";
+import { useMentorProfile } from "../hooks/useMentorProfile";
 
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
@@ -68,6 +69,12 @@ export default function MentorsPage() {
         error: availableMentorPoolError,
     } = useMentors(searchQuery, !showAllMentors, 10, 0, orgId || undefined)
 
+    const { mentorProfile: requestedMentorProfile, loading: requestedMentorLoading } = useMentorProfile(
+        mentorIdToOpen || undefined,
+        Boolean(mentorIdToOpen),
+        orgId || undefined
+    )
+
     const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
 
     const availableMentors = useMemo(() => {
@@ -77,7 +84,7 @@ export default function MentorsPage() {
     }, [availableMentorPool])
 
     useEffect(() => {
-        if (!mentorIdToOpen || availableMentorPoolLoading) return
+        if (!mentorIdToOpen || availableMentorPoolLoading || requestedMentorLoading) return
 
         const mentorToOpen = availableMentorPool.find(
             (mentor) => String(mentor.userId) === mentorIdToOpen
@@ -86,8 +93,26 @@ export default function MentorsPage() {
         if (mentorToOpen) {
             setSelectedMentor(mentorToOpen)
             setIsDrawerOpen(true)
+            return
         }
-    }, [availableMentorPool, availableMentorPoolLoading, mentorIdToOpen])
+
+        if (requestedMentorProfile) {
+            setSelectedMentor({
+                userId: String(requestedMentorProfile.mentorUserId || mentorIdToOpen),
+                name: requestedMentorProfile.name || `Mentor ${mentorIdToOpen}`,
+                email: "",
+                role: requestedMentorProfile.title || null,
+                bio: requestedMentorProfile.bio || null,
+                pastExperiences: requestedMentorProfile.pastExperiences || null,
+                expertise: requestedMentorProfile.expertise,
+                title: requestedMentorProfile.title || null,
+                availabilityStatus: "available",
+                availableSlots: 0,
+                organizationId: orgId ? Number(orgId) : undefined,
+            })
+            setIsDrawerOpen(true)
+        }
+    }, [availableMentorPool, availableMentorPoolLoading, mentorIdToOpen, requestedMentorLoading, requestedMentorProfile, orgId])
 
     const totalForPagination = showAllMentors ? total : availableMentors.length
     const totalPages = Math.max(1, Math.ceil(totalForPagination / limit))
