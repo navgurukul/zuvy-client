@@ -260,6 +260,25 @@ export const getDifficultyColor = (difficulty: string) => {
     }
 }
 
+// PDF Color Constants (RGB tuples for jsPDF)
+// Converted from HSL values in globals.css
+export const PDF_COLORS = {
+    primary: [46, 92, 68] as [number, number, number],           // HSL(120, 37%, 27%) - Forest Green
+    accent: [11, 209, 157] as [number, number, number],          // HSL(153, 91%, 49%) - Bright Teal
+    success: {
+        bg: [232, 245, 233] as [number, number, number],         // Light success background
+        text: [22, 101, 52] as [number, number, number]          // Dark success text
+    },
+    warning: {
+        bg: [255, 248, 225] as [number, number, number],         // Light warning background
+        text: [161, 98, 7] as [number, number, number]           // Dark warning text
+    },
+    destructive: {
+        bg: [254, 242, 242] as [number, number, number],         // Light destructive background
+        text: [185, 28, 28] as [number, number, number]          // Dark destructive text
+    }
+} as const
+
 
 interface ChapterTrackingDetail {
     id: number

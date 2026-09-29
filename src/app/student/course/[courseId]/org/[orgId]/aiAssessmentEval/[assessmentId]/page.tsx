@@ -16,6 +16,8 @@ import { useGetStudentAiAssessmentQuestions } from '@/hooks/useGetAiAssessmentQu
 import { useGetStudentAiAssessmentResult } from '@/hooks/useAiAssessmentResultsEval'
 import { useExplanationStore } from '@/store/useExplanationStore'
 import { useGetQuestionExplanation } from '@/hooks/useExplanationEval'
+import { PDF_COLORS } from '@/lib/utils'
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
 
 const AssessmentQuestionsPage = () => {
   const router = useRouter()
@@ -28,6 +30,11 @@ const AssessmentQuestionsPage = () => {
   const assessmentIdParam = params?.assessmentId
   const assessmentId = Number(assessmentIdParam)
 
+  const { completeChapter } = useChapterCompletion({
+    courseId: params?.courseId as string,
+    moduleId: domainId as string,
+    chapterId: chapterId as string,
+  })
 
   const {
     questions,
@@ -58,45 +65,45 @@ const AssessmentQuestionsPage = () => {
   const { fetchExplanation, isLoading: isExplanationLoading, error: explanationError } = useGetQuestionExplanation()
   const { getExplanation } = useExplanationStore()
 
-  const handleDownloadPDF = () => {
-    if (!result) return
+  // const handleDownloadPDF = () => {
+  //   if (!result) return
 
-    const doc = new jsPDF()
+  //   const doc = new jsPDF()
 
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(96, 144, 130)
-    doc.setFontSize(16)
-    doc.text(`AI Assessment Report`, 105, 15, { align: 'center' })
+  //   doc.setFont('helvetica', 'bold')
+  //   doc.setTextColor(96, 144, 130)
+  //   doc.setFontSize(16)
+  //   doc.text(`AI Assessment Report`, 105, 15, { align: 'center' })
 
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(11)
-    doc.setTextColor(0, 0, 0)
-    doc.text(`Score: ${result.score} / ${result.totalQuestions}`, 15, 30)
-    doc.text(`Percentage: ${result.percentage}%`, 15, 35)
-    doc.text(`Grade: ${result.level.grade} (${result.level.meaning})`, 15, 40)
-    // doc.text(`Difficulty: ${result.level.hardship}`, 15, 45)
+  //   doc.setFont('helvetica', 'normal')
+  //   doc.setFontSize(11)
+  //   doc.setTextColor(0, 0, 0)
+  //   doc.text(`Score: ${result.score} / ${result.totalQuestions}`, 15, 30)
+  //   doc.text(`Percentage: ${result.percentage}%`, 15, 35)
+  //   doc.text(`Grade: ${result.level.grade} (${result.level.meaning})`, 15, 40)
+  //   // doc.text(`Difficulty: ${result.level.hardship}`, 15, 45)
 
-    const tableData = result.questions.map((q, index) => [
-      `Q${index + 1}`,
-      q.isCorrect ? 'Correct' : 'Incorrect'
-    ])
+  //   const tableData = result.questions.map((q, index) => [
+  //     `Q${index + 1}`,
+  //     q.isCorrect ? 'Correct' : 'Incorrect'
+  //   ])
 
-    autoTable(doc, {
-      head: [['Question', 'Status']],
-      body: tableData,
-      startY: 55,
-      theme: 'grid',
-      headStyles: {
-        fillColor: [96, 144, 130],
-        textColor: [255, 255, 255],
-      },
-      bodyStyles: {
-        textColor: [0, 0, 0],
-      },
-    })
+  //   autoTable(doc, {
+  //     head: [['Question', 'Status']],
+  //     body: tableData,
+  //     startY: 55,
+  //     theme: 'grid',
+  //     headStyles: {
+  //       fillColor: [96, 144, 130],
+  //       textColor: [255, 255, 255],
+  //     },
+  //     bodyStyles: {
+  //       textColor: [0, 0, 0],
+  //     },
+  //   })
 
-    doc.save(`Assessment_Report.pdf`)
-  }
+  //   doc.save(`Assessment_Report.pdf`)
+  // }
 
   useEffect(() => {
     if (!Number.isNaN(assessmentId) && assessmentId > 0) {
@@ -259,7 +266,7 @@ const AssessmentQuestionsPage = () => {
       utterance.voice = voiceToUse
       utterance.lang = voiceToUse.lang
     }
-    utterance.rate = 1.75
+    utterance.rate = 1.50
     utterance.onend = () => {
       setActiveSpeechTarget((prev) => (prev === target ? null : prev))
     }
@@ -318,6 +325,9 @@ const AssessmentQuestionsPage = () => {
       }
 
       const response = await api.post(`${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/submit-score`, payload)
+
+      // Mark chapter as completed in tracking — same API used by all other chapter types
+      await completeChapter()
 
       toast({
         title: 'Success',
@@ -420,7 +430,7 @@ const AssessmentQuestionsPage = () => {
     const doc = new jsPDF()
 
     doc.setFont('helvetica', 'bold')
-    doc.setTextColor(96, 144, 130)
+    doc.setTextColor(PDF_COLORS.primary[0], PDF_COLORS.primary[1], PDF_COLORS.primary[2])
     doc.setFontSize(16)
     doc.text(`AI Assessment Report`, 105, 10, { align: 'center' })
 
@@ -428,41 +438,86 @@ const AssessmentQuestionsPage = () => {
     doc.setFontSize(11)
     doc.setTextColor(0, 0, 0)
 
-    doc.text(`Assessment ID: ${assessmentMeta.aiAssessmentId || 'N/A'}`, 15, 25)
-    doc.text(`Set #: ${assessmentMeta.questionSetId || 'N/A'}`, 15, 30)
-    doc.text(`Total Marks: ${result.totalQuestions}`, 15, 40)
-    doc.text(`Score: ${result.score}`, 15, 45)
-    doc.text(`Percentage: ${result.percentage}%`, 15, 50)
-    doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 55)
+    doc.text(`Total Questions: ${result.totalQuestions}`, 15, 25)
+    doc.text(`Score: ${result.score}`, 15, 30)
+    doc.text(`Percentage: ${result.percentage}%`, 15, 35)
+    doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 40)
 
     autoTable(doc, {
-      head: [['Question', 'Status', 'Your Answer', 'Correct Answer']],
+      head: [['Q#', 'Question', 'Topic', 'Difficulty', 'Language', 'Status', 'Your Answer', 'Correct Answer']],
       body: result.questions.map((q, index) => {
         const originalQuestion = questions.find(oq => oq.questionId === q.questionId)
-        const selectedOptionLabel = q.selectedOption ? originalQuestion?.options[q.selectedOption] || `Option ${q.selectedOption}` : 'Not answered'
+        const selectedOptionLabel = q.selectedOption 
+          ? originalQuestion?.options[q.selectedOption] || `Option ${q.selectedOption}` 
+          : 'Not answered'
         const correctOptionLabel = originalQuestion?.options[q.correctOption] || `Option ${q.correctOption}`
+        const difficulty = (originalQuestion?.difficulty || 'N/A').toLowerCase()
 
         return [
-          `Q${index + 1}. ${originalQuestion?.question || ''}`,
+          `${index + 1}`,
+          originalQuestion?.question || '',
+          originalQuestion?.topic || 'N/A',
+          difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
+          originalQuestion?.language || 'N/A',
           q.isCorrect ? 'Correct' : 'Incorrect',
           selectedOptionLabel,
           correctOptionLabel
         ]
       }),
-      startY: 65,
+      startY: 50,
       theme: 'grid',
       headStyles: {
-        fillColor: [96, 144, 130],
+        fillColor: PDF_COLORS.primary,
         textColor: [255, 255, 255],
+        fontSize: 8,
+        fontStyle: 'bold',
       },
       bodyStyles: {
         textColor: [0, 0, 0],
+        fontSize: 7,
       },
       columnStyles: {
-        0: { cellWidth: 70 },
-        1: { cellWidth: 20 },
-        2: { cellWidth: 45 },
-        3: { cellWidth: 45 },
+        0: { cellWidth: 8 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 18 },
+        4: { cellWidth: 18 },
+        5: { cellWidth: 18 },
+        6: { cellWidth: 29 },
+        7: { cellWidth: 29 },
+      },
+      didParseCell: function (data) {
+        // Color for difficulty column using global colors
+        if (data.column.index === 3 && data.section === 'body') {
+          const difficulty = data.cell.text[0]?.toLowerCase()
+          if (difficulty === 'easy') {
+            data.cell.styles.fillColor = PDF_COLORS.success.bg
+            data.cell.styles.textColor = PDF_COLORS.success.text
+            data.cell.styles.fontStyle = 'bold'
+          } else if (difficulty === 'medium') {
+            data.cell.styles.fillColor = PDF_COLORS.warning.bg
+            data.cell.styles.textColor = PDF_COLORS.warning.text
+            data.cell.styles.fontStyle = 'bold'
+          } else if (difficulty === 'hard') {
+            data.cell.styles.fillColor = PDF_COLORS.destructive.bg
+            data.cell.styles.textColor = PDF_COLORS.destructive.text
+            data.cell.styles.fontStyle = 'bold'
+          }
+        }
+        
+        // Color for status column using global colors
+        if (data.column.index === 5 && data.section === 'body') {
+          const status = data.cell.text[0]
+          if (status?.includes('Correct')) {
+            data.cell.styles.fillColor = PDF_COLORS.success.bg
+            data.cell.styles.textColor = PDF_COLORS.success.text
+            data.cell.styles.fontStyle = 'bold'
+          } else if (status?.includes('Incorrect')) {
+            data.cell.styles.fillColor = PDF_COLORS.destructive.bg
+            data.cell.styles.textColor = PDF_COLORS.destructive.text
+            data.cell.styles.fontStyle = 'bold'
+          }
+        }
       },
     })
 
@@ -633,7 +688,7 @@ const AssessmentQuestionsPage = () => {
                         </div>
 
                         <button
-                          onClick={handleDownloadPDF}
+                          onClick={handleDownloadReport}
                           className="flex flex-col items-center justify-center space-y-2.5 p-4 rounded-xl bg-card backdrop-blur-sm border border-border/30 hover:bg-muted hover:shadow-soft transition-all cursor-pointer group"
                         >
                           <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-110 transition-all">
