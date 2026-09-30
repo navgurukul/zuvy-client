@@ -224,11 +224,11 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                             {/* Back to all orgs - Fixed at bottom */}
                             {isSuperAdmin && (
                                 <div className="flex-none p-1">
-                                    <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50 cursor-pointer rounded-md">
+                                    <DropdownMenuItem className="px-0 py-0 focus:bg-muted-foreground/10 cursor-pointer rounded-md">
                                         <Link
                                             href={`/${role}/organizations`}
                                             onClick={() => setIsOpen(false)}
-                                            className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"
+                                            className="w-full px-4 py-3 text-left text-muted-foreground hover:bg-muted-foreground/10 flex items-center gap-2 text-sm font-medium"
                                         >
                                             ← Back to all orgs
                                         </Link>

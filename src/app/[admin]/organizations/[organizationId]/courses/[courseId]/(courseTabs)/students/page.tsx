@@ -526,7 +526,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     <div className="w-full sm:w-[160px] mt-2">
                         <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
                             <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
+                            <SelectContent className="w-[160px]"><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
                         </Select>
                     </div>
 

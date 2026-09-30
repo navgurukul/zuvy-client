@@ -376,7 +376,7 @@ export default function AdminSettingPage() {
                                                 className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer gap-4 ${
                                                     logoPreview
                                                         ? 'border-border bg-background'
-                                                        : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                                                        : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                                 }`}
                                             >
                                                 {logoPreview ? (
@@ -389,7 +389,7 @@ export default function AdminSettingPage() {
                                                     <>
                                                         <Cloud className="h-12 w-12 text-slate-400" />
                                                         <div className="text-center px-4">
-                                                            <p className="text-base font-semibold text-slate-700">
+                                                            <p className="text-base font-semibold text-foreground/85">
                                                                 Upload your organization logo
                                                             </p>
                                                             <p className="text-sm text-slate-500 mt-1">
@@ -478,7 +478,7 @@ export default function AdminSettingPage() {
                                                 {/* Role (Non-editable) */}
                                                 <div className="space-y-2">
                                                     <Label className="text-sm font-semibold text-foreground text-left block">Role</Label>
-                                                    <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
+                                                    <div className="px-3 py-3 bg-[#E8E7DC] dark:bg-slate-600 text-base text-foreground/80 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
                                                         {role}
                                                     </div>
                                                 </div>
