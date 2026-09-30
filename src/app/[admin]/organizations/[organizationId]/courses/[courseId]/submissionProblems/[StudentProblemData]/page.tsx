@@ -202,7 +202,7 @@ const PracticeProblems = ({ params }: any) => {
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
                                     <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>

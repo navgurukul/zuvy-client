@@ -142,7 +142,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     const fetchedAssigneeName = data.zuvyPocName || ''
                     const fetchedAssigneeEmail = data.zuvyPocEmail || ''
                     // Mapping isManagedByZuvy to role id (1: Self, 2: Zuvy)
-                    const fetchedRoleId = user.managementType || data.isManagedByZuvy ? 2 : 1
+                    const fetchedRoleId = data.isManagedByZuvy ? 2 : 1
 
                     setNewUser({
                         orgName: fetchedOrgName,

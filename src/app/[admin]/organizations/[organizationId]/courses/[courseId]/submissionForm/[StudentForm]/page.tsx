@@ -133,8 +133,9 @@ const Page = ({ params }: any) => {
 
             setOverallStats({
                 totalStudents:
-                    responseData.totalAllStudents || allStudents.length,
-                totalSubmissions: submitted.length,
+                    responseData.totalStudentsCount ?? allStudents.length,
+                totalSubmissions:
+                    responseData.totalSubmittedStudents ?? submitted.length,
                 notSubmitted: notSubmittedData.length,
                 isInitialized: true,
             })
@@ -418,7 +419,7 @@ const Page = ({ params }: any) => {
                                     Total Submissions:
                                 </div>
                                 <div className="text-lg font-semibold">
-                                    {overallStats.totalStudents || 0}
+                                    {overallStats.totalSubmissions || 0}
                                 </div>
                             </div>
                             <div className="text-left">
@@ -450,7 +451,7 @@ const Page = ({ params }: any) => {
                                     <SelectTrigger className="w-full mt-1">
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
                                         <SelectItem value="all" className='text-lg font-semibold'>
                                             All Batches
                                         </SelectItem>

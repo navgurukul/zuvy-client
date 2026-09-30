@@ -106,6 +106,7 @@ export const usePracticeProblemStatus = (
       if (mountedRef.current) {
         setStudentDetails(res?.data || [])
         setTotalStudentsCount(res?.totalStudentsCount || 0)
+        setTotalSubmittedStudents(res?.totalSubmittedStudents || 0)
       }
     } catch (err: any) {
       if (mountedRef.current) {

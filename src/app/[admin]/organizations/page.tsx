@@ -315,7 +315,7 @@ export default function OrganizationsPage() {
 
                 <div className="flex gap-4 mb-6">
                     {/* SearchBox */}
-                    <div className="flex-1 relative">
+                    <div className="relative w-full max-w-[420px]">
                         <SearchBox
                             placeholder="Search organisations..."
                             fetchSuggestionsApi={fetchSuggestionsApi}
