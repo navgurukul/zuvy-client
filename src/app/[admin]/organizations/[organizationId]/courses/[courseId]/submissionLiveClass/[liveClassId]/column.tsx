@@ -166,8 +166,8 @@ export const columns: ColumnDef<any>[] = [
                     <Badge
                         className={
                             isViewed
-                                ? "text-success bg-green-100 hover:bg-green-100"
-                                : "text-destructive bg-red-100 hover:bg-red-100"
+                                ? "text-success bg-green-100 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/40"
+                                : "text-destructive bg-red-100 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/40"
                         }
                     >
                         {status}

@@ -129,10 +129,10 @@ export default function AuditLogGroup({ title, logs, groupKey, count }: AuditLog
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] bg-muted/20 text-muted-foreground">
+                          {/* <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] bg-muted/20 text-muted-foreground">
                             {log.details.from}
                           </span>
-                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" /> */}
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] bg-success/10 text-success">
                             {log.details.to}
                           </span>
