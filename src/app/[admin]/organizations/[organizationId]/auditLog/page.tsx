@@ -18,6 +18,7 @@ import { AuditLog } from './components/auditLogTypes';
 import { useTrackingLog } from '@/app/[admin]/hooks/useTrackingLog';
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic';
 import { getUser } from '@/store/store';
+import { parseAuditLogDate } from './components/auditLogDateUtils';
 
 export default function AuditLogPage() {
   const { organizationId } = useParams();
@@ -89,6 +90,14 @@ export default function AuditLogPage() {
 
   const STATUS_OPTIONS = ['success', 'failed', 'pending'] as const;
 
+  const timeRangeLabels: Record<string, string> = {
+    all: 'All Time',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    past7Days: 'Past 7 Days',
+    past30Days: 'Past 30 Days',
+  };
+
   const normalizeRole = (role: string) => role.trim().toLowerCase().replace(/\s+/g, '_');
   const formatRoleLabel = (role: string) =>
     role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -116,14 +125,14 @@ export default function AuditLogPage() {
       roles: Array.from(rolesSet).sort(),
       actions: Array.from(actionsSet).sort(),
       statuses: [...STATUS_OPTIONS],
-      timeRanges: ['all', 'today', 'past7Days', 'past30Days']
+      timeRanges: ['all', 'today', 'yesterday', 'past7Days', 'past30Days']
     };
   }, [trackingLogs]);
 
   // Backend API function for search suggestions (same pattern as courses page)
   const fetchSuggestionsApi = useCallback(async (query: string) => {
     if (orgId === undefined) return [];
-    if (!query || query.length < 2) return [];
+    if (!query.trim()) return [];
 
     try {
       const logs = await fetchTrackingLog({
@@ -157,6 +166,14 @@ export default function AuditLogPage() {
           suggestions.add(log.resourceType);
         }
       });
+
+      if (suggestions.size === 0) {
+        return [{
+          id: `search-${query}`,
+          label: `Search for "${query}"`,
+          value: query,
+        }];
+      }
 
       return Array.from(suggestions).slice(0, 8).map((text, index) => ({ id: String(index), label: text }));
     } catch (error) {
@@ -238,7 +255,11 @@ export default function AuditLogPage() {
       };
 
       // Determine time grouping based on createdAt timestamp
-      const logDate = new Date(log.createdAt);
+      const logDate = parseAuditLogDate(log.createdAt);
+      if (!logDate) {
+        return null;
+      }
+
       const now = new Date();
       const diffInDays = Math.floor((now.getTime() - logDate.getTime()) / (1000 * 3600 * 24));
       
@@ -299,7 +320,7 @@ export default function AuditLogPage() {
       };
 
       return auditLog;
-    });
+    }).filter((log): log is AuditLog => log !== null);
   }, [trackingLogs]);
 
   // Group logs by date
@@ -313,6 +334,8 @@ export default function AuditLogPage() {
   }, [transformedLogs, visibleCount]);
 
   const hasMore = transformedLogs.length > visibleCount;
+  const getGroupTitle = (groupTitle: string) =>
+    timeRangeLabels[selectedTimeRange] || groupTitle;
 
   // Handle filter changes and refetch data
   const handleRoleChange = (value: string) => {
@@ -471,6 +494,7 @@ export default function AuditLogPage() {
           <SelectContent>
             <SelectItem value="all">All Time</SelectItem>
             <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="yesterday">Yesterday</SelectItem>
             <SelectItem value="past7Days">Past 7 Days</SelectItem>
             <SelectItem value="past30Days">Past 30 Days</SelectItem>
           </SelectContent>
@@ -482,7 +506,7 @@ export default function AuditLogPage() {
         {groupedLogs.today.length > 0 && (
           <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="Today"
+              title={getGroupTitle('Today')}
               logs={groupedLogs.today}
               groupKey="today"
               count={groupedLogs.today.length}
@@ -492,7 +516,7 @@ export default function AuditLogPage() {
         {groupedLogs.thisWeek.length > 0 && (
           <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="This Week"
+              title={getGroupTitle('This Week')}
               logs={groupedLogs.thisWeek}
               groupKey="thisWeek"
               count={groupedLogs.thisWeek.length}
@@ -502,7 +526,7 @@ export default function AuditLogPage() {
         {groupedLogs.older.length > 0 && (
           <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="Older"
+              title={getGroupTitle('Older')}
               logs={groupedLogs.older}
               groupKey="older"
               count={groupedLogs.older.length}

@@ -166,7 +166,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                 <div className="p-2 rounded-md">
                                     <Play className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base min-w-0 whitespace-normal break-all">
+                                <h3 className="font-body text-body2 font-medium min-w-0 whitespace-normal break-all">
                                     {liveClass.title || 'Untitled Live Class'}
                                 </h3>
                             </div>

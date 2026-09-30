@@ -881,7 +881,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   alt={courseName}
                   width={400}
                   height={160}
-                  className="w-full h-40 rounded-lg object-cover mb-4"
+                  className="mx-auto mb-4 aspect-[5/2] h-auto max-h-20 w-full max-w-[220px] rounded-lg object-contain"
                 />
                 <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
                 <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
