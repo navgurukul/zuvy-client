@@ -221,8 +221,6 @@ const StudentDashboard = () => {
     );
   }
 
-  console.log('studentData:', studentProfile);
-
   return (
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
@@ -257,7 +255,7 @@ const StudentDashboard = () => {
               </TooltipProvider> */}
             </div>
 
-            <Card className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
+            <Card className="w-full border-border bg-card text-card-foreground shadow-4dp transition-shadow duration-200 hover:shadow-8dp mb-8 overflow-hidden">
               <CardContent className="p-0 relative">
                 <div
                   className="absolute inset-0 w-full h-full"
@@ -280,17 +278,17 @@ const StudentDashboard = () => {
                   </div>
 
                   <div className="flex-1 flex flex-col justify-center text-center md:text-left">
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-800 flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground flex flex-wrap items-center justify-center md:justify-start gap-2">
                       <span>I am Zoe, your learning assistant</span>
-                      <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center">New</button>
+                      <span className="rounded bg-accent px-2 sm:px-3 py-0.5 font-semibold text-accent-foreground text-xs sm:text-sm inline-flex items-center justify-center">New</span>
                     </h3>
-                    <p className="text-sm sm:text-base text-gray-700 mb-4 md:mb-0">
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4 md:mb-0">
                       I will help you get job-ready with mock interviews, resume building, and a mentor who actually gets you.
                     </p>
                   </div>
 
                   <div className="flex items-center justify-center md:justify-end flex-shrink-0">
-                    <Button onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
+                    <Button onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-primary text-primary-foreground hover:bg-primary-dark font-semibold w-full md:w-auto text-sm sm:text-base">
                       Learn with zoe
                     </Button>
                   </div>
@@ -346,7 +344,7 @@ const StudentDashboard = () => {
 
             <div className="space-y-6 mb-12">
               {filteredBootcamps.map((bootcamp) => (
-                <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                <Card key={bootcamp.id} className="w-full border-border bg-card text-card-foreground shadow-4dp hover:shadow-8dp transition-shadow duration-200">
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="mt-2 md:self-center">
@@ -433,10 +431,10 @@ const StudentDashboard = () => {
                                             <div className="flex items-start gap-3">
                                               <div className="flex-shrink-0 mt-1">
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
-                                                  ? 'bg-primary-light'
+                                                  ? 'bg-primary/15'
                                                   : eventType === 'Assessment'
-                                                    ? 'bg-warning-light'
-                                                    : 'bg-info-light'
+                                                    ? 'bg-warning/15'
+                                                    : 'bg-info/15'
                                                   }`}>
                                                   {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
                                                   {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
@@ -452,11 +450,11 @@ const StudentDashboard = () => {
                                                     <div className="flex flex-col">
                                                       <Badge
                                                         variant="outline"
-                                                        className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
-                                                          ? 'bg-primary-light text-foreground border-primary-light'
+                                                        className={`text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
+                                                          ? 'bg-primary/15 text-foreground border-primary/30'
                                                           : eventType === 'Assessment'
-                                                            ? 'bg-warning-light text-foreground border-warning-light'
-                                                            : 'bg-info-light text-foreground border-info-light'
+                                                            ? 'bg-warning/15 text-foreground border-warning/30'
+                                                            : 'bg-info/15 text-foreground border-info/30'
                                                           }`}
                                                       >
                                                         {eventType}
@@ -483,8 +481,8 @@ const StudentDashboard = () => {
                               </CarouselContent>
                               {(upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id)?.length || 0) > 3 && (
                                 <>
-                                  <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
-                                  <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                                  <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border-border hover:border-primary text-primary" />
+                                  <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border-border hover:border-primary text-primary" />
                                 </>
                               )}
                             </Carousel>
@@ -515,7 +513,7 @@ const StudentDashboard = () => {
                   <div className="space-y-6">
                     {/* ✅ Map over globalCourses array */}
                     {globalCourses.map((course) => (
-                      <Card key={course.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                      <Card key={course.id} className="w-full border-border bg-card text-card-foreground shadow-4dp hover:shadow-8dp transition-shadow duration-200">
                         <CardContent className="p-6">
                           <div className="flex flex-col md:flex-row gap-6">
                             {/* Course Image */}
@@ -546,7 +544,7 @@ const StudentDashboard = () => {
                                     maxLength={150}
                                     className="text-muted-foreground mb-3"
                                   />
-
+                                  
                                   {/* ✅ Fixed instructor path */}
                                   <div className="flex items-center gap-2 mb-4">
                                     <span className="text-sm text-muted-foreground capitalize">
