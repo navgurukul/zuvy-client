@@ -127,8 +127,9 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
           <Badge
             variant="outline"
             className={`text-xs font-medium px-3 py-1 ${
-              isCompleted ? 'bg-green-100 dark:text-black text-green-600 hover:bg-green-100' :
-              'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100'
+                isCompleted
+                  ? 'bg-green-100 text-green-600 border-green-200 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-900/30'
+                  : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
             }`}
           >
             {isCompleted ? 'Attempted' : 'Not Submitted'}

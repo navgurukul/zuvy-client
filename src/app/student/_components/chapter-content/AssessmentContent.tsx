@@ -321,7 +321,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               <h5 className="font-bold font-body text-xl text-foreground break-words">
                 {assessmentDetails.ModuleAssessment?.title}
               </h5>
-              <span className={`text-xs dark:text-white font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>
+              <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light dark:bg-warning/15 dark:text-warning-dark' : 'text-success border-success bg-success-light dark:bg-success/15 dark:text-success-dark'}`}>
                 {chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}
               </span>
             </div>
@@ -361,7 +361,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {assessmentDetails.assessmentState?.toUpperCase() !== 'CLOSED' &&
             assessmentDetails.assessmentState?.toUpperCase() !== 'PUBLISHED' &&
             ((isAssessmentStarted && !reattemptRequested && !reattemptApproved) ||
-              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex bg-warning/15 flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-card border border-border rounded-lg shadow-2dp">
+              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-warning/10 dark:bg-warning/10 border border-warning/30 dark:border-warning/40 rounded-lg shadow-2dp">
                 <h2 className="mt-4 text-lg text-foreground flex items-center gap-x-2">
                   <div className="relative w-6 h-6">
                     <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-warning"></div>
@@ -377,7 +377,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 </h2>
                 <Dialog open={reattemptDialogOpen} onOpenChange={setReattemptDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="mt-4 bg-warning hover:bg-warning/50 text-black font-semibold">
+                    <Button className="mt-4 bg-warning hover:bg-warning/50 text-warning-foreground font-semibold">
                     <RotateCcw className=" h-3.5 mx-2" />
                     Request Re-Attempt</Button>
                   </DialogTrigger>
@@ -429,8 +429,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               >
                 <div
                   className={`  ${isPassed
-                    ? 'bg-success-light border-success'
-                    : 'bg-destructive-light border-destructive'
+                    ? 'bg-success-light border-success dark:bg-success/15 dark:border-success/60'
+                    : 'bg-destructive-light border-destructive dark:bg-destructive/15 dark:border-destructive/60'
                     } flex flex-col items-center justify-between max-w-lg sm:max-w-xl lg:max-w-4xl py-8 rounded-lg border shadow-4dp`}
                 >
                   <div className="flex gap-2 items-center">
@@ -459,7 +459,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   </div>
                   <div>
                     <Button
-                      className={`${isPassed ? 'text-success bg-success text-white' : 'text-destructive bg-destructive text-white'} font-semibold mt-3 `}
+                      className={`${isPassed ? 'text-success-foreground bg-success' : 'text-destructive-foreground bg-destructive'} font-semibold mt-3 `}
                       onClick={handleViewResults}
                       disabled={chapterStatus === 'Pending' && !isSubmitedAt}
                     >
@@ -473,10 +473,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {/* Active assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'ACTIVE' &&
             (!isAssessmentStarted || (reattemptRequested && reattemptApproved)) && (<div
-              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light border border-success p-5 text-center transition-all [transition-duration:1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light dark:bg-success/15 border border-success dark:border-success/60 p-5 text-center transition-all [transition-duration:1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`}
             >
-              <div className="text-success-dark text-left w-full font-medium">
+              <div className="text-success-dark dark:text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
                     <p className="font-bold text-accent text-center mb-4 dark:text-white">
