@@ -101,7 +101,7 @@ const PreviewMCQ = ({
                 <div className="flex gap-x-3 text-foreground">
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
-                        <span className="font-md text-[14px] text-success bg-success-foreground px-2 py-0.5 my-0.5 rounded-md">
+                        <span className="font-md text-[14px] text-success bg-slate-200 dark:bg-slate-600 px-2 py-0.5 my-0.5 rounded-md">
                             {displayTagName}
                         </span>
                         <span
@@ -147,7 +147,7 @@ const PreviewMCQ = ({
                                     className="w-full mt-0"
                                 >
                                     <div className="mb-4 p-2">
-                                        <div className="text-left text-gray-600 mb-2">
+                                        <div className="text-left text-gray-600 dark:text-muted-foreground mb-2">
                                             <RemirrorForm
                                                 description={variant.question}
                                                 preview={true}

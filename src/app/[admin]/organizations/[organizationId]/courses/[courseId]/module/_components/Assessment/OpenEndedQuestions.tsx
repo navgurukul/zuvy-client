@@ -39,7 +39,7 @@ const OpenEndedQuestions = ({
                                     <h2 className="font-bold text-[15px] text-gray-600 dark:text-muted-foreground">
                                         {ellipsis(question?.question, 35)}
                                     </h2>
-                                    <div className="flex gap-2 ml-auto">
+                                    <div className="flex items-center gap-2 ml-auto">
                                         {tag && (
                                             <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-slate-600 rounded-[100px] px-[8px]">
                                                 {tag?.tagName}
@@ -58,6 +58,44 @@ const OpenEndedQuestions = ({
                                         >
                                             {question.difficulty}
                                         </span>
+                                        {selectedQuestions.some(
+                                            (q: OpenEndedQuestiones) =>
+                                                q.id === question.id
+                                        ) ? (
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="lucide lucide-circle-check"
+                                            >
+                                                <circle cx="12" cy="12" r="10" />
+                                                <path d="m9 12 2 2 4-4" />
+                                            </svg>
+                                        ) : (
+                                            <PlusCircle
+                                                onClick={() => {
+                                                    if (
+                                                        !selectedQuestions.some(
+                                                            (q: OpenEndedQuestiones) =>
+                                                                q.id === question.id
+                                                        )
+                                                    ) {
+                                                        setSelectedQuestions([
+                                                            ...selectedQuestions,
+                                                            question,
+                                                        ])
+                                                    }
+                                                }}
+                                                className="text-primary cursor-pointer"
+                                                size={20}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                                 <p className="text-[#4A4A4A] dark:text-muted-foreground mt-1 text-[1rem] font-[14px]">
@@ -70,7 +108,6 @@ const OpenEndedQuestions = ({
                                         </p>
                                     </DialogTrigger>
                                     <DialogOverlay />
-
                                     <DialogContent>
                                         <div className="flex-1 overflow-y-auto px-6 py-4">
                                             <PreviewOpenEnded
@@ -80,46 +117,6 @@ const OpenEndedQuestions = ({
                                         </div>
                                     </DialogContent>
                                 </Dialog>
-                            </div>
-                            <div className="flex">
-                                {selectedQuestions.some(
-                                    (q: OpenEndedQuestiones) =>
-                                        q.id === question.id
-                                ) ? (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="lucide lucide-circle-check"
-                                    >
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="m9 12 2 2 4-4" />
-                                    </svg>
-                                ) : (
-                                    <PlusCircle
-                                        onClick={() => {
-                                            if (
-                                                !selectedQuestions.some(
-                                                    (q: OpenEndedQuestiones) =>
-                                                        q.id === question.id
-                                                )
-                                            ) {
-                                                setSelectedQuestions([
-                                                    ...selectedQuestions,
-                                                    question,
-                                                ])
-                                            }
-                                        }}
-                                        className="text-primary cursor-pointer"
-                                        size={20}
-                                    />
-                                )}
                             </div>
                         </div>
                     </div>

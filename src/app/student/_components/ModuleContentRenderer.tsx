@@ -12,6 +12,7 @@ import AssessmentContent from "./chapter-content/AssessmentContent";
 import FeedbackFormContent from "./chapter-content/FeedbackFormContent";
 import LiveClassContent from "./chapter-content/LiveClassContent";
 import {StudentDashboardSkeleton} from "@/app/student/_components/Skeletons"
+import ChapterLockedView from "@/app/student/_components/ChapterLockedView";
 
 // Fallback imports for backward compatibility
 import { Badge } from "@/components/ui/badge";
@@ -52,10 +53,20 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
   const parsedCourseId = Number(courseId);
   const parsedModuleId = Number(moduleId);
   const parsedChapterId = chapterId ? Number(chapterId) : null;
-  
-  
-  // Fetch chapter details using the new hook
-  const { chapterDetails, loading, error , refetch} = useChapterDetails(chapterId);
+
+  // Pass null to the hook when the chapter is locked — avoids fetching locked content
+  const isLocked = selectedItemData?.item?.isLock ?? false;
+  const { chapterDetails, loading, error, refetch } = useChapterDetails(isLocked ? null : chapterId);
+
+  // If the chapter is locked, show the lock UI (hook has already been called above)
+  if (isLocked) {
+    return (
+      <ChapterLockedView
+        chapterTitle={selectedItemData!.item.title}
+        lockMessage={selectedItemData!.item.lockMessage}
+      />
+    );
+  }
   
 
 

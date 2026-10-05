@@ -136,7 +136,7 @@ const Dropzone = ({
                             Format for student data:
                             <Link
                                 href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
-                                className="mx-2 text-xs font-semibold text-[#2F433A]"
+                                className="mx-2 text-xs font-semibold text-[#2F433A] dark:text-[#A3C7B0]"
                             >
                                 Sample_Student_Data.csv
                             </Link>

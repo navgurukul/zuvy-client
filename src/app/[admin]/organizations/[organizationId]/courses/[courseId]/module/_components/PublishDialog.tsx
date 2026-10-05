@@ -537,7 +537,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                         </DialogClose>
                         <Button
                             onClick={handleScheduleAssessment}
-                            className="bg-success-dark opacity-75"
+                            className="bg-success-dark text-success-foreground hover:bg-primary-dark dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary-dark transition-colors"
                         >
                             Schedule Assessment
                         </Button>

@@ -26,7 +26,7 @@ const ProfileStrengthCard = ({
     <CardContent className="p-6">
       <div className="mb-8 flex items-center justify-between">
         <h3 className="text-xl font-heading font-bold">Profile Strength</h3>
-        <span className="rounded-lg bg-primary-light px-3 py-1 text-xl font-semibold text-primary">
+        <span className="rounded-lg bg-primary-light dark:bg-primary/25 px-3 py-1 text-xl font-semibold text-primary">
           {Math.round(displayProgress)}%
         </span>
       </div>
@@ -63,7 +63,7 @@ const ProfileStrengthCard = ({
 
       <button
         onClick={onProfileClick}
-        className="group flex w-full items-center gap-3 rounded-xl border border-transparent bg-primary-light p-4 transition-all hover:border-primary hover:bg-primary-light/80"
+        className="group flex w-full items-center gap-3 rounded-xl border border-transparent bg-primary-light dark:bg-primary/25 p-4 transition-all hover:border-primary hover:bg-primary-light/80"
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card shadow-sm">
           <Plus className="h-5 w-5 text-primary" />
@@ -72,7 +72,7 @@ const ProfileStrengthCard = ({
           <p className="truncate text-sm font-medium text-foreground">
             {isProfileComplete ? 'Review profile' : 'Complete profile'}
           </p>
-          <p className="text-xs font-medium text-primary">
+          <p className="text-xs font-medium text-primary dark:text-primary-foreground">
             {isProfileComplete ? 'All key details are filled out' : `${remainingProfilePercentage}% remaining`}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
