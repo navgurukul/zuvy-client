@@ -198,31 +198,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     switch (getEventType(type)) {
       case 'Live Class':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       case 'Assessment':
         return (
-          <div className="w-5 h-5 rounded-full bg-warning-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-warning/15 flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-warning" />
           </div>
         );
       case 'Assignment':
         return (
-          <div className="w-5 h-5 rounded-full bg-info-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-info/15 flex items-center justify-center">
             <FileText className="w-5 h-5 text-info" />
           </div>
         );
       case 'Mentor Session':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       default:
         return (
-          <div className="w-5 h-5 rounded-full bg-muted-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
         );
@@ -1014,10 +1014,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           <div className="flex flex-1 flex-col lg:flex-row lg:justify-between lg:items-start gap-3 min-w-0">
                             <div className="flex-1 min-w-0 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 self-start rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary dark:text-white border-primary/20 hover:bg-primary-light/80">Current Module</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary border-primary/20 hover:bg-primary/25">Current Module</Badge>
                               )}
                               {isCompleted && (
-                                <Badge className="mb-2 self-start rounded-full bg-success-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success-light/80">Completed</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success/25">Completed</Badge>
                               )}
                               {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
@@ -1178,30 +1178,30 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-border bg-white dark:bg-muted/50 px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 transition-all duration-200 hover:border-primary/40 hover:bg-primary/5"
                       >
                         {/* Icon */}
                         <div
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] dark:bg-gray-400 transition-colors duration-200 group-hover:bg-[#DDF3E2] dark:group-hover:bg-gray-500"
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-200 group-hover:bg-primary/20"
                           )}
                         >
-                          <a.icon className="h-4 w-4 text-[#2F6F3E]" />
+                          <a.icon className={cn("h-4 w-4", a.color)} />
                         </div>
 
                         {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold leading-5 text-[#1F2937] dark:text-gray-100">
+                          <p className="text-sm font-semibold leading-5 text-foreground">
                             {a.label}
                           </p>
 
-                          <p className="text-xs leading-4 text-[#6B7280] dark:text-gray-400">
+                          <p className="text-xs leading-4 text-muted-foreground">
                             {a.sub}
                           </p>
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight className="h-4 w-4 shrink-0 text-[#9CA3AF] transition-all duration-200 group-hover:text-[#2F6F3E]" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:text-primary" />
                       </Link>
                     ))}
                   </div>
@@ -1287,7 +1287,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 {eventType === 'Mentor Session' && isMentorSession(item) && (
                                   <p className="text-sm text-muted-foreground mb-2">Mentor: {item.mentorName}</p>
                                 )}
-                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                <Badge className={`my-2 ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary/15 text-primary border-primary/20 hover:bg-primary/25' : item.type === 'Assessment' ? 'bg-warning/15 text-warning border-warning/20 hover:bg-warning/25' : 'bg-info/15 text-info border-info/20 hover:bg-info/25'} `} >{item.type}</Badge>
                                 <div className="flex items-center justify-between mb-3">
                                   <p className="text-sm font-medium">
                                     {eventType === 'Mentor Session' && isMentorSession(item)

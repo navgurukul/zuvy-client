@@ -242,7 +242,12 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
           <div className="flex flex-col items-end space-y-2">
             <Badge 
               variant={isCompleted ? "secondary" : "outline"}
-              className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
+              // className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
+              className={`${
+                  isCompleted
+                    ? 'bg-green-100 text-green-800 hover:text-white dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/30 dark:hover:text-green-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+                } px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
             >
               {getSubmissionStatus()}
             </Badge>
