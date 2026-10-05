@@ -75,8 +75,8 @@ function ChapterItem({
     
     const isActive = activeChapter === chapterId
     const activeChapterClasses = isActive
-        ? 'bg-primary-light border border-primary text-primary'
-        : 'bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700'
+        ? 'bg-primary-light dark:bg-primary/30 border border-primary text-primary'
+        : 'bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-muted border border-gray-300 dark:border-primary/20'
 
     const handleClick = () => {
         if (isDragging) return

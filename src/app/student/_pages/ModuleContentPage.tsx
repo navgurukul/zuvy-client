@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon } from "lucide-react";
+import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon, Lock } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
@@ -153,7 +153,10 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
             contentType === 'assessment' ? '2 hours' :
               contentType === 'quiz' ? '30 mins' : undefined,
         scheduledDateTime: contentType === 'assessment' || contentType === 'live-class' ?
-          new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined
+          new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined,
+        isLock: item.isLock ?? false,
+        lockReason: item.lockReason ?? null,
+        lockMessage: item.lockMessage ?? null,
       };
     });
 
@@ -486,11 +489,15 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                                 {getItemDetails(item)}
                               </div>
                             </div>
-                            {item.status === 'completed' && (
+                            {item.isLock ? (
+                              <div className="flex-shrink-0">
+                                <Lock className="w-4 h-4 mt-1 text-muted-foreground" />
+                              </div>
+                            ) : item.status === 'completed' ? (
                               <div className="flex-shrink-0">
                                 <Check className="w-4 h-4 mt-1 text-success" />
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         </Button>
                       ))}

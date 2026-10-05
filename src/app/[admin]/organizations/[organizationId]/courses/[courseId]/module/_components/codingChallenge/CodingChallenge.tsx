@@ -366,8 +366,9 @@ useEffect(() => {
 
                     <div className="grid grid-cols-2">
                         <div className="">
-                            <div className="">
-                                <ScrollArea className="h-screen pb-80">
+                            <div>
+                                <ScrollArea className="h-[calc(100vh-20rem)] pr-3">
+                                    <div>
                                     {filteredQuestions?.map((question: any) => {
                                         const selectedTagName = tags?.filter(
                                             (tag: any) =>
@@ -494,6 +495,7 @@ useEffect(() => {
                                             </div>
                                         )
                                     })}
+                                    </div>
                                 </ScrollArea>
                             </div>
                         </div>

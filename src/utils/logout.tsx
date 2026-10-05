@@ -27,9 +27,17 @@ export const Logout = async () => {
             description: 'Goodbye, See you soon!',
         })
 
+        // Preserve theme preference before clearing
+        const themeStorage = localStorage.getItem('student-theme-storage')
+        
         // Clear localStorage first
         localStorage.clear()
         db.permissions.clear()
+        
+        // Restore theme preference
+        if (themeStorage) {
+            localStorage.setItem('student-theme-storage', themeStorage)
+        }
 
         // Delete auth and redirect cookies
         document.cookie =

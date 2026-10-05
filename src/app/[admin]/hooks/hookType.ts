@@ -186,6 +186,7 @@ export interface UseBootcampDeleteReturn {
 export interface BootcampSettingsData {
   type: string;
   isModuleLocked: boolean;
+  isChapterLocked: boolean;
   mentorshipEnabled: boolean;
   leaderboardEnabled: boolean;
 }

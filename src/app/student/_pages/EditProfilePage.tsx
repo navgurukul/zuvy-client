@@ -3008,7 +3008,7 @@ export const EditProfilePage: React.FC = () => {
                       ) : (
                         <>
                           {step4.locationPreferences?.remote && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200">
                               Open to Remote
                             </Badge>
                           )}

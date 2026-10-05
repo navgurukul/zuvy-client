@@ -651,7 +651,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
                             {questionType !== 'settings' && questionType !== 'adaptive-assessment' && (
                                 <div className="h-screen border-l border-muted-light pl-4">
-                                    <ScrollArea className="h-96 px-2 pb-4">
+                                    <ScrollArea className="h-96 pl-2 pr-4 pt-3 pb-4">
                                         <ScrollBar
                                             orientation="vertical"
                                             className=""

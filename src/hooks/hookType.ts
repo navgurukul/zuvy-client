@@ -10,6 +10,9 @@ export interface TrackingDataItem {
   chapterTrackingDetails: ChapterTrackingDetail[];
   status: 'Pending' | 'Completed';
   sparks?: number;
+  isLock?: boolean;
+  lockReason?: string | null;
+  lockMessage?: string | null;
 }
 
 export interface ModuleDetail {

@@ -135,15 +135,15 @@ function LoginPage() {
         avatar: string
         image: string
     }) => (
-        <div className="bg-primary-light p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
+        <div className="bg-primary-light dark:bg-primary-light/20 p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
             <div className="h-12 w-12 relative rounded-full overflow-hidden">
                 <Image src={image} alt={name} fill className="object-cover" />
             </div>
             <div className="text-left">
-                <div className="text-primary-dark font-bold text-md">
+                <div className="text-primary-dark dark:text-primary-dark font-bold text-md">
                     {name}
                 </div>
-                <div className="text-primary-dark text-sm">{role}</div>
+                <div className="text-primary-dark dark:text-primary-dark text-sm">{role}</div>
             </div>
         </div>
     )
@@ -156,9 +156,9 @@ function LoginPage() {
         number: string
         description: string
     }) => (
-        <div className="bg-accent-light p-3 rounded-lg text-center min-w-fit flex-shrink-0">
-            <div className="text-accent-dark font-bold text-md">{number}</div>
-            <div className="text-accent-dark text-sm">{description}</div>
+        <div className="bg-accent-light dark:bg-accent-light/20 p-3 rounded-lg text-center min-w-fit flex-shrink-0">
+            <div className="text-accent-dark dark:text-accent-dark font-bold text-md">{number}</div>
+            <div className="text-accent-dark dark:text-accent-dark text-sm">{description}</div>
         </div>
     )
 

@@ -12,7 +12,8 @@ import {
   FileText, 
   Play, 
   Circle,
-  User
+  User,
+  Lock
 } from "lucide-react";
 import { Topic, ModuleSidebarProps, TopicItem } from '@/app/student/_components/componentStudentType'
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
@@ -183,11 +184,15 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                               {getItemDetails(adjustedItem)}
                             </div> */}
                           </div>
-                          {item.status === 'completed' && (
+                          {item.isLock ? (
+                            <div className="flex-shrink-0">
+                              <Lock className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground" />
+                            </div>
+                          ) : item.status === 'completed' ? (
                             <div className="flex-shrink-0">
                               <Check className="w-3 h-3 lg:w-4 lg:h-4 text-success" />
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </Button>
                     );
