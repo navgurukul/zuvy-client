@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
@@ -10,7 +9,7 @@ import { FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import usePathname from 'next/navigation'
 import { getUser } from '@/store/store'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -19,10 +18,14 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
-                    <div className="flex items-center">
-                        <ProfileImage src={row.original.profilePicture} />
-                    </div>
-                ),
+            <div className="flex items-center">
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },

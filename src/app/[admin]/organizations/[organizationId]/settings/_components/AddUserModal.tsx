@@ -39,6 +39,13 @@ import {
 } from 'lucide-react'
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
+import { z } from 'zod'
+import { requiredEmailSchema, requiredNameSchema } from '@/utils/validation/nameEmail'
+
+const userFormSchema = z.object({
+    name: requiredNameSchema,
+    email: requiredEmailSchema,
+})
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -134,6 +141,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         name: '',
         email: '',
     })
+    const [touchedFields, setTouchedFields] = useState<Partial<Record<'name' | 'email', boolean>>>({})
     // Store original values to track changes
     const [originalUser, setOriginalUser] = useState<{ name: string; email: string; roleId: number | null }>({
         name: '',
@@ -144,6 +152,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     // Sync fresh user data from the reusable hook when entering edit mode
     useEffect(() => {
         if (isEditMode && isOpen && shouldFetchFreshUser) {
+            setTouchedFields({})
             if (fetchedUser) {
                 setFreshUserData(fetchedUser)
                 const fetchedName = fetchedUser.name || ''
@@ -189,6 +198,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name: '',
                 email: '',
             })
+            setTouchedFields({})
             setPendingUserRole(null)
             setFreshUserData(null)
             setOriginalUser({
@@ -210,13 +220,21 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setNewUser((prev) => ({ ...prev, [name]: value }))
+        setTouchedFields((prev) => ({ ...prev, [name as 'name' | 'email']: true }))
     }
 
-    // Check if form is valid (for add mode)
-    const isFormValid =
-        newUser.name.trim().length > 0 &&
-        newUser.email.trim().length > 0 &&
-        !!pendingUserRole
+    const validationResult = userFormSchema.safeParse(newUser)
+    const validationErrors: Partial<Record<'name' | 'email', string>> = validationResult.success
+        ? {}
+        : validationResult.error.issues.reduce<Partial<Record<'name' | 'email', string>>>((errors, issue) => {
+            const field = issue.path[0]
+            if ((field === 'name' || field === 'email') && !errors[field]) errors[field] = issue.message
+            return errors
+        }, {})
+    const fieldError = (field: 'name' | 'email') =>
+        touchedFields[field] ? validationErrors[field] : undefined
+
+    const isFormValid = validationResult.success && !!pendingUserRole
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
@@ -227,7 +245,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
     // In edit mode, button should be enabled only if there are changes
     // In add mode, button should be enabled if form is valid
-    const canSubmit = isEditMode ? hasChanges : isFormValid
+    const canSubmit = isFormValid && (isEditMode ? hasChanges : true)
 
      const iconList = [
         User,
@@ -298,6 +316,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: '',
             email: '',
         })
+        setTouchedFields({})
         setPendingUserRole(null)
         setFreshUserData(null)
         refetchUsers && refetchUsers()
@@ -381,8 +400,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                                 value={newUser.name}
                                 onChange={handleInputChange}
                                 placeholder="Enter full name"
-                                className="mt-2"
+                                className={`mt-2 ${fieldError('name') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                             />
+                            {fieldError('name') && (
+                                <p className="text-red-500 text-xs mt-1">{fieldError('name')}</p>
+                            )}
                         </div>
                         <div className="text-left">
                             <Label className="text-[14px] font-medium">
@@ -391,11 +413,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                             <Input
                                 id="email"
                                 name="email"
+                                type="email"
                                 value={newUser.email}
                                 onChange={handleInputChange}
                                 placeholder="Enter email address"
-                                className="mt-2"
+                                className={`mt-2 ${fieldError('email') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                             />
+                            {fieldError('email') && (
+                                <p className="text-red-500 text-xs mt-1">{fieldError('email')}</p>
+                            )}
                         </div>
                     </div>
 

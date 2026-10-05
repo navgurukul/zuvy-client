@@ -12,6 +12,7 @@ import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
 import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/columns'
 import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
+import { requiredEmailSchema } from '@/utils/validation/nameEmail'
 import {
     StudentData,
     BatchSuggestion,
@@ -181,7 +182,7 @@ const searchParams = useSearchParams()
     const createFormSchema = (editingBatch: EnhancedBatch | null) => {
         return z.object({
             name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
-            instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
+            instructorEmail: requiredEmailSchema,
             bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
             capEnrollment: z.string()
                 .refine((capEnrollment) => {

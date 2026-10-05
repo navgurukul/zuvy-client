@@ -26,6 +26,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { MAX_EMAIL_LENGTH } from '@/utils/validation/nameEmail'
 
 import // getDeleteStudentStore,
 // getStoreStudentData,
@@ -757,12 +758,21 @@ const BatchesInfo = ({
                                                                     </FormLabel>
                                                                     <FormControl>
                                                                         <Input
-                                                                            placeholder="Instructor Email"
-                                                                            type="name"
                                                                             {...field}
+                                                                            placeholder="Instructor Email"
+                                                                            type="email"
+                                                                            className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                                            onChange={(event) => {
+                                                                                field.onChange(event)
+                                                                                void form.trigger('instructorEmail')
+                                                                            }}
                                                                         />
                                                                     </FormControl>
-                                                                    <FormMessage />
+                                                                    <FormMessage>
+                                                                        {field.value.length > MAX_EMAIL_LENGTH
+                                                                            ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                                            : undefined}
+                                                                    </FormMessage>
                                                                 </FormItem>
                                                             )}
                                                         />

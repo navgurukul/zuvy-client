@@ -79,32 +79,22 @@ export const createColumns = (
       header: 'Point of Contact',
       cell: ({ row }) => {
         const poc = row.original.poc
-        const limit = 35
 
         return (
-          <div>
-            <div className="font-medium text-foreground text-start">{poc.name}</div>
-            <div className="text-muted-foreground text-xs text-start">{poc.email}</div>
-          </div>
-          //   <TooltipProvider delayDuration={200}>
-          //     <Tooltip>
-          //       <TooltipTrigger asChild>
-          //         <div className="max-w-[220px] cursor-pointer text-left text-gray-600">
-          //           {poc.length > limit
-          //             ? poc.substring(0, limit) + '...'
-          //             : poc}
-          //         </div>
-          //       </TooltipTrigger>
-
-          //       {poc.length > limit && (
-          //         <TooltipContent side="top" align="start">
-          //           <p className="text-sm max-w-xs break-all">
-          //             {poc}
-          //           </p>
-          //         </TooltipContent>
-          //       )}
-          //     </Tooltip>
-          //   </TooltipProvider>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="max-w-[220px] cursor-default text-left">
+                  <div className="truncate font-medium text-foreground">{poc.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">{poc.email}</div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start" className="max-w-xs break-all">
+                <div className="font-medium">{poc.name}</div>
+                <div className="text-xs">{poc.email}</div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )
       },
     },
@@ -114,29 +104,20 @@ export const createColumns = (
       cell: ({ row }) => {
         const assignee = row.original.assignee
         return (
-          <div>
-            <div className="font-medium text-foreground text-start">{assignee.name}</div>
-            <div className="text-muted-foreground text-xs text-start">{assignee.email}</div>
-          </div>
-          //   <TooltipProvider delayDuration={200}>
-          //     <Tooltip>
-          //       <TooltipTrigger asChild>
-          //         <div className="max-w-[220px] cursor-pointer text-left text-gray-600">
-          //           {assignee.length > limit
-          //             ? assignee.substring(0, limit) + '...'
-          //             : assignee}
-          //         </div>
-          //       </TooltipTrigger>
-
-          //       {assignee.length > limit && (
-          //         <TooltipContent side="top" align="start">
-          //           <p className="text-sm max-w-xs break-all">
-          //             {assignee}
-          //           </p>
-          //         </TooltipContent>
-          //       )}
-          //     </Tooltip>
-          //   </TooltipProvider>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="max-w-[220px] cursor-default text-left">
+                  <div className="truncate font-medium text-foreground">{assignee.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">{assignee.email}</div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start" className="max-w-xs break-all">
+                <div className="font-medium">{assignee.name}</div>
+                <div className="text-xs">{assignee.email}</div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )
       },
     },
