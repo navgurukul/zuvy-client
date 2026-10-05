@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
@@ -39,6 +40,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     const handleStudentClick = () => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
+    const studentName = String(row.getValue('name') ?? '')
     
     return (
         <>
@@ -50,12 +52,19 @@ const StudentNameCell = ({ row }: { row: any }) => {
                     onChange={handleSingleStudent}
                 />
             ) : (
-                <div 
-                    className="w-[150px] text-left text-gray-800 dark:text-muted-foreground cursor-pointer hover:text-blue-600 hover:underline"
-                    onClick={handleStudentClick}
-                >
-                    {row.getValue('name')}
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className="w-[150px] text-left text-gray-800 dark:text-muted-foreground cursor-pointer hover:text-blue-600 hover:underline"
+                                onClick={handleStudentClick}
+                            >
+                                {studentName.length > 20 ? `${studentName.slice(0, 20)}...` : studentName}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{studentName}</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             )}
         </>
     )
@@ -111,6 +120,7 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const { userId } = row.original
+            const email = String(row.getValue('email') ?? '')
             const { isStudent, setIsStudent } = getEditStudent()
             const { studentData, setStudentData } = getStudentData()
             const handleSingleStudent = (
@@ -130,11 +140,18 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium text-gray-800 dark:text-muted-foreground">
-                                {row.getValue('email')}
-                            </span>
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex space-x-2">
+                                        <span className="max-w-[500px] truncate font-medium text-gray-800 dark:text-muted-foreground">
+                                            {email.length > 30 ? `${email.slice(0, 30)}...` : email}
+                                        </span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>{email}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
                 </>
             )

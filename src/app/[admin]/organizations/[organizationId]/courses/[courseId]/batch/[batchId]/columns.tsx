@@ -21,6 +21,7 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 import EditModal from '../../(courseTabs)/students/components/editModal'
 import { Input } from '@/components/ui/input'
 import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 type CreateColumnsOptions = {
     userRole: string
@@ -91,6 +92,7 @@ export const createColumns = (
         ),
         cell: ({ row }) => {
             const { userId } = row.original
+            const studentName = String(row.getValue('name') ?? '')
             const { isStudent, setIsStudent } = getEditStudent()
             const { studentData, setStudentData } = getStudentData()
             const handleSingleStudent = (
@@ -112,9 +114,16 @@ export const createColumns = (
                             />
                         </div>
                     ) : (
-                        <div className="w-full min-w-0 text-left dark:text-muted-foreground">
-                            {row.getValue('name')}
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="w-full min-w-0 text-left dark:text-muted-foreground">
+                                        {studentName.length > 20 ? `${studentName.slice(0, 20)}...` : studentName}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>{studentName}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
                 </>
             )
@@ -129,6 +138,7 @@ export const createColumns = (
         ),
         cell: ({ row }) => {
             const { userId } = row.original
+            const email = String(row.getValue('email') ?? '')
             const { isStudent, setIsStudent } = getEditStudent()
             const { studentData, setStudentData } = getStudentData()
             const handleSingleStudent = (
@@ -150,11 +160,18 @@ export const createColumns = (
                             />
                         </div>
                     ) : (
-                        <div className="flex w-full min-w-0 space-x-2">
-                            <span className="block max-w-[500px] truncate text-left font-medium dark:text-muted-foreground">
-                                {row.getValue('email')}
-                            </span>
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex w-full min-w-0 space-x-2">
+                                        <span className="block max-w-[500px] truncate text-left font-medium dark:text-muted-foreground">
+                                            {email.length > 30 ? `${email.slice(0, 30)}...` : email}
+                                        </span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>{email}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
                 </>
             )

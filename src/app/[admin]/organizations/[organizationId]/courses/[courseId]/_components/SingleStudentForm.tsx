@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -9,6 +9,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { requiredEmailSchema, requiredNameSchema } from '@/utils/validation/nameEmail'
 
 type StudentDataType = {
     name: string
@@ -21,6 +22,7 @@ interface SingleStudentFormProps {
     setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
     courseId: string | number
     showBatchSelection?: boolean
+    showValidationErrors?: boolean
 }
 
 const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
@@ -28,9 +30,11 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
     setStudentData,
     courseId,
     showBatchSelection = true,
+    showValidationErrors = false,
 }) => {
     // enabled mirrors showBatchSelection — no fetch happens when the section is hidden
     const { batchData } = useBatchList(courseId, { enabled: showBatchSelection })
+    const [touchedFields, setTouchedFields] = useState<{ name?: boolean; email?: boolean }>({})
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -41,6 +45,13 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
         setStudentData({ ...studentData, batchId: value })
     }
 
+    const nameResult = requiredNameSchema.safeParse(studentData.name || '')
+    const emailResult = requiredEmailSchema.safeParse(studentData.email || '')
+    const nameError = nameResult.success ? undefined : nameResult.error.issues[0]?.message
+    const emailError = emailResult.success ? undefined : emailResult.error.issues[0]?.message
+    const showNameError = showValidationErrors || touchedFields.name
+    const showEmailError = showValidationErrors || touchedFields.email
+
     return (
         <div className="space-y-4">
             <div className="text-left">
@@ -49,10 +60,16 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                     id="name"
                     name="name"
                     value={studentData.name || ''}
-                    onChange={handleInputChange}
+                    onChange={(event) => {
+                        setTouchedFields((prev) => ({ ...prev, name: true }))
+                        handleInputChange(event)
+                    }}
                     placeholder="Enter student's full name"
-                    className="mt-1"
+                    className={`mt-1 ${showNameError && nameError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
+                {showNameError && nameError && (
+                    <p className="text-red-500 text-xs mt-1">{nameError}</p>
+                )}
             </div>
 
             <div className="text-left">
@@ -60,11 +77,18 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                 <Input
                     id="email"
                     name="email"
+                    type="email"
                     value={studentData.email || ''}
-                    onChange={handleInputChange}
+                    onChange={(event) => {
+                        setTouchedFields((prev) => ({ ...prev, email: true }))
+                        handleInputChange(event)
+                    }}
                     placeholder="Enter student's email address"
-                    className="mt-1"
+                    className={`mt-1 ${showEmailError && emailError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
+                {showEmailError && emailError && (
+                    <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                )}
             </div>
 
             {showBatchSelection && (

@@ -1,11 +1,10 @@
 'use client'
-import Image from 'next/image'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Task } from '@/utils/data/schema'
 import { getSubmissionDate } from '@/utils/admin'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
 
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 export const columns: ColumnDef<Task>[] = [
@@ -16,7 +15,11 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => (
             <div className="flex items-center">
-                <ProfileImage src={row.original.profilePicture} />
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
             </div>
         ),
         enableSorting: false,
