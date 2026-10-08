@@ -11,9 +11,12 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
         const role = user.rolesList[0]
         const rawOrgId = (organizationId && organizationId !== 'undefined' ? organizationId : null) || user?.orgId;
         const validOrgId = rawOrgId && String(rawOrgId) !== 'NaN' && String(rawOrgId) !== 'undefined' ? rawOrgId : null;
-        const homeHref = role === 'student'
+        const roleNormalized = role?.toLowerCase() || '';
+        const homeHref = roleNormalized === 'student'
             ? '/student'
-            : (validOrgId ? `/${role}/organizations/${validOrgId}/courses` : `/${role}/organizations`);
+            : (roleNormalized === 'super_admin'
+                ? `/${role}/organizations`
+                : (validOrgId ? `/${role}/organizations/${validOrgId}/courses` : '/'));
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">
@@ -21,10 +24,10 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
             <p className="text-base font-semibold text-secondary dark:text-default">
                     There was a problem.
                 </p>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 ">
+                <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 dark:text-muted-foreground">
                     Something went wrong.
                 </h1>
-                <p className="mt-6 text-base leading-7 text-zinc-900 dark:text-black">
+                <p className="mt-6 text-base leading-7 text-zinc-900 dark:text-muted-foreground">
                     Please go back, youve typed the wrong link.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">

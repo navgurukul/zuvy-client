@@ -116,7 +116,7 @@ const IndividualStudentAssesment = ({
                                         : scoreHandler().className
                                 }`}
                         />
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-muted-foreground">
                             {type === 'codingSubmission' ? (
                                 <>Status: {data.status}</>
                             ) : type === 'openEndedSubmission' ? (
@@ -131,7 +131,7 @@ const IndividualStudentAssesment = ({
                 <Button
                     variant="outline"
                     size="sm"
-                    className="w-full mt-1 text-black hover:text-white font-semibold text-sm"
+                    className="w-full mt-1 text-foreground hover:text-white font-semibold text-sm"
                 >
                     <Link
                         className=" flex items-center justify-center"

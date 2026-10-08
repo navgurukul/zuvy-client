@@ -22,7 +22,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
     const handleDownloadCsv = () => {
         if (!props.moduleId || !props.chapterId || !props.questionId) return
         downloadCsv({
-          endpoint: `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`,
+          endpoint: `submission/practiseProblemStatus/${props.moduleId}?bootcampId=${props.courseId}&chapterId=${props.chapterId}&questionId=${props.questionId}`,
           fileName: props.title || 'practice-problem',
       
           dataPath: 'data',
@@ -52,7 +52,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
         props.totalSubmissions > 0 && props.studentsSubmitted > 0
 
     return (
-        <div className="bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
+        <div className="bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
             <div className="flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -66,8 +66,8 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                         <button
                             className={`ml-2 ${
                                 isDisabled
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-gray-500 hover:text-gray-700 cursor-pointer'
+                                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer'
                             }`}
                             onClick={
                                 isDisabled ? undefined : () => handleDownloadCsv()
@@ -89,13 +89,13 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     href={`/${userRole}/organizations/${orgId}/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
                                 >
                                     <div>
-                                        <Eye className="text-gray-500 mb-2 hover:text-gray-700" size={20} />
+                                        <Eye className="text-gray-500 mb-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" size={20} />
                                     </div>
                                 </Link>
                             ) : (
                             <div className="group relative">
                                 <button
-                                className="text-gray-400 cursor-not-allowed"
+                                className="text-gray-400 dark:text-gray-500 cursor-not-allowed"
                                 onClick={(e) => e.preventDefault()}
                                 disabled
                             >

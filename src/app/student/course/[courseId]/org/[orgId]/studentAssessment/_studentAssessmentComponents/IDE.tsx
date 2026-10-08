@@ -229,10 +229,10 @@ const IDE: React.FC<IDEProps> = ({
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
             <div className="sticky top-0 z-50  backdrop-blur-sm border-b border-border shadow-4dp">
-                <div className="w-full px-6 py-4">
-                    <div className="flex items-center justify-between">
+                <div className="w-full px-3 py-2 sm:px-6 sm:py-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:justify-between">
                         {/* Left: Back Button and Question Title */}
-                        <div className="flex items-center space-x-4">
+                        <div className="flex min-w-0 items-center space-x-4 sm:flex-1">
                             {isSubmitted ? <button onClick={onBack} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
                                 <X className="w-5 h-5" />
                             </button> :
@@ -268,53 +268,54 @@ const IDE: React.FC<IDEProps> = ({
                                 </AlertDialog>
                             }
                             {questionDetails && (
-                                <div className="flex items-center space-x-3">
+                                <div className="hidden min-w-0 items-center space-x-3 sm:flex">
                                     <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
                                         <Code className="w-4 h-4 text-accent" />
                                     </div>
-                                    <h1 className="text-xl font-bold text-foreground">
+                                    <h1 className="truncate text-xl font-bold text-foreground">
                                         {questionDetails.title}
                                     </h1>
                                 </div>
                             )}
                         </div>
 
-                        {/* Right: Timer and Action Buttons */}
-                        <div className="flex items-center space-x-4">
+                        {/* Timer and theme controls */}
+                        <div className="ml-auto flex items-center gap-2 sm:ml-0 sm:gap-4">
                             <TimerDisplay remainingTime={remainingTime} />
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={toggleTheme}
-                                    className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                                >
-                                    {isDark ? (
-                                        <Sun className="h-4 w-4" />
-                                    ) : (
-                                        <Moon className="h-4 w-4" />
-                                    )}
-                                </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={toggleTheme}
+                                className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            >
+                                {isDark ? (
+                                    <Sun className="h-4 w-4" />
+                                ) : (
+                                    <Moon className="h-4 w-4" />
+                                )}
+                            </Button>
+                        </div>
+                        {/* Action buttons */}
+                        <div className="ml-auto flex w-full items-center justify-end gap-1.5 sm:ml-0 sm:w-auto sm:gap-2">
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'run')}
                                     size="sm"
                                     variant="outline"
-                                    className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
+                                    className="px-2 text-xs text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 sm:px-3 sm:text-sm dark:text-white"
                                     disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Run Code</span>
+                                    <span className="ml-1.5 font-medium sm:ml-2">Run Code</span>
                                 </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
-                                    className="bg-primary-dark hover:bg-primary text-primary-foreground"
+                                    className="px-2 text-xs bg-primary-dark hover:bg-primary text-primary-foreground sm:px-3 sm:text-sm"
                                     disabled={(loading || isSubmitted)}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Submit Solution</span>
+                                    <span className="ml-1.5 font-medium sm:ml-2">Submit Solution</span>
                                 </Button>
-                            </div>
                         </div>
                     </div>
                 </div>

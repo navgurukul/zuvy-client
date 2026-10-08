@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
@@ -10,7 +9,7 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import usePathname from 'next/navigation'
 import { getUser } from '@/store/store'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -19,10 +18,14 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
-                    <div className="flex items-center">
-                        <ProfileImage src={row.original.profilePicture} />
-                    </div>
-                ),
+            <div className="flex items-center">
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },
@@ -42,7 +45,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {name}
                     </span>
                 </div>
@@ -66,7 +69,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {email}
                     </span>
                 </div>
@@ -80,7 +83,7 @@ export const columns: ColumnDef<Task>[] = [
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>
@@ -97,7 +100,7 @@ export const columns: ColumnDef<Task>[] = [
             const isSubmitted = row.original.status === 'Submitted'
             return (
                 <div className="flex space-x-2">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
+                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium text-foreground">
                         {isSubmitted ? (
                             <div className="bg-green-600 h-3 w-3 rounded-full" />
                         ) : (
@@ -111,6 +114,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
+        header: () => <div className="flex w-full items-center justify-start text-left">Actions</div>,
         cell: ({ row }) => {
             const { bootcampId, moduleId, userId, chapterId } = row.original
             const isSubmitted = row.original.status !== 'Submitted'
@@ -121,10 +125,10 @@ export const columns: ColumnDef<Task>[] = [
             const orgId = Number(organizationId) || user?.orgId; 
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex w-full items-center justify-start">
                     <Button
                         variant={'ghost'}
-                        className="text-lg font-bold  hover:bg-muted/30"
+                        className="flex items-center justify-start p-0 text-left text-lg font-bold hover:bg-muted/30"
                         disabled={isSubmitted}
                     >
                         <Link

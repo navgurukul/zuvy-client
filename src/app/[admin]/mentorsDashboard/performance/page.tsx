@@ -117,27 +117,18 @@ export default function PerformanceMetrics() {
             onClick={() =>
               setFeedbackFilter(item.value as "30days" | "3months" | "all")
             }
-            //       className={`
-            //   h-10 rounded-full px-5 text-sm
-            //   ${feedbackFilter === item.value
-            //           ? "border-slate-900 bg-white text-slate-900 font-semibold"
-            //           : "border-slate-200 text-slate-500 hover:text-slate-900"
-            //         }
-            // `}
             className={`
-  h-10 rounded-full px-5 text-sm
-  ${feedbackFilter === item.value
-                ? "border-slate-900 bg-white text-slate-900 font-semibold hover:bg-white hover:text-slate-900"
-                : "border-slate-200 bg-white text-slate-500 hover:bg-white hover:text-slate-500"
-              }
-`}
+                h-10 rounded-full px-5 text-sm
+                ${feedbackFilter === item.value
+                  ? "border-foreground bg-card text-foreground font-semibold hover:bg-card hover:text-foreground"
+                  : "border-border bg-card text-muted-foreground/90 hover:bg-card hover:text-muted-foreground/90"
+                }
+            `}
           >
             {item.label}
           </Button>
         ))}
       </div>
-
-      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"> */}
       <div className="grid gap-5 md:grid-cols-3 mb-8">
         <Card className='rounded-lg'>
           <CardContent className="p-6 text-left">
@@ -159,7 +150,6 @@ export default function PerformanceMetrics() {
             </p>
 
             <p className="text-3xl font-semibold">{averageRating ? averageRating : "—"}</p>
-            {/* <p className="text-sm font-medium">Average Rating</p> */}
             <p className="text-xs text-muted-foreground">
               {averageRating
                 ? "Across completed sessions with rating"
@@ -190,7 +180,7 @@ export default function PerformanceMetrics() {
         </Card>
       </div>
       <div className="grid gap-6 md:grid-cols-1">
-        <Card className="rounded-lg shadow-sm border-slate-200">
+        <Card className="rounded-lg shadow-sm border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-base text-left">Student Feedback</CardTitle>
           </CardHeader>
@@ -217,10 +207,10 @@ export default function PerformanceMetrics() {
                 const feedbackText = entry.feedback || entry.notes || ""
 
                 return (
-                  <div key={entry.id || entry.bookingId} className="rounded-lg border p-3 bg-white space-y-1">
+                  <div key={entry.id || entry.bookingId} className="rounded-lg border p-3 bg-card space-y-1">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-xs font-semibold text-gray-900">{nameLabel}</p>
+                        <p className="text-xs font-semibold text-foreground">{nameLabel}</p>
                         <p className="text-[10px] text-muted-foreground">
                           Date: {formatDateTime(dateVal)}
                         </p>
@@ -228,7 +218,7 @@ export default function PerformanceMetrics() {
                       {renderRatingStars(entry.studentRating)}
                     </div>
                     {feedbackText && (
-                      <p className="text-xs text-slate-600 bg-slate-50/50 p-2 rounded italic mt-1 font-normal leading-normal">
+                      <p className="text-xs text-slate-600 bg-slate-50/50 dark:text-muted-foreground dark:bg-muted p-2 rounded italic mt-1 font-normal leading-normal">
                         &ldquo;{feedbackText}&rdquo;
                       </p>
                     )}

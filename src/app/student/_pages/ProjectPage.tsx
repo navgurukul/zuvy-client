@@ -103,7 +103,8 @@ const ProjectPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-heading font-bold mb-4">Project Not Found</h1>
             <p className="text-muted-foreground mb-6">{error || 'The requested project could not be found.'}</p>
-            <Button onClick={() => router.push(`/student/course/${courseId}/org/${orgId}`)}>
+            <Button onClick={() => router.push(`/student/course/${courseId}/org/${orgId}`)}   className="hover:bg-primary"
+>
               <X className="w-4 h-4 mr-2" />
               Back to Course Dashboard
             </Button>
@@ -223,7 +224,7 @@ const ProjectPage = () => {
           <div className="flex items-center">
             <Button 
               variant="ghost" 
-              className="p-0 h-auto text-primary hover:text-primary hover:underline"
+              className="p-0 h-auto text-primary hover:text-primary hover:no-underline hover:bg-transparent"
               onClick={() => router.back()}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />

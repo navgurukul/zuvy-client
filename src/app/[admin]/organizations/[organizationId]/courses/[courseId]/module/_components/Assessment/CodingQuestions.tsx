@@ -42,17 +42,17 @@ const CodingQuestions = ({
                     return (
                         <div
                             key={question.id}
-                            className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                            className="py-4 px-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-card mb-4"
                         >
                             <div className="flex justify-between text-start items-center w-full">
                                 <div className="w-full">
                                     <div className="flex items-center justify-between w-full">
-                                        <h2 className="font-bold text-[1rem] text-gray-600">
+                                        <h2 className="font-bold text-[1rem] text-gray-600 dark:text-muted-foreground">
                                             {ellipsis(question.title, 30)}
                                         </h2>
                                         <div className="flex gap-2 ml-auto">
                                             {tag && (
-                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] rounded-full px-2">
+                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-slate-600 rounded-full px-2">
                                                     {tag?.tagName}
                                                 </span>
                                             )}
@@ -110,7 +110,7 @@ const CodingQuestions = ({
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px]">
+                                    <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px] dark:text-muted-foreground">
                                         {ellipsis(question.description, 45)}
                                     </p>
                                     <Dialog>

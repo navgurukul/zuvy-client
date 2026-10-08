@@ -190,7 +190,12 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={isSuperAdmin || !orgId ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
-                        <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo' />
+                        <Image
+                            src={isDark ? '/zuvy-logo-horizontal-dark.png' : '/zuvy-logo-horizontal.png'}
+                            height={100}
+                            width={100}
+                            alt="Zuvy logo"
+                        />
                     </Link>
 
                     <OrganizationDropdown orgId={orgId} />
@@ -233,7 +238,7 @@ const Navbar = () => {
                                                 'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
                                                 isActive
                                                     ? 'bg-primary text-primary-foreground shadow-sm'
-                                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
@@ -260,7 +265,7 @@ const Navbar = () => {
                     )} */}
                     <Badge
                         // variant="yellow"
-                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 dark:bg-violet-500/20 text-violet-700 dark:text-violet-600 border border-violet-200 dark:border-violet-400 hover:bg-violet-100"
                     >
                         {formattedRole(role)}
                     </Badge>
@@ -273,7 +278,7 @@ const Navbar = () => {
                                 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
                                 pathname === `/${role}/organizations/${orgId}/setting`
                                     ? 'bg-primary text-primary-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                             )}
                         >
                             <Settings className="h-4 w-4" />
@@ -289,7 +294,7 @@ const Navbar = () => {
                                 'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                                 pathname === `/${role}/organizations/${orgId}/auditLog`
                                     ? 'bg-primary text-primary-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                             )}
                         >
                             <Bell className="h-4 w-4" />
@@ -297,7 +302,7 @@ const Navbar = () => {
                         </Link>
                     )}
 
-                    {/* <Button
+                    <Button
                         variant="ghost"
                         size="sm"
                         onClick={toggleTheme}
@@ -308,7 +313,7 @@ const Navbar = () => {
                         ) : (
                             <Moon className="h-4 w-4" />
                         )}
-                    </Button> */}
+                    </Button>
 
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown

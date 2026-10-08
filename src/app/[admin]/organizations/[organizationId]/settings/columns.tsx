@@ -47,7 +47,7 @@ export const createColumns = (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                <div className="max-w-[180px] cursor-pointer text-left text-foreground">
                   {name.length > limit
                     ? name.substring(0, limit) + '...'
                     : name}
@@ -78,7 +78,7 @@ export const createColumns = (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="max-w-[220px] cursor-pointer text-left text-gray-600">
+                <div className="max-w-[220px] cursor-pointer text-left text-foreground/70">
                   {email.length > limit
                     ? email.substring(0, limit) + '...'
                     : email}
@@ -106,7 +106,11 @@ export const createColumns = (
             const userId = row.original.userId
             const roleId = row.original.roleId
             const userEmail = row.original.email
-            return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} userEmail={userEmail} roleId={roleId} onRoleUpdate={refreshData} />
+            return (
+                <div className="flex justify-start">
+                  <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} userEmail={userEmail} roleId={roleId} onRoleUpdate={refreshData} />
+                </div>
+            )
         },
     },
    {
@@ -115,7 +119,7 @@ export const createColumns = (
         cell: ({ row }) => {
              const createdAt = row.original.createdAt
             return (
-                <div className="text-left text-gray-600">{formatDate(createdAt)}</div>
+                <div className="text-left text-foreground/70">{formatDate(createdAt)}</div>
             )
         },
     },

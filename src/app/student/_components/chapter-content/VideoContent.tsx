@@ -127,7 +127,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     <div className="flex flex-col space-y-2 mb-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-xl text-left font-extrabold">
+                                <h1 className="text-xl text-left font-extrabold font-body">
                                     {chapterDetails.title}
                                 </h1>
                                 {chapterDetails.description && (
@@ -140,8 +140,9 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                 variant="secondary"
                                 className={`${
                                     isCompleted
-                                        ? 'bg-green-100 text-green-600 hover:bg-green-100'
-                                        : 'bg-white text-slate-700 hover:bg-white border border-slate-200'
+                                        ? 'bg-green-100 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/30'
+                                        : 'bg-white text-slate-700 hover:bg-white border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:border-slate-700'
+
                                 } text-xs font-medium px-2 py-1 mb-5`}
                             >
                                 {isCompleted ? 'Watched' : 'Not Watched'}

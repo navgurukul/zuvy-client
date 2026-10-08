@@ -35,6 +35,11 @@ import {
     Megaphone,
 } from 'lucide-react'
 import useOrgSettings from '@/app/[admin]/hooks/useOrgSettings'
+import { z } from 'zod'
+import {
+    requiredEmailSchema,
+    requiredNameSchema,
+} from '@/utils/validation/nameEmail'
 
 type AddUserModalProps = {
     isEditMode: boolean;
@@ -53,6 +58,14 @@ type NewUser = {
     assigneeName: string;
     assigneeEmail: string;
 }
+
+const organizationFormSchema = z.object({
+    orgName: requiredNameSchema,
+    name: requiredNameSchema,
+    email: requiredEmailSchema,
+    assigneeName: requiredNameSchema,
+    assigneeEmail: requiredEmailSchema,
+})
 
 type RoleCardProps = {
     id: number
@@ -77,14 +90,14 @@ const RoleCard: React.FC<RoleCardProps> = ({
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
                 ? 'border-primary bg-primary-light'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-border hover:border-gray-300'
                 }`}
         >
             <div className="flex items-start gap-3">
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
                         ? 'bg-blue-100 text-primary'
-                        : 'bg-gray-100 text-foreground'
+                        : 'bg-muted/50 text-foreground'
                         }`}
                 >
                     {icon}
@@ -121,6 +134,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         assigneeName: '',
         assigneeEmail: '',
     })
+    const [touchedFields, setTouchedFields] = useState<Partial<Record<keyof NewUser, boolean>>>({})
     // Store original values to track changes
     const [originalUser, setOriginalUser] = useState<{ name: string; email: string; roleId: number | null }>({
         name: '',
@@ -131,6 +145,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     // Fetch fresh organization data when entering edit mode
     useEffect(() => {
         if (isEditMode && user?.id && isOpen) {
+            setTouchedFields({})
             const fetchFreshOrgData = async () => {
                 setIsFetchingFreshData(true)
                 try {
@@ -142,7 +157,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     const fetchedAssigneeName = data.zuvyPocName || ''
                     const fetchedAssigneeEmail = data.zuvyPocEmail || ''
                     // Mapping isManagedByZuvy to role id (1: Self, 2: Zuvy)
-                    const fetchedRoleId = user.managementType || data.isManagedByZuvy ? 2 : 1
+                    const fetchedRoleId = data.isManagedByZuvy ? 2 : 1
 
                     setNewUser({
                         orgName: fetchedOrgName,
@@ -196,6 +211,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 assigneeName: '',
                 assigneeEmail: '',
             })
+            setTouchedFields({})
             setPendingUserRole(null)
             setFreshUserData(null)
             setOriginalUser({
@@ -209,6 +225,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setNewUser((prev) => ({ ...prev, [name]: value }))
+        setTouchedFields((prev) => ({ ...prev, [name as keyof NewUser]: true }))
     }
 
     // Check if form is valid (for add mode)
@@ -225,23 +242,22 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         }
     }, [isZuvyManaged])
 
-    const MAX_NAME_LENGTH = 30
+    const activeFormSchema = isZuvyManaged
+        ? organizationFormSchema
+        : organizationFormSchema.omit({ assigneeName: true, assigneeEmail: true })
+    const validationResult = activeFormSchema.safeParse(newUser)
+    const validationErrors: Record<string, string> = validationResult.success
+        ? {}
+        : validationResult.error.issues.reduce<Record<string, string>>((errors, issue) => {
+            const field = issue.path[0]
+            if (typeof field === 'string' && !errors[field]) errors[field] = issue.message
+            return errors
+        }, {})
 
-    const validateEmail = (email: string) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        return re.test(email.toLowerCase())
-    }
+    const fieldError = (field: keyof NewUser) =>
+        touchedFields[field] ? validationErrors[field] : undefined
 
-    const isFormValid =
-        newUser.orgName.trim().length > 0 && newUser.orgName.trim().length <= MAX_NAME_LENGTH &&
-        newUser.name.trim().length > 0 &&
-        newUser.name.trim().length <= MAX_NAME_LENGTH &&
-        validateEmail(newUser.email.trim()) &&
-        !!pendingUserRole &&
-        (!isZuvyManaged ||
-            (newUser.assigneeName.trim().length > 0 &&
-                newUser.assigneeName.trim().length <= MAX_NAME_LENGTH &&
-                validateEmail(newUser.assigneeEmail.trim())))
+    const isFormValid = validationResult.success && !!pendingUserRole
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
@@ -295,7 +311,8 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     }, [])
 
     const handleAddUser = async () => {
-        if (!canSubmit) return
+        const result = activeFormSchema.safeParse(newUser)
+        if (!canSubmit || !result.success) return
 
         const payload = {
             title: newUser.orgName.trim(),
@@ -336,6 +353,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
             assigneeName: '',
             assigneeEmail: '',
         })
+        setTouchedFields({})
         setPendingUserRole(null)
 
         refetchUsers && refetchUsers()
@@ -344,7 +362,8 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
 
     const handleEditUser = async () => {
-        if (!canSubmit || !user?.id) return
+        const result = activeFormSchema.safeParse(newUser)
+        if (!canSubmit || !result.success || !user?.id) return
 
         const payload = {
             title: newUser.orgName.trim(),
@@ -420,10 +439,10 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                             value={newUser.orgName}
                             onChange={handleInputChange}
                             placeholder="Enter Organisation Name"
-                            className={`mt-2 ${newUser.orgName.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                            className={`mt-2 ${fieldError('orgName') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         />
-                        {newUser.orgName.trim().length > MAX_NAME_LENGTH && (
-                            <p className="text-red-500 text-xs mt-1">Organisation name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                        {fieldError('orgName') && (
+                            <p className="text-red-500 text-xs mt-1">{fieldError('orgName')}</p>
                         )}
                     </div>
 
@@ -446,7 +465,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                         </div>
                     </div>
                     <div>
-                        <Label className="block text-sm font-medium text-gray-900 mb-4 text-start">
+                        <Label className="block text-sm font-medium text-foreground mb-4 text-start">
                             Point of Contact <span className="text-red-500">*</span>
                         </Label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -460,10 +479,10 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                     value={newUser.name}
                                     onChange={handleInputChange}
                                     placeholder="Enter full name"
-                                    className={`mt-2 ${newUser.name.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                                    className={`mt-2 ${fieldError('name') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                                 />
-                                {newUser.name.trim().length > MAX_NAME_LENGTH && (
-                                    <p className="text-red-500 text-xs mt-1">Name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                                {fieldError('name') && (
+                                    <p className="text-red-500 text-xs mt-1">{fieldError('name')}</p>
                                 )}
                             </div>
                             <div className="text-left">
@@ -479,11 +498,14 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                     placeholder="Enter email address"
                                     className="mt-2"
                                 />
+                                {fieldError('email') && (
+                                    <p className="text-red-500 text-xs mt-1">{fieldError('email')}</p>
+                                )}
                             </div>
                         </div>
                         {isZuvyManaged && (
                             <>
-                                <Label className="block text-sm font-medium text-gray-900 my-4 text-start">
+                                <Label className="block text-sm font-medium text-foreground my-4 text-start">
                                     Zuvy Assignee
                                 </Label>
 
@@ -495,10 +517,10 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                             value={newUser.assigneeName}
                                             onChange={handleInputChange}
                                             placeholder="Enter full name"
-                                            className={`mt-2 ${newUser.assigneeName.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                                            className={`mt-2 ${fieldError('assigneeName') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                                         />
-                                        {newUser.assigneeName.trim().length > MAX_NAME_LENGTH && (
-                                            <p className="text-red-500 text-xs mt-1">Name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                                        {fieldError('assigneeName') && (
+                                            <p className="text-red-500 text-xs mt-1">{fieldError('assigneeName')}</p>
                                         )}
                                     </div>
 
@@ -512,6 +534,9 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                             placeholder="Enter email address"
                                             className="mt-2"
                                         />
+                                        {fieldError('assigneeEmail') && (
+                                            <p className="text-red-500 text-xs mt-1">{fieldError('assigneeEmail')}</p>
+                                        )}
                                     </div>
                                 </div>
                             </>
@@ -523,7 +548,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline" className="bg-white">
+                    <Button variant="outline">
                         Cancel
                     </Button>
                 </DialogClose>

@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter, usePathname, useParams } from 'next/navigation'
+import { useRouter, usePathname, useParams,useSearchParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -12,6 +12,7 @@ import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
 import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/columns'
 import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
+import { requiredEmailSchema } from '@/utils/validation/nameEmail'
 import {
     StudentData,
     BatchSuggestion,
@@ -36,6 +37,7 @@ export default function useBatches(params: ParamsType) {
     const { setStoreStudentData } = getStoreStudentData()
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const { assignBatch } = useAssignBatch()
+const searchParams = useSearchParams()
 
     const [loading, setLoading] = useState(true)
     const [assignStudents, setAssignStudents] = useState('')
@@ -130,14 +132,19 @@ export default function useBatches(params: ParamsType) {
     const fetchSearchResultsApi = useCallback(
         async (query: string) => {
             setSearchQuery(query)
-            const response = await api.get(`/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`)
-            setBatchData(response.data || [])
-            return response.data || []
+            setLoading(true)
+            try {
+                const response = await api.get(`/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`)
+                setBatchData(response.data?.data || response.data || [])
+                if (response.data?.totalBatches !== undefined) setTotalBatches(response.data.totalBatches)
+                if (response.data?.permissions) setPermissions(response.data.permissions)
+                return response.data || []
+            } finally {
+                setLoading(false)
+            }
         },
         [params.courseId, setBatchData]
     )
-
-
     const isFetchingRef = useRef(false);
 
     const defaultFetchApi = useCallback(
@@ -175,7 +182,7 @@ export default function useBatches(params: ParamsType) {
     const createFormSchema = (editingBatch: EnhancedBatch | null) => {
         return z.object({
             name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
-            instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
+            instructorEmail: requiredEmailSchema,
             bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
             capEnrollment: z.string()
                 .refine((capEnrollment) => {
@@ -441,10 +448,17 @@ export default function useBatches(params: ParamsType) {
     }
     useEffect(() => {
         if (!params.courseId) return
-        defaultFetchApi()
+
+        const urlSearch = searchParams.get('search')?.trim()
+
+        ;(async () => {
+            await defaultFetchApi()         
+            if (urlSearch) {
+                await fetchSearchResultsApi(urlSearch)   
+            }
+        })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.courseId])
-    
 
     const getUnAssignedStudents = useCallback(async () => {
         try {

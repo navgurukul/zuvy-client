@@ -4,7 +4,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { cn, difficultyBgColor, difficultyColor } from '@/lib/utils'
+import { cn, difficultyBgColor, getDifficultyColor } from '@/lib/utils'
 import { QuestionDescriptionModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
 import {
     ReactElement,
@@ -36,8 +36,7 @@ const QuestionDescriptionModal = ({
                         <span
                             className={cn(
                                 `text-[12px] text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]`,
-                                difficultyColor(question.difficulty), // Text color
-                                difficultyBgColor(question.difficulty) // Background color
+                                getDifficultyColor(question.difficulty), // Text color
                             )}
                         >
                             {question.difficulty}
@@ -147,7 +146,7 @@ const QuestionDescriptionModal = ({
                                                     <strong className="text-foreground text-[18px]">
                                                         Input:
                                                     </strong>
-                                                    <pre className="ml-4 bg-gray-100 p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
+                                                    <pre className="ml-4 bg-gray-100 dark:bg-muted-light p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
                                                         {testCase.inputs.map(
                                                             (
                                                                 input: {

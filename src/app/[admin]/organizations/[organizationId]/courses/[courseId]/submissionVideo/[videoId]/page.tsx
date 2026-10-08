@@ -11,7 +11,6 @@ import Link from 'next/link'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
@@ -150,9 +149,9 @@ const Page = ({ params }: any) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {videoData?.title || 'Loading...'}
                     </CardTitle>
                 </CardHeader>
@@ -160,16 +159,16 @@ const Page = ({ params }: any) => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className="text-left">
                             <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">{videoData?.totalStudents || 0}</div>
+                            <div className="text-lg font-semibold">{videoData?.totalSubmittedStudents  || 0}</div>
                         </div>
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Video</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                            <div className="text-lg font-semibold">Video</div>
                         </div>
 
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                            <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                            <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className="text-left">
                             <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -180,8 +179,8 @@ const Page = ({ params }: any) => {
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
@@ -197,7 +196,7 @@ const Page = ({ params }: any) => {
             <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button

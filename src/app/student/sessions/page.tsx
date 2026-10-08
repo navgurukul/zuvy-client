@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { useSubmitStudentFeedback } from "@/app/student/hooks/useSubmitStudentFeedback"
 import {
-  getMentorProfileHref,
+  getMentorDrawerHref,
   getMentorsHref,
   getSessionCancelHref,
   getSessionJoinHref,
@@ -182,14 +182,15 @@ export default function MySessions() {
     <div className="max-w-[90rem] mx-auto p-6 space-y-6">
 
       <div>
-        <h1 className="text-2xl font-semibold text-left text-gray-900">Mentorship</h1>
+        <h1 className="text-2xl font-semibold text-left text-foreground">Mentorship</h1>
         {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or manage your sessions.</p> */}
       </div>
 
       <MentorshipTabs courseId={courseId} orgId={orgId} />
       {/* TABS */}
 
-      <div className="flex items-center  rounded-full p-1 w-fit gap-3">
+      <div className="-mx-6 overflow-x-auto px-6 pb-2 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0">
+        <div className="flex w-max items-center gap-3 rounded-full p-1">
 
         <TabButton
           id="tour-all-sessions"
@@ -226,6 +227,7 @@ export default function MySessions() {
           onClick={() => setActiveTab("cancelled")}
         />
 
+        </div>
       </div>
 
       {/* SESSION CARD */}
@@ -247,7 +249,7 @@ export default function MySessions() {
         </div>
       ) : error ? (
         <div className="space-y-3 rounded-2xl border bg-card p-6">
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
           <Button variant="outline" onClick={refetchMySessions}>
             Retry
           </Button>
@@ -261,7 +263,7 @@ export default function MySessions() {
               <p className="text-sm text-muted-foreground max-w-sm">
                 Your sessions will appear here once you book them.
               </p>
-              <Button className="mt-4 text-sm text-white px-5 py-2 rounded-lg flex items-center gap-2" asChild>
+              <Button className="mt-4 text-sm text-primary-foreground px-5 py-2 rounded-lg flex items-center gap-2" asChild>
                 <Link href={getMentorsHref(routeContext)}>
                   <Users size={16} />
                   Book a Session
@@ -289,13 +291,13 @@ export default function MySessions() {
             const studentFeedback = (session as any).studentFeedback || (session as any).studentFeedbackNotes || (session as any).studentNotes || locallySubmittedFeedbackIds[session.id]?.feedback || ""
 
             const statusBadge = isInProgress ? (
-              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-blue-100 text-blue-700">In Progress</span>
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-info/30 bg-info/20 text-info-dark">In Progress</span>
             ) : isCompleted ? (
-              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">Completed</span>
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">Completed</span>
             ) : isCancelled ? (
-              <Badge className="bg-destructive-light text-destructive">Cancelled</Badge>
+              <Badge className="border border-destructive/30 bg-destructive/20 text-destructive-dark">Cancelled</Badge>
             ) : (
-              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">Upcoming</span>
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">Upcoming</span>
             )
 
             // Cancelled card
@@ -323,7 +325,7 @@ export default function MySessions() {
                       <div className="text-sm">{session.status}</div>
                     </div>
                     <div className="border-t pt-4" />
-                    <Link href={getMentorProfileHref(session.mentorUserId, routeContext)} className="text-green-600 text-sm font-medium flex items-center gap-2">
+                    <Link href={getMentorDrawerHref(session.mentorUserId, routeContext)} className="text-primary text-sm font-medium flex items-center gap-2 hover:text-primary-dark">
                       <CalendarDays size={16} />
                       Book again with {getMentorDisplayName(session.mentorName, session.mentorUserId)} →
                     </Link>
@@ -362,12 +364,12 @@ export default function MySessions() {
                     </div>
                     {hasStudentFeedback ? (
                       <div className="mt-4 border-t pt-4 space-y-1 text-left">
-                        <p className="text-sm font-semibold text-slate-800">Your Feedback to Mentor</p>
+                        <p className="text-sm font-semibold text-foreground">Your Feedback to Mentor</p>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <span>Rating:</span>
                           <div className="flex gap-0.5">
                             {Array.from({ length: 5 }).map((_, idx) => (
-                              <Star key={idx} size={12} className={idx < studentRating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"} />
+                              <Star key={idx} size={12} className={idx < studentRating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"} />
                             ))}
                           </div>
                         </div>
@@ -375,7 +377,7 @@ export default function MySessions() {
                       </div>
                     ) : (
                       <div className="mt-4 border-t pt-4 flex justify-end">
-                        <Button size="sm" className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium" onClick={() => { setFeedbackBookingId(session.id); setTempRating(5); setTempFeedback("") }}>
+                        <Button size="sm" className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium" onClick={() => { setFeedbackBookingId(session.id); setTempRating(5); setTempFeedback("") }}>
                           Submit Feedback
                         </Button>
                       </div>
@@ -469,7 +471,7 @@ export default function MySessions() {
 
                 </div>
 
-                <Badge className="bg-destructive-light text-destructive">
+                <Badge className="border border-destructive/30 bg-destructive/20 text-destructive-dark">
                   Cancelled
                 </Badge>
 
@@ -496,8 +498,8 @@ export default function MySessions() {
               <div className="border-t pt-4" />
 
               <Link
-                href={getMentorProfileHref(session.mentorUserId, routeContext)}
-                className="text-green-600 text-sm font-medium flex items-center gap-2"
+                href={getMentorDrawerHref(session.mentorUserId, routeContext)}
+                className="text-primary text-sm font-medium flex items-center gap-2 hover:text-primary-dark"
               >
 
                 <CalendarDays size={16} />
@@ -534,7 +536,7 @@ export default function MySessions() {
               Your completed sessions will appear here after you attend them.
             </p>
 
-            <Button className="mt-4 text-sm text-white px-5 py-2 rounded-lg flex items-center gap-2" asChild>
+            <Button className="mt-4 text-sm text-primary-foreground px-5 py-2 rounded-lg flex items-center gap-2" asChild>
 
               <Link href={getMentorsHref(routeContext)}>
                 <Users size={16} />
@@ -563,7 +565,7 @@ export default function MySessions() {
                   </div>
                 </div>
 
-                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">
                   Completed
                 </span>
               </div>
@@ -610,7 +612,7 @@ export default function MySessions() {
 
                 return hasStudentFeedback ? (
                   <div className="mt-4 border-t pt-4 space-y-1 text-left">
-                    <p className="text-sm font-semibold text-slate-800">Your Feedback to Mentor</p>
+                            <p className="text-sm font-semibold text-foreground">Your Feedback to Mentor</p>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <span>Rating:</span>
                       <div className="flex gap-0.5">
@@ -621,7 +623,7 @@ export default function MySessions() {
                             className={
                               idx < studentRating
                                 ? "text-yellow-500 fill-yellow-500"
-                                : "text-gray-300"
+                                : "text-muted-foreground"
                             }
                           />
                         ))}
@@ -637,7 +639,7 @@ export default function MySessions() {
                   <div className="mt-4 border-t pt-4 flex justify-end">
                     <Button
                       size="sm"
-                      className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                      className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium"
                       onClick={() => {
                         setFeedbackBookingId(session.id)
                         setTempRating(5)
@@ -675,7 +677,7 @@ export default function MySessions() {
 
                 </div>
 
-                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">
                   Upcoming
                 </span>
 
@@ -780,7 +782,7 @@ export default function MySessions() {
 
             <div className="space-y-4 py-2">
               <div className="space-y-1.5 text-left">
-                <p className="text-sm font-medium text-gray-700">Rating</p>
+                <p className="text-sm font-medium text-foreground">Rating</p>
                 <div className="flex gap-1.5">
                   {Array.from({ length: 5 }).map((_, index) => {
                     const starValue = index + 1
@@ -796,7 +798,7 @@ export default function MySessions() {
                           className={
                             starValue <= tempRating
                               ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300"
+                              : "text-muted-foreground"
                           }
                         />
                       </button>
@@ -806,7 +808,7 @@ export default function MySessions() {
               </div>
 
               <div className="space-y-1.5 text-left">
-                <p className="text-sm font-medium text-gray-700">Feedback / Notes</p>
+                <p className="text-sm font-medium text-foreground">Feedback / Notes</p>
                 <Textarea
                   placeholder="Share details about what went well and areas for improvement..."
                   value={tempFeedback}
@@ -816,7 +818,7 @@ export default function MySessions() {
               </div>
 
               {submitError && (
-                <p className="text-xs text-red-500 text-left">{submitError}</p>
+                <p className="text-xs text-destructive text-left">{submitError}</p>
               )}
             </div>
 
@@ -831,7 +833,7 @@ export default function MySessions() {
               </Button>
               <Button
                 type="button"
-                className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium"
                 onClick={handleSubmitFeedback}
                 disabled={isSubmitting || tempRating < 1 || tempRating > 5}
               >
@@ -863,7 +865,7 @@ function StatCard({
       onClick={onClick}
       className={cn(
         "cursor-pointer rounded-2xl border transition",
-        active && "border-green-700 bg-green-50"
+        active && "border-primary bg-primary-light"
       )}
     >
 
@@ -897,10 +899,10 @@ function TabButton({
       id={id}
       onClick={onClick}
       className={cn(
-        "flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+        "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
         active
-          ? "bg-[#2F6B2F] text-white border-[#2F6B2F]"
-          : "bg-white text-[#5F6D5F] border-[#D9DED9] hover:bg-[#F8F9F8]"
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-card text-muted-foreground border-border hover:bg-muted"
       )}
     >
       <Icon size={14} strokeWidth={2.2} />
@@ -913,7 +915,7 @@ function TabButton({
             "flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none",
             active
               ? "bg-white/20 text-white"
-              : "bg-[#EEF1EE] text-[#5F6D5F]"
+              : "bg-muted text-muted-foreground"
           )}
         >
           {count}

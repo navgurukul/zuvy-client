@@ -48,7 +48,7 @@ const NotAuthorizedUser = () => {
                         }
 
                         // Fallback: go to the organizations list for the role, or root
-                        if (userRole) {
+                        if (userRole === 'super_admin') {
                             router.push(`/${userRole}/organizations`);
                         } else {
                             router.push(`/`);

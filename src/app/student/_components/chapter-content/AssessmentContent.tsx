@@ -315,73 +315,53 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     <div className="h-full overflow-y-auto">
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
         <div className="flex flex-col gap-y-4 text-left w-full max-w-lg sm:max-w-xl lg:max-w-4xl">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 lg:pr-10 mb-8">
-            <div className="min-w-0 flex-1">
-              <div className="flex w-full justify-between items-center mb-6">
-                <h5 className=" font-bold text-foreground break-words">
-                  {assessmentDetails.ModuleAssessment?.title}
-                </h5>
-                <span className={`text-xs dark:text-white font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
-              </div>
-              {/* Meta Info Row */}
-              <div className="flex flex-wrap gap-x-12 gap-y-2 mb-8">
-                <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
-                  <span className="font-semibold text-sm text-muted-foreground">Start Date</span>
-                  <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.startDatetime)}</span>
-                </span>
-                {assessmentDetails.endDatetime && <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
-                  <span className="font-semibold text-sm text-muted-foreground">End Date</span>
-                  <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.endDatetime)}</span>
-                </span>}
+          {/* Header & Description */}
+          <div className="flex flex-col gap-y-3 mb-6">
+            <div className="flex w-full justify-between items-center">
+              <h5 className="font-bold font-body text-xl text-foreground break-words">
+                {assessmentDetails.ModuleAssessment?.title}
+              </h5>
+              <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light dark:bg-warning/15 dark:text-warning-dark' : 'text-success border-success bg-success-light dark:bg-success/15 dark:text-success-dark'}`}>
+                {chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}
+              </span>
+            </div>
 
-                <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
-                  <span className="font-semibold text-sm text-muted-foreground">Duration</span>
-                  <span className="text-lg font-medium text-foreground">{formatTimeLimit(assessmentDetails.timeLimit)}</span>
-                </span>
-                <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
-                  <span className="font-semibold text-sm text-muted-foreground">Total Marks</span>
-                  <span className="text-lg font-medium text-foreground">{assessmentDetails.weightageMcqQuestions + assessmentDetails.weightageCodingQuestions}</span>
-                </span>
-              </div>
-              {/* Assessment State Badge (optional, can be removed if not needed) */}
-              {/* {assessmentDetails.assessmentState && (
-                <Badge
-                  variant={
-                    assessmentDetails.assessmentState.toUpperCase() === 'ACTIVE'
-                      ? 'default'
-                      : assessmentDetails.assessmentState.toUpperCase() === 'PUBLISHED'
-                        ? 'outline'
-                        : assessmentDetails.assessmentState.toUpperCase() === 'DRAFT'
-                          ? 'outline'
-                          : assessmentDetails.assessmentState.toUpperCase() === 'CLOSED'
-                            ? 'destructive'
-                            : 'destructive'
-                  }
-                  className={`text-xs sm:text-sm ${assessmentDetails.assessmentState.toUpperCase() === 'ACTIVE'
-                    ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
-                    : ''
-                    }`}
-                >
-                  {assessmentDetails.assessmentState.charAt(0).toUpperCase() +
-                    assessmentDetails.assessmentState.slice(1).toLowerCase()}
-                </Badge>
-              )} */}
+            {/* Description Tag & Text */}
+            <div className="mt-1">
+              <span className="font-semibold text-sm text-muted-foreground block mb-1">Description</span>
+              <p className="text-base text-foreground/80 leading-relaxed">
+                {assessmentDetails.ModuleAssessment?.description ? assessmentDetails.ModuleAssessment?.description : 'No description available'}
+              </p>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="mb-10">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {assessmentDetails.ModuleAssessment?.description ? assessmentDetails.ModuleAssessment?.description : 'No description available'}
-            </p>
+          {/* Meta Info Row */}
+          <div className="flex flex-wrap gap-x-12 gap-y-4 mb-6">
+            <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+              <span className="font-semibold text-sm text-muted-foreground">Start Date</span>
+              <span className="text-base font-medium text-foreground">{formatToIST(assessmentDetails.startDatetime)}</span>
+            </span>
+            {assessmentDetails.endDatetime && (
+              <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+                <span className="font-semibold text-sm text-muted-foreground">End Date</span>
+                <span className="text-base font-medium text-foreground">{formatToIST(assessmentDetails.endDatetime)}</span>
+              </span>
+            )}
+            <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+              <span className="font-semibold text-sm text-muted-foreground">Duration</span>
+              <span className="text-base font-medium text-foreground">{formatTimeLimit(assessmentDetails.timeLimit)}</span>
+            </span>
+            <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+              <span className="font-semibold text-sm text-muted-foreground">Total Marks</span>
+              <span className="text-base font-medium text-foreground">{assessmentDetails.weightageMcqQuestions + assessmentDetails.weightageCodingQuestions}</span>
+            </span>
           </div>
 
           {/* Re-attempt request section */}
           {assessmentDetails.assessmentState?.toUpperCase() !== 'CLOSED' &&
             assessmentDetails.assessmentState?.toUpperCase() !== 'PUBLISHED' &&
             ((isAssessmentStarted && !reattemptRequested && !reattemptApproved) ||
-              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex bg-warning/15 flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-card border border-border rounded-lg shadow-2dp">
+              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-warning/10 dark:bg-warning/10 border border-warning/30 dark:border-warning/40 rounded-lg shadow-2dp">
                 <h2 className="mt-4 text-lg text-foreground flex items-center gap-x-2">
                   <div className="relative w-6 h-6">
                     <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-warning"></div>
@@ -397,7 +377,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 </h2>
                 <Dialog open={reattemptDialogOpen} onOpenChange={setReattemptDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="mt-4 bg-warning hover:bg-warning/50 text-black font-semibold">
+                    <Button className="mt-4 bg-warning hover:bg-warning/50 text-warning-foreground font-semibold">
                     <RotateCcw className=" h-3.5 mx-2" />
                     Request Re-Attempt</Button>
                   </DialogTrigger>
@@ -449,8 +429,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               >
                 <div
                   className={`  ${isPassed
-                    ? 'bg-success-light border-success'
-                    : 'bg-destructive-light border-destructive'
+                    ? 'bg-success-light border-success dark:bg-success/15 dark:border-success/60'
+                    : 'bg-destructive-light border-destructive dark:bg-destructive/15 dark:border-destructive/60'
                     } flex flex-col items-center justify-between max-w-lg sm:max-w-xl lg:max-w-4xl py-8 rounded-lg border shadow-4dp`}
                 >
                   <div className="flex gap-2 items-center">
@@ -479,7 +459,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   </div>
                   <div>
                     <Button
-                      className={`${isPassed ? 'text-success bg-success text-white' : 'text-destructive bg-destructive text-white'} font-semibold mt-3 `}
+                      className={`${isPassed ? 'text-success-foreground bg-success' : 'text-destructive-foreground bg-destructive'} font-semibold mt-3 `}
                       onClick={handleViewResults}
                       disabled={chapterStatus === 'Pending' && !isSubmitedAt}
                     >
@@ -493,10 +473,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {/* Active assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'ACTIVE' &&
             (!isAssessmentStarted || (reattemptRequested && reattemptApproved)) && (<div
-              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light border border-success p-5 text-center transition-all [transition-duration:1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+              className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex flex-col items-center justify-center rounded-lg bg-success-light dark:bg-success/15 border border-success dark:border-success/60 p-5 text-center transition-all [transition-duration:1500ms] ease-in-out shadow-8dp ${showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`}
             >
-              <div className="text-success-dark text-left w-full font-medium">
+              <div className="text-success-dark dark:text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
                     <p className="font-bold text-accent text-center mb-4 dark:text-white">
@@ -527,13 +507,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             </div>
             )}                     {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all [transition-duration:1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all [transition-duration:1500ms] ease-in-out text-sm sm:text-base shadow-error dark:bg-rose-950/30 dark:border-rose-700/50 dark:text-rose-100 ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
               
               <div className='flex flex-col items-center space-y-5' >
-                <span className=" text-destructive flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive' />Assessment expired and cannot be submitted.</span>
-                <span className='text-destructive font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
+                <span className="text-destructive dark:text-rose-200 flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive dark:text-rose-300' />Assessment expired and cannot be submitted.</span>
+                <span className='text-destructive dark:text-rose-200 font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
               </div>
             </div>
           )}

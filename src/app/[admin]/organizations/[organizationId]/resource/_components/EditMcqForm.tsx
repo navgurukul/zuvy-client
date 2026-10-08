@@ -426,7 +426,7 @@ const EditMcqForm = ({
                                             }
                                         }}
                                     >
-                                        <FormControl className="w-[190px]">
+                                        <FormControl className="w-[200px]">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
@@ -436,6 +436,7 @@ const EditMcqForm = ({
                                                 .filter((tag) => tag.id !== -1) // Filter out "All Topics"
                                                 .map((tag) => (
                                                     <SelectItem
+                                                        className="w-[200px]"
                                                         key={tag.id}
                                                         value={tag.tagName}
                                                     >
@@ -581,7 +582,7 @@ const EditMcqForm = ({
                                                                 <Button
                                                                     type="button"
                                                                     variant="outline"
-                                                                    className="text-red-500"
+                                                                    className="text-red-500 mt-2"
                                                                     onClick={() =>
                                                                         removeOption(
                                                                             optionIndex

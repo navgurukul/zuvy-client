@@ -121,6 +121,46 @@ function Page({ params }: PageParams) {
     setIsFullScreen(true);
   }, []);
 
+  const navigateToChapter = useCallback(
+    (bootcampId: any, moduleId: any, chId: any) => {
+      router.push(`/student/course/${bootcampId}/org/${orgId}/modules/${moduleId}?chapterId=${chId}`);
+    },
+    [router, orgId]
+  );
+
+  const submitAssessment = useCallback(
+    async (typeOfsubmission: "studentSubmit" | "auto-submit" = "studentSubmit") => {
+      setDisableSubmit(true);
+      if (!assessmentSubmitId) return;
+      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+      const success = await submitAssessmentApi(assessmentSubmitId, {
+        tabChange,
+        copyPaste,
+        fullScreenExit,
+        eyeMomentCount,
+        typeOfsubmission,
+      });
+      if (!success) return;
+      await completeChapter();
+      navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
+      const channel = new BroadcastChannel("assessment_channel");
+      channel.postMessage("assessment_submitted");
+      channel.close();
+      setTimeout(() => window.close(), 2000);
+    },
+    [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter, submitAssessmentApi]
+  );
+
+  const handleCopyPasteAttempt = useCallback(async () => {
+    if (!assessmentSubmitId || !isCopyPasteProctorOn) return;
+    try {
+      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+      await updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
+    } catch (error) {
+      console.error("Failed to handle paste attempt:", error);
+    }
+  }, [assessmentSubmitId, isCopyPasteProctorOn]);
+
   const startTimer = useCallback((endTime: number) => {
     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
     intervalIdRef.current = window.setInterval(() => {
@@ -131,21 +171,14 @@ function Page({ params }: PageParams) {
         toast.warning({ title: "WARNING", description: "Hurry up, less than 5 minutes remaining now!" });
       }
       if (secondsLeft === 0) {
-        submitAssessment();
+        void submitAssessment("auto-submit");
         if (intervalIdRef.current) {
           clearInterval(intervalIdRef.current);
           intervalIdRef.current = null;
         }
       }
     }, 1000);
-  }, []);
-
-  const navigateToChapter = useCallback(
-    (bootcampId: any, moduleId: any, chId: any) => {
-      router.push(`/student/course/${bootcampId}/org/${orgId}/modules/${moduleId}?chapterId=${chId}`);
-    },
-    [router, orgId]
-  );
+  }, [submitAssessment]);
 
   // -------- data fetchers --------
   const fetchAndApplyAssessmentData = useCallback(
@@ -227,7 +260,7 @@ function Page({ params }: PageParams) {
         intervalIdRef.current = null;
       }
     };
-  }, [assessmentData, assessmentSubmitId, isCurrentPageSubmitAssessment, isFullScreenProctorOn, isTabProctorOn, startTimer, startedAt]);
+  }, [assessmentData, assessmentSubmitId, isCurrentPageSubmitAssessment, isFullScreenProctorOn, isTabProctorOn, startTimer, startedAt, submitAssessment]);
 
   useEffect(() => {
     if (!assessmentSubmitId || !isCopyPasteProctorOn) return;
@@ -241,7 +274,7 @@ function Page({ params }: PageParams) {
     return () => {
       document.removeEventListener("paste", handleClipboardEvent, true);
     };
-  }, [assessmentSubmitId, isCopyPasteProctorOn]);
+  }, [assessmentSubmitId, isCopyPasteProctorOn, handleCopyPasteAttempt]);
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
@@ -258,40 +291,6 @@ function Page({ params }: PageParams) {
   }, []);
 
   // -------- handlers --------
-  const handleCopyPasteAttempt = useCallback(async () => {
-    if (!assessmentSubmitId || !isCopyPasteProctorOn) return;
-    try {
-      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-      await updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
-    } catch (error) {
-      console.error("Failed to handle paste attempt:", error);
-    }
-  }, [assessmentSubmitId, isCopyPasteProctorOn]);
-
-  const submitAssessment = useCallback(
-    async (typeOfsubmission: "studentSubmit" | "auto-submit" = "studentSubmit") => {
-      setDisableSubmit(true);
-      if (!assessmentSubmitId) return;
-      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-      const success = await submitAssessmentApi(assessmentSubmitId, {
-        tabChange,
-        copyPaste,
-        fullScreenExit,
-        eyeMomentCount,
-        typeOfsubmission,
-      });
-      if (!success) return;
-      // toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
-      await completeChapter();
-      navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
-      const channel = new BroadcastChannel("assessment_channel");
-      channel.postMessage("assessment_submitted");
-      channel.close();
-      setTimeout(() => window.close(), 2000);
-    },
-    [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter, submitAssessmentApi]
-  );
-
   const handleSolveChallenge = useCallback(
     async (type: QType, id?: number, codingQuestion?: CodingQuestion) => {
       setSelectedQuesType(type);

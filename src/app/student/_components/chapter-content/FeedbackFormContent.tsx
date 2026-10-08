@@ -128,7 +128,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                     {chapterDetails.title || 'Module 2 Feedback'}
                 </h5>
                 {status === 'Completed' && (
-                    <div className="text-md mb-4 bg-[#E5FFF3] text-[#00B37E] p-3 rounded-md">
+                    <div className="text-md mb-4 rounded-md bg-[#E5FFF3] p-3 text-[#00B37E] dark:bg-[#12352B] dark:text-[#4ADEA8]">
                         Your feedback has been submitted successfully
                     </div>
                 )}

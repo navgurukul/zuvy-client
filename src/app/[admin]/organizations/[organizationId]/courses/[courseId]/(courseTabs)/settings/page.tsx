@@ -45,6 +45,7 @@ const Page = ({ params }: { params: PageProps }) => {
     const [localSettings, setLocalSettings] = useState({
         type: '',
         isModuleLocked: false,
+        isChapterLocked: false,
         mentorshipEnabled: false,
         leaderboardEnabled: false,
     })
@@ -58,6 +59,7 @@ const Page = ({ params }: { params: PageProps }) => {
             setLocalSettings({
                 type: bootcampSettings.type,
                 isModuleLocked: bootcampSettings.isModuleLocked,
+                isChapterLocked: bootcampSettings.isChapterLocked,
                 mentorshipEnabled: bootcampSettings.mentorshipEnabled,
                 leaderboardEnabled: bootcampSettings.leaderboardEnabled,
             })
@@ -75,6 +77,13 @@ const Page = ({ params }: { params: PageProps }) => {
         setLocalSettings((prev) => ({
             ...prev,
             isModuleLocked: !prev.isModuleLocked,
+        }))
+    }
+
+    const handleChapterLockToggle = () => {
+        setLocalSettings((prev) => ({
+            ...prev,
+            isChapterLocked: !prev.isChapterLocked,
         }))
     }
 
@@ -257,6 +266,39 @@ const Page = ({ params }: { params: PageProps }) => {
                                 <div
                                     className={`absolute ml-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
                                         localSettings.isModuleLocked
+                                            ? 'translate-x-full'
+                                            : ''
+                                    }`}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Chapter Lock Toggle Switch */}
+                <div className="mt-4 pt-2 border-t border-border">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-base font-medium text-foreground mb-1">
+                                Chapter Lock
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                                If enabled, students must complete chapters
+                                within a module in sequential order
+                            </p>
+                        </div>
+                        <div className="flex flex-col justify-left items-start">
+                            <div
+                                className={`relative w-11 h-6 rounded-full bg-gray-300 p-0.5 cursor-pointer ${
+                                    localSettings.isChapterLocked
+                                        ? 'bg-primary'
+                                        : ''
+                                }`}
+                                onClick={handleChapterLockToggle}
+                            >
+                                <div
+                                    className={`absolute ml-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                                        localSettings.isChapterLocked
                                             ? 'translate-x-full'
                                             : ''
                                     }`}

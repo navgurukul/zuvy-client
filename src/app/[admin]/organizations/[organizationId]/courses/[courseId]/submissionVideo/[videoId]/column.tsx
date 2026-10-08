@@ -1,22 +1,25 @@
 'use client'
-import Image from 'next/image'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Task } from '@/utils/data/schema'
 import { getSubmissionDate } from '@/utils/admin'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
 
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => (
             <div className="flex items-center">
-                <ProfileImage src={row.original.profilePicture} />
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
             </div>
         ),
         enableSorting: false,
@@ -38,7 +41,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {name}
                     </span>
                 </div>
@@ -62,7 +65,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {email}
                     </span>
                 </div>
@@ -71,12 +74,13 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="flex w-full items-center justify-start text-left">Batch</div>,
+        // header: 'Batch',
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>
@@ -93,7 +97,7 @@ export const columns: ColumnDef<Task>[] = [
             const submissionDate = getSubmissionDate(completedAt)
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {submissionDate}
                     </span>
                 </div>

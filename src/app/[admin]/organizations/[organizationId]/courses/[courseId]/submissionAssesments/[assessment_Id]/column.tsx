@@ -21,13 +21,13 @@ interface ColumnContext {
 export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'student',
-        header: 'Student',
+        header: () => <div className="text-left w-full">Student</div>,
         cell: ({ row }) => {
             const { name, email } = row.original
             return (
                 <div className="flex gap-3">
                     <div>
-                        <div className="text-left font-medium text-black">
+                        <div className="text-left font-medium text-foreground">
                             {name}
                         </div>
                         <div className="truncate max-w-[100px] font-mono text-left text-sm text-muted-foreground">
@@ -38,27 +38,28 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             )
         },
     },
-{
-    accessorKey: 'batchName',
-    header: () => <div className="text-left w-full">Batch</div>,
-    cell: ({ row }) => {
-        const batchName = row.original.batchName || 'N/A'
-        return (
-            <div className="text-left w-full">
-                <Badge variant="outline" className="text-black border-black">
-                    {batchName}
-                </Badge>
-            </div>
-        )
+    {
+        accessorKey: 'batchName',
+        header: () => <div className="text-left w-full">Batch</div>,
+        cell: ({ row }) => {
+            const batchName = row.original.batchName || 'N/A'
+            return (
+                <div className="text-left w-full">
+                    <Badge variant="outline" className="text-foreground border-foreground">
+                        {batchName}
+                    </Badge>
+                </div>
+            )
+        },
     },
-},
     {
         accessorKey: 'startedAt',
+        header: () => <div className="text-left w-full">Started At</div>,
         cell: ({ row }) => {
             const startedAt = row.original.startedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium text-black">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {startedAt
                             ? (() => {
                                   const date = new Date(startedAt)
@@ -105,7 +106,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const submitedAt = row.original.submitedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium text-black">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
                         {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
                         {submitedAt
                             ? (() => {
@@ -140,6 +141,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     },
     {
         accessorKey: 'time taken',
+        header: () => <div className="text-left w-full">Time Taken</div>,
         cell: ({ row }) => {
             const startedAt = row.original.startedAt
             const submitedAt = row.original.submitedAt
@@ -153,7 +155,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             }
 
             return (
-                <div className="flex items-center gap-2 text-sm text-black">
+                <div className="flex items-center gap-2 font-medium text-foreground">
                     {timeTaken}
                 </div>
             )
@@ -161,7 +163,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     },
     {
         accessorKey: 'typeOfsubmission',
-        header: () => <div className="text-center w-full">Submit Mode</div>,
+        header: () => <div className="text-left w-full">Submit Mode</div>,
         cell: ({ row }) => {
             const rawType =
                 (row.original as any).typeOfsubmission || (row.original as any).typeOfSubmission
@@ -172,9 +174,11 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                     ? 'Student Submit'
                     : 'N/A'
             return (
-                <Badge variant="outline" className="text-black border-black">
-                    {label}
-                </Badge>
+                <div className='flex w-full items-center justify-start'>
+                    <Badge variant="outline" className="text-foreground border-foreground">
+                        {label}
+                    </Badge>
+                </div>
             )
         },
     },
@@ -193,7 +197,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const isPassed = row.original.isPassed
             return (
                 <span
-                    className={`font-semibold ${
+                    className={`flex w-full items-center justify-start ${
                         isPassed ? 'text-green-600' : 'text-red-600'
                     }`}
                 >
@@ -204,11 +208,13 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     },
     {
         accessorKey: 'isPassed',
-        header: 'Qualified',
+        header: () => <div className="text-left  w-full">Qualified</div>,
+        // header: 'Qualified',
         cell: ({ row }) => {
             const isPassed = row.original.isPassed
             return (
-                <div className="flex items-center gap-2">
+                <div className="flex w-full items-center justify-start">
+
                     <div 
                          className={` ${
                             isPassed ? 'bg-green-500' : 'bg-red-500'
@@ -230,10 +236,17 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     },
     {
         accessorKey: 'reattemptCount',
-        header: 'Attempts',
+        header: () => <div className="text-left w-full">Attempts</div>,
         cell: ({ row }) => {
             const attempts = (row.original.reattemptCount ?? 0) + 1
-            return <span className="font-medium">{attempts}</span>
+            return (
+            <div className="flex w-full items-center justify-start text-left text-foreground">
+                <span className="font-medium">
+                    {attempts}
+                </span>
+            </div>
+        )
+
         },
     },
     {
@@ -259,7 +272,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                         }
                         className={
                             submitedAt
-                                ? 'text-black hover:text-blue-600'
+                                ? 'text-foreground hover:text-blue-600'
                                 : 'opacity-50 cursor-not-allowed'
                         }
                     >

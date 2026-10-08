@@ -215,7 +215,7 @@ const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
                         : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`
                 }
             >
-                <Download className="h-4 w-4 text-black" />
+                <Download className="h-4 w-4 text-foreground" />
                 {/* Download Report */}
             </button>
         </div>

@@ -71,8 +71,13 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
     };
 
     const switchOrganization = async (org: Organization) => {
+        handleSelect(org);
         const refresh_token = localStorage.getItem('refresh_token');
-        if (!refresh_token) return;
+        if (!refresh_token) {
+            router.push(`/${role}/organizations/${org.id}/courses`);
+            router.refresh();
+            return;
+        }
 
         const result = await switchOrg({
             orgId: org.id,
@@ -83,6 +88,10 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
             setIsOpen(false);
             const newRole = result.user.rolesList[0].toLowerCase();
             router.push(`/${newRole}/organizations/${org.id}/courses`);
+            router.refresh();
+        } else {
+            router.push(`/${role}/organizations/${org.id}/courses`);
+            router.refresh();
         }
     }
 
@@ -103,7 +112,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                 !shouldShowDropdown ? (
                     <Button
                         variant="ghost"
-                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 dark:hover:bg-card border-none"
                     >
                         <div className="flex items-center gap-3">
                             {selected ? (
@@ -112,7 +121,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                         {/* {getInitials(selected)} */}
                                         {selected.code}
                                     </div>
-                                    <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                    <span className="text-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
                                         {selected.title}
                                     </span>
                                 </>
@@ -128,7 +137,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                                className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 dark:hover:bg-card border-none"
                             >
                                 <div className="flex items-center gap-3">
                                     {selected ? (
@@ -137,7 +146,7 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                                 {/* {getInitials(selected)} */}
                                                 {selected.code}
                                             </div>
-                                            <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                            <span className="text-muted-dark font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
                                                 {selected.title}
                                             </span>
                                         </>
@@ -185,52 +194,26 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                                 ) : (
                                     organizations
                                         .map(org => (
-                                            <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50 cursor-pointer">
-                                                {
-                                                    isSuperAdmin ? (
-                                                        <Link
-                                                            key={org.id}
-                                                            href={`/${role}/organizations/${org.id}/courses`}
-                                                            onClick={() => handleSelect(org)}
-                                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                                                    {/* {getInitials(org)} */}
-                                                                    {org.code}
-                                                                </div>
-                                                                <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
-                                                                    {org.title}
-                                                                </span>
-                                                            </div>
-                                                            {selected?.id === org.id && (
-                                                                <Check size={16} className="text-green-600 ml-2" />
-                                                            )}
-                                                        </Link>
-                                                    ) : (
-                                                        <div
-                                                            key={org.id}
-                                                            onClick={() => switchOrganization(org)}
-                                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                                                    {/* {getInitials(org)} */}
-                                                                    {org.code}
-                                                                </div>
-                                                                <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
-                                                                    {org.title}
-                                                                </span>
-                                                            </div>
-                                                            {selected?.id === org.id && (
-                                                                <Check size={16} className="text-green-600 ml-2" />
-                                                            )}
+                                            <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-muted-foreground/10 cursor-pointer">
+                                                <div
+                                                    key={org.id}
+                                                    onClick={() => switchOrganization(org)}
+                                                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-muted-foreground/10 ${selected?.id === org.id ? 'bg-green-50 dark:bg-success/10' : ''
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                                            {/* {getInitials(org)} */}
+                                                            {org.code}
                                                         </div>
-                                                    )
-                                                }
-
+                                                        <span className={`text-sm ${selected?.id === org.id ? 'text-foreground font-medium' : 'text-foreground/70'}`}>
+                                                            {org.title}
+                                                        </span>
+                                                    </div>
+                                                    {selected?.id === org.id && (
+                                                        <Check size={16} className="text-green-600 ml-2" />
+                                                    )}
+                                                </div>
                                             </DropdownMenuItem>
                                         ))
                                 )}
@@ -241,11 +224,11 @@ export default function OrganizationDropdown({ orgId }: { orgId?: string }) {
                             {/* Back to all orgs - Fixed at bottom */}
                             {isSuperAdmin && (
                                 <div className="flex-none p-1">
-                                    <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50 cursor-pointer rounded-md">
+                                    <DropdownMenuItem className="px-0 py-0 focus:bg-muted-foreground/10 cursor-pointer rounded-md">
                                         <Link
                                             href={`/${role}/organizations`}
                                             onClick={() => setIsOpen(false)}
-                                            className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"
+                                            className="w-full px-4 py-3 text-left text-muted-foreground hover:bg-muted-foreground/10 flex items-center gap-2 text-sm font-medium"
                                         >
                                             ← Back to all orgs
                                         </Link>

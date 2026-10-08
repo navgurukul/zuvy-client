@@ -56,7 +56,7 @@ const FormComponent = ({
         })
     }
     return (
-        <div className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
+        <div className="relative bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between">
                 <div className="flex items-center gap-2">
                     <div className="p-2 rounded-md">
@@ -73,7 +73,7 @@ const FormComponent = ({
                                 onClick={handleDownloadCsv}
                                 disabled={downloading}
                             >
-                                <ArrowDownToLine size={20} className="text-gray-500" />
+                                <ArrowDownToLine size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
                             </Button>
 
                             <Link
@@ -87,7 +87,7 @@ const FormComponent = ({
                                     className="px-1 hover:bg-white-500 hover:text-gray-700 transition-colors"
                                     title={'View Submissions'}
                                 >
-                                    <Eye size={20} className="text-gray-500" />
+                                    <Eye size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
                                 </Button>
                             </Link>
                         </div>
@@ -95,7 +95,7 @@ const FormComponent = ({
                         <div className="flex items-center gap-[2px] mt-2">
                         <div className="relative group">
                             <button  disabled className="px-1 cursor-not-allowed">
-                                <ArrowDownToLine size={20} className="text-gray-400" />
+                                <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                             </button>
 
                             <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
@@ -105,7 +105,7 @@ const FormComponent = ({
 
                         <div className="relative group">
                             <button  disabled className="px-1 cursor-not-allowed">
-                                <Eye size={20} className="ml-1 text-gray-400" />
+                                <Eye size={20} className="ml-1 text-gray-400 dark:text-gray-500" />
                             </button>
 
                             <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">

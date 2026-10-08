@@ -49,8 +49,8 @@ const durationOptions = [30, 45, 60, 90]
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
 
-const START_HOUR = 7
-const END_HOUR = 22
+const START_HOUR = 0
+const END_HOUR = 24
 const HOURS_COUNT = END_HOUR - START_HOUR
 const HOUR_HEIGHT = 56
 const TOTAL_HEIGHT = HOURS_COUNT * HOUR_HEIGHT
@@ -429,7 +429,7 @@ function AddSlotPanel({
   const dateLabel = slotDate
     ? new Date(slotDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
     : ""
-
+  
   return (
     <Card className="rounded-lg border border-border bg-card shadow-sm">
       <CardContent className="space-y-4 p-5">
@@ -445,7 +445,7 @@ function AddSlotPanel({
               type="date"
               value={slotDate}
               onChange={(e) => setSlotDate(e.target.value)}
-              className="w-full text-sm font-medium"
+              className="w-full  text-sm font-medium [color-scheme:light] dark:[color-scheme:dark]"
             />
           </div>
           {dateLabel && <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>}
@@ -467,7 +467,7 @@ function AddSlotPanel({
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="text-sm font-medium"
+                className="text-sm font-medium [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
           </div>
@@ -489,9 +489,9 @@ function AddSlotPanel({
         </div>
         {/* Conflict */}
         {overlappingSlot && (
-          <div className="border border-red-200 bg-red-50 rounded-lg p-3 space-y-1">
-            <p className="text-left text-xs font-semibold text-red-500">CONFLICT DETECTED</p>
-            <div className="flex items-center gap-2 text-xs text-red-600">
+          <div className="border border-red-200 bg-red-50 rounded-lg p-3 space-y-1 dark:border-red-900/50 dark:bg-red-950/30">
+            <p className="text-left text-xs font-semibold text-red-500 dark:text-red-400">CONFLICT DETECTED</p>
+            <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
               <Clock size={12} />
               {formatLocalTimeRange(overlappingSlot.slotStartDateTime, overlappingSlot.slotEndDateTime)}
             </div>
@@ -886,7 +886,7 @@ export default function AvailabilityPage() {
               onClick={() => setViewMode("grid")}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
-                viewMode === "grid" ? "bg-green-50 text-foreground" : "text-muted-foreground hover:text-foreground"
+                viewMode === "grid" ? "bg-green-50 dark:bg-green-500/30 text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Grid3X3 className="h-3.5 w-3.5" />
@@ -897,7 +897,7 @@ export default function AvailabilityPage() {
               onClick={() => setViewMode("list")}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
-                viewMode === "list" ? "bg-green-100 text-foreground" : "text-muted-foreground hover:text-foreground"
+                viewMode === "list" ? "bg-green-100 dark:bg-green-500/30 text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <List className="h-3.5 w-3.5" />

@@ -145,48 +145,48 @@ const QuizResults = ({
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-card border border-border rounded-xl p-6 shadow-8dp hover:shadow-16dp transition-all duration-300">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Target className="w-5 h-5 text-primary" />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground font-medium">Score</p>
-                                <p className="text-2xl font-bold text-foreground">{percentage}%</p>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground font-medium text-left">Score</p>
+                                <p className="text-2xl font-bold text-foreground text-left">{percentage}%</p>
                             </div>
                         </div>
                     </div>
                     
                     <div className="bg-card border border-border rounded-xl p-6 shadow-8dp hover:shadow-16dp transition-all duration-300">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Check className="w-5 h-5 text-success" />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground font-medium">Correct</p>
-                                <p className="text-2xl font-bold text-foreground">{correctAnswers}/{totalQuestions}</p>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground font-medium text-left">Correct</p>
+                                <p className="text-2xl font-bold text-foreground text-left">{correctAnswers}/{totalQuestions}</p>
                             </div>
                         </div>
                     </div>
                     
                     <div className="bg-card border border-border rounded-xl p-6 shadow-8dp hover:shadow-16dp transition-all duration-300">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Award className="w-5 h-5 text-accent" />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground font-medium text-left">Points</p>
+                                <p className="text-2xl font-bold text-foreground text-left">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>
                     
                     <div className="bg-card border border-border rounded-xl p-6 shadow-8dp hover:shadow-16dp transition-all duration-300">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Clock className="w-5 h-5 text-secondary" />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground font-medium">Questions</p>
-                                <p className="text-2xl font-bold text-foreground">{totalQuestions}</p>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground font-medium text-left">Questions</p>
+                                <p className="text-2xl font-bold text-foreground text-left">{totalQuestions}</p>
                             </div>
                         </div>
                     </div>

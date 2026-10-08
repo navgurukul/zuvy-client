@@ -414,13 +414,20 @@ if (!courseData || !courseData.id) {
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
+                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary dark:from-emerald-900/40 dark:to-emerald-950/60">
                                             <Image
                                                 src="/zuvy-logo-horizontal-dark.png"
                                                 alt="Course Image"
                                                 width={240}
                                                 height={80}
-                                                className="object-contain"
+                                                className="object-contain dark:block hidden"
+                                            />
+                                            <Image
+                                                src="/zuvy-logo-horizontal.png"
+                                                alt="Course Image"
+                                                width={240}
+                                                height={80}
+                                                className="object-contain dark:hidden block"
                                             />
                                         </div>
                                     )}
@@ -573,13 +580,20 @@ if (!courseData || !courseData.id) {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
+                                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary dark:from-emerald-900/40 dark:to-emerald-950/60">
                                                             <Image
                                                                 src="/zuvy-logo-horizontal-dark.png"
                                                                 alt="Collaborator Image"
                                                                 width={240}
                                                                 height={80}
-                                                                className="object-contain"
+                                                                className="object-contain dark:block hidden"
+                                                            />
+                                                            <Image
+                                                                src="/zuvy-logo-horizontal.png"
+                                                                alt="Collaborator Image"
+                                                                width={240}
+                                                                height={80}
+                                                                className="object-contain dark:hidden block"
                                                             />
                                                         </div>
                                                     )}

@@ -199,50 +199,50 @@ export const Toolbar = () => {
     }
 
     return (
-        <div className="sticky top-0 z-10 bg-white border-b p-2 flex flex-wrap gap-2">
+        <div className="sticky top-0 z-10 bg-white dark:bg-card border-b p-2 flex flex-wrap gap-2">
             {/* Text formatting */}
             <button
                 onClick={() => toggleBold()}
                 className={`p-2 rounded ${
-                    active.bold() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.bold() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Bold"
                 type="button"
             >
-                <Bold size={18} className="text-gray-700" />
+                <Bold size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={() => toggleItalic()}
                 className={`p-2 rounded ${
-                    active.italic() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.italic() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Italic"
                 type="button"
             >
-                <Italic size={18} className="text-gray-700" />
+                <Italic size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={() => toggleUnderline()}
                 className={`p-2 rounded ${
-                    active.underline() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.underline() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Underline"
                 type="button"
             >
-                <Underline size={18} className="text-gray-700" />
+                <Underline size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={() => toggleStrike()}
                 className={`p-2 rounded ${
-                    active.strike() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.strike() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Strikethrough"
                 type="button"
             >
-                <Strikethrough size={18} className="text-gray-700" />
+                <Strikethrough size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <div className="border-l h-8 mx-1"></div>
@@ -253,12 +253,12 @@ export const Toolbar = () => {
                 className={`p-2 rounded ${
                     active.heading({ level: 1 })
                         ? 'bg-[#d1d5db]'
-                        : 'hover:bg-gray-200'
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Heading 1"
                 type="button"
             >
-                <Heading1 size={18} className="text-gray-700" />
+                <Heading1 size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
@@ -266,12 +266,12 @@ export const Toolbar = () => {
                 className={`p-2 rounded ${
                     active.heading({ level: 2 })
                         ? 'bg-[#d1d5db]'
-                        : 'hover:bg-gray-200'
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Heading 2"
                 type="button"
             >
-                <Heading2 size={18} className="text-gray-700" />
+                <Heading2 size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
@@ -279,12 +279,12 @@ export const Toolbar = () => {
                 className={`p-2 rounded ${
                     active.heading({ level: 3 })
                         ? 'bg-[#d1d5db]'
-                        : 'hover:bg-gray-200'
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Heading 3"
                 type="button"
             >
-                <Heading3 size={18} className="text-gray-700" />
+                <Heading3 size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
@@ -292,12 +292,12 @@ export const Toolbar = () => {
                 className={`p-2 rounded ${
                     active.heading({ level: 4 })
                         ? 'bg-[#d1d5db]'
-                        : 'hover:bg-gray-200'
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Heading 4"
                 type="button"
             >
-                <Heading4 size={18} className="text-gray-700" />
+                <Heading4 size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <div className="border-l h-8 mx-1"></div>
@@ -306,23 +306,23 @@ export const Toolbar = () => {
             <button
                 onClick={handleBulletList}
                 className={`p-2 rounded ${
-                    active.bulletList() ? 'bg-[#d1d5db]' : 'hover:[#d1d5db]'
+                    active.bulletList() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Bullet List"
                 type="button"
             >
-                <List size={18} className="text-gray-700" />
+                <List size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={handleOrderedList}
                 className={`p-2 rounded ${
-                    active.orderedList() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.orderedList() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Ordered List"
                 type="button"
             >
-                <ListOrdered size={18} className="text-gray-700" />
+                <ListOrdered size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <div className="border-l h-8 mx-1"></div>
@@ -332,34 +332,34 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleCode()}
                 className={`p-2 rounded ${
-                    active.code() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.code() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Code"
                 type="button"
             >
-                <Code size={18} className="text-gray-700" />
+                <Code size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={handleCodeBlock}
                 className={`p-2 rounded ${
-                    active.codeBlock() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
+                    active.codeBlock() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Code Block"
                 type="button"
             >
-                <Braces size={18} className="text-gray-700" />
+                <Braces size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <button
                 onClick={() => toggleBlockquote()}
                 className={`p-2 rounded ${
-                    active.blockquote() ? 'bg-[#cbd1da]' : 'hover:bg-gray-200'
+                    active.blockquote() ? 'bg-[#cbd1da]' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title="Blockquote"
                 type="button"
             >
-                <Quote size={18} className="text-gray-700" />
+                <Quote size={18} className="text-gray-700 dark:text-muted-foreground" />
             </button>
 
             <div className="border-l h-8 mx-1"></div>
@@ -376,9 +376,9 @@ export const Toolbar = () => {
                 />
                 <label
                     htmlFor="image-upload"
-                    className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-200"
+                    className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                 >
-                    <Camera size={18} className="text-gray-700" />
+                    <Camera size={18} className="text-gray-700 dark:text-muted-foreground" />
                 </label>
             </div>
         </div>

@@ -16,6 +16,7 @@ import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/o
 import type { StudentDataPage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
 import { PermissionsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
 import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/columns'
+import { requiredEmailSchema } from '@/utils/validation/nameEmail'
 
 export default function useBatchDetail(params: { courseId: string; batchId: string }) {
     const router = useRouter()
@@ -89,7 +90,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
 
     const formSchema = z.object({
         name: z.string().min(2, { message: 'Batch name must be at least 2 characters.' }),
-        instructorEmail: z.string().min(2, { message: 'Instructor email must be at least 2 characters.' }),
+        instructorEmail: requiredEmailSchema,
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)

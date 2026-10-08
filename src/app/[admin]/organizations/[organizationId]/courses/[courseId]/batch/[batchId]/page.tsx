@@ -26,6 +26,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { MAX_EMAIL_LENGTH } from '@/utils/validation/nameEmail'
 
 import // getDeleteStudentStore,
 // getStoreStudentData,
@@ -457,7 +458,7 @@ const BatchesInfo = ({
                     Back to Batches
                 </p>
             </Link>
-            <MaxWidthWrapper className="p-4 text-gray-600">
+            <MaxWidthWrapper className="p-4 text-gray-600 dark:text-muted-foreground">
                 <div className="flex justify-between">
                     <div className="w-full flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -658,7 +659,7 @@ const BatchesInfo = ({
                             </div>
                         </div>
                         <div className="flex w-full justify-between items-center mt-4">
-                            <div className="w-1/2">
+                            <div className="w-full max-w-md">
                                 <SearchBox
                                     placeholder="Search by name or email..."
                                     fetchSuggestionsApi={
@@ -679,7 +680,7 @@ const BatchesInfo = ({
                                     inputWidth="w-full"
                                 />
                             </div>
-                            <div className="flex items-center gap-x-4 text-sm">
+                            <div className="flex items-center gap-x-4 text-sm dark:text-muted-foreground">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -757,12 +758,21 @@ const BatchesInfo = ({
                                                                     </FormLabel>
                                                                     <FormControl>
                                                                         <Input
-                                                                            placeholder="Instructor Email"
-                                                                            type="name"
                                                                             {...field}
+                                                                            placeholder="Instructor Email"
+                                                                            type="email"
+                                                                            className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                                            onChange={(event) => {
+                                                                                field.onChange(event)
+                                                                                void form.trigger('instructorEmail')
+                                                                            }}
                                                                         />
                                                                     </FormControl>
-                                                                    <FormMessage />
+                                                                    <FormMessage>
+                                                                        {field.value.length > MAX_EMAIL_LENGTH
+                                                                            ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                                            : undefined}
+                                                                    </FormMessage>
                                                                 </FormItem>
                                                             )}
                                                         />
@@ -837,7 +847,7 @@ const BatchesInfo = ({
                                 )}
                                 {permissions.deleteBatch && (
                                     <>
-                                    <div  className="flex items-center gap-1 cursor-pointer">
+                                    <div  className="flex items-center gap-1 cursor-pointer dark:text-muted-foreground">
                                         <Trash2
                                             onClick={() =>
                                                 setDeleteModalOpen(true)
@@ -899,34 +909,30 @@ const BatchesInfo = ({
                                 </Dialog>
                             </div>
                         </div>
-                        <div className="flex">
-                            <div className="flex items-center mx-4 text-sm">
-                                {selectedRows.length > 0 && (
-                                    <>
-                                        <AlertDialogDemo
-                                            userId={userIds}
-                                            batchId={(params.batchId)}
-                                            bootcampId={parseInt(
-                                                params.courseId
-                                            )}
-                                            title="Are you absolutely sure?"
-                                            description={`This action cannot be undone. This will permanently remove the ${
-                                                selectedRows.length > 1
-                                                    ? 'students'
-                                                    : 'student'
-                                            } from the bootcamp`}
-                                            fetchStudentData={fetchStudentData}
-                                        />
-                                        <ComboboxStudent
-                                            batchData={allBatches}
-                                            bootcampId={params.courseId}
-                                            selectedRows={selectedRows}
-                                            fetchStudentData={fetchStudentData}
-                                        />
-                                    </>
-                                )}
+                        {selectedRows.length > 0 && (
+                            <div className="flex items-center mt-2 text-sm">
+                                <AlertDialogDemo
+                                    userId={userIds}
+                                    batchId={(params.batchId)}
+                                    bootcampId={parseInt(
+                                        params.courseId
+                                    )}
+                                    title="Are you absolutely sure?"
+                                    description={`This action cannot be undone. This will permanently remove the ${
+                                        selectedRows.length > 1
+                                            ? 'students'
+                                            : 'student'
+                                    } from the bootcamp`}
+                                    fetchStudentData={fetchStudentData}
+                                />
+                                <ComboboxStudent
+                                    batchData={allBatches}
+                                    bootcampId={params.courseId}
+                                    selectedRows={selectedRows}
+                                    fetchStudentData={fetchStudentData}
+                                />
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
                 {loading ? (

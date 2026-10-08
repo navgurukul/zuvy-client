@@ -350,9 +350,9 @@ const Page = ({ params }: any) => {
                 </div>
 
                 {/* Assessment Info Card */}
-                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <Card className="mb-8 border border-border shadow-sm bg-muted">
                     <CardHeader className="bg-card">
-                        <CardTitle className="text-2xl text-gray-800 text-left">
+                        <CardTitle className="text-2xl text-foreground text-left">
                             {assesmentData?.title || 'Loading...'}
                         </CardTitle>
                     </CardHeader>
@@ -364,13 +364,13 @@ const Page = ({ params }: any) => {
                             </div>
 
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                                <div className="text-xl font-semibold text-gray-900">Assessments</div>
+                                <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                                <div className="text-lg font-semibold">Assessments</div>
                             </div>
 
                             <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                                <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                                <div className="text-lg font-semibold">{params.courseId}</div>
                             </div>
                             <div className="text-left">
                                 <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -382,8 +382,8 @@ const Page = ({ params }: any) => {
                                     <SelectTrigger className="w-full mt-1">
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Batches</SelectItem>
+                                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                        <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                         {batches.map((batch) => (
                                             <SelectItem key={batch.id} value={batch.id.toString()}>
                                                 {batch.name}
@@ -400,7 +400,7 @@ const Page = ({ params }: any) => {
                 <Card className="bg-card">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl text-gray-800">
+                            <CardTitle className="text-xl text-foreground">
                                 Student Submissions
                             </CardTitle>
                             <Button

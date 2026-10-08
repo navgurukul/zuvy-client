@@ -378,3 +378,15 @@
     word-break: break-word !important;
     overflow-wrap: break-word !important;
 }
+
+/* Make time input clock icon white in dark mode */
+.dark input[type='time']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+/* Native checkbox dark mode fix — browser defaults render a white bg in dark mode */
+.dark input[type='checkbox'] {
+    color-scheme: dark;
+}
