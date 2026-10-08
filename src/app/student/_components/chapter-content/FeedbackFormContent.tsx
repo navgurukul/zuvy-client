@@ -334,7 +334,8 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                         }}
                                         disabled={true}
                                         placeholder="Type your answer here..."
-                                        className="min-h-[100px] resize-none mt-2 w-full"
+                                        rows={1}
+                                        className="mt-2 h-9 min-h-0 w-[90%] ml-5 resize-y overflow-auto"
                                     />
                                 ) : (
                                     <Textarea
@@ -350,7 +351,8 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                             setQuestions(updatedQuestions)
                                         }}
                                         placeholder="Type your answer here..."
-                                        className="min-h-[12rem] resize-none mt-2 ml-5 w-[90%]"
+                                        rows={1}
+                                        className="mt-2 h-9 min-h-0 w-[90%] ml-5 resize-y overflow-auto"
                                     />
                                 )}
                             </>
