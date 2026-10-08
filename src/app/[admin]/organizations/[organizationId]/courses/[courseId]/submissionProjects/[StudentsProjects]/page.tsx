@@ -46,7 +46,7 @@ const Page = ({ params }: any) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId;
-    
+
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -175,9 +175,9 @@ const Page = ({ params }: any) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {data?.projectData[0].title || 'Loading...'}
                     </CardTitle>
 
@@ -189,13 +189,13 @@ const Page = ({ params }: any) => {
                             <div className="text-lg font-semibold">{submitStudents || 0}</div>
                         </div>
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Project</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                            <div className="text-lg font-semibold">Project</div>
                         </div>
 
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                            <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                            <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className="text-left">
                             <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -206,8 +206,8 @@ const Page = ({ params }: any) => {
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
@@ -223,7 +223,7 @@ const Page = ({ params }: any) => {
             <Card className='bg-card'>
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button

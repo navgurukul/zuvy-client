@@ -80,34 +80,34 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
   if (isCancelledValue(status) || isCancelledValue(lifecycle)) {
     return {
       label: "Cancelled",
-      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
+      className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
   if (isMissedValue(status) || isMissedValue(lifecycle)) {
     return {
       label: "Missed",
-      className: "border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-600 hover:opacity-100",
+      className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
   if (lifecycle === "completed") {
     return {
       label: "Completed",
-      className: "border-green-600/30 bg-green-50 text-green-700 hover:border-green-600/30 hover:bg-green-50 hover:text-green-700 hover:opacity-100",
+      className: "border-success/30 bg-success/5 text-success-dark hover:border-success/30 hover:bg-success/5 hover:text-success-dark hover:opacity-100",
     }
   }
 
   if (hasReschedule) {
     return {
       label: "Action needed",
-      className: "border-orange-500/30 bg-orange-50 text-orange-600 hover:border-orange-500/30 hover:bg-orange-50 hover:text-orange-600 hover:opacity-100",
+      className: "border-warning/40 bg-warning/5 text-warning-dark hover:border-warning/40 hover:bg-warning/5 hover:text-warning-dark hover:opacity-100",
     }
   }
 
   return {
     label: "Upcoming",
-    className: "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 hover:opacity-100",
+    className: "border-info/30 bg-info/5 text-info-dark hover:border-info/30 hover:bg-info/5 hover:text-info-dark hover:opacity-100",
   }
 }
 
@@ -476,15 +476,15 @@ export default function SessionsPage() {
             setSelectedBookingId(null)
           }}
           className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "all"
-            ? "font-medium text-[#111827]"
-            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
             }`}
         >
           <span>All</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
             {Number(summaryCounts.total) || 0}
           </span>
-          {activeTab === "all" && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />}
+          {activeTab === "all" && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />}
         </button>
 
         <button
@@ -493,16 +493,16 @@ export default function SessionsPage() {
             setSelectedBookingId(null)
           }}
           className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "upcoming"
-            ? "font-medium text-[#111827]"
-            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
             }`}
         >
           <span>Upcoming</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
             {Number(summaryCounts.upcoming) || 0}
           </span>
           {activeTab === "upcoming" && (
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
 
@@ -512,16 +512,16 @@ export default function SessionsPage() {
             setSelectedBookingId(null)
           }}
           className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "reschedule"
-            ? "font-medium text-[#111827]"
-            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
             }`}
         >
           <span>Action Needed</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f59e0b] px-1.5 text-[11px] font-medium text-white">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-warning px-1.5 text-[11px] font-medium text-warning-foreground">
             {Number(summaryCounts.reschedule) || 0}
           </span>
           {activeTab === "reschedule" && (
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
 
@@ -531,16 +531,16 @@ export default function SessionsPage() {
             setSelectedBookingId(null)
           }}
           className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "completed"
-            ? "font-medium text-[#111827]"
-            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
             }`}
         >
           <span>Completed</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
             {Number(summaryCounts.completed) || 0}
           </span>
           {activeTab === "completed" && (
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
 
@@ -550,28 +550,26 @@ export default function SessionsPage() {
             setSelectedBookingId(null)
           }}
           className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "cancelled"
-            ? "font-medium text-[#111827]"
-            : "font-normal text-[#6b7280] hover:text-[#111827]"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
             }`}
         >
           <span>Cancelled</span>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f3f4f6] px-1.5 text-[11px] font-medium text-[#6b7280]">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
             {Number(summaryCounts.cancelled) || 0}
           </span>
           {activeTab === "cancelled" && (
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#111827]" />
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
       </div>
-      <div className="border-b border-gray-200"></div>
+      <div className="border-b border-border"></div>
       {showGlobalEmptyState ? (
         <div className="flex h-full justify-center pt-20 px-6 text-center">
           <div className="max-w-sm">
-            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-[#d1d5db] bg-[#fafafa">
-              <Calendar size={16} className="text-[#9ca3af]" />
+           <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center text-3xl">
+              📋
             </div>
-
-
             <p className="text-sm text-gray-400 sm:whitespace-nowrap">
               No sessions yet. Sessions will appear here once students book your open slots.
             </p>
@@ -605,16 +603,16 @@ export default function SessionsPage() {
                     <button
                       key={session.id}
                       onClick={() => setSelectedBookingId(session.id)}
-                      className={`w-full border-b border-[#e5e7eb] p-4 text-left transition ${isSelected ? "bg-[#f4faf4]" : "bg-white hover:bg-[#fafafa]"
+                      className={`w-full border-b border-border p-4 text-left transition ${isSelected ? "bg-[#f4faf4] dark:bg-muted-foreground/20" : "bg-card hover:bg-[#fafafa] dark:hover:bg-muted-foreground/10"}
                         }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] text-xs font-semibold text-[#4b6b50]">
+                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] dark:bg-emerald-800/50 text-xs font-semibold text-[#4b6b50] dark:text-emerald-600">
                           {initials}
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <p className="mb-1 truncate text-[15px] font-semibold text-[#1f2937]">
+                          <p className="mb-1 truncate text-[15px] font-semibold text-foreground">
                             {displayName}
                           </p>
                           <p className="truncate text-xs text-[#9ca3af]">
@@ -644,11 +642,11 @@ export default function SessionsPage() {
                 <div className="p-4 text-left">
                   <div className="flex items-start justify-between gap-3 border-b pb-4">
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] text-xs font-semibold text-[#4b6b50]">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] dark:bg-emerald-800/50 text-xs font-semibold text-[#4b6b50] dark:text-emerald-600">
                         {selectedInitials}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-gray-900">
+                        <p className="truncate text-sm font-semibold text-foreground">
                           {selectedDisplayName}
                         </p>
                         {selectedCourseLabel && (
@@ -667,21 +665,21 @@ export default function SessionsPage() {
                   <div className="mt-5 grid grid-cols-2 gap-4 border-b pb-4">
                     <div>
                       <p className="text-[11px] font-semibold tracking-wide text-gray-500">DATE</p>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-foreground">
                         {formatDateOnly(selectedSession.slotStart || selectedSession.slotEnd)}
                       </p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold tracking-wide text-gray-500">TIME</p>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-foreground">
                         {formatTimeRange(selectedSession.slotStart, selectedSession.slotEnd)}
                       </p>
                     </div>
                   </div>
 
                   {selectedSession && (isCancelledValue(selectedSession.status) || isCancelledValue(selectedSession.sessionLifecycleState)) && (
-                    <div className="mt-4 space-y-3  bg-red-50/50  text-left">
-                      <p className="text-base font-semibold text-red-950">Cancellation Details</p>
+                    <div className="mt-4 space-y-3  bg-red-50/50 dark:bg-red-900/20 text-left">
+                      <p className="text-base font-semibold text-red-950 dark:text-red-400">Cancellation Details</p>
                       <div className="space-y-2 text-sm text-red-800">
                         {/* {selectedSession.cancelledBy && (
                           <div className="flex gap-2">
@@ -696,9 +694,9 @@ export default function SessionsPage() {
                           </div>
                         )} */}
                         {selectedSession.cancellationReason && (
-                          <div className="mt-2 bg-white p-3 rounded-lg border border-red-100">
+                          <div className="mt-2 bg-card p-3 rounded-lg border border-red-100">
                             <p className="font-semibold text-xs text-red-400 uppercase tracking-wider mb-1">Reason</p>
-                            <p className="whitespace-pre-wrap text-red-950">{selectedSession.cancellationReason}</p>
+                            <p className="whitespace-pre-wrap text-red-950 dark:text-red-300">{selectedSession.cancellationReason}</p>
                           </div>
                         )}
                       </div>

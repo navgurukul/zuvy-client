@@ -25,7 +25,7 @@ import TruncatedDescription from "@/app/student/_components/TruncatedDescription
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
-import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
+import { useIsStudentEnrolledInOneCourseStore, useThemeStore } from "@/store/store";
 import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudentType'
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
@@ -69,6 +69,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     error: leaderboardError,
   } = useLeaderboard(courseId);
   const { width } = useWindowSize();
+  const { isDark } = useThemeStore();
   const isMobile = width < 768;
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
 
@@ -138,7 +139,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const courseName = progressData?.data?.bootcampTracking?.name || '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';
   const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
-  const validCourseCoverImage = isValidImageUrl(courseCoverImage) ? courseCoverImage : '/logo.PNG';
+  const validCourseCoverImage = isValidImageUrl(courseCoverImage)
+    ? courseCoverImage
+    : isDark
+      ? '/zuvy-logo-horizontal-dark.png'
+      : '/zuvy-logo-horizontal.png';
   const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
   const validCollaborator = isValidImageUrl(collaborator) ? collaborator : '';
   const duration = progressData?.data?.bootcampTracking?.duration || 0;
@@ -193,31 +198,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     switch (getEventType(type)) {
       case 'Live Class':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       case 'Assessment':
         return (
-          <div className="w-5 h-5 rounded-full bg-warning-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-warning/15 flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-warning" />
           </div>
         );
       case 'Assignment':
         return (
-          <div className="w-5 h-5 rounded-full bg-info-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-info/15 flex items-center justify-center">
             <FileText className="w-5 h-5 text-info" />
           </div>
         );
       case 'Mentor Session':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       default:
         return (
-          <div className="w-5 h-5 rounded-full bg-muted-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
         );
@@ -575,7 +580,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-red-500 bg-primary-light text-sm border-primary"
+                                className="text-red-500 text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -592,7 +597,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-primary bg-primary-light text-sm border-primary"
+                                className="text-primary text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -876,7 +881,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   alt={courseName}
                   width={400}
                   height={160}
-                  className="w-full h-40 rounded-lg object-cover mb-4"
+                  className="mx-auto mb-4 aspect-[5/2] h-auto max-h-20 w-full max-w-[220px] rounded-lg object-contain"
                 />
                 <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
                 <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
@@ -903,9 +908,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             <div className="space-y-4 min-w-0">
               {/* Course Header Card - Desktop only, matches module cards width */}
               <div className="hidden md:block">
-                <div className="rounded-lg bg-white p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="rounded-lg bg-card p-6 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-start gap-6">
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 self-center">
                       <Image
                         src={validCourseCoverImage}
                         alt={courseName}
@@ -944,7 +949,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>
 
               {/* Progress Stats Card - Full width on desktop, matches course header width */}
-              <div className="w-full rounded-lg bg-white p-4 md:p-5 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-full rounded-lg bg-card p-4 md:p-5 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 w-full">
                     <div className="relative bg-primary-light rounded-full h-1.5 flex-1">
@@ -959,7 +964,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div className="flex items-center gap-2.5 text-foreground/80">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                         <BookOpen size={16} className="text-foreground/60" />
@@ -1009,10 +1014,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           <div className="flex flex-1 flex-col lg:flex-row lg:justify-between lg:items-start gap-3 min-w-0">
                             <div className="flex-1 min-w-0 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 self-start rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary dark:text-white border-primary/20 hover:bg-primary-light/80">Current Module</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary border-primary/20 hover:bg-primary/25">Current Module</Badge>
                               )}
                               {isCompleted && (
-                                <Badge className="mb-2 self-start rounded-full bg-success-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success-light/80">Completed</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success/25">Completed</Badge>
                               )}
                               {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
@@ -1163,7 +1168,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {/* Mentorship Card - All screens */}
               {latestCourseData?.mentorshipEnabled && (
                 <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
-                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-border px-4 pb-3">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
                         MENTORSHIP
                       </p>
@@ -1173,30 +1178,30 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 transition-all duration-200 hover:border-primary/40 hover:bg-primary/5"
                       >
                         {/* Icon */}
                         <div
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] transition-colors duration-200 group-hover:bg-[#DDF3E2]"
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-200 group-hover:bg-primary/20"
                           )}
                         >
-                          <a.icon className="h-4 w-4 text-[#2F6F3E]" />
+                          <a.icon className={cn("h-4 w-4", a.color)} />
                         </div>
 
                         {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold leading-5 text-[#1F2937]">
+                          <p className="text-sm font-semibold leading-5 text-foreground">
                             {a.label}
                           </p>
 
-                          <p className="text-xs leading-4 text-[#6B7280]">
+                          <p className="text-xs leading-4 text-muted-foreground">
                             {a.sub}
                           </p>
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight className="h-4 w-4 shrink-0 text-[#9CA3AF] transition-all duration-200 group-hover:text-[#2F6F3E]" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:text-primary" />
                       </Link>
                     ))}
                   </div>
@@ -1204,7 +1209,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
               {/* Leaderboard - All screens when enabled */}
               {latestCourseData?.leaderboardEnabled && (
-                <Card className="w-full shadow-4dp text-left rounded-lg bg-white dark:bg-gray-800 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                <Card className="w-full shadow-4dp text-left rounded-lg bg-card border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
@@ -1235,7 +1240,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               />
 
               {/* What's Next Section */}
-              <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <Card className="w-full shadow-4dp text-left rounded-lg bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
                   {/* <p className="text-sm text-muted-foreground">
@@ -1282,7 +1287,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 {eventType === 'Mentor Session' && isMentorSession(item) && (
                                   <p className="text-sm text-muted-foreground mb-2">Mentor: {item.mentorName}</p>
                                 )}
-                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                <Badge className={`my-2 ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary/15 text-primary border-primary/20 hover:bg-primary/25' : item.type === 'Assessment' ? 'bg-warning/15 text-warning border-warning/20 hover:bg-warning/25' : 'bg-info/15 text-info border-info/20 hover:bg-info/25'} `} >{item.type}</Badge>
                                 <div className="flex items-center justify-between mb-3">
                                   <p className="text-sm font-medium">
                                     {eventType === 'Mentor Session' && isMentorSession(item)

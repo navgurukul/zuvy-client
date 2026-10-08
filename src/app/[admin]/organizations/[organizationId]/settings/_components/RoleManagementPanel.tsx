@@ -281,7 +281,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ selectedRole,
                                                     const showDisabledMessage = isParentLocked && parentLevelName === 'No access'
 
                                                     return mod.children.map((child: any) => (
-                                                        <div key={child.id} className="bg-white">
+                                                        <div key={child.id} className="bg-card">
                                                             <div className="flex gap-2 items-center justify-between px-6 py-3 border-b border-border last:border-b-0" onMouseEnter={() => setHoveredRowId(child.id)} onMouseLeave={() => setHoveredRowId(null)}>
                                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                                                     <div className="w-5 flex-shrink-0" />

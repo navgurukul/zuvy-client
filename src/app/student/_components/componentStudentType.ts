@@ -110,6 +110,9 @@ export interface TopicItem {
   status: string;
   duration?: string;
   scheduledDateTime?: Date;
+  isLock?: boolean;
+  lockReason?: string | null;
+  lockMessage?: string | null;
 }
 
 export interface Topic {
@@ -174,4 +177,21 @@ export interface ViolationModalProps {
   isOpen: boolean;
   onClose: () => void;
   violation: ViolationType | null;
+}
+
+export interface AdaptiveAssessementStudentViewProps {
+  chapterDetails: {
+    id: number;
+    title: string;
+    description: string | null;
+    status: string;
+    assessmentId: number | null;
+    moduleId: number;
+  };
+  onChapterComplete?: () => void;
+  details?: {
+    chapterId: number | null;
+    moduleId: number | null;
+    courseId: number | null;
+  }
 }

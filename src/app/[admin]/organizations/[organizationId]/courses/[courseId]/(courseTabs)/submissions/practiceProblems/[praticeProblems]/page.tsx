@@ -39,6 +39,7 @@ const PraticeProblems = ({ params }: any) => {
     const [matchingData, setMatchingData] = useState<any>(null)
 
     const { studentDetails } = usePracticeProblemStatus(matchingData?.id, {
+        bootcampId: params.courseId,
         chapterId: matchingData?.moduleChapterData?.[0]?.id,
         questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
         enabled: !!matchingData,

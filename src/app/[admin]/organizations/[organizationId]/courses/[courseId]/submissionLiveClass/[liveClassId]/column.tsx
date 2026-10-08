@@ -1,9 +1,8 @@
 'use client'
-import Image from 'next/image'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
@@ -15,7 +14,11 @@ export const columns: ColumnDef<any>[] = [
         ),
         cell: ({ row }) => (
             <div className="flex items-center">
-                <ProfileImage src={row.original.profilePicture} />
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
             </div>
         ),
         enableSorting: false,
@@ -71,71 +74,14 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         id: 'batchName',
-        header: 'Batch',
+        header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
-                </div>
-            )
-        },
-    }
-    ,    
-    {
-        accessorKey: 'startTime',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Start Time" />
-        ),
-        cell: ({ row }) => {
-            const startTime = row.original.startTime
-            if (!startTime) return <span>N/A</span>
-            
-            const formattedTime = new Date(startTime)
-                .toLocaleString('en-IN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                })
-            
-            return (
-                <div className="flex space-x-2">
-                    <span className="font-medium">
-                        {formattedTime}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'endTime',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="End Time" />
-        ),
-        cell: ({ row }) => {
-            const endTime = row.original.endTime
-            if (!endTime) return <span>N/A</span>
-            
-            const formattedTime = new Date(endTime)
-                .toLocaleString('en-IN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                })
-            
-            return (
-                <div className="flex space-x-2">
-                    <span className="font-medium">
-                        {formattedTime}
-                    </span>
                 </div>
             )
         },
@@ -146,16 +92,16 @@ export const columns: ColumnDef<any>[] = [
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const status = row.original.status || 'absent'
-            const isPresent = status.toLowerCase() === 'present'
-            
+            const status = row.original.status || 'Not Viewed'
+            const isViewed = status.toLowerCase() === 'viewed'
+
             return (
                 <div className="flex space-x-2">
-                    <Badge 
+                    <Badge
                         className={
-                            isPresent 
-                                ? "text-success bg-green-100" 
-                                : "text-destructive bg-red-100"
+                            isViewed
+                                ? "text-success bg-green-100 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/40"
+                                : "text-destructive bg-red-100 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/40"
                         }
                     >
                         {status}

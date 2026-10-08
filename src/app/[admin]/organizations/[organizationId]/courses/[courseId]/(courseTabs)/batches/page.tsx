@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/form'
 import { CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { MAX_EMAIL_LENGTH } from '@/utils/validation/nameEmail'
 // import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
@@ -511,12 +512,21 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
+                                                                {...field}
                                                                 placeholder="instructor@navgurukul.org"
                                                                 type="email"
-                                                                {...field}
+                                                                className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                                onChange={(event) => {
+                                                                    field.onChange(event)
+                                                                    void form.trigger('instructorEmail')
+                                                                }}
                                                             />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage>
+                                                            {field.value.length > MAX_EMAIL_LENGTH
+                                                                ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                                : undefined}
+                                                        </FormMessage>
                                                     </FormItem>
                                                 )}
                                             />
@@ -726,12 +736,21 @@ const Page = ({ params }: { params: ParamsType }) => {
                                         <FormLabel>Instructor Email</FormLabel>
                                         <FormControl>
                                             <Input
+                                                {...field}
                                                 placeholder="instructor@navgurukul.org"
                                                 type="email"
-                                                {...field}
+                                                className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                onChange={(event) => {
+                                                    field.onChange(event)
+                                                    void form.trigger('instructorEmail')
+                                                }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage>
+                                            {field.value.length > MAX_EMAIL_LENGTH
+                                                ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                : undefined}
+                                        </FormMessage>
                                     </FormItem>
                                 )}
                             />

@@ -65,7 +65,7 @@ export const usePracticeProblemSubmissions = (
 
       if (mountedRef.current) {
         setTrackingData(data.trackingData || [])
-        setTotalStudents(data.totalStudents || 0)
+        setTotalStudents(data.totalStudents ?? data.totalStudentsCount ?? 0)
       }
     } catch (err: any) {
       if (mountedRef.current) {

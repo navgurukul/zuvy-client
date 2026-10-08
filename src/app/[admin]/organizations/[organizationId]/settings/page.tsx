@@ -164,7 +164,7 @@ const SettingsPage: React.FC = () => {
                     onClick={() => handleTabChange('users')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${activeTab === 'users'
                             ? 'bg-primary text-primary-foreground'
-                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                         }`}
                 >
                     <Users className="w-4 h-4" />
@@ -175,7 +175,7 @@ const SettingsPage: React.FC = () => {
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors
                         ${activeTab === 'roles'
                             ? 'bg-primary text-primary-foreground'
-                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                         }
                     `}
                 >

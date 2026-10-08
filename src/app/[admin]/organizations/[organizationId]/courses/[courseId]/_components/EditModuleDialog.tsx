@@ -82,6 +82,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                 <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>Edit Module</DialogTitle>
+                    </DialogHeader>
                         <div className="py-4">
                             <div>
                                 <FormField
@@ -106,7 +107,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label htmlFor="desc">
                                 {typeId === 2
                                     ? 'Project Description'
@@ -136,7 +137,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label>Time Allotted:</Label>
                             <div className="flex gap-2">
                                 <div>
@@ -243,7 +244,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                 </div>
                             </div>
                         </div>
-                    </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
                             <Button

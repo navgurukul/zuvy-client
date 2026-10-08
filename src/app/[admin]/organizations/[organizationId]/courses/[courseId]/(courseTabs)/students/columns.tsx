@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
@@ -39,6 +40,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     const handleStudentClick = () => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
+    const studentName = String(row.getValue('name') ?? '')
     
     return (
         <>
@@ -50,12 +52,19 @@ const StudentNameCell = ({ row }: { row: any }) => {
                     onChange={handleSingleStudent}
                 />
             ) : (
-                <div 
-                    className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
-                    onClick={handleStudentClick}
-                >
-                    {row.getValue('name')}
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className="w-[150px] text-left text-gray-800 dark:text-muted-foreground cursor-pointer hover:text-blue-600 hover:underline"
+                                onClick={handleStudentClick}
+                            >
+                                {studentName.length > 20 ? `${studentName.slice(0, 20)}...` : studentName}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{studentName}</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             )}
         </>
     )
@@ -66,7 +75,7 @@ export const columns: ColumnDef<Task>[] = [
         id: 'select',
         header: ({ table }) => {
             return (
-                <div className="ml-5">
+                <div className="flex items-center justify-center">
                     <Checkbox
                         checked={
                             table.getIsAllPageRowsSelected() ||
@@ -79,16 +88,18 @@ export const columns: ColumnDef<Task>[] = [
                         aria-label="Select all"
                         className="translate-y-[2px]"
                     />
-                </div>
+               </div>
             )
         },
         cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="translate-y-[2px]"
-            />
+            <div className="flex items-center justify-center">
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                    className="translate-y-[1px]"
+                />
+            </div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -109,6 +120,7 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const { userId } = row.original
+            const email = String(row.getValue('email') ?? '')
             const { isStudent, setIsStudent } = getEditStudent()
             const { studentData, setStudentData } = getStudentData()
             const handleSingleStudent = (
@@ -128,11 +140,18 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium text-gray-800">
-                                {row.getValue('email')}
-                            </span>
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex space-x-2">
+                                        <span className="max-w-[500px] truncate font-medium text-gray-800 dark:text-muted-foreground">
+                                            {email.length > 30 ? `${email.slice(0, 30)}...` : email}
+                                        </span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>{email}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
                 </>
             )
@@ -141,7 +160,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'batchName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Batch" />
+            <DataTableColumnHeader column={column} title="Batch" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const { batchName, userId, bootcampId, batchId } = row.original
@@ -154,7 +173,7 @@ export const columns: ColumnDef<Task>[] = [
             })
 
             return (
-                <div className="flex text-gray-800">
+                <div className="flex text-gray-800 w-full justify-start items-center">
                     <ComboboxStudent
                         batchData={newBatchData || []}
                         batchName={batchName}
@@ -170,7 +189,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'enrolledDate',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Enrolled Date" />
+            <DataTableColumnHeader column={column} title="Enrolled Date" className="w-full text-center"/>
         ),
         cell: ({ row }) => {
             const enrolledDate = row.original.enrolledDate
@@ -192,7 +211,7 @@ export const columns: ColumnDef<Task>[] = [
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
-                <div className="flex items-center text-gray-800">
+                <div className="flex w-full justify-center items-center text-gray-800 dark:text-muted-foreground">
                     <span className="text-sm">{formattedDate}</span>
                 </div>
             )
@@ -202,19 +221,19 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'progress',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Progress" />
+            <DataTableColumnHeader column={column} title="Progress" className="w-full text-center" />
         ),
         cell: ({ row }) => {
             const progress = Math.max(0, Math.min(100, row.original.progress))
             return (
-                <div className="flex flex-grow justify-center min-w-[70px]">
+                <div className="flex w-full justify-center items-center">
                     {/* <div className="h-2 w-full rounded-full progress-bg">
                         <div
                             className="h-2 rounded-full progress-fill"
                             style={{ width: `${progress}%` }}
                         />
                     </div> */}
-                    <div className="text-sm text-gray-800">{progress}%</div>
+                    <div className="text-sm text-gray-800 dark:text-muted-foreground">{progress}%</div>
                 </div>
             )
         },
@@ -223,7 +242,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendance" />
+            <DataTableColumnHeader column={column} title="Attendance" className="w-full text-center" />
         ),
         cell: ({ row }) => {
             const attendance =
@@ -234,7 +253,7 @@ export const columns: ColumnDef<Task>[] = [
             const circleColorClass = getAttendanceColorClass(attendance)
 
             return (
-                <div className="relative size-9">
+                <div className="relative size-9 w-full flex justify-center items-center">
                     <svg
                         className="size-full"
                         width="24"

@@ -333,7 +333,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         <Textarea
                             id="description"
                             placeholder="Enter course description"
-                            className="text-[0.95rem] mt-2 ml-1 bg-background-secondary"
+                            className="text-[0.95rem] mt-2 ml-1 bg-background-secondary dark:bg-card"
                             value={newCourseDescription}
                             onChange={handleDescriptionChangeWithValidation}
                             rows={3}
@@ -615,7 +615,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             <DialogFooter className="sm:justify-end gap-4">
                 <DialogClose asChild>
-                    <Button className="text-primary border border-primary bg-grey-light hover:bg-grey-light">
+                    <Button className="text-black dark:text-muted-foreground dark:hover:text-black border border-input bg-background hover:bg-accent hover:text-accent-foreground">
                         Cancel
                     </Button>
                 </DialogClose>

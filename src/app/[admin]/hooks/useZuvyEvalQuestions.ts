@@ -14,11 +14,13 @@ interface UseZuvyEvalQuestionsOptions {
     page?: number
     limit?: number
     difficulty?: string
+    topicName?: string
     enabled?: boolean
+    org?: number
 }
 
 export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) {
-    const { page = 1, limit = 20, difficulty, enabled = false } = options
+    const { page = 1, limit = 20, difficulty, topicName, enabled = false } = options
 
     const [questions, setQuestions] = useState<ZuvyEvalQuestion[]>([])
     const [loading, setLoading] = useState(false)
@@ -46,6 +48,13 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
                 normalizedDifficulty !== 'all' &&
                 normalizedDifficulty !== 'none'
 
+            const normalizedTopicName =
+                typeof topicName === 'string' ? topicName.trim() : ''
+            const shouldApplyTopicName =
+                normalizedTopicName.length > 0 &&
+                normalizedTopicName !== 'all' &&
+                normalizedTopicName !== 'none'
+
             const params = new URLSearchParams({
                 page: String(safePage),
                 limit: String(safeLimit),
@@ -54,10 +63,13 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
             if (shouldApplyDifficulty) {
                 params.set('difficulty', normalizedDifficulty)
             }
+            if (shouldApplyTopicName) {
+                params.set('topicName', normalizedTopicName)
+            }
 
             const baseUrl =
                 process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000'
-            const requestUrl = `${baseUrl.replace(/\/$/, '')}/questions?${params.toString()}`
+            const requestUrl = `${baseUrl.replace(/\/$/, '')}/questions?orgId=${options.org}&${params.toString()}`
 
             const accessToken =
                 typeof window !== 'undefined'
@@ -133,7 +145,7 @@ export function useZuvyEvalQuestions(options: UseZuvyEvalQuestionsOptions = {}) 
                 setLoading(false)
             }
         }
-    }, [page, limit, difficulty])
+    }, [page, limit, difficulty, topicName])
 
     useEffect(() => {
         if (enabled) {

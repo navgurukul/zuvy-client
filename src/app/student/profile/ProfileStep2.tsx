@@ -436,6 +436,7 @@ export const ProjectModal: React.FC<{
                 Start Date
               </Label>
               <div className="relative">
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   ref={startDateInputRef}
                   id="startDate"
@@ -490,11 +491,8 @@ export const ProjectModal: React.FC<{
                       setFormData((prev) => ({ ...prev, startDate: undefined }));
                     }
                   }}
-                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  className="pr-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <Calendar className="h-4 w-4" />
-                </div>
               </div>
               {errors.startDate && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -508,6 +506,7 @@ export const ProjectModal: React.FC<{
                 End Date
               </Label>
               <div className="relative">
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   ref={endDateInputRef}
                   id="endDate"
@@ -552,11 +551,8 @@ export const ProjectModal: React.FC<{
                       setFormData((prev) => ({ ...prev, endDate: undefined }));
                     }
                   }}
-                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  className="pr-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <Calendar className="h-4 w-4" />
-                </div>
               </div>
               {errors.endDate && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -934,7 +930,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Technical Skills Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center justify-between mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <div className="flex items-center gap-2">
@@ -991,9 +987,9 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
               disabled={totalSkills >= 100 || isSkillsLoading}
             />
             
-            {/* Dropdown with skill suggestions */}
+            {/* Dropdown with skill suggestions - 2 rows with scroll */}
             {showSkillDropdown && !isSkillsLoading && filteredSkills.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[80px] overflow-y-auto overflow-x-hidden">
                 {isSkillsLoading ? (
                   <div className="p-4 text-center text-muted-foreground text-sm">
                     Loading skills...
@@ -1004,7 +1000,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                       <Badge
                         key={skill}
                         variant="outline"
-                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors shrink-0"
                         onClick={() => handleAddSkill(skill)}
                       >
                         {skill}
@@ -1039,7 +1035,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
       </Card>
 
       {/* Projects Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Briefcase className="w-5 h-5 text-primary" />

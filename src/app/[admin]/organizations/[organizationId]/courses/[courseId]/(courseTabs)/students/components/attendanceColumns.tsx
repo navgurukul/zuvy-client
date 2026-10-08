@@ -196,7 +196,7 @@ export const createAttendanceColumns = (
         {
             accessorKey: 'startTime',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Start Date & Time" />
+                <DataTableColumnHeader column={column} title="Start Date & Time" className="text-center" />
             ),
             cell: ({ row }) => {
                 const startTime = row.getValue('startTime') as string
@@ -204,7 +204,7 @@ export const createAttendanceColumns = (
 
                 return (
                     <div className="flex flex-col min-w-[120px]">
-                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="font-medium text-gray-800 dark:text-muted-foreground">{date}</span>
                         <span className="text-sm text-muted-foreground">{time}</span>
                     </div>
                 )
@@ -214,7 +214,7 @@ export const createAttendanceColumns = (
         {
             accessorKey: 'endTime',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="End Date & Time" />
+                <DataTableColumnHeader column={column} title="End Date & Time" className="text-center" />
             ),
             cell: ({ row }) => {
                 const endTime = row.getValue('endTime') as string
@@ -222,7 +222,7 @@ export const createAttendanceColumns = (
 
                 return (
                     <div className="flex flex-col min-w-[120px]">
-                        <span className="font-medium text-gray-800">{date}</span>
+                        <span className="font-medium text-gray-800 dark:text-muted-foreground">{date}</span>
                         <span className="text-sm text-muted-foreground">{time}</span>
                     </div>
                 )
@@ -243,7 +243,7 @@ export const createAttendanceColumns = (
                 return (
                     <div className="flex items-center space-x-1 min-w-[80px]">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-gray-800">
+                        <span className="text-sm text-gray-800 dark:text-muted-foreground">
                             {durationInMinutes} mins
                         </span>
                     </div>
@@ -254,7 +254,7 @@ export const createAttendanceColumns = (
         {
             accessorKey: 'attendanceStatus',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Status" />
+                <DataTableColumnHeader column={column} title="Status" className="text-center" />
             ),
             cell: ({ row }) => {
                 const status = row.getValue('attendanceStatus') as string
@@ -262,7 +262,7 @@ export const createAttendanceColumns = (
                 const StatusIcon = statusDisplay.icon
 
                 return (
-                    <div className="flex items-center justify-start min-w-[100px] space-x-2">
+                    <div className="flex items-center justify-center min-w-[100px] space-x-2">
                         <StatusIcon className={`h-4 w-4 ${statusDisplay.className}`} />
                         <span className={`text-sm font-medium ${statusDisplay.className}`}>
                             {statusDisplay.text}
@@ -278,18 +278,20 @@ export const createAttendanceColumns = (
         {
             id: 'updateStatus',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Update Status" />
+                <DataTableColumnHeader column={column} title="Update Status"/>
             ),
             cell: ({ row }) => {
                 const classData = row.original
 
                 return (
+                    <div className="flex items-center justify-center min-w-[100px]">    
                     <UpdateStatusCell
                         classData={classData}
                         courseId={courseId}
                         studentId={studentId}
                         onStatusUpdate={onStatusUpdate}
                     />
+                    </div>
                 )
             },
             enableSorting: false,

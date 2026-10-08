@@ -20,6 +20,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { requiredNameEmailSchema } from '@/utils/validation/nameEmail'
 
 interface EditModalProps {
     userId: number
@@ -60,21 +61,29 @@ export const EditModal: React.FC<EditModalProps> = ({
         status: status || 'active',
         batchId: batchId || 0,
     })
+    const [touchedFields, setTouchedFields] = useState<{ name?: boolean; email?: boolean }>({})
+    const [submitAttempted, setSubmitAttempted] = useState(false)
 
     useEffect(() => {
         if (isOpen) {
+            setTouchedFields({})
+            setSubmitAttempted(false)
             setStudentData({
                 name: name || '',
                 email: email || '',
                 status: status || 'active',
                 batchId: batchId || 0,
             })
+        } else {
+            setTouchedFields({})
+            setSubmitAttempted(false)
         }
     }, [name, email, status, batchId, isOpen])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setStudentData(prev => ({ ...prev, [name]: value }))
+        setTouchedFields(prev => ({ ...prev, [name as 'name' | 'email']: true }))
     }
 
     const handleStatusChange = (value: string) => {
@@ -82,10 +91,16 @@ export const EditModal: React.FC<EditModalProps> = ({
     }
 
     const handleSave = async () => {
+        const result = requiredNameEmailSchema.safeParse(studentData)
+        if (!result.success) {
+            setSubmitAttempted(true)
+            return
+        }
+
         // Create payload according to schema
         const payload = {
-            email: studentData.email,
-            name: studentData.name,
+            email: result.data.email,
+            name: result.data.name,
             status: studentData.status,
             batchId: studentData.batchId,
         }
@@ -100,6 +115,17 @@ export const EditModal: React.FC<EditModalProps> = ({
         })
     }
 
+    const validationResult = requiredNameEmailSchema.safeParse(studentData)
+    const validationErrors: Partial<Record<'name' | 'email', string>> = validationResult.success
+        ? {}
+        : validationResult.error.issues.reduce<Partial<Record<'name' | 'email', string>>>((errors, issue) => {
+            const field = issue.path[0]
+            if ((field === 'name' || field === 'email') && !errors[field]) errors[field] = issue.message
+            return errors
+        }, {})
+    const showFieldError = (field: 'name' | 'email') =>
+        submitAttempted || touchedFields[field] ? validationErrors[field] : undefined
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
@@ -110,8 +136,8 @@ export const EditModal: React.FC<EditModalProps> = ({
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="name" className="text-left mb-1">
                             Name
                         </Label>
                         <Input
@@ -119,12 +145,15 @@ export const EditModal: React.FC<EditModalProps> = ({
                             name="name"
                             value={studentData.name}
                             onChange={handleInputChange}
-                            className="col-span-3"
                             placeholder="Enter student name"
+                            className={showFieldError('name') ? 'border-red-500 focus-visible:ring-red-500' : ''}
                         />
+                        {showFieldError('name') && (
+                            <p className="text-red-500 text-xs mt-1">{showFieldError('name')}</p>
+                        )}
                     </div>
-                    <div className="grid grid-cols-4 gap-4">
-                        <Label htmlFor="email" className="col-span-1 h-full flex items-center justify-end">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="email" className="text-left mb-1">
                             Email
                         </Label>
                         <Input
@@ -133,20 +162,22 @@ export const EditModal: React.FC<EditModalProps> = ({
                             type="email"
                             value={studentData.email}
                             onChange={handleInputChange}
-                            className="col-span-3"
                             placeholder="Enter student email"
+                            className={showFieldError('email') ? 'border-red-500 focus-visible:ring-red-500' : ''}
                         />
+                        {showFieldError('email') && (
+                            <p className="text-red-500 text-xs mt-1">{showFieldError('email')}</p>
+                        )}
                     </div>
-                    {/* Status Dropdown */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="status" className="text-right">
+                    <div className="flex flex-col gap-1">
+                        <Label htmlFor="status" className="text-left mb-1">
                             Status
                         </Label>
                         <Select
                             value={studentData.status}
                             onValueChange={handleStatusChange}
                         >
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                             <SelectContent>

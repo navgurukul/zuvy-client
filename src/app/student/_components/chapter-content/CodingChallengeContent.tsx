@@ -120,15 +120,16 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className='flex justify-between items-center w-full' >
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-body text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
           <Badge
             variant="outline"
             className={`text-xs font-medium px-3 py-1 ${
-              isCompleted ? 'bg-green-100 dark:text-black text-green-600 hover:bg-green-100' :
-              'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100'
+                isCompleted
+                  ? 'bg-green-100 text-green-600 border-green-200 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-900/30'
+                  : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
             }`}
           >
             {isCompleted ? 'Attempted' : 'Not Submitted'}

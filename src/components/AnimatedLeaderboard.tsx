@@ -171,7 +171,7 @@ const PodiumCharacter = ({ rank, name, points }: { rank: number; name: string; p
             {/* Glow effect for 1st place */}
             {rank === 1 && (
               <motion.div
-                className="absolute inset-0 rounded-full"
+                className="absolute inset-0 rounded-full drop-shadow-2xl"
                 animate={{
                   boxShadow: [
                     '0 0 0px rgba(255, 215, 0, 0)',
@@ -323,7 +323,7 @@ export default function AnimatedLeaderboard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h3 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-1">🏆 Top Performers</h3>
+            <h3 className="text-base font-bold text-foreground mb-1">🏆 Top Performers</h3>
             {/* <p className="text-xs text-muted-foreground">Leading the pack this week</p> */}
           </motion.div>
           <TopThreePodium entries={topThree} />
@@ -339,8 +339,8 @@ export default function AnimatedLeaderboard({
                 key={`${entry.rank}-${entry.name}-${idx}`}
                 className={`flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 ${
                   entry.isYou 
-                    ? 'bg-emerald-50 border border-emerald-200' 
-                    : 'bg-gray-50 hover:bg-gray-100'
+                    ? 'border border-primary/20 bg-primary-light' 
+                    : 'bg-muted/50'
                 }`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -350,19 +350,25 @@ export default function AnimatedLeaderboard({
                 title={entry.name}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="text-[10px] font-semibold text-gray-500 w-5">
+                  <span className="text-[10px] font-semibold text-muted-foreground w-5">
                     #{entry.rank}
                   </span>
                   
-                  <span className="text-xs font-medium truncate flex-1">
+                  <span className={`text-xs font-medium truncate flex-1 ${
+                    entry.isYou ? 'text-primary' : 'text-foreground'
+                  }`}>
                     {entry.name}
                     {entry.isYou && (
-                      <span className="ml-1 text-[10px] text-emerald-600 font-semibold">(You)</span>
+                      <span className="ml-1 text-[10px] text-primary font-semibold">(You)</span>
                     )}
                   </span>
                 </div>
 
-                <span className="text-xs font-bold text-orange-500 ml-2 whitespace-nowrap">
+                <span className={`text-xs font-bold ml-2 whitespace-nowrap rounded-full px-2.5 py-1 ${
+                  entry.isYou
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-orange-50 text-orange-500'
+                }`}>
                   {entry.points} <span className="text-[10px] text-gray-400">pts</span>
                 </span>
               </motion.div>
@@ -389,23 +395,23 @@ export default function AnimatedLeaderboard({
           </motion.p>
 
           <motion.div
-            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-blue-50 border border-blue-200"
+            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-primary-light border border-primary/20"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 2.3 }}
             title={selfEntry.name}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="text-[10px] font-semibold text-gray-500 w-5">
+              <span className="text-[10px] font-semibold text-muted-foreground w-5">
                 #{selfEntry.rank}
               </span>
 
-              <span className="text-xs font-medium truncate flex-1">
-                {selfEntry.name} <span className="text-blue-600 font-semibold text-[10px]">(You)</span>
+              <span className="text-xs font-medium truncate flex-1 text-foreground">
+                {selfEntry.name} <span className="text-primary font-semibold text-[10px]">(You)</span>
               </span>
             </div>
 
-            <span className="text-xs font-bold text-blue-600 ml-2 whitespace-nowrap">
+            <span className="text-xs font-bold text-primary ml-2 whitespace-nowrap rounded-full px-2.5 py-1 bg-primary/10">
               {selfEntry.points} <span className="text-[10px] text-gray-400">pts</span>
             </span>
           </motion.div>

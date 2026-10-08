@@ -126,7 +126,7 @@ const LiveClass = ({
             case 'ongoing':
                 return 'bg-green-100 text-green-800 border-green-200'
             case 'completed':
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-gray-100 dark:bg-card dark:text-muted-foreground text-gray-800 border-gray-200'
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200'
         }
@@ -419,7 +419,7 @@ const LiveClass = ({
                                         placeholder="Advanced Event Handling"
                                         disabled={!canEditFields}
                                         maxLength={100}
-                                        className="bg-card border-input"
+                                        className="!bg-background"
                                     />
                                 </FormControl>
                                 {field.value?.length >= 100 && (
@@ -448,7 +448,7 @@ const LiveClass = ({
                                                     variant="outline"
                                                     disabled={!canEditFields}
                                                     className={cn(
-                                                        "w-full justify-start text-left font-normal bg-card border-input",
+                                                        "w-full justify-start text-left font-normal",
                                                         !field.value && "text-muted-foreground"
                                                     )}
                                                 >
@@ -492,7 +492,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-card border-input"
+                                            className="!bg-background"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -513,7 +513,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-card border-input"
+                                            className="!bg-background"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -538,7 +538,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-card border-input">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -569,7 +569,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-card border-input">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select secondary batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -660,7 +660,7 @@ const LiveClass = ({
                         </div>
                     ) : (
                         <div className="pt-4 border-t">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex gap-3">
                                 <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                 <div className="space-y-1">
                                     <h4 className="font-medium text-left text-yellow-900 text-sm">

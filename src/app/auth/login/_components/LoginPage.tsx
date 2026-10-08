@@ -18,11 +18,13 @@ import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser, useThemeStore, useStudentData } from '@/store/store'
+import { setApiAuthToken } from '@/utils/axios.config'
 import Image from 'next/image'
 import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
 import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
 import { useLogin } from '@/hooks/useLogin'
 import { DecodedGoogleToken, AuthResponse } from "@/app/auth/login/_components/componentLogin"
+import { isRedirectAllowed } from '@/utils/redirectValidation'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -133,15 +135,15 @@ function LoginPage() {
         avatar: string
         image: string
     }) => (
-        <div className="bg-primary-light p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
+        <div className="bg-primary-light dark:bg-primary-light/20 p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
             <div className="h-12 w-12 relative rounded-full overflow-hidden">
                 <Image src={image} alt={name} fill className="object-cover" />
             </div>
             <div className="text-left">
-                <div className="text-primary-dark font-bold text-md">
+                <div className="text-primary-dark dark:text-primary-dark font-bold text-md">
                     {name}
                 </div>
-                <div className="text-primary-dark text-sm">{role}</div>
+                <div className="text-primary-dark dark:text-primary-dark text-sm">{role}</div>
             </div>
         </div>
     )
@@ -154,9 +156,9 @@ function LoginPage() {
         number: string
         description: string
     }) => (
-        <div className="bg-accent-light p-3 rounded-lg text-center min-w-fit flex-shrink-0">
-            <div className="text-accent-dark font-bold text-md">{number}</div>
-            <div className="text-accent-dark text-sm">{description}</div>
+        <div className="bg-accent-light dark:bg-accent-light/20 p-3 rounded-lg text-center min-w-fit flex-shrink-0">
+            <div className="text-accent-dark dark:text-accent-dark font-bold text-md">{number}</div>
+            <div className="text-accent-dark dark:text-accent-dark text-sm">{description}</div>
         </div>
     )
 
@@ -190,7 +192,7 @@ function LoginPage() {
 
             // Handle your backend response
             if (response.data.access_token) {
-                localStorage.setItem('access_token', response.data.access_token)
+                setApiAuthToken(response.data.access_token)
                 localStorage.setItem(
                     'refresh_token',
                     response.data.refresh_token
@@ -255,20 +257,14 @@ function LoginPage() {
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
 
+                const isRedirectValid = isRedirectAllowed(userRole, redirectedUrl)
+
                 if (shouldForceProfilePage && organizationId) {
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
-                } else if (redirectedUrl) {
+                } else if (isRedirectValid) {
                     router.push(redirectedUrl)
-                }
-                // else if (userRole === 'student') {
-                //     if (response.data.showTooltip) {
-                //         router.push('/student/profile')
-                //     } else {
-                //         router.push('/student')
-                //     }
-                // } 
-                else if (userRole === 'super_admin') {
-                    router.push(`/${userRole}/organizations`)
+                } else if (userRole === 'super_admin') {
+                    router.push(`/${userRole}/organizations?page=1&limit=10`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
                     if (organizationId) {
@@ -307,18 +303,11 @@ function LoginPage() {
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
-        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
-        console.log('Current URL:', window.location.href)
         if (urlParams.has('route')) {
-            console.log('URL has route param')
             const route = urlParams.get('route')
-            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
-            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', btoa(redirectedUrl))
-            // setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
-
         }
     }, [router])
 

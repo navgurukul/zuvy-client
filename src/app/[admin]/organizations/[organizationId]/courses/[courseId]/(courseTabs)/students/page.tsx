@@ -494,25 +494,23 @@ const StudentsPage = ({ params }: { params: any }) => {
                     </div>
                 </div>
 
-                <div className='flex flex-row justify-end mt-6'>
-                    {selectedRows.length > 0 && (
-                        <>
-                            <AlertDialogDemo
-                                setSelectedRows={setSelectedRows}
-                                userId={userIds}
-                                bootcampId={batchData && params.courseId}
-                                title="Are you absolutely sure?"
-                                description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
-                            />
-                            <ComboboxStudent
-                                batchData={newBatchData || []}
-                                bootcampId={batchData && params.courseId}
-                                selectedRows={selectedRows}
-                                fetchStudentData={fetchStudentDataForBatch}
-                            />
-                        </>
-                    )}
-                </div>
+                {selectedRows.length > 0 && (
+                    <div className='flex flex-row mt-3'>
+                        <AlertDialogDemo
+                            setSelectedRows={setSelectedRows}
+                            userId={userIds}
+                            bootcampId={batchData && params.courseId}
+                            title="Are you absolutely sure?"
+                            description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
+                        />
+                        <ComboboxStudent
+                            batchData={newBatchData || []}
+                            bootcampId={batchData && params.courseId}
+                            selectedRows={selectedRows}
+                            fetchStudentData={fetchStudentDataForBatch}
+                        />
+                    </div>
+                )}
 
                 {/* Filters Row (on mobile both in one row) */}
                 <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
@@ -528,7 +526,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     <div className="w-full sm:w-[160px] mt-2">
                         <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
                             <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
+                            <SelectContent className="w-[160px]"><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
                         </Select>
                     </div>
 

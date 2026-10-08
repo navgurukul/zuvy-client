@@ -42,6 +42,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import PreviewZuvyEvalQuestion from '../_components/PreviewZuvyEvalQuestion'
+import EditZuvyEvalQuestion from '../_components/EditEvalQuestion'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -49,6 +50,7 @@ export const columns: ColumnDef<quiz>[] = [
         header: ({ table }) => {
             return (
                 <Checkbox
+                    className='flex justify-center'
                     checked={
                         table.getIsAllPageRowsSelected() ||
                         (table.getIsSomePageRowsSelected() && 'indeterminate')
@@ -64,6 +66,7 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ table, row }) => {
             return (
                 <CheckboxAndDeleteHandler
+                    className='flex justify-center'
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => {
                         row.toggleSelected(!!value)
@@ -133,7 +136,7 @@ export const columns: ColumnDef<quiz>[] = [
         accessorKey: 'difficulty',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className=""
+                className="flex justify-center"
                 column={column}
                 title="Difficulty"
             />
@@ -157,7 +160,7 @@ export const columns: ColumnDef<quiz>[] = [
         accessorKey: 'usage',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-center w-[100px]"
+                className="flex justify-center"
                 column={column}
                 title="Usage"
             />
@@ -165,7 +168,7 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const usage = row.original.usage
             return (
-                <p className={` text-center font-semibold `}>
+                <p className={` flex justify-center`}>
                     {usage}
                 </p>
             )
@@ -205,7 +208,7 @@ export const columns: ColumnDef<quiz>[] = [
         id: 'actions1',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]"
+                className="flex justify-center"
                 column={column}
                 title="Preview"
             />
@@ -216,7 +219,7 @@ export const columns: ColumnDef<quiz>[] = [
             const { tags, setTags } = getCodingQuestionTags()
 
             return (
-                <div className="mr-5">
+                <div className="flex justify-center">
                     <Dialog>
                         <DialogTrigger>
                             {!selectedRows && (
@@ -244,7 +247,7 @@ export const columns: ColumnDef<quiz>[] = [
         id: 'actions2',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]"
+                className="flex justify-end"
                 column={column}
                 title=""
             />
@@ -260,12 +263,12 @@ export const columns: ColumnDef<quiz>[] = [
             const selectedRows = row.getIsSelected()
 
             return (
-                <div className="flex">
+                <div className="flex justify-end">
                     <div>
                         {!selectedRows && (
                             <Edit
                                 onClick={() => editQuizHandler(quizQuestionid)}
-                                className="cursor-pointer mr-5"
+                                className="cursor-pointer"
                                 size={18}
                             />
                         )}
@@ -300,7 +303,7 @@ export const columns: ColumnDef<quiz>[] = [
             const selectedRows = row.getIsSelected()
 
             return (
-                <div className="ml-[-30px]">
+                <div className="flex justify-start">
                     {!selectedRows && (
                         <Trash2
                             onClick={(e) => {
@@ -344,26 +347,26 @@ export const columns: ColumnDef<quiz>[] = [
 ]
 
 export const zuvyEvalColumns: ColumnDef<any>[] = [
-    {
-        accessorKey: 'domainName',
-        header: ({ column }) => (
-            <DataTableColumnHeader
-                className="flex text-left"
-                column={column}
-                title="Domain Name"
-            />
-        ),
-        cell: ({ row }) => {
-            return (
-                <div className="flex text-left">
-                    <span className="text-foreground rounded-md text-sm font-medium">
-                        {row.original.domainName || 'No Domain'}
-                    </span>
-                </div>
-            )
-        },
-        enableSorting: true,
-    },
+    // {
+    //     accessorKey: 'domainName',
+    //     header: ({ column }) => (
+    //         <DataTableColumnHeader
+    //             className="flex text-left"
+    //             column={column}
+    //             title="Domain Name"
+    //         />
+    //     ),
+    //     cell: ({ row }) => {
+    //         return (
+    //             <div className="flex text-left">
+    //                 <span className="text-foreground rounded-md text-sm font-medium">
+    //                     {row.original.domainName || 'No Domain'}
+    //                 </span>
+    //             </div>
+    //         )
+    //     },
+    //     enableSorting: true,
+    // },
     {
         accessorKey: 'question',
         header: ({ column }) => (
@@ -446,6 +449,19 @@ export const zuvyEvalColumns: ColumnDef<any>[] = [
         ),
         cell: ({ row }) => {
             return <PreviewZuvyEvalQuestion questionId={row.original.id} />
+        },
+    },
+        {
+        id: 'actions-edit',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Edit"
+            />
+        ),
+        cell: ({ row }) => {
+            return <EditZuvyEvalQuestion questionId={row.original.id} />
         },
     },
 ]

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import { AllChaptersWithStatusResponse, UseAllChaptersWithStatusReturn, ModuleDetail, TrackingDataItem } from '@/hooks/hookType'
-const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusReturn => {
+const useAllChaptersWithStatus = (moduleId: any): UseAllChaptersWithStatusReturn => {
   const [trackingData, setTrackingData] = useState<TrackingDataItem[]>([]);
   const [moduleDetails, setModuleDetails] = useState<ModuleDetail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -9,7 +9,7 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async (isRefetch = false) => {
-    
+
     if (!moduleId) {
       setError('Module ID is required');
       setLoading(false);
@@ -23,9 +23,9 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
         setLoading(true);
       }
       setError(null);
-      
+
       const response = await api.get<AllChaptersWithStatusResponse>(`/tracking/getAllChaptersWithStatus/${moduleId}`);
-      
+
       if (response.data.status === 'success') {
         setTrackingData(response.data.trackingData);
         setModuleDetails(response.data.moduleDetails);

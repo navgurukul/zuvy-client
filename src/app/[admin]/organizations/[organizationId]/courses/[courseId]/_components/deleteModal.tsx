@@ -23,12 +23,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
-    const [deleteWithSession, setDeleteWithSession] = useState<boolean>(false)
     useEffect(() => {
         if (!isOpen) {
             setInputValue('')
             setError(null)
-            setDeleteWithSession(false)
         }
     }, [isOpen])
 
@@ -82,7 +80,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <div className="flex-shrink-0">
                                             <AlertTriangle className="h-6 w-6 text-destructive" />
                                         </div>
-                                        <DialogTitle className="text-lg font-semibold text-gray-900">
+                                        <DialogTitle className="text-lg font-semibold text-foreground">
                                             {input ? 'Delete Batch' : modalTitle || 'Permanent Deletion'}
                                         </DialogTitle>
                                     </div>
@@ -92,8 +90,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </p>
 
                                     {(modalText2 || instructorInfo?.name) && (
-                                        <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
-                                            <p className="text-gray-600 font-normal">
+                                        <div className="text-sm flex gap-x-2 text-foreground font-semibold mt-3">
+                                            <p className="text-muted-foreground font-normal">
                                                 {modalText2}
                                             </p>
                                             {instructorInfo?.name}
@@ -116,27 +114,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Live Class System Deletion Checkbox */}
-                                    {topicId === 8 && (
-                                        <div className="mt-2 pt-4 border-t">
-                                            <label className="flex items-start space-x-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={deleteWithSession}
-                                                    onChange={(e) => setDeleteWithSession(e.target.checked)}
-                                                    className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                                />
-                                                <div>
-                                                    <span className="text-sm font-medium text-foreground block">
-                                                        Delete live class from system
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        It will not be available anymore
-                                                    </span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    )}
+
                                 </div>
                                 <div className="mt-6 flex justify-end gap-2 sm:gap-3">
                                     <Button
@@ -160,7 +138,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <Button
                                             variant="destructive"
                                             onClick={() => {
-                                                if (topicId === 8 && deleteWithSession) {
+                                                if (topicId === 8) {
                                                     onDeleteChapterWithSession?.()
                                                 } else {
                                                     handleConfirm()

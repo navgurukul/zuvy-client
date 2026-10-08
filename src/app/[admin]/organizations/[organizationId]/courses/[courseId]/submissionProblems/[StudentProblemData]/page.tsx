@@ -42,7 +42,8 @@ const PracticeProblems = ({ params }: any) => {
     const orgId = Number(organizationId) || user?.orgId;
 
     const [appliedSearchQuery, setAppliedSearchQuery] = useState('')
-    const { studentDetails, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
+    const { studentDetails, totalStudentsCount, totalSubmittedStudents, loading: hookLoading, fetchStatus } = usePracticeProblemStatus(matchingData?.id, {
+        bootcampId: params.courseId,
         chapterId: matchingData?.moduleChapterData?.[0]?.id,
         questionId: matchingData?.moduleChapterData?.[0]?.codingQuestionDetails?.id,
         searchStudent: appliedSearchQuery,
@@ -88,6 +89,8 @@ const PracticeProblems = ({ params }: any) => {
         if (!matchingData) return
 
         const queryParams = new URLSearchParams()
+
+        queryParams.append('bootcampId', params.courseId)
 
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
@@ -172,25 +175,25 @@ const PracticeProblems = ({ params }: any) => {
                     </Button>
                 </Link>
             </div>
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {matchingData?.moduleChapterData[0]?.codingQuestionDetails?.title}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className='text-left'>
-                            <div className="font-medium text-muted-foreground">Total Students</div>
-                            <div className="text-lg font-semibold">{totalStudents}</div>
+                            <div className="font-medium text-muted-foreground">Total Submission</div>
+                            <div className="text-lg font-semibold">{totalSubmittedStudents || 0}</div>
                         </div>
                         <div className='text-left'>
-                            <div className="text-sm text-gray-600 mb-1">Submission Type</div>
-                            <div className="text-xl font-semibold text-gray-900">Coding</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type</div>
+                            <div className="text-lg font-semibold">Coding</div>
                         </div>
 
                         <div className='text-left'>
-                            <div className="font-medium text-muted-foreground">Course ID</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID</div>
                             <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className='text-left'>
@@ -199,8 +202,8 @@ const PracticeProblems = ({ params }: any) => {
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
@@ -215,7 +218,7 @@ const PracticeProblems = ({ params }: any) => {
             <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button

@@ -56,8 +56,8 @@ const QuestionBankDropdown = () => {
               isActive
                 ? 'bg-primary text-primary-foreground'
                 : open
-                ? 'bg-gray-100 text-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                ? 'bg-muted-foreground/10 text-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
             )}
           >
             <Database className="h-4 w-4" />
@@ -76,8 +76,8 @@ const QuestionBankDropdown = () => {
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
               pathname === `/${role}/organizations/${organizationId}/resource/coding`
-                ? 'bg-gray-300 text-black'
-                : 'text-black hover:bg-gray-100'
+                ? 'bg-background text-foreground'
+                : 'text-foreground hover:bg-background'
             )}
           >
             Coding Problems
@@ -89,8 +89,8 @@ const QuestionBankDropdown = () => {
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
               pathname === `/${role}/organizations/${organizationId}/resource/mcq`
-                ? 'bg-gray-300 text-black'
-                : 'text-black hover:bg-gray-100'
+                ? 'bg-background text-foreground'
+                : 'text-foreground hover:bg-background'
             )}
           >
             MCQ
@@ -102,8 +102,8 @@ const QuestionBankDropdown = () => {
             className={cn(
               'block w-full px-3 py-2 rounded text-sm',
               pathname === `/${role}/organizations/${organizationId}/resource/open-ended`
-                ? 'bg-gray-300 text-black'
-                : 'text-black hover:bg-gray-100'
+                ? 'bg-background text-foreground'
+                : 'text-foreground hover:bg-background'
             )}
           >
             Open Ended

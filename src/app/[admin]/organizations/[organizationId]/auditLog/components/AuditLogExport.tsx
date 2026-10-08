@@ -5,6 +5,7 @@ import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTrackingLog } from '@/app/[admin]/hooks/useTrackingLog';
 import { TrackingLogEntry } from '@/app/[admin]/hooks/hookType';
+import { parseAuditLogDate } from './auditLogDateUtils';
 
 interface AuditLogExportProps {
   orgId?: number;
@@ -45,7 +46,9 @@ export default function AuditLogExport({ orgId, currentFilters }: AuditLogExport
       headers.join(','), // Header row
       ...data.map(log => {
         const formatDate = (dateString: string) => {
-          const date = new Date(dateString);
+          const date = parseAuditLogDate(dateString);
+          if (!date) return '';
+
           return date.toLocaleString('en-US', {
             year: 'numeric',
             month: '2-digit',
