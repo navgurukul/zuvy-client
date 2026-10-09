@@ -38,13 +38,13 @@ export const formattedRole = (role: string) => {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-success-light text-success border-success dark:text-white '
+            return 'bg-success-light text-success border-success dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700/60'
         case 'medium':
-            return 'bg-warning-light text-warning border-warning dark:text-white'
+            return 'bg-warning-light text-warning border-warning dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700/60'
         case 'hard':
-            return 'bg-destructive-light text-destructive border-destructive dark:text-white '
+            return 'bg-destructive-light text-destructive border-destructive dark:bg-red-950/80 dark:text-red-300 dark:border-red-700/60'
         default:
-            return 'bg-muted text-muted-foreground dark:text-white'
+            return 'bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-200'
     }
 }
 
