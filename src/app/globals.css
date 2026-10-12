@@ -390,3 +390,23 @@
 .dark input[type='checkbox'] {
     color-scheme: dark;
 }
+
+/* Override browser autofill background in dark mode.
+   Chrome ignores background-color on autofilled inputs; the box-shadow trick
+   paints over the autofill highlight using the card surface colour. */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 9999px hsl(0 0% 15%) inset !important;
+    box-shadow: 0 0 0 9999px hsl(0 0% 15%) inset !important;
+    -webkit-text-fill-color: hsl(30 30% 98%) !important;
+    caret-color: hsl(30 30% 98%);
+}
+
+/* Non-autofill inputs: ensure colour-scheme so native UI elements render dark */
+.dark input,
+.dark textarea,
+.dark select {
+    color-scheme: dark;
+}

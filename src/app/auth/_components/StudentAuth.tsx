@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { Eye, EyeOff } from 'lucide-react'
 import { api, setApiAuthToken } from '@/utils/axios.config'
 import { AuthResponse } from '@/app/auth/login/_components/componentLogin'
 import { getUser, useStudentData } from '@/store/store'
@@ -54,6 +55,9 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     const [studentId, setStudentId] = useState('')
     const [confirmed, setConfirmed] = useState(false)
     const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
+    const [copied, setCopied] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
     const submit = async (event: FormEvent) => {
@@ -96,6 +100,7 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
         <div className="mb-5 flex gap-3">
             <Button type="button" variant="outline" className="w-full" onClick={() => { const blob = new Blob([`Zuvy Student ID\n\n${studentId}\n`], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = `zuvy-student-id-${studentId}.txt`; anchor.click(); URL.revokeObjectURL(url) }}>Download</Button>
             <Button type="button" variant="outline" className="w-full" onClick={() => { const printWindow = window.open('', '_blank', 'width=560,height=420'); if (!printWindow) return; printWindow.document.write(`<html><head><title>Zuvy Student ID</title><style>body{font-family:Arial,sans-serif;padding:48px;color:#111}.card{border:2px solid #333;border-radius:12px;padding:32px;text-align:center}.id{font-size:32px;font-weight:bold;margin-top:12px;word-break:break-all}</style></head><body><div class="card"><h1>Zuvy Student ID</h1><div class="id">${studentId.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char] || char))}</div></div></body></html>`); printWindow.document.close(); printWindow.focus(); printWindow.print(); printWindow.close() }}>Print</Button>
+            <Button type="button" variant="outline" className="w-full" onClick={() => { navigator.clipboard.writeText(studentId).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) }) }}>{copied ? 'Copied!' : 'Copy'}</Button>
         </div>
         <label className="mb-5 flex cursor-pointer items-center gap-3 text-sm"><Checkbox checked={confirmed} onCheckedChange={(value) => setConfirmed(value === true)} />I have written down my Student ID</label>
         <Button className="w-full" disabled={!confirmed} onClick={continueAfterId}>Continue</Button>
@@ -104,8 +109,8 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     return <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-lg border bg-card p-7 shadow-lg">
         <div><h1 className="text-2xl font-bold">Create your student account</h1><p className="mt-1 text-sm text-muted-foreground">Sign up with a name and password to receive your Student ID.</p></div>
         <div className="space-y-2"><Label htmlFor="student-name">Full name</Label><Input id="student-name" autoComplete="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} /></div>
-        <div className="space-y-2"><Label htmlFor="student-password">Password</Label><Input id="student-password" type="password" autoComplete="new-password" required minLength={6} maxLength={64} value={password} onChange={e => setPassword(e.target.value)} /></div>
-        <div className="space-y-2"><Label htmlFor="student-confirm-password">Confirm password</Label><Input id="student-confirm-password" type="password" autoComplete="new-password" required minLength={6} maxLength={64} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} /></div>
+        <div className="space-y-2"><Label htmlFor="student-password">Password</Label><div className="relative"><Input id="student-password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" required minLength={6} maxLength={64} value={password} onChange={e => setPassword(e.target.value)} className="pr-10" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)} className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
+        <div className="space-y-2"><Label htmlFor="student-confirm-password">Confirm password</Label><div className="relative"><Input id="student-confirm-password" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" required minLength={6} maxLength={64} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="pr-10" /><button type="button" aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} onClick={() => setShowConfirmPassword(v => !v)} className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none">{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
         {siteKey ? <Turnstile ref={widget} siteKey={siteKey} onSuccess={(token) => { setCaptchaToken(token); setCaptchaError('') }} onExpire={() => { setCaptchaToken(''); setCaptchaError('The verification expired. Please complete it again.') }} onError={(code) => { setCaptchaToken(''); setCaptchaError(`Cloudflare verification failed${code ? ` (${code})` : ''}. Check that challenges.cloudflare.com is reachable, then retry. If it continues, verify this site key and that this hostname is allowed in Cloudflare Turnstile.`) }} onTimeout={() => { setCaptchaToken(''); setCaptchaError('Cloudflare verification timed out. Please try again.') }} /> : <p className="text-sm text-destructive">Signup is unavailable: Turnstile site key is not configured.</p>}
         {captchaError && <div role="alert" className="space-y-2 text-left text-sm text-destructive"><p>{captchaError}</p><Button type="button" variant="outline" size="sm" onClick={() => { setCaptchaToken(''); setCaptchaError(''); widget.current?.reset() }}>Retry verification</Button></div>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
@@ -121,6 +126,7 @@ export function StudentLogin({ onSignupClick }: { onSignupClick?: () => void }) 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [rememberedId, setRememberedId] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     useEffect(() => {
         try { setRememberedId(localStorage.getItem('last_student_id') || '') } catch { /* storage may be disabled */ }
     }, [])
@@ -141,7 +147,7 @@ export function StudentLogin({ onSignupClick }: { onSignupClick?: () => void }) 
     return <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-lg border bg-card p-7 shadow-lg">
         <div><h2 className="text-xl font-bold">Login with Student ID</h2></div>
         <div className="space-y-2"><Label htmlFor="student-id-login">Student ID</Label><Input id="student-id-login" required autoComplete="username" value={studentId || rememberedId} onChange={e => { setStudentId(e.target.value); setRememberedId('') }} /></div>
-        <div className="space-y-2"><Label htmlFor="student-login-password">Password</Label><Input id="student-login-password" type="password" required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+        <div className="space-y-2"><Label htmlFor="student-login-password">Password</Label><div className="relative"><Input id="student-login-password" type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="pr-10" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)} className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
         <p className="text-sm text-muted-foreground">Forgot your password? Ask your teacher or the Zuvy team.</p>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <Button className="w-full" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Login'}</Button>
