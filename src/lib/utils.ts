@@ -38,11 +38,11 @@ export const formattedRole = (role: string) => {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-success-light text-success border-success dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700/60'
+            return 'bg-success-light text-success border-success dark:bg-success/15 dark:text-success-dark dark:border-success/40'
         case 'medium':
-            return 'bg-warning-light text-warning border-warning dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700/60'
+            return 'bg-warning-light text-warning border-warning dark:bg-warning/15 dark:text-warning-dark dark:border-warning/40'
         case 'hard':
-            return 'bg-destructive-light text-destructive border-destructive dark:bg-red-950/80 dark:text-red-300 dark:border-red-700/60'
+            return 'bg-destructive-light text-destructive border-destructive dark:bg-destructive/15 dark:text-destructive-dark dark:border-destructive/40'
         default:
             return 'bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-200'
     }

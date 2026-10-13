@@ -375,27 +375,12 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     </div>
                 </div>
             </div>
-
-            {/* <div className="flex w-fit gap-1 rounded-md border bg-muted p-1">
+            <div className="flex w-[420px] gap-1 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-900">
                 <Button
-                    variant={activeTab === 'profile' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('profile')}
-                >
-                    Profile
-                </Button>
-                <Button
-                    variant={activeTab === 'attendance' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('attendance')}
-                >
-                    Attendance
-                </Button>
-            </div> */}
-            <div className="flex w-[420px] gap-1 rounded-lg border bg-white p-1">
-                <Button
-                    className={`flex-1 rounded-md ${
+                    className={`flex-1 rounded-md transition-colors ${
                         activeTab === 'profile'
-                            ? 'bg-[#28632D] text-white hover:bg-[#28632D]'
-                            : 'bg-white text-gray-500 hover:bg-gray-100'
+                            ? 'bg-[#28632D] text-white hover:bg-[#28632D] dark:bg-[#28632D] dark:text-white dark:hover:bg-[#347A3A]'
+                            : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
                     onClick={() => setActiveTab('profile')}
                 >
@@ -403,17 +388,16 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 </Button>
 
                 <Button
-                    className={`flex-1 rounded-md ${
+                    className={`flex-1 rounded-md transition-colors ${
                         activeTab === 'attendance'
-                            ? 'bg-[#28632D] text-white hover:bg-[#28632D]'
-                            : 'bg-white text-gray-500 hover:bg-gray-100'
+                            ? 'bg-[#28632D] text-white hover:bg-[#28632D] dark:bg-[#28632D] dark:text-white dark:hover:bg-[#347A3A]'
+                            : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
                     onClick={() => setActiveTab('attendance')}
                 >
                     Attendance
                 </Button>
             </div>
-
             {activeTab === 'profile' ? (
                 <div className="grid gap-6 text-left lg:grid-cols-[252px_minmax(0,1fr)]">
                     <nav className="space-y-1" aria-label="Profile sections">
