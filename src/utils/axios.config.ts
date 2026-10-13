@@ -117,6 +117,8 @@ api.interceptors.response.use(
         // 🚫 Skip token refresh if on login route or calling login/refresh endpoints
         const isLoginOrRefresh =
             originalRequest.url.includes('/auth/login') ||
+            originalRequest.url.includes('/auth/student/login') ||
+            originalRequest.url.includes('/auth/student/signup') ||
             originalRequest.url.includes('/auth/refresh')
 
         if (isLoginOrRefresh) {
