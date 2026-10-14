@@ -51,6 +51,12 @@ export type StudentData = {
 }
 
 type StudentDataState = Student[]
+type StudentDropdownOptions = {
+    careerStatus?: string[]
+    skills?: string[]
+    openToRemote?: boolean[]
+    education?: string[]
+}
 
 const StudentsPage = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
@@ -85,11 +91,18 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [batchFilter, setBatchFilter] = useState<string>('all')
+    const [careerStatusFilter, setCareerStatusFilter] = useState('all')
+    const [skillsFilter, setSkillsFilter] = useState('all')
+    const [educationFilter, setEducationFilter] = useState('all')
+    const [openToRemoteFilter, setOpenToRemoteFilter] = useState('all')
+    const [dropdownOptions, setDropdownOptions] = useState<StudentDropdownOptions>({})
     const [attendanceInput, setAttendanceInput] = useState('')
     const [loading, setLoading] = useState(true)
-    
     // Use debounce hook for attendance input
     const debouncedAttendance = useDebounce(attendanceInput, 500)
+    const debouncedCareerStatus = useDebounce(careerStatusFilter === 'all' ? '' : careerStatusFilter, 500)
+    const debouncedSkills = useDebounce(skillsFilter === 'all' ? '' : skillsFilter, 500)
+    const debouncedEducation = useDebounce(educationFilter === 'all' ? '' : educationFilter, 500)
 
     
     // Add refs to track initialization and prevent duplicate calls
@@ -102,7 +115,11 @@ const StudentsPage = ({ params }: { params: any }) => {
         statusFilter,
         batchFilter,
         attendanceFilter: debouncedAttendance,
-    }), [enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance])
+        careerStatus: debouncedCareerStatus,
+        skills: debouncedSkills,
+        education: debouncedEducation,
+        openToRemote: openToRemoteFilter,
+    }), [enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance, debouncedCareerStatus, debouncedSkills, debouncedEducation, openToRemoteFilter])
     
     const fetchFilteredData = useCallback(async (customOffset?: number) => {
         if (isFetching.current) return
@@ -124,12 +141,17 @@ const StudentsPage = ({ params }: { params: any }) => {
             if (debouncedAttendance.trim() !== '') {
                 queryStr += `&attendance=${debouncedAttendance.trim()}`
             }
+            if (debouncedCareerStatus) queryStr += `&careerStatus=${encodeURIComponent(debouncedCareerStatus)}`
+            if (debouncedSkills) queryStr += `&skills=${encodeURIComponent(debouncedSkills)}`
+            if (debouncedEducation) queryStr += `&education=${encodeURIComponent(debouncedEducation)}`
+            if (openToRemoteFilter !== 'all') queryStr += `&openToRemote=${openToRemoteFilter}`
     
             const searchQuery = new URLSearchParams(window.location.search).get("search")
             if (searchQuery) queryStr += `&searchTerm=${searchQuery}`
     
             const response = await getCourseStudents(params.courseId, queryStr)
     
+            if (response.data.dropdownOptions) setDropdownOptions(response.data.dropdownOptions)
             setStudents(response.data.modifiedStudentInfo || [])
             setTotalStudents(response.data.totalStudents || 0)
             setTotalPages(response.data.totalPages || 1)
@@ -144,7 +166,7 @@ const StudentsPage = ({ params }: { params: any }) => {
             setTimeout(() => {
                 isFetching.current = false
             }, 100) }
-    }, [params.courseId,limit,offset,enrolledDateFilter,statusFilter,batchFilter,debouncedAttendance,setStudents,setTotalStudents,setTotalPages,getCourseStudents])
+    }, [params.courseId,limit,offset,enrolledDateFilter,statusFilter,batchFilter,debouncedAttendance,debouncedCareerStatus,debouncedSkills,debouncedEducation,openToRemoteFilter,setStudents,setTotalStudents,setTotalPages,getCourseStudents])
      // Update this helper function to handle new options
     // const convertLastActiveFilterToDate = (filter: string): string | null => {
     // const today = new Date()
@@ -250,11 +272,15 @@ const StudentsPage = ({ params }: { params: any }) => {
         if (debouncedAttendance && debouncedAttendance.trim() !== '') {
             queryStr += `&attendance=${debouncedAttendance.trim()}`
         }
+        if (debouncedCareerStatus) queryStr += `&careerStatus=${encodeURIComponent(debouncedCareerStatus)}`
+        if (debouncedSkills) queryStr += `&skills=${encodeURIComponent(debouncedSkills)}`
+        if (debouncedEducation) queryStr += `&education=${encodeURIComponent(debouncedEducation)}`
+        if (openToRemoteFilter !== 'all') queryStr += `&openToRemote=${openToRemoteFilter}`
         
         const response = await getCourseStudents(params.courseId, queryStr)
         const suggestions = (response.data.modifiedStudentInfo || []).map((student: StudentData) => ({ ...student, id: student.userId }));
         return suggestions;
-    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance, getCourseStudents]);
+    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance, debouncedCareerStatus, debouncedSkills, debouncedEducation, openToRemoteFilter, getCourseStudents]);
 
     // Keep fetchSearchResultsApi with current offset for proper search functionality
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -281,8 +307,13 @@ const StudentsPage = ({ params }: { params: any }) => {
         if (debouncedAttendance.trim() !== '') {
             queryStr += `&attendance=${debouncedAttendance.trim()}`
         }
+        if (debouncedCareerStatus) queryStr += `&careerStatus=${encodeURIComponent(debouncedCareerStatus)}`
+        if (debouncedSkills) queryStr += `&skills=${encodeURIComponent(debouncedSkills)}`
+        if (debouncedEducation) queryStr += `&education=${encodeURIComponent(debouncedEducation)}`
+        if (openToRemoteFilter !== 'all') queryStr += `&openToRemote=${openToRemoteFilter}`
     
         const response = await getCourseStudents(params.courseId, queryStr)
+        if (response.data.dropdownOptions) setDropdownOptions(response.data.dropdownOptions)
     
         setStudents(response.data.modifiedStudentInfo || [])
         setTotalStudents(response.data.totalStudents || 0)
@@ -293,7 +324,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     
         return response.data
     
-    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, debouncedAttendance,fetchFilteredData,students,getCourseStudents])
+    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, debouncedAttendance, debouncedCareerStatus, debouncedSkills, debouncedEducation, openToRemoteFilter,fetchFilteredData,students,getCourseStudents])
     
     const defaultFetchApi = useCallback(async () => {
         // Clear search from URL when input is cleared
@@ -367,6 +398,18 @@ const StudentsPage = ({ params }: { params: any }) => {
         urlParams.delete('page')
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`
         window.history.replaceState({}, '', newUrl)
+    }
+
+    const handleProfileFilterChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
+        setter(value)
+        setOffset(0)
+        setCurrentPage(1)
+        setSelectedRows([])
+
+        // The current offset is read from the URL page parameter in useStudentData.
+        const urlParams = new URLSearchParams(window.location.search)
+        urlParams.delete('page')
+        window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`)
     }
 
     // Handle last active filter change
@@ -546,6 +589,39 @@ const StudentsPage = ({ params }: { params: any }) => {
                                 <SelectItem value="last6months">Last 6 Months</SelectItem>
                                 <SelectItem value="lastyear">Last Year</SelectItem>
                                 <SelectItem value="older">Older</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full sm:w-[160px] mt-2">
+                        <Select value={careerStatusFilter} onValueChange={(value) => handleProfileFilterChange(setCareerStatusFilter, value)}>
+                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Career status" /></SelectTrigger>
+                            <SelectContent><SelectItem value="all">All career statuses</SelectItem>{(dropdownOptions.careerStatus || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full sm:w-[160px] mt-2">
+                        <Select value={skillsFilter} onValueChange={(value) => handleProfileFilterChange(setSkillsFilter, value)}>
+                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Skills" /></SelectTrigger>
+                            <SelectContent className="w-[220px]"><SelectItem value="all">All Skills</SelectItem>{(dropdownOptions.skills || []).map((skill) => (<SelectItem key={skill} value={skill}>{skill}</SelectItem>))}</SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full sm:w-[160px] mt-2">
+                        <Select value={educationFilter} onValueChange={(value) => handleProfileFilterChange(setEducationFilter, value)}>
+                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Education" /></SelectTrigger>
+                            <SelectContent><SelectItem value="all">All education</SelectItem>{(dropdownOptions.education || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full sm:w-[160px] mt-2">
+                        <Select value={openToRemoteFilter} onValueChange={(value) => handleProfileFilterChange(setOpenToRemoteFilter, value)}>
+                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Remote work" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All remote preferences</SelectItem>
+                                {(dropdownOptions.openToRemote || []).map((option) => (
+                                    <SelectItem key={String(option)} value={String(option)}>{option ? 'Open to remote' : 'Not open to remote'}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
