@@ -4,7 +4,7 @@ import { isRedirectAllowed } from './utils/redirectValidation'
 
 // This is hardcoded for Career Tours and may change in the future.
 // Add CareerTours course IDs here to use student ID signup/login.
-const CAREER_TOURS_COURSE_IDS: number[] = [129, 130, 131, 132, 133, 134, 135, 136]
+const CAREER_TOURS_COURSE_IDS: number[] = [129, 130, 131, 132, 133, 134, 135, 136] 
 
 export function middleware(request: NextRequest) {
     // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
