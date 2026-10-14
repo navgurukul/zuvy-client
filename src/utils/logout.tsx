@@ -1,6 +1,7 @@
 import { toast } from '@/components/ui/use-toast'
 import { db } from '@/lib/indexDb'
 import { api } from '@/utils/axios.config'
+import { clearAuthEntryRoute, getAuthEntryRoute } from '@/utils/authEntryRoute'
 // import axios from 'axios'
 
 export const Logout = async () => {
@@ -21,6 +22,7 @@ export const Logout = async () => {
         // )
 
         const response = await api.post(`/auth/logout`, {})
+        const authEntryRoute = getAuthEntryRoute()
 
         toast.success({
             title: 'Logout Successful',
@@ -44,10 +46,11 @@ export const Logout = async () => {
             'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
         document.cookie =
             'redirectedUrl=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+        clearAuthEntryRoute()
 
         // Reset to the app root without preserving any previous query params,
         // such as ?chapterId=5057 from the protected route redirect flow.
-        window.location.assign(`${window.location.origin}/`)
+        window.location.assign(`${window.location.origin}${authEntryRoute}`)
     } catch (error) {
         console.error('Logout error:', error)
     }
