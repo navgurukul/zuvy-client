@@ -610,7 +610,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     <div className="w-full sm:w-[160px] mt-2">
                         <Select value={educationFilter} onValueChange={(value) => handleProfileFilterChange(setEducationFilter, value)}>
                             <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Education" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">All education</SelectItem>{(dropdownOptions.education || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+                            <SelectContent><SelectItem value="all">Graduating</SelectItem>{(dropdownOptions.education || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
 
