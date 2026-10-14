@@ -41,28 +41,45 @@ const StudentNameCell = ({ row }: { row: any }) => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
     const studentName = String(row.getValue('name') ?? '')
+    const studentEmail = String(row.original.email ?? '')
     
     return (
         <>
             {isStudent === userId ? (
-                <Input
-                    id="name"
-                    name="name"
-                    value={studentData.name}
-                    onChange={handleSingleStudent}
-                />
+                <div className="space-y-1">
+                    <Input
+                        id="name"
+                        name="name"
+                        value={studentData.name}
+                        onChange={handleSingleStudent}
+                    />
+                    <Input
+                        id="email"
+                        name="email"
+                        value={studentData.email}
+                        onChange={handleSingleStudent}
+                    />
+                </div>
             ) : (
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div
-                                className="w-[150px] text-left text-gray-800 dark:text-muted-foreground cursor-pointer hover:text-blue-600 hover:underline"
+                                className="w-[220px] cursor-pointer text-left"
                                 onClick={handleStudentClick}
                             >
-                                {studentName.length > 20 ? `${studentName.slice(0, 20)}...` : studentName}
+                                <div className="truncate font-medium text-gray-800 hover:text-blue-600 hover:underline dark:text-muted-foreground">
+                                    {studentName}
+                                </div>
+                                <div className="truncate text-xs text-muted-foreground">
+                                    {studentEmail}
+                                </div>
                             </div>
                         </TooltipTrigger>
-                        <TooltipContent>{studentName}</TooltipContent>
+                        <TooltipContent>
+                            <div>{studentName}</div>
+                            <div className="text-xs">{studentEmail}</div>
+                        </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
             )}
@@ -114,50 +131,6 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: true,
     },
     {
-        accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
-        ),
-        cell: ({ row }) => {
-            const { userId } = row.original
-            const email = String(row.getValue('email') ?? '')
-            const { isStudent, setIsStudent } = getEditStudent()
-            const { studentData, setStudentData } = getStudentData()
-            const handleSingleStudent = (
-                e: React.ChangeEvent<HTMLInputElement>
-            ) => {
-                const { name, value } = e.target
-                setStudentData({ ...studentData, [name]: value })
-            }
-
-            return (
-                <>
-                    {isStudent === userId ? (
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email}
-                            onChange={handleSingleStudent}
-                        />
-                    ) : (
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="flex space-x-2">
-                                        <span className="max-w-[500px] truncate font-medium text-gray-800 dark:text-muted-foreground">
-                                            {email.length > 30 ? `${email.slice(0, 30)}...` : email}
-                                        </span>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>{email}</TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    )}
-                </>
-            )
-        },
-    },
-    {
         accessorKey: 'batchName',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Batch" className="w-full text-left" />
@@ -185,6 +158,84 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
+    },
+    {
+        id: 'careerStatus',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Career status" />
+        ),
+        cell: ({ row }) => {
+            const careerStatus = row.original.careerStatus
+            const status = typeof careerStatus === 'string' && careerStatus.trim()
+                ? careerStatus.trim()
+                : 'Not set'
+
+            return status === 'Not set' ? (
+                <span className="text-sm text-muted-foreground">Not set</span>
+            ) : (
+                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                    status === 'Looking for Job'
+                        ? 'border-primary/30 bg-primary/10 text-primary'
+                        : status === 'Working'
+                          ? 'border-secondary bg-secondary text-secondary-foreground'
+                          : 'border-border bg-muted text-foreground'
+                }`}>
+                    {status}
+                </span>
+            )
+        },
+        enableSorting: false,
+    },
+    {
+        id: 'graduating',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Graduating" />
+        ),
+        cell: ({ row }) => {
+            const { graduationDate, graduationMonth, graduationYear } = row.original
+            const monthName = graduationMonth && graduationMonth >= 1 && graduationMonth <= 12
+                ? new Date(2000, graduationMonth - 1, 1).toLocaleString('en-US', { month: 'short' })
+                : null
+            const graduation = graduationDate?.trim()
+                || (monthName && graduationYear ? `${monthName} ${graduationYear}` : null)
+
+            return <span className="text-sm">{graduation || '—'}</span>
+        },
+        enableSorting: false,
+    },
+    {
+        id: 'topSkills',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Top skills" />
+        ),
+        cell: ({ row }) => {
+            const skills = row.original.skills
+            const skillList = Array.isArray(skills)
+                ? skills
+                    .filter((skill): skill is string => typeof skill === 'string' && skill.trim().length > 0)
+                    .map((skill) => skill.trim())
+                : []
+            const visibleSkills = skillList.slice(0, 3)
+            const remainingCount = skillList.length - visibleSkills.length
+
+            if (skillList.length === 0) return <span className="text-sm text-muted-foreground">—</span>
+
+            return (
+                <div className="flex max-w-[160px] flex-wrap gap-1">
+                    {visibleSkills.map((skill, index) => (
+                        <span key={`${skill}-${index}`} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
+                            {skill}
+                        </span>
+                    ))}
+                    {remainingCount > 0 && (
+                        <span className="rounded-full border bg-muted px-2 py-0.5 text-xs text-foreground">
+                            +{remainingCount}
+                        </span>
+                    )}
+                </div>
+            )
+        },
+        enableSorting: false,
     },
     {
         accessorKey: 'enrolledDate',
