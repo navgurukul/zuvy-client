@@ -2,17 +2,41 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Eye, EyeOff } from 'lucide-react'
 import { api, setApiAuthToken } from '@/utils/axios.config'
 import { AuthResponse } from '@/app/auth/login/_components/componentLogin'
-import { getUser, useStudentData } from '@/store/store'
+import { getUser, useStudentData, useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { rememberAuthEntryRoute } from '@/utils/authEntryRoute'
+import { isRedirectAllowed } from '@/utils/redirectValidation'
+
+function getStudentPostLoginRoute() {
+    const requestedRoute = new URLSearchParams(window.location.search).get('route')
+    return isRedirectAllowed('student', requestedRoute) && requestedRoute.startsWith('/student/')
+        ? requestedRoute
+        : '/student'
+}
+
+function AuthLogo() {
+    const { isDark } = useThemeStore()
+    return <div className="mb-5 flex justify-center">
+        <Image
+            src={isDark ? '/zuvy-logo-horizontal-dark.png' : '/zuvy-logo-horizontal.png'}
+            alt="Zuvy"
+            width={52}
+            height={44}
+            priority
+            className="h-[44px] w-[52px] object-contain"
+        />
+    </div>
+}
 
 type SignupResponse = Partial<AuthResponse> & {
     studentId?: string
@@ -31,10 +55,15 @@ function messageForError(error: any) {
 
 function persistStudentSession(data: AuthResponse) {
     const user = { ...data.user, email: data.user.email || '' }
+    rememberAuthEntryRoute()
     setApiAuthToken(data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('AUTH', JSON.stringify(user))
     localStorage.setItem('AUTH_PERMISSIONS', JSON.stringify(user.permissions || {}))
+    // Match the existing Google-login behavior so the /student guard keeps
+    // Student ID users on the dashboard instead of redirecting to profile setup.
+    localStorage.setItem('skipProfileSetup', 'true')
+    localStorage.removeItem('isLoginFirst')
     const role = user.rolesList?.[0] || 'student'
     setCookie('secure_typeuser', JSON.stringify(btoa(String(role))))
     if (user.orgId) setCookie('orgId', String(user.orgId))
@@ -88,12 +117,13 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     const continueAfterId = () => {
         if (!confirmed) return
         if (authResponse) {
-            try { persistStudentSession(authResponse); router.push('/student') } catch { router.push('/auth/login') }
+            try { persistStudentSession(authResponse); router.push(getStudentPostLoginRoute()) } catch { router.push('/student') }
         } else if (onLoginClick) onLoginClick()
         else router.push('/auth/login')
     }
 
     if (studentId) return <section className="w-full max-w-md rounded-lg border bg-card p-7 shadow-lg" aria-labelledby="student-id-title">
+        <AuthLogo />
         <h1 id="student-id-title" className="mb-2 text-2xl font-bold">Your Student ID</h1>
         <p className="mb-5 text-sm text-muted-foreground">Save this ID somewhere safe. You will need it to log in. Student ID accounts do not have email-based password recovery; ask your teacher or the Zuvy team if you need help.</p>
         <div className="mb-5 rounded-lg border-2 border-primary bg-primary/5 p-6 text-center"><div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Student ID</div><div className="mt-2 break-all text-3xl font-bold tracking-wide">{studentId}</div></div>
@@ -107,6 +137,7 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     </section>
 
     return <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-lg border bg-card p-7 shadow-lg">
+        <AuthLogo />
         <div><h1 className="text-2xl font-bold">Create your student account</h1><p className="mt-1 text-sm text-muted-foreground">Sign up with a name and password to receive your Student ID.</p></div>
         <div className="space-y-2"><Label htmlFor="student-name">Full name</Label><Input id="student-name" autoComplete="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} /></div>
         <div className="space-y-2"><Label htmlFor="student-password">Password</Label><div className="relative"><Input id="student-password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" required minLength={6} maxLength={64} value={password} onChange={e => setPassword(e.target.value)} className="pr-10" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)} className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
@@ -140,11 +171,12 @@ export function StudentLogin({ onSignupClick }: { onSignupClick?: () => void }) 
             if (!data?.access_token || !data?.refresh_token || !data?.user) throw new Error('Invalid authentication response.')
             persistStudentSession(data)
             try { localStorage.setItem('last_student_id', id) } catch { /* storage may be disabled */ }
-            router.push('/student')
+            router.push(getStudentPostLoginRoute())
         } catch (err: any) { setError(err.message === 'Invalid authentication response.' ? err.message : messageForError(err)) }
         finally { setLoading(false) }
     }
     return <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-lg border bg-card p-7 shadow-lg">
+        <AuthLogo />
         <div><h2 className="text-xl font-bold">Login with Student ID</h2></div>
         <div className="space-y-2"><Label htmlFor="student-id-login">Student ID</Label><Input id="student-id-login" required autoComplete="username" value={studentId || rememberedId} onChange={e => { setStudentId(e.target.value); setRememberedId('') }} /></div>
         <div className="space-y-2"><Label htmlFor="student-login-password">Password</Label><div className="relative"><Input id="student-login-password" type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="pr-10" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)} className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
