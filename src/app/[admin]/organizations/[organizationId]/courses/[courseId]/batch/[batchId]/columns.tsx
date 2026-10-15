@@ -22,13 +22,9 @@ import EditModal from '../../(courseTabs)/students/components/editModal'
 import { Input } from '@/components/ui/input'
 import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
-// Career Tour Course Bootcamp IDs - Student ID column is shown only for these,
-// and the Attendance column is hidden for these bootcamps (no live-class attendance tracked)
 
-// Dev IDs (kept for reference): [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
-// Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
-const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
 
 type CreateColumnsOptions = {
     userRole: string

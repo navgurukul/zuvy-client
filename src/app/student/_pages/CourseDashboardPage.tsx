@@ -29,7 +29,7 @@ import { useIsStudentEnrolledInOneCourseStore, useThemeStore } from "@/store/sto
 import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudentType'
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
-import { cn } from "@/lib/utils";
+import { cn, CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
 import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
 import { MentorSessionEvent, Module } from "../hooks/hookTypes";
@@ -130,9 +130,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const currentProgress = progressData?.data?.progress || 0;
 
   // Career Tours: bootcamp IDs that belong to the career tour programme
-  //for prod
-  // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-  const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106];
   const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId));
 
   // Email gate: hide certain cards when the user account has no email OR is a career-tour bootcamp

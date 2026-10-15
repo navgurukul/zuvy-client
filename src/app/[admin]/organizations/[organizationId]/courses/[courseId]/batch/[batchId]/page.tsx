@@ -46,6 +46,7 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 import { SearchBox } from '@/utils/searchBox'
 import { getUser } from '@/store/store'
 import { api } from '@/utils/axios.config'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const BatchesInfo = ({
     params,
@@ -113,12 +114,7 @@ const BatchesInfo = ({
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const [isDownloadingReport, setIsDownloadingReport] = React.useState(false)
-
-    //Hard Coded for Career tours
-    // Dev IDs (kept for reference): [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
-    // Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
-    const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
-    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
+        const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
     const handleDownloadReport = async () => {
         try {

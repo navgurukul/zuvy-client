@@ -18,6 +18,7 @@ import { getUser } from '@/store/store'
 import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 type Props = {}
 interface BatchFilter {
@@ -98,10 +99,6 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         defaultFetchApi()
     }, [selectedBatch, sortField, sortDirection, defaultFetchApi])
-    //for prod
-   // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-
-    const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
     const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
     const handleVideoDownloadCsv = useCallback(() => {

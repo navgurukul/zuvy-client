@@ -15,6 +15,7 @@ import StudentProfileDropDown from './StudentProfileDropDown'
 import { useOnboardingStorage } from '@/app/student/hooks/use-profile'
 import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse'
 import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -113,9 +114,6 @@ const Header = () => {
     const hasEmail = storedEmail.trim().length > 0
 
     // Career Tours: hide View/Edit Profile when no email OR on a career-tour bootcamp
-    //for prod
-   // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-    const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
     const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(currentCourseId))
 
     // Show profile option only when not in onboarding flow AND the account has an email AND not a career-tour bootcamp

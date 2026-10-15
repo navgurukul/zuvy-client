@@ -17,15 +17,9 @@ import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
-// Career Tour Course Bootcamp IDs - These bootcamps should NOT display the attendance column
-// This is hardcoded as per requirements for specific career tour courses
 
-//for prod
-// const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-
-//for dev
-const CAREER_TOUR_BOOTCAMP_IDS = [1113,1112,1111,1110,1109,1108,1107,1106]
 
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {

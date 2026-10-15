@@ -5,10 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Task } from '@/utils/data/schema'
 import { getSubmissionDate } from '@/utils/admin'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
-// Dev IDs: [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
-// Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
-const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
 
 export const createColumns = (courseId: number | string): ColumnDef<Task>[] => {
     const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))

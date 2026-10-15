@@ -29,6 +29,7 @@ import useLearnerProfileStrength from "../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/app/student/hooks/useLearnerProfile";
 import { useTour } from "@/app/student/_components/guided-tour";
 import ProfileStrengthCard from "@/app/student/_components/ProfileStrengthCard";
+import { CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -52,9 +53,6 @@ const StudentDashboard = () => {
       return false;
     }
   })();
-  //for prod
- // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-  const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106];
   const isCareerTour = (studentData?.inProgressBootcamps ?? []).some(
     (b: any) => CAREER_TOUR_BOOTCAMP_IDS.includes(Number(b.id))
   );
