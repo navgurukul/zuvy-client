@@ -334,3 +334,7 @@ export function isAllSelectedChaptersCompleted(
         chapter.status?.toLowerCase() === "completed"
     );
 }
+
+
+export const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+// export const CAREER_TOUR_BOOTCAMP_IDS = [674, 135, 134, 133, 132, 131, 130, 1099]

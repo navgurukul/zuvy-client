@@ -53,7 +53,6 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
   const parsedCourseId = Number(courseId);
   const parsedModuleId = Number(moduleId);
   const parsedChapterId = chapterId ? Number(chapterId) : null;
-
   // Pass null to the hook when the chapter is locked — avoids fetching locked content
   const isLocked = selectedItemData?.item?.isLock ?? false;
   const { chapterDetails, loading, error, refetch } = useChapterDetails(isLocked ? null : chapterId);
@@ -83,7 +82,7 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
 
   // Show loading state when fetching chapter details
 if (loading) {
-  return<StudentDashboardSkeleton/>;
+  return <StudentDashboardSkeleton/>;
 }
 
   // Show error state if chapter details failed to load

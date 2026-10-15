@@ -92,6 +92,7 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     const submit = async (event: FormEvent) => {
         event.preventDefault()
         if (loading || !captchaToken) return
+
         setError('')
         if (name.trim().length < 2 || name.trim().length > 100) return setError('Name must be between 2 and 100 characters.')
         if (password.length < 6 || password.length > 64) return setError('Password must be between 6 and 64 characters.')
@@ -101,6 +102,7 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
         setCaptchaToken('')
         try {
             const { data } = await api.post<SignupResponse>('/auth/student/signup', { name: name.trim(), password, captchaToken: token })
+            localStorage.setItem('CAREER_TOURS_BANNER_STORAGE_KEY', 'true')
             const id = data.studentId || data.student_id || data.user?.studentId || data.user?.student_id
             if (!id) throw new Error('The registration response did not include a Student ID.')
             setStudentId(String(id))
@@ -168,6 +170,7 @@ export function StudentLogin({ onSignupClick }: { onSignupClick?: () => void }) 
         const id = (studentId || rememberedId).trim()
         try {
             const { data } = await api.post<AuthResponse>('/auth/student/login', { studentId: id, password })
+            localStorage.setItem('isFirstTImeLogin', `${data.showTooltip}`)
             if (!data?.access_token || !data?.refresh_token || !data?.user) throw new Error('Invalid authentication response.')
             persistStudentSession(data)
             try { localStorage.setItem('last_student_id', id) } catch { /* storage may be disabled */ }
