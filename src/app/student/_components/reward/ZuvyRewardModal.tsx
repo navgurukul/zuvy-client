@@ -63,6 +63,11 @@ export const ZuvyRewardModal: React.FC<
       useState(false);
 
     const isZeroSparks = !hideSparks && totalSparks === 0;
+    const rewardTitle = hideSparks
+      ? 'Form Submitted Successfully'
+      : isZeroSparks
+        ? 'Keep Trying!'
+        : 'Chapter Completed!';
 
     // =========================================================
     // Confetti
@@ -422,7 +427,7 @@ export const ZuvyRewardModal: React.FC<
         =================================================== */}
 
           <h3 className="reward-title">
-            {isZeroSparks ? 'Keep Trying!' : 'Chapter Completed!'}
+            {rewardTitle}
           </h3>
 
           <p className="reward-subtitle">

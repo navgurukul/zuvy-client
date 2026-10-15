@@ -47,7 +47,8 @@ import {
 
 type WhatsNextItem = UpcomingEvent | MentorSessionEvent;
 
-
+// This is hardcoded for Career Tours and may change in the future.
+const DURATION_OVERRIDE_BOOTCAMP_IDS = [ '136', '135', '134', '133', '132', '131', '130', '129'];
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const params = useParams();
   const orgId = params.orgId;
@@ -148,6 +149,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const validCollaborator = isValidImageUrl(collaborator) ? collaborator : '';
   const duration = progressData?.data?.bootcampTracking?.duration || 0;
 
+  // This is hardcoded for Career Tours and may change in the future.
+  const displayedDuration = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
+    ? '30 mins'
+    : (+duration) > 1 ? `${duration} weeks` : `${duration} week`;
   // Use API modules if available, otherwise fall back to mock modules
   const modulesToDisplay = apiModules || [];
   const modulesToShow = showAllModules ? modulesToDisplay : modulesToDisplay.slice(0, 7);
@@ -989,7 +994,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       </div>
                       <div>
                         <div className="text-[11px] leading-4 text-muted-foreground text-left">Duration</div>
-                        <div className="text-sm font-semibold leading-5">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div>
+                        {/* <div className="text-sm font-semibold leading-5">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div> */}
+                         <div className="text-sm font-semibold leading-5">{displayedDuration}</div>
                       </div>
                     </div>
                   </div>

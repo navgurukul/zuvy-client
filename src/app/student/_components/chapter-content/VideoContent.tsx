@@ -13,6 +13,8 @@ import { useVideoStore } from '@/store/store'
 
 import { VideoSkeleton } from "@/app/student/_components/Skeletons";
 
+const DURATION_OVERRIDE_BOOTCAMP_IDS = ['136', '135', '134', '133', '132', '131', '130', '129'];
+
 function getYoutubeId(url: string) {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
     return match ? match[1] : url // fallback to full URL if no match
@@ -78,21 +80,26 @@ const VideoContent: React.FC<VideoContentProps> = ({
     // Throttle saving progress every 2 seconds
     const lastSaveRef = useRef<number>(0)
     const hasCompletedRef = useRef(false)
+    // This is hardcoded for Career Tours and may change in the future.
+    const chapterKey = chapterDetails.id.toString()
+    const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
+    const completionThreshold = isBootcampVideoOverride ? 0.99 : 0.75
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
             const now = Date.now()
             // Save progress every 2 seconds
             if (now - lastSaveRef.current > 2000) {
-                setProgress(chapterDetails.id.toString(), state.playedSeconds)
+                setProgress(chapterKey, state.playedSeconds)
                 lastSaveRef.current = now
             }
 
-            // Call completeChapter when 75% is reached (only once)
+            // For bootcamp video overrides, the reward should wait until full video completion.
+            // Otherwise, standard videos reward at 75% watched.
             if (
                 !isCompleted &&
                 !hasCompletedRef.current &&
-                state.played >= 0.75
+                state.played >= completionThreshold
             ) {
                 hasCompletedRef.current = true
                 completeChapter()
@@ -100,10 +107,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
             }
         },
         [
-            chapterDetails.id.toString(),
+            chapterKey,
             setProgress,
             completeChapter,
             isCompleted,
+            completionThreshold,
+            refetch,
         ]
     )
 

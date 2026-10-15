@@ -25,6 +25,7 @@ import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
 import { useLogin } from '@/hooks/useLogin'
 import { DecodedGoogleToken, AuthResponse } from "@/app/auth/login/_components/componentLogin"
 import { isRedirectAllowed } from '@/utils/redirectValidation'
+import { rememberAuthEntryRoute } from '@/utils/authEntryRoute'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
@@ -192,6 +193,7 @@ function LoginPage() {
 
             // Handle your backend response
             if (response.data.access_token) {
+                rememberAuthEntryRoute()
                 setApiAuthToken(response.data.access_token)
                 localStorage.setItem(
                     'refresh_token',
