@@ -48,7 +48,7 @@ import {
 type WhatsNextItem = UpcomingEvent | MentorSessionEvent;
 
 // This is hardcoded for Career Tours and may change in the future.
-const DURATION_OVERRIDE_BOOTCAMP_IDS = ['674', '1106'];
+const DURATION_OVERRIDE_BOOTCAMP_IDS = [ '136', '135', '134', '133', '132', '131', '130', '129'];
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const params = useParams();
   const orgId = params.orgId;
