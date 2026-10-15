@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isRedirectAllowed } from './utils/redirectValidation'
-
-// This is hardcoded for Career Tours and may change in the future.
-// Add CareerTours course IDs here to use student ID signup/login.
-const CAREER_TOURS_COURSE_IDS: number[] = [129, 130, 131, 132, 133, 134, 135, 136] 
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 export function middleware(request: NextRequest) {
     // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
@@ -56,7 +53,7 @@ export function middleware(request: NextRequest) {
             const courseIdMatch = pathname.match(/^\/student\/course\/(\d+)(?:\/|$)/)
             const courseId = courseIdMatch ? Number(courseIdMatch[1]) : null
             const isCareerToursCourse =
-                courseId !== null && CAREER_TOURS_COURSE_IDS.includes(courseId)
+                courseId !== null && CAREER_TOUR_BOOTCAMP_IDS.includes(courseId)
             const redirectUrl = new URL(
                 isCareerToursCourse ? '/careertours/signup' : '/',
                 request.url
