@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
-import { columns } from './column'
+import { createColumns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import {
@@ -28,6 +28,7 @@ import {
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 import { getUser } from '@/store/store'
 import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
@@ -216,7 +217,7 @@ const Page = ({ params }: any) => {
                     bootcampId: params.courseId,
                     moduleId: response.data.moduleId,
                     chapterId: response.data.chapterId,
-                    userId: student.id,
+                    studentId: student.studentId ?? null,
                     email: student.email,
                 })) || []
             // Only update table-related state, NOT overallStats
@@ -268,7 +269,7 @@ const Page = ({ params }: any) => {
                     bootcampId: params.courseId,
                     moduleId: responseData.moduleId,
                     chapterId: responseData.chapterId,
-                    userId: student.id,
+                    studentId: student.studentId ?? null,
                     email: student.email,
                 })) || []
 
@@ -287,6 +288,8 @@ const Page = ({ params }: any) => {
 
     const paginationUrlChangeHandler = useCallback(() => {}, [])
 
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
+
     const handleVideoDownloadCsv = useCallback(() => {
         if (!moduleId) return
 
@@ -304,6 +307,14 @@ const Page = ({ params }: any) => {
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
 
+        const csvColumns = [
+            { header: 'Student Name', key: 'name' },
+            ...(isCareerTourBootcamp ? [{ header: 'Student ID', key: 'studentId' }] : []),
+            { header: 'Email', key: 'email' },
+            { header: 'Batch', key: 'batchName' },
+            { header: 'Status', key: 'status' },
+        ]
+
         downloadCsv({
             endpoint: `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`,
 
@@ -313,21 +324,17 @@ const Page = ({ params }: any) => {
 
             dataPath: 'combinedData',
 
-            columns: [
-                { header: 'Student Name', key: 'name' },
-                { header: 'Email', key: 'email' },
-                { header: 'Batch', key: 'batchName' },
-                { header: 'Status', key: 'status' },
-            ],
+            columns: csvColumns,
 
             mapData: (item: any) => ({
                 name: item.name || '',
-                email: item.email || '',
+                ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
+                email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 status: item.status || '',
             }),
         })
-    }, [moduleId, params.courseId, params.StudentForm, selectedBatch, searchParams, sortField, sortDirection, chapterDetails,])
+    }, [moduleId, params.courseId, params.StudentForm, selectedBatch, searchParams, sortField, sortDirection, chapterDetails, isCareerTourBootcamp])
 
     const handleBatchChange = useCallback((value: string) => {
         setSelectedBatch(value)
@@ -515,7 +522,7 @@ const Page = ({ params }: any) => {
                 <CardContent className="p-0">
                     <DataTable
                         data={studentStatus || []}
-                        columns={columns}
+                        columns={createColumns(params.courseId)}
                         onSortingChange={handleSortingChange}
                     />
                 </CardContent>

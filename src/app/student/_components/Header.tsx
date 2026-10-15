@@ -15,6 +15,7 @@ import StudentProfileDropDown from './StudentProfileDropDown'
 import { useOnboardingStorage } from '@/app/student/hooks/use-profile'
 import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse'
 import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -100,8 +101,23 @@ const Header = () => {
         !isOnboardingLoading &&
         !onboardingData?.isCompleted
 
-    // Show profile option in dropdown whenever the student is not in the initial onboarding flow
-    const showProfileOption = !isInProfileSetupFlow
+    // Derive email from localStorage AUTH key (safe for SSR — guarded by isClient) # For Career Tours
+    const storedEmail: string = (() => {
+        if (typeof window === 'undefined') return ''
+        try {
+            const auth = localStorage.getItem('AUTH')
+            return auth ? (JSON.parse(auth)?.email ?? '') : ''
+        } catch {
+            return ''
+        }
+    })()
+    const hasEmail = storedEmail.trim().length > 0
+
+    // Career Tours: hide View/Edit Profile when no email OR on a career-tour bootcamp
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(currentCourseId))
+
+    // Show profile option only when not in onboarding flow AND the account has an email AND not a career-tour bootcamp
+    const showProfileOption = !isInProfileSetupFlow && hasEmail && !isCareerTour
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')

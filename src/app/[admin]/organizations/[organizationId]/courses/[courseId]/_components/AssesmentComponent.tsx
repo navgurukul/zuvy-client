@@ -7,6 +7,12 @@ import { AssesmentComponentProps } from '@/app/[admin]/organizations/[organizati
 import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const AssesmentComponent = (props: AssesmentComponentProps) => {
     const isDisabled = props.studentsSubmitted === 0
@@ -19,15 +25,24 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
 
     return (
         <div className="bg-card border border-border rounded-md p-3 hover:shadow-lg transition-shadow w-full mb-4">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-2 min-w-0">
                 {/* Icon + Title */}
-                <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-md">
+                <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                    <div className="p-2 rounded-md flex-shrink-0">
                         <ClipboardCheck className="h-4 w-4" />
                     </div>
-                    <h3 className="font-medium text-base">
-                        {props.title}
-                    </h3>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <h3 className="font-medium text-base truncate">
+                                    {props.title}
+                                </h3>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {props.title}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
 
                 {/* Dropdown / Download Button */}

@@ -15,6 +15,12 @@ import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 import { useAssignmentSubmissions } from '@/app/[admin]/hooks/useAssignmentSubmissions'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
@@ -159,15 +165,22 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                                                         {/* Content */}
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="p-2">
+                                                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                                                                <div className="p-2 flex-shrink-0">
                                                                     <FileText className="w-4 h-4 text-foreground" />
                                                                 </div>
-                                                                <h3 className="font-medium text-base text-foreground">
-                                                                    {
-                                                                        moduleData.title
-                                                                    }
-                                                                </h3>
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <h3 className="font-medium text-base text-foreground truncate">
+                                                                                {moduleData.title}
+                                                                            </h3>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            {moduleData.title}
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
                                                             </div>
                                                             <div className="flex items-center justify-between mt-4 text-sm">
                                                                 <div className="flex items-center gap-1">
