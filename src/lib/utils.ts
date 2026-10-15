@@ -334,6 +334,8 @@ export function isAllSelectedChaptersCompleted(
         chapter.status?.toLowerCase() === "completed"
     );
 }
+
+// This is hardcoded for Career Tours and may change in the future.
 // export const CAREER_TOUR_BOOTCAMP_IDS = [674, 135, 134, 133, 132, 131, 130, 1099]
 
 // for prod: 

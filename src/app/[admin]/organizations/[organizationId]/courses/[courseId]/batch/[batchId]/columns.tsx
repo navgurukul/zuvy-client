@@ -20,7 +20,7 @@ import DeleteConfirmationModal from '@/app/[admin]/organizations/[organizationId
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import EditModal from '../../(courseTabs)/students/components/editModal'
 import { Input } from '@/components/ui/input'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
@@ -97,8 +97,12 @@ export const createColumns = (
                 />
             ),
             cell: ({ row }) => (
-                <div className="flex w-full justify-center items-center">
-                    <ProfileImage src={row.original.profilePicture} />
+                <div className="flex items-center">
+                    <Avatar className="ml-2 h-[35px] w-[35px]">
+                        <AvatarImage
+                            src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                        />
+                    </Avatar>
                 </div>
             ),
             enableSorting: false,
