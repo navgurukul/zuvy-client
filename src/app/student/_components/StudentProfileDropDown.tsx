@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,6 +40,12 @@ const StudentProfileDropDown = ({
     onProfileClick,
     showProfileOption = true,
 }: StudentProfileDropDownProps) => {
+    const [storedStudentId, setStoredStudentId] = useState('')
+    useEffect(() => {
+        try { setStoredStudentId(localStorage.getItem('student_id') || '') } catch { /* storage may be disabled */ }
+    }, [])
+
+    const emailOrStudentId = studentData?.email || storedStudentId || ''
     return (
         <>
             <DropdownMenu>
@@ -61,7 +68,7 @@ const StudentProfileDropDown = ({
                                 {studentData?.name}
                             </p>
                             <p className="text-[14px] leading-none text-[#78908a] dark:text-muted-foreground">
-                                {studentData?.email}
+                                {emailOrStudentId}
                             </p>
                         </div>
                     </DropdownMenuLabel>

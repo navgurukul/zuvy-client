@@ -11,6 +11,12 @@ import { Button } from '@/components/ui/button'
 import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
     const { downloadCsv } = useDownloadCsv()
@@ -54,12 +60,21 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
     return (
         <div className="bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
             <div className="flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-md">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                        <div className="p-2 rounded-md flex-shrink-0">
                             <Code className="w-4 h-4" />
                         </div>
-                        <h3 className="font-medium text-base">{props.title}</h3>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <h3 className="font-medium text-base truncate">{props.title}</h3>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {props.title}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                     <div className="flex items-center gap-3">
                     <div className="relative group">

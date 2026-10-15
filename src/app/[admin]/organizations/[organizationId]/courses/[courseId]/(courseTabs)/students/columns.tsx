@@ -18,9 +18,18 @@ import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+// Career Tour Course Bootcamp IDs - These bootcamps should NOT display the attendance column
+// This is hardcoded as per requirements for specific career tour courses
+
+//for prod
+// const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+
+//for dev
+const CAREER_TOUR_BOOTCAMP_IDS = [1113,1112,1111,1110,1109,1108,1107,1106]
+
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
-    const { userId } = row.original
+    const { userId, bootcampId, studentId } = row.original
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -41,7 +50,16 @@ const StudentNameCell = ({ row }: { row: any }) => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
     const studentName = String(row.getValue('name') ?? '')
-    const studentEmail = String(row.original.email ?? '')
+    const studentEmail = row.original.email?.trim() || ''
+
+    // For Career Tour bootcamps: show email if available, otherwise show student ID
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
+    const subLabel = isCareerTourBootcamp
+        ? (studentEmail || `ID: ${studentId ?? 'NA'}`)
+        : studentEmail
+    const tooltipSubLabel = isCareerTourBootcamp
+        ? (studentEmail || `Student ID: ${studentId ?? 'NA'}`)
+        : studentEmail
     
     return (
         <>
@@ -72,13 +90,13 @@ const StudentNameCell = ({ row }: { row: any }) => {
                                     {studentName}
                                 </div>
                                 <div className="truncate text-xs text-muted-foreground">
-                                    {studentEmail}
+                                    {subLabel}
                                 </div>
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>
                             <div>{studentName}</div>
-                            <div className="text-xs">{studentEmail}</div>
+                            <div className="text-xs">{tooltipSubLabel}</div>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -87,7 +105,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     )
 }
 
-export const columns: ColumnDef<Task>[] = [
+const allColumns: ColumnDef<Task>[] = [
     {
         id: 'select',
         header: ({ table }) => {
@@ -472,3 +490,26 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 ]
+
+// Export allColumns as columns for backward compatibility
+export const columns = allColumns
+
+/**
+ * Helper function to filter columns based on bootcamp ID.
+ *
+ * For Career Tour bootcamp IDs [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]:
+ *   - Hides the "attendance" column (no live-class attendance tracked)
+ *   - Hides the "status" column (active/dropout/graduate status not applicable)
+ *
+ * Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
+ */
+export const getFilteredColumns = (bootcampId?: number): ColumnDef<Task>[] => {
+    if (bootcampId && CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)) {
+        // Hide both attendance and status columns for career tour bootcamps
+        const hiddenKeys = new Set(['attendance', 'status'])
+        return allColumns.filter((col: any) =>
+            !hiddenKeys.has(col.accessorKey) && !hiddenKeys.has(col.id)
+        )
+    }
+    return allColumns
+}

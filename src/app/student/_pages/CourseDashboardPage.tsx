@@ -128,6 +128,23 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   }
   // Use real progress data if available, otherwise fall back to mock data
   const currentProgress = progressData?.data?.progress || 0;
+
+  // Career Tours: bootcamp IDs that belong to the career tour programme
+  //for prod
+  // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+  const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106];
+  const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId));
+
+  // Email gate: hide certain cards when the user account has no email OR is a career-tour bootcamp
+  const hasEmail: boolean = (() => {
+    try {
+      const auth = typeof window !== 'undefined' ? localStorage.getItem('AUTH') : null;
+      return auth ? (JSON.parse(auth)?.email ?? '').trim().length > 0 : false;
+    } catch {
+      return false;
+    }
+  })();
+  const showEmailGatedCards = hasEmail && !isCareerTour;
   const batchName = progressData?.batchInfo?.batchName || '';
   const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
   const instructorName = progressData?.instructorDetails?.instructorName || '';
@@ -1246,6 +1263,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               />
 
               {/* What's Next Section */}
+              {showEmailGatedCards && (
               <Card className="w-full shadow-4dp text-left rounded-lg bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
@@ -1392,6 +1410,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
+              )}
 
               {/* {latestCourseData?.leaderboardEnabled && (
                 <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -1413,6 +1432,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               )} */}
 
               {/* Attendance */}
+              {showEmailGatedCards && (
               <Card className="w-full text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-xl">Attendance</CardTitle>
@@ -1628,6 +1648,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
+              )}
               </div>
             </div>
           </div>

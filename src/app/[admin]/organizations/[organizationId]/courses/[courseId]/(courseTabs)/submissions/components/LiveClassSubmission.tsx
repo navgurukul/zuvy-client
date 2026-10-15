@@ -17,6 +17,12 @@ interface LiveClassSubmissionsProps {
 }
 
 import { useLiveClassSubmissions } from '@/app/[admin]/hooks/useLiveClassSubmissions'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 
 const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
@@ -162,13 +168,22 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                             )}
                         </div>
                         <div className="flex flex-col w-full">
-                            <div className="flex items-start gap-2 min-w-0 pr-24">
-                                <div className="p-2 rounded-md">
+                            <div className="flex items-start gap-2 min-w-0 pr-16">
+                                <div className="p-2 rounded-md flex-shrink-0">
                                     <Play className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-body text-body2 font-medium min-w-0 whitespace-normal break-all">
-                                    {liveClass.title || 'Untitled Live Class'}
-                                </h3>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <h3 className="font-body text-body2 font-medium truncate">
+                                                {liveClass.title || 'Untitled Live Class'}
+                                            </h3>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {liveClass.title || 'Untitled Live Class'}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                             <div className="flex w-full items-center justify-between mt-4 text-sm">
                                 <div className="flex items-center gap-1">

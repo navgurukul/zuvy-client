@@ -8,7 +8,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { columns } from './column'
+import { createColumns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { SearchBox } from '@/utils/searchBox'
@@ -98,8 +98,21 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         defaultFetchApi()
     }, [selectedBatch, sortField, sortDirection, defaultFetchApi])
+    //for prod
+   // const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+
+    const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
     const handleVideoDownloadCsv = useCallback(() => {
+        const csvColumns = [
+            { header: 'Student Name', key: 'name' },
+            ...(isCareerTourBootcamp ? [{ header: 'Student ID', key: 'studentId' }] : []),
+            { header: 'Email', key: 'email' },
+            { header: 'Batch', key: 'batchName' },
+            { header: 'Watched At', key: 'completedAt' },
+        ]
+
         downloadCsv({
             endpoint: getChapterStudentsUrl(params.videoId, {
                 batchId: selectedBatch,
@@ -113,21 +126,17 @@ const Page = ({ params }: any) => {
 
             dataPath: 'submittedStudents',
 
-            columns: [
-                { header: 'Student Name', key: 'name' },
-                { header: 'Email', key: 'email' },
-                { header: 'Batch', key: 'batchName' },
-                { header: 'Watched At', key: 'completedAt' },
-            ],
+            columns: csvColumns,
 
             mapData: (item: any) => ({
                 name: item.name || '',
-                email: item.email || '',
+                ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
+                email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',
             }),
         })
-    }, [params.videoId, selectedBatch, sortField, sortDirection, videoData,])
+    }, [params.videoId, selectedBatch, sortField, sortDirection, videoData, isCareerTourBootcamp])
 
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
@@ -228,7 +237,7 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={dataTableVideo} columns={columns} onSortingChange={handleSortingChange} />
+                    <DataTable data={dataTableVideo} columns={createColumns(params.courseId)} onSortingChange={handleSortingChange} />
                 </CardContent>
             </Card>
         </>

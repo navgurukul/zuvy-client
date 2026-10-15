@@ -114,6 +114,12 @@ const BatchesInfo = ({
     const role = pathname.split('/')[1]
     const [isDownloadingReport, setIsDownloadingReport] = React.useState(false)
 
+    //Hard Coded for Career tours
+    // Dev IDs (kept for reference): [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
+    // Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
+    const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
+
     const handleDownloadReport = async () => {
         try {
             setIsDownloadingReport(true)
@@ -218,6 +224,7 @@ const BatchesInfo = ({
                     'Course Name': stringifyCsvValue(reportData.courseName ?? ''),
                     'Batch Name': stringifyCsvValue(reportData.batchName ?? ''),
                     'Student Name': stringifyCsvValue(student.name ?? ''),
+                    ...(isCareerTourBootcamp ? { 'Student ID': stringifyCsvValue(student.studentId ?? 'NA') } : {}),
                     Email: stringifyCsvValue(student.email ?? ''),
                     'Overall Attendance': stringifyCsvValue(student.overAllAttendance ?? ''),
                     'Assessments Attempted': stringifyCsvValue(

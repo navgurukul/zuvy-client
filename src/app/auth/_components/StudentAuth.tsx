@@ -119,7 +119,12 @@ export function StudentSignup({ onLoginClick }: { onLoginClick?: () => void }) {
     const continueAfterId = () => {
         if (!confirmed) return
         if (authResponse) {
-            try { persistStudentSession(authResponse); router.push(getStudentPostLoginRoute()) } catch { router.push('/student') }
+            try {
+                persistStudentSession(authResponse)
+                localStorage.setItem('skipProfileSetup', 'true')
+                try { localStorage.setItem('student_id', studentId) } catch { /* storage may be disabled */ }
+                router.push(getStudentPostLoginRoute())
+            } catch { router.push('/student') }
         } else if (onLoginClick) onLoginClick()
         else router.push('/auth/login')
     }
@@ -173,7 +178,7 @@ export function StudentLogin({ onSignupClick }: { onSignupClick?: () => void }) 
             localStorage.setItem('isFirstTImeLogin', `${data.showTooltip}`)
             if (!data?.access_token || !data?.refresh_token || !data?.user) throw new Error('Invalid authentication response.')
             persistStudentSession(data)
-            try { localStorage.setItem('last_student_id', id) } catch { /* storage may be disabled */ }
+            try { localStorage.setItem('last_student_id', id); localStorage.setItem('student_id', id) } catch { /* storage may be disabled */ }
             router.push(getStudentPostLoginRoute())
         } catch (err: any) { setError(err.message === 'Invalid authentication response.' ? err.message : messageForError(err)) }
         finally { setLoading(false) }
