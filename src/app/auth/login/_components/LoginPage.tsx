@@ -209,13 +209,7 @@ function LoginPage() {
                     description: 'Welcome to Zuvy Dashboard',
                 })
 
-                if (response.data.showTooltip) {
-                    localStorage.setItem('isLoginFirst', 'true')
-                    localStorage.removeItem('skipProfileSetup')
-                } else {
-                    localStorage.removeItem('isLoginFirst')
-                    localStorage.setItem('skipProfileSetup', 'true')
-                }
+             
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')

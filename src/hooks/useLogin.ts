@@ -19,6 +19,7 @@ export function useLogin() {
         setError(null)
         try {
             const response = await api.post<AuthResponse>('/auth/login', payload)
+            localStorage.setItem('isFirstTImeLogin', `${response.data.showTooltip}`)
             return response
         } catch (err) {
             setError(err)
