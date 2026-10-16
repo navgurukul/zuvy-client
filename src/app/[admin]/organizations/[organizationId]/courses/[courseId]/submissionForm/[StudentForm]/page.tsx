@@ -33,7 +33,7 @@ import { getUser } from '@/store/store'
 import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 import useFormsStatus from '@/app/[admin]/hooks/useFormsStatus'
-import useChapterDetails from '@/hooks/useChapterDetails'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 
 type Props = {}
 interface Batch {
@@ -59,10 +59,16 @@ const Page = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const { fetchFormsStatus } = useFormsStatus()
     const [studentStatus, setStudentStatus] = useState<any>()
-    const {
-        chapterDetails,
-        error: chapterDetailsError,
-    } = useChapterDetails(params.StudentForm)
+    const { getChapterDetails } = useGetChapterDetails()
+    const [chapterDetails, setChapterDetails] = useState<any>(null)
+    const [chapterDetailsError, setChapterDetailsError] = useState<any>(null)
+
+    useEffect(() => {
+        if (!params.StudentForm) return
+        getChapterDetails({ chapterId: params.StudentForm, bootcampId: params.courseId, moduleId: moduleId ?? undefined })
+            .then((res) => setChapterDetails(res.data))
+            .catch((err) => setChapterDetailsError(err))
+    }, [params.StudentForm, params.courseId, moduleId])
     useCourseExistenceCheck(params.courseId)
     const [totalStudents, setTotalStudents] = useState(0)
     const [pages, setPages] = useState(0)
@@ -218,6 +224,7 @@ const Page = ({ params }: any) => {
                     moduleId: response.data.moduleId,
                     chapterId: response.data.chapterId,
                     studentId: student.studentId ?? null,
+                    userId: student.id,
                     email: student.email,
                 })) || []
             // Only update table-related state, NOT overallStats
@@ -270,6 +277,7 @@ const Page = ({ params }: any) => {
                     moduleId: responseData.moduleId,
                     chapterId: responseData.chapterId,
                     studentId: student.studentId ?? null,
+                    userId: student.id,
                     email: student.email,
                 })) || []
 

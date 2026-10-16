@@ -247,6 +247,7 @@ export const EditProfilePage: React.FC = () => {
   const [customLocation, setCustomLocation] = useState('');
   const [internshipSalary, setInternshipSalary] = useState('');
   const [fullTimeSalary, setFullTimeSalary] = useState('');
+  const [currentStatusEdit, setCurrentStatusEdit] = useState<'Learning' | 'Looking for Job' | 'Working'>('Learning');
   const [allowCompanies, setAllowCompanies] = useState(true);
   const [emailPref, setEmailPref] = useState(true);
   const [whatsappPref, setWhatsappPref] = useState(false);
@@ -873,6 +874,13 @@ export const EditProfilePage: React.FC = () => {
         return;
       }
 
+      // Persist currentStatus back to step1
+      const updatedStep1: Step1Type = {
+        ...(step1 as Step1Type),
+        currentStatus: currentStatusEdit,
+      };
+      updateStepData(1, updatedStep1);
+
       const updatedStep4 = {
         ...step4,
         ...(editedData.step4 || {}),
@@ -894,7 +902,7 @@ export const EditProfilePage: React.FC = () => {
       };
 
       updateStepData(4, updatedStep4);
-      const isSaved = await persistProfileChanges(step1, step2, step3, updatedStep4);
+      const isSaved = await persistProfileChanges(updatedStep1, step2, step3, updatedStep4);
       if (!isSaved) return;
 
       showSaveSuccess();
@@ -982,6 +990,9 @@ export const EditProfilePage: React.FC = () => {
   // Initialize career goals edit state
   useEffect(() => {
     if (editingCard === 'career-goals' && step4) {
+      setCurrentStatusEdit(
+        (step1?.currentStatus as 'Learning' | 'Looking for Job' | 'Working') || 'Learning'
+      );
       const existingRoles = step4.targetRoles || [];
       const detectedCustomRole = existingRoles.find((role) => role && !roleOptions.includes(role));
       const normalizedRoles = detectedCustomRole
@@ -2985,6 +2996,14 @@ export const EditProfilePage: React.FC = () => {
                   ) : (
                     <>
                   {/* View Mode - Display Target Roles and Locations */}
+                  {/* Current Status */}
+                  <div className="mb-6 pb-6 border-b border-border/30">
+                    <Label className="text-xs font-medium text-muted-foreground mb-3 block">Current status</Label>
+                    <Badge variant="secondary" className="bg-black dark:bg-white text-white dark:text-black">
+                      {step1?.currentStatus || 'Learning'}
+                    </Badge>
+                  </div>
+
                   {/* Target Roles */}
                   {step4?.targetRoles && step4.targetRoles.length > 0 && (
                     <div className="mb-6">
@@ -3085,6 +3104,29 @@ export const EditProfilePage: React.FC = () => {
                 <>
                   {/* Edit Mode - Match OnboardingStep4 */}
                   <div className="space-y-6">
+                    {/* Current Status */}
+                    <div className="space-y-3">
+                      <Label className="font-medium text-sm tracking-wide">
+                        Current status <span className="text-destructive">*</span>
+                      </Label>
+                      <div className="flex gap-3 flex-wrap">
+                        {(['Learning', 'Looking for Job', 'Working'] as const).map((status) => (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() => setCurrentStatusEdit(status)}
+                            className={`px-5 py-2 rounded-lg font-medium text-sm border transition-all ${
+                              currentStatusEdit === status
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted/30 text-muted-foreground border-border hover:border-primary/50'
+                            }`}
+                          >
+                            {status}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Target Roles */}
                     <div className="space-y-4">
                       <div>

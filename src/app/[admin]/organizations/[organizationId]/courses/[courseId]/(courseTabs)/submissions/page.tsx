@@ -446,20 +446,31 @@ const Page = ({ params }: { params: any }) => {
                                     {type.id === 'form' && (
                                         <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
-                                                    {formData.map((item: any) =>
-                                                        (item.moduleChapterData || []).map((data: any, index: any) => (
-                                                            <FormComponent
-                                                                key={`${item.id}-${index}`}
-                                                                moduleName={item.name}
-                                                                moduleId={item.id}
-                                                                bootcampId={item.bootcampId}
-                                                                data={data}
-                                                                debouncedSearch={appliedSearchQuery}
-                                                                totalStudents={totalStudents}
-                                                            />
-                                                        ))
-                                                    )}
+                                                <div className="grid grid-cols-1 gap-8">
+                                                    {formData.map((item: any) => {
+                                                        const chapters = item.moduleChapterData || []
+                                                        if (chapters.length === 0) return null
+                                                        return (
+                                                            <div key={item.id} className="mb-6">
+                                                                <h2 className="text-lg text-start font-bold text-foreground mb-3">
+                                                                    Module - {item.name}
+                                                                </h2>
+                                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                                                    {chapters.map((data: any, index: any) => (
+                                                                        <FormComponent
+                                                                            key={`${item.id}-${index}`}
+                                                                            moduleName={item.name}
+                                                                            moduleId={item.id}
+                                                                            bootcampId={item.bootcampId}
+                                                                            data={data}
+                                                                            debouncedSearch={appliedSearchQuery}
+                                                                            totalStudents={totalStudents}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })}
                                                 </div>
                                             ) : (
 

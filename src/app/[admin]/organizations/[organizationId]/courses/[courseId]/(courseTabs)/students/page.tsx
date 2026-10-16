@@ -10,6 +10,7 @@ import {
     FileSpreadsheet,
     UserPlus,
     Search,
+    Download,
 } from 'lucide-react'
 import { getUser, getBatchData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -452,6 +453,66 @@ const StudentsPage = ({ params }: { params: any }) => {
     // Hide attendance column for these specific bootcamp IDs
     const bootcampId = students.length > 0 ? students[0].bootcampId : undefined
     const filteredColumns = getFilteredColumns(bootcampId)
+
+    const downloadReportAsCSV = () => {
+        if (!students || students.length === 0) {
+            toast.info({ title: 'No Data', description: 'No student data available to download.' })
+            return
+        }
+
+        const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+        const isCareerTour = bootcampId !== undefined && CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
+
+        const headers = [
+            'Name',
+            'Email',
+            'Batch',
+            'Career Status',
+            'Graduating',
+            'Top Skills',
+            'Enrolled Date',
+            'Progress (%)',
+            ...(!isCareerTour ? ['Attendance', 'Status'] : []),
+        ]
+
+        const rows = students.map((student: any) => {
+            const graduating =
+                student.graduationDate ||
+                (student.graduationMonth && student.graduationYear
+                    ? `${student.graduationMonth} ${student.graduationYear}`
+                    : '')
+            const skills = Array.isArray(student.skills)
+                ? student.skills.join('; ')
+                : student.skills || ''
+
+            const row = [
+                student.name || '',
+                student.email || '',
+                student.batchName || '',
+                student.careerStatus || '',
+                graduating,
+                skills,
+                student.enrolledDate || '',
+                student.progress ?? '',
+                ...(!isCareerTour
+                    ? [student.attendance ?? '', student.status || '']
+                    : []),
+            ]
+            // Wrap fields in quotes to handle commas inside values
+            return row.map((field) => `"${String(field).replace(/"/g, '""')}"`)
+        })
+
+        const csvContent = [headers.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `students_report_${params.courseId}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+    }
     
     return (
         <div className="text-foreground">
@@ -485,6 +546,16 @@ const StudentsPage = ({ params }: { params: any }) => {
 
                     {/* Action Buttons Row (on mobile both in one row) */}
                     <div className="flex w-full flex-row mt-2 md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
+                        {/* Download Report Button */}
+                        <Button
+                            variant="outline"
+                            onClick={downloadReportAsCSV}
+                            className=""
+                        >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download Report
+                        </Button>
+
                         {/* Add Single Student Button */}
                         <Dialog
                             open={isSingleStudentOpen}
