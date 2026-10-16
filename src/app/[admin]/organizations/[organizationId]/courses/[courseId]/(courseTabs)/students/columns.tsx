@@ -252,7 +252,7 @@ const allColumns: ColumnDef<Task>[] = [
     {
         accessorKey: 'enrolledDate',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Enrolled Date" className="w-full text-center"/>
+            <DataTableColumnHeader column={column} title="Enrolled Date" className="w-full text-left"/>
         ),
         cell: ({ row }) => {
             const enrolledDate = row.original.enrolledDate
@@ -274,7 +274,7 @@ const allColumns: ColumnDef<Task>[] = [
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
-                <div className="flex w-full justify-center items-center text-gray-800 dark:text-muted-foreground">
+                <div className="flex w-full justify-start items-center text-left text-gray-800 dark:text-muted-foreground">
                     <span className="text-sm">{formattedDate}</span>
                 </div>
             )
@@ -284,12 +284,12 @@ const allColumns: ColumnDef<Task>[] = [
     {
         accessorKey: 'progress',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Progress" className="w-full text-center" />
+            <DataTableColumnHeader column={column} title="Progress" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const progress = Math.max(0, Math.min(100, row.original.progress))
-            return (
-                <div className="flex w-full justify-center items-center">
+            return (                                
+            <div className="flex w-full justify-center items-center">
                     {/* <div className="h-2 w-full rounded-full progress-bg">
                         <div
                             className="h-2 rounded-full progress-fill"
@@ -305,7 +305,7 @@ const allColumns: ColumnDef<Task>[] = [
     {
         accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendance" className="w-full text-center" />
+            <DataTableColumnHeader column={column} title="Attendance" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const attendance =
@@ -316,7 +316,7 @@ const allColumns: ColumnDef<Task>[] = [
             const circleColorClass = getAttendanceColorClass(attendance)
 
             return (
-                <div className="relative size-9 w-full flex justify-center items-center">
+                <div className="relative flex size-9 w-full items-center justify-start text-left">
                     <svg
                         className="size-full"
                         width="24"
