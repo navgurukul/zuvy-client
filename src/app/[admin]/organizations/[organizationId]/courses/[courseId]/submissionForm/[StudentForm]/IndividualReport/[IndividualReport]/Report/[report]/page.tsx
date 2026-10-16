@@ -233,31 +233,27 @@ const Page = ({ params }: { params: Params }) => {
                                                         item.options
                                                     ).map((option) => {
                                                         const answer =
-                                                            item
-                                                                .formTrackingData[0]
-                                                                .chosenOptions
+                                                            item.formTrackingData?.[0]?.chosenOptions ?? []
                                                         const optionNumber =
                                                             option
+                                                        const isSelected = answer.some(
+                                                            (chosenOption) =>
+                                                                String(chosenOption) === optionNumber
+                                                        )
                                                         return (
                                                             <div
                                                                 key={option}
-                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${answer.includes(
-                                                                    optionNumber
-                                                                ) &&
+                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${isSelected &&
                                                                     'border-gray-800 border-2 rounded-lg'
                                                                     }`}
                                                             >
                                                                 <Checkbox
-                                                                    checked={answer.includes(
-                                                                        optionNumber
-                                                                    )}
+                                                                    checked={isSelected}
                                                                     disabled
                                                                     aria-label={
                                                                         option
                                                                     }
-                                                                    className={`translate-y-[2px] mr-1 ${answer.includes(
-                                                                        optionNumber
-                                                                    ) &&
+                                                                    className={`translate-y-[2px] mr-1 ${isSelected &&
                                                                         'bg-green-500'
                                                                         }`}
                                                                 />

@@ -98,10 +98,9 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             const formData = {
                 section: questions.map((q) => ({
                     ...q,
-                    answer:
-                        q.typeId === 1
-                            ? (parseInt(q.answer) + 1).toString()
-                            : q.answer || null,
+                    // Keep the selected option key unchanged. The radio group
+                    // and the tracking API both use the option key directly.
+                    answer: q.answer || null,
                 })),
             }
             await submitForm(formData)

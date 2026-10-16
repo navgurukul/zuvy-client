@@ -922,7 +922,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
           </div>
 
               <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-2 pb-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)] lg:items-start">
+          <div className={`grid grid-cols-1 gap-6 lg:items-start ${showEmailGatedCards ? 'lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)]' : 'lg:grid-cols-1'}`}>
             {/* Left Column - Course Header, Progress, and Modules */}
             <div className="space-y-4 min-w-0">
               {/* Course Header Card - Desktop only, matches module cards width */}

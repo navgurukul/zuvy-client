@@ -518,7 +518,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                     field.onChange(e)
                                                 }}
                                                 placeholder="Untitled Form"
-                                                className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                className="text-md p-2 focus-visible:ring-0 placeholder:text-muted-foreground"
                                                 disabled={!canEdit}
                                             />
                                         </>
