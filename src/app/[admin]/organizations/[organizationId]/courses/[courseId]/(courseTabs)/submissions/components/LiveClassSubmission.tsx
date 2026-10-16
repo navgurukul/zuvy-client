@@ -80,16 +80,11 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
         return <LiveClassSubmissionSkeleton />
     }
 
-    // Flatten all live classes from all modules
-    const allLiveClasses = liveClassData.flatMap((module) =>
-        (module.moduleChapterData || []).map((liveClass: any) => ({
-            ...liveClass,
-            moduleName: module.name,
-            moduleId: module.id,
-        }))
+    const hasAnyLiveClass = liveClassData.some(
+        (module) => (module.moduleChapterData || []).length > 0
     )
 
-    if (allLiveClasses.length === 0) {
+    if (!hasAnyLiveClass) {
         return (
             <div className="w-full flex flex-col justify-center items-center h-4/5">
                 <p className="text-center text-muted-foreground max-w-md">
@@ -108,99 +103,111 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     }
 
     return (
-        <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
-            {allLiveClasses.map((liveClass: any) => {
-                const submissions = liveClass.submitStudents || 0
+        <div className="">
+            {liveClassData.map((module) => {
+                const liveClasses = module.moduleChapterData || []
+                if (liveClasses.length === 0) return null
 
                 return (
-                    <div
-                        key={liveClass.id}
-                        className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
-                    >
-                        <div className="absolute top-2 right-2 z-10 flex items-center">
-                            {submissions > 0 ? (
-                                <button
-                                    onClick={() => handleDownloadCsv(liveClass.id, liveClass.title)}
-                                    className="hover:text-gray-700 cursor-pointer"
-                                    title="Download Report"
-                                >
-                                    <ArrowDownToLine size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                                </button>
-                            ) : (
-                                <div className="absolute top-2 pr-3 right-10">
-                                    <div className="relative group inline-flex">
-                                        <button disabled className="cursor-not-allowed">
-                                            <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
-                                        </button>
+                    <div className="mb-6" key={module.id}>
+                        <h2 className="text-lg text-start font-bold text-foreground mb-3">
+                            Module - {module.name}
+                        </h2>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {liveClasses.map((liveClass: any) => {
+                                const submissions = liveClass.submitStudents || 0
 
-                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                            No submissions available
+                                return (
+                                    <div
+                                        key={liveClass.id}
+                                        className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
+                                    >
+                                        <div className="absolute top-2 right-2 z-10 flex items-center">
+                                            {submissions > 0 ? (
+                                                <button
+                                                    onClick={() => handleDownloadCsv(liveClass.id, liveClass.title)}
+                                                    className="hover:text-gray-700 cursor-pointer"
+                                                    title="Download Report"
+                                                >
+                                                    <ArrowDownToLine size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                                                </button>
+                                            ) : (
+                                                <div className="absolute top-2 pr-3 right-10">
+                                                    <div className="relative group inline-flex">
+                                                        <button disabled className="cursor-not-allowed">
+                                                            <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
+                                                        </button>
+                                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                            No submissions available
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {submissions > 0 ? (
+                                                <Link
+                                                    href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
+                                                    >
+                                                        <Eye size={20} className="hover:text-gray-700 text-gray-500 dark:text-gray-400 dark:hover:text-gray-300" />
+                                                    </Button>
+                                                </Link>
+                                            ) : (
+                                                <div className="absolute top-2 pr-3 right-0">
+                                                    <div className="relative group inline-flex">
+                                                        <button
+                                                            disabled
+                                                            className="cursor-not-allowed"
+                                                        >
+                                                            <Eye size={20} className="text-gray-400 dark:text-gray-500" />
+                                                        </button>
+                                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                            No submissions to view
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col w-full">
+                                            <div className="flex items-start gap-2 min-w-0 pr-16">
+                                                <div className="p-2 rounded-md flex-shrink-0">
+                                                    <Play className="w-4 h-4" />
+                                                </div>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <h3 className="font-body text-body2 font-medium truncate">
+                                                                {liveClass.title || 'Untitled Live Class'}
+                                                            </h3>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {liveClass.title || 'Untitled Live Class'}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                            <div className="flex w-full items-center justify-between mt-4 text-sm">
+                                                <div className="flex items-center gap-1">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                                                    >
+                                                        {submissions} submissions
+                                                    </Badge>
+                                                </div>
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                >
+                                                    {totalStudents - submissions} pending
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                            {submissions > 0 ? (
-                                <Link
-                                    href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
-                                >
-                                    <Button
-                                        variant="ghost"
-                                        className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
-                                    >
-                                        <Eye size={20} className="hover:text-gray-700 text-gray-500 dark:text-gray-400 dark:hover:text-gray-300" />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <div className="absolute top-2 pr-3 right-0">
-                                    <div className="relative group inline-flex">
-                                        <button
-                                            disabled
-                                            className="cursor-not-allowed"
-                                        >
-                                            <Eye size={20} className="text-gray-400 dark:text-gray-500" />
-                                        </button>
-
-                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                            No submissions to view
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex flex-col w-full">
-                            <div className="flex items-start gap-2 min-w-0 pr-16">
-                                <div className="p-2 rounded-md flex-shrink-0">
-                                    <Play className="w-4 h-4" />
-                                </div>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <h3 className="font-body text-body2 font-medium truncate">
-                                                {liveClass.title || 'Untitled Live Class'}
-                                            </h3>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {liveClass.title || 'Untitled Live Class'}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </div>
-                            <div className="flex w-full items-center justify-between mt-4 text-sm">
-                                <div className="flex items-center gap-1">
-                                    <Badge
-                                        variant="outline"
-                                        className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
-                                    >
-                                        {submissions} submissions
-                                    </Badge>
-                                </div>
-                                <Badge
-                                    variant="secondary"
-                                    className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                >
-                                    {totalStudents - submissions} pending
-                                </Badge>
-                            </div>
+                                )
+                            })}
                         </div>
                     </div>
                 )
