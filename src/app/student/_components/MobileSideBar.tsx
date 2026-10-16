@@ -90,7 +90,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
       return 'Practice problem';
     }
     if (item.type === 'feedback-form') {
-      return 'Share your feedback';
+      return '';
     }
     return '';
   };
@@ -175,7 +175,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                                item.type === 'article' ? `Article: ${item.title}` :
                                item.type === 'assignment' ? `Assignment: ${item.title}` :
                                item.type === 'assessment' ? `Assessment: ${item.title}` :
-                               item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
+                               item.type === 'feedback-form' ? ` ${item.title}` :
                                item.type === 'quiz' ? `Quiz: ${item.title}` :
                                item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
                                item.title}
