@@ -24,7 +24,7 @@ const Page = () => {
     {isCareerTourBootcamp &&
     (isFirstTimeLogin || isStudentSignUp) &&
     <CareerToursBanner />}
-    
+
         <ModuleContentPage courseId={courseId} moduleId={moduleId} />
     </div>
   )

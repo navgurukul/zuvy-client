@@ -404,7 +404,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       return '1 Coding Practice problem';
     }
     if (item.type === 'feedback-form') {
-      return 'Share your feedback';
+      return '';
     }
     return '';
   };
@@ -479,7 +479,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                                     item.type === 'article' ? `Article: ${item.title}` :
                                       item.type === 'assignment' ? `Assignment: ${item.title}` :
                                         item.type === 'assessment' ? `Assessment: ${item.title}` :
-                                          item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
+                                          item.type === 'feedback-form' ? ` ${item.title}` :
                                             item.type === 'quiz' ? `Quiz: ${item.title}` :
                                               item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
                                                 item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :

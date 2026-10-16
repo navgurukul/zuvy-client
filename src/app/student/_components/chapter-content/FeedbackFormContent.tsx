@@ -129,7 +129,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 </h5>
                 {status === 'Completed' && (
                     <div className="text-md mb-4 rounded-md bg-[#E5FFF3] p-3 text-[#00B37E] dark:bg-[#12352B] dark:text-[#4ADEA8]">
-                        Your feedback has been submitted successfully
+                        Registered successfully
                     </div>
                 )}
                 <p className="text-md text-muted-foreground">
