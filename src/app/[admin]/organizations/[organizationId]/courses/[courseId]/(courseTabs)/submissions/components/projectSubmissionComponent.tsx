@@ -11,6 +11,12 @@ import autoTable from 'jspdf-autotable'
 import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ProjectsComponentProps {
     courseId: string
@@ -127,11 +133,20 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
 
 
                         <div className="flex flex-col w-full">
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 rounded-md">
+                            <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                                <div className="p-2 rounded-md flex-shrink-0">
                                     <BookOpen className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base">{projectTitle}</h3>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <h3 className="font-medium text-base truncate">{projectTitle}</h3>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {projectTitle}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                             <div className="flex items-center justify-between mt-4 text-sm">
                                 <div className="flex items-center gap-1">

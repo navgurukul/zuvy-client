@@ -21,6 +21,12 @@ import { getUser } from '@/store/store'
 
 import { useVideoSubmissions } from '@/app/[admin]/hooks/useVideoSubmissions'
 import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()
@@ -131,13 +137,21 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                 key={video.id}
                                             >
-                                                {/* Content */}
-                                                <div className="font-semibold  flex w-full flex-col justify-between">
-                                                    <div className="flex items-center ">
-                                                        <div className="p-2 rounded-md">
+                                                <div className="font-semibold flex w-full flex-col justify-between">
+                                                    <div className="flex items-center min-w-0 pr-2">
+                                                        <div className="p-2 rounded-md flex-shrink-0">
                                                             <Play className="w-4 h-4" />
                                                         </div>
-                                                        <h3 title={video.title} className="font-medium text-base">{ellipsis(video.title , 25)}</h3>
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <h3 className="font-medium text-base truncate">{ellipsis(video.title, 25)}</h3>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {video.title}
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
                                                     </div>
                                                 </div>
                                                 <div className="absolute top-3 right-2">

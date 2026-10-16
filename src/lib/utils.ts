@@ -335,6 +335,11 @@ export function isAllSelectedChaptersCompleted(
     );
 }
 
-
-export const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+// This is hardcoded for Career Tours and may change in the future.
 // export const CAREER_TOUR_BOOTCAMP_IDS = [674, 135, 134, 133, 132, 131, 130, 1099]
+
+// for prod: 
+// export const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
+
+// for dev:
+export const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]

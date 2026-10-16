@@ -12,7 +12,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { ProfileImage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/ProfileImage'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
     {
@@ -108,7 +108,11 @@ export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
         ),
         cell: ({ row }) => (
             <div className="flex items-center">
-                <ProfileImage src={row.original.profilePicture} />
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                    />
+                </Avatar>
             </div>
         ),
         enableSorting: false,

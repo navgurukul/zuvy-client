@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input'
 import { DataTable } from '../../../../../../../_components/datatable/data-table'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import AddStudentsModal from '../../_components/addStudentsmodal'
-import { columns } from './columns'
+import { columns, getFilteredColumns } from './columns'
 import { useStudentData } from './components/useStudentData'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { useGetCourseStudents } from '@/app/[admin]/hooks/useGetCourseStudents'
@@ -446,6 +446,12 @@ const StudentsPage = ({ params }: { params: any }) => {
     if (loading) {
         return <StudentPageSkeleton />
     }
+
+    // Get bootcamp ID from the first student (all students in this view belong to the same bootcamp)
+    // Career Tour Course Bootcamp IDs: [136, 135, 134, 133, 132, 131, 130, 129]
+    // Hide attendance column for these specific bootcamp IDs
+    const bootcampId = students.length > 0 ? students[0].bootcampId : undefined
+    const filteredColumns = getFilteredColumns(bootcampId)
     
     return (
         <div className="text-foreground">
@@ -665,7 +671,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     <div className="mt-5">
                         <DataTable
                             data={students}
-                            columns={columns}
+                            columns={filteredColumns}
                             setSelectedRows={setSelectedRows}
                         />
                     </div>

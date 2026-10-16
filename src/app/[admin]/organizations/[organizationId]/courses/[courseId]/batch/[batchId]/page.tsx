@@ -46,6 +46,7 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 import { SearchBox } from '@/utils/searchBox'
 import { getUser } from '@/store/store'
 import { api } from '@/utils/axios.config'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const BatchesInfo = ({
     params,
@@ -113,6 +114,7 @@ const BatchesInfo = ({
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const [isDownloadingReport, setIsDownloadingReport] = React.useState(false)
+        const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
     const handleDownloadReport = async () => {
         try {
@@ -218,6 +220,7 @@ const BatchesInfo = ({
                     'Course Name': stringifyCsvValue(reportData.courseName ?? ''),
                     'Batch Name': stringifyCsvValue(reportData.batchName ?? ''),
                     'Student Name': stringifyCsvValue(student.name ?? ''),
+                    ...(isCareerTourBootcamp ? { 'Student ID': stringifyCsvValue(student.studentId ?? 'NA') } : {}),
                     Email: stringifyCsvValue(student.email ?? ''),
                     'Overall Attendance': stringifyCsvValue(student.overAllAttendance ?? ''),
                     'Assessments Attempted': stringifyCsvValue(

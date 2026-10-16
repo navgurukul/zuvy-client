@@ -14,6 +14,12 @@ import { FeedbackSubmissionSkeleton } from '@/app/[admin]/organizations/[organiz
 import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const FormComponent = ({
     bootcampId,
@@ -58,11 +64,20 @@ const FormComponent = ({
     return (
         <div className="relative bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-md">
+                <div className="flex items-center gap-2 min-w-0 flex-1 pr-20">
+                    <div className="p-2 rounded-md flex-shrink-0">
                         <MessageSquare className="w-4 h-4" />
                     </div>
-                    <h3 className="font-medium text-base">{data.title}</h3>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <h3 className="font-medium text-base truncate">{data.title}</h3>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {data.title}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
                 <div className="absolute top-2 right-2">
                     {data.submitStudents > 0 ? (

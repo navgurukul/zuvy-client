@@ -29,6 +29,7 @@ import useLearnerProfileStrength from "../hooks/useLearnerProfileStrength";
 import useLearnerProfile from "@/app/student/hooks/useLearnerProfile";
 import { useTour } from "@/app/student/_components/guided-tour";
 import ProfileStrengthCard from "@/app/student/_components/ProfileStrengthCard";
+import { CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -43,6 +44,19 @@ const StudentDashboard = () => {
   const { strengthPercentage, strengthLevel, strengthMessage, isProfileComplete, missingFields } = useLearnerProfileStrength();
   const { refetchLearnerProfile } = useLearnerProfile(false);
   const access_token = localStorage.getItem('access_token');
+  // For career Tours, we need to check if the user has an email associated with their account. If not, we will hide certain cards on the dashboard.
+  const storedAuth = typeof window !== 'undefined' ? localStorage.getItem('AUTH') : null;
+  const hasEmail: boolean = (() => {
+    try {
+      return storedAuth ? (JSON.parse(storedAuth)?.email ?? '').trim().length > 0 : false;
+    } catch {
+      return false;
+    }
+  })();
+  const isCareerTour = (studentData?.inProgressBootcamps ?? []).some(
+    (b: any) => CAREER_TOUR_BOOTCAMP_IDS.includes(Number(b.id))
+  );
+  const showEmailGatedCards = hasEmail && !isCareerTour;
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore();
   const { isDark } = useThemeStore();
@@ -298,6 +312,7 @@ const StudentDashboard = () => {
 
 
             <div className="mb-6">
+              {showEmailGatedCards && (
               <div className="mb-8 lg:hidden">
                 <ProfileStrengthCard
                   displayProgress={displayProgress}
@@ -313,6 +328,7 @@ const StudentDashboard = () => {
                   }}
                 />
               </div>
+              )}
               <h2 className="text-2xl font-heading text-left font-semibold mb-6" id="tour-courses">My Courses</h2>
 
               <div className="flex gap-3 mb-6">
@@ -606,6 +622,7 @@ const StudentDashboard = () => {
           </div>
 
           <div className="hidden lg:block lg:col-span-1 space-y-4">
+            {showEmailGatedCards && (
             <ProfileStrengthCard
               displayProgress={displayProgress}
               profileLevel={profileLevel}
@@ -619,6 +636,7 @@ const StudentDashboard = () => {
                 router.push('/student/profile?mode=edit');
               }}
             />
+            )}
           </div>
         </div>
       </div>
