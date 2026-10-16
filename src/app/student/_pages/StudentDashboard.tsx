@@ -239,7 +239,7 @@ const StudentDashboard = () => {
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+          <div className={showEmailGatedCards ? 'lg:col-span-3' : 'lg:col-span-4'}>
             <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div className="text-left">
                 <h1 className="text-3xl font-heading font-bold mb-2">

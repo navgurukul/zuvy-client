@@ -13,21 +13,22 @@ const Page = () => {
   const { onboardingData, isLoading } = useOnboardingStorage();
   const stayOnDashboard = searchParams.get('stay') === 'dashboard';
 
-  // Route guard: only redirect to profile if showTooltip was true (skipProfileSetup not set)
+  // Route guard: only redirect to profile for first-time logins.
   useEffect(() => {
     if (isLoading) return;
     if (isOpen || isTourCompleted) return;
     if (stayOnDashboard) return;
     // showTooltip was false on login — user should stay on dashboard regardless of profile completion
     const skipProfileSetup = localStorage.getItem('skipProfileSetup');
-    if (skipProfileSetup) return;
+    const isFirstTimeLogin = localStorage.getItem('isFirstTImeLogin');
+    if (skipProfileSetup || isFirstTimeLogin === 'false') return;
     if (onboardingData && !onboardingData.isCompleted) {
       router.push('/student/profile');
     }
   }, [onboardingData, isLoading, router, isOpen, isTourCompleted, stayOnDashboard]);
 
   // Prevent UI flash while redirecting
-  if (isLoading || (!isOpen && !isTourCompleted && onboardingData && !onboardingData.isCompleted && !stayOnDashboard && !localStorage.getItem('skipProfileSetup'))) {
+  if (isLoading || (!isOpen && !isTourCompleted && onboardingData && !onboardingData.isCompleted && !stayOnDashboard && !localStorage.getItem('skipProfileSetup') && localStorage.getItem('isFirstTImeLogin') !== 'false')) {
     return null;
   }
 
