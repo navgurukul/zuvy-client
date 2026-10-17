@@ -27,7 +27,6 @@ import {
     APIResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 import { getUser } from '@/store/store'
 import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
@@ -56,7 +55,6 @@ const Page = ({ params }: any) => {
     const searchParams = useSearchParams()
     const moduleId = searchParams.get('moduleId')
     const currentTab = searchParams.get('tab') || 'form'
-    const { downloadCsv } = useDownloadCsv()
     const { fetchFormsStatus } = useFormsStatus()
     const [studentStatus, setStudentStatus] = useState<any>()
     const { getChapterDetails } = useGetChapterDetails()
@@ -298,50 +296,144 @@ const Page = ({ params }: any) => {
 
     const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
-    const handleVideoDownloadCsv = useCallback(() => {
+    const handleVideoDownloadCsv = useCallback(async () => {
         if (!moduleId) return
 
-        const queryParams = new URLSearchParams()
+        try {
+            // Build query params — fetch ALL records (no pagination limit)
+            const queryParams = new URLSearchParams()
+            queryParams.append('limit', '10000')
+            queryParams.append('offset', '0')
 
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
+            if (selectedBatch !== 'all') {
+                queryParams.append('batchId', selectedBatch)
+            }
+
+            const currentSearchQuery = searchParams.get('search')
+            if (currentSearchQuery) {
+                queryParams.append('searchStudent', currentSearchQuery)
+            }
+
+            if (sortField) queryParams.append('orderBy', sortField)
+            if (sortDirection) queryParams.append('orderDirection', sortDirection)
+
+            const response = await api.get(
+                `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`
+            )
+
+            const allStudents: any[] = response.data.combinedData || []
+
+            if (allStudents.length === 0) {
+                toast({ title: 'No data', description: 'No students found to export.', variant: 'destructive' })
+                return
+            }
+
+            // ── Determine the max number of questions across all submitted students ──
+            const maxQuestions = allStudents.reduce((max: number, s: any) => {
+                return Math.max(max, (s.formResponses || []).length)
+            }, 0)
+
+            // ── Build CSV header row ──
+            const escapeCell = (value: any): string => {
+                const str = (value ?? '').toString().replace(/"/g, '""')
+                return `"${str}"`
+            }
+
+            const fixedHeaders = [
+                'Student Name',
+                ...(isCareerTourBootcamp ? ['Student ID'] : []),
+                'Email',
+                'Batch',
+                'Status',
+                'Submitted At',
+            ]
+
+            const questionHeaders: string[] = []
+            for (let i = 1; i <= maxQuestions; i++) {
+                questionHeaders.push(
+                    `Q${i}: Question`,
+                    `Q${i}: Question Type`,
+                    `Q${i}: Options`,
+                    `Q${i}: Chosen Options`,
+                    `Q${i}: Selected Answers`,
+                    `Q${i}: Required`,
+                    `Q${i}: Answered At`,
+                )
+            }
+
+            const headerRow = [...fixedHeaders, ...questionHeaders].map(escapeCell).join(',')
+
+            // ── Build CSV data rows ──
+            const dataRows = allStudents.map((student: any) => {
+                const fixedCells = [
+                    student.name || '',
+                    ...(isCareerTourBootcamp ? [student.studentId ?? 'NA'] : []),
+                    student.email ?? 'NA',
+                    student.batchName || '',
+                    student.status || '',
+                    student.submittedAt
+                        ? new Date(student.submittedAt).toLocaleString()
+                        : 'NA',
+                ]
+
+                const responseCells: string[] = []
+                const responses: any[] = student.formResponses || []
+
+                for (let i = 0; i < maxQuestions; i++) {
+                    const r = responses[i]
+                    if (!r) {
+                        // Pad empty columns for students with fewer questions
+                        responseCells.push('', '', '', '', '', '', '')
+                    } else {
+                        // Format options object: { "1": "A", "2": "B" } → "1: A | 2: B"
+                        const optionsStr = r.options && typeof r.options === 'object'
+                            ? Object.entries(r.options)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(' | ')
+                            : 'NA'
+
+                        // chosenOptions: [2] → "2"
+                        const chosenOptionsStr = Array.isArray(r.chosenOptions) && r.chosenOptions.length > 0
+                            ? r.chosenOptions.join(', ')
+                            : r.answer ?? 'NA'
+
+                        // selectedAnswers: ["B"] → "B"
+                        const selectedAnswersStr = Array.isArray(r.selectedAnswers) && r.selectedAnswers.length > 0
+                            ? r.selectedAnswers.join(', ')
+                            : r.answer ?? 'NA'
+
+                        responseCells.push(
+                            r.question || '',
+                            r.questionType || '',
+                            optionsStr,
+                            chosenOptionsStr,
+                            selectedAnswersStr,
+                            r.isRequired ? 'Yes' : 'No',
+                            r.answeredAt
+                                ? new Date(r.answeredAt).toLocaleString()
+                                : 'NA',
+                        )
+                    }
+                }
+
+                return [...fixedCells, ...responseCells].map(escapeCell).join(',')
+            })
+
+            const csvContent = [headerRow, ...dataRows].join('\n')
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `feedback_${chapterDetails?.title || 'submissions'}_${new Date().toISOString().split('T')[0]}.csv`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+
+        } catch (error) {
+            console.error('CSV download error', error)
+            toast({ title: 'Error', description: 'Failed to download report.', variant: 'destructive' })
         }
-
-        const currentSearchQuery = searchParams.get('search')
-        if (currentSearchQuery) {
-            queryParams.append('searchStudent', currentSearchQuery)
-        }
-
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-
-        const csvColumns = [
-            { header: 'Student Name', key: 'name' },
-            ...(isCareerTourBootcamp ? [{ header: 'Student ID', key: 'studentId' }] : []),
-            { header: 'Email', key: 'email' },
-            { header: 'Batch', key: 'batchName' },
-            { header: 'Status', key: 'status' },
-        ]
-
-        downloadCsv({
-            endpoint: `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`,
-
-            fileName: `feedback_${chapterDetails?.title || 'submissions'}_${new Date()
-                .toISOString()
-                .split('T')[0]}`,
-
-            dataPath: 'combinedData',
-
-            columns: csvColumns,
-
-            mapData: (item: any) => ({
-                name: item.name || '',
-                ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
-                email: item.email ?? 'NA',
-                batchName: item.batchName || '',
-                status: item.status || '',
-            }),
-        })
     }, [moduleId, params.courseId, params.StudentForm, selectedBatch, searchParams, sortField, sortDirection, chapterDetails, isCareerTourBootcamp])
 
     const handleBatchChange = useCallback((value: string) => {

@@ -11,9 +11,10 @@ import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { FeedbackSubmissionSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
+
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 import {
     Tooltip,
     TooltipContent,
@@ -28,38 +29,129 @@ const FormComponent = ({
     moduleName,
     totalStudents,
 }: FormComponentProps) => {
-    const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
     const [downloading, setDownloading] = useState(false)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(bootcampId))
 
-    const handleDownloadCsv = () => {
+    const handleDownloadCsv = async () => {
         if (!bootcampId || !moduleId || !data?.id) return
-    
-        downloadCsv({
-          endpoint: `/submission/formsStatus/${bootcampId}/${moduleId}?chapterId=${data.id}`,
-          fileName: `form-status-${bootcampId}-${moduleId}-chapter-${data.id}`,
-      
-          dataPath: 'combinedData',
-      
-          columns: [
-            { header: 'Name', key: 'name' },
-            { header: 'Email', key: 'email' },
-            { header: 'Status', key: 'status' },
-            { header: 'Submitted At', key: 'submittedAt' },
-          ],
-      
-          mapData: (item) => ({
-            name: item.name || 'N/A',
-            email: item.email || 'N/A',
-            status: item.status || 'N/A',
-            submittedAt: item.submittedAt
-              ? moment(item.submittedAt).utc().format('DD MMM YYYY, HH:mm')
-              : 'N/A',
-          }),
-        })
+
+        setDownloading(true)
+        try {
+            const response = await api.get(
+                `/submission/formsStatus/${bootcampId}/${moduleId}?chapterId=${data.id}&limit=10000&offset=0`
+            )
+
+            const allStudents: any[] = response.data.combinedData || []
+
+            if (allStudents.length === 0) return
+
+            // ── Determine the max number of questions across all submitted students ──
+            const maxQuestions = allStudents.reduce((max: number, s: any) => {
+                return Math.max(max, (s.formResponses || []).length)
+            }, 0)
+
+            const escapeCell = (value: any): string => {
+                const str = (value ?? '').toString().replace(/"/g, '""')
+                return `"${str}"`
+            }
+
+            // ── Fixed headers ──
+            const fixedHeaders = [
+                'Student Name',
+                ...(isCareerTourBootcamp ? ['Student ID'] : []),
+                'Email',
+                'Batch',
+                'Status',
+                'Submitted At',
+            ]
+
+            // ── Dynamic question headers ──
+            const questionHeaders: string[] = []
+            for (let i = 1; i <= maxQuestions; i++) {
+                questionHeaders.push(
+                    `Q${i}: Question`,
+                    `Q${i}: Question Type`,
+                    `Q${i}: Options`,
+                    `Q${i}: Chosen Options`,
+                    `Q${i}: Selected Answers`,
+                    `Q${i}: Required`,
+                    `Q${i}: Answered At`,
+                )
+            }
+
+            const headerRow = [...fixedHeaders, ...questionHeaders].map(escapeCell).join(',')
+
+            // ── Data rows ──
+            const dataRows = allStudents.map((student: any) => {
+                const fixedCells = [
+                    student.name || '',
+                    ...(isCareerTourBootcamp ? [student.studentId ?? 'NA'] : []),
+                    student.email || 'NA',
+                    student.batchName || '',
+                    student.status || '',
+                    student.submittedAt
+                        ? moment(student.submittedAt).utc().format('DD MMM YYYY, HH:mm')
+                        : 'NA',
+                ]
+
+                const responseCells: string[] = []
+                const responses: any[] = student.formResponses || []
+
+                for (let i = 0; i < maxQuestions; i++) {
+                    const r = responses[i]
+                    if (!r) {
+                        responseCells.push('', '', '', '', '', '', '')
+                    } else {
+                        const optionsStr = r.options && typeof r.options === 'object'
+                            ? Object.entries(r.options)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(' | ')
+                            : 'NA'
+
+                        const chosenOptionsStr = Array.isArray(r.chosenOptions) && r.chosenOptions.length > 0
+                            ? r.chosenOptions.join(', ')
+                            : r.answer ?? 'NA'
+
+                        const selectedAnswersStr = Array.isArray(r.selectedAnswers) && r.selectedAnswers.length > 0
+                            ? r.selectedAnswers.join(', ')
+                            : r.answer ?? 'NA'
+
+                        responseCells.push(
+                            r.question || '',
+                            r.questionType || '',
+                            optionsStr,
+                            chosenOptionsStr,
+                            selectedAnswersStr,
+                            r.isRequired ? 'Yes' : 'No',
+                            r.answeredAt
+                                ? moment(r.answeredAt).utc().format('DD MMM YYYY, HH:mm')
+                                : 'NA',
+                        )
+                    }
+                }
+
+                return [...fixedCells, ...responseCells].map(escapeCell).join(',')
+            })
+
+            const csvContent = [headerRow, ...dataRows].join('\n')
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `feedback_${data.title || `chapter-${data.id}`}_${new Date().toISOString().split('T')[0]}.csv`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+        } catch (error) {
+            console.error('CSV download error', error)
+        } finally {
+            setDownloading(false)
+        }
     }
     return (
         <div className="relative bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full">
