@@ -904,7 +904,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 />
                 <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
                 <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
-                <div className="flex items-center gap-2 mb-4">
+                <div className={`flex items-center gap-2 mb-4 ${instructorName ? '' : 'hidden'}`}>
                   <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
                 </div>
                 {validCollaborator && <div className="flex items-center gap-2 mb-4">
