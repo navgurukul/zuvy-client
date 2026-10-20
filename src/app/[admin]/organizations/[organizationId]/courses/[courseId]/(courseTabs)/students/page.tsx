@@ -13,6 +13,7 @@ import {
     UserPlus,
     Search,
     Download,
+    X,
 } from 'lucide-react'
 import { getUser, getBatchData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -100,6 +101,7 @@ const FilterPopover = ({
     onApply,
 }: FilterPopoverProps) => {
     const [open, setOpen] = useState(false)
+    const [activeFilter, setActiveFilter] = useState<keyof FilterDraft>('status')
     const [draft, setDraft] = useState<FilterDraft>({
         status: statusFilter,
         batch: batchFilter,
@@ -153,12 +155,12 @@ const FilterPopover = ({
                 key={`${key}-${value}`}
                 type="button"
                 onClick={() => updateDraft(key, selected ? (key === 'attendance' ? '' : 'all') : value)}
-                className={`flex w-full items-start gap-2 break-words px-2 py-1.5 text-left text-sm whitespace-normal hover:bg-muted ${selected ? 'text-primary font-medium' : 'text-foreground'}`}
+                className={`flex w-full items-center gap-2 break-words px-2 py-1.5 text-left text-sm font-normal whitespace-normal hover:bg-muted ${selected ? 'text-primary' : 'text-foreground'}`}
             >
-                <span className={`h-3.5 w-3.5 shrink-0 rounded border ${selected ? 'border-primary bg-primary' : 'border-input'}`}>
+                <span className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border ${selected ? 'border-primary bg-primary' : 'border-input'}`}>
                     {selected && <span className="block text-center text-[10px] leading-3 text-primary-foreground">✓</span>}
                 </span>
-                <span>{label}</span>
+                <span className="min-w-0">{label}</span>
             </button>
         )
     }
@@ -174,35 +176,104 @@ const FilterPopover = ({
         attendance: '',
     })
 
+    const filterLabels: Record<keyof FilterDraft, string> = {
+        status: 'Status',
+        batch: 'Batch',
+        enrolledDate: 'Enrolled Date',
+        careerStatus: 'Career Status',
+        skills: 'Skills',
+        education: 'Graduating Year',
+        openToRemote: 'Remote Preference',
+        attendance: 'Attendance',
+    }
+    const filterValueLabels: Record<string, string> = {
+        active: 'Active',
+        dropout: 'Inactive',
+        graduate: 'Graduate',
+        today: 'Today',
+        yesterday: 'Yesterday',
+        thisWeek: 'This week',
+        thisMonth: 'This month',
+        last3months: 'Last 3 months',
+        last6months: 'Last 6 months',
+        lastyear: 'Last year',
+        older: 'Older',
+        true: 'Remote Only',
+        false: 'In-Office',
+    }
+    const selectedFilters = (Object.keys(draft) as (keyof FilterDraft)[])
+        .filter((key) => draft[key] !== 'all' && draft[key] !== '')
+        .map((key) => {
+            const value = draft[key]
+            const batch = key === 'batch' ? batchOptions.find((option) => String(option.id) === value) : undefined
+            const displayValue = batch?.name || filterValueLabels[value] || value
+            return { key, label: `${filterLabels[key]}: ${displayValue}` }
+        })
+
     return (
-        <div ref={popoverRef} className="relative">
-            <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen((current) => !current)}
-                aria-expanded={open}
-                className="gap-2"
-            >
-                <ListFilter className="h-4 w-4" />
-                Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
-                {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-            {open && (
-                <div className="absolute right-0 z-50 mt-2 flex max-h-[min(70vh,620px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg">
-                    <div className="min-h-0 flex-1 overflow-y-auto p-2">
-                        <details open className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Status</summary>
+        <div ref={popoverRef} className="relative flex flex-col items-end gap-2">
+            {selectedFilters.length > 0 && (
+                <div className="flex max-h-20 max-w-[min(92vw,520px)] flex-wrap justify-end gap-1.5 overflow-y-auto">
+                    {selectedFilters.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => updateDraft(key, key === 'attendance' ? '' : 'all')}
+                            className="inline-flex max-w-full items-center gap-1 rounded-full border bg-muted px-2.5 py-1 text-xs text-foreground hover:bg-muted/80"
+                            aria-label={`Remove ${label} filter`}
+                        >
+                            <span className="truncate">{label}</span>
+                            <X className="h-3 w-3 shrink-0" />
+                        </button>
+                    ))}
+                </div>
+            )}
+            <div className="relative">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen((current) => !current)}
+                    aria-expanded={open}
+                    className="gap-2"
+                >
+                    <ListFilter className="h-4 w-4" />
+                    Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
+                    {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+                {open && (
+                    <div className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(70vh,620px)] w-[min(92vw,400px)] max-w-[calc(100vw-2rem)] flex-row-reverse overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg">
+                    <div className="w-40 shrink-0 overflow-y-auto border-l p-2">
+                        {([
+                            ['status', 'Status'],
+                            ['batch', 'Batches'],
+                            ['enrolledDate', 'Enrolled Date'],
+                            ['careerStatus', 'Career Status'],
+                            ['skills', 'Skills'],
+                            ['education', 'Graduating Year'],
+                            ['openToRemote', 'Remote Preference'],
+                        ] as [keyof FilterDraft, string][]).map(([key, label]) => (
+                            <button
+                                key={key}
+                                type="button"
+                                onClick={() => setActiveFilter(key)}
+                                className={`flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm ${activeFilter === key ? 'bg-muted font-medium text-primary' : 'hover:bg-muted'}`}
+                            >
+                                <span>{label}</span>
+                                {draft[key] !== 'all' && draft[key] !== '' && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="min-w-0 flex-1 overflow-y-auto p-2">
+                        {activeFilter === 'status' && <>
                             {optionButton('status', 'active', 'Active')}
                             {optionButton('status', 'dropout', 'Inactive')}
                             {optionButton('status', 'graduate', 'Graduate')}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Batches</summary>
+                        </>}
+                        {activeFilter === 'batch' && <>
                             {optionButton('batch', 'all', 'All batches')}
                             {batchOptions.map((batch) => optionButton('batch', String(batch.id), batch.name))}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Enrolled Date</summary>
+                        </>}
+                        {activeFilter === 'enrolledDate' && <>
                             {optionButton('enrolledDate', 'all', 'All enrolled dates')}
                             {optionButton('enrolledDate', 'today', 'Today')}
                             {optionButton('enrolledDate', 'yesterday', 'Yesterday')}
@@ -212,31 +283,28 @@ const FilterPopover = ({
                             {optionButton('enrolledDate', 'last6months', 'Last 6 months')}
                             {optionButton('enrolledDate', 'lastyear', 'Last year')}
                             {optionButton('enrolledDate', 'older', 'Older')}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Career Status</summary>
+                        </>}
+                        {activeFilter === 'careerStatus' && <>
                             {optionButton('careerStatus', 'all', 'All career statuses')}
                             {(dropdownOptions.careerStatus || []).map((option) => optionButton('careerStatus', option, option))}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Skills</summary>
+                        </>}
+                        {activeFilter === 'skills' && <>
                             {optionButton('skills', 'all', 'All skills')}
                             {(dropdownOptions.skills || []).map((option) => optionButton('skills', option, option))}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Graduating Year</summary>
+                        </>}
+                        {activeFilter === 'education' && <>
                             {optionButton('education', 'all', 'All graduating years')}
                             {(dropdownOptions.education || []).map((option) => optionButton('education', option, option))}
-                        </details>
-                        <details className="border-b py-1">
-                            <summary className="cursor-pointer list-none px-2 py-2 text-sm font-medium">Remote Preference</summary>
+                        </>}
+                        {activeFilter === 'openToRemote' && <>
                             {optionButton('openToRemote', 'all', 'All preferences')}
                             {optionButton('openToRemote', 'true', 'Remote Only')}
                             {optionButton('openToRemote', 'false', 'In-Office')}
-                        </details>
+                        </>}
                     </div>
-                </div>
-            )}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
@@ -816,7 +884,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end gap-3">
+                <div className="mt-4 flex items-end justify-end gap-3">
                     <FilterPopover
                         statusFilter={statusFilter}
                         batchFilter={batchFilter}
