@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select"
 import {StudentPageSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import { Student } from './studentComponentTypes'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 export type StudentData = {
     email: string
@@ -85,6 +86,7 @@ type FilterPopoverProps = {
     batchOptions: { id: number; name: string }[]
     dropdownOptions: StudentDropdownOptions
     onApply: (filters: FilterDraft) => void
+    bootcampId: number
 }
 
 const FilterPopover = ({
@@ -99,7 +101,9 @@ const FilterPopover = ({
     batchOptions,
     dropdownOptions,
     onApply,
+    bootcampId,
 }: FilterPopoverProps) => {
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
     const [open, setOpen] = useState(false)
     const [activeFilter, setActiveFilter] = useState<keyof FilterDraft>('status')
     const [draft, setDraft] = useState<FilterDraft>({
@@ -140,8 +144,12 @@ const FilterPopover = ({
         return () => document.removeEventListener('mousedown', handleOutsideClick)
     }, [open])
 
-    const activeFilterCount = [statusFilter, batchFilter, enrolledDateFilter, careerStatusFilter, skillsFilter, educationFilter, openToRemoteFilter]
-        .filter((value) => value !== 'all').length + (attendanceInput ? 1 : 0)
+    const activeFilterCount = [
+        statusFilter,
+        batchFilter,
+        enrolledDateFilter,
+        ...(isCareerTour ? [] : [careerStatusFilter, skillsFilter, educationFilter, openToRemoteFilter]),
+    ].filter((value) => value !== 'all').length + (!isCareerTour && attendanceInput ? 1 : 0)
     const updateDraft = (key: keyof FilterDraft, value: string) => {
         const nextDraft = { ...draft, [key]: value }
         setDraft(nextDraft)
@@ -202,7 +210,10 @@ const FilterPopover = ({
         false: 'In-Office',
     }
     const selectedFilters = (Object.keys(draft) as (keyof FilterDraft)[])
-        .filter((key) => draft[key] !== 'all' && draft[key] !== '')
+        .filter((key) => {
+            if (isCareerTour && ['status', 'careerStatus', 'skills', 'education', 'openToRemote', 'attendance'].includes(key)) return false
+            return draft[key] !== 'all' && draft[key] !== ''
+        })
         .map((key) => {
             const value = draft[key]
             const batch = key === 'batch' ? batchOptions.find((option) => String(option.id) === value) : undefined
@@ -244,13 +255,15 @@ const FilterPopover = ({
                     <div className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(70vh,620px)] w-[min(92vw,400px)] max-w-[calc(100vw-2rem)] flex-row-reverse overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg">
                     <div className="w-40 shrink-0 overflow-y-auto border-l p-2">
                         {([
-                            ['status', 'Status'],
+                            ...(!isCareerTour ? [['status', 'Status']] as [keyof FilterDraft, string][] : []),
                             ['batch', 'Batches'],
                             ['enrolledDate', 'Enrolled Date'],
-                            ['careerStatus', 'Career Status'],
-                            ['skills', 'Skills'],
-                            ['education', 'Graduating Year'],
-                            ['openToRemote', 'Remote Preference'],
+                            ...(!isCareerTour ? [
+                                ['careerStatus', 'Career Status'],
+                                ['skills', 'Skills'],
+                                ['education', 'Graduating Year'],
+                                ['openToRemote', 'Remote Preference'],
+                            ] as [keyof FilterDraft, string][] : []),
                         ] as [keyof FilterDraft, string][]).map(([key, label]) => (
                             <button
                                 key={key}
@@ -264,7 +277,7 @@ const FilterPopover = ({
                         ))}
                     </div>
                     <div className="min-w-0 flex-1 overflow-y-auto p-2">
-                        {activeFilter === 'status' && <>
+                        {!isCareerTour && activeFilter === 'status' && <>
                             {optionButton('status', 'active', 'Active')}
                             {optionButton('status', 'dropout', 'Inactive')}
                             {optionButton('status', 'graduate', 'Graduate')}
@@ -284,19 +297,19 @@ const FilterPopover = ({
                             {optionButton('enrolledDate', 'lastyear', 'Last year')}
                             {optionButton('enrolledDate', 'older', 'Older')}
                         </>}
-                        {activeFilter === 'careerStatus' && <>
+                        {!isCareerTour && activeFilter === 'careerStatus' && <>
                             {optionButton('careerStatus', 'all', 'All career statuses')}
                             {(dropdownOptions.careerStatus || []).map((option) => optionButton('careerStatus', option, option))}
                         </>}
-                        {activeFilter === 'skills' && <>
+                        {!isCareerTour && activeFilter === 'skills' && <>
                             {optionButton('skills', 'all', 'All skills')}
                             {(dropdownOptions.skills || []).map((option) => optionButton('skills', option, option))}
                         </>}
-                        {activeFilter === 'education' && <>
+                        {!isCareerTour && activeFilter === 'education' && <>
                             {optionButton('education', 'all', 'All graduating years')}
                             {(dropdownOptions.education || []).map((option) => optionButton('education', option, option))}
                         </>}
-                        {activeFilter === 'openToRemote' && <>
+                        {!isCareerTour && activeFilter === 'openToRemote' && <>
                             {optionButton('openToRemote', 'all', 'All preferences')}
                             {optionButton('openToRemote', 'true', 'Remote Only')}
                             {optionButton('openToRemote', 'false', 'In-Office')}
@@ -718,10 +731,9 @@ const StudentsPage = ({ params }: { params: any }) => {
         return <StudentPageSkeleton />
     }
 
-    // Get bootcamp ID from the first student (all students in this view belong to the same bootcamp)
-    // Career Tour Course Bootcamp IDs: [136, 135, 134, 133, 132, 131, 130, 129]
-    // Hide attendance column for these specific bootcamp IDs
-    const bootcampId = students.length > 0 ? students[0].bootcampId : undefined
+    // Use courseId from params as the bootcamp ID — always available regardless of student count
+    const bootcampId = Number(params.courseId)
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
     const filteredColumns = getFilteredColumns(bootcampId)
 
     const downloadReportAsCSV = () => {
@@ -729,45 +741,58 @@ const StudentsPage = ({ params }: { params: any }) => {
             toast.info({ title: 'No Data', description: 'No student data available to download.' })
             return
         }
+        const isCareerTour = isCareerTourBootcamp
 
-        const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
-        const isCareerTour = bootcampId !== undefined && CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
-
-        const headers = [
-            'Name',
-            'Email',
-            'Batch',
-            'Career Status',
-            'Graduating',
-            'Top Skills',
-            'Enrolled Date',
-            'Progress (%)',
-            ...(!isCareerTour ? ['Attendance', 'Status'] : []),
-        ]
+        const headers = isCareerTour
+            ? ['Name', 'Student ID', 'Email', 'Batch', 'Enrolled Date', 'Progress (%)']
+            : [
+                'Name',
+                'Email',
+                'Batch',
+                'Career Status',
+                'Graduating',
+                'Graduation Month',
+                'Graduation Year',
+                'Graduation Date',
+                'Top Skills',
+                'Education',
+                'Open to Remote',
+                'Enrolled Date',
+                'Progress (%)',
+                'Attendance',
+                'Status',
+            ]
 
         const rows = students.map((student: any) => {
-            const graduating =
-                student.graduationDate ||
-                (student.graduationMonth && student.graduationYear
-                    ? `${student.graduationMonth} ${student.graduationYear}`
-                    : '')
-            const skills = Array.isArray(student.skills)
-                ? student.skills.join('; ')
-                : student.skills || ''
-
-            const row = [
-                student.name || '',
-                student.email || '',
-                student.batchName || '',
-                student.careerStatus || '',
-                graduating,
-                skills,
-                student.enrolledDate || '',
-                student.progress ?? '',
-                ...(!isCareerTour
-                    ? [student.attendance ?? '', student.status || '']
-                    : []),
-            ]
+            const row = isCareerTour
+                ? [
+                    student.name || '',
+                    student.studentId || 'NA',
+                    student.email || '',
+                    student.batchName || '',
+                    student.enrolledDate || '',
+                    student.progress ?? '',
+                ]
+                : [
+                    student.name || '',
+                    student.email || '',
+                    student.batchName || '',
+                    student.careerStatus || '',
+                    student.graduationDate ||
+                        (student.graduationMonth && student.graduationYear
+                            ? `${student.graduationMonth} ${student.graduationYear}`
+                            : ''),
+                    student.graduationMonth ?? '',
+                    student.graduationYear ?? '',
+                    student.graduationDate || '',
+                    Array.isArray(student.skills) ? student.skills.join('; ') : student.skills || '',
+                    student.education || '',
+                    student.openToRemote === true ? 'Yes' : student.openToRemote === false ? 'No' : '',
+                    student.enrolledDate || '',
+                    student.progress ?? '',
+                    student.attendance ?? '',
+                    student.status || '',
+                ]
             // Wrap fields in quotes to handle commas inside values
             return row.map((field) => `"${String(field).replace(/"/g, '""')}"`)
         })
@@ -897,17 +922,20 @@ const StudentsPage = ({ params }: { params: any }) => {
                         batchOptions={(batchData || []).map((batch) => ({ id: batch.id, name: batch.name }))}
                         dropdownOptions={dropdownOptions}
                         onApply={handleApplyFilters}
+                        bootcampId={bootcampId}
                     />
-                    <div className="w-full sm:w-[160px]">
-                        <Input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="Attendance number"
-                            value={attendanceInput}
-                            onChange={handleAttendanceFilterChange}
-                            className="text-sm w-full"
-                        />
-                    </div>
+                    {!isCareerTourBootcamp && (
+                        <div className="w-full sm:w-[160px]">
+                            <Input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Attendance number"
+                                value={attendanceInput}
+                                onChange={handleAttendanceFilterChange}
+                                className="text-sm w-full"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {selectedRows.length > 0 && (

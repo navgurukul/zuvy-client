@@ -499,8 +499,8 @@ export const columns = allColumns
  */
 export const getFilteredColumns = (bootcampId?: number): ColumnDef<Task>[] => {
     if (bootcampId && CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)) {
-        // Hide both attendance and status columns for career tour bootcamps
-        const hiddenKeys = new Set(['attendance', 'status'])
+        // Hide attendance, status, careerStatus, graduating, and topSkills for career tour bootcamps
+        const hiddenKeys = new Set(['attendance', 'status', 'careerStatus', 'graduating', 'topSkills'])
         return allColumns.filter((col: any) =>
             !hiddenKeys.has(col.accessorKey) && !hiddenKeys.has(col.id)
         )
