@@ -24,7 +24,7 @@ export interface RoleAction {
 
 export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: string) => void) => {
     const searchParams = useSearchParams()
-    const { roles } = useRoles()
+    const { roles, refetchRoles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [roleId, setRoleId] = useState<number | undefined>(undefined)
 
@@ -398,6 +398,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     return {
         roles,
+        refetchRoles,
         resources,
         loading,
         error,
