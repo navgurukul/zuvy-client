@@ -10,6 +10,8 @@ import { VideoContentProps } from '@/app/student/_components/chapter-content/com
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useVideoStore } from '@/store/store'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 import { VideoSkeleton } from "@/app/student/_components/Skeletons";
 
@@ -34,6 +36,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const [isCompleted, setIsCompleted] = useState(
         chapterDetails.status === 'Completed'
     )
+    const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
+    const hasShownFeedbackReminderRef = useRef<string | null>(null)
 
     const { isCompleting, completeChapter } = useChapterCompletion({
         courseId: courseId as string,
@@ -82,8 +86,27 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const hasCompletedRef = useRef(false)
     // This is hardcoded for Career Tours and may change in the future.
     const chapterKey = chapterDetails.id.toString()
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
     const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
     const completionThreshold = isBootcampVideoOverride ? 0.99 : 0.75
+
+    const showFeedbackReminderOnce = useCallback(() => {
+        if (!isCareerTour || hasShownFeedbackReminderRef.current === chapterKey) return
+
+        const storageKey = `career-tour-feedback-reminder:${courseId}:${chapterKey}`
+        try {
+            if (window.localStorage.getItem(storageKey)) {
+                hasShownFeedbackReminderRef.current = chapterKey
+                return
+            }
+            window.localStorage.setItem(storageKey, 'shown')
+        } catch {
+            // Keep the reminder one-time for this mounted video if storage is unavailable.
+        }
+
+        hasShownFeedbackReminderRef.current = chapterKey
+        setShowFeedbackReminder(true)
+    }, [chapterKey, courseId, isCareerTour])
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
@@ -92,6 +115,10 @@ const VideoContent: React.FC<VideoContentProps> = ({
             if (now - lastSaveRef.current > 2000) {
                 setProgress(chapterKey, state.playedSeconds)
                 lastSaveRef.current = now
+            }
+
+            if (state.played >= 1) {
+                showFeedbackReminderOnce()
             }
 
             // For bootcamp video overrides, the reward should wait until full video completion.
@@ -113,6 +140,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
             isCompleted,
             completionThreshold,
             refetch,
+            showFeedbackReminderOnce,
         ]
     )
 
@@ -130,6 +158,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
 
     return (
+        <>
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
             <div className="max-w-4xl mx-auto">
                 <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}>
@@ -183,6 +212,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
+                                                onEnded={showFeedbackReminderOnce}
                                                
 
                                                 // onEnded={() => completeChapter()}
@@ -205,6 +235,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 // onReady={handleReady}
                                                 onProgress={handleProgress}
+                                                onEnded={showFeedbackReminderOnce}
                                               
 
                                                 // onEnded={() => completeChapter()}
@@ -269,6 +300,32 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 </ScrollArea>
             </div>
         </div>
+        <Dialog open={showFeedbackReminder} onOpenChange={setShowFeedbackReminder}>
+            <DialogContent className="max-w-lg overflow-hidden border-border bg-card p-0 shadow-2xl">
+                {/* <div className="h-1 w-full bg-primary" /> */}
+                <div className="p-6 sm:p-7">
+                    <DialogHeader className="space-y-3 text-left">
+                        <DialogTitle className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                            Please fill out the feedback form
+                        </DialogTitle>
+                        <DialogDescription className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                            Before moving to the next module, click the{' '}
+                            <span className="font-semibold text-primary">Feedback Form</span>{' '}
+                            chapter in the left sidebar and submit your feedback.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6">
+                        <Button
+                            onClick={() => setShowFeedbackReminder(false)}
+                            className="w-full bg-primary font-semibold text-primary-foreground shadow-hover hover:bg-primary-dark sm:w-auto"
+                        >
+                            Got it
+                        </Button>
+                    </DialogFooter>
+                </div>
+            </DialogContent>
+        </Dialog>
+        </>
     )
 }
 

@@ -343,3 +343,6 @@ export const CAREER_TOUR_BOOTCAMP_IDS = [136, 135, 134, 133, 132, 131, 130, 129]
 
 // for dev:
 // export const CAREER_TOUR_BOOTCAMP_IDS = [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]
+
+export const isNumberQuestion = (label: string | null | undefined): boolean =>
+    /\d/.test(label || '')
