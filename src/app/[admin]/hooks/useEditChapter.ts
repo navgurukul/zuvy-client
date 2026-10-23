@@ -8,6 +8,7 @@ export type EditChapterPayload = {
   completionDate?: string | null
   description?: string | null
   newOrder?: number
+  videoDurationSeconds?: number
 }
 
 /**
