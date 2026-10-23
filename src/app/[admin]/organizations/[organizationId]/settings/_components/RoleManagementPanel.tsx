@@ -483,16 +483,16 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 return
             }
 
-            const module = Object.entries(
+            const resourceGroupMatch = Object.entries(
                 groupedResources as Record<string, { id: string; children: any[] }>,
             ).find(([, mod]) => mod.children.some((c: any) => c.id === resourceId))
 
-            if (!module) {
+            if (!resourceGroupMatch) {
                 handlePermissionChange(resourceId, tier, true)
                 return
             }
 
-            const [, mod] = module
+            const [, mod] = resourceGroupMatch
             setParentLevelOverrides((prev) => ({ ...prev, [mod.id]: tier }))
             const beforeSnapshot: Record<number, number> = {}
             mod.children.forEach((child: any) => {
@@ -597,7 +597,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         } else if (pendingTab && pendingTab !== 'roles' && !hasUnsavedChanges) {
             onTabSwitch?.(pendingTab)
         }
-    }, [pendingTab, hasUnsavedChanges, onTabSwitch])
+    }, [pendingTab, hasUnsavedChanges, onTabSwitch, setPendingAction, setShowWarningModal])
 
     // ── Lock focus when any Select (dropdown) is open ────────────────────────
     useEffect(() => {
@@ -657,7 +657,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             {isOwnRole && !isAdminRole && (
                 <div className="flex items-center gap-3 rounded-md border border-warning/30 bg-warning-light px-3 py-2 text-xs text-warning-dark">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
-                    <p>You can't modify your own role's permissions. Switch to another role with sufficient privileges.</p>
+                    <p>You can&apos;t modify your own role&apos;s permissions. Switch to another role with sufficient privileges.</p>
                 </div>
             )}
 
