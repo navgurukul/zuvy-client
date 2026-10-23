@@ -67,8 +67,8 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     Object.keys(assesments).map(
                         (key) =>
                             key !== 'totalStudents' && (
-                                <div key={key}>
-                                    <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white mb-4">
+                                <div key={key} className="mb-6">
+                                    <h2 className="text-lg text-start font-bold text-foreground mb-3">
                                         Module - {key}
                                     </h2>
                                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">

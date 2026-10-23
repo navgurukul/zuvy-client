@@ -30,11 +30,17 @@ import useLearnerProfile from "@/app/student/hooks/useLearnerProfile";
 import { useTour } from "@/app/student/_components/guided-tour";
 import ProfileStrengthCard from "@/app/student/_components/ProfileStrengthCard";
 import { CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
+import { useBootcampProgress } from "@/app/student/hooks/useBootcampProgress";
+
+// This is hardcoded for Career Tours and may change in the future.
+const PROFILE_STRENGTH_CARD_CUTOFF_DATE = new Date('2026-10-14T00:00:00.000Z');
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const [enrollingBootcampId, setEnrollingBootcampId] = useState<number | null>(null);
   const { studentData, loading, error, refetch } = useStudentData();
+  const profileCourseId = studentData?.inProgressBootcamps?.[0]?.id?.toString() || '';
+  const { progressData: profileCourseProgress } = useBootcampProgress(profileCourseId);
 
   // ✅ Fix: Use correct property name 'globalCourses'
   const { globalCourses, loading: globalLoading, error: globalError, refetch: refetchGlobalCourses } = useFetchGlobalCourses();
@@ -69,6 +75,10 @@ const StudentDashboard = () => {
     : studentData?.completedBootcamps || [];
 
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
+  const profileCreatedAt = profileCourseProgress?.data?.createdAt;
+  const showProfileStrengthCard = Boolean(
+    profileCreatedAt && new Date(profileCreatedAt).getTime() < PROFILE_STRENGTH_CARD_CUTOFF_DATE.getTime()
+  );
   const displayProgress = strengthPercentage ?? 0;
   const defaultCourseCoverImage = isDark
     ? '/zuvy-logo-horizontal-dark.png'
@@ -239,7 +249,7 @@ const StudentDashboard = () => {
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+          <div className={showEmailGatedCards ? 'lg:col-span-3' : 'lg:col-span-4'}>
             <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div className="text-left">
                 <h1 className="text-3xl font-heading font-bold mb-2">
@@ -312,8 +322,7 @@ const StudentDashboard = () => {
 
 
             <div className="mb-6">
-              {showEmailGatedCards && (
-              <div className="mb-8 lg:hidden">
+              {showProfileStrengthCard && <div className="mb-8 lg:hidden">
                 <ProfileStrengthCard
                   displayProgress={displayProgress}
                   profileLevel={profileLevel}
@@ -327,8 +336,7 @@ const StudentDashboard = () => {
                     router.push('/student/profile?mode=edit');
                   }}
                 />
-              </div>
-              )}
+              </div>}
               <h2 className="text-2xl font-heading text-left font-semibold mb-6" id="tour-courses">My Courses</h2>
 
               <div className="flex gap-3 mb-6">
@@ -389,7 +397,7 @@ const StudentDashboard = () => {
                               maxLength={150}
                               className="text-muted-foreground mb-3"
                             />
-                            <div className="flex items-center gap-2 mb-4">
+                            <div className={`flex items-center gap-2 mb-4 ${bootcamp.instructorDetails ? '' : 'hidden'}`}>
                               <span className="text-sm text-muted-foreground capitalize">
                                 Instructor: {bootcamp.instructorDetails.name}
                               </span>
@@ -562,7 +570,7 @@ const StudentDashboard = () => {
                                   />
                                   
                                   {/* ✅ Fixed instructor path */}
-                                  <div className="flex items-center gap-2 mb-4">
+                                  <div className={`flex items-center gap-2 mb-4 ${course.batchInfo?.instructorDetails ? '' : 'hidden'}`}>
                                     <span className="text-sm text-muted-foreground capitalize">
                                       Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
                                     </span>
@@ -622,8 +630,7 @@ const StudentDashboard = () => {
           </div>
 
           <div className="hidden lg:block lg:col-span-1 space-y-4">
-            {showEmailGatedCards && (
-            <ProfileStrengthCard
+            {showProfileStrengthCard && <ProfileStrengthCard
               displayProgress={displayProgress}
               profileLevel={profileLevel}
               profileLevelColor={profileLevelColor}
@@ -635,8 +642,7 @@ const StudentDashboard = () => {
                 await refetchLearnerProfile();
                 router.push('/student/profile?mode=edit');
               }}
-            />
-            )}
+            />}
           </div>
         </div>
       </div>

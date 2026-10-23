@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { useSearchParams, useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -30,6 +30,7 @@ import {FeedbackFormContentProps,FeedbackQuestion,QuestionItem} from '@/app/stud
 import useWindowSize from '@/hooks/useHeightWidth'
 import {FeedbackFormSkeleton} from "@/app/student/_components/Skeletons";
 import { toast } from '@/components/ui/use-toast'
+import { CAREER_TOUR_BOOTCAMP_IDS, isNumberQuestion } from '@/lib/utils'
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
@@ -51,6 +52,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         () => courseIdParam?.toString() || null,
         [courseIdParam]
     )
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(bootcampId))
     const chapterId = useMemo(
         () => chapterDetails.id?.toString() || null,
         [chapterDetails.id]
@@ -65,7 +67,8 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 onChapterComplete() 
             },
         })
-
+    const [emailErrors, setEmailErrors] = useState<Record<number, boolean>>({})
+    const [numberErrors, setNumberErrors] = useState<Record<number, boolean>>({})
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -83,6 +86,32 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            const invalidEmails = isCareerTour
+                ? Object.fromEntries(
+                      questions
+                          .filter((q) => /\b(e-?mail)(\s+address)?\b/i.test(q.question || ''))
+                          .filter((q) => {
+                              const answer = typeof q.answer === 'string' ? q.answer.trim() : ''
+                              return answer !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)
+                          })
+                          .map((q) => [q.id, true])
+                  )
+                : {}
+            const invalidNumbers = isCareerTour
+                ? Object.fromEntries(
+                      questions
+                          .filter((q) => isNumberQuestion(q.question))
+                          .filter((q) => {
+                              const answer = typeof q.answer === 'string' ? q.answer : ''
+                              return answer !== '' && !/^\d+$/.test(answer)
+                          })
+                          .map((q) => [q.id, true])
+                  )
+                : {}
+            setEmailErrors(invalidEmails)
+            setNumberErrors(invalidNumbers)
+            if (Object.keys(invalidEmails).length > 0 || Object.keys(invalidNumbers).length > 0) return
+
             const result = formSchema.safeParse({ section: questions })
             if (!result.success) {
                 result.error.errors.forEach((error) => {
@@ -98,10 +127,9 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             const formData = {
                 section: questions.map((q) => ({
                     ...q,
-                    answer:
-                        q.typeId === 1
-                            ? (parseInt(q.answer) + 1).toString()
-                            : q.answer || null,
+                    // Keep the selected option key unchanged. The radio group
+                    // and the tracking API both use the option key directly.
+                    answer: q.answer || null,
                 })),
             }
             await submitForm(formData)
@@ -132,7 +160,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                         Your response has been submitted successfully.
                     </div>
                 )}
-                <p className="text-md text-muted-foreground">
+                <p className={`text-md text-muted-foreground ${isCareerTour ? 'hidden' : ''}`}>
                     Share your feedback about this module to help us improve.
                 </p>
             </div>
@@ -341,19 +369,26 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                     <Textarea
                                         value={item.answer as string}
                                         onChange={(e) => {
+                                            const answer = isCareerTour && isNumberQuestion(item.question)
+                                                ? e.target.value.replace(/\D/g, '')
+                                                : e.target.value
                                             const updatedQuestions = [
                                                 ...questions,
                                             ]
                                             updatedQuestions[index] = {
                                                 ...item,
-                                                answer: e.target.value,
+                                                answer,
                                             }
                                             setQuestions(updatedQuestions)
                                         }}
+                                        inputMode={isCareerTour && isNumberQuestion(item.question) ? 'numeric' : undefined}
                                         placeholder="Type your answer here..."
                                         rows={1}
                                         className="mt-2 h-9 min-h-0 w-[90%] ml-5 resize-y overflow-auto"
                                     />
+                                )}
+                                {emailErrors[item.id] && (
+                                    <p className="mt-1 ml-5 text-sm text-red-500">Enter a valid email address.</p>
                                 )}
                             </>
                         )}

@@ -118,11 +118,11 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                     )
                     if (filteredVideos.length === 0) return null
                     return (
-                        <div key={key}>
-                            <h2 className="text-lg text-start font-bold text-foreground">
+                        <div key={key} className="mb-6">
+                            <h2 className="text-lg text-start font-bold text-foreground mb-3">
                                 Module - {key}
                             </h2>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {filteredVideos.map(
                                     (video: VideoSubmissions) => {
                                         const isDisabled =

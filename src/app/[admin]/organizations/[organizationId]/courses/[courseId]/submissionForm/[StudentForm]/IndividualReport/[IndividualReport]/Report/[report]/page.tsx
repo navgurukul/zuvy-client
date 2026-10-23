@@ -17,7 +17,7 @@ import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import useFormsStatus from '@/app/[admin]/hooks/useFormsStatus'
 import useFormDetailsById from '@/app/[admin]/hooks/useFormDetailsById'
-import useChapterDetails from '@/hooks/useChapterDetails'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 
 import {
     FormItem,
@@ -30,10 +30,16 @@ const Page = ({ params }: { params: Params }) => {
     const { fetchFormsStatus } = useFormsStatus()
     const { fetchFormDetailsById } = useFormDetailsById()
     const [individualFormData, setIndividualFormData] = useState<any>()
-    const {
-        chapterDetails,
-        error: chapterDetailsError,
-    } = useChapterDetails(params.report)
+    const { getChapterDetails } = useGetChapterDetails()
+    const [chapterDetails, setChapterDetails] = useState<any>(null)
+    const [chapterDetailsError, setChapterDetailsError] = useState<any>(null)
+
+    useEffect(() => {
+        if (!params.report) return
+        getChapterDetails({ chapterId: params.report, bootcampId: params.courseId, moduleId: params.StudentForm })
+            .then((res) => setChapterDetails(res.data))
+            .catch((err) => setChapterDetailsError(err))
+    }, [params.report, params.courseId, params.StudentForm])
     useCourseExistenceCheck(params.courseId)
     const [user, setUser] = useState<any>()
 
@@ -227,31 +233,27 @@ const Page = ({ params }: { params: Params }) => {
                                                         item.options
                                                     ).map((option) => {
                                                         const answer =
-                                                            item
-                                                                .formTrackingData[0]
-                                                                .chosenOptions
+                                                            item.formTrackingData?.[0]?.chosenOptions ?? []
                                                         const optionNumber =
                                                             option
+                                                        const isSelected = answer.some(
+                                                            (chosenOption) =>
+                                                                String(chosenOption) === optionNumber
+                                                        )
                                                         return (
                                                             <div
                                                                 key={option}
-                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${answer.includes(
-                                                                    optionNumber
-                                                                ) &&
+                                                                className={`flex space-x-2 mr-5 mt-1 p-3 text-md text-muted-foreground ${isSelected &&
                                                                     'border-gray-800 border-2 rounded-lg'
                                                                     }`}
                                                             >
                                                                 <Checkbox
-                                                                    checked={answer.includes(
-                                                                        optionNumber
-                                                                    )}
+                                                                    checked={isSelected}
                                                                     disabled
                                                                     aria-label={
                                                                         option
                                                                     }
-                                                                    className={`translate-y-[2px] mr-1 ${answer.includes(
-                                                                        optionNumber
-                                                                    ) &&
+                                                                    className={`translate-y-[2px] mr-1 ${isSelected &&
                                                                         'bg-green-500'
                                                                         }`}
                                                                 />

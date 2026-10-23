@@ -6,10 +6,14 @@ import {
     ArrowLeft,
     ArrowRight,
     ChevronDown,
+    ChevronUp,
     Plus,
     FileSpreadsheet,
+    ListFilter,
     UserPlus,
     Search,
+    Download,
+    X,
 } from 'lucide-react'
 import { getUser, getBatchData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -37,6 +41,7 @@ import {
 } from "@/components/ui/select"
 import {StudentPageSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import { Student } from './studentComponentTypes'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 export type StudentData = {
     email: string
@@ -56,6 +61,265 @@ type StudentDropdownOptions = {
     skills?: string[]
     openToRemote?: boolean[]
     education?: string[]
+}
+
+type FilterDraft = {
+    status: string
+    batch: string
+    enrolledDate: string
+    careerStatus: string
+    skills: string
+    education: string
+    openToRemote: string
+    attendance: string
+}
+
+type FilterPopoverProps = {
+    statusFilter: string
+    batchFilter: string
+    enrolledDateFilter: string
+    careerStatusFilter: string
+    skillsFilter: string
+    educationFilter: string
+    openToRemoteFilter: string
+    attendanceInput: string
+    batchOptions: { id: number; name: string }[]
+    dropdownOptions: StudentDropdownOptions
+    onApply: (filters: FilterDraft) => void
+    bootcampId: number
+}
+
+const FilterPopover = ({
+    statusFilter,
+    batchFilter,
+    enrolledDateFilter,
+    careerStatusFilter,
+    skillsFilter,
+    educationFilter,
+    openToRemoteFilter,
+    attendanceInput,
+    batchOptions,
+    dropdownOptions,
+    onApply,
+    bootcampId,
+}: FilterPopoverProps) => {
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
+    const [open, setOpen] = useState(false)
+    const [activeFilter, setActiveFilter] = useState<keyof FilterDraft>('status')
+    const [draft, setDraft] = useState<FilterDraft>({
+        status: statusFilter,
+        batch: batchFilter,
+        enrolledDate: enrolledDateFilter,
+        careerStatus: careerStatusFilter,
+        skills: skillsFilter,
+        education: educationFilter,
+        openToRemote: openToRemoteFilter,
+        attendance: attendanceInput,
+    })
+    const popoverRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!open) return
+
+        setDraft({
+            status: statusFilter,
+            batch: batchFilter,
+            enrolledDate: enrolledDateFilter,
+            careerStatus: careerStatusFilter,
+            skills: skillsFilter,
+            education: educationFilter,
+            openToRemote: openToRemoteFilter,
+            attendance: attendanceInput,
+        })
+    }, [open, statusFilter, batchFilter, enrolledDateFilter, careerStatusFilter, skillsFilter, educationFilter, openToRemoteFilter, attendanceInput])
+
+    useEffect(() => {
+        if (!open) return
+        const handleOutsideClick = (event: MouseEvent) => {
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+                setOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleOutsideClick)
+        return () => document.removeEventListener('mousedown', handleOutsideClick)
+    }, [open])
+
+    const activeFilterCount = [
+        statusFilter,
+        batchFilter,
+        enrolledDateFilter,
+        ...(isCareerTour ? [] : [careerStatusFilter, skillsFilter, educationFilter, openToRemoteFilter]),
+    ].filter((value) => value !== 'all').length + (!isCareerTour && attendanceInput ? 1 : 0)
+    const updateDraft = (key: keyof FilterDraft, value: string) => {
+        const nextDraft = { ...draft, [key]: value }
+        setDraft(nextDraft)
+        onApply(nextDraft)
+    }
+
+    const optionButton = (key: keyof FilterDraft, value: string, label: string) => {
+        const selected = draft[key] === value
+        return (
+            <button
+                key={`${key}-${value}`}
+                type="button"
+                onClick={() => updateDraft(key, selected ? (key === 'attendance' ? '' : 'all') : value)}
+                className={`flex w-full items-center gap-2 break-words px-2 py-1.5 text-left text-sm font-normal whitespace-normal hover:bg-muted ${selected ? 'text-primary' : 'text-foreground'}`}
+            >
+                <span className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border ${selected ? 'border-primary bg-primary' : 'border-input'}`}>
+                    {selected && <span className="block text-center text-[10px] leading-3 text-primary-foreground">✓</span>}
+                </span>
+                <span className="min-w-0">{label}</span>
+            </button>
+        )
+    }
+
+    const resetDraft = () => setDraft({
+        status: 'all',
+        batch: 'all',
+        enrolledDate: 'all',
+        careerStatus: 'all',
+        skills: 'all',
+        education: 'all',
+        openToRemote: 'all',
+        attendance: '',
+    })
+
+    const filterLabels: Record<keyof FilterDraft, string> = {
+        status: 'Status',
+        batch: 'Batch',
+        enrolledDate: 'Enrolled Date',
+        careerStatus: 'Career Status',
+        skills: 'Skills',
+        education: 'Graduating Year',
+        openToRemote: 'Remote Preference',
+        attendance: 'Attendance',
+    }
+    const filterValueLabels: Record<string, string> = {
+        active: 'Active',
+        dropout: 'Inactive',
+        graduate: 'Graduate',
+        today: 'Today',
+        yesterday: 'Yesterday',
+        thisWeek: 'This week',
+        thisMonth: 'This month',
+        last3months: 'Last 3 months',
+        last6months: 'Last 6 months',
+        lastyear: 'Last year',
+        older: 'Older',
+        true: 'Remote Only',
+        false: 'In-Office',
+    }
+    const selectedFilters = (Object.keys(draft) as (keyof FilterDraft)[])
+        .filter((key) => {
+            if (isCareerTour && ['status', 'careerStatus', 'skills', 'education', 'openToRemote', 'attendance'].includes(key)) return false
+            return draft[key] !== 'all' && draft[key] !== ''
+        })
+        .map((key) => {
+            const value = draft[key]
+            const batch = key === 'batch' ? batchOptions.find((option) => String(option.id) === value) : undefined
+            const displayValue = batch?.name || filterValueLabels[value] || value
+            return { key, label: `${filterLabels[key]}: ${displayValue}` }
+        })
+
+    return (
+        <div ref={popoverRef} className="relative flex flex-col items-end gap-2">
+            {selectedFilters.length > 0 && (
+                <div className="flex max-h-20 max-w-[min(92vw,520px)] flex-wrap justify-end gap-1.5 overflow-y-auto">
+                    {selectedFilters.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => updateDraft(key, key === 'attendance' ? '' : 'all')}
+                            className="inline-flex max-w-full items-center gap-1 rounded-full border bg-muted px-2.5 py-1 text-xs text-foreground hover:bg-muted/80"
+                            aria-label={`Remove ${label} filter`}
+                        >
+                            <span className="truncate">{label}</span>
+                            <X className="h-3 w-3 shrink-0" />
+                        </button>
+                    ))}
+                </div>
+            )}
+            <div className="relative">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen((current) => !current)}
+                    aria-expanded={open}
+                    className="gap-2"
+                >
+                    <ListFilter className="h-4 w-4" />
+                    Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
+                    {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+                {open && (
+                    <div className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(70vh,620px)] w-[min(92vw,400px)] max-w-[calc(100vw-2rem)] flex-row-reverse overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg">
+                    <div className="w-40 shrink-0 overflow-y-auto border-l p-2">
+                        {([
+                            ...(!isCareerTour ? [['status', 'Status']] as [keyof FilterDraft, string][] : []),
+                            ['batch', 'Batches'],
+                            ['enrolledDate', 'Enrolled Date'],
+                            ...(!isCareerTour ? [
+                                ['careerStatus', 'Career Status'],
+                                ['skills', 'Skills'],
+                                ['education', 'Graduating Year'],
+                                ['openToRemote', 'Remote Preference'],
+                            ] as [keyof FilterDraft, string][] : []),
+                        ] as [keyof FilterDraft, string][]).map(([key, label]) => (
+                            <button
+                                key={key}
+                                type="button"
+                                onClick={() => setActiveFilter(key)}
+                                className={`flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm ${activeFilter === key ? 'bg-muted font-medium text-primary' : 'hover:bg-muted'}`}
+                            >
+                                <span>{label}</span>
+                                {draft[key] !== 'all' && draft[key] !== '' && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="min-w-0 flex-1 overflow-y-auto p-2">
+                        {!isCareerTour && activeFilter === 'status' && <>
+                            {optionButton('status', 'active', 'Active')}
+                            {optionButton('status', 'dropout', 'Inactive')}
+                            {optionButton('status', 'graduate', 'Graduate')}
+                        </>}
+                        {activeFilter === 'batch' && <>
+                            {optionButton('batch', 'all', 'All batches')}
+                            {batchOptions.map((batch) => optionButton('batch', String(batch.id), batch.name))}
+                        </>}
+                        {activeFilter === 'enrolledDate' && <>
+                            {optionButton('enrolledDate', 'all', 'All enrolled dates')}
+                            {optionButton('enrolledDate', 'today', 'Today')}
+                            {optionButton('enrolledDate', 'yesterday', 'Yesterday')}
+                            {optionButton('enrolledDate', 'thisWeek', 'This week')}
+                            {optionButton('enrolledDate', 'thisMonth', 'This month')}
+                            {optionButton('enrolledDate', 'last3months', 'Last 3 months')}
+                            {optionButton('enrolledDate', 'last6months', 'Last 6 months')}
+                            {optionButton('enrolledDate', 'lastyear', 'Last year')}
+                            {optionButton('enrolledDate', 'older', 'Older')}
+                        </>}
+                        {!isCareerTour && activeFilter === 'careerStatus' && <>
+                            {optionButton('careerStatus', 'all', 'All career statuses')}
+                            {(dropdownOptions.careerStatus || []).map((option) => optionButton('careerStatus', option, option))}
+                        </>}
+                        {!isCareerTour && activeFilter === 'skills' && <>
+                            {optionButton('skills', 'all', 'All skills')}
+                            {(dropdownOptions.skills || []).map((option) => optionButton('skills', option, option))}
+                        </>}
+                        {!isCareerTour && activeFilter === 'education' && <>
+                            {optionButton('education', 'all', 'All graduating years')}
+                            {(dropdownOptions.education || []).map((option) => optionButton('education', option, option))}
+                        </>}
+                        {!isCareerTour && activeFilter === 'openToRemote' && <>
+                            {optionButton('openToRemote', 'all', 'All preferences')}
+                            {optionButton('openToRemote', 'true', 'Remote Only')}
+                            {optionButton('openToRemote', 'false', 'In-Office')}
+                        </>}
+                    </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
 }
 
 const StudentsPage = ({ params }: { params: any }) => {
@@ -433,6 +697,26 @@ const StudentsPage = ({ params }: { params: any }) => {
         }
     }
 
+    const handleApplyFilters = (filters: FilterDraft) => {
+        setStatusFilter(filters.status)
+        setBatchFilter(filters.batch)
+        setEnrolledDateFilter(filters.enrolledDate)
+        setCareerStatusFilter(filters.careerStatus)
+        setSkillsFilter(filters.skills)
+        setEducationFilter(filters.education)
+        setOpenToRemoteFilter(filters.openToRemote)
+        setAttendanceInput(filters.attendance)
+        setOffset(0)
+        setCurrentPage(1)
+        setSelectedRows([])
+
+        const urlParams = new URLSearchParams(window.location.search)
+        if (filters.batch !== 'all') urlParams.set('batch_id', filters.batch)
+        else urlParams.delete('batch_id')
+        urlParams.delete('page')
+        window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`)
+    }
+
     useEffect(() => {
         const handleRefresh = () => { 
             if (!isFetching.current) {
@@ -447,11 +731,83 @@ const StudentsPage = ({ params }: { params: any }) => {
         return <StudentPageSkeleton />
     }
 
-    // Get bootcamp ID from the first student (all students in this view belong to the same bootcamp)
-    // Career Tour Course Bootcamp IDs: [136, 135, 134, 133, 132, 131, 130, 129]
-    // Hide attendance column for these specific bootcamp IDs
-    const bootcampId = students.length > 0 ? students[0].bootcampId : undefined
+    // Use courseId from params as the bootcamp ID — always available regardless of student count
+    const bootcampId = Number(params.courseId)
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
     const filteredColumns = getFilteredColumns(bootcampId)
+
+    const downloadReportAsCSV = () => {
+        if (!students || students.length === 0) {
+            toast.info({ title: 'No Data', description: 'No student data available to download.' })
+            return
+        }
+        const isCareerTour = isCareerTourBootcamp
+
+        const headers = isCareerTour
+            ? ['Name', 'Student ID', 'Email', 'Batch', 'Enrolled Date', 'Progress (%)']
+            : [
+                'Name',
+                'Email',
+                'Batch',
+                'Career Status',
+                'Graduating',
+                'Graduation Month',
+                'Graduation Year',
+                'Graduation Date',
+                'Top Skills',
+                'Education',
+                'Open to Remote',
+                'Enrolled Date',
+                'Progress (%)',
+                'Attendance',
+                'Status',
+            ]
+
+        const rows = students.map((student: any) => {
+            const row = isCareerTour
+                ? [
+                    student.name || '',
+                    student.studentId || 'NA',
+                    student.email || '',
+                    student.batchName || '',
+                    student.enrolledDate || '',
+                    student.progress ?? '',
+                ]
+                : [
+                    student.name || '',
+                    student.email || '',
+                    student.batchName || '',
+                    student.careerStatus || '',
+                    student.graduationDate ||
+                        (student.graduationMonth && student.graduationYear
+                            ? `${student.graduationMonth} ${student.graduationYear}`
+                            : ''),
+                    student.graduationMonth ?? '',
+                    student.graduationYear ?? '',
+                    student.graduationDate || '',
+                    Array.isArray(student.skills) ? student.skills.join('; ') : student.skills || '',
+                    student.education || '',
+                    student.openToRemote === true ? 'Yes' : student.openToRemote === false ? 'No' : '',
+                    student.enrolledDate || '',
+                    student.progress ?? '',
+                    student.attendance ?? '',
+                    student.status || '',
+                ]
+            // Wrap fields in quotes to handle commas inside values
+            return row.map((field) => `"${String(field).replace(/"/g, '""')}"`)
+        })
+
+        const csvContent = [headers.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `students_report_${params.courseId}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+    }
     
     return (
         <div className="text-foreground">
@@ -485,6 +841,16 @@ const StudentsPage = ({ params }: { params: any }) => {
 
                     {/* Action Buttons Row (on mobile both in one row) */}
                     <div className="flex w-full flex-row mt-2 md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
+                        {/* Download Report Button */}
+                        <Button
+                            variant="outline"
+                            onClick={downloadReportAsCSV}
+                            className=""
+                        >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download Report
+                        </Button>
+
                         {/* Add Single Student Button */}
                         <Dialog
                             open={isSingleStudentOpen}
@@ -543,6 +909,35 @@ const StudentsPage = ({ params }: { params: any }) => {
                     </div>
                 </div>
 
+                <div className="mt-4 flex items-end justify-end gap-3">
+                    <FilterPopover
+                        statusFilter={statusFilter}
+                        batchFilter={batchFilter}
+                        enrolledDateFilter={enrolledDateFilter}
+                        careerStatusFilter={careerStatusFilter}
+                        skillsFilter={skillsFilter}
+                        educationFilter={educationFilter}
+                        openToRemoteFilter={openToRemoteFilter}
+                        attendanceInput={attendanceInput}
+                        batchOptions={(batchData || []).map((batch) => ({ id: batch.id, name: batch.name }))}
+                        dropdownOptions={dropdownOptions}
+                        onApply={handleApplyFilters}
+                        bootcampId={bootcampId}
+                    />
+                    {!isCareerTourBootcamp && (
+                        <div className="w-full sm:w-[160px]">
+                            <Input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Attendance number"
+                                value={attendanceInput}
+                                onChange={handleAttendanceFilterChange}
+                                className="text-sm w-full"
+                            />
+                        </div>
+                    )}
+                </div>
+
                 {selectedRows.length > 0 && (
                     <div className='flex flex-row mt-3'>
                         <AlertDialogDemo
@@ -560,112 +955,6 @@ const StudentsPage = ({ params }: { params: any }) => {
                         />
                     </div>
                 )}
-
-                {/* Filters Row (on mobile both in one row) */}
-                <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
-                    {/* Status Filter */}
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">All Status</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="dropout">Dropout</SelectItem><SelectItem value="graduate">Graduate</SelectItem></SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Batch Filter (placed after Status) */}
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
-                            <SelectContent className="w-[160px]"><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Enrolled Date filter */}
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={enrolledDateFilter} onValueChange={handleEnrolledDateFilterChange}>
-                            <SelectTrigger className="text-sm w-full">
-                                <SelectValue placeholder="Enrolled Dates" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Enrolled</SelectItem>
-                                <SelectItem value="today">Today</SelectItem>
-                                <SelectItem value="yesterday">Yesterday</SelectItem>
-                                <SelectItem value="thisWeek">This Week</SelectItem>
-                                <SelectItem value="thisMonth">This Month</SelectItem>
-                                <SelectItem value="last3months">Last 3 Months</SelectItem>
-                                <SelectItem value="last6months">Last 6 Months</SelectItem>
-                                <SelectItem value="lastyear">Last Year</SelectItem>
-                                <SelectItem value="older">Older</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={careerStatusFilter} onValueChange={(value) => handleProfileFilterChange(setCareerStatusFilter, value)}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Career status" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">All career statuses</SelectItem>{(dropdownOptions.careerStatus || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={skillsFilter} onValueChange={(value) => handleProfileFilterChange(setSkillsFilter, value)}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Skills" /></SelectTrigger>
-                            <SelectContent className="w-[220px]"><SelectItem value="all">All Skills</SelectItem>{(dropdownOptions.skills || []).map((skill) => (<SelectItem key={skill} value={skill}>{skill}</SelectItem>))}</SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={educationFilter} onValueChange={(value) => handleProfileFilterChange(setEducationFilter, value)}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Education" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">Graduating</SelectItem>{(dropdownOptions.education || []).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={openToRemoteFilter} onValueChange={(value) => handleProfileFilterChange(setOpenToRemoteFilter, value)}>
-                            <SelectTrigger className="text-sm w-full"><SelectValue placeholder="Remote work" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All remote preferences</SelectItem>
-                                {(dropdownOptions.openToRemote || []).map((option) => (
-                                    <SelectItem key={String(option)} value={String(option)}>{option ? 'Open to remote' : 'Not open to remote'}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Last Active Filter */}
-                    {/* <div className="w-full sm:w-[160px] mt-2">
-                        <Select
-                            value={lastActiveFilter}
-                            onValueChange={handleLastActiveFilterChange}
-                        >
-                            <SelectTrigger className="text-sm w-full">
-                                <SelectValue placeholder="Last Active" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Active</SelectItem>
-                                <SelectItem value="today">Today</SelectItem>
-                                <SelectItem value="yesterday">Yesterday</SelectItem>
-                                <SelectItem value="thisWeek">This Week</SelectItem>
-                                <SelectItem value="thisMonth">This Month</SelectItem>
-                                <SelectItem value="last3months">Last 3 Months</SelectItem>
-                                <SelectItem value="last6months">Last 6 Months</SelectItem>
-                                <SelectItem value="lastyear">Last Year</SelectItem>
-                                <SelectItem value="older">Older</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div> */}
-
-                    {/* Attendance Filter - with debouncing */}
-                    <div className="w-full sm:w-[160px]">
-                        <Input
-                            type="text"
-                            placeholder="Attendance number"
-                            value={attendanceInput}
-                            onChange={handleAttendanceFilterChange}
-                            className="text-sm w-full"
-                        />
-                    </div>
-                </div>
 
                 <div>
                     <div className="mt-5">

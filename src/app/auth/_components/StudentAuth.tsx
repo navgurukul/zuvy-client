@@ -268,7 +268,7 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                 </p>
             </div>
 
-            <div className="space-y-0 text-left">
+            <div className="space-y-2 text-left">
                 <Label htmlFor="student-name">Full name</Label>
                 <Input
                     id="student-name"
@@ -281,7 +281,7 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                 />
             </div>
 
-            <div className="space-y-0 text-left">
+            <div className="space-y-2 text-left">
                 <Label htmlFor="student-password">Password</Label>
                 <div className="relative">
                     <Input
