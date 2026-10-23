@@ -1255,6 +1255,15 @@ export const isLinkValid = (link: string) => {
     }
 }
 
+export const isYouTubeLink = (url: string) => {
+    try {
+        const hostname = new URL(url.trim()).hostname
+        return hostname.includes('youtube.com') || hostname.includes('youtu.be')
+    } catch {
+        return false
+    }
+}
+
 export const getEmbedLink = (url: string) => {
     if (!url) return ''
     try {
