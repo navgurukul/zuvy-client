@@ -588,12 +588,26 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       )}
 
       {/* Reward Modal */}
+      {/* onContinue auto-advances to the next chapter when the student completes one.
+          We only navigate when sparks > 0 (genuine completion); zero sparks means
+          the student failed/retried and the modal shows "Try Again →", so we skip
+          the advance. When there is no next chapter (last item in module) nextItem
+          is null and onContinue is left undefined, preserving the current behaviour. */}
       <ZuvyRewardModal
         isOpen={rewardModalState.isOpen}
         totalSparks={rewardModalState.sparks}
         chapterTitle={rewardModalState.chapterTitle}
         hideSparks={rewardModalState.hideSparks}
         onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
+        onContinue={
+          // Advance when: there is a next chapter AND either the chapter awarded
+          // sparks (normal completion) OR it was a no-sparks item like a feedback
+          // form (hideSparks=true). The only case we DON'T advance is zero-sparks
+          // on a sparks-bearing chapter, which means the student failed/needs retry.
+          nextItem && (rewardModalState.sparks > 0 || rewardModalState.hideSparks)
+            ? () => handleItemSelect(nextItem.item.id)
+            : undefined
+        }
       />
     </div>
   );
