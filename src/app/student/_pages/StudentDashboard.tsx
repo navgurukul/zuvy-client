@@ -397,7 +397,7 @@ const StudentDashboard = () => {
                               maxLength={150}
                               className="text-muted-foreground mb-3"
                             />
-                            <div className="flex items-center gap-2 mb-4">
+                            <div className={`flex items-center gap-2 mb-4 ${bootcamp.instructorDetails ? '' : 'hidden'}`}>
                               <span className="text-sm text-muted-foreground capitalize">
                                 Instructor: {bootcamp.instructorDetails.name}
                               </span>
@@ -570,7 +570,7 @@ const StudentDashboard = () => {
                                   />
                                   
                                   {/* ✅ Fixed instructor path */}
-                                  <div className="flex items-center gap-2 mb-4">
+                                  <div className={`flex items-center gap-2 mb-4 ${course.batchInfo?.instructorDetails ? '' : 'hidden'}`}>
                                     <span className="text-sm text-muted-foreground capitalize">
                                       Instructor: {course.batchInfo?.instructorDetails?.name || 'N/A'}
                                     </span>
