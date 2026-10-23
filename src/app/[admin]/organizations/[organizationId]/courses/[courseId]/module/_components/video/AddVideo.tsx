@@ -26,7 +26,7 @@ import {
     AddVideoProps,
     EditChapterResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
-import { getEmbedLink, isLinkValid } from '@/utils/admin'
+import { getEmbedLink, isLinkValid, isYouTubeLink } from '@/utils/admin'
 import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
@@ -73,6 +73,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
+    const [videoDurationSeconds, setVideoDurationSeconds] = useState<number>()
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -109,6 +110,10 @@ const AddVideo: React.FC<AddVideoProps> = ({
             title: values.videoTitle,
             description: values.description,
             links: [modifiedLink],
+            ...(isYouTubeLink(modifiedLink) &&
+            videoDurationSeconds !== undefined
+                ? { videoDurationSeconds }
+                : {}),
         }
 
         try {
@@ -131,6 +136,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
 
 
     useEffect(() => {
+        setVideoDurationSeconds(undefined)
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
@@ -313,6 +319,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                     content?.contentDetails?.[0]
                                                         ?.links?.[0] || ''
                                                 )}
+                                                onDuration={setVideoDurationSeconds}
                                             />
                                         )}
                                     </div>
