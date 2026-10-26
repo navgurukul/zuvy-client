@@ -108,6 +108,8 @@ const Page = ({ params }: any) => {
             { header: 'Email', key: 'email' },
             { header: 'Batch', key: 'batchName' },
             { header: 'Watched At', key: 'completedAt' },
+            { header: 'Title', key: 'title' },
+            { header: 'Total Watch Time', key: 'totalWatchTime' },
         ]
 
         downloadCsv({
@@ -125,12 +127,14 @@ const Page = ({ params }: any) => {
 
             columns: csvColumns,
 
-            mapData: (item: any) => ({
+            mapData: (item: any, responseData: any) => ({
                 name: item.name || '',
                 ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
                 email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',
+                title: responseData?.moduleVideochapter?.title || '',
+                totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
             }),
         })
     }, [params.videoId, selectedBatch, sortField, sortDirection, videoData, isCareerTourBootcamp])

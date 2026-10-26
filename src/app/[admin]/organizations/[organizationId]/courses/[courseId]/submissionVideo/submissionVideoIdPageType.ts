@@ -60,6 +60,7 @@ export interface ModuleVideoChapter {
   videoUrl?: string;
   totalStudents:number
   totalSubmittedStudents:number
+  totalwatchedtime?: number
 }
 
 export interface SubmittedStudent {

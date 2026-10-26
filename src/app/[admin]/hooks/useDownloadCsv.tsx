@@ -5,7 +5,7 @@ type CsvConfig = {
   endpoint: string
   fileName: string
   columns: { header: string; key: string }[]
-  mapData: (item: any) => any
+  mapData: (item: any, responseData?: any) => any
   dataPath?: string //NEW (for different APIs)
 }
 
@@ -31,15 +31,17 @@ const useDownloadCsv = () => {
 
       const headers = columns.map((col) => col.header).join(',')
 
-      const csvRows = data.map((item: any) =>
-        columns
+      const csvRows = data.map((item: any) => {
+        const mappedItem = mapData(item, response.data)
+
+        return columns
           .map((col) =>
-            `"${(mapData(item)[col.key] ?? '')
+            `"${(mappedItem[col.key] ?? '')
               .toString()
               .replace(/"/g, '""')}"`
           )
           .join(',')
-      )
+      })
 
       const csvContent = [headers, ...csvRows].join('\n')
 

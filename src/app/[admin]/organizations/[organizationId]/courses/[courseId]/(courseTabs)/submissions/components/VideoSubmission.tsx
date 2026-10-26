@@ -72,14 +72,18 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
             { header: 'Name', key: 'name' },
             { header: 'Email', key: 'email' },
             { header: 'Completed Date', key: 'completedAt' },
+            { header: 'Title', key: 'title' },
+            { header: 'Total Watch Time', key: 'totalWatchTime' },
           ],
       
-          mapData: (student: any) => ({
+          mapData: (student: any, responseData: any) => ({
             name: student.name || 'N/A',
             email: student.email || 'N/A',
             completedAt: student.completedAt
               ? new Date(student.completedAt).toLocaleString()
               : 'N/A',
+            title: responseData?.moduleVideochapter?.title || 'N/A',
+            totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? 'N/A',
           }),
         })
       }
