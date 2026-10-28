@@ -307,6 +307,7 @@ const Page = ({ params }: any) => {
 
             columns: [
                 { header: 'Student Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Batch', key: 'batchName' },
                 { header: 'Started At', key: 'startedAt' },
@@ -320,6 +321,7 @@ const Page = ({ params }: any) => {
 
             mapData: (assessment: any) => ({
                 name: assessment.name || '',
+                studentId: assessment.userId ?? assessment.id ?? 'NA',
                 email: assessment.email || '',
                 batchName: assessment.batchName || '',
                 startedAt: assessment.startedAt || '',
