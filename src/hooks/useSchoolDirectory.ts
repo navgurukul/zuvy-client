@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface School {
@@ -126,17 +126,23 @@ export const useSchools = ({
   const [schools, setSchools] = useState<School[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const currentOffsetRef = useRef(offset)
+  const requestInFlightRef = useRef(false)
 
   const fetchSchools = useCallback(async () => {
     if (!enabled || !state || !city) {
       setSchools([])
       setTotal(0)
+      currentOffsetRef.current = offset
+      requestInFlightRef.current = false
       setLoading(false)
       setError(null)
       return
     }
 
+    requestInFlightRef.current = true
     setLoading(true)
     setError(null)
 
@@ -146,12 +152,15 @@ export const useSchools = ({
       })
       setSchools(Array.isArray(response.data?.data) ? response.data.data : [])
       setTotal(response.data?.total ?? 0)
+      currentOffsetRef.current = offset
     } catch (requestError) {
       console.error('Error fetching schools:', requestError)
       setSchools([])
       setTotal(0)
+      currentOffsetRef.current = offset
       setError(getErrorMessage(requestError, 'Failed to fetch schools'))
     } finally {
+      requestInFlightRef.current = false
       setLoading(false)
     }
   }, [city, enabled, limit, offset, search, state])
@@ -160,5 +169,56 @@ export const useSchools = ({
     void fetchSchools()
   }, [fetchSchools])
 
-  return { data: schools, total, limit, offset, loading, error, refetch: fetchSchools }
+  const loadMore = useCallback(async () => {
+    if (
+      !enabled ||
+      !state ||
+      !city ||
+      requestInFlightRef.current ||
+      schools.length >= total
+    ) {
+      return
+    }
+
+    const nextOffset = currentOffsetRef.current + limit
+    requestInFlightRef.current = true
+    setLoadingMore(true)
+    setError(null)
+
+    try {
+      const response = await api.get<SchoolsResponse>('/schools', {
+        params: { state, city, search: search || undefined, limit, offset: nextOffset },
+      })
+      const nextSchools = Array.isArray(response.data?.data) ? response.data.data : []
+
+      setSchools(currentSchools => {
+        const existingCodes = new Set(currentSchools.map(school => school.udiseCode))
+        return [
+          ...currentSchools,
+          ...nextSchools.filter(school => !existingCodes.has(school.udiseCode)),
+        ]
+      })
+      setTotal(response.data?.total ?? total)
+      currentOffsetRef.current = nextOffset
+    } catch (requestError) {
+      console.error('Error loading more schools:', requestError)
+      setError(getErrorMessage(requestError, 'Failed to load more schools'))
+    } finally {
+      requestInFlightRef.current = false
+      setLoadingMore(false)
+    }
+  }, [city, enabled, limit, search, state, schools.length, total])
+
+  return {
+    data: schools,
+    total,
+    limit,
+    offset,
+    loading,
+    loadingMore,
+    hasMore: schools.length < total,
+    error,
+    refetch: fetchSchools,
+    loadMore,
+  }
 }
