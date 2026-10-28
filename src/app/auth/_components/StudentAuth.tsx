@@ -107,6 +107,8 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
     const [city, setCity] = useState('')
     const [schoolSearch, setSchoolSearch] = useState('')
     const [schoolCode, setSchoolCode] = useState('')
+    const [manualSchoolName, setManualSchoolName] = useState('')
+    const [isManualSchool, setIsManualSchool] = useState(false)
     const [schoolOpen, setSchoolOpen] = useState(false)
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
     const { data: states, loading: statesLoading, error: statesError } = useSchoolStates()
@@ -127,7 +129,9 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
 
         setError('')
         if (name.trim().length < 2 || name.trim().length > 100) return setError('Name must be between 2 and 100 characters.')
-        if (!state || !city || !schoolCode) return setError('Please select your state, city, and school.')
+        if (!state || !city || (!schoolCode && (!isManualSchool || !manualSchoolName.trim()))) {
+            return setError('Please select your state, city, and school.')
+        }
         if (!isPasswordValid(password)) return setError('Please meet all password requirements listed below.')
         if (password !== confirmPassword) return setError('Passwords do not match.')
         setLoading(true)
@@ -140,7 +144,8 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                 captchaToken: token,
                 state,
                 city,
-                udiseCode: schoolCode,
+                schoolName: isManualSchool ? manualSchoolName.trim() : undefined,
+                udiseCode: isManualSchool ? null : schoolCode,
             })
             localStorage.setItem('CAREER_TOURS_BANNER_STORAGE_KEY', 'true')
             const id = data.studentId || data.student_id || data.user?.studentId || data.user?.student_id
@@ -315,6 +320,8 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                             setState(value)
                             setCity('')
                             setSchoolCode('')
+                            setManualSchoolName('')
+                            setIsManualSchool(false)
                             setSchoolSearch('')
                         }}
                     >
@@ -337,6 +344,8 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                         onValueChange={value => {
                             setCity(value)
                             setSchoolCode('')
+                            setManualSchoolName('')
+                            setIsManualSchool(false)
                             setSchoolSearch('')
                         }}
                         disabled={!state || citiesLoading}
@@ -369,7 +378,9 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                             className="w-full justify-between font-normal"
                         >
                             <span className="truncate">
-                                {selectedSchool?.schoolName || (city ? 'Search and select your school' : 'Select state and city first')}
+                                {isManualSchool
+                                    ? manualSchoolName || 'Enter your school name'
+                                    : selectedSchool?.schoolName || (city ? 'Search and select your school' : 'Select state and city first')}
                             </span>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -383,6 +394,7 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                                 onValueChange={value => {
                                     setSchoolSearch(value)
                                     setSchoolCode('')
+                                    setIsManualSchool(false)
                                 }}
                             />
                             <CommandList>
@@ -412,10 +424,34 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                                         <span className="truncate">{school.schoolName}</span>
                                     </CommandItem>
                                 ))}
+                                {!schoolsLoading && (
+                                    <CommandItem
+                                        value="school-not-listed"
+                                        onSelect={() => {
+                                            setIsManualSchool(true)
+                                            setSchoolCode('')
+                                            setSchoolSearch('')
+                                            setSchoolOpen(false)
+                                        }}
+                                    >
+                                        <span className="text-primary">My school is not listed</span>
+                                    </CommandItem>
+                                )}
                             </CommandList>
                         </Command>
                     </PopoverContent>
                 </Popover>
+                {isManualSchool && (
+                    <Input
+                        id="student-manual-school-name"
+                        autoFocus
+                        placeholder="Type your school name"
+                        value={manualSchoolName}
+                        onChange={event => setManualSchoolName(event.target.value)}
+                        maxLength={200}
+                        required
+                    />
+                )}
                 {schoolsError && <p className="text-xs text-destructive">{schoolsError}</p>}
             </div>
 
