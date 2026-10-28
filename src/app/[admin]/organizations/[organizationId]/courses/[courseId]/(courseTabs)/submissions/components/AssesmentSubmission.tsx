@@ -31,6 +31,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Qualified', key: 'qualified' },
             { header: 'Percentage', key: 'percentage' },
@@ -46,6 +47,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
       
           mapData: (student) => ({
             name: student.name || 'N/A',
+            studentId: student.userId ?? student.id ?? 'NA',
             email: student.email || 'N/A',
             qualified: student.isPassed ? 'Yes' : 'No',
             percentage: `${(student.percentage || 0).toFixed(2)}%`,

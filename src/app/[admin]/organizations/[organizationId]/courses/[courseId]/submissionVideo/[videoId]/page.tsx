@@ -104,7 +104,7 @@ const Page = ({ params }: any) => {
     const handleVideoDownloadCsv = useCallback(() => {
         const csvColumns = [
             { header: 'Student Name', key: 'name' },
-            ...(isCareerTourBootcamp ? [{ header: 'Student ID', key: 'studentId' }] : []),
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Batch', key: 'batchName' },
             { header: 'Watched At', key: 'completedAt' },
@@ -129,7 +129,7 @@ const Page = ({ params }: any) => {
 
             mapData: (item: any, responseData: any) => ({
                 name: item.name || '',
-                ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
+                studentId: item.userId ?? item.id ?? 'NA',
                 email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',

@@ -114,7 +114,7 @@ const BatchesInfo = ({
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const [isDownloadingReport, setIsDownloadingReport] = React.useState(false)
-        const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
 
     const handleDownloadReport = async () => {
         try {
@@ -220,7 +220,7 @@ const BatchesInfo = ({
                     'Course Name': stringifyCsvValue(reportData.courseName ?? ''),
                     'Batch Name': stringifyCsvValue(reportData.batchName ?? ''),
                     'Student Name': stringifyCsvValue(student.name ?? ''),
-                    ...(isCareerTourBootcamp ? { 'Student ID': stringifyCsvValue(student.studentId ?? 'NA') } : {}),
+                    'Student ID': stringifyCsvValue(student.userId ?? 'NA'),
                     Email: stringifyCsvValue(student.email ?? ''),
                     'Overall Attendance': stringifyCsvValue(student.overAllAttendance ?? ''),
                     'Assessments Attempted': stringifyCsvValue(
@@ -316,6 +316,7 @@ const BatchesInfo = ({
                         'Course Name': stringifyCsvValue(reportData?.courseName ?? ''),
                         'Batch Name': stringifyCsvValue(reportData?.batchName ?? ''),
                         'Student Name': stringifyCsvValue(student),
+                        'Student ID': '',
                         Email: '',
                         'Overall Attendance': '',
                         'Assessments Attempted': '',

@@ -143,6 +143,23 @@ const allColumns: ColumnDef<Task>[] = [
         enableHiding: true,
     },
     {
+        accessorKey: 'userId',
+        id: 'studentId',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Student Id" />
+        ),
+        cell: ({ row }) => {
+            const userId = row.original.userId
+            return (
+                <div className="text-sm text-gray-800 dark:text-muted-foreground">
+                    {userId ?? '—'}
+                </div>
+            )
+        },
+        enableSorting: true,
+        enableHiding: true,
+    },
+    {
         accessorKey: 'batchName',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Batch" className="w-full text-left" />

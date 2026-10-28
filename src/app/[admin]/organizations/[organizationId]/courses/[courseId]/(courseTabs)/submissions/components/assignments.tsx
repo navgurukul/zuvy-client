@@ -49,11 +49,13 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
           fileName: 'Assignment_Status',
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Status', key: 'status' },
           ],
           mapData: (assessment) => ({
             name: assessment.name || 'N/A',
+            studentId: assessment.userId ?? assessment.id ?? 'NA',
             email: assessment.emailId || 'N/A',
             status: assessment.status || 'N/A',
           }),

@@ -50,6 +50,25 @@ export const columns: ColumnDef<any>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'userId',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Student ID" />
+        ),
+        id: 'studentId',
+        cell: ({ row }) => {
+            const studentId = row.original.userId ?? row.original.id ?? row.original.studentId ?? 'NA'
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: false,
+    },
+    {
         accessorKey: 'email',
         header: ({ column, onSort }: any) => (
             <DataTableColumnHeader 
