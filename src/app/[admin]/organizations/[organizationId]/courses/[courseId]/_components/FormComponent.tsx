@@ -62,7 +62,7 @@ const FormComponent = ({
             // ── Fixed headers ──
             const fixedHeaders = [
                 'Student Name',
-                ...(isCareerTourBootcamp ? ['Student ID'] : []),
+                'Student ID',
                 'Email',
                 'Batch',
                 'Status',
@@ -89,7 +89,7 @@ const FormComponent = ({
             const dataRows = allStudents.map((student: any) => {
                 const fixedCells = [
                     student.name || '',
-                    ...(isCareerTourBootcamp ? [student.studentId ?? 'NA'] : []),
+                    student.userId ?? student.id ?? 'NA',
                     student.email || 'NA',
                     student.batchName || '',
                     student.status || '',

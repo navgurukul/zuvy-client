@@ -60,6 +60,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
             columns: [
                 { header: 'Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Status', key: 'status' },
                 { header: 'Duration (min)', key: 'duration' },
@@ -68,6 +69,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
             mapData: (record: any) => ({
                 name: record.user?.name || 'N/A',
+                studentId: record.userId ?? record.id ?? 'NA',
                 email: record.user?.email || 'N/A',
                 status: record.status || 'N/A',
                 duration: ((record.duration || 0) / 60).toFixed(2),

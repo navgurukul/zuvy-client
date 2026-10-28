@@ -70,6 +70,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Completed Date', key: 'completedAt' },
             { header: 'Title', key: 'title' },
@@ -78,6 +79,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
       
           mapData: (student: any, responseData: any) => ({
             name: student.name || 'N/A',
+            studentId: student.userId ?? student.id ?? 'NA',
             email: student.email || 'N/A',
             completedAt: student.completedAt
               ? new Date(student.completedAt).toLocaleString()

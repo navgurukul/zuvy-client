@@ -36,19 +36,20 @@ type CreateColumnsOptions = {
 }
 
 const studentIdColumn: ColumnDef<Task> = {
-    accessorKey: 'studentId',
+    accessorKey: 'userId',
+    id: 'studentId',
     header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Student ID" className="w-full" />
+        <DataTableColumnHeader column={column} title="Student Id" className="w-full whitespace-nowrap" />
     ),
     cell: ({ row }) => {
-        const studentId = (row.original as any).studentId
+        const studentId = (row.original as any).userId ?? 'NA'
         return (
-            <div className="text-sm text-muted-foreground dark:text-muted-foreground">
-                {studentId ?? 'NA'}
+            <div className="text-sm dark:text-muted-foreground">
+                {studentId}
             </div>
         )
     },
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: true,
 }
 
@@ -158,7 +159,7 @@ export const createColumns = (
             enableSorting: true,
             enableHiding: true,
         },
-        ...(isCareerTourBootcamp ? [studentIdColumn] : []),
+        studentIdColumn,
         {
             accessorKey: 'email',
             header: ({ column }) => (

@@ -44,11 +44,13 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
             dataPath: 'projectSubmissionData.projectTrackingData',
             columns: [
                 { header: 'Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Project Links', key: 'projectLink' },
             ],
             mapData: (student: any) => ({
                 name: student.name || 'N/A',
+                studentId: student.userId ?? student.id ?? 'NA',
                 email: student.email || 'N/A',
                 projectLink: formatProjectLinks(student.projectLink),
             }),

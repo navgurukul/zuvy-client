@@ -134,6 +134,7 @@ const Page = ({ params }: any) => {
 
             columns: [
                 { header: 'Student Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Batch', key: 'batchName' },
                 { header: 'Project Links', key: 'projectLink' },
@@ -141,6 +142,7 @@ const Page = ({ params }: any) => {
 
             mapData: (item: any) => ({
                 name: item.name || '',
+                studentId: item.userId ?? item.id ?? 'NA',
                 email: item.email || '',
                 batchName: item.batchName || '',
                 projectLink: formatProjectLinks(item.projectLink),

@@ -55,6 +55,28 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'userId',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Student ID"
+                onSort={onSort}
+                sortField="userId"
+            />
+        ),
+        id: 'userId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium whitespace-nowrap">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: 'email',
         header: ({ column, onSort }: any) => (
             <DataTableColumnHeader 
