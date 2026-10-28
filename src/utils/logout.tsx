@@ -8,6 +8,21 @@ export const Logout = async () => {
     // const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
     const access_token = localStorage.getItem('access_token')
+    const storedAuth = localStorage.getItem('AUTH')
+    let isEmaillessStudent = false
+
+    if (storedAuth) {
+        try {
+            const user = JSON.parse(storedAuth)
+            const roles = Array.isArray(user?.rolesList)
+                ? user.rolesList.map((role: unknown) => String(role).toLowerCase())
+                : []
+            const email = typeof user?.email === 'string' ? user.email.trim() : ''
+            isEmaillessStudent = roles.includes('student') && !email
+        } catch (error) {
+            console.error('Unable to determine logout destination:', error)
+        }
+    }
 
     try {
         // const response = await axios.post(
@@ -50,7 +65,8 @@ export const Logout = async () => {
 
         // Reset to the app root without preserving any previous query params,
         // such as ?chapterId=5057 from the protected route redirect flow.
-        window.location.assign(`${window.location.origin}${authEntryRoute}`)
+        const logoutRoute = isEmaillessStudent ? '/careertours/signup' : authEntryRoute
+        window.location.assign(`${window.location.origin}${logoutRoute}`)
     } catch (error) {
         console.error('Logout error:', error)
     }
