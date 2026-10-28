@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import { Turnstile } from '@marsidev/react-turnstile'
-import { Check, Circle, Copy, Eye, EyeOff } from 'lucide-react'
+import { Check, Circle, Copy, Eye, EyeOff, ChevronsUpDown } from 'lucide-react'
 import { api, setApiAuthToken } from '@/utils/axios.config'
 import { AuthResponse } from '@/app/auth/login/_components/componentLogin'
 import { getUser, useStudentData, useThemeStore } from '@/store/store'
@@ -17,6 +17,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { rememberAuthEntryRoute } from '@/utils/authEntryRoute'
 import { isRedirectAllowed } from '@/utils/redirectValidation'
+import { useSchoolCities, useSchoolStates, useSchools } from '@/hooks/useSchoolDirectory'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const passwordRules = [
     { id: 'min-length', label: 'At least 6 characters', test: (value: string) => value.length >= 6 },
@@ -99,7 +103,20 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
     const [copied, setCopied] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [state, setState] = useState('')
+    const [city, setCity] = useState('')
+    const [schoolSearch, setSchoolSearch] = useState('')
+    const [schoolCode, setSchoolCode] = useState('')
+    const [schoolOpen, setSchoolOpen] = useState(false)
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+    const { data: states, loading: statesLoading, error: statesError } = useSchoolStates()
+    const { data: cities, loading: citiesLoading, error: citiesError } = useSchoolCities(state)
+    const {
+        data: schools,
+        loading: schoolsLoading,
+        error: schoolsError,
+    } = useSchools({ state, city, search: schoolSearch })
+    const selectedSchool = schools.find(school => school.udiseCode === schoolCode)
     const preventPasswordClipboard = (event: ClipboardEvent<HTMLInputElement>) => {
         event.preventDefault()
     }
@@ -110,13 +127,21 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
 
         setError('')
         if (name.trim().length < 2 || name.trim().length > 100) return setError('Name must be between 2 and 100 characters.')
+        if (!state || !city || !schoolCode) return setError('Please select your state, city, and school.')
         if (!isPasswordValid(password)) return setError('Please meet all password requirements listed below.')
         if (password !== confirmPassword) return setError('Passwords do not match.')
         setLoading(true)
         const token = captchaToken
         setCaptchaToken('')
         try {
-            const { data } = await api.post<SignupResponse>('/auth/student/signup', { name: name.trim(), password, captchaToken: token })
+            const { data } = await api.post<SignupResponse>('/auth/student/signup', {
+                name: name.trim(),
+                password,
+                captchaToken: token,
+                state,
+                city,
+                udiseCode: schoolCode,
+            })
             localStorage.setItem('CAREER_TOURS_BANNER_STORAGE_KEY', 'true')
             const id = data.studentId || data.student_id || data.user?.studentId || data.user?.student_id
             if (!id) throw new Error('The registration response did not include a Student ID.')
@@ -279,6 +304,119 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                     value={name}
                     onChange={event => setName(event.target.value)}
                 />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2 text-left">
+                    <Label htmlFor="student-state">State</Label>
+                    <Select
+                        value={state}
+                        onValueChange={value => {
+                            setState(value)
+                            setCity('')
+                            setSchoolCode('')
+                            setSchoolSearch('')
+                        }}
+                    >
+                        <SelectTrigger id="student-state" aria-label="State" disabled={statesLoading}>
+                            <SelectValue placeholder={statesLoading ? 'Loading states…' : 'Select state'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {states.map(item => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {statesError && <p className="text-xs text-destructive">{statesError}</p>}
+                </div>
+
+                <div className="space-y-2 text-left">
+                    <Label htmlFor="student-city">City</Label>
+                    <Select
+                        value={city}
+                        onValueChange={value => {
+                            setCity(value)
+                            setSchoolCode('')
+                            setSchoolSearch('')
+                        }}
+                        disabled={!state || citiesLoading}
+                    >
+                        <SelectTrigger id="student-city" aria-label="City">
+                            <SelectValue placeholder={citiesLoading ? 'Loading cities…' : 'Select city'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {cities.map(item => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {citiesError && <p className="text-xs text-destructive">{citiesError}</p>}
+                </div>
+            </div>
+
+            <div className="space-y-2 text-left">
+                <Label htmlFor="student-school-search">School</Label>
+                <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            id="student-school-search"
+                            type="button"
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={schoolOpen}
+                            aria-haspopup="listbox"
+                            disabled={!state || !city}
+                            className="w-full justify-between font-normal"
+                        >
+                            <span className="truncate">
+                                {selectedSchool?.schoolName || (city ? 'Search and select your school' : 'Select state and city first')}
+                            </span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+                        <Command shouldFilter={false}>
+                            <CommandInput
+                                autoFocus
+                                placeholder="Search schools..."
+                                value={schoolSearch}
+                                onValueChange={value => {
+                                    setSchoolSearch(value)
+                                    setSchoolCode('')
+                                }}
+                            />
+                            <CommandList>
+                                {schoolsLoading && (
+                                    <p className="py-6 text-center text-sm text-muted-foreground">
+                                        Searching schools…
+                                    </p>
+                                )}
+                                {!schoolsLoading && schools.length === 0 && (
+                                    <CommandEmpty>
+                                        {schoolSearch ? 'No schools found.' : 'Start typing to search schools.'}
+                                    </CommandEmpty>
+                                )}
+                                {!schoolsLoading && schools.map(school => (
+                                    <CommandItem
+                                        key={school.udiseCode}
+                                        value={`${school.schoolName} ${school.udiseCode}`}
+                                        onSelect={() => {
+                                            setSchoolCode(school.udiseCode)
+                                            setSchoolSearch(school.schoolName)
+                                            setSchoolOpen(false)
+                                        }}
+                                    >
+                                        <Check
+                                            className={`mr-2 h-4 w-4 ${schoolCode === school.udiseCode ? 'opacity-100' : 'opacity-0'}`}
+                                        />
+                                        <span className="truncate">{school.schoolName}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+                {schoolsError && <p className="text-xs text-destructive">{schoolsError}</p>}
             </div>
 
             <div className="space-y-2 text-left">
