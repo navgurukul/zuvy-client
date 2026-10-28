@@ -116,7 +116,10 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
     const {
         data: schools,
         loading: schoolsLoading,
+        loadingMore: schoolsLoadingMore,
+        hasMore: schoolsHasMore,
         error: schoolsError,
+        loadMore: loadMoreSchools,
     } = useSchools({ state, city, search: schoolSearch })
     const selectedSchool = schools.find(school => school.udiseCode === schoolCode)
     const preventPasswordClipboard = (event: ClipboardEvent<HTMLInputElement>) => {
@@ -365,85 +368,86 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
 
             <div className="space-y-2 text-left">
                 <Label htmlFor="student-school-search">School</Label>
-                <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            id="student-school-search"
-                            type="button"
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={schoolOpen}
-                            aria-haspopup="listbox"
-                            disabled={!state || !city}
-                            className="w-full justify-between font-normal"
-                        >
-                            <span className="truncate">
-                                {isManualSchool
-                                    ? manualSchoolName || 'Enter your school name'
-                                    : selectedSchool?.schoolName || (city ? 'Search and select your school' : 'Select state and city first')}
-                            </span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
-                        <Command shouldFilter={false}>
-                            <CommandInput
-                                autoFocus
-                                placeholder="Search schools..."
-                                value={schoolSearch}
-                                onValueChange={value => {
-                                    setSchoolSearch(value)
-                                    setSchoolCode('')
-                                    setIsManualSchool(false)
-                                }}
-                            />
-                            <CommandList>
-                                {schoolsLoading && (
-                                    <p className="py-6 text-center text-sm text-muted-foreground">
-                                        Searching schools…
-                                    </p>
-                                )}
-                                {!schoolsLoading && schools.length === 0 && (
-                                    <CommandEmpty>
-                                        {schoolSearch ? 'No schools found.' : 'Start typing to search schools.'}
-                                    </CommandEmpty>
-                                )}
-                                {!schoolsLoading && schools.map(school => (
-                                    <CommandItem
-                                        key={school.udiseCode}
-                                        value={`${school.schoolName} ${school.udiseCode}`}
-                                        onSelect={() => {
-                                            setSchoolCode(school.udiseCode)
-                                            setSchoolSearch(school.schoolName)
-                                            setSchoolOpen(false)
-                                        }}
-                                    >
-                                        <Check
-                                            className={`mr-2 h-4 w-4 ${schoolCode === school.udiseCode ? 'opacity-100' : 'opacity-0'}`}
-                                        />
-                                        <span className="truncate">{school.schoolName}</span>
-                                    </CommandItem>
-                                ))}
-                                {!schoolsLoading && (
-                                    <CommandItem
-                                        value="school-not-listed"
-                                        onSelect={() => {
-                                            setIsManualSchool(true)
-                                            setSchoolCode('')
-                                            setSchoolSearch('')
-                                            setSchoolOpen(false)
-                                        }}
-                                    >
-                                        <span className="text-primary">My school is not listed</span>
-                                    </CommandItem>
-                                )}
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
+                {!isManualSchool && (
+                    <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                id="student-school-search"
+                                type="button"
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={schoolOpen}
+                                aria-haspopup="listbox"
+                                disabled={!state || !city}
+                                className="w-full justify-between font-normal"
+                            >
+                                <span className="truncate">
+                                    {selectedSchool?.schoolName || (city ? 'Search and select your school' : 'Select state and city first')}
+                                </span>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command shouldFilter={false}>
+                                <CommandInput
+                                    autoFocus
+                                    placeholder="Search schools..."
+                                    value={schoolSearch}
+                                    onValueChange={value => {
+                                        setSchoolSearch(value)
+                                        setSchoolCode('')
+                                    }}
+                                />
+                                <CommandList
+                                    onScroll={event => {
+                                        const list = event.currentTarget
+                                        const reachedBottom =
+                                            list.scrollTop + list.clientHeight >= list.scrollHeight - 8
+
+                                        if (reachedBottom && schoolsHasMore && !schoolsLoadingMore) {
+                                            void loadMoreSchools()
+                                        }
+                                    }}
+                                >
+                                    {schoolsLoading && (
+                                        <p className="py-6 text-center text-sm text-muted-foreground">
+                                            Searching schools…
+                                        </p>
+                                    )}
+                                    {!schoolsLoading && schools.length === 0 && (
+                                        <CommandEmpty>
+                                            {schoolSearch ? 'No schools found.' : 'Start typing to search schools.'}
+                                        </CommandEmpty>
+                                    )}
+                                    {!schoolsLoading && schools.map(school => (
+                                        <CommandItem
+                                            key={school.udiseCode}
+                                            value={`${school.schoolName} ${school.udiseCode}`}
+                                            onSelect={() => {
+                                                setSchoolCode(school.udiseCode)
+                                                setSchoolSearch(school.schoolName)
+                                                setSchoolOpen(false)
+                                            }}
+                                        >
+                                            <Check
+                                                className={`mr-2 h-4 w-4 ${schoolCode === school.udiseCode ? 'opacity-100' : 'opacity-0'}`}
+                                            />
+                                            <span className="truncate">{school.schoolName}</span>
+                                        </CommandItem>
+                                    ))}
+                                    {schoolsLoadingMore && (
+                                        <p className="py-3 text-center text-xs text-muted-foreground">
+                                            Loading more schools…
+                                        </p>
+                                    )}
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                )}
                 {isManualSchool && (
                     <Input
-                        id="student-manual-school-name"
+                        id="student-school-search"
                         autoFocus
                         placeholder="Type your school name"
                         value={manualSchoolName}
@@ -452,6 +456,21 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                         required
                     />
                 )}
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Checkbox
+                        checked={isManualSchool}
+                        disabled={!state || !city}
+                        onCheckedChange={checked => {
+                            const useManualSchool = checked === true
+                            setIsManualSchool(useManualSchool)
+                            setSchoolCode('')
+                            setSchoolSearch('')
+                            setManualSchoolName('')
+                            setSchoolOpen(false)
+                        }}
+                    />
+                    <span>My school is not listed</span>
+                </label>
                 {schoolsError && <p className="text-xs text-destructive">{schoolsError}</p>}
             </div>
 
