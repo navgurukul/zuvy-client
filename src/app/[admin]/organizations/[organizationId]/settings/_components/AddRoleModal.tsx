@@ -110,7 +110,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded })=> {
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline" className="bg-white">
+                    <Button variant="outline">
                         Cancel
                     </Button>
                 </DialogClose>

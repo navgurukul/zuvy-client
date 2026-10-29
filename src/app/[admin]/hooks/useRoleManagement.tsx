@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRbacResources } from '@/app/[admin]/hooks/useRbacResources'
 import { useRbacPermissions } from '@/app/[admin]/hooks/useRbacPermissions'
 import { useRoles } from '@/app/[admin]/hooks/useRoles'
@@ -24,7 +24,7 @@ export interface RoleAction {
 
 export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: string) => void) => {
     const searchParams = useSearchParams()
-    const { roles } = useRoles()
+    const { roles, refetchRoles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [roleId, setRoleId] = useState<number | undefined>(undefined)
 
@@ -32,6 +32,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
     const [originalResourcePermissions, setOriginalResourcePermissions] = useState<Record<number, Record<number, boolean>>>({})
     const [permissionLevels, setPermissionLevels] = useState<Record<number, PermissionLevel>>({})
     const [permissionsData, setPermissionsData] = useState<Record<number, Array<{ id: number; name: string; granted?: boolean }>>>({})
+    const [hasPendingPermissionChanges, setHasPendingPermissionChanges] = useState(false)
 
     const [showWarningModal, setShowWarningModal] = useState(false)
     const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
@@ -49,6 +50,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     const resourceIds = useMemo(() => (resources || []).map(r => r.id), [resources])
     const [lastFetchedRoleId, setLastFetchedRoleId] = useState<number | undefined>(undefined)
+    const permissionsFetchKeyRef = useRef<string | null>(null)
 
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
     const [hoveredRowId, setHoveredRowId] = useState<number | null>(null)
@@ -64,46 +66,72 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
     }, [selectedRole, roles])
 
     useEffect(() => {
-        if (roleId && resourceIds.length > 0 && roleId !== lastFetchedRoleId) {
+        setResourcePermissions({})
+        setOriginalResourcePermissions({})
+        setPermissionLevels({})
+        setPermissionsData({})
+        setHasPendingPermissionChanges(false)
+        setLastFetchedRoleId(undefined)
+        permissionsFetchKeyRef.current = null
+    }, [roleId])
+
+    useEffect(() => {
+        if (!roleId || resourceIds.length === 0) return
+
+        const fetchRoleId = roleId
+        const fetchKey = `${fetchRoleId}:${resourceIds.join(',')}`
+
+        if (fetchKey && roleId !== lastFetchedRoleId && permissionsFetchKeyRef.current !== fetchKey) {
+            permissionsFetchKeyRef.current = fetchKey
             const loadAllPermissions = async () => {
-                const newPermissionsData = await fetchAllPermissions(resourceIds, roleId)
+                try {
+                    const newPermissionsData = await fetchAllPermissions(resourceIds, fetchRoleId)
 
-                const newResourcePermissions: Record<number, Record<number, boolean>> = {}
-                const newPermissionLevels: Record<number, PermissionLevel> = {}
+                    const newResourcePermissions: Record<number, Record<number, boolean>> = {}
+                    const newPermissionLevels: Record<number, PermissionLevel> = {}
 
-                for (const resourceId of Object.keys(newPermissionsData).map(Number)) {
-                    const permissions = newPermissionsData[resourceId] || []
-                    const permMap: Record<number, boolean> = {}
-                    let view = false
-                    let create = false
-                    let edit = false
-                    let deletePerm = false
+                    for (const resourceId of Object.keys(newPermissionsData).map(Number)) {
+                        const permissions = newPermissionsData[resourceId] || []
+                        const permMap: Record<number, boolean> = {}
+                        let view = false
+                        let create = false
+                        let edit = false
+                        let deletePerm = false
 
-                    permissions.forEach((perm: any) => {
-                        const granted = perm.granted || false
-                        permMap[perm.id] = granted
+                        permissions.forEach((perm: any) => {
+                            const granted = perm.granted || false
+                            permMap[perm.id] = granted
 
-                        const permName = (perm.name || '').toLowerCase()
-                        if (permName.includes('view') || permName.includes('read')) {
-                            view = granted
-                        } else if (permName.includes('create') || permName.includes('add')) {
-                            create = granted
-                        } else if (permName.includes('edit') || permName.includes('update')) {
-                            edit = granted
-                        } else if (permName.includes('delete') || permName.includes('remove')) {
-                            deletePerm = granted
-                        }
-                    })
+                            const permName = (perm.name || '').toLowerCase()
+                            if (permName.includes('view') || permName.includes('read')) {
+                                view = granted
+                            } else if (permName.includes('create') || permName.includes('add')) {
+                                create = granted
+                            } else if (permName.includes('edit') || permName.includes('update')) {
+                                edit = granted
+                            } else if (permName.includes('delete') || permName.includes('remove')) {
+                                deletePerm = granted
+                            }
+                        })
 
-                    newResourcePermissions[resourceId] = permMap
-                    newPermissionLevels[resourceId] = getPermissionLevelFromPermissions(view, create, edit, deletePerm)
+                        newResourcePermissions[resourceId] = permMap
+                        newPermissionLevels[resourceId] = getPermissionLevelFromPermissions(view, create, edit, deletePerm)
+                    }
+
+                    if (permissionsFetchKeyRef.current !== fetchKey) return
+
+                    setPermissionsData(newPermissionsData)
+                    setResourcePermissions(newResourcePermissions)
+                    setOriginalResourcePermissions(JSON.parse(JSON.stringify(newResourcePermissions)))
+                    setPermissionLevels(newPermissionLevels)
+                    setHasPendingPermissionChanges(false)
+                    setLastFetchedRoleId(fetchRoleId)
+                } catch (error) {
+                    if (permissionsFetchKeyRef.current === fetchKey) {
+                        permissionsFetchKeyRef.current = null
+                    }
+                    throw error
                 }
-
-                setPermissionsData(newPermissionsData)
-                setResourcePermissions(newResourcePermissions)
-                setOriginalResourcePermissions(JSON.parse(JSON.stringify(newResourcePermissions)))
-                setPermissionLevels(newPermissionLevels)
-                setLastFetchedRoleId(roleId)
             }
 
             loadAllPermissions()
@@ -111,8 +139,8 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
     }, [roleId, resourceIds, fetchAllPermissions, lastFetchedRoleId])
 
     const hasUnsavedChanges = useMemo(() => {
-        return JSON.stringify(resourcePermissions) !== JSON.stringify(originalResourcePermissions)
-    }, [resourcePermissions, originalResourcePermissions])
+        return hasPendingPermissionChanges || JSON.stringify(resourcePermissions) !== JSON.stringify(originalResourcePermissions)
+    }, [hasPendingPermissionChanges, resourcePermissions, originalResourcePermissions])
 
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -264,34 +292,28 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
             const newResourcePermissions: Record<number, Record<number, boolean>> = { ...resourcePermissions }
             const newPermissionLevels: Record<number, PermissionLevel> = { ...permissionLevels }
 
-            for (const [moduleName, module] of Object.entries(groupedResources)) {
-                if (module.children.some(child => child.id === resourceId)) {
-                    module.children.forEach(child => {
-                        const updated = updateResourcePermissions(child.id)
-                        if (!updated) return
-                        newResourcePermissions[child.id] = updated
-                        newPermissionLevels[child.id] = tierToLevel[tier]
-                    })
-                    if (tierToLevel[tier] === 'No access') {
-                        setParentLockedModules((prev) => {
-                            const next = new Set(prev)
-                            next.add(module.id)
-                            return next
-                        })
-                    } else {
-                        setParentLockedModules((prev) => {
-                            if (!prev.has(module.id)) return prev
-                            const next = new Set(prev)
-                            next.delete(module.id)
-                            return next
-                        })
-                    }
-                    break
-                }
-            }
+            for (const resourceGroup of Object.values(groupedResources)) {
+                if (!resourceGroup.children.some(child => child.id === resourceId)) continue
 
-            setResourcePermissions(newResourcePermissions)
-            setPermissionLevels(newPermissionLevels)
+                resourceGroup.children.forEach((child) => {
+                    const updated = updateResourcePermissions(child.id)
+                    if (!updated) return
+
+                    newResourcePermissions[child.id] = updated
+                    newPermissionLevels[child.id] = tierToLevel[tier]
+                })
+
+                setParentLockedModules((prev) => {
+                    const next = new Set(prev)
+                    if (tierToLevel[tier] === 'No access') next.add(resourceGroup.id)
+                    else next.delete(resourceGroup.id)
+                    return next
+                })
+                setResourcePermissions(newResourcePermissions)
+                setPermissionLevels(newPermissionLevels)
+                setHasPendingPermissionChanges(true)
+                break
+            }
         } else {
             const newPerms = updateResourcePermissions(resourceId)
             if (!newPerms) return
@@ -305,6 +327,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                 ...prev,
                 [resourceId]: tierToLevel[tier],
             }))
+            setHasPendingPermissionChanges(true)
 
             for (const [moduleName, module] of Object.entries(groupedResources)) {
                 if (module.children.some(child => child.id === resourceId)) {
@@ -357,14 +380,30 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                 }
             }
 
+            if (payloads.length === 0 && hasPendingPermissionChanges) {
+                for (const resourceId of Object.keys(resourcePermissions).map(Number)) {
+                    const permissions = resourcePermissions[resourceId] || {}
+                    if (Object.keys(permissions).length === 0) continue
+
+                    payloads.push({
+                        resourceId,
+                        roleId: currentRoleId,
+                        orgId,
+                        permissions,
+                    })
+                }
+            }
+
             if (payloads.length > 0) {
                 await assignPermissions(payloads)
                 setOriginalResourcePermissions(JSON.parse(JSON.stringify(resourcePermissions)))
+                setHasPendingPermissionChanges(false)
             } else {
                 toast.info({
                     title: 'No changes',
                     description: 'There are no permission changes to save.',
                 })
+                setHasPendingPermissionChanges(false)
             }
         } catch (error: any) {
             console.error('Error saving permissions:', error)
@@ -373,6 +412,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     const discardChanges = (recalculateLevels?: () => void) => {
         setResourcePermissions(JSON.parse(JSON.stringify(originalResourcePermissions)))
+        setHasPendingPermissionChanges(false)
         if (recalculateLevels) recalculateLevels()
         setShowWarningModal(false)
         setTimeout(() => {
@@ -398,6 +438,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
     return {
         roles,
+        refetchRoles,
         resources,
         loading,
         error,
