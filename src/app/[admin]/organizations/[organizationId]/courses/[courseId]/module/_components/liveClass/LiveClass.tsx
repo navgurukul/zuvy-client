@@ -669,18 +669,37 @@ const LiveClass = ({
                                 Meeting Recording
                             </h4>
                             <div className="bg-foreground/5 rounded-lg overflow-hidden">
-                                <iframe
-                                    src={getEmbedLink(
+                                {(() => {
+                                    const activeUrl =
                                         recordingLink ||
-                                        (session.s3link && session.s3link !== 'not found' 
-                                            ? session.s3link 
-                                            : session.recordingLink || session.youtubeLink)
-                                    )}
-                                    className="w-full h-80 border-0"
-                                    allowFullScreen
-                                    title={`Recording: ${session.title}`}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                />
+                                        (session.s3link && session.s3link !== 'not found'
+                                            ? session.s3link
+                                            : session.recordingLink || session.youtubeLink) || '';
+                                    const isDirectVideo =
+                                        activeUrl.includes('amazonaws.com') ||
+                                        activeUrl.includes('.mp4');
+
+                                    if (isDirectVideo) {
+                                        return (
+                                            <video
+                                                src={activeUrl}
+                                                controls
+                                                playsInline
+                                                className="w-full h-80 rounded-lg bg-black"
+                                            />
+                                        );
+                                    }
+
+                                    return (
+                                        <iframe
+                                            src={getEmbedLink(activeUrl)}
+                                            className="w-full h-80 border-0"
+                                            allowFullScreen
+                                            title={`Recording: ${session.title}`}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        />
+                                    );
+                                })()}
                             </div>
                         </div>
                     ) : (
