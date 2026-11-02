@@ -62,16 +62,19 @@ const VideoContent: React.FC<VideoContentProps> = ({
             ? [chapterDetails.file]
             : []
     const flatLinks = videoLinks.flat()
-    const isYouTubeandZoom =
+    const isTrackableVideo =
         flatLinks.some(
-            (link) => link.includes('youtube.com') || link.includes('youtu.be')
+            (link) =>
+                link.includes('youtube.com') ||
+                link.includes('youtu.be') ||
+                link.includes('vimeo.com')
         ) ||
         flatLinks.some(
             (link) => link.includes('zoom.us') || link.includes('zoom')
         )
 
     // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
-    const savedTime = isYouTubeandZoom
+    const savedTime = isTrackableVideo
         ? progress[chapterDetails.id.toString()] || 0
         : 0
     const handleReady = useCallback(() => {
@@ -190,22 +193,26 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
                     {videoLinks.length > 0 ? (
                         videoLinks.map((link, idx) => {
+                            const rawLink = Array.isArray(link) ? link[0] : link
                             const isYouTube =
-                                link[0].includes('youtube.com') ||
-                                link[0].includes('youtu.be')
-                            const isDrive = link[0].includes('drive.google.com')
-                            const isZoom = link[0].includes('zoom.us')
-                            const embedLink = getEmbedLink(link)
+                                rawLink.includes('youtube.com') ||
+                                rawLink.includes('youtu.be')
+                            const isVimeo = rawLink.includes('vimeo.com')
+                            const isDrive = rawLink.includes('drive.google.com')
+                            const isZoom = rawLink.includes('zoom.us')
+                            const embedLink = getEmbedLink(rawLink)
+                            const isReactPlayerVideo =
+                                isYouTube || isVimeo || isZoom
                             return (
                                 <div
-                                    key={`${idx}-${link[0]}`}
+                                    key={`${idx}-${rawLink}`}
                                     className="mb-8 bg-card-elevated rounded-lg shadow-16dp overflow-hidden border border-border"
                                 >
                                     <div className="aspect-video bg-black flex items-center justify-center relative">
-                                        {isYouTube  ? (
+                                        {isReactPlayerVideo ? (
                                             <ReactPlayer
                                                 ref={playerRef}
-                                                url={embedLink[0]}
+                                                url={embedLink}
                                                 playing={playing}
                                                 controls={isCompleted}
                                                 width="100%"
@@ -219,7 +226,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                             />
                                         ) : isDrive ? (
                                             <iframe
-                                                src={embedLink[0]}
+                                                src={embedLink}
                                                 title="Google Drive Video"
                                                 allow="autoplay"
                                                 allowFullScreen
@@ -228,7 +235,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                         ) : isZoom ? 
                                         <ReactPlayer
                                                 ref={playerRef}
-                                                url={embedLink[0]}
+                                                url={embedLink}
                                                 playing={playing}
                                                 controls={isCompleted}
                                                 width="100%"
@@ -255,6 +262,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                             <span className="text-xs text-white font-medium">
                                                 {isYouTube
                                                     ? 'YouTube'
+                                                    : isVimeo
+                                                    ? 'Vimeo'
                                                     : isDrive
                                                     ? 'Google Drive'
                                                     : 'Video'}
@@ -282,7 +291,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     {/* Mark as Watched Button */}
                     {!isCompleted &&
                         videoLinks.length > 0 &&
-                        !isYouTubeandZoom && (
+                        !isTrackableVideo && (
                             <div className="flex justify-end mt-6">
                                 <Button
                                     onClick={completeChapter}
@@ -330,7 +339,6 @@ const VideoContent: React.FC<VideoContentProps> = ({
 }
 
 export default VideoContent
-
 
 
 

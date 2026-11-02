@@ -1245,11 +1245,13 @@ export const isLinkValid = (link: string) => {
             url.hostname.includes('youtube.com') ||
             url.hostname.includes('youtu.be')
 
+        const isVimeo = url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com')
+
         const isGoogleDrive = url.hostname.includes('drive.google.com')
 
         const isZoom = url.hostname.includes('zoom')
 
-        return isYouTube || isGoogleDrive || isZoom
+        return isYouTube || isVimeo || isGoogleDrive || isZoom
     } catch {
         return false // If it's not a valid URL at all
     }
@@ -1263,6 +1265,18 @@ export const isYouTubeLink = (url: string) => {
         return false
     }
 }
+
+export const isVimeoLink = (url: string) => {
+    try {
+        const hostname = new URL(url.trim()).hostname
+        return hostname === 'vimeo.com' || hostname.endsWith('.vimeo.com')
+    } catch {
+        return false
+    }
+}
+
+export const isTrackableVideoLink = (url: string) =>
+    isYouTubeLink(url) || isVimeoLink(url)
 
 export const getEmbedLink = (url: string) => {
     if (!url) return ''
@@ -1281,6 +1295,14 @@ export const getEmbedLink = (url: string) => {
         if (urlObj.hostname.includes('youtu.be')) {
             const videoId = urlObj.pathname.slice(1)
             return `https://www.youtube.com/embed/${videoId}`
+        }
+
+        // Vimeo links are supported directly by ReactPlayer.
+        if (
+            urlObj.hostname === 'vimeo.com' ||
+            urlObj.hostname.endsWith('.vimeo.com')
+        ) {
+            return url
         }
 
         // Google Drive

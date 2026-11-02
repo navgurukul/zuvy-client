@@ -26,7 +26,11 @@ import {
     AddVideoProps,
     EditChapterResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
-import { getEmbedLink, isLinkValid, isYouTubeLink } from '@/utils/admin'
+import {
+    getEmbedLink,
+    isLinkValid,
+    isTrackableVideoLink,
+} from '@/utils/admin'
 import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
@@ -52,7 +56,7 @@ const formSchema = z.object({
             return links.every((link) => isLinkValid(link))
         },
         {
-            message: 'Only YouTube and Google Drive links are allowed.',
+            message: 'Only YouTube, Vimeo, Google Drive, and Zoom links are allowed.',
         }
     ),
 })
@@ -110,7 +114,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
             title: values.videoTitle,
             description: values.description,
             links: [modifiedLink],
-            ...(isYouTubeLink(modifiedLink) &&
+            ...(isTrackableVideoLink(modifiedLink) &&
             videoDurationSeconds !== undefined
                 ? { videoDurationSeconds }
                 : {}),
