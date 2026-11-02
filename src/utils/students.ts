@@ -455,6 +455,7 @@ export const handleAssessmentStateTransitions = (
 export const getEmbedLink = (link: string) => {
     if (!link) return ''
     if (link.includes('youtube.com') || link.includes('youtu.be')) return link
+    if (link.includes('vimeo.com')) return link
     if (link.includes('drive.google.com')) {
         // Convert Google Drive link to embeddable format
         const match = link.match(/\/d\/([\w-]+)/)
@@ -630,4 +631,3 @@ export const formatUpcomingItem = (item: any) => {
   // Fallback
   return "Status unavailable";
 };
-
