@@ -81,9 +81,9 @@ const LiveClass = ({
         session?.id,
         { enabled: session?.status?.toLowerCase() === 'completed' }
     )
-        const { moduleData, setModuleData } = getModuleData()    
-        const { chapterData, setChapterData } = getChapterDataState()    
-        const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
+    const { moduleData, setModuleData } = getModuleData()    
+    const { chapterData, setChapterData } = getChapterDataState()    
+    const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
     const canEditFields = canEdit && isUpcoming
 
     const form = useForm<LiveClassFormData>({
@@ -186,7 +186,7 @@ const LiveClass = ({
     const endTime = form.watch('endTime')
 
     // Trigger validation when times change
-    React.useEffect(() => {
+    useEffect(() => {
         if (startTime && endTime) {
             form.trigger(['startTime', 'endTime'])
         }
@@ -325,8 +325,10 @@ const LiveClass = ({
        return <RecordingSkeletons/>
     }
 
-    console.log('Session Data:', session)
-    console.log('Recording Links - s3link:', session?.s3link, 'recordingLink:', session?.recordingLink, 'youtubeLink:', session?.youtubeLink)
+    const activeUrl = recordingLink ||
+    (session.s3link && session.s3link !== 'not found'
+        ? session.s3link
+        : session.recordingLink || session.youtubeLink);
 
     if (!content || !session) {
         return (
@@ -635,63 +637,20 @@ const LiveClass = ({
 
                 {/* Recording or Meeting Link Section */}
                 {session.status.toLowerCase() === 'completed' ? (
-                    (session.s3link && session.s3link !== 'not found') || 
-                    session.recordingLink || 
-                    session.youtubeLink ||
-                    recordingLink ? (
+                    activeUrl ? (
                         <div className="space-y-3 pt-4 border-t">
                             <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                                 <Video className="w-4 h-4" />
                                 Meeting Recording
                             </h4>
                             <div className="relative w-full h-80 rounded-lg overflow-hidden bg-black flex items-center justify-center">
-                                {(() => {
-                                    const activeUrl =
-                                        recordingLink ||
-                                        (session.s3link && session.s3link !== 'not found'
-                                            ? session.s3link
-                                            : session.recordingLink || session.youtubeLink) || '';
-
-                                    if (!activeUrl) return null;
-
-                                    if (!isClient) {
-                                        return (
-                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground animate-pulse">
-                                                <Video className="w-8 h-8 opacity-40" />
-                                            </div>
-                                        );
-                                    }
-
-                                    const isPlayable = ReactPlayer.canPlay(activeUrl) || activeUrl.includes('amazonaws.com') || activeUrl.includes('.mp4');
-                                    if (isPlayable) {
-                                        return (
-                                            <ReactPlayer
-                                                url={activeUrl}
-                                                controls
-                                                width="100%"
-                                                height="100%"
-                                                config={{
-                                                    file: {
-                                                        attributes: {
-                                                            controlsList: 'nodownload',
-                                                            preload: 'metadata',
-                                                        },
-                                                    },
-                                                }}
-                                            />
-                                        );
-                                    }
-
-                                    return (
-                                        <iframe
-                                            src={getEmbedLink(activeUrl)}
-                                            className="w-full h-full border-0"
-                                            allowFullScreen
-                                            title={`Recording: ${session.title}`}
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        />
-                                    );
-                                })()}
+                                <iframe
+                                    src={getEmbedLink(activeUrl)}
+                                    className="w-full h-full border-0"
+                                    allowFullScreen
+                                    title={`Recording: ${session.title}`}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                />
                             </div>
                         </div>
                     ) : (
