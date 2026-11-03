@@ -157,80 +157,87 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
+                    </DialogHeader>
                         <div className="main_container flex items-center align-middle text-center">
-                            <div className="flex items-center">
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="moduleType"
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <FormControl>
-                                                    <Input
-                                                        type="radio"
-                                                        id="learning-material"
-                                                        className="size-4 accent-primary"
-                                                        value="learning-material"
-                                                        checked={
-                                                            field.value ===
-                                                            'learning-material'
-                                                        } // FIXED: Use form field value
-                                                        onChange={
-                                                            handleRadioChange
-                                                        } // FIXED: Use wrapper function
-                                                        name="moduleType"
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="mt-2">
-                                    <Label
-                                        className="mx-2 "
-                                        htmlFor="learning-material"
-                                    >
-                                        Learning Material
-                                    </Label>
-                                </div>
-                            </div>
+                            {/* Learning Material radio */}
+                            <FormField
+                                control={form.control}
+                                name="moduleType"
+                                render={({ field }) => (
+                                    <FormItem className="text-left">
+                                        <FormControl>
+                                            <label
+                                                htmlFor="learning-material"
+                                                className="flex items-center gap-2 cursor-pointer"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    id="learning-material"
+                                                    value="learning-material"
+                                                    checked={field.value === 'learning-material'}
+                                                    onChange={handleRadioChange}
+                                                    name="moduleType"
+                                                    className="sr-only"
+                                                />
+                                                {/* Custom radio circle */}
+                                                <span
+                                                    className={`size-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                                        field.value === 'learning-material'
+                                                            ? 'border-primary bg-transparent'
+                                                            : 'border-muted-foreground bg-transparent'
+                                                    }`}
+                                                >
+                                                    {field.value === 'learning-material' && (
+                                                        <span className="size-2 rounded-full bg-primary block" />
+                                                    )}
+                                                </span>
+                                                <span className="text-sm font-medium">Learning Material</span>
+                                            </label>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                            <div className="flex items-center ">
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="moduleType"
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <FormControl>
-                                                    <Input
-                                                        type="radio"
-                                                        id="project"
-                                                        className="size-4 accent-primary"
-                                                        value="project"
-                                                        checked={
-                                                            field.value ===
-                                                            'project'
-                                                        } // FIXED: Use form field value
-                                                        onChange={
-                                                            handleRadioChange
-                                                        } // FIXED: Use wrapper function
-                                                        name="moduleType"
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                <div className="mt-2">
-                                    <Label className="mx-2" htmlFor="project">
-                                        Project
-                                    </Label>
-                                </div>
-                            </div>
+                            {/* Project radio */}
+                            <FormField
+                                control={form.control}
+                                name="moduleType"
+                                render={({ field }) => (
+                                    <FormItem className="text-left ml-4">
+                                        <FormControl>
+                                            <label
+                                                htmlFor="project"
+                                                className="flex items-center gap-2 cursor-pointer"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    id="project"
+                                                    value="project"
+                                                    checked={field.value === 'project'}
+                                                    onChange={handleRadioChange}
+                                                    name="moduleType"
+                                                    className="sr-only"
+                                                />
+                                                {/* Custom radio circle */}
+                                                <span
+                                                    className={`size-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                                        field.value === 'project'
+                                                            ? 'border-primary bg-transparent'
+                                                            : 'border-muted-foreground bg-transparent'
+                                                    }`}
+                                                >
+                                                    {field.value === 'project' && (
+                                                        <span className="size-2 rounded-full bg-primary block" />
+                                                    )}
+                                                </span>
+                                                <span className="text-sm font-medium">Project</span>
+                                            </label>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
 
                         <div className="py-4">
@@ -262,7 +269,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label htmlFor="desc">
                                 {typeId === 2
                                     ? 'Project Description'
@@ -298,7 +305,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-start">
                             <Label>Time Alotted:</Label>
                             <div className="flex gap-2">
                                 <div>
@@ -429,7 +436,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                 </p>
                             )}
                         </div>
-                    </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
                             <Button

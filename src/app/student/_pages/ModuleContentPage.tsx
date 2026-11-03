@@ -1,32 +1,67 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
+import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon, Lock } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
-import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
+import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
-import Header from "../_components/Header";
-import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
+import { getIconColor } from "@/app/student/_utils/sidebarUtils";
+import { TopicItem, Topic } from '@/app/student/_pages/pageStudentType'
+import ZuvyRewardModal from "@/app/student/_components/reward/ZuvyRewardModal";
+import { chapterRewardManager } from "@/app/student/_components/reward/chapterRewardManager";
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
   const chapterId = searchParams.get('chapterId');
-  const rawOrgId = searchParams.get('orgId');
-  const orgId = rawOrgId && rawOrgId !== 'null' && rawOrgId !== 'undefined' ? rawOrgId : null;
+  const orgId = params.orgId;
 
   // Move hooks before conditional return
-  const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
+  const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(+moduleId);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
-  
+
+  const [rewardModalState, setRewardModalState] = useState<{
+    isOpen: boolean;
+    sparks: number;
+    chapterTitle: string;
+    hideSparks: boolean;
+  }>({
+    isOpen: false,
+    sparks: 0,
+    chapterTitle: "",
+    hideSparks: false,
+  });
+
+  useEffect(() => {
+    if (trackingData && trackingData.length > 0) {
+      const pending = chapterRewardManager.consumePendingCompletion();
+      if (pending) {
+        const { id: pendingChapterId, hideSparks } = pending;
+        const completedChapter = trackingData.find(
+          (c) => c.id.toString() === pendingChapterId.toString()
+        );
+        const sparks = hideSparks ? 0 : (completedChapter?.sparks ?? 0);
+        const title = completedChapter?.title || "Chapter";
+
+        setRewardModalState({
+          isOpen: true,
+          sparks,
+          chapterTitle: title,
+          hideSparks,
+        });
+      }
+    }
+  }, [trackingData]);
+
 
 
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -36,11 +71,11 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
 
 
-useEffect(() => {
-  if (enhancedModule) {
-    setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
-  }
-}, [trackingData, moduleDetails, loading, error]);
+  useEffect(() => {
+    if (enhancedModule) {
+      setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
+    }
+  }, [trackingData, moduleDetails, loading, error]);
 
 
 
@@ -54,7 +89,7 @@ useEffect(() => {
           behavior: 'smooth',
           block: 'center',
         });
-        hasScrolledRef.current = true;  
+        hasScrolledRef.current = true;
       }
     }
   }, [chapterId, expandedTopics]);
@@ -83,6 +118,7 @@ useEffect(() => {
         case 6: return 'assessment';
         case 7: return 'feedback-form';
         case 8: return 'live-class';
+        case 9: return 'adaptive-assessment';
         default: return 'video';
       }
     };
@@ -97,6 +133,7 @@ useEffect(() => {
         case 6: return 'Assessment';
         case 7: return 'Feedback Form';
         case 8: return 'Live Class';
+        case 9: return 'adaptive-assessment';
         default: return 'Video';
       }
     };
@@ -116,7 +153,10 @@ useEffect(() => {
             contentType === 'assessment' ? '2 hours' :
               contentType === 'quiz' ? '30 mins' : undefined,
         scheduledDateTime: contentType === 'assessment' || contentType === 'live-class' ?
-          new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined
+          new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined,
+        isLock: item.isLock ?? false,
+        lockReason: item.lockReason ?? null,
+        lockMessage: item.lockMessage ?? null,
       };
     });
 
@@ -144,7 +184,6 @@ useEffect(() => {
       if (firstChapterId) {
         const queryParams = new URLSearchParams();
         queryParams.set('chapterId', firstChapterId);
-        if (orgId) queryParams.set('orgId', orgId);
         router.replace(`?${queryParams.toString()}`);
       }
     }
@@ -170,7 +209,7 @@ useEffect(() => {
           <h1 className="text-2xl font-heading font-bold mb-2">Invalid Module</h1>
           <p className="text-muted-foreground mb-4">Module ID is missing</p>
           <Button asChild>
-            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
+            <Link href={`/student/course/${courseId}/org/${orgId}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -204,7 +243,7 @@ useEffect(() => {
           <h1 className="text-2xl font-heading font-bold mb-2">Error Loading Module</h1>
           <p className="text-muted-foreground mb-4">{error}</p>
           <Button asChild>
-            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
+            <Link href={`/student/course/${courseId}/org/${orgId}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -216,8 +255,8 @@ useEffect(() => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl text-primary font-heading font-bold mb-2">Module Not Found</h1>
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"  asChild>
-            <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>Back to Course</Link>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
+            <Link href={`/student/course/${courseId}/org/${orgId}`}>Back to Course</Link>
           </Button>
         </div>
       </div>
@@ -295,7 +334,6 @@ useEffect(() => {
   const handleItemSelect = (itemId: string) => {
     const queryParams = new URLSearchParams();
     queryParams.set('chapterId', itemId);
-    if (orgId) queryParams.set('orgId', orgId);
     router.push(`?${queryParams.toString()}`);
     if (isMobile) {
       setIsMobileSidebarOpen(false);
@@ -329,39 +367,21 @@ useEffect(() => {
           return <User className="w-4 h-4" />;
         case 'coding-challenge':
           return <BookOpen className="w-4 h-4" />;
+        case 'adaptive-assessment':
+          return <SparkleIcon className="w-4 h-4" />;
         default:
           return <Circle className="w-4 h-4" />;
       }
     };
 
-    const getIconColor = () => {
-      switch (type) {
-        case 'live-class':
-        case 'video':
-          return status === 'completed' ? 'text-success' : 'text-primary';
-        case 'article':
-        case 'assessment':
-          return status === 'completed' ? 'text-success' : 'text-accent';
-        case 'assignment':
-          return status === 'completed' ? 'text-success' : 'text-secondary';
-        case 'quiz':
-        case 'coding-challenge':
-          return status === 'completed' ? 'text-success' : 'text-warning';
-        case 'feedback-form':
-          return status === 'completed' ? 'text-success' : 'text-info';
-        default:
-          return 'text-muted-foreground';
-      }
-    };
-
     return (
-      <div className={getIconColor()}>
+      <div className={getIconColor(type, status)}>
         {getIconComponent()}
       </div>
     );
   };
 
-  const getItemDetails = (item:TopicItem) => {
+  const getItemDetails = (item: TopicItem) => {
     if (item.type === 'live-class') {
       return 'Live Class';
     }
@@ -384,132 +404,132 @@ useEffect(() => {
       return '1 Coding Practice problem';
     }
     if (item.type === 'feedback-form') {
-      return 'Share your feedback';
+      return '';
     }
     return '';
   };
 
   return (
-    <div className="h-screen flex">
+    <div className="h-[calc(100vh-4rem)] flex overflow-hidden">
 
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <div>
-
-          <div className="w-80 h-screen bg-background border-r border-border flex flex-col">
-            <Header />
-            <div className="p-4 border-b text-left border-border flex-shrink-0">
-              <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
-                </Link>
-              </Button>
-              <h2 className="text-base font-heading font-semibold">{enhancedModule.name}</h2>
-              {/* <p className="text-xs text-muted-foreground mt-1 break-words"></p> */}
-            </div>
-
-            <div className="border-t border-border flex-shrink-0"></div>
-
-            <ScrollArea className="flex-1">
-              <div className="p-3 space-y-3">
-                {enhancedModule.topics.map((topic) => (
-                  <div key={topic.id} className="space-y-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-left h-auto p-2 hover:bg-primary-light hover:text-charcoal"
-                      onClick={() => toggleTopic(topic.id)}
-                    >
-                      <div className="flex w-full justify-between items-start gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-xs break-words leading-relaxed whitespace-normal">
-                            {topic.name}
-                          </div>
-                        </div>
-                        <div className="flex-shrink-0 mt-0.5">
-                          {expandedTopics.includes(topic.id) ? (
-                            <ChevronDown className="w-3 h-3" />
-                          ) : (
-                            <ChevronRight className="w-3 h-3" />
-                          )}
-                        </div>
-                      </div>
-                    </Button>
-
-                    {expandedTopics.includes(topic.id) && (
-                      <div className="space-y-1 pl-0">
-                        {topic.items.map((item) => (
-                          <Button
-                            key={item.id}
-                            variant="ghost"
-                            size="sm"
-                            className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
-                              ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
-                              : "hover:bg-primary-light hover:text-charcoal"
-                              }`}
-                            onClick={() => handleItemSelect(item.id)}
-                            ref={(el) => {
-                              if (el) itemRefs.current[item.id] = el;
-                            }}
-                          >
-                            <div className="flex items-start gap-2 w-full">
-                              <div className="flex-shrink-0 mt-1">
-                                {getItemIcon(item.type, item.status)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-sm break-words whitespace-normal text-left mb-1">
-                                  {item.type === 'live-class' ? `Live Class: ${item.title}` :
-                                    item.type === 'video' ? `Video: ${item.title}` :
-                                      item.type === 'article' ? `Article: ${item.title}` :
-                                        item.type === 'assignment' ? `Assignment: ${item.title}` :
-                                          item.type === 'assessment' ? `Assessment: ${item.title}` :
-                                            item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
-                                              item.type === 'quiz' ? `Quiz: ${item.title}` :
-                                                item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
-                                                  item.title}
-                                </div>
-                                <div className="text-xs font-md text-muted-foreground">
-                                  {getItemDetails(item)}  
-                                </div>
-                              </div>
-                              {item.status === 'completed' && (
-                                <div className="flex-shrink-0">
-                                  <Check className="w-4 h-4 mt-1 text-success" />
-                                </div>
-                              )}
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <ScrollBar />
-            </ScrollArea>
+        <div className="w-80 h-full bg-background border-r border-border flex flex-col flex-shrink-0">
+          <div className="p-4 border-b text-left border-border flex-shrink-0">
+            <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
+              <Link href={`/student/course/${courseId}/org/${orgId}`}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Course
+              </Link>
+            </Button>
+            <h2 className="text-base font-heading font-semibold">{enhancedModule.name}</h2>
           </div>
+
+          <div className="border-t border-border flex-shrink-0"></div>
+
+          <ScrollArea className="flex-1">
+            <div className="p-3 space-y-3">
+              {enhancedModule.topics.map((topic) => (
+                <div key={topic.id} className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left h-auto p-2 hover:bg-primary-light hover:text-charcoal"
+                    onClick={() => toggleTopic(topic.id)}
+                  >
+                    <div className="flex w-full justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-xs break-words leading-relaxed whitespace-normal">
+                          {topic.name}
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 mt-0.5">
+                        {expandedTopics.includes(topic.id) ? (
+                          <ChevronDown className="w-3 h-3" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3" />
+                        )}
+                      </div>
+                    </div>
+                  </Button>
+
+                  {expandedTopics.includes(topic.id) && (
+                    <div className="space-y-1 pl-0">
+                      {topic.items.map((item) => (
+                        <Button
+                          key={item.id}
+                          variant="ghost"
+                          size="sm"
+                          className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
+                            ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
+                            : "hover:bg-primary-light hover:text-charcoal"
+                            }`}
+                          onClick={() => handleItemSelect(item.id)}
+                          ref={(el) => {
+                            if (el) itemRefs.current[item.id] = el;
+                          }}
+                        >
+                          <div className="flex items-start gap-2 w-full">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getItemIcon(item.type, item.status)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm font-body break-words whitespace-normal text-left mb-1">
+                                {item.type === 'live-class' ? `Live Class: ${item.title}` :
+                                  item.type === 'video' ? `Video: ${item.title}` :
+                                    item.type === 'article' ? `Article: ${item.title}` :
+                                      item.type === 'assignment' ? `Assignment: ${item.title}` :
+                                        item.type === 'assessment' ? `Assessment: ${item.title}` :
+                                          item.type === 'feedback-form' ? ` ${item.title}` :
+                                            item.type === 'quiz' ? `Quiz: ${item.title}` :
+                                              item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
+                                                item.type === 'adaptive-assessment' ? `Adaptive Assessment: ${item.title}` :
+                                                  item.title}
+                              </div>
+                              <div className="text-xs font-medium text-muted-foreground">
+                                {getItemDetails(item)}
+                              </div>
+                            </div>
+                            {item.isLock ? (
+                              <div className="flex-shrink-0">
+                                <Lock className="w-4 h-4 mt-1 text-muted-foreground" />
+                              </div>
+                            ) : item.status === 'completed' ? (
+                              <div className="flex-shrink-0">
+                                <Check className="w-4 h-4 mt-1 text-success" />
+                              </div>
+                            ) : null}
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <ScrollBar />
+          </ScrollArea>
         </div>
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 h-screen flex flex-col ${!isMobile ? '' : 'pb-20'}`}>
-        {isMobile && <Header />}
-        <div className="flex w-full flex-start" >
-
-              <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}${orgId ? `?orgId=${orgId}` : ''}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
-                </Link>
-              </Button>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
+      <div className={`flex-1 h-full flex flex-col overflow-hidden ${!isMobile ? '' : 'pb-20'}`}>
+        {isMobile && (
+          <div className="flex w-full justify-start p-4 border-b border-border">
+            <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline p-0 h-auto">
+              <Link href={`/student/course/${courseId}/org/${orgId}`}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Course
+              </Link>
+            </Button>
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto">
+          <div className={`h-full ${isMobile ? 'p-2.5' : 'p-10'}`}>
             <ModuleContentRenderer
               selectedItemData={selectedItemData}
               onChapterComplete={refetch} getAssessmentData={function (itemId: string) {
                 throw new Error("Function not implemented.");
-              } }            />
+              }} />
           </div>
         </div>
       </div>
@@ -566,6 +586,29 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {/* Reward Modal */}
+      {/* onContinue auto-advances to the next chapter when the student completes one.
+          We only navigate when sparks > 0 (genuine completion); zero sparks means
+          the student failed/retried and the modal shows "Try Again →", so we skip
+          the advance. When there is no next chapter (last item in module) nextItem
+          is null and onContinue is left undefined, preserving the current behaviour. */}
+      <ZuvyRewardModal
+        isOpen={rewardModalState.isOpen}
+        totalSparks={rewardModalState.sparks}
+        chapterTitle={rewardModalState.chapterTitle}
+        hideSparks={rewardModalState.hideSparks}
+        onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
+        onContinue={
+          // Advance when: there is a next chapter AND either the chapter awarded
+          // sparks (normal completion) OR it was a no-sparks item like a feedback
+          // form (hideSparks=true). The only case we DON'T advance is zero-sparks
+          // on a sparks-bearing chapter, which means the student failed/needs retry.
+          nextItem && (rewardModalState.sparks > 0 || rewardModalState.hideSparks)
+            ? () => handleItemSelect(nextItem.item.id)
+            : undefined
+        }
+      />
     </div>
   );
 };

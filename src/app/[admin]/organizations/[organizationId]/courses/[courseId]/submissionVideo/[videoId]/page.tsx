@@ -2,187 +2,142 @@
 
 // External imports
 import React, { useCallback, useEffect, useState } from 'react'
-import { useRouter,useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { columns } from './column'
+import { createColumns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 type Props = {}
 interface BatchFilter {
     id: number
     name: string
-  }
+}
 
 const Page = ({ params }: any) => {
+    const { fetchChapterStudents, getChapterStudentsUrl } = useChapterStudents()
     const router = useRouter()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'video'
     const [videoData, setVideoData] = useState<any>()
     const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState<boolean>(false)
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
-
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
+    const orgId = Number(organizationId) || user?.orgId;
     
     // API functions for the hook - exactly like your pattern
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
 
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=5&offset=0`
-        const response = await api.get(url)
-        return response.data.submittedStudents?.map((student: any) => ({
+        const response = await fetchChapterStudents(params.videoId, {
+            searchStudent: query,
+            limit: 10,
+            offset: 0
+        })
+        return response?.data?.submittedStudents?.map((student: any) => ({
             id: student.id,
             name: student.name,
             email: student.email,
             ...student
         })) || []
-    }, [params.videoId])
+    }, [params.videoId, fetchChapterStudents])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
-    
-        const queryParams = new URLSearchParams()
-        queryParams.append('searchStudent', query)
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
-    
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-        
-    
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
-        const response = await api.get(url)
-    
-        setDataTableVideo(response.data.submittedStudents || [])
-        setVideoData(response.data.moduleVideochapter)
-    
+
+        const response = await fetchChapterStudents(params.videoId, {
+            searchStudent: query,
+            limit: 10,
+            offset: 0,
+            batchId: selectedBatch,
+            orderBy: sortField,
+            orderDirection: sortDirection
+        })
+
+        setDataTableVideo(response?.data?.submittedStudents || [])
+        setVideoData(response?.data?.moduleVideochapter)
+
         setLoading(false)
-    }, [params.videoId, selectedBatch,sortField, sortDirection])
-    
+    }, [params.videoId, selectedBatch, sortField, sortDirection, fetchChapterStudents])
+
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
-    
-        const queryParams = new URLSearchParams()
-    
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-        
-    
-        const url = queryParams.toString()
-            ? `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
-            : `/admin/moduleChapter/students/chapter_id${params.videoId}`
-    
-        const response = await api.get(url)
-    
-        const students = response.data.submittedStudents || []
+
+        const response = await fetchChapterStudents(params.videoId, {
+            batchId: selectedBatch,
+            orderBy: sortField,
+            orderDirection: sortDirection
+        })
+
+        const students = response?.data?.submittedStudents || []
         setDataTableVideo(students)
-        setVideoData(response.data.moduleVideochapter)
-    
+        setVideoData(response?.data?.moduleVideochapter)
+
         setLoading(false)
-    }, [params.videoId, selectedBatch,sortField, sortDirection])
+    }, [params.videoId, selectedBatch, sortField, sortDirection, fetchChapterStudents])
     useEffect(() => {
         defaultFetchApi()
-    }, [selectedBatch ,sortField, sortDirection, defaultFetchApi])
-     
+    }, [selectedBatch, sortField, sortDirection, defaultFetchApi])
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(params.courseId))
+
     const handleVideoDownloadCsv = useCallback(() => {
-        const queryParams = new URLSearchParams()
-    
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
+        const csvColumns = [
+            { header: 'Student Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
+            { header: 'Email', key: 'email' },
+            { header: 'Batch', key: 'batchName' },
+            { header: 'Watched At', key: 'completedAt' },
+            { header: 'Title', key: 'title' },
+            { header: 'Total Watch Time', key: 'totalWatchTime' },
+        ]
+
         downloadCsv({
-            endpoint: `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`,
-    
+            endpoint: getChapterStudentsUrl(params.videoId, {
+                batchId: selectedBatch,
+                orderBy: sortField,
+                orderDirection: sortDirection
+            }),
+
             fileName: `video_submissions_${videoData?.title || 'video'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'submittedStudents',
-    
-            columns: [
-                { header: 'Student Name', key: 'name' },
-                { header: 'Email', key: 'email' },
-                { header: 'Batch', key: 'batchName' },
-                { header: 'Watched At', key: 'completedAt' },
-            ],
-    
-            mapData: (item: any) => ({
+
+            columns: csvColumns,
+
+            mapData: (item: any, responseData: any) => ({
                 name: item.name || '',
-                email: item.email || '',
+                studentId: item.userId ?? item.id ?? 'NA',
+                email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',
+                title: responseData?.moduleVideochapter?.title || '',
+                totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
             }),
         })
-    }, [params.videoId,selectedBatch,sortField,sortDirection,videoData,])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('Error fetching bootcamp data:', error)
-        }
-    }, [params.courseId])
-
-    useEffect(() => {
-        getBootcampHandler()
-    }, [getBootcampHandler])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([
-                    getBootcampHandler(),
-                    fetchBatches()
-                ])
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
-
-        fetchData()
-    }, [fetchBatches])
+    }, [params.videoId, selectedBatch, sortField, sortDirection, videoData, isCareerTourBootcamp])
 
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
@@ -194,7 +149,7 @@ const Page = ({ params }: any) => {
             <div className="flex items-center gap-4 mb-8 mt-6">
                 <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
-                        variant="ghost"              
+                        variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -204,54 +159,54 @@ const Page = ({ params }: any) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {videoData?.title || 'Loading...'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                            <div className="text-left">
-                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                                <div className="text-lg font-semibold">{videoData?.totalStudents || 0}</div>
-                            </div>
-                            <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                                <div className="text-xl font-semibold text-gray-900">Video</div>
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                        <div className="text-left">
+                            <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                            <div className="text-lg font-semibold">{videoData?.totalSubmittedStudents  || 0}</div>
+                        </div>
+                        <div className="text-left">
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                            <div className="text-lg font-semibold">Video</div>
+                        </div>
 
-                            <div className="text-left">
-                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
-                            </div>
-                            <div className="text-left">
-                                <label className="font-medium text-muted-foreground">Batch Filter</label>
-                                <Select
-                                    value={selectedBatch}
-                                    onValueChange={setSelectedBatch}
-                                >
-                                    <SelectTrigger className="w-full mt-1">
-                                        <SelectValue placeholder="All Batches" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
+                        <div className="text-left">
+                            <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                            <div className="text-lg font-semibold">{params.courseId}</div>
+                        </div>
+                        <div className="text-left">
+                            <label className="font-medium text-muted-foreground">Batch Filter</label>
+                            <Select
+                                value={selectedBatch}
+                                onValueChange={setSelectedBatch}
+                            >
+                                <SelectTrigger className="w-full mt-1">
+                                    <SelectValue placeholder="All Batches" />
+                                </SelectTrigger>
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
                                     {batches.map(batch => (
                                         <SelectItem key={batch.id} value={batch.id.toString()}>
                                             {batch.name}
                                         </SelectItem>
                                     ))}
-                                    </SelectContent>
+                                </SelectContent>
 
-                                </Select>
-                            </div>
+                            </Select>
                         </div>
+                    </div>
                 </CardContent>
             </Card>
             <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button
@@ -283,7 +238,7 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={dataTableVideo} columns={columns} onSortingChange={handleSortingChange}/>
+                    <DataTable data={dataTableVideo} columns={createColumns(params.courseId)} onSortingChange={handleSortingChange} />
                 </CardContent>
             </Card>
         </>

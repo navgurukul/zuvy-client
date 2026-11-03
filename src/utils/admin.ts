@@ -310,13 +310,14 @@ export const handlerQuizQuestions = (
     setIsQuizQuestionId(quizQuestion.id)
 }
 
-export async function getAllTags(setTags: any, setOptions?: any) {
+export async function fetchAllTags() {
     const response = await api.get('Content/allTags')
-    if (response) {
-        const tagArr = [
-            { id: -1, tagName: 'All Topics' },
-            ...response.data.allTags,
-        ]
+    return [{ id: -1, tagName: 'All Topics' }, ...response.data.allTags]
+}
+
+export async function getAllTags(setTags: any, setOptions?: any) {
+    const tagArr = await fetchAllTags()
+    if (tagArr) {
         const transformedTags = tagArr.map(
             (item: { id: any; tagName: any }) => ({
                 id: item.id,
@@ -338,9 +339,9 @@ export async function getAllTags(setTags: any, setOptions?: any) {
 // get tags without filtering:
 
 export async function getAllTagsWithoutFilter(setTags: any) {
-    const response = await api.get('Content/allTags')
-    if (response) {
-        setTags([{ id: -1, tagName: 'All Topics' }, ...response.data.allTags])
+    const tagArr = await fetchAllTags()
+    if (tagArr) {
+        setTags(tagArr)
     }
 }
 
@@ -813,6 +814,7 @@ export const fetchProjectDetails = async (
             `Content/project/${projectID}?bootcampId=${courseId}`
         )
         setProjectData(response.data)
+        return response.data
     } catch (error) {
         console.error(error)
     }
@@ -1243,15 +1245,38 @@ export const isLinkValid = (link: string) => {
             url.hostname.includes('youtube.com') ||
             url.hostname.includes('youtu.be')
 
+        const isVimeo = url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com')
+
         const isGoogleDrive = url.hostname.includes('drive.google.com')
 
         const isZoom = url.hostname.includes('zoom')
 
-        return isYouTube || isGoogleDrive || isZoom
+        return isYouTube || isVimeo || isGoogleDrive || isZoom
     } catch {
         return false // If it's not a valid URL at all
     }
 }
+
+export const isYouTubeLink = (url: string) => {
+    try {
+        const hostname = new URL(url.trim()).hostname
+        return hostname.includes('youtube.com') || hostname.includes('youtu.be')
+    } catch {
+        return false
+    }
+}
+
+export const isVimeoLink = (url: string) => {
+    try {
+        const hostname = new URL(url.trim()).hostname
+        return hostname === 'vimeo.com' || hostname.endsWith('.vimeo.com')
+    } catch {
+        return false
+    }
+}
+
+export const isTrackableVideoLink = (url: string) =>
+    isYouTubeLink(url) || isVimeoLink(url)
 
 export const getEmbedLink = (url: string) => {
     if (!url) return ''
@@ -1270,6 +1295,14 @@ export const getEmbedLink = (url: string) => {
         if (urlObj.hostname.includes('youtu.be')) {
             const videoId = urlObj.pathname.slice(1)
             return `https://www.youtube.com/embed/${videoId}`
+        }
+
+        // Vimeo links are supported directly by ReactPlayer.
+        if (
+            urlObj.hostname === 'vimeo.com' ||
+            urlObj.hostname.endsWith('.vimeo.com')
+        ) {
+            return url
         }
 
         // Google Drive
@@ -1342,3 +1375,14 @@ export const getEmbedLink = (url: string) => {
         }
         return false
     }
+
+export const normalizeLinks = (links?: string | string[]): string[] => {
+    if (!links) return []
+    if (Array.isArray(links)) {
+        return links.map((link) => link.trim()).filter(Boolean)
+    }
+    return links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
+}

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import {ProjectPageSkeleton}  from "@/app/student/_components/Skeletons"
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 import { 
   X, 
   FileText, 
@@ -21,8 +22,8 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
-import useProjectDetails from "@/hooks/useProjectDetails";
-import useProjectSubmission from "@/hooks/useProjectSubmission";
+import useProjectDetails from "@/app/student/hooks/useProjectDetails";
+import useProjectSubmission from "@/app/student/hooks/useProjectSubmission";
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
 import {ProjectState,ParagraphContentItem} from '@/app/student/_pages/pageStudentType'
 
@@ -35,7 +36,7 @@ const ProjectPage = () => {
   const projectId = searchParams.get('projectId');
   const moduleId = searchParams.get('moduleId');
   const courseId = params.courseId;
-  const orgId = searchParams.get('orgId');
+  const orgId = params.orgId;
   
   const [projectState, setProjectState] = useState<ProjectState>({
     submissionLinks: [''],
@@ -102,7 +103,8 @@ const ProjectPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-heading font-bold mb-4">Project Not Found</h1>
             <p className="text-muted-foreground mb-6">{error || 'The requested project could not be found.'}</p>
-            <Button onClick={() => router.push(`/student/course/${courseId}?orgId=${orgId}`)}>
+            <Button onClick={() => router.push(`/student/course/${courseId}/org/${orgId}`)}   className="hover:bg-primary"
+>
               <X className="w-4 h-4 mr-2" />
               Back to Course Dashboard
             </Button>
@@ -222,7 +224,7 @@ const ProjectPage = () => {
           <div className="flex items-center">
             <Button 
               variant="ghost" 
-              className="p-0 h-auto text-primary hover:text-primary hover:underline"
+              className="p-0 h-auto text-primary hover:text-primary hover:no-underline hover:bg-transparent"
               onClick={() => router.back()}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -474,21 +476,6 @@ const normalizeLinks = (links?: string | string[]): string[] => {
     .filter(Boolean);
 };
 
-const isValidUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-    if (!url.hostname) return false;
-    if (url.hostname === 'localhost') return true;
-    if (url.hostname.endsWith('.')) return false;
-    const hostnameParts = url.hostname.split('.');
-    if (hostnameParts.length < 2) return false;
-    const tld = hostnameParts[hostnameParts.length - 1];
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
-    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
-  } catch {
-    return false;
-  }
-};
+
 
 export default ProjectPage;

@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
-import useAssignmentDetails from '@/hooks/useAssignmentDetails';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
-import { api } from '@/utils/axios.config';
+import useAssignmentDetails from '@/app/student/hooks/useAssignmentDetails';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
+import useSubmitQuizAndAssignment from '@/app/student/hooks/useSubmitQuizAndAssignment';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
@@ -16,7 +16,8 @@ import useWindowSize from '@/hooks/useHeightWidth';
 import { X } from 'lucide-react';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
-
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
+import { normalizeLinks } from '@/utils/admin';
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -44,6 +45,12 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       setLocalIsCompleted(true);
       onChapterComplete(); 
     },
+  });
+
+  const { submitAssignment, isSubmitting: isSubmittingApi } = useSubmitQuizAndAssignment({
+    courseId: courseId as string,
+    moduleId: moduleId as string,
+    chapterId: chapterDetails.id,
   });
 
   useEffect(() => {
@@ -151,10 +158,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     };
 
     try {
-      await api.post(
-        `/tracking/updateQuizAndAssignmentStatus/${courseId}/${moduleId}?chapterId=${chapterDetails.id}`,
-        submissionBody
-      );
+      await submitAssignment(submissionBody);
 
       await completeChapter();
       
@@ -195,7 +199,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   const trimmedLinks = submissionLinks.map((link) => link.trim());
   const hasEmptyLink = trimmedLinks.some((link) => link.length === 0);
   const hasInvalidLink = trimmedLinks.some((link) => link.length > 0 && !isValidUrl(link));
-  const isSubmitDisabled = isSubmitting || isCompleting || hasEmptyLink || hasInvalidLink;
+  const isSubmitDisabled = isSubmitting || isSubmittingApi || isCompleting || hasEmptyLink || hasInvalidLink;
 
   if (loading) {
     // return (
@@ -228,7 +232,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         {/* Header Section */}
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h1 className={`font-bold text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-xl'}`}>
+            <h1 className={`font-bold font-body text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-xl'}`}>
               {chapterDetails.title}
             </h1>
             <p className={`text-muted-foreground text-left ${isMobile ? 'text-sm' : 'text-base'}`}>
@@ -238,7 +242,12 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
           <div className="flex flex-col items-end space-y-2">
             <Badge 
               variant={isCompleted ? "secondary" : "outline"}
-              className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
+              // className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
+              className={`${
+                  isCompleted
+                    ? 'bg-green-100 text-green-800 hover:text-white dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/30 dark:hover:text-green-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+                } px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
             >
               {getSubmissionStatus()}
             </Badge>
@@ -300,7 +309,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                         value={link}
                         onChange={(e) => handleSubmissionChange(index, e.target.value)}
                         disabled={isCompleted || isSubmitting || isCompleting}
-                        className={`text-base text-left ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'} ${validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}`}
+                        className={`text-base text-left dark:bg-slate-900 dark:text-slate-100 dark:disabled:text-slate-200 dark:disabled:opacity-85 ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'} ${validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}`}
                       />
                       {!isCompleted && submissionLinks.length > 1 && (
                         <Button
@@ -366,30 +375,6 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
 export default AssignmentContent; 
 
-const normalizeLinks = (links?: string | string[]): string[] => {
-  if (!links) return [];
-  if (Array.isArray(links)) {
-    return links.map((link) => link.trim()).filter(Boolean);
-  }
-  return links
-    .split(/\r?\n+/)
-    .map((link) => link.trim())
-    .filter(Boolean);
-};
 
-const isValidUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-    if (!url.hostname) return false;
-    if (url.hostname === 'localhost') return true;
-    if (url.hostname.endsWith('.')) return false;
-    const hostnameParts = url.hostname.split('.');
-    if (hostnameParts.length < 2) return false;
-    const tld = hostnameParts[hostnameParts.length - 1];
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
-    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
-  } catch {
-    return false;
-  }
-};
+
+

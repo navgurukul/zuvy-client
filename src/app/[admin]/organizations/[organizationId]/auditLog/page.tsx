@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,16 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import AuditLogGroup from './components/AuditLogGroup';
 import AuditLogExport from './components/AuditLogExport';
 import { SearchBox } from '@/utils/searchBox';
 import { AuditLog } from './components/auditLogTypes';
-import { useTrackingLog } from '@/hooks/useTrackingLog';
+import { useTrackingLog } from '@/app/[admin]/hooks/useTrackingLog';
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic';
-import { api } from '@/utils/axios.config';
 import { getUser } from '@/store/store';
+import { parseAuditLogDate } from './components/auditLogDateUtils';
 
 export default function AuditLogPage() {
   const { organizationId } = useParams();
@@ -40,7 +39,7 @@ export default function AuditLogPage() {
 
 
   // Use the tracking log hook with current filter values - using actual search term
-  const { trackingLogs, loading, error, totalRows, refetch } = useTrackingLog({
+  const { trackingLogs, loading, error, totalRows, refetch, fetchTrackingLog } = useTrackingLog({
     limit: 1000,
     offset: 0,
     role: selectedRole !== 'all' ? selectedRole : undefined,
@@ -50,11 +49,7 @@ export default function AuditLogPage() {
     search: actualSearchTerm || undefined
   });
 
-  // Fetch all data without filters to get available options for dropdowns
-  const { trackingLogs: allLogs } = useTrackingLog({
-    limit: 1000, // Get more records to extract all possible values
-    initialFetch: true
-  });
+  const didMountRef = useRef(false);
 
   // Set initial load to false after first successful load
   useEffect(() => {
@@ -95,6 +90,14 @@ export default function AuditLogPage() {
 
   const STATUS_OPTIONS = ['success', 'failed', 'pending'] as const;
 
+  const timeRangeLabels: Record<string, string> = {
+    all: 'All Time',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    past7Days: 'Past 7 Days',
+    past30Days: 'Past 30 Days',
+  };
+
   const normalizeRole = (role: string) => role.trim().toLowerCase().replace(/\s+/g, '_');
   const formatRoleLabel = (role: string) =>
     role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -102,22 +105,19 @@ export default function AuditLogPage() {
   // Extract unique values from API data for dropdowns
   const filterOptions = useMemo(() => {
     const rolesSet = new Set<string>(ROLE_OPTIONS);
+    const actionsSet = new Set<string>(ACTION_OPTIONS);
 
-    // derive roles from logs + merge with static roles
-    if (Array.isArray(allLogs) && allLogs.length > 0) {
-      allLogs.forEach((log) => {
+    if (Array.isArray(trackingLogs) && trackingLogs.length > 0) {
+      trackingLogs.forEach((log) => {
         if (Array.isArray(log.actorRoles)) {
           log.actorRoles.forEach((role) => {
             if (role) rolesSet.add(normalizeRole(role));
           });
         }
-      });
-    }
 
-    const actionsSet = new Set<string>(ACTION_OPTIONS);
-    if (Array.isArray(allLogs) && allLogs.length > 0) {
-      allLogs.forEach((log) => {
-        if (log.action) actionsSet.add(log.action);
+        if (log.action) {
+          actionsSet.add(log.action);
+        }
       });
     }
 
@@ -125,58 +125,62 @@ export default function AuditLogPage() {
       roles: Array.from(rolesSet).sort(),
       actions: Array.from(actionsSet).sort(),
       statuses: [...STATUS_OPTIONS],
-      timeRanges: ['all', 'today', 'past7Days', 'past30Days']
+      timeRanges: ['all', 'today', 'yesterday', 'past7Days', 'past30Days']
     };
-  }, [allLogs]);
+  }, [trackingLogs]);
 
   // Backend API function for search suggestions (same pattern as courses page)
   const fetchSuggestionsApi = useCallback(async (query: string) => {
     if (orgId === undefined) return [];
-    if (!query || query.length < 2) return [];
-    
-    try {
-      
-      // Call tracking log API with search query
-      const response = await api.get(
-        `/trackinglog?orgId=${orgId}&limit=10&offset=0&search=${encodeURIComponent(query)}&timeRange=all`
-      );
-      
-      if (response.data?.success && response.data?.data?.logs) {
-        const logs = response.data.data.logs;
-        
-        // Extract unique simple suggestions
-        const suggestions = new Set<string>();
-        
-        logs.forEach((log: any) => {
-          // Add actor names only if they match the query
-          if (log.actorName && log.actorName.toLowerCase().includes(query.toLowerCase())) {
-            suggestions.add(log.actorName);
-          }
-          
-          // Add actions (formatted) only if they match
-          if (log.action) {
-            const formattedAction = log.action.replace(/_/g, ' ');
-            if (formattedAction.toLowerCase().includes(query.toLowerCase())) {
-              suggestions.add(formattedAction);
-            }
-          }
-          
-          // Add resource types only if they match
-          if (log.resourceType && log.resourceType.toLowerCase().includes(query.toLowerCase())) {
-            suggestions.add(log.resourceType);
-          }
-        });
+    if (!query.trim()) return [];
 
-        // Return Suggestion objects (first 8)
-        return Array.from(suggestions).slice(0, 8).map((text, index) => ({ id: String(index), label: text }));
+    try {
+      const logs = await fetchTrackingLog({
+        orgId,
+        search: query,
+        limit: 10,
+        offset: 0,
+        timeRange: 'all',
+        updateState: false,
+      });
+
+      if (!logs || logs.length === 0) {
+        return [];
       }
-      
-      return [];
+
+      const suggestions = new Set<string>();
+
+      logs.forEach((log: any) => {
+        if (log.actorName && log.actorName.toLowerCase().includes(query.toLowerCase())) {
+          suggestions.add(log.actorName);
+        }
+
+        if (log.action) {
+          const formattedAction = log.action.replace(/_/g, ' ');
+          if (formattedAction.toLowerCase().includes(query.toLowerCase())) {
+            suggestions.add(formattedAction);
+          }
+        }
+
+        if (log.resourceType && log.resourceType.toLowerCase().includes(query.toLowerCase())) {
+          suggestions.add(log.resourceType);
+        }
+      });
+
+      if (suggestions.size === 0) {
+        return [{
+          id: `search-${query}`,
+          label: `Search for "${query}"`,
+          value: query,
+        }];
+      }
+
+      return Array.from(suggestions).slice(0, 8).map((text, index) => ({ id: String(index), label: text }));
     } catch (error) {
       console.error('Error fetching audit log suggestions:', error);
       return [];
     }
-  }, [orgId]);
+  }, [fetchTrackingLog, orgId]);
 
   const fetchSearchResultsApi = useCallback(async (query: string) => {
     
@@ -251,7 +255,11 @@ export default function AuditLogPage() {
       };
 
       // Determine time grouping based on createdAt timestamp
-      const logDate = new Date(log.createdAt);
+      const logDate = parseAuditLogDate(log.createdAt);
+      if (!logDate) {
+        return null;
+      }
+
       const now = new Date();
       const diffInDays = Math.floor((now.getTime() - logDate.getTime()) / (1000 * 3600 * 24));
       
@@ -312,7 +320,7 @@ export default function AuditLogPage() {
       };
 
       return auditLog;
-    });
+    }).filter((log): log is AuditLog => log !== null);
   }, [trackingLogs]);
 
   // Group logs by date
@@ -326,6 +334,8 @@ export default function AuditLogPage() {
   }, [transformedLogs, visibleCount]);
 
   const hasMore = transformedLogs.length > visibleCount;
+  const getGroupTitle = (groupTitle: string) =>
+    timeRangeLabels[selectedTimeRange] || groupTitle;
 
   // Handle filter changes and refetch data
   const handleRoleChange = (value: string) => {
@@ -350,6 +360,11 @@ export default function AuditLogPage() {
 
   // Refetch data when actual search term or other filters change
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
     refetch({
       role: selectedRole !== 'all' ? selectedRole : undefined,
       action: selectedAction !== 'all' ? selectedAction : undefined,
@@ -357,9 +372,9 @@ export default function AuditLogPage() {
       timeRange: selectedTimeRange,
       search: actualSearchTerm || undefined,
       offset: 0,
-      limit: totalRows || 1000
+      limit: 1000
     });
-  }, [selectedRole, selectedAction, selectedStatus, selectedTimeRange, actualSearchTerm, totalRows, refetch]);
+  }, [selectedRole, selectedAction, selectedStatus, selectedTimeRange, actualSearchTerm, refetch]);
 
   // Only show full loading screen on initial load
   if (isInitialLoad && loading) {
@@ -479,6 +494,7 @@ export default function AuditLogPage() {
           <SelectContent>
             <SelectItem value="all">All Time</SelectItem>
             <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="yesterday">Yesterday</SelectItem>
             <SelectItem value="past7Days">Past 7 Days</SelectItem>
             <SelectItem value="past30Days">Past 30 Days</SelectItem>
           </SelectContent>
@@ -488,9 +504,9 @@ export default function AuditLogPage() {
       {/* Main Content - Audit Log with API Data */}
       <div className={`space-y-6 ${loading && !isInitialLoad ? 'opacity-75' : ''} transition-opacity`}>
         {groupedLogs.today.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="Today"
+              title={getGroupTitle('Today')}
               logs={groupedLogs.today}
               groupKey="today"
               count={groupedLogs.today.length}
@@ -498,9 +514,9 @@ export default function AuditLogPage() {
           </div>
         )}
         {groupedLogs.thisWeek.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="This Week"
+              title={getGroupTitle('This Week')}
               logs={groupedLogs.thisWeek}
               groupKey="thisWeek"
               count={groupedLogs.thisWeek.length}
@@ -508,9 +524,9 @@ export default function AuditLogPage() {
           </div>
         )}
         {groupedLogs.older.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
             <AuditLogGroup
-              title="Older"
+              title={getGroupTitle('Older')}
               logs={groupedLogs.older}
               groupKey="older"
               count={groupedLogs.older.length}
@@ -531,7 +547,7 @@ export default function AuditLogPage() {
         )}
 
         {transformedLogs.length === 0 && !loading && (
-          <div className="rounded-lg border border-slate-200 bg-white px-6 py-12 text-center text-slate-600">
+          <div className="rounded-lg border border-border bg-card px-6 py-12 text-center text-foreground/70">
             <p>No audit logs found for the selected filters</p>
           </div>
         )}

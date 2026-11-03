@@ -1,5 +1,6 @@
 'use client';
 import Header from './_components/Header'
+import { TourProvider, TourOverlay, TourTooltip } from './_components/guided-tour';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense, useState } from 'react';
 import { getUser, useThemeStore } from '@/store/store';
@@ -10,6 +11,8 @@ import UnauthorizedStudent from '@/components/UnauthorizedStudent';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import ZoeBanner from '../_components/ZoeBanner';
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/app/student/hooks/useMentors';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,9 +41,7 @@ function StudentLayoutContent({
 }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const chapterId = searchParams.get('chapterId');
     const hideHeader = pathname.includes('/assessmentResult/') || pathname.includes('/codingChallenge') || pathname.includes('/projects');
-    const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
     // const { roles, loading } = useRoles()
     const { user } = getUser()
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
@@ -48,6 +49,22 @@ function StudentLayoutContent({
     // const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
     const [showZoeBanner, setShowZoeBanner] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+
+    // Derive the active courseId the same way Header does so TourProvider can
+    // know whether mentorship is enabled for the current course.
+    const courseIdMatch = pathname.match(/\/course\/([^\/]+)/);
+    const courseIdFromPath = courseIdMatch?.[1];
+    const courseIdFromQuery = searchParams.get('courseId');
+    const activeCourseId = courseIdFromPath || courseIdFromQuery || '';
+    const { latestCourseData } = useLatestUpdatedCourse(activeCourseId);
+    const mentorshipEnabled = Boolean(latestCourseData?.mentorshipEnabled);
+
+    // Fetch mentors only when mentorship is enabled so we can decide whether
+    // the tour should continue past the "Browse Mentors" step.
+    const { mentors, loading: mentorsLoading } = useMentors('', mentorshipEnabled, 1000, 0);
+    const hasAvailableMentors = mentorsLoading ? true : mentors.some(
+        (m) => m.availabilityStatus?.trim().toLowerCase() === 'available'
+    );
 
     useEffect(() => {
         setIsMounted(true);
@@ -71,7 +88,7 @@ function StudentLayoutContent({
             document.documentElement.style.overflow = previousHtmlOverflow;
         };
     }, []);
-    
+
     const handleDismissBanner = () => {
         setShowZoeBanner(false);
         if (typeof window !== 'undefined') {
@@ -90,22 +107,26 @@ function StudentLayoutContent({
     };
 
     return (
-        <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
+        <TourProvider mentorshipEnabled={mentorshipEnabled} hasAvailableMentors={hasAvailableMentors}>
+            <div className="h-screen overflow-hidden bg-background flex flex-col font-manrope">
 
-            <ThemeInitializer />
-            <div className="sticky top-0 z-50">
-                <ZoeBanner 
-                    isVisible={showZoeBanner}
-                    onDismiss={handleDismissBanner}
-                    onStartInterview={handleStartInterview}
-                    onGiveFeedback={handleGiveFeedback}
-                />
-                {!hideHeader && !isOnCourseModulePage && <Header />}
+                <ThemeInitializer />
+                <div className="sticky top-0 z-50">
+                    <ZoeBanner
+                        isVisible={showZoeBanner && !hideHeader}
+                        onDismiss={handleDismissBanner}
+                        onStartInterview={handleStartInterview}
+                        onGiveFeedback={handleGiveFeedback}
+                    />
+                    {!hideHeader && <Header />}
+                </div>
+                <main id="main-scroll-container" className="flex-1 overflow-y-auto">
+                    {children}
+                </main>
+                <TourOverlay />
+                <TourTooltip />
             </div>
-            <main className="flex-1 overflow-y-auto">
-                {children}
-            </main>
-        </div>
+        </TourProvider>
     )
 }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -42,8 +42,10 @@ import {
 } from '@/components/ui/command'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
-import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
+import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { useCreateClass } from '@/app/[admin]/hooks/useCreateClass'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
 // Removed conflicting imported type CreateSessionDialogProps (local type declared below)
 
 const formSchema = z
@@ -147,42 +149,28 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
-    const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
+    const { chapters, refetch: refetchChapters } = useModuleChapters(params.moduleId as string)
+    const { createClass, creating: isLoading } = useCreateClass()
     const [isCalendarOpen, setCalendarOpen] = useState(false)
-    const [bootcampData, setBootcampData] = useState<any>([])
+
+    const { batchData } = useBatchList(params.courseId as string)
+    // Map to {value, label} shape used by the batch selects in the form
+    const bootcampData = batchData.map((b) => ({
+        value: b.id.toString(),
+        label: b.name,
+    }))
 
     // Reusable select styling helper
     const baseSelectClass =
-        'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed'
+        'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed'
 
     // Platform options - Only Zoom
     const platformOptions = [
         { value: 'zoom', label: 'Zoom' },
         // { value: 'google-meet', label: 'Google Meet' },
     ]
-    const getHandleAllBootcampBatches = useCallback(async () => {
-        if (params.courseId) {
-            await api
-                .get(`/bootcamp/batches/${params.courseId}`)
-                .then((response) => {
-                    const transformedData = response.data.data.map(
-                        (item: { id: number; name: string }) => ({
-                            value: item.id.toString(),
-                            label: item.name,
-                        })
-                    )
-                    setBootcampData(transformedData)
-                })
-                .catch((error) => {
-                    console.error('Error fetching data:', error)
-                })
-        }
-    }, [params.courseId])
-    useEffect(() => {
-        getHandleAllBootcampBatches()
-    }, [getHandleAllBootcampBatches])
 
     // Removed toggleForm since dialog-based selects were replaced with native dropdowns
 
@@ -232,8 +220,6 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsLoading(true)
-
         const combineDateTime = (date: Date, time: string) => {
             const year = date.getFullYear()
             const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -260,13 +246,9 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         }
 
         try {
-            await api.post('/classes', transformedData)
+            await createClass(transformedData)
 
-            const chaptersRes = await api.get(
-                `/Content/allChaptersOfModule/${params.moduleId}`
-            )
-            const chapters = chaptersRes?.data?.chapterWithTopic || []
-
+            await refetchChapters()
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
                 router.push(
@@ -283,10 +265,11 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         } catch (error:any) {
             toast.error({
                 title: 'Error',
-                description: error.response?.data?.message || 'Class not created',
+                description:
+                    error.response?.data?.message ||
+                    error.message ||
+                    'Class not created',
             })
-        } finally {
-            setIsLoading(false)
         }
     }
 
@@ -308,7 +291,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
 
     return (
         <div className="w-full ">
-            <div className="text-lg text-left font-semibold mb-4 text-gray-600">
+            <div className="text-lg text-left font-semibold mb-4 text-foreground/80">
                 Live Classes Chapter
             </div>
             {/* Removed stray baseSelectClass constant that was rendering as text */}
@@ -322,7 +305,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                         control={form.control}
                         name="sessionTitle"
                         render={({ field }) => (
-                            <FormItem className="text-left text-gray-600">
+                            <FormItem className="text-left text-foreground/80">
                                 <FormLabel>
                                     Session Title
                                     <span className="text-red-500">*</span>
@@ -348,7 +331,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left text-gray-600">
+                                <FormItem className="flex flex-col text-left text-foreground/80">
                                     <FormLabel className="p-0 my-2">
                                         Classes start date
                                         <span className="text-red-500">*</span>
@@ -360,7 +343,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:bg-background hover:border-primary ${
+                                                    className={`w-full text-left font-normal text-foreground/80 border border-input bg-background hover:bg-background hover:border-primary ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -409,7 +392,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                 control={form.control}
                                 name="startTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left text-gray-600">
+                                    <FormItem className="flex flex-col text-left text-foreground/80">
                                         <FormLabel className="p-0 my-2">
                                             Start Time
                                             <span className="text-red-500">
@@ -469,7 +452,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                 control={form.control}
                                 name="endTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left text-gray-600">
+                                    <FormItem className="flex flex-col text-left text-foreground/80">
                                         <FormLabel className="p-0 my-2">
                                             End Time
                                             <span className="text-red-500">
@@ -495,7 +478,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="batch"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Batches{' '}
                                         <span className="text-red-500">*</span>
@@ -525,13 +508,14 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                             }}
                                             aria-busy={isLoading}
                                         >
-                                            <option value="">
+                                            <option value="" className='text-muted-foreground'>
                                                 Select batch...
                                             </option>
                                             {bootcampData.map((b: any) => (
                                                 <option
                                                     key={b.value}
                                                     value={b.value}
+                                                    className='text-muted-foreground'
                                                 >
                                                     {b.label}
                                                 </option>
@@ -546,7 +530,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="secondBatch"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Second Batch (optional)
                                     </FormLabel>
@@ -564,7 +548,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         >
                                             {batch ? (
                                                 <>
-                                                    <option value="">
+                                                    <option value="" className='text-muted-foreground'>
                                                         None
                                                     </option>
                                                     {bootcampData
@@ -579,6 +563,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                                             <option
                                                                 key={b.value}
                                                                 value={b.value}
+                                                                className='text-muted-foreground'
                                                             >
                                                                 {b.label}
                                                             </option>
@@ -599,7 +584,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             control={form.control}
                             name="platform"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-foreground/80">
                                     <FormLabel>
                                         Platform{' '}
                                         <span className="text-red-500">*</span>
@@ -609,7 +594,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                             baseSelectClass,
                                             "flex items-center"
                                         )}>
-                                            <span>Zoom</span>
+                                            <span className='text-muted-foreground'>Zoom</span>
                                         </div>
                                     </FormControl>
                                     {/* <FormControl>

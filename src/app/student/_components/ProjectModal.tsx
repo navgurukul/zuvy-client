@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, X } from 'lucide-react';
 import { ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK } from '@/lib/profile.mockData';
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -52,14 +53,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+
 
   const handleTechStackSelect = (tech: string) => {
     setFormData((prev) => ({
@@ -118,7 +112,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
             <Label htmlFor="detailedDescription" className="font-medium">
-              Detailed Description (Optional)
+              Detailed Description 
             </Label>
             <Textarea
               id="detailedDescription"

@@ -74,7 +74,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         accessorKey: 'difficulty',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="flex justify-end"
+                className="flex justify-center"
                 column={column}
                 title="Difficulty"
             />
@@ -101,7 +101,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         accessorKey: 'usage',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="flex justify-end"
+                className="flex justify-center"
                 column={column}
                 title="Usage"
             />
@@ -151,7 +151,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         id: 'actions1',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]  flex justify-end ml-4"
+                className="flex justify-center"
                 column={column}
                 title="Preview"
             />
@@ -164,7 +164,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const topicName = tags.find(tag => tag.id === codingQuestion.tagId)?.tagName || 'Unknown Topic'
 
             return (
-                <div className="mr-5 flex justify-end">
+                <div className="flex justify-center">
                     <Dialog>
                         <DialogTrigger asChild>
                             <button>

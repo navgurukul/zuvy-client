@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, AlertCircle, Plus } from 'lucide-react';
 import { HelpTooltip } from './HelpTooltip';
 import { Button } from '@/components/ui/button';
+import { difficultyColor } from '@/lib/utils';
 
 interface TopicQuestionConfigProps {
   topic: { id: string; name: string };
@@ -17,12 +18,6 @@ interface TopicQuestionConfigProps {
 }
 
 const difficulties: Difficulty[] = ['Easy', 'Medium', 'Hard'];
-
-const difficultyColors: Record<Difficulty, string> = {
-  Easy: 'bg-success/20 text-success border-success/30',
-  Medium: 'bg-warning/20 text-warning border-warning/30',
-  Hard: 'bg-destructive/20 text-destructive border-destructive/30',
-};
 
 export function TopicQuestionConfig({
   topic,
@@ -56,7 +51,7 @@ export function TopicQuestionConfig({
           value={selection.difficulty} 
           onValueChange={(v) => onUpdate({ difficulty: v as Difficulty })}
         >
-          <SelectTrigger className={`h-7 w-24 text-xs border rounded-lg px-2 ${difficultyColors[selection.difficulty]}`}>
+          <SelectTrigger className={`h-7 w-24 text-xs border rounded-lg px-2 ${difficultyColor(selection.difficulty)}`}>
             <span className="text-xs font-medium">{selection.difficulty}</span>
           </SelectTrigger>
           <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl z-50 min-w-[100px]">
@@ -66,7 +61,7 @@ export function TopicQuestionConfig({
                 value={diff}
                 className="rounded-lg focus:bg-primary/10 cursor-pointer text-xs"
               >
-                <span className={`px-2 py-0.5 rounded ${difficultyColors[diff]}`}>
+                <span className={`px-2 py-0.5 rounded ${difficultyColor(diff)}`}>
                   {diff}
                 </span>
               </SelectItem>

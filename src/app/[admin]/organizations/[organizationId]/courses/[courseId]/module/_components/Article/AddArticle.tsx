@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 // import '@\app\_components\editor\Tiptap.css'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/app/[admin]/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore, getUser } from '@/store/store'
 import { useRouter, useParams } from 'next/navigation'
 import { Label } from '@/components/ui/label'
@@ -35,9 +35,9 @@ import {
     ContentArticle,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Article/courseModuleArticleType'
 import { BookOpenText } from 'lucide-react'
-import useEditChapter from '@/hooks/useEditChapter'
-import useUploadPdf from '@/hooks/useUploadPdf'
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
+import useUploadPdf from '@/app/[admin]/hooks/useUploadPdf'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 import {ArticleSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
@@ -191,6 +191,56 @@ const AddArticle: React.FC<AddArticleProps> = ({
         }
     }
 
+    const applyArticleContent = (articleData: any) => {
+        const contentDetails = articleData?.contentDetails?.[0]
+
+        const link = contentDetails?.links?.[0]
+        // setIsDataLoading(false)
+        if (link) {
+            setpdfLink(link)
+            setDefaultValue('pdf')
+            setIsPdfUploaded(true)
+            setIsEditorSaved(false) 
+        } else {
+            setpdfLink(null)
+            setDefaultValue('editor')
+            setIsPdfUploaded(false)
+            // --- Check if editor me content hai ---
+            const data = contentDetails?.content
+            let hasEditorContent = false
+            if (data && data.length > 0) {
+                hasEditorContent = true
+                setHasUserSaved(true)
+                setWasContentNonEmptyWhenSaved(true)
+            }
+            setIsEditorSaved(hasEditorContent)
+        }
+        const fetchedTitle = articleData.title || articleData.name || ''
+        setTitle(fetchedTitle)
+        setOriginalTitle(fetchedTitle)
+
+        const data = contentDetails?.content
+        let parsedContent
+        if (data && data.length > 0) {
+            if (typeof data[0] === 'string') {
+                parsedContent = JSON.parse(data[0])
+            } else {
+                parsedContent = data[0]
+            }
+        } else {
+            // Empty content - create default empty doc structure
+            parsedContent = undefined
+        }
+
+        setInitialContent(parsedContent)
+
+        // NEW: Set initial content states
+        setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
+        setPreviousContentHash(generateContentHash(parsedContent))
+        setIsDataLoading(false)
+        setTimeout(() => setIsInitialLoad(false), 500)
+    }
+
     const getArticleContent = async () => {
         try {
             const response = await getChapterDetails({
@@ -199,52 +249,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-            const contentDetails = response?.data?.contentDetails?.[0]
-
-            const link = contentDetails?.links?.[0]
-            // setIsDataLoading(false)
-            if (link) {
-                setpdfLink(link)
-                setDefaultValue('pdf')
-                setIsPdfUploaded(true)
-                setIsEditorSaved(false) 
-            } else {
-                setpdfLink(null)
-                setDefaultValue('editor')
-                setIsPdfUploaded(false)
-                // --- Check if editor me content hai ---
-                const data = contentDetails?.content
-                let hasEditorContent = false
-                if (data && data.length > 0) {
-                    hasEditorContent = true
-                    setHasUserSaved(true)
-                    setWasContentNonEmptyWhenSaved(true)
-                }
-                setIsEditorSaved(hasEditorContent)
-            }
-            const fetchedTitle = response.data.title || response.data.name || ''
-            setTitle(fetchedTitle)
-            setOriginalTitle(fetchedTitle)
-
-            const data = contentDetails?.content
-            let parsedContent
-            if (data && data.length > 0) {
-                if (typeof data[0] === 'string') {
-                    parsedContent = JSON.parse(data[0])
-                } else {
-                    parsedContent = data[0]
-                }
-            } else {
-                // Empty content - create default empty doc structure
-                parsedContent = undefined
-            }
-
-            setInitialContent(parsedContent)
-
-            // NEW: Set initial content states
-            setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
-            setPreviousContentHash(generateContentHash(parsedContent))
-            
+            applyArticleContent(response.data)
         } catch (error) {
             console.error('Error fetching article content:', error)
         } finally {
@@ -301,7 +306,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     useEffect(() => {
         if (content?.id && !hasFetched.current) {
             hasFetched.current = true
-            getArticleContent()
+            applyArticleContent(content)
         }
     }, [content?.id]) 
 

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { Badge } from '@/components/ui/badge'
+import { useThemeStore } from '@/store/store'
 
 const CourseCard = ({
     course,
@@ -12,18 +13,22 @@ const CourseCard = ({
     onClick,
     statusOptions,
 }: CourseCardProps) => {
+    const { isDark } = useThemeStore()
     const index = Math.floor(Math.random() * (5 - 1 + 1)) + 1
+    
+    // Use dark logo when theme is dark, otherwise use light logo
+    const fallbackLogo = isDark ? '/zuvy-logo-horizontal-dark.png' : '/zuvy-logo-horizontal.png'
 
     return (
         <Card
-            className="group cursor-pointer transition-all duration-200 hover:shadow-hover hover:-translate-y-1 bg-card border-border flex flex-col h-full"
+            className="group cursor-pointer transition-all duration-200 hover:shadow-hover hover:-translate-y-1 bg-card dark:bg-muted border-border flex flex-col h-full"
             onClick={onClick}
         >
             <CardHeader className="p-0">
                 {(
-                    <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 relative">
+                    <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-card relative">
                         <Image
-                            src={validImageUrl || `/zuvy-logo-horizontal.png`}
+                            src={validImageUrl || fallbackLogo}
                             alt={course.name}
                             fill
                             className={validImageUrl ? `h-full w-full object-cover group-hover:scale-105 transition-transform duration-200` : `object-scale-down group-hover:scale-105 transition-transform duration-200` }
@@ -50,7 +55,7 @@ const CourseCard = ({
             </CardContent>
 
             <CardFooter className="px-6 pb-6 pt-0 mt-auto">
-                <div className="flex items-center justify-between w-full text-sm text-gray-600">
+                <div className="flex items-center justify-between w-full text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
                         <span>

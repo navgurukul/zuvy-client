@@ -17,17 +17,18 @@ import ProfileStep1Component from '@/app/student/profile/ProfileStep1';
 import ProfileStep2Component from '@/app/student/profile/ProfileStep2';
 import ProfileStep3Component from '@/app/student/profile/ProfileStep3';
 import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
-import { useOnboardingStorage } from '@/hooks/use-profile';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Info, Sparkles, X } from 'lucide-react';
 import { MONTHS } from '@/lib/profile.mockData';
 import { toast } from '@/components/ui/use-toast';
-import useSaveLearnerProfile from '@/hooks/useSaveLearnerProfile';
-import useResumeParse from '@/hooks/useResumeParse';
-import useParsedResume from '@/hooks/useParsedResume';
-import useLearnerProfile from '@/hooks/useLearnerProfile';
+import useSaveLearnerProfile from '@/app/student/hooks/useSaveLearnerProfile';
+import useResumeParse from '@/app/student/hooks/useResumeParse';
+import useParsedResume from '@/app/student/hooks/useParsedResume';
+import useLearnerProfile from '@/app/student/hooks/useLearnerProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { normalizeText, normalizeEmail, normalizeOptionalUrl, normalizeGithubUrl, parseScore, formatMonthYearToDate, toMonthNumber, toMonthName, mapWorkExperiencesToPayload } from '@/app/student/_utils/profileNormalizers';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -114,63 +115,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     consentTimestamp: new Date().toISOString(),
   });
 
-  const formatMonthYearToDate = (
-    value?: { day?: string; month: string; year: string } | string
-  ) => {
-    if (!value) {
-      return undefined;
-    }
-
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      return trimmed || undefined;
-    }
-
-    if (!value.year) {
-      return undefined;
-    }
-
-    const normalizedMonth = String(value.month || '').trim();
-    const numericMonth = Number(normalizedMonth);
-    let month = '01';
-
-    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
-      month = String(Math.trunc(numericMonth)).padStart(2, '0');
-    } else {
-      const monthIndex = MONTHS.findIndex(
-        (monthName) => monthName.toLowerCase() === normalizedMonth.toLowerCase()
-      );
-      month = monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-    }
-
-    const numericDay = Number(String(value.day || '').trim());
-    const day =
-      Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31
-        ? String(Math.trunc(numericDay)).padStart(2, '0')
-        : '01';
-
-    return `${value.year}-${month}-${day}`;
-  };
-
-  const toMonthNumber = (month?: string) => {
-    if (!month) {
-      return undefined;
-    }
-    const monthIndex = MONTHS.indexOf(month);
-    return monthIndex >= 0 ? monthIndex + 1 : undefined;
-  };
-
-  const toMonthName = (value: string | number | null | undefined) => {
-    if (value === null || value === undefined) return '';
-    const monthNumber = Number(value);
-    if (Number.isFinite(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
-      return MONTHS[monthNumber - 1] || '';
-    }
-
-    const normalized = String(value).trim().toLowerCase();
-    const mapped = MONTHS.find((month) => month.toLowerCase() === normalized);
-    return mapped || '';
-  };
+  // formatMonthYearToDate, toMonthNumber, toMonthName moved to _utils/profileNormalizers.ts
 
   const buildLearnerProfilePayload = (
     step1Data: Step1Type,
@@ -178,44 +123,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     step3Data?: Step3Type,
     step4Data?: Step4Type
   ) => {
-    const normalizeText = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      return stringValue ? stringValue : null;
-    };
-
-    const normalizeEmail = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(stringValue) ? stringValue : null;
-    };
-
-    const normalizeOptionalUrl = (value?: any) => {
-      if (value === null || value === undefined || value === '') return null;
-      const stringValue = String(value).trim();
-      if (!stringValue) return null;
-
-      const valueWithProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(stringValue)
-        ? stringValue
-        : `https://${stringValue}`;
-
-      try {
-        return new URL(valueWithProtocol).toString();
-      } catch {
-        return null;
-      }
-    };
-
-    const normalizeGithubUrl = (value?: any) => {
-      const normalizedUrl = normalizeOptionalUrl(value);
-      if (!normalizedUrl) return null;
-
-      const host = new URL(normalizedUrl).hostname.toLowerCase();
-      return host === 'github.com' || host === 'www.github.com' ? normalizedUrl : null;
-    };
-
     const isValidOtherCollege = (value?: any) => {
       if (value === null || value === undefined || value === '') return false;
       const stringValue = String(value).trim();
@@ -248,20 +155,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     }));
 
     const academicPerformance = step3Data?.academicPerformance;
-    const collegeScore = academicPerformance?.marksFormat === 'CGPA'
-      ? academicPerformance?.cgpa
-      : academicPerformance?.percentage;
+    const collegeScore = academicPerformance?.marksFormat === 'Percentage' ? academicPerformance.percentage : academicPerformance?.marksFormat;
 
-    const workExperiences = (step3Data?.workExperiences || []).map((experience) => ({
-      title: experience.role,
-      company: experience.companyName,
-      startDate: formatMonthYearToDate(experience.startDate),
-     isCurrentlyWorking: experience.isCurrentlyWorking,
-      endDate: experience.isCurrentlyWorking
-      ? null
-      : formatMonthYearToDate(experience.endDate),
-      description: experience.responsibilities,
-    }));
+    const workExperiences = mapWorkExperiencesToPayload(step3Data?.workExperiences || []);
 
     const leetcodeUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'LeetCode')?.username;
     const codechefUsername = step3Data?.competitiveProfiles?.find((item) => item.platform === 'CodeChef')?.username;
@@ -338,6 +234,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       termsAndCondition: step4Data?.termsAndCondition,
 
       preferredContactMethods,
+      profileVisibility: step4Data?.allowCompaniesViewProfile ?? false,
     };
   };
 
@@ -346,6 +243,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     setCurrentStepData(data);
     updateStepData(stepNumber, data);
   };
+
+  // Scroll to top whenever the step changes
+  useEffect(() => {
+    const scrollContainer = document.getElementById('main-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [onboardingData?.currentStep]);
 
   // Timer effect
   useEffect(() => {
@@ -377,12 +284,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     if (hydratedProfileIdRef.current === learnerProfile.id) {
       return;
     }
-
-    const parseScore = (value: string | number | null) => {
-      if (value === null || value === undefined || value === '') return undefined;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    };
 
     const hasText = (value?: string | null) => Boolean(String(value || '').trim());
 
@@ -438,7 +339,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       // customCollege: learnerProfile.otherCollegeName || '',
       degree: learnerProfile.degree || '',
       branch: learnerProfile.branch || '',
-      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+      yearOfStudy: (learnerProfile.yearOfStudy as Step1Type['yearOfStudy']) || ('' as Step1Type['yearOfStudy']),
       graduationDate: {
         month: toMonthName(learnerProfile.graduationMonth),
         year: learnerProfile.graduationYear ? String(learnerProfile.graduationYear) : '',
@@ -456,7 +357,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       customCollege: hasText(onboardingData.step1?.customCollege) ? onboardingData.step1?.customCollege : profileStep1.customCollege,
       degree: hasText(onboardingData.step1?.degree) ? onboardingData.step1?.degree : profileStep1.degree,
       branch: hasText(onboardingData.step1?.branch) ? String(onboardingData.step1?.branch) : profileStep1.branch,
-      yearOfStudy: onboardingData.step1?.yearOfStudy || profileStep1.yearOfStudy,
+      yearOfStudy: profileStep1.yearOfStudy || onboardingData.step1?.yearOfStudy || '1st',
       graduationDate: {
         month: hasText(onboardingData.step1?.graduationDate?.month)
           ? String(onboardingData.step1?.graduationDate?.month)
@@ -500,13 +401,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
       academicPerformance:
         learnerProfile.collegeScore || learnerProfile.class12Score || learnerProfile.class10Score
           ? {
-              marksFormat: learnerProfile.collegeScoreType === '%' ? 'Percentage' : 'CGPA',
-              cgpa: learnerProfile.collegeScoreType !== '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              percentage: learnerProfile.collegeScoreType === '%' ? parseScore(learnerProfile.collegeScore) : undefined,
-              class12Format: learnerProfile.class12ScoreType === '%' ? 'Percentage' : 'CGPA',
+              marksFormat: 'Percentage' as const,
+              percentage: parseScore(learnerProfile.collegeScore),
+              class12Format: 'Percentage' as const,
               class12Percentage: parseScore(learnerProfile.class12Score),
               class12Board: learnerProfile.class12Board || undefined,
-              class10Format: learnerProfile.class10ScoreType === '%' ? 'Percentage' : 'CGPA',
+              class10Format: 'Percentage' as const,
               class10Marks: parseScore(learnerProfile.class10Score),
               class10Board: learnerProfile.class10Board || undefined,
             }
@@ -571,7 +471,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         phone: preferredMethods.has('phone'),
       },
       termsAndCondition: Boolean((learnerProfile as any)?.termsAndCondition),
-      allowCompaniesViewProfile: true,
+      allowCompaniesViewProfile: Boolean((learnerProfile as any)?.profileVisibility),
       consentTimestamp: learnerProfile.updatedAt || new Date().toISOString(),
     };
 
@@ -1097,15 +997,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const extractAcademicPerformanceFromText = (text: string): Step3Type['academicPerformance'] => {
     const normalized = text.replace(/\s+/g, ' ').trim();
-    const cgpaMatch = normalized.match(/(?:cgpa|gpa)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
     const percentageMatch = normalized.match(/(?:percentage|percent|\bmarks\b)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i);
-
-    if (cgpaMatch?.[1]) {
-      const cgpa = Number(cgpaMatch[1]);
-      if (!Number.isNaN(cgpa) && cgpa > 0 && cgpa <= 10) {
-        return { marksFormat: 'CGPA', cgpa };
-      }
-    }
 
     if (percentageMatch?.[1]) {
       const percentage = Number(percentageMatch[1]);
@@ -1607,7 +1499,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Setup your Profile</h1>
+              <h1 id="tour-profile" className="text-3xl md:text-4xl font-bold mb-2">Setup your Profile</h1>
               <p className="text-muted-foreground">Complete these steps to unlock job applications.</p>
             </div>
             <div className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm font-medium">
@@ -1686,7 +1578,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 <p className="text-xs text-muted-foreground">Auto-fill details using either method.</p>
               </div>
 
-              <div className="flex items-stretch gap-3">
+              <div className="flex flex-col md:flex-row items-stretch gap-3">
                 {/* Upload Resume Card */}
                 <div className="flex-1">
                   <Input
@@ -1720,7 +1612,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
                 </div>
 
                 {/* OR Divider */}
-                <div className="flex flex-col items-center justify-center px-2">
+                <div className="flex md:flex-col flex-row items-center justify-center md:px-2 py-2 md:py-0">
                   <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border border-border">
                     <span className="text-xs font-medium text-muted-foreground">OR</span>
                   </div>

@@ -1,9 +1,8 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, Play, Eye, DownloadIcon ,ArrowDownToLine} from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
@@ -16,15 +15,23 @@ import {VideoSubmissionSkeleton} from '@/app/[admin]/organizations/[organization
 import { ellipsis } from '@/lib/utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { getUser } from '@/store/store'
 
+
+import { useVideoSubmissions } from '@/app/[admin]/hooks/useVideoSubmissions'
+import { useChapterStudents } from '@/app/[admin]/hooks/useChapterStudents'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
-    const [videoData, setVideoData] = useState<VideoData | null>(null)
-    const [loading, setLoading] = useState(true)
+    const { getChapterStudentsUrl } = useChapterStudents()
 
     // Add pathname extraction like CourseLayout
     const pathname = usePathname()
@@ -33,26 +40,18 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
 
-    const getVideoSubmission = useCallback(async () => {
-        try {
-            const url = debouncedSearch
-                ? `/admin/bootcampModuleCompletion/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
-                : `/admin/bootcampModuleCompletion/bootcamp_id${courseId}`
+    const { videoData, loading, error } = useVideoSubmissions(courseId, {
+        searchAssessment: debouncedSearch,
+    })
 
-            const res = await api.get(url)
-            setVideoData(res.data)
-            setLoading(false)
-        } catch (error) {
+    useEffect(() => {
+        if (error) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
         }
-    }, [courseId, debouncedSearch])
-
-    useEffect(() => {
-        getVideoSubmission()
-    }, [getVideoSubmission])
+    }, [error])
 
     if (loading) {
         return<VideoSubmissionSkeleton/>
@@ -64,23 +63,29 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         if (!chapterId) return
       
         downloadCsv({
-          endpoint: `/admin/moduleChapter/students/chapter_id${chapterId}`,
+          endpoint: getChapterStudentsUrl(chapterId),
           fileName: chapterTitle || 'video-chapter',
       
           dataPath: 'submittedStudents',
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Completed Date', key: 'completedAt' },
+            { header: 'Title', key: 'title' },
+            { header: 'Total Watch Time', key: 'totalWatchTime' },
           ],
       
-          mapData: (student: any) => ({
+          mapData: (student: any, responseData: any) => ({
             name: student.name || 'N/A',
+            studentId: student.userId ?? student.id ?? 'NA',
             email: student.email || 'N/A',
             completedAt: student.completedAt
               ? new Date(student.completedAt).toLocaleString()
               : 'N/A',
+            title: responseData?.moduleVideochapter?.title || 'N/A',
+            totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? 'N/A',
           }),
         })
       }
@@ -119,11 +124,11 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                     )
                     if (filteredVideos.length === 0) return null
                     return (
-                        <div key={key}>
-                            <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
+                        <div key={key} className="mb-6">
+                            <h2 className="text-lg text-start font-bold text-foreground mb-3">
                                 Module - {key}
                             </h2>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {filteredVideos.map(
                                     (video: VideoSubmissions) => {
                                         const isDisabled =
@@ -135,16 +140,24 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 : 0
                                         return (
                                             <div
-                                                className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                 key={video.id}
                                             >
-                                                {/* Content */}
-                                                <div className="font-semibold  flex w-full flex-col justify-between">
-                                                    <div className="flex items-center ">
-                                                        <div className="p-2 rounded-md">
+                                                <div className="font-semibold flex w-full flex-col justify-between">
+                                                    <div className="flex items-center min-w-0 pr-2">
+                                                        <div className="p-2 rounded-md flex-shrink-0">
                                                             <Play className="w-4 h-4" />
                                                         </div>
-                                                        <h3 title={video.title} className="font-medium text-base">{ellipsis(video.title , 25)}</h3>
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <h3 className="font-medium text-base truncate">{ellipsis(video.title, 25)}</h3>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {video.title}
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
                                                     </div>
                                                 </div>
                                                 <div className="absolute top-3 right-2">
@@ -152,7 +165,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         <div className="flex items-center gap-1">
                                                         <Button
                                                             variant="ghost"
-                                                            className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
+                                                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
                                                             onClick={() =>
                                                             handleVideoDownloadCsv(Number(video.id), video.title)
                                                             }
@@ -164,7 +177,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         >
                                                             <Button
                                                             variant="ghost"
-                                                            className="flex items-center text-gray-500 hover:text-gray-700 hover:bg-transparent px-1"
+                                                            className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-transparent px-1"
                                                             >
                                                             <Eye size={20} />
                                                             </Button>
@@ -177,7 +190,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                     disabled
                                                                     className="cursor-not-allowed px-1 text-gray-400"
                                                                 >
-                                                                    <ArrowDownToLine size={20} className="text-gray-400" />
+                                                                    <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                                                                 </button>
 
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
@@ -191,7 +204,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                     disabled
                                                                     className="cursor-not-allowed px-1 text-gray-400"
                                                                 >
-                                                                    <Eye size={20} className="text-gray-400" />
+                                                                    <Eye size={20} className="text-gray-400 dark:text-gray-500" />
                                                                 </button>
 
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block

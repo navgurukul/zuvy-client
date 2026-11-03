@@ -8,7 +8,7 @@ export interface OnboardingStep1 {
   customCollege?: string;
   degree?: string;
   branch: string;
-  yearOfStudy: '1st' | '2nd' | '3rd' | '4th';
+  yearOfStudy: '1st' | '2nd' | '3rd' | '4th' | 'passed_out';
   graduationDate: {
     month: string;
     year: string;
@@ -38,16 +38,15 @@ export interface OnboardingStep2 {
 
 // Onboarding Step 3 - Education & Experience
 export interface AcademicPerformance {
-  marksFormat: 'CGPA' | 'Percentage';
-  cgpa?: number;
+  marksFormat: 'Percentage';
   percentage?: number;
-  class12Format?: 'CGPA' | 'Percentage';
+  class12Format?: 'Percentage';
   class12Percentage?: number;
   class12Board?: string;
-  class10Format?: 'CGPA' | 'Percentage';
+  class10Format?: 'Percentage';
   class10Marks?: number;
   class10Board?: string;
-  class10MarksOut?: '10' | '100';
+  class10MarksOut?: '100';
 }
 
 export interface WorkExperience {

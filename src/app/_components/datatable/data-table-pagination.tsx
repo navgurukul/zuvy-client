@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,19 +21,21 @@ export function DataTablePagination<TData>({
     lastPage,
     pages,
     fetchStudentData,
+    disableAutoFetch = false,
 }: DataTablePaginationProps<TData>) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const offset = useMemo(() => (currentPage - 1) * +position, [currentPage, position])
+    const lastFetchedPageRef = useRef<string | null>(null)
 
-    const updateURLParams = (page: number, limit: string = position) => {
+    const updateURLParams = useCallback((page: number, limit: string = position) => {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(limit))
         router.push(`?${newParams.toString()}`)
-    }
+    }, [position, router, searchParams])
 
     const prevPageHandler = () => updateURLParams(currentPage - 1)
     const nextPageHandler = () => updateURLParams(currentPage + 1)
@@ -47,17 +49,32 @@ export function DataTablePagination<TData>({
         const totalPages = Math.ceil(totalStudents / +position)
         if (totalPages > 0 && currentPage > totalPages) {
             updateURLParams(totalPages)
-        } else {
+            return
+        }
+
+        const pageKey = `${currentPage}-${position}`
+        if (lastFetchedPageRef.current === pageKey) return
+
+        lastFetchedPageRef.current = pageKey
+        if (!disableAutoFetch) {
             fetchStudentData(offset)
         }
-    }, [currentPage, position, totalStudents])
+    }, [
+        currentPage,
+        position,
+        totalStudents,
+        offset,
+        fetchStudentData,
+        disableAutoFetch,
+        updateURLParams,
+    ])
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">
-            <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
+            <p className="text-sm text-muted-dark font-medium">Items Per Page</p>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className='border border-input bg-background-secondary text-gray-600 hover:text-primary-foreground'>
+                    <Button className='border border-input bg-background-secondary text-muted-dark hover:text-primary-foreground'>
                         {position} <ChevronDown className="ml-2" size={15} />
                     </Button>
                 </DropdownMenuTrigger>
@@ -86,7 +103,7 @@ export function DataTablePagination<TData>({
                 </DropdownMenuContent>
             </DropdownMenu>
             <div className="flex items-center space-x-6 lg:space-x-8">
-                <div className="flex w-[100px] items-center text-gray-600 justify-center text-sm font-medium">
+                <div className="flex w-[100px] items-center text-muted-dark justify-center text-sm font-medium">
                     Page {currentPage} of {pages}
                 </div>
                 <div className="flex items-center space-x-2">

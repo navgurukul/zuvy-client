@@ -28,6 +28,7 @@ export interface AssessmentContentProps {
     moduleId: number;
   };
   onChapterComplete?: () => void;
+  refetchChapter?: () => void;
 }
 
 
@@ -153,7 +154,9 @@ export interface Session {
   s3link: string;
   status: string;
   attendance: string;
+  attendanceMessage?: string | null;
   duration: number;
+  batchId?: number;
 }
 
 export interface LiveClassContentProps {

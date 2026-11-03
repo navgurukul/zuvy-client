@@ -9,6 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useState } from 'react';
 import { QuestionCreationModal } from './QuestionCreationModal';
+import { difficultyColor } from '@/lib/utils';
 
 interface CriteriaRowProps {
   criteria: AssessmentCriteria;
@@ -19,12 +20,6 @@ interface CriteriaRowProps {
 }
 
 const difficulties: Difficulty[] = ['Easy', 'Medium', 'Hard'];
-
-const difficultyColors: Record<Difficulty, string> = {
-  Easy: 'bg-success/20 text-success border-success/30',
-  Medium: 'bg-warning/20 text-warning border-warning/30',
-  Hard: 'bg-destructive/20 text-destructive border-destructive/30',
-};
 
 export function CriteriaRow({ criteria, domains, onUpdate, onRemove, canRemove }: CriteriaRowProps) {
   const selectedDomain = domains.find(d => d.id === criteria.domainId);
@@ -411,7 +406,7 @@ export function CriteriaRow({ criteria, domains, onUpdate, onRemove, canRemove }
                         value={t.difficulty} 
                         onValueChange={(v) => handleTopicDifficultyChange(t.topicId, v as Difficulty)}
                       >
-                        <SelectTrigger className={`h-7 w-24 text-xs border rounded-lg px-2 ${difficultyColors[t.difficulty]}`}>
+                        <SelectTrigger className={`h-7 w-24 text-xs border rounded-lg px-2 ${difficultyColor(t.difficulty)}`}>
                           <span className="text-xs font-medium">{t.difficulty}</span>
                         </SelectTrigger>
                         <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl z-50 min-w-[100px]">
@@ -421,7 +416,7 @@ export function CriteriaRow({ criteria, domains, onUpdate, onRemove, canRemove }
                               value={diff}
                               className="rounded-lg focus:bg-primary/10 cursor-pointer text-xs"
                             >
-                              <span className={`px-2 py-0.5 rounded ${difficultyColors[diff]}`}>
+                              <span className={`px-2 py-0.5 rounded ${difficultyColor(diff)}`}>
                                 {diff}
                               </span>
                             </SelectItem>

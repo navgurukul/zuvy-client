@@ -43,7 +43,7 @@ const QuizModal = ({
     const hasCodeBlock = isCodeQuestion(question)
 
     return (
-        <div className="flex w-full justify-between py-4 px-8 items-center h-30 rounded-lg border border-gray-200 bg-white mb-4">
+        <div className="flex w-full justify-between py-4 px-8 items-center h-30 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-card mb-4">
             <div className="flex flex-col gap-2 w-full">
                 <div className="flex flex-col gap-2 w-full">
                     <div className="font-semibold flex justify-between w-full">
@@ -54,7 +54,7 @@ const QuizModal = ({
                                     textLength: 40,
                                 })}
                             </span> */}
-                            <h2 className="font-bold text-[15px] text-gray-600">
+                            <h2 className="font-bold text-[15px] text-gray-600 dark:text-muted-foreground">
                                 {renderQuestionPreview(question, {
                                     textLength: 40,
                                 })}
@@ -62,12 +62,12 @@ const QuizModal = ({
                         </div>
                         {/* {ellipsis(data?.quizVariants[0]?.question, 40)} */}
                         <div className="mr-4 space-x-2 ">
-                            <span className="text-sm text-[#518672] bg-[#DCE7E3] p-1 rounded-[100px] px-[8px]">
+                            <span className="text-sm text-[#518672] bg-[#DCE7E3]  dark:bg-gray-700 p-1 rounded-[100px] px-[8px]">
                                 {filteredTag[0]?.tagName}
                             </span>
                             <span
                                 className={cn(
-                                    `text-[12px] rounded-[100px] py-1 px-1 `,
+                                    `text-[12px] rounded-[100px] py-1 px-1`,
                                     difficultyColor(data.difficulty), // Text color
                                     difficultyBgColor(data.difficulty) // Background color
                                 )}

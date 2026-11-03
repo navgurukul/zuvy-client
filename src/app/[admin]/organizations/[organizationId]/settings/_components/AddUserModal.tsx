@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useRoles } from '@/hooks/useRoles'
-import { api } from '@/utils/axios.config'
+import { useRoles } from '@/app/[admin]/hooks/useRoles'
+import { useAddUser } from '@/app/[admin]/hooks/useAddUser'
+import { useUpdateUser } from '@/app/[admin]/hooks/useUpdateUser'
+import { useUser } from '@/app/[admin]/hooks/useSingleUser'
 import { toast } from '@/components/ui/use-toast'
 import {
     GraduationCap,
@@ -37,6 +39,13 @@ import {
 } from 'lucide-react'
 import { getUser } from '@/store/store'
 import { useParams } from 'next/navigation'
+import { z } from 'zod'
+import { requiredEmailSchema, requiredNameSchema } from '@/utils/validation/nameEmail'
+
+const userFormSchema = z.object({
+    name: requiredNameSchema,
+    email: requiredEmailSchema,
+})
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -72,7 +81,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             className={`w-full text-left border rounded-lg p-4 transition-colors ${
                 selected
                     ? 'border-primary bg-primary-light'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:border-foreground/20'
             }`}
         >
             <div className="flex items-start gap-3">
@@ -80,7 +89,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
                         selected
                             ? 'bg-blue-100 text-primary'
-                            : 'bg-gray-100 text-foreground'
+                            : 'bg-muted/50 text-foreground'
                     }`}
                 >
                     {icon}
@@ -116,13 +125,23 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             : currentUser?.orgId
 
     const { roles, loading: rolesLoading } = useRoles()
+    const { addUser } = useAddUser()
+    const { updateUser } = useUpdateUser()
+    const shouldFetchFreshUser = isEditMode && isOpen && !!user?.id
+    const {
+        user: fetchedUser,
+        loading: isFetchingFreshData,
+        error: fetchedUserError,
+    } = useUser(shouldFetchFreshUser ? user.id : null, {
+        enabled: shouldFetchFreshUser,
+    })
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [freshUserData, setFreshUserData] = useState<any>(null)
-    const [isFetchingFreshData, setIsFetchingFreshData] = useState(false)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
         name: '',
         email: '',
     })
+    const [touchedFields, setTouchedFields] = useState<Partial<Record<'name' | 'email', boolean>>>({})
     // Store original values to track changes
     const [originalUser, setOriginalUser] = useState<{ name: string; email: string; roleId: number | null }>({
         name: '',
@@ -130,59 +149,56 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         roleId: null,
     })
 
-    // Fetch fresh user data when entering edit mode
+    // Sync fresh user data from the reusable hook when entering edit mode
     useEffect(() => {
-        if (isEditMode && user?.id && isOpen) {
-            const fetchFreshUserData = async () => {
-                setIsFetchingFreshData(true)
-                try {
-                    const response = await api.get(`/users/getUser/${user.id}`)
-                    setFreshUserData(response.data)
-                    const fetchedName = response.data.name || ''
-                    const fetchedEmail = response.data.email || ''
-                    const fetchedRoleId = response.data.roleId || null
-                    
-                    setNewUser({
-                        name: fetchedName,
-                        email: fetchedEmail,
-                    })
-                    setPendingUserRole(fetchedRoleId)
-                    // Store original values
-                    setOriginalUser({
-                        name: fetchedName,
-                        email: fetchedEmail,
-                        roleId: fetchedRoleId,
-                    })
-                } catch (error) {
-                    // Fallback to passed user data if fetch fails
-                    console.error('Error fetching fresh user data:', error)
-                    const fallbackName = user.name || ''
-                    const fallbackEmail = user.email || ''
-                    const fallbackRoleId = user.roleId || null
-                    
-                    setNewUser({
-                        name: fallbackName,
-                        email: fallbackEmail,
-                    })
-                    setPendingUserRole(fallbackRoleId)
-                    // Store original values
-                    setOriginalUser({
-                        name: fallbackName,
-                        email: fallbackEmail,
-                        roleId: fallbackRoleId,
-                    })
-                } finally {
-                    setIsFetchingFreshData(false)
-                }
+        if (isEditMode && isOpen && shouldFetchFreshUser) {
+            setTouchedFields({})
+            if (fetchedUser) {
+                setFreshUserData(fetchedUser)
+                const fetchedName = fetchedUser.name || ''
+                const fetchedEmail = fetchedUser.email || ''
+                const fetchedRoleId = fetchedUser.roleId || null
+
+                setNewUser({
+                    name: fetchedName,
+                    email: fetchedEmail,
+                })
+                setPendingUserRole(fetchedRoleId)
+                // Store original values
+                setOriginalUser({
+                    name: fetchedName,
+                    email: fetchedEmail,
+                    roleId: fetchedRoleId,
+                })
+                return
             }
 
-            fetchFreshUserData()
+            if (fetchedUserError && !isFetchingFreshData) {
+                // Fallback to passed user data if fetch fails
+                console.error('Error fetching fresh user data:', fetchedUserError)
+                const fallbackName = user.name || ''
+                const fallbackEmail = user.email || ''
+                const fallbackRoleId = user.roleId || null
+
+                setNewUser({
+                    name: fallbackName,
+                    email: fallbackEmail,
+                })
+                setPendingUserRole(fallbackRoleId)
+                // Store original values
+                setOriginalUser({
+                    name: fallbackName,
+                    email: fallbackEmail,
+                    roleId: fallbackRoleId,
+                })
+            }
         } else if (!isEditMode && isOpen) {
             // Reset form for add mode
             setNewUser({
                 name: '',
                 email: '',
             })
+            setTouchedFields({})
             setPendingUserRole(null)
             setFreshUserData(null)
             setOriginalUser({
@@ -191,18 +207,34 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 roleId: null,
             })
         }
-    }, [isEditMode, user?.id, isOpen])
+    }, [
+        isEditMode,
+        isOpen,
+        shouldFetchFreshUser,
+        fetchedUser,
+        fetchedUserError,
+        isFetchingFreshData,
+        user,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setNewUser((prev) => ({ ...prev, [name]: value }))
+        setTouchedFields((prev) => ({ ...prev, [name as 'name' | 'email']: true }))
     }
 
-    // Check if form is valid (for add mode)
-    const isFormValid =
-        newUser.name.trim().length > 0 &&
-        newUser.email.trim().length > 0 &&
-        !!pendingUserRole
+    const validationResult = userFormSchema.safeParse(newUser)
+    const validationErrors: Partial<Record<'name' | 'email', string>> = validationResult.success
+        ? {}
+        : validationResult.error.issues.reduce<Partial<Record<'name' | 'email', string>>>((errors, issue) => {
+            const field = issue.path[0]
+            if ((field === 'name' || field === 'email') && !errors[field]) errors[field] = issue.message
+            return errors
+        }, {})
+    const fieldError = (field: 'name' | 'email') =>
+        touchedFields[field] ? validationErrors[field] : undefined
+
+    const isFormValid = validationResult.success && !!pendingUserRole
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
@@ -213,7 +245,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
     // In edit mode, button should be enabled only if there are changes
     // In add mode, button should be enabled if form is valid
-    const canSubmit = isEditMode ? hasChanges : isFormValid
+    const canSubmit = isFormValid && (isEditMode ? hasChanges : true)
 
      const iconList = [
         User,
@@ -263,7 +295,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         }
 
         try {
-            const response = await api.post('/users/addUsers', payload)
+            const response = await addUser(payload)
             if(response.status === 201) {
                 toast.success({
                     title: 'User added successfully',
@@ -284,6 +316,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: '',
             email: '',
         })
+        setTouchedFields({})
         setPendingUserRole(null)
         setFreshUserData(null)
         refetchUsers && refetchUsers()
@@ -301,7 +334,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         }
 
         try {
-            const response = await api.put(`/users/updateUser/${user.id}`, payload)
+            const response = await updateUser(user.id, payload)
             if(response.status === 200) {
                 // Update the cached fresh data immediately
                 setFreshUserData({
@@ -367,8 +400,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                                 value={newUser.name}
                                 onChange={handleInputChange}
                                 placeholder="Enter full name"
-                                className="mt-2"
+                                className={`mt-2 ${fieldError('name') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                             />
+                            {fieldError('name') && (
+                                <p className="text-red-500 text-xs mt-1">{fieldError('name')}</p>
+                            )}
                         </div>
                         <div className="text-left">
                             <Label className="text-[14px] font-medium">
@@ -377,11 +413,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                             <Input
                                 id="email"
                                 name="email"
+                                type="email"
                                 value={newUser.email}
                                 onChange={handleInputChange}
                                 placeholder="Enter email address"
-                                className="mt-2"
+                                className={`mt-2 ${fieldError('email') ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                             />
+                            {fieldError('email') && (
+                                <p className="text-red-500 text-xs mt-1">{fieldError('email')}</p>
+                            )}
                         </div>
                     </div>
 
@@ -409,7 +449,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline" className="bg-white">
+                    <Button variant="outline" >
                         Cancel
                     </Button>
                 </DialogClose>

@@ -38,17 +38,17 @@ const SelectCodingQuestions = ({
                 return (
                     <div
                         key={question.id}
-                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                        className="py-4 px-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-card mb-4"
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold truncate text-[15px] text-gray-600">
+                                    <h2 className="font-bold truncate text-[15px] text-gray-600 dark:text-muted-foreground">
                                         {ellipsis(question.title, 25)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
                                         {tag && (
-                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] rounded-full px-2">
+                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-gray-700 rounded-full px-2">
                                                 {tag.tagName}
                                             </span>
                                         )}
@@ -67,7 +67,7 @@ const SelectCodingQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-gray-600 mt-1 text-[1rem] text-left">
+                                <p className="text-gray-600 dark:text-muted-foreground mt-1 text-[1rem] text-left">
                                     {ellipsis(question.description, 45)}
                                 </p>
                                 <Dialog>

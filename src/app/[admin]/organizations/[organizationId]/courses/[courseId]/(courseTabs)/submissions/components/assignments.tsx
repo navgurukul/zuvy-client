@@ -1,55 +1,47 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, ArrowDownToLine, FileText,Eye } from 'lucide-react'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
-import { error } from 'console'
-import { nullable } from 'zod'
 import {
     AssignmentProps,
     AssignmentModuleData,
-    AssignmentApiResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useAssignmentSubmissions } from '@/app/[admin]/hooks/useAssignmentSubmissions'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const { downloadCsv } = useDownloadCsv()
     const { organizationId } = useParams()
-    const [assignmentData, setAssignmentData] = useState<any[]>([])
-    const [totalStudents, setTotalStudents] = useState(0)
-    const [loading, setLoading] = useState(true)
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const orgId = Number(organizationId) || user?.orgId; 
 
-    useEffect(() => {
-        const fetchAssignmentDataHandler = async () => {
-            try {
-                const url = debouncedSearch
-                    ? `/submission/submissionsOfAssignment/${courseId}?searchAssignment=${debouncedSearch}`
-                    : `/submission/submissionsOfAssignment/${courseId}`
-                const res = await api.get<AssignmentApiResponse>(url)
-                setAssignmentData(res.data.data.trackingData)
-                setTotalStudents(res.data.data.totalStudents)
-            setLoading(false)
-            } catch (error) {
-                toast.error({
-                    title: 'Error',
-                    description: 'Error while fetching assignment data',
-                })
-            }
-        }
+    const { assignmentData, totalStudents, loading, error } = useAssignmentSubmissions(courseId, {
+        searchAssignment: debouncedSearch,
+    })
 
-        fetchAssignmentDataHandler()
-    }, [courseId, debouncedSearch])
+    useEffect(() => {
+        if (error) {
+            toast.error({
+                title: 'Error',
+                description: 'Error while fetching assignment data',
+            })
+        }
+    }, [error])
 
     const handleDownloadCsv = (id: number) => {
         downloadCsv({
@@ -57,11 +49,13 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
           fileName: 'Assignment_Status',
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Status', key: 'status' },
           ],
           mapData: (assessment) => ({
             name: assessment.name || 'N/A',
+            studentId: assessment.userId ?? assessment.id ?? 'NA',
             email: assessment.emailId || 'N/A',
             status: assessment.status || 'N/A',
           }),
@@ -95,14 +89,12 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                         if (moduleDataLength > 0)
                             return (
-                                <div className="my-3" key={data.id}>
-                                    <div className="w-full flex flex-col gap-y-5">
-                                        <h1 className="w-full text-[20px] text-left font-semibold">
-                                            Module: {data.name}
-                                        </h1>
-                                    </div>
+                                <div className="mb-6" key={data.id}>
+                                    <h2 className="text-lg text-start font-bold text-foreground mb-3">
+                                        Module - {data.name}
+                                    </h2>
 
-                                    <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         {data.moduleChapterData.map(
                                             (
                                                 moduleData: AssignmentModuleData
@@ -120,68 +112,71 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         : 0
                                                 return (
                                                     <div
-                                                        className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
+                                                        className="relative bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full"
                                                         key={moduleData.id}
                                                     >
                                                    
-                                                   <div className="flex items-center gap-3">
-                                                        <div className="absolute top-5 pr-3 right-10">
-                                                            {isDisabled ? (
-                                                            <div className="relative group inline-flex">
-                                                                <button
-                                                                    disabled
-                                                                    className="ml-2 cursor-not-allowed text-gray-400"
-                                                                    aria-label="Download full report"
-                                                                >
-                                                                    <ArrowDownToLine size={20} />
-                                                                </button>
-                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                                                    No submissions available   
-                                                                </div>
-                                                            </div>
-                                                            ) : (
-                                                            <button
-                                                                className="ml-2 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                                onClick={() => handleDownloadCsv(Number(chapterId))}
-                                                                aria-label="Download full report"
-                                                            >
-                                                                <ArrowDownToLine size={20} />
-                                                            </button>
-                                                            )}
+                                                   {/* Action icons */}
+                                                   <TooltipProvider>
+                                                        <div className="absolute top-5 right-10">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <button
+                                                                        disabled={isDisabled}
+                                                                        className={isDisabled ? 'cursor-not-allowed text-gray-400 dark:text-gray-500' : 'cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}
+                                                                        onClick={!isDisabled ? () => handleDownloadCsv(Number(chapterId)) : undefined}
+                                                                        aria-label="Download full report"
+                                                                    >
+                                                                        <ArrowDownToLine size={20} />
+                                                                    </button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {isDisabled ? 'No submissions available' : 'Download report'}
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         </div>
 
                                                         {/* EYE ICON */}
-                                                        <div className="absolute top-5 pr-3 right-2">
-                                                            {isDisabled ? (
-                                                            <div className="relative group inline-flex">
-                                                                <span className="cursor-not-allowed">
-                                                                <Eye size={20} className="text-gray-400 mb-1" />
-                                                                </span>
-                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                                                    No submissions to view
-                                                                </div>
-                                                            </div>
-                                                            ) : (
-                                                            <Link
-                                                                href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
-                                                            >
-                                                                <Eye size={20} className="text-gray-500 hover:text-gray-700 mb-1" />
-                                                            </Link>
-                                                            )}
+                                                        <div className="absolute top-5 right-2">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    {isDisabled ? (
+                                                                        <span className="cursor-not-allowed">
+                                                                            <Eye size={20} className="text-gray-400 dark:text-gray-500" />
+                                                                        </span>
+                                                                    ) : (
+                                                                        <Link
+                                                                            href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                        >
+                                                                            <Eye size={20} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                                                                        </Link>
+                                                                    )}
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {isDisabled ? 'No submissions to view' : 'View submissions'}
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         </div>
-                                                        </div>
+                                                   </TooltipProvider>
 
                                                         {/* Content */}
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="p-2 bg-gray-100 rounded-md">
-                                                                    <FileText className="w-4 h-4 text-gray-600" />
+                                                            <div className="flex items-center gap-3 min-w-0 pr-16">
+                                                                <div className="p-2 flex-shrink-0">
+                                                                    <FileText className="w-4 h-4 text-foreground" />
                                                                 </div>
-                                                                <h3 className="font-medium text-base text-gray-900">
-                                                                    {
-                                                                        moduleData.title
-                                                                    }
-                                                                </h3>
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <h3 className="font-medium text-base text-foreground truncate min-w-0">
+                                                                                {moduleData.title}
+                                                                            </h3>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            {moduleData.title}
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
                                                             </div>
                                                             <div className="flex items-center justify-between mt-4 text-sm">
                                                                 <div className="flex items-center gap-1">

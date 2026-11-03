@@ -12,6 +12,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
     {
@@ -105,32 +106,15 @@ export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePicture = student.profilePicture
-            const ImageContainer = () =>
-                profilePicture ? (
-                    <Image
-                        src={profilePicture}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
+        cell: ({ row }) => (
+            <div className="flex items-center">
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
                     />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+                </Avatar>
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },

@@ -7,7 +7,6 @@ import Dropzone from './dropzone'
 import SingleStudentForm from './SingleStudentForm'
 
 import { Button } from '@/components/ui/button'
-import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
     DialogClose,
@@ -23,6 +22,8 @@ import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
 import { AddStudentsModalProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
+import { useAssignBatch } from '@/app/[admin]/hooks/useAssignBatch'
+import { requiredNameEmailSchema } from '@/utils/validation/nameEmail'
 
 type StudentDataType = {
     name: string
@@ -46,9 +47,12 @@ const AddStudentsModal = ({
     setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
 }) => {
     const [selectedOption, setSelectedOption] = useState('1')
+    const [submitAttempted, setSubmitAttempted] = useState(false)
+    const { assignBatch } = useAssignBatch()
 
     const handleStudentUploadType = (value: string) => {
         setSelectedOption(value)
+        setSubmitAttempted(false)
     }
 
     // state and variables
@@ -67,7 +71,16 @@ const AddStudentsModal = ({
 
     const courseId: string = id.toString()
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        const isSingleStudent = modalType === 'single' || (modalType === 'both' && selectedOption === '2')
+        if (isSingleStudent) {
+            setSubmitAttempted(true)
+            if (!requiredNameEmailSchema.safeParse(studentData).success) {
+                event.preventDefault()
+                return
+            }
+        }
+
         const transformedObject = {
             students:
                 modalType === 'bulk'
@@ -83,10 +96,12 @@ const AddStudentsModal = ({
         if (transformedObject) {
             const requestBody = transformedObject
             try {
-                const endpoint = studentData.batchId
-                    ? `/bootcamp/students/${id}?batch_id=${studentData.batchId}`
-                    : `/bootcamp/students/${id}`
-                await api.post(endpoint, requestBody).then((response) => {
+                const batchId = studentData.batchId ? studentData.batchId : undefined
+                await assignBatch({
+                    bootcampId: id,
+                    batchId,
+                    students: requestBody.students as { name: string; email: string }[],
+                }).then((response) => {
                     batch && fetchBatchesData()
                     toast.success({
                         title: response.data.status,
@@ -116,7 +131,7 @@ const AddStudentsModal = ({
     }
 
     return (
-        <DialogContent className="text-black">
+        <DialogContent className="text-black dark:text-white">
             <DialogHeader>
                 <DialogTitle>
                     {message
@@ -159,6 +174,7 @@ const AddStudentsModal = ({
                             setStudentData={setStudentData}
                             courseId={id}
                             showBatchSelection={true}
+                            showValidationErrors={submitAttempted}
                         />
                     )}
 
@@ -178,6 +194,7 @@ const AddStudentsModal = ({
                     setStudentData={setStudentData}
                     courseId={id}
                     showBatchSelection={true}
+                    showValidationErrors={submitAttempted}
                 />
             )}
 

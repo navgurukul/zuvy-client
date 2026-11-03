@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Mail } from 'lucide-react'
-import { api } from '@/utils/axios.config'
+import { useGetStudentInfo } from '@/app/[admin]/hooks/useGetStudentInfo'
+import { useGetStudentCompletedClasses } from '@/app/[admin]/hooks/useGetStudentCompletedClasses'
+import { useLearnerProfiles } from '@/app/[admin]/hooks/useLearnerProfiles'
 import { toast } from '@/components/ui/use-toast'
 import { DataTable } from '../../../../../../../../_components/datatable/data-table'
 import { createAttendanceColumns } from './attendanceColumns'
@@ -28,41 +30,46 @@ const dateFilterSchema = z.object({
     fromDate: z.string().optional(),
     toDate: z.string().optional(),
 })
-.refine((data) => {
-    // If toDate is provided but fromDate is not, return error
-    if (data.toDate && !data.fromDate) {
-        return false
-    }
-    return true
-}, {
-    message: 'Please select a From date first.',
-    path: ['toDate']
-})
-.refine((data) => {
-    // If both dates exist, fromDate should not be after toDate
-    if (data.fromDate && data.toDate && data.fromDate > data.toDate) {
-        return false
-    }
-    return true
-}, {
-    message: 'From date cannot be after To date.',
-    path: ['fromDate']
-})
+    .refine((data) => {
+        // If toDate is provided but fromDate is not, return error
+        if (data.toDate && !data.fromDate) {
+            return false
+        }
+        return true
+    }, {
+        message: 'Please select a From date first.',
+        path: ['toDate']
+    })
+    .refine((data) => {
+        // If both dates exist, fromDate should not be after toDate
+        if (data.fromDate && data.toDate && data.fromDate > data.toDate) {
+            return false
+        }
+        return true
+    }, {
+        message: 'From date cannot be after To date.',
+        path: ['fromDate']
+    })
 
 const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     courseId,
     studentId,
     onBack
 }) => {
-    
+
     const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
+    const { getStudentInfo } = useGetStudentInfo()
+    const { getStudentCompletedClasses } = useGetStudentCompletedClasses()
+    const { learnerProfile, loading: profileLoading } = useLearnerProfiles(studentId)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState('all')
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+    const [activeTab, setActiveTab] = useState<'profile' | 'attendance'>('profile')
+    const [activeProfileSection, setActiveProfileSection] = useState('Basic Info')
     const [isFromCalendarOpen, setFromCalendarOpen] = useState(false)
     const [isToCalendarOpen, setToCalendarOpen] = useState(false)
     const [dateErrors, setDateErrors] = useState<{
@@ -83,8 +90,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     // Create columns with courseId and studentId
     const attendanceColumns = createAttendanceColumns(
-        courseId, 
-        studentId, 
+        courseId,
+        studentId,
         () => {
             fetchCompletedClasses(searchTerm)
         }
@@ -104,7 +111,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     errors[path] = error.message
                 })
                 setDateErrors(errors)
-                
+
                 // Show toast for the first error
                 const firstError = err.errors[0]
             }
@@ -112,24 +119,10 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
     }
 
-    useEffect(() => {
-        fetchStudentInfo()
-
-        const params = new URLSearchParams(window.location.search)
-        const search = params.get("search") || ""
-
-        setSearchTerm(search)
-
-        if (search) {
-            fetchCompletedClasses(search)
-        } else {
-            fetchCompletedClasses("")
-        }
-    }, [studentId, courseId])
 
     const fetchStudentInfo = async () => {
         try {
-            const response = await api.get(`/bootcamp/students/${courseId}?userId=${studentId}`)
+            const response = await getStudentInfo(courseId, studentId)
             const student = response.data?.modifiedStudentInfo?.find((s: any) => s.userId == studentId)
 
             if (student) {
@@ -161,23 +154,22 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             })
 
             const currentSearchTerm = searchTermParam !== undefined ? searchTermParam : searchTerm
-            
+
             if (currentSearchTerm && currentSearchTerm.trim()) {
                 params.append('searchTerm', currentSearchTerm.trim())
             }
-            
+
             if (statusFilter !== 'all') {
                 params.append('attendanceStatus', statusFilter)
             }
-            
+
             // Only add date filters if BOTH dates are selected and valid
             if (fromDate && toDate && fromDate <= toDate) {
                 params.append('fromDate', fromDate)
                 params.append('toDate', toDate)
             }
 
-            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`             
-            const response = await api.get(endpoint)
+            const response = await getStudentCompletedClasses(courseId, params)
 
             const classes = response.data?.data?.classes || []
             setCompletedClasses(classes)
@@ -202,12 +194,27 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
             toast.error({
                 title: 'API Error',
-                description: errorMessage,            
+                description: errorMessage,
             })
         } finally {
             setLoading(false)
         }
-    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
+    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm, getStudentCompletedClasses])
+
+    useEffect(() => {
+        const loadData = async () => {
+            await fetchStudentInfo()
+
+            const params = new URLSearchParams(window.location.search)
+            const search = params.get("search") || ""
+
+            setSearchTerm(search)
+            fetchCompletedClasses(search)
+        }
+
+        loadData()
+    }, [studentId, courseId, fetchCompletedClasses])
+
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -221,16 +228,14 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             if (statusFilter !== 'all') {
                 params.append('attendanceStatus', statusFilter)
             }
-            
+
             if (fromDate && toDate && fromDate <= toDate) {
                 params.append('fromDate', fromDate)
                 params.append('toDate', toDate)
             }
 
-            const res = await api.get(
-                `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
-            )
-            
+            const res = await getStudentCompletedClasses(courseId, params)
+
             return res.data?.data?.classes?.map((classItem: any) => ({
                 ...classItem,
                 name: classItem.title
@@ -239,7 +244,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             console.error('Search suggestions error:', error)
             return []
         }
-    }, [courseId, studentId, statusFilter, fromDate, toDate])
+    }, [courseId, studentId, statusFilter, fromDate, toDate, getStudentCompletedClasses])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setSearchTerm(query)
@@ -275,16 +280,16 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             return
         }
 
-        const shouldFetch = 
+        const shouldFetch =
             statusFilter !== 'all' ||
             (fromDate && toDate && fromDate <= toDate) ||
             (!fromDate && !toDate)
-        
+
         if (shouldFetch && !loading) {
             const timer = setTimeout(() => {
                 fetchCompletedClasses(searchTerm)
             }, 300)
-            
+
             return () => clearTimeout(timer)
         }
     }, [statusFilter, fromDate, toDate, dateErrors])
@@ -314,6 +319,11 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     const hasActiveFilters = statusFilter !== 'all' || fromDate || toDate
 
+    const profileDetails = learnerProfile
+    const graduationDate = profileDetails?.graduationMonth && profileDetails.graduationYear
+        ? `${new Date(0, profileDetails.graduationMonth - 1).toLocaleString('en-US', { month: 'short' })} ${profileDetails.graduationYear}`
+        : 'Not provided'
+
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Back Button */}
@@ -333,7 +343,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 <div className="flex flex-col items-start space-y-2">
                     {/* Name and Status */}
                     <div className="flex items-center space-x-3">
-                        <h1 className="text-2xl font-bold text-foreground">{studentInfo.name}</h1>
+                        <h1 className="text-2xl font-bold text-foreground">{learnerProfile?.fullName || studentInfo.name}</h1>
                         <Badge
                             variant={getStatusBadgeVariant(studentInfo.status)}
                             className="text-xs"
@@ -345,7 +355,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     {/* Email with Icon */}
                     <div className="flex items-center space-x-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">{studentInfo.email}</p>
+                        <p className="text-sm text-muted-foreground">{learnerProfile?.email || studentInfo.email}</p>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -365,6 +375,159 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     </div>
                 </div>
             </div>
+            <div className="flex w-[420px] gap-1 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-900">
+                <Button
+                    className={`flex-1 rounded-md transition-colors ${
+                        activeTab === 'profile'
+                            ? 'bg-[#28632D] text-white hover:bg-[#28632D] dark:bg-[#28632D] dark:text-white dark:hover:bg-[#347A3A]'
+                            : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                    }`}
+                    onClick={() => setActiveTab('profile')}
+                >
+                    Profile
+                </Button>
+
+                <Button
+                    className={`flex-1 rounded-md transition-colors ${
+                        activeTab === 'attendance'
+                            ? 'bg-[#28632D] text-white hover:bg-[#28632D] dark:bg-[#28632D] dark:text-white dark:hover:bg-[#347A3A]'
+                            : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                    }`}
+                    onClick={() => setActiveTab('attendance')}
+                >
+                    Attendance
+                </Button>
+            </div>
+            {activeTab === 'profile' ? (
+                <div className="grid gap-6 text-left lg:grid-cols-[252px_minmax(0,1fr)]">
+                    <nav className="space-y-1" aria-label="Profile sections">
+                        {[
+                            'Basic Info',
+                            'Skills & Projects',
+                            'Education',
+                            'Career goals',
+                        ].map((section) => (
+                            <button
+                                key={section}
+                                type="button"
+                                onClick={() => {
+                                    setActiveProfileSection(section)
+                                    const sectionIds: Record<string, string> = {
+                                        'Basic Info': 'basic-info',
+                                        'Skills & Projects': 'skills-projects',
+                                        Education: 'education',
+                                        'Career goals': 'career-goals',
+                                    }
+                                    document.getElementById(sectionIds[section])?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                }}
+                                className={`w-full rounded-md px-4 py-3 text-left text-sm transition-colors ${
+                                    activeProfileSection === section
+                                        ? 'bg-green-50 font-semibold text-green-900 dark:bg-green-950 dark:text-green-200'
+                                        : 'text-foreground hover:bg-muted'
+                                }`}
+                            >
+                                {section}
+                            </button>
+                        ))}
+                    </nav>
+
+                    <div className="space-y-6">
+                    {profileLoading && (
+                        <Card>
+                            <CardContent className="p-6 text-sm text-muted-foreground">Loading profile...</CardContent>
+                        </Card>
+                    )}
+                    {!profileLoading && !profileDetails && (
+                        <Card>
+                            <CardContent className="p-6 text-sm text-muted-foreground">Profile details are not available.</CardContent>
+                        </Card>
+                    )}
+                    <Card id="basic-info">
+                        <CardContent className="p-6">
+                            <h2 className="mb-6 text-lg font-semibold">Basic Info</h2>
+                            <div className="grid gap-6 md:grid-cols-3">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Full name</p>
+                                    <p className="mt-1 font-medium">{profileDetails?.fullName || studentInfo.name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Email</p>
+                                    <p className="mt-1 font-medium">{profileDetails?.email || studentInfo.email}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Phone</p>
+                                    <p className="mt-1 font-medium">{profileDetails?.phoneNumber || 'Not provided'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">LinkedIn</p>
+                                    <p className="mt-1 font-medium text-green-800 dark:text-green-300">{profileDetails?.linkedinProfile || 'Not provided'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Career status</p>
+                                    <Badge className="mt-1">{profileDetails?.currentStatus || 'Not provided'}</Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card id="skills-projects">
+                        <CardContent className="p-6">
+                            <h2 className="mb-6 text-lg font-semibold">Skills & Projects</h2>
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="mb-3 text-sm text-muted-foreground">Technical skills</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {profileDetails?.technicalSkills?.length ? profileDetails.technicalSkills.map((skill) => (
+                                            <Badge key={skill} variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:hover:bg-green-900/70">{skill}</Badge>
+                                        )) : <p className="font-medium">Not provided</p>}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="mb-3 text-sm text-muted-foreground">Projects</p>
+                                    {profileDetails?.projects?.length ? profileDetails.projects.map((project, index) => (
+                                        <div key={`${project.title || 'project'}-${index}`} className="mb-4 space-y-2 last:mb-0">
+                                            <p className="font-medium">{project.title || 'Untitled project'}</p>
+                                            <p className="text-sm text-muted-foreground">{project.description || 'No description provided'}</p>
+                                            <p className="text-sm">{project.techStack?.join(', ') || 'No tech stack provided'}</p>
+                                        </div>
+                                    )) : <p className="font-medium">Not provided</p>}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card id="education">
+                        <CardContent className="p-6">
+                            <h2 className="mb-6 text-lg font-semibold">Education</h2>
+                            <div className="grid gap-6 md:grid-cols-3">
+                                <div><p className="text-sm text-muted-foreground">College</p><p className="mt-1 font-medium">{profileDetails?.collegeName || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Degree</p><p className="mt-1 font-medium">{profileDetails?.degree || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Branch</p><p className="mt-1 font-medium">{profileDetails?.branch || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Year of study</p><p className="mt-1 font-medium">{profileDetails?.yearOfStudy || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Graduating</p><p className="mt-1 font-medium">{graduationDate}</p></div>
+                                <div><p className="text-sm text-muted-foreground">College score</p><p className="mt-1 font-medium">{profileDetails?.collegeScore ? `${profileDetails.collegeScore}${profileDetails.collegeScoreType || ''}` : 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Class 12</p><p className="mt-1 font-medium">{profileDetails?.class12Score ? `${profileDetails.class12Score}${profileDetails.class12ScoreType || ''} (${profileDetails.class12Board || 'Board not provided'})` : 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Class 10</p><p className="mt-1 font-medium">{profileDetails?.class10Score ? `${profileDetails.class10Score}${profileDetails.class10ScoreType || ''} (${profileDetails.class10Board || 'Board not provided'})` : 'Not provided'}</p></div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card id="career-goals">
+                        <CardContent className="p-6">
+                            <h2 className="mb-6 text-lg font-semibold">Career goals</h2>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div><p className="text-sm text-muted-foreground">Target roles</p><p className="mt-1 font-medium">{profileDetails?.targetRoles?.join(', ') || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Preferred locations</p><p className="mt-1 font-medium">{profileDetails?.preferredLocations?.join(', ') || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Internship stipend</p><p className="mt-1 font-medium">{profileDetails?.internshipStipend || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Full-time CTC</p><p className="mt-1 font-medium">{profileDetails?.fullTimeCtc || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Preferred contact</p><p className="mt-1 font-medium">{profileDetails?.preferredContactMethods?.join(', ') || 'Not provided'}</p></div>
+                                <div><p className="text-sm text-muted-foreground">Open to remote</p><p className="mt-1 font-medium">{profileDetails?.openToRemote ? 'Yes' : 'No'}</p></div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    </div>
+                </div>
+            ) : (
+                <>
 
             {/* Filters Row - All 4 filters in one line - Left aligned */}
             <div className="flex items-center gap-4 flex-wrap justify-start">
@@ -404,38 +567,37 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         <Popover open={isFromCalendarOpen} onOpenChange={setFromCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <div className="relative w-[150px]">
-                                <Input
-                                    value={fromDate ? format(new Date(fromDate), "dd-MM-yyyy") : ""}
-                                    placeholder="From Date"
-                                    readOnly
-                                    className={`cursor-pointer pr-10 ${
-                                    dateErrors.fromDate ? "border-red-500" : ""
-                                    }`}
-                                />
-                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        value={fromDate ? format(new Date(fromDate), "dd-MM-yyyy") : ""}
+                                        placeholder="From Date"
+                                        readOnly
+                                        className={`cursor-pointer pr-10 ${dateErrors.fromDate ? "border-red-500" : ""
+                                            }`}
+                                    />
+                                    <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </PopoverTrigger>
 
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
-                                mode="single"
-                                selected={fromDate ? new Date(fromDate) : undefined}
-                                onSelect={(date) => {
-                                    if (date) {
-                                    handleFromDateChange(date.toISOString().split("T")[0])
-                                    setFromCalendarOpen(false)
-                                    }
-                                }}
-                                disabled={(date) => {
-                                    // Disable dates after `toDate`
-                                    if (toDate) {
-                                    return date > new Date(toDate)
-                                    }
-                                    return false
-                                }}
+                                    mode="single"
+                                    selected={fromDate ? new Date(fromDate) : undefined}
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            handleFromDateChange(date.toISOString().split("T")[0])
+                                            setFromCalendarOpen(false)
+                                        }
+                                    }}
+                                    disabled={(date) => {
+                                        // Disable dates after `toDate`
+                                        if (toDate) {
+                                            return date > new Date(toDate)
+                                        }
+                                        return false
+                                    }}
                                 />
                             </PopoverContent>
-                        </Popover>                          
+                        </Popover>
                     </div>
                     {dateErrors.fromDate && (
                         <p className="text-xs text-red-500 ml-14">{dateErrors.fromDate}</p>
@@ -449,38 +611,37 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         <Popover open={isToCalendarOpen} onOpenChange={setToCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <div className="relative w-[150px]">
-                                <Input
-                                    value={toDate ? format(new Date(toDate), "dd-MM-yyyy") : ""}
-                                    placeholder="To Date"
-                                    readOnly
-                                    className={`cursor-pointer pr-10 ${
-                                    dateErrors.toDate ? "border-red-500" : ""
-                                    }`}
-                                />
-                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        value={toDate ? format(new Date(toDate), "dd-MM-yyyy") : ""}
+                                        placeholder="To Date"
+                                        readOnly
+                                        className={`cursor-pointer pr-10 ${dateErrors.toDate ? "border-red-500" : ""
+                                            }`}
+                                    />
+                                    <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
                             </PopoverTrigger>
 
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
-                                mode="single"
-                                selected={toDate ? new Date(toDate) : undefined}
-                                onSelect={(date) => {
-                                    if (date) {
-                                    handleToDateChange(date.toISOString().split("T")[0])
-                                    setToCalendarOpen(false)
-                                    }
-                                }}
-                                disabled={(date) => {
-                                    // Disable dates after `toDate`
-                                    if (toDate) {
-                                    return date > new Date(toDate)
-                                    }
-                                    return false
-                                }}
+                                    mode="single"
+                                    selected={toDate ? new Date(toDate) : undefined}
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            handleToDateChange(date.toISOString().split("T")[0])
+                                            setToCalendarOpen(false)
+                                        }
+                                    }}
+                                    disabled={(date) => {
+                                        // Disable dates after `toDate`
+                                        if (toDate) {
+                                            return date > new Date(toDate)
+                                        }
+                                        return false
+                                    }}
                                 />
                             </PopoverContent>
-                        </Popover>  
+                        </Popover>
                     </div>
                     {dateErrors.toDate && (
                         <p className="text-xs text-red-500 ml-8">{dateErrors.toDate}</p>
@@ -542,6 +703,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         />
                     )}
                 </div>
+            )}
+                </>
             )}
         </div>
     )

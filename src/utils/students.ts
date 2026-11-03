@@ -3,8 +3,8 @@ import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
-import { QuestionPanel } from '@/app/student/course/[courseId]/codingChallenge/components'
+import { showProctoringAlert } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
+import { QuestionPanel } from '@/app/student/course/[courseId]/org/[orgId]/codingChallenge/components'
 
 export const fetchStudentData = async (
     id: number, 
@@ -177,8 +177,9 @@ export async function handleVisibilityChange(
     submitAssessment: (typeOfSubmission?: "studentSubmit" | "auto-submit") => void,
     isCurrentPageSubmitAssessment: () => boolean,
     assessmentSubmitId: any,
+    forceTabChange: boolean = false,
 ) {
-    if (document.hidden) {
+    if (document.hidden || forceTabChange) {
         try {
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount} = await getProctoringData(assessmentSubmitId);
             const newTabChangeInstance = tabChange + 1;
@@ -454,6 +455,7 @@ export const handleAssessmentStateTransitions = (
 export const getEmbedLink = (link: string) => {
     if (!link) return ''
     if (link.includes('youtube.com') || link.includes('youtu.be')) return link
+    if (link.includes('vimeo.com')) return link
     if (link.includes('drive.google.com')) {
         // Convert Google Drive link to embeddable format
         const match = link.match(/\/d\/([\w-]+)/)
@@ -464,38 +466,6 @@ export const getEmbedLink = (link: string) => {
     }
     return link
 }
-
-// --------------------------------------------
-
-export const formatToIST = (dateString: string | null | undefined) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-
-        const options: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: 'long',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Kolkata',
-        };
-
-        const formatter = new Intl.DateTimeFormat('en-IN', options);
-        const parts = formatter.formatToParts(date);
-
-        const getPart = (type: string) =>
-            parts.find(part => part.type === type)?.value || '';
-
-        const day = getPart('day');
-        const month = getPart('month');
-        const year = getPart('year');
-        const hour = getPart('hour');
-        const minute = getPart('minute');
-        const dayPeriod = getPart('dayPeriod');
-
-        return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
-    };
 
 // --------------------------------------------
 
@@ -661,4 +631,3 @@ export const formatUpcomingItem = (item: any) => {
   // Fallback
   return "Status unavailable";
 };
-

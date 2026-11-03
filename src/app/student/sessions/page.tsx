@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -36,75 +36,27 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import { useSubmitStudentFeedback } from "@/hooks/useSubmitStudentFeedback"
+import { useSubmitStudentFeedback } from "@/app/student/hooks/useSubmitStudentFeedback"
+import {
+  getMentorDrawerHref,
+  getMentorsHref,
+  getSessionCancelHref,
+  getSessionJoinHref,
+  getSessionRescheduleHref,
+} from "@/utils/studentMentorshipRoutes"
 
-type Tab = "upcoming" | "completed" | "cancelled"
+import {
+  formatDateOnly,
+  formatTimeOnly,
+  formatTimeRange,
+  parseDateValue,
+  isJoinWindowOpen,
+} from "@/utils/sessionDateTime"
+
+type Tab = "all" | "upcoming" | "completed" | "cancelled"
 
 const formatLifecycleValue = (value: string | null | undefined) =>
   (value || "-").replaceAll("_", " ")
-
-const formatDateOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
-const formatTimeOnly = (value?: string | null) => {
-  if (!value) return "-"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "-"
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-const formatTimeRange = (start?: string | null, end?: string | null) => {
-  const startTime = formatTimeOnly(start)
-  const endTime = formatTimeOnly(end)
-
-  if (startTime === "-" && endTime === "-") return "-"
-  if (startTime === "-") return endTime
-  if (endTime === "-") return startTime
-
-  return `${startTime} - ${endTime}`
-}
-
-const parseDateValue = (value?: string | null) => {
-  if (!value) return null
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-
-  return date
-}
-
-const isJoinWindowOpen = (
-  slotStart?: string | null,
-  slotEnd?: string | null,
-  nowTimestamp: number = Date.now()
-) => {
-  const startDate = parseDateValue(slotStart)
-  if (!startDate) return false
-
-  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
-  const endDate = parseDateValue(slotEnd)
-
-  if (!endDate) {
-    return nowTimestamp >= tenMinutesBeforeStart
-  }
-
-  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
-}
 
 const getMentorDisplayName = (mentorName: string | null | undefined, mentorUserId: number | string) =>
   mentorName?.trim() || `Mentor ${mentorUserId}`
@@ -141,13 +93,10 @@ function RecordingLink({ bookingId }: { bookingId: number }) {
 
 export default function MySessions() {
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const courseId = searchParams.get("courseId") || ""
-  const mentorsHref = courseId ? `/student/mentors?courseId=${courseId}` : "/student/mentors"
-  const sessionsHref = courseId ? `/student/sessions?courseId=${courseId}` : "/student/sessions"
-  const isMentorsTabActive = pathname.startsWith("/student/mentors")
-  const isSessionsTabActive = pathname.startsWith("/student/sessions")
-  const [activeTab, setActiveTab] = useState<Tab>("upcoming")
+  const orgId = searchParams.get("orgId") || ""
+  const routeContext = { courseId, orgId }
+  const [activeTab, setActiveTab] = useState<Tab>("all")
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
   const [feedbackBookingId, setFeedbackBookingId] = useState<number | null>(null)
   const [tempRating, setTempRating] = useState(5)
@@ -213,7 +162,14 @@ export default function MySessions() {
     "cancelled"
   )
 
+  const { counts: allCounts } = useMyMentorSessions(
+    true,
+    "/student/mentor-sessions/my",
+    "all"
+  )
+
   const counts = {
+    all: Number(allCounts.total) || 0,
     upcoming: Number(upcomingCounts.upcoming) || 0,
     completed: Number(completedCounts.completed) || 0,
     cancelled: Number(cancelledCounts.cancelled) || 0,
@@ -226,16 +182,27 @@ export default function MySessions() {
     <div className="max-w-[90rem] mx-auto p-6 space-y-6">
 
       <div>
-        <h1 className="text-2xl font-semibold text-left text-gray-900">Mentorship</h1>
+        <h1 className="text-2xl font-semibold text-left text-foreground">Mentorship</h1>
         {/* <p className="mt-1 text-sm text-gray-500 text-left">Browse mentors or manage your sessions.</p> */}
       </div>
 
-      <MentorshipTabs courseId={courseId} />
+      <MentorshipTabs courseId={courseId} orgId={orgId} />
       {/* TABS */}
 
-      <div className="flex items-center  rounded-full p-1 w-fit gap-3">
+      <div className="-mx-6 overflow-x-auto px-6 pb-2 sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0">
+        <div className="flex w-max items-center gap-3 rounded-full p-1">
 
         <TabButton
+          id="tour-all-sessions"
+          active={activeTab === "all"}
+          icon={Calendar}
+          label="All"
+          count={counts.all}
+          onClick={() => setActiveTab("all")}
+        />
+
+        <TabButton
+          id="tour-upcoming-sessions"
           active={activeTab === "upcoming"}
           icon={CalendarDays}
           label="Upcoming"
@@ -244,6 +211,7 @@ export default function MySessions() {
         />
 
         <TabButton
+          id="tour-completed-sessions"
           active={activeTab === "completed"}
           icon={CheckCircle2}
           label="Completed"
@@ -259,6 +227,7 @@ export default function MySessions() {
           onClick={() => setActiveTab("cancelled")}
         />
 
+        </div>
       </div>
 
       {/* SESSION CARD */}
@@ -280,11 +249,204 @@ export default function MySessions() {
         </div>
       ) : error ? (
         <div className="space-y-3 rounded-2xl border bg-card p-6">
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
           <Button variant="outline" onClick={refetchMySessions}>
             Retry
           </Button>
         </div>
+      ) : activeTab === "all" ? (
+        counts.all === 0 ? (
+          <Card className="rounded-3xl border">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+              <CalendarDays className="h-6 w-6 text-muted-foreground" size={36} />
+              <h1 className="font-semibold text-sm">No sessions yet</h1>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Your sessions will appear here once you book them.
+              </p>
+              <Button className="mt-4 text-sm text-primary-foreground px-5 py-2 rounded-lg flex items-center gap-2" asChild>
+                <Link href={getMentorsHref(routeContext)}>
+                  <Users size={16} />
+                  Book a Session
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          sessions.map((session) => {
+            const lifecycle = (session.sessionLifecycleState || "").toUpperCase()
+            const isInProgress = lifecycle === "IN_PROGRESS"
+            const isCompleted = lifecycle === "COMPLETED"
+            const isCancelled = lifecycle === "CANCELLED" || session.status === "cancelled"
+            const isUpcoming = !isInProgress && !isCompleted && !isCancelled
+            const joinUrl = session.meetingLink?.trim() || ""
+            const canJoinNow = !!joinUrl && isJoinWindowOpen(session.slotStart, session.slotEnd, nowTimestamp)
+
+            const hasStudentFeedback = Boolean(
+              (session as any).studentRating ||
+              (session as any).studentFeedback ||
+              (session as any).studentFeedbackNotes ||
+              locallySubmittedFeedbackIds[session.id]
+            )
+            const studentRating = Number((session as any).studentRating || locallySubmittedFeedbackIds[session.id]?.rating || 0)
+            const studentFeedback = (session as any).studentFeedback || (session as any).studentFeedbackNotes || (session as any).studentNotes || locallySubmittedFeedbackIds[session.id]?.feedback || ""
+
+            const statusBadge = isInProgress ? (
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-info/30 bg-info/20 text-info-dark">In Progress</span>
+            ) : isCompleted ? (
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">Completed</span>
+            ) : isCancelled ? (
+              <Badge className="border border-destructive/30 bg-destructive/20 text-destructive-dark">Cancelled</Badge>
+            ) : (
+              <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">Upcoming</span>
+            )
+
+            // Cancelled card
+            if (isCancelled) {
+              return (
+                <Card key={session.id} className="rounded-2xl border shadow-sm">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-3 items-center">
+                        <Avatar>
+                          <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                            {getMentorAvatarFallback(session.mentorName, session.mentorUserId)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
+                        </div>
+                      </div>
+                      {statusBadge}
+                    </div>
+                    <div className="flex gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1 text-sm"><Calendar size={14} />{formatDateOnly(session.slotStart || session.slotEnd)}</div>
+                      <div className="flex items-center gap-1 text-sm"><Clock size={14} />{formatTimeRange(session.slotStart, session.slotEnd)}</div>
+                      <div className="text-sm">Booking #{session.id}</div>
+                      <div className="text-sm">{session.status}</div>
+                    </div>
+                    <div className="border-t pt-4" />
+                    <Link href={getMentorDrawerHref(session.mentorUserId, routeContext)} className="text-primary text-sm font-medium flex items-center gap-2 hover:text-primary-dark">
+                      <CalendarDays size={16} />
+                      Book again with {getMentorDisplayName(session.mentorName, session.mentorUserId)} →
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            }
+
+            // Completed card
+            if (isCompleted) {
+              return (
+                <Card key={session.id} className="rounded-2xl border shadow-sm">
+                  <CardContent className="p-6 rounded-3xl">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-3 items-center">
+                        <Avatar>
+                          <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
+                        </div>
+                      </div>
+                      {statusBadge}
+                    </div>
+                    <div className="flex gap-6 text-sm text-muted-foreground mt-3">
+                      <div className="flex items-center gap-1 text-sm"><Calendar size={14} />{formatDateOnly(session.slotStart || session.slotEnd)}</div>
+                      <div className="flex items-center gap-1 text-sm"><Clock size={14} />{formatTimeRange(session.slotStart, session.slotEnd)}</div>
+                      <div className="text-sm">Booking #{session.id}</div>
+                      <div className="text-sm">{session.status}</div>
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm text-muted-foreground text-left">
+                      <p>Mentor rating: {typeof session.mentorRating === "number" ? session.mentorRating : "-"}</p>
+                      <p>Feedback notes: {session.mentorFeedback?.notes?.trim() || "-"}</p>
+                      <p>Areas of improvement: {session.mentorFeedback?.areasOfImprovement?.trim() || "-"}</p>
+                      <RecordingLink bookingId={session.id} />
+                    </div>
+                    {hasStudentFeedback ? (
+                      <div className="mt-4 border-t pt-4 space-y-1 text-left">
+                        <p className="text-sm font-semibold text-foreground">Your Feedback to Mentor</p>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span>Rating:</span>
+                          <div className="flex gap-0.5">
+                            {Array.from({ length: 5 }).map((_, idx) => (
+                              <Star key={idx} size={12} className={idx < studentRating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"} />
+                            ))}
+                          </div>
+                        </div>
+                        {studentFeedback && <p className="text-xs text-muted-foreground italic">&ldquo;{studentFeedback}&rdquo;</p>}
+                      </div>
+                    ) : (
+                      <div className="mt-4 border-t pt-4 flex justify-end">
+                        <Button size="sm" className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium" onClick={() => { setFeedbackBookingId(session.id); setTempRating(5); setTempFeedback("") }}>
+                          Submit Feedback
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            }
+
+            // Upcoming + In Progress card
+            return (
+              <Card key={session.id} className="rounded-3xl">
+                <CardContent className="p-6 rounded-3xl">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3 items-center">
+                      <Avatar>
+                        <AvatarFallback className="bg-primary text-primary-foreground font-bold">{getMentorAvatarFallback(session.mentorName, session.mentorUserId)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-semibold truncate">{getMentorDisplayName(session.mentorName, session.mentorUserId)}</p>
+                      </div>
+                    </div>
+                    {statusBadge}
+                  </div>
+                  <div className="flex gap-6 text-sm text-muted-foreground mt-3">
+                    <div className="flex items-center gap-1 text-sm"><Calendar size={14} />{formatDateOnly(session.slotStart || session.slotEnd)}</div>
+                    <div className="flex items-center gap-1 text-sm"><Clock size={14} />{formatTimeRange(session.slotStart, session.slotEnd)}</div>
+                    <div className="text-sm">Booking #{session.id}</div>
+                    <div className="text-sm">{session.status}</div>
+                  </div>
+                  {isUpcoming && (
+                    <p className="text-sm text-muted-foreground mt-2 text-left">
+                      You&apos;re all set. We&apos;ll remind you before the session.
+                    </p>
+                  )}
+                </CardContent>
+                <CardFooter className="flex gap-3 flex-wrap">
+                  {!canJoinNow && !isInProgress && !!joinUrl && (
+                    <p className="basis-full text-xs text-muted-foreground text-left">Join opens 10 min before start</p>
+                  )}
+                  <Button className="flex gap-2" asChild={canJoinNow || isInProgress} disabled={!canJoinNow && !isInProgress}>
+                    {canJoinNow || isInProgress ? (
+                      <Link href={getSessionJoinHref(session.id, joinUrl, routeContext)} target="_blank" rel="noopener noreferrer">
+                        <Video size={14} />
+                        Join Session
+                      </Link>
+                    ) : joinUrl ? (
+                      <><Video size={14} />Join Session</>
+                    ) : (
+                      <><Video size={14} />Join Unavailable</>
+                    )}
+                  </Button>
+                  {isUpcoming && (
+                    <>
+                      <Button variant="outline" asChild>
+                        <Link href={getSessionRescheduleHref(session.id, routeContext, { currentSlotId: session.slotAvailabilityId, mentorId: session.mentorUserId })}>
+                          Reschedule
+                        </Link>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href={getSessionCancelHref(session.id, routeContext)}>Cancel</Link>
+                      </Button>
+                    </>
+                  )}
+                </CardFooter>
+              </Card>
+            )
+          })
+        )
       ) : activeTab === "cancelled" && counts.cancelled > 0 ? (
         sessions.map((session) => (
           <Card key={session.id} className="rounded-2xl border shadow-sm">
@@ -309,7 +471,7 @@ export default function MySessions() {
 
                 </div>
 
-                <Badge className="bg-destructive-light text-destructive">
+                <Badge className="border border-destructive/30 bg-destructive/20 text-destructive-dark">
                   Cancelled
                 </Badge>
 
@@ -336,8 +498,8 @@ export default function MySessions() {
               <div className="border-t pt-4" />
 
               <Link
-                href={`/student/mentors/${session.mentorUserId}`}
-                className="text-green-600 text-sm font-medium flex items-center gap-2"
+                href={getMentorDrawerHref(session.mentorUserId, routeContext)}
+                className="text-primary text-sm font-medium flex items-center gap-2 hover:text-primary-dark"
               >
 
                 <CalendarDays size={16} />
@@ -374,9 +536,9 @@ export default function MySessions() {
               Your completed sessions will appear here after you attend them.
             </p>
 
-            <Button className="mt-4 text-sm text-white px-5 py-2 rounded-lg flex items-center gap-2" asChild>
+            <Button className="mt-4 text-sm text-primary-foreground px-5 py-2 rounded-lg flex items-center gap-2" asChild>
 
-              <Link href="/student/mentors">
+              <Link href={getMentorsHref(routeContext)}>
                 <Users size={16} />
 
                 Book a Session
@@ -403,7 +565,7 @@ export default function MySessions() {
                   </div>
                 </div>
 
-                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">
                   Completed
                 </span>
               </div>
@@ -450,7 +612,7 @@ export default function MySessions() {
 
                 return hasStudentFeedback ? (
                   <div className="mt-4 border-t pt-4 space-y-1 text-left">
-                    <p className="text-sm font-semibold text-slate-800">Your Feedback to Mentor</p>
+                            <p className="text-sm font-semibold text-foreground">Your Feedback to Mentor</p>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <span>Rating:</span>
                       <div className="flex gap-0.5">
@@ -461,7 +623,7 @@ export default function MySessions() {
                             className={
                               idx < studentRating
                                 ? "text-yellow-500 fill-yellow-500"
-                                : "text-gray-300"
+                                : "text-muted-foreground"
                             }
                           />
                         ))}
@@ -477,7 +639,7 @@ export default function MySessions() {
                   <div className="mt-4 border-t pt-4 flex justify-end">
                     <Button
                       size="sm"
-                      className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                      className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium"
                       onClick={() => {
                         setFeedbackBookingId(session.id)
                         setTempRating(5)
@@ -515,7 +677,7 @@ export default function MySessions() {
 
                 </div>
 
-                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full bg-green-100 text-green-700">
+                <span className="inline-flex self-start items-center gap-1.5 px-3 py-1 leading-none text-xs font-medium rounded-full border border-success/30 bg-success/20 text-success-dark">
                   Upcoming
                 </span>
 
@@ -558,7 +720,7 @@ export default function MySessions() {
               >
                 {canJoinNow ? (
                   <Link
-                    href={`/student/sessions/${session.id}/join?joinUrl=${encodeURIComponent(joinUrl)}`}
+                    href={getSessionJoinHref(session.id, joinUrl, routeContext)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -580,14 +742,17 @@ export default function MySessions() {
 
               <Button variant="outline" asChild>
                 <Link
-                  href={`/student/sessions/${session.id}/reschedule?currentSlotId=${session.slotAvailabilityId}&mentorId=${session.mentorUserId}`}
+                  href={getSessionRescheduleHref(session.id, routeContext, {
+                    currentSlotId: session.slotAvailabilityId,
+                    mentorId: session.mentorUserId,
+                  })}
                 >
                   Reschedule
                 </Link>
               </Button>
 
               <Button variant="outline" asChild>
-                <Link href={`/student/sessions/${session.id}/cancel`}>
+                <Link href={getSessionCancelHref(session.id, routeContext)}>
                   Cancel
                 </Link>
               </Button>
@@ -617,7 +782,7 @@ export default function MySessions() {
 
             <div className="space-y-4 py-2">
               <div className="space-y-1.5 text-left">
-                <p className="text-sm font-medium text-gray-700">Rating</p>
+                <p className="text-sm font-medium text-foreground">Rating</p>
                 <div className="flex gap-1.5">
                   {Array.from({ length: 5 }).map((_, index) => {
                     const starValue = index + 1
@@ -633,7 +798,7 @@ export default function MySessions() {
                           className={
                             starValue <= tempRating
                               ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300"
+                              : "text-muted-foreground"
                           }
                         />
                       </button>
@@ -643,7 +808,7 @@ export default function MySessions() {
               </div>
 
               <div className="space-y-1.5 text-left">
-                <p className="text-sm font-medium text-gray-700">Feedback / Notes</p>
+                <p className="text-sm font-medium text-foreground">Feedback / Notes</p>
                 <Textarea
                   placeholder="Share details about what went well and areas for improvement..."
                   value={tempFeedback}
@@ -653,7 +818,7 @@ export default function MySessions() {
               </div>
 
               {submitError && (
-                <p className="text-xs text-red-500 text-left">{submitError}</p>
+                <p className="text-xs text-destructive text-left">{submitError}</p>
               )}
             </div>
 
@@ -668,7 +833,7 @@ export default function MySessions() {
               </Button>
               <Button
                 type="button"
-                className="bg-[#2F6B2F] hover:bg-[#204a20] text-white font-medium"
+                className="bg-primary hover:bg-primary-dark text-primary-foreground font-medium"
                 onClick={handleSubmitFeedback}
                 disabled={isSubmitting || tempRating < 1 || tempRating > 5}
               >
@@ -700,7 +865,7 @@ function StatCard({
       onClick={onClick}
       className={cn(
         "cursor-pointer rounded-2xl border transition",
-        active && "border-green-700 bg-green-50"
+        active && "border-primary bg-primary-light"
       )}
     >
 
@@ -722,6 +887,7 @@ function StatCard({
 }
 
 function TabButton({
+  id,
   icon: Icon,
   label,
   count,
@@ -730,12 +896,13 @@ function TabButton({
 }: any) {
   return (
     <button
+      id={id}
       onClick={onClick}
       className={cn(
-        "flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+        "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
         active
-          ? "bg-[#2F6B2F] text-white border-[#2F6B2F]"
-          : "bg-white text-[#5F6D5F] border-[#D9DED9] hover:bg-[#F8F9F8]"
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-card text-muted-foreground border-border hover:bg-muted"
       )}
     >
       <Icon size={14} strokeWidth={2.2} />
@@ -748,7 +915,7 @@ function TabButton({
             "flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none",
             active
               ? "bg-white/20 text-white"
-              : "bg-[#EEF1EE] text-[#5F6D5F]"
+              : "bg-muted text-muted-foreground"
           )}
         >
           {count}

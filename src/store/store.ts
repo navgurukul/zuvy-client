@@ -8,6 +8,7 @@ import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
+import { fetchCourseById } from '@/app/[admin]/hooks/useCourseExistenceCheck'
 
 type CounterStore = {
     studentData: {
@@ -36,6 +37,7 @@ interface CourseData {
     language: string
     startTime: string
     unassigned_students: number
+    students_in_bootcamp?: number
 }
 interface Permissions {
     editCourse: boolean
@@ -122,10 +124,7 @@ export const getCourseData = create<StoreCourseData>((set) => ({
     },
     fetchCourseDetails: async (courseId: number): Promise<boolean> => {
         try {
-            const response = await api.get(`/bootcamp/${courseId}`)
-            const data = response.data
-            set({ courseData: data.bootcamp })
-            set({ Permissions: data.permissions })
+            await fetchCourseById(courseId.toString())
             return true
         } catch (error: unknown) {
             console.error('Error fetching course details:', error)
@@ -810,7 +809,7 @@ export const getProctoringDataStore = create<proctoringDataType>((set) => ({
     fetchProctoringData: async (submissionId, studentId) => {
         await api
             .get(
-                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+                `/tracking/assessment/submissionId/${submissionId}?studentId=${studentId}`
             )
             .then((res) => {
                 set({ proctoringData: res.data })
@@ -954,18 +953,6 @@ export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
     setIsPreviewModalOpen: (newValue: boolean) => {
         set({ isPreviewModalOpen: newValue })
     },
-}))
-
-// ------------------------- Session expire ---------------------------
-
-type SessionStore = {
-    showModal: boolean
-    setShowModal: (value: boolean) => void
-}
-
-export const useSessionModalStore = create<SessionStore>((set) => ({
-    showModal: false,
-    setShowModal: (value) => set({ showModal: value }),
 }))
 
 type QuestionsReadyEvent = {

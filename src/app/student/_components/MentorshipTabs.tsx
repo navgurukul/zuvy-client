@@ -2,24 +2,23 @@
 
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
+import { getMentorsHref, getSessionsHref } from "@/utils/studentMentorshipRoutes"
 
 type Props = {
   courseId?: string
+  orgId?: string
 }
 
-export default function MentorshipTabs({ courseId }: Props) {
+export default function MentorshipTabs({ courseId, orgId }: Props) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
   const cid = courseId ?? searchParams?.get("courseId") ?? ""
+  const oid = orgId ?? searchParams?.get("orgId") ?? ""
 
-  const mentorsHref = cid
-    ? `/student/mentors?courseId=${cid}`
-    : "/student/mentors"
-
-  const sessionsHref = cid
-    ? `/student/sessions?courseId=${cid}`
-    : "/student/sessions"
+  const routeContext = { courseId: cid, orgId: oid }
+  const mentorsHref = getMentorsHref(routeContext)
+  const sessionsHref = getSessionsHref(routeContext)
 
   const isMentorsTabActive = pathname?.startsWith("/student/mentors")
   const isSessionsTabActive = pathname?.startsWith("/student/sessions")
@@ -28,6 +27,7 @@ export default function MentorshipTabs({ courseId }: Props) {
     <div className="w-full border-b border-[#e8ece8]">
       <div className="flex items-center gap-8">
         <Link
+          id="tour-browse-mentors"
           href={mentorsHref}
           className={`
             relative flex items-center gap-2 px-3 py-2  text-sm transition-all
@@ -59,6 +59,7 @@ export default function MentorshipTabs({ courseId }: Props) {
         </Link>
 
         <Link
+          id="tour-my-sessions"
           href={sessionsHref}
           className={`
             relative flex items-center gap-2 px-3 py-2  text-sm transition-all

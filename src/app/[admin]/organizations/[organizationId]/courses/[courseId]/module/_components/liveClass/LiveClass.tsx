@@ -7,6 +7,7 @@ import { Calendar, Clock, Video, Users, ExternalLink, Info, CalendarIcon } from 
 import { LiveClassProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
 import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
+import { useClassAnalytics } from '@/app/[admin]/hooks/useClassAnalytics'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -26,6 +27,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
+import { useUpdateLiveClassSession} from '@/app/[admin]/hooks/useUpdateLiveClassSession'
+import { useAttendanceStatus } from '@/app/[admin]/hooks/useAttendanceStatus'
 
 const liveClassSchema = z
     .object({
@@ -69,13 +72,15 @@ const LiveClass = ({
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
     const [isLoading, setIsLoading] = useState(true)
+    const { updateLiveClassSession, updating } = useUpdateLiveClassSession()
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
-    const [isClient, setIsClient] = useState(false)
-    useEffect(() => {
-        setIsClient(true)
-    }, [])
+    const { getClassAnalytics } = useClassAnalytics()
+    const { attendanceStatus, isAttendanceReady, loading: attendanceLoading } = useAttendanceStatus(
+        session?.id,
+        { enabled: session?.status?.toLowerCase() === 'completed' }
+    )
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -122,83 +127,45 @@ const LiveClass = ({
             case 'ongoing':
                 return 'bg-green-100 text-green-800 border-green-200'
             case 'completed':
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-gray-100 dark:bg-card dark:text-muted-foreground text-gray-800 border-gray-200'
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200'
         }
     }
 
-    const handleDownloadAttendance = async () => {
-        if (!canEdit) return
-        try {
-            const sessionId = session.id || session.meetingId || session.title
-            const res = await api.get(`/classes/analytics/${sessionId}`)
-            const data = res.data
+    const handleDownloadAttendance = () => {
+        if (!canEdit || !attendanceStatus) return
 
-            const studentRecords =
-                data?.data?.session?.studentAttendanceRecords ?? []
-            const invited = data?.data?.session?.invitedStudents ?? []
+        const records = attendanceStatus.studentAttendanceRecords ?? []
 
-            type AttendanceRecord = {
-                userId: number | string
-                duration?: number
-                status?: string
-            }
-
-            const attendanceMap = new Map(
-                studentRecords.map((r: AttendanceRecord) => [r.userId, r])
-            )
-
-            const attendanceData = invited.map((student: any) => {
-                const record = attendanceMap.get(student.userId) as
-                    | AttendanceRecord
-                    | undefined
-                return {
-                    userId: student.userId,
-                    name: student.name ?? '',
-                    email: student.email ?? '',
-                    duration:
-                        record && record.duration !== undefined
-                            ? record.duration
-                            : 0,
-                    attendance:
-                        record && record.status ? record.status : 'absent',
-                }
-            })
-
-            if (attendanceData.length === 0) {
-                toast.error({ title: 'No attendance data to download.' })
-                return
-            }
-
-
-            const headers = Object.keys(attendanceData[0])
-            const csvContent = `${headers.join(',')}\n${attendanceData
-                .map((row: any) =>
-                    headers
-                        .map((header) => `"${String(row[header] ?? '')}"`)
-                        .join(',')
-                )
-                .join('\n')}`
-
-            const encodedUri =
-                'data:text/csv;charset=utf-8,' + encodeURI(csvContent)
-            const link = document.createElement('a')
-            link.setAttribute(
-                'href',
-                encodedUri
-            )
-            link.setAttribute(
-                'download',
-                `${data?.data?.session?.title ?? 'attendance'}_attendance.csv`
-            )
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        } catch (err) {
-            console.error('Failed to download attendance', err)
-            toast.error({ title: 'Failed to download attendance' })
+        if (records.length === 0) {
+            toast.error({ title: 'No attendance data to download.' })
+            return
         }
+
+        const csvRows = records.map((r: any) => ({
+            userId: r.userId,
+            name: r.name ?? '',
+            email: r.email ?? '',
+            status: r.status ?? 'absent',
+            duration: r.duration ?? 0,
+            attendanceDate: r.attendanceDate ?? '',
+        }))
+
+        const headers = Object.keys(csvRows[0])
+        const csvContent = `${headers.join(',')}\n${csvRows
+            .map((row: any) =>
+                headers.map((h) => `"${String(row[h] ?? '')}"`).join(',')
+            )
+            .join('\n')}`
+
+        const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent)
+        const link = document.createElement('a')
+        link.setAttribute('href', encodedUri)
+        link.setAttribute('download', `${content?.title ?? 'attendance'}_attendance.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     const getStatusIcon = (status: string) => {
@@ -230,11 +197,11 @@ const LiveClass = ({
         const fetchRecordingLink = async () => {
             if (session?.status?.toLowerCase() === 'completed' && session?.id) {
                 try {
-                    const res = await api.get(`/classes/analytics/${session.id}`)
-                    const analyticsS3Link = res.data?.data?.session?.s3link
-                    const analyticsRecordingLink = res.data?.data?.session?.recordingLink
-                    const analyticsYoutubeLink = res.data?.data?.session?.youtubeLink
-                    
+                    const data = await getClassAnalytics({ classId: session.id })
+                    const analyticsS3Link = data?.data?.session?.s3link
+                    const analyticsRecordingLink = (data?.data?.session as any)?.recordingLink
+                    const analyticsYoutubeLink = (data?.data?.session as any)?.youtubeLink
+
                     // Set recording link if available
                     if (analyticsS3Link && analyticsS3Link !== 'not found') {
                         setRecordingLink(analyticsS3Link)
@@ -319,7 +286,7 @@ const LiveClass = ({
             // console.log('Payload:', payload)
             
             const sessionId =  session.id
-            await api.put(`/classes/sessions/${sessionId}`, payload)
+            await updateLiveClassSession(sessionId, payload)
             
             // Update both moduleData and chapterData in store to reflect title change in sidebar
             if (capitalizedTitle !== content?.title) {
@@ -410,17 +377,21 @@ const LiveClass = ({
                                                 onClick={handleDownloadAttendance}
                                                 disabled={
                                                     !canEdit ||
-                                                    !session?.s3link ||
-                                                    session?.s3link === 'not found'
+                                                    attendanceLoading ||
+                                                    !isAttendanceReady
                                                 }
                                             >
-                                                Download Attendance
+                                                {attendanceLoading
+                                                    ? 'Checking...'
+                                                    : 'Download Attendance'}
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p className="text-sm">
-                                                {!session?.s3link || session?.s3link === 'not found' 
-                                                    ? 'No attendance report available' 
+                                                {attendanceLoading
+                                                    ? 'Checking attendance availability...'
+                                                    : !isAttendanceReady
+                                                    ? 'Attendance is not ready yet. Please check back later.'
                                                     : 'Click to download attendance report'}
                                             </p>
                                         </TooltipContent>
@@ -449,7 +420,7 @@ const LiveClass = ({
                                         placeholder="Advanced Event Handling"
                                         disabled={!canEditFields}
                                         maxLength={100}
-                                        className="bg-card border-input"
+                                        className="!bg-background"
                                     />
                                 </FormControl>
                                 {field.value?.length >= 100 && (
@@ -478,7 +449,7 @@ const LiveClass = ({
                                                     variant="outline"
                                                     disabled={!canEditFields}
                                                     className={cn(
-                                                        "w-full justify-start text-left font-normal bg-card border-input",
+                                                        "w-full justify-start text-left font-normal",
                                                         !field.value && "text-muted-foreground"
                                                     )}
                                                 >
@@ -522,7 +493,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-card border-input"
+                                            className="!bg-background"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -543,7 +514,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-card border-input"
+                                            className="!bg-background"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -568,7 +539,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-card border-input">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -599,7 +570,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-card border-input">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select secondary batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -725,7 +696,7 @@ const LiveClass = ({
                         </div>
                     ) : (
                         <div className="pt-4 border-t">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex gap-3">
                                 <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                 <div className="space-y-1">
                                     <h4 className="font-medium text-left text-yellow-900 text-sm">
@@ -767,8 +738,9 @@ const LiveClass = ({
                         <Button
                             type="submit"
                             className="px-6 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={updating}
                         >
-                            Save Live Class
+                            {updating ? 'Saving...' : 'Save Live Class'}
                         </Button>
                     </div>
                 )}

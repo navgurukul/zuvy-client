@@ -1,6 +1,5 @@
 'use client'
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
@@ -22,6 +21,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { useEditChapter } from '@/app/[admin]/hooks/useEditChapter'
 import { ModuleContentSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
@@ -64,6 +64,7 @@ function Chapter() {
     const lastOrderRef = useRef<number[]>([])
     const isDragActiveRef = useRef(false)
     const draggedChapterRef = useRef<number | null>(null)
+    const missingChapterRetryRef = useRef<string | null>(null)
 
     const {
         moduleName: fetchedModuleName,
@@ -72,6 +73,8 @@ function Chapter() {
         loading: moduleLoading,
         refetch,
     } = useModuleChapters(moduleID)
+
+    const { editChapter } = useEditChapter()
 
     // Fetch course details on mount
     useEffect(() => {
@@ -134,18 +137,28 @@ function Chapter() {
 
         setChapterData(moduleChapters)
         setModuleData(moduleChapters)
-        
+
         const clickedChapter = moduleChapters.find(
             (item: any) => item.chapterId === chapter_id
         )
 
         if (clickedChapter?.topicId) {
+            // Found in current list — use its topicId
             setTopicId(clickedChapter.topicId)
+            missingChapterRetryRef.current = null
+        } else if (chapter_id && moduleChapters.length > 0) {
+            // A newly created chapter can be absent from the first response.
+            // Retry once for this route, but never on every response update.
+            const retryKey = `${moduleID}-${chapter_id}`
+            if (missingChapterRetryRef.current !== retryKey) {
+                missingChapterRetryRef.current = retryKey
+                void refetch()
+            }
         }
 
         setOriginalChapterData(moduleChapters.map((item: any) => ({ ...item })))
         lastOrderRef.current = moduleChapters.map((item: any) => item.chapterId)
-    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter])
+    }, [moduleLoading, fetchedModuleName, permissions, moduleChapters, chapter_id, moduleID, setModuleName, setChapterData, setModuleData, setTopicId, setChapterContent, setActiveChapter, refetch])
 
     // Update active chapter when chapter data changes
     useEffect(() => {
@@ -243,35 +256,45 @@ function Chapter() {
         }
 
         try {
-            await api.put(
-                `/Content/editChapterOfModule/${moduleId}?chapterId=${chapterId}`,
-                { newOrder: newPosition }
+            await editChapter(
+                moduleID,
+                chapterId,
+                { newOrder: newPosition },
+                {
+                    onSuccess: () => {
+                        toast.success({
+                            title: 'Success',
+                            description: 'Chapter order updated successfully',
+                        })
+
+                        triggerBorderFlash(chapterId)
+
+                        // Update reference data
+                        const updatedOriginalData = chapterData.map((item, index) => ({
+                            ...item,
+                            order: index + 1,
+                        }))
+                        setOriginalChapterData(updatedOriginalData)
+                        lastOrderRef.current = chapterData.map((c) => c.chapterId)
+
+                        // Refetch chapters to sync hook cache with latest server state
+                        refetch()
+                    },
+                    onError: (error: any) => {
+                        console.error('Reorder error:', error)
+
+                        toast.error({
+                            title: 'Failed',
+                            description:
+                                error.response?.data?.message || 'Failed to update chapter order',
+                        })
+
+                        setChapterData([...originalChapterData])
+                    },
+                }
             )
-
-            toast.success({
-                title: 'Success',
-                description: 'Chapter order updated successfully',
-            })
-
-            triggerBorderFlash(chapterId)
-
-            // Update reference data
-            const updatedOriginalData = chapterData.map((item, index) => ({
-                ...item,
-                order: index + 1,
-            }))
-            setOriginalChapterData(updatedOriginalData)
-            lastOrderRef.current = chapterData.map((c) => c.chapterId)
-        } catch (error: any) {
-            console.error('Reorder error:', error)
-
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'Failed to update chapter order',
-            })
-
-            setChapterData([...originalChapterData])
+        } catch {
+            // errors are handled via onError callback above
         }
     }
 

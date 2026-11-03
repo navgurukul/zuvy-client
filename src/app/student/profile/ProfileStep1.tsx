@@ -13,11 +13,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Check, AlertCircle, ChevronDown, User, Phone, Mail, GraduationCap } from 'lucide-react';
 import type { OnboardingStep1 as Step1Type } from '@/lib/profile.types';
 import { MONTHS, getYearsArray, getBranchesByDegree } from '@/lib/profile.mockData';
-import { useLearnerDegreeDetails } from '@/hooks/useLearnerDegreeDetails';
-import { useLearnerBranchDetails } from '@/hooks/useLearnerBranchDetails';
-import { useCollegeSearch } from '@/hooks/useCollegeSearch';
+import { useLearnerDegreeDetails } from '@/app/student/hooks/useLearnerDegreeDetails';
+import { useLearnerBranchDetails } from '@/app/student/hooks/useLearnerBranchDetails';
+import { useCollegeSearch } from '@/app/student/hooks/useCollegeSearch';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
+import { 
+  validateGraduationDate, 
+  getAllowedYears, 
+  getAllowedMonths
+} from '@/app/student/_utils/graduationDateValidation';
 
 interface ProfileStep1Props {
   initialData?: Partial<Step1Type>;
@@ -69,8 +74,10 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const [selectedYear, setSelectedYear] = useState<string>(formData.graduationDate.year || '');
   const [customDegree, setCustomDegree] = useState<string>('');
   const [customBranch, setCustomBranch] = useState<string>('');
+  const [isOtherBranchSelected, setIsOtherBranchSelected] = useState<boolean>(false);
   const fullNameEditedRef = useRef(false);
   const resumeClearedRef = useRef(false);
+  const isAutofillRef = useRef(false);
   const { colleges: filteredColleges, isLoading: isLoadingColleges } = useCollegeSearch(collegeSearch);
 
   const buildEmptyStep1Data = (): Step1Type => ({
@@ -125,7 +132,8 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const { degreeDetails, loading: isDegreeLoading } = useLearnerDegreeDetails();
   const { loading: isBranchLoading, getBranchesForDegree } = useLearnerBranchDetails();
   
-  const years = getYearsArray(1990);
+  const years = getAllowedYears(formData.yearOfStudy);
+  const allowedMonths = getAllowedMonths(formData.yearOfStudy, selectedYear);
   const degreeOptions = degreeDetails.map((item) => item.name);
   const selectedDegreeDetails = useMemo(
     () =>
@@ -153,6 +161,11 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     const unique = Array.from(new Set(source));
     return unique.includes('Other') ? unique : [...unique, 'Other'];
   }, [formData.degree, getBranchesForDegree, selectedDegreeDetails]);
+
+  // Keep a ref so effects can read the latest branches without adding it
+  // as a dependency (which would cause unintended autofill re-runs).
+  const branchesRef = useRef<string[]>(branches);
+  useEffect(() => { branchesRef.current = branches; }, [branches]);
   
   // Handle custom degree initialization
   useEffect(() => {
@@ -165,21 +178,50 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     }
   }, [degreeDetails, formData.degree, degreeOptions, customDegree]);
 
-  // Handle custom branch initialization
-  useEffect(() => {
-    if (!formData.branch || formData.branch === 'Other') {
-      return;
-    }
+  // Helper: find the canonical branch name from the list using case-insensitive match
+  const findBranchInList = (value: string, list: string[]): string | undefined => {
+    if (!value) return undefined;
+    const lower = value.trim().toLowerCase();
+    return list.find((b) => b.toLowerCase() === lower);
+  };
 
-    const isCustomBranch = !branches.includes(formData.branch);
-    if (isCustomBranch && customBranch !== formData.branch) {
+  // When loading existing data, if the saved branch is not in the dropdown list
+  // (exact match) but IS there case-insensitively, normalise it to the API spelling.
+  // If it genuinely isn't in the list at all, treat it as a custom "Other" value.
+  // We never store 'Other' in formData.branch — the real typed value lives there.
+  useEffect(() => {
+    if (isAutofillRef.current) return;
+    if (!formData.branch || formData.branch === 'Other') return;
+    if (branches.length === 0) return;
+
+    // Exact match — already correct, nothing to do
+    if (branches.includes(formData.branch)) return;
+
+    const canonical = findBranchInList(formData.branch, branches);
+    if (canonical) {
+      // Same branch, different casing — update to the API's spelling so the
+      // Select value matches a real SelectItem and displays correctly.
+      isAutofillRef.current = true;
+      setFormData((prev) => ({ ...prev, branch: canonical }));
+      Promise.resolve().then(() => { isAutofillRef.current = false; });
+    } else if (customBranch !== formData.branch) {
+      // Genuinely not in the list — it's a custom typed value
       setCustomBranch(formData.branch);
+      setIsOtherBranchSelected(true);
     }
   }, [branches, formData.branch, customBranch]);
   
   // Auto-save form data on change
   useEffect(() => {
     if (isResumeCleared) {
+      return;
+    }
+
+    // Skip notifying the parent when the change was triggered by the parent's
+    // own initialData update (autofill). Notifying in that case creates a
+    // feedback loop: parent data → setFormData → onFieldChange → parent
+    // updates initialData again → setFormData again → infinite loop.
+    if (isAutofillRef.current) {
       return;
     }
 
@@ -199,7 +241,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     customCollege: data.customCollege ?? '',
     degree: data.degree?.trim() || '',
     branch: data.branch?.trim() || '',
-    yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || '1st',
+    yearOfStudy: (data.yearOfStudy as Step1Type['yearOfStudy']) || formData.yearOfStudy,
     graduationDate: {
       month: data.graduationDate?.month?.trim() || '',
       year: data.graduationDate?.year?.trim() || '',
@@ -216,16 +258,21 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       resumeClearedRef.current = true;
       fullNameEditedRef.current = false;
       lastAutofillRef.current = '';
+      isAutofillRef.current = true;
       setFormData(buildEmptyStep1Data());
       setSelectedMonth('');
       setSelectedYear('');
       setCustomDegree('');
       setCustomBranch('');
+      setIsOtherBranchSelected(false);
       setCollegeSearch('');
       setShowCollegeDropdown(false);
       setShowGraduationDatePicker(false);
       setErrors({});
       setValidations({});
+      Promise.resolve().then(() => {
+        isAutofillRef.current = false;
+      });
       return;
     }
 
@@ -288,14 +335,42 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       graduationDate: initialData.graduationDate,
     });
 
-    const nextFormData = buildStep1FromInitialData(initialData);
+    let nextFormData = buildStep1FromInitialData(initialData);
+
+    // Flag that the upcoming formData change is driven by initialData (autofill)
+    // so the auto-save effect won't echo it back to the parent and cause an
+    // infinite update loop.
+    isAutofillRef.current = true;
 
     fullNameEditedRef.current = false;
     setFormData(nextFormData);
     setSelectedMonth(nextFormData.graduationDate.month);
     setSelectedYear(nextFormData.graduationDate.year);
     setCustomDegree(nextFormData.degree && nextFormData.degree !== 'Other' ? nextFormData.degree : '');
-    setCustomBranch(nextFormData.branch && nextFormData.branch !== 'Other' ? nextFormData.branch : '');
+    // If the saved branch is a custom value (not in the dropdown list), pre-fill
+    // customBranch so the text input shows it. If it matches case-insensitively,
+    // use the API's canonical spelling so the Select displays it correctly.
+    if (nextFormData.branch && nextFormData.branch !== 'Other' && branchesRef.current.length > 0) {
+      const canonical = branchesRef.current.find(
+        (b) => b.toLowerCase() === nextFormData.branch.toLowerCase()
+      );
+      if (canonical && canonical !== nextFormData.branch) {
+        // Normalise to API spelling — update the branch to canonical casing
+        nextFormData = { ...nextFormData, branch: canonical };
+        setFormData(nextFormData);
+      } else if (!canonical) {
+        // Not in the list at all — it's a custom value
+        setCustomBranch(nextFormData.branch);
+        setIsOtherBranchSelected(true);
+      }
+    } else if (nextFormData.branch && nextFormData.branch !== 'Other' && branchesRef.current.length === 0) {
+      // Branches haven't loaded yet — the initialization effect will handle it
+      setCustomBranch('');
+      setIsOtherBranchSelected(false);
+    } else {
+      setCustomBranch('');
+      setIsOtherBranchSelected(false);
+    }
     setErrors({});
 
     if (nextFormData.phoneNumber) {
@@ -308,6 +383,14 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     }
 
     lastAutofillRef.current = signature;
+
+    // Clear the autofill flag after React has flushed the state updates.
+    // Using a microtask (Promise.resolve) ensures this runs after all
+    // synchronous setState calls above have been scheduled, but before the
+    // next user interaction can trigger the auto-save effect.
+    Promise.resolve().then(() => {
+      isAutofillRef.current = false;
+    });
   }, [initialData]);
 
   // Close college dropdown when clicking outside
@@ -344,6 +427,16 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
     };
   }, [showGraduationDatePicker]);
 
+  // Sync selectedYear and selectedMonth with formData when they change
+  useEffect(() => {
+    if (formData.graduationDate.year !== selectedYear) {
+      setSelectedYear(formData.graduationDate.year);
+    }
+    if (formData.graduationDate.month !== selectedMonth) {
+      setSelectedMonth(formData.graduationDate.month);
+    }
+  }, [formData.graduationDate.year, formData.graduationDate.month, selectedYear, selectedMonth]);
+
   // Validate phone number
   const validatePhoneNumber = (phone: string): boolean => {
     const phoneRegex = /^(\+91)?[6-9]\d{9}$/;
@@ -351,47 +444,45 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   };
 
   // Validate form
-  const validateForm = (): Record<string, string> => {
+  const validateForm = (data: Step1Type = formData): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.fullName.trim()) {
+    if (!data.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     }
 
-    if (!formData.phoneNumber.trim()) {
+    if (!data.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-    } else if (!validatePhoneNumber(formData.phoneNumber)) {
+    } else if (!validatePhoneNumber(data.phoneNumber)) {
       newErrors.phoneNumber = 'Enter a valid 10-digit Indian mobile number';
     }
 
-    if (!(formData.linkedin ?? '').trim()) {
+    if (!(data.linkedin ?? '').trim()) {
       newErrors.linkedin = 'LinkedIn Profile is required';
     } else {
       // LinkedIn URL validation
       const linkedinRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+\/?$/;
-      if (!linkedinRegex.test((formData.linkedin || '').trim())) {
+      if (!linkedinRegex.test((data.linkedin || '').trim())) {
         newErrors.linkedin = 'Enter a valid LinkedIn profile URL';
       }
     }
 
-    if (!formData.collegeName && !formData.customCollege) {
+    if (!data.collegeName && !data.customCollege) {
       newErrors.college = 'College selection is required';
     }
 
-    if (!(formData.degree ?? '').trim()) {
+    if (!(data.degree ?? '').trim()) {
       newErrors.degree = 'Degree selection is required';
     }
 
-    if (!formData.branch) {
+    if (!data.branch || data.branch === 'Other') {
       newErrors.branch = 'Branch selection is required';
     }
 
-    if (!formData.graduationDate.month && !formData.graduationDate.year) {
-      newErrors.graduationDate = 'Graduation month and year are required';
-    } else if (!formData.graduationDate.month) {
-      newErrors.graduationDate = 'Graduation month is required';
-    } else if (!formData.graduationDate.year) {
-      newErrors.graduationDate = 'Graduation year is required';
+    // Validate graduation date
+    const graduationValidation = validateGraduationDate(data.graduationDate, data.yearOfStudy);
+    if (!graduationValidation.isValid) {
+      newErrors.graduationDate = graduationValidation.error || 'Invalid graduation date';
     }
 
     setErrors(newErrors);
@@ -500,6 +591,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         setCustomDegree('');
       }
       setCustomBranch('');
+      setIsOtherBranchSelected(false);
       if (errors.degree || errors.branch) {
         setErrors((prev) => {
           const next = { ...prev };
@@ -519,14 +611,17 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
       }
 
       if (value === 'Other') {
-        // When "Other" is selected for branch, keep the dropdown value as "Other"
+        // When "Other" is selected, clear formData.branch so it's empty
+        // until the user types something in the custom input.
+        setIsOtherBranchSelected(true);
         setFormData((prev) => ({
           ...prev,
-          branch: 'Other',
+          branch: '',
         }));
-        // Don't clear customBranch here - let user continue typing
+        // Keep customBranch as-is so they don't lose what they already typed
       } else {
-        // When a predefined branch is selected
+        // When a predefined branch is selected, store it as the real value
+        setIsOtherBranchSelected(false);
         setFormData((prev) => ({
           ...prev,
           branch: value,
@@ -540,6 +635,49 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
           delete next.branch;
           return next;
         });
+      }
+    } else if (name === 'yearOfStudy') {
+      const currentYear = new Date().getFullYear().toString();
+      
+      if (value !== 'passed_out') {
+        // For current students (1st, 2nd, 3rd, 4th), always auto-set current year
+        setSelectedYear(currentYear);
+        setFormData((prev) => ({
+          ...prev,
+          yearOfStudy: value as Step1Type['yearOfStudy'],
+          graduationDate: {
+            ...prev.graduationDate,
+            year: currentYear,
+          },
+        }));
+        
+        // Clear any graduation date errors since we're auto-selecting valid year
+        if (errors.graduationDate) {
+          setErrors((prev) => {
+            const next = { ...prev };
+            delete next.graduationDate;
+            return next;
+          });
+        }
+      } else {
+        // For passout, validate existing date and clear if invalid
+        const currentGradDate = formData.graduationDate;
+        let newGradDate = currentGradDate;
+        
+        if (currentGradDate.month && currentGradDate.year) {
+          const validation = validateGraduationDate(currentGradDate, value);
+          if (!validation.isValid) {
+            setSelectedMonth('');
+            setSelectedYear('');
+            newGradDate = { month: '', year: '' };
+          }
+        }
+        
+        setFormData((prev) => ({
+          ...prev,
+          yearOfStudy: value as Step1Type['yearOfStudy'],
+          graduationDate: newGradDate,
+        }));
       }
     } else if (name === 'graduationMonth' || name === 'graduationYear') {
       setFormData((prev) => ({
@@ -577,10 +715,11 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleCustomBranchChange = (value: string) => {
     setCustomBranch(value);
-    // Always update form data when typing in custom field
+    setIsOtherBranchSelected(true);
+    // Store the real typed value in formData.branch directly.
     setFormData((prev) => ({
       ...prev,
-      branch: value.trim() || 'Other', // Use the custom value or fallback to "Other"
+      branch: value,
     }));
   };
 
@@ -588,6 +727,20 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleGraduationDateSave = () => {
     if (selectedMonth && selectedYear) {
+      // Validate the selected graduation date
+      const validation = validateGraduationDate(
+        { month: selectedMonth, year: selectedYear }, 
+        formData.yearOfStudy
+      );
+      
+      if (!validation.isValid) {
+        setErrors((prev) => ({
+          ...prev,
+          graduationDate: validation.error || 'Invalid graduation date',
+        }));
+        return;
+      }
+      
       setFormData((prev) => ({
         ...prev,
         graduationDate: {
@@ -595,6 +748,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
           year: selectedYear,
         },
       }));
+      
       // Clear error if exists
       if (errors.graduationDate) {
         setErrors((prev) => {
@@ -627,7 +781,10 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors = validateForm();
+
+    // formData.branch always holds the real value (never 'Other').
+    // Just validate and submit directly.
+    const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length === 0) {
       onNext(formData);
       return;
@@ -651,16 +808,22 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
   const hasManualCollege = Boolean(formData.customCollege?.trim());
   const isSearchCollegeDisabled = hasManualCollege;
   const isManualCollegeDisabled = hasSelectedCollege;
+  // Show the custom text input when:
+  // 1. User explicitly picked "Other" from the dropdown, OR
+  // 2. The current branch value is a custom typed value (not in the known list)
   const shouldShowCustomBranchInput =
-    formData.branch === 'Other' ||
-    Boolean(customBranch.trim()) ||
-    Boolean(formData.branch && !branches.includes(formData.branch));
+    isOtherBranchSelected ||
+    Boolean(
+      formData.branch &&
+      branches.length > 0 &&
+      !branches.includes(formData.branch)
+    );
 
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Personal Details Card */}
-        <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+        <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
           <CardContent className="pb-6">
             <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
               <User className="w-5 h-5 text-primary" />
@@ -775,7 +938,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
         </Card>
 
         {/* Education Card */}
-        <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+        <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
           <CardContent className="pb-6">
             <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
               <GraduationCap className="w-5 h-5 text-primary" />
@@ -973,28 +1136,34 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                       <SelectValue placeholder="Select Degree" />
                     </SelectTrigger>
                     <SelectContent>
-                      {formData.degree &&
-                        formData.degree !== 'Other' &&
-                        !isDegreeLoading &&
-                        !degreeOptions.includes(formData.degree) && (
-                          <SelectItem value={formData.degree}>{formData.degree}</SelectItem>
-                        )}
                       {isDegreeLoading ? (
-                        <SelectItem value="loading" disabled>
-                          Loading degrees...
-                        </SelectItem>
-                      ) : degreeOptions.length > 0 ? (
-                        degreeOptions.map((degree) => (
-                          <SelectItem key={degree} value={degree}>
-                            {degree}
+                        <>
+                          {/* While loading, keep the current selection visible */}
+                          {formData.degree && formData.degree !== 'Other' && (
+                            <SelectItem value={formData.degree}>{formData.degree}</SelectItem>
+                          )}
+                          <SelectItem value="loading" disabled>
+                            Loading degrees...
                           </SelectItem>
-                        ))
+                        </>
+                      ) : degreeOptions.length > 0 ? (
+                        <>
+                          {formData.degree &&
+                            formData.degree !== 'Other' &&
+                            !degreeOptions.includes(formData.degree) && (
+                              <SelectItem value={formData.degree}>{formData.degree}</SelectItem>
+                            )}
+                          {degreeOptions.map((degree) => (
+                            <SelectItem key={degree} value={degree}>
+                              {degree}
+                            </SelectItem>
+                          ))}
+                        </>
                       ) : (
                         <SelectItem value="no-degrees" disabled>
                           No degrees available
                         </SelectItem>
                       )}
-                      {/* <SelectItem value="Other">Other</SelectItem> */}
                     </SelectContent>
                   </Select>
                   {errors.degree && (
@@ -1029,15 +1198,16 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                           <Select 
                             value={(() => {
                               const branch = formData.branch ?? '';
-                              // If it's empty, return empty
+                              // User explicitly picked "Other" but hasn't typed yet
+                              if (isOtherBranchSelected && !branch) return 'Other';
+                              // Nothing selected yet — show placeholder
                               if (!branch) return '';
-                              if (branch === 'Other') return 'Other';
-                              // Preserve previously selected branch while options are still loading
+                              // Branches still loading — show what we have
                               if (branches.length === 0) return branch;
-                              // If it's a predefined branch (either API or mock data), show it
+                              // It's a known branch — show it directly
                               if (branches.includes(branch)) return branch;
-                              // Keep the saved branch visible even if the refreshed branch list does not include it
-                              return branch;
+                              // It's a custom typed value — show "Other" in the dropdown
+                              return 'Other';
                             })()} 
                             onValueChange={(value) => handleSelectChange('branch', value)}
                             disabled={!hasSelectedDegree}
@@ -1047,9 +1217,17 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             </SelectTrigger>
                             <SelectContent>
                               {isBranchLoading ? (
-                                <SelectItem value="loading" disabled>
-                                  Loading branches...
-                                </SelectItem>
+                                <>
+                                  {/* While loading, keep the current selection visible */}
+                                  {formData.branch && formData.branch !== 'Other' && (
+                                    <SelectItem value={formData.branch}>
+                                      {formData.branch}
+                                    </SelectItem>
+                                  )}
+                                  <SelectItem value="loading" disabled>
+                                    Loading branches...
+                                  </SelectItem>
+                                </>
                               ) : branches.length > 0 ? (
                                 <>
                                   {formData.branch && formData.branch !== 'Other' && !branches.includes(formData.branch) && (
@@ -1086,12 +1264,12 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                     </Tooltip>
                   </TooltipProvider>
                   
-                  {/* Custom Branch Input - Show when "Other" is selected or custom branch */}
+                  {/* Custom Branch Input - only shown when user selects "Other" */}
                   {shouldShowCustomBranchInput && (
                     <div className="mt-2">
                       <Input
                         placeholder="Enter your branch name"
-                        value={customBranch || (formData.branch && formData.branch !== 'Other' ? formData.branch : '')}
+                        value={customBranch}
                         onChange={(e) => handleCustomBranchChange(e.target.value)}
                         className="w-full"
                       />
@@ -1114,22 +1292,29 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   <Label className="font-medium text-left block">
                     Year of Study <span className="text-destructive">*</span>
                   </Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {['1st', '2nd', '3rd', '4th'].map((year) => (
-                      <button
-                        key={year}
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, yearOfStudy: year as any }))}
-                        className={`py-2 px-3 rounded-lg border-2 font-medium text-sm transition-all ${
-                          formData.yearOfStudy === year
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-background hover:border-primary'
-                        }`}
-                      >
-                        {year}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={formData.yearOfStudy}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, yearOfStudy: value as any }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year of study" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        { value: '1st', label: '1st' },
+                        { value: '2nd', label: '2nd' },
+                        { value: '3rd', label: '3rd' },
+                        { value: '4th', label: '4th' },
+                        { value: 'passed_out', label: 'Passout' },
+                      ].map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Graduation Date */}
@@ -1139,8 +1324,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                   </Label>
                   <div className="grid grid-cols-2 gap-4">
                     <Select
-                      value={formData.graduationDate.month}
+                      key={`month-${formData.yearOfStudy}`}
+                      value={formData.graduationDate.month || selectedMonth}
                       onValueChange={(value) => {
+                        // Validate the new month selection
+                        const newGradDate = { ...formData.graduationDate, month: value };
+                        const validation = validateGraduationDate(newGradDate, formData.yearOfStudy);
+                        
                         setFormData((prev) => ({
                           ...prev,
                           graduationDate: {
@@ -1148,7 +1338,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             month: value,
                           },
                         }));
-                        if (errors.graduationDate) {
+                        
+                        if (!validation.isValid) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            graduationDate: validation.error || 'Invalid graduation date',
+                          }));
+                        } else if (errors.graduationDate) {
                           setErrors((prev) => {
                             const next = { ...prev };
                             delete next.graduationDate;
@@ -1161,7 +1357,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                         <SelectValue placeholder="Month" />
                       </SelectTrigger>
                       <SelectContent>
-                        {MONTHS.map((month) => (
+                        {allowedMonths.map((month) => (
                           <SelectItem key={month} value={month}>
                             {month}
                           </SelectItem>
@@ -1170,8 +1366,13 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                     </Select>
                     
                     <Select
-                      value={formData.graduationDate.year}
+                      key={`year-${formData.yearOfStudy}`}
+                      value={formData.graduationDate.year || selectedYear}
                       onValueChange={(value) => {
+                        // Validate the new year selection
+                        const newGradDate = { ...formData.graduationDate, year: value };
+                        const validation = validateGraduationDate(newGradDate, formData.yearOfStudy);
+                        
                         setFormData((prev) => ({
                           ...prev,
                           graduationDate: {
@@ -1179,7 +1380,27 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
                             year: value,
                           },
                         }));
-                        if (errors.graduationDate) {
+                        
+                        // Clear month if it becomes invalid with new year
+                        if (formData.graduationDate.month) {
+                          const newAllowedMonths = getAllowedMonths(formData.yearOfStudy, value);
+                          if (!newAllowedMonths.includes(formData.graduationDate.month)) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              graduationDate: {
+                                ...prev.graduationDate,
+                                month: '',
+                              },
+                            }));
+                          }
+                        }
+                        
+                        if (!validation.isValid && newGradDate.month) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            graduationDate: validation.error || 'Invalid graduation date',
+                          }));
+                        } else if (errors.graduationDate) {
                           setErrors((prev) => {
                             const next = { ...prev };
                             delete next.graduationDate;

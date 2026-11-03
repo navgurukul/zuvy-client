@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { usePathname } from 'next/navigation'
+import { isRedirectAllowed } from './utils/redirectValidation'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 export function middleware(request: NextRequest) {
     // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
     // const user = userData === "false" ? "false" : atob(userData);
 
-    const path = request.nextUrl.href
     const redirectedUrl = request.cookies.get('redirectedUrl')?.value ?? null
-    console.log('redirectedUrl cookie:', redirectedUrl)
     const userData = request.cookies.get('secure_typeuser')?.value ?? 'false'
     let user = 'false'
     try {
@@ -17,60 +16,129 @@ export function middleware(request: NextRequest) {
         console.error(e)
     }
     const matcher = ['/', '/student', '/admin', '/instructor']
-    const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
+    let decodedUrl: string | null = null
+    if (redirectedUrl) {
+        try {
+            const cleanCookie = redirectedUrl.replace(/^"|"$/g, '')
+            decodedUrl = atob(cleanCookie)
+        } catch (e) {
+            console.error('Error decoding redirectedUrl cookie:', e)
+        }
+    }
+
+
     const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
-    const orgId = pathname.split('/')[3]
+    const pathSegments = pathname.split('/')
+    const orgIdFromPath = pathSegments[2] === 'organizations' && pathSegments[3] && pathSegments[3] !== 'undefined' && pathSegments[3] !== 'null' ? pathSegments[3] : undefined
+    const orgIdFromCookie = request.cookies.get('orgId')?.value
+    const validOrgIdFromCookie = orgIdFromCookie && orgIdFromCookie !== 'undefined' && orgIdFromCookie !== 'null' ? orgIdFromCookie : undefined
+    const orgId = orgIdFromPath || validOrgIdFromCookie
 
-   if (user === 'false') {
-      
-      const isProtectedRoute =
-         pathname.startsWith('/student') ||
-         pathname.startsWith('/admin') ||
-         pathname.startsWith('/instructor')
+    if (user === 'false') {
 
-       if (isProtectedRoute) {
-        const hasCoursePath =
-            pathname.startsWith('/student/') ||
-            pathname.startsWith('/admin/') ||
-            pathname.startsWith('/super_admin/') ||
-            pathname.startsWith('/instructor/')
-        //   path.includes('/student/course') ||
-        //   path.includes('/admin/course') ||
-        //   path.includes('/instructor/course')
+        const isProtectedRoute =
+            pathname.startsWith('/student') ||
+            pathname.startsWith('/admin') ||
+            pathname.startsWith('/instructor')
 
-        const redirectUrl = new URL('/', request.url)
+        if (isProtectedRoute) {
+            const hasCoursePath =
+                pathname.startsWith('/student/') ||
+                pathname.startsWith('/admin/') ||
+                pathname.startsWith('/super_admin/') ||
+                pathname.startsWith('/instructor/')
 
-       // if course path present, add route param
-       if (hasCoursePath) {
-        redirectUrl.searchParams.set('route', pathname)
-       }
+            const requestedRoute = `${pathname}${request.nextUrl.search}`
+            const courseIdMatch = pathname.match(/^\/student\/course\/(\d+)(?:\/|$)/)
+            const courseId = courseIdMatch ? Number(courseIdMatch[1]) : null
+            const isCareerToursCourse =
+                courseId !== null && CAREER_TOUR_BOOTCAMP_IDS.includes(courseId)
+            const redirectUrl = new URL(
+                isCareerToursCourse ? '/careertours/signup' : '/',
+                request.url
+            )
 
-       return NextResponse.redirect(redirectUrl)
-      }
+            if (hasCoursePath) {
+                redirectUrl.searchParams.set('route', requestedRoute)
+            }
+
+            return NextResponse.redirect(redirectUrl)
+        }
+    }
+
+    // ─── Student route whitelist ───────────────────────────────────────────────
+    // Only students should be checked; other roles have their own layout guards.
+    if (user === 'student' && pathname.startsWith('/student/')) {
+        const VALID_STUDENT_PREFIXES = [
+            '/student/course/',
+            '/student/mentors',
+            '/student/profile',
+            '/student/sessions',
+            '/student/reactplayground',
+            '/student/not-found',   // allow the error page itself
+        ]
+        const isValidStudentPath = VALID_STUDENT_PREFIXES.some(prefix =>
+            pathname.startsWith(prefix)
+        )
+        if (!isValidStudentPath) {
+            // Unknown student sub-path — show the "There was a problem" error page
+            return NextResponse.rewrite(new URL('/student/not-found', request.url))
+        }
     }
 
     const handleUnauthorized = (role: string) => {
+        // Only intercept if the request path belongs to this role
         if (!pathname.startsWith(`/${role}`)) return null
 
-        if (!decodedUrl) return NextResponse.next()
+        // User is visiting a route that belongs to a different role
+        // Redirect them to their own home so the layout's role guard shows the error page
+        if (user !== role) {
+            if (decodedUrl) {
+                // Admin visiting another role's page with a redirect cookie
+                if (user === 'admin') {
+                    const response = NextResponse.redirect(
+                        new URL(
+                            orgId
+                                ? `/admin/organizations/${orgId}/courses`
+                                : `/admin/organizations`,
+                            request.url
+                        )
+                    )
+                    response.cookies.set('redirectedUrl', '', { path: '/', maxAge: 60 })
+                    return response
+                }
 
-        if (decodedUrl) {
-            const response = NextResponse.redirect(new URL(decodedUrl, request.url))
-            response.cookies.set('redirectedUrl', '', {
-                path: '/',
-                maxAge: 60, // 1 min
-            })
-
-            // special case: admin visiting another role’s page
-            if (user === 'admin') {
-                return NextResponse.redirect(new URL(`/admin/organizations/${orgId}/courses`, request.url))
+                if (isRedirectAllowed(user, decodedUrl)) {
+                    const response = NextResponse.redirect(new URL(decodedUrl, request.url))
+                    response.cookies.set('redirectedUrl', '', { path: '/', maxAge: 60 })
+                    return response
+                }
+                // decodedUrl failed validation — fall through to own-home redirect below
             }
 
-            return response
+            // No redirect cookie — bounce them straight to their own role's home.
+            // The layout guard will render the "There was a problem" error page
+            // if they somehow reach a route that doesn't match their role.
+            if (user === 'false') {
+                // Unauthenticated — send to login
+                return NextResponse.redirect(new URL('/', request.url))
+            }
+            // Authenticated but wrong role — redirect to their own home
+            if (user === 'admin') {
+                return NextResponse.redirect(
+                    new URL(
+                        orgId
+                            ? `/admin/organizations/${orgId}/courses`
+                            : `/admin/organizations`,
+                        request.url
+                    )
+                )
+            }
+            return NextResponse.redirect(new URL(`/${user}`, request.url))
         }
 
-        return NextResponse.redirect(new URL('/', request.url))
+        return null
     }
 
     for (const role of roles) {
@@ -86,7 +154,7 @@ export function middleware(request: NextRequest) {
             if (['/student', '/admin'].some(role => request.nextUrl.pathname.startsWith(role))) {
                 return NextResponse.redirect(new URL('/', request.url));
             }
-        } else if (decodedUrl && user !== 'admin') {
+        } else if (isRedirectAllowed(user, decodedUrl) && user !== 'admin') {
             const absoluteUrl = new URL(decodedUrl, request.url)
             const response = NextResponse.redirect(absoluteUrl)
             response.cookies.set('redirectedUrl', '', {
@@ -102,12 +170,18 @@ export function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/student', request.url))
             }
         } else {
-            // For any non-student role, always redirect to /${user}/courses if pathname is / or /${user}
+            // For any non-student role, redirect to courses if orgId exists, else to organizations list
             if (
                 request.nextUrl.pathname === '/' ||
                 request.nextUrl.pathname === `/${user}`
             ) {
-                return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
+                if (user === 'super_admin') {
+                    return NextResponse.redirect(new URL(`/${user}/organizations?page=1&limit=10`, request.url))
+                } else if (orgId) {
+                    return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
+                } else {
+                    return NextResponse.redirect(new URL(`/${user}/organizations`, request.url))
+                }
             }
         }
     }

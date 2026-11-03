@@ -8,16 +8,17 @@ import CodingTopics from '@/app/[admin]/organizations/[organizationId]/courses/[
 import SelectedProblems from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
     getUser,
 } from '@/store/store'
+import useCodingQuestions from '@/app/[admin]/hooks/useCodingQuestions'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
-import { handleSaveChapter } from '@/utils/admin'
+import { fetchAllTags, handleSaveChapter } from '@/utils/admin'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -31,6 +32,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {CodingChallengeSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
+
+let tagsRequest: Promise<any[]> | null = null
 
 function CodingChallenge({
     content,
@@ -57,7 +60,7 @@ function CodingChallenge({
         resolver: zodResolver(chapterSchema),
          mode: 'onChange',
         defaultValues: {
-            title: activeChapterTitle || '',
+            title: activeChapterTitle || content?.title || content?.name || '',
         },
        
     })
@@ -89,12 +92,13 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<
         CodingChallangesQuestion[]
     >([])
-    const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
+    const [chapterTitle, setChapterTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
 
-    const [isSaved, setIsSaved] = useState<boolean>(true)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // FORCE UPDATE: Use a key to force re-render when content changes
@@ -102,8 +106,12 @@ function CodingChallenge({
         content?.codingQuestionDetails?.length || 0
     }`
 
-    const [initialTitle] = useState<string>(activeChapterTitle)
-    const [savedTitle, setSavedTitle] = useState<string>(activeChapterTitle)
+    const [initialTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
+    const [savedTitle, setSavedTitle] = useState<string>(
+        activeChapterTitle || content?.title || content?.name || ''
+    )
     const [hasTitleChanged, setHasTitleChanged] = useState(false)
 
     const handleSaveClick = async (data: { title: string }) => {
@@ -121,7 +129,6 @@ function CodingChallenge({
             })
 
             setIsChapterUpdated(!isChapterUpdated)
-            setIsSaved(true)
             setSavedQuestions([...selectedQuestions])
             setSavedTitle(titleToSave)
             setHasTitleChanged(false)
@@ -140,6 +147,8 @@ function CodingChallenge({
         }
     }
 
+    const prevChapterIdRef = useRef<number | null>(null)
+
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value
         setChapterTitle(newTitle)
@@ -147,19 +156,34 @@ function CodingChallenge({
         form.setValue('title', newTitle, { shouldValidate: true })
         form.trigger('title')
     }
+
+    // Trigger form validation on mount / title sync
     useEffect(() => {
+        form.trigger('title')
+    }, [form])
+
+    // Only reset selected questions when chapter ID actually changes
+    useEffect(() => {
+        const incomingChapterId = content?.id ?? null
+        if (incomingChapterId && prevChapterIdRef.current === incomingChapterId) {
+            return
+        }
+        if (incomingChapterId) {
+            prevChapterIdRef.current = incomingChapterId
+        }
+
         const newQuestions = content?.codingQuestionDetails || []
         setSelectedQuestions(newQuestions)
         setSavedQuestions(newQuestions)
-        setIsSaved(true)
 
-        // Reset title changes when content changes
-        setChapterTitle(activeChapterTitle)
-        setSavedTitle(activeChapterTitle)
+        const initialTitleVal = content?.title || content?.name || activeChapterTitle || ''
+        setChapterTitle(initialTitleVal)
+        setSavedTitle(initialTitleVal)
         setHasTitleChanged(false)
-    }, [content?.id]) // Only depend on content.id
+        form.setValue('title', initialTitleVal, { shouldValidate: true })
+    }, [content?.id, activeChapterTitle, content?.title, content?.name])
 
-    // Function to check if current selection matches saved questions
+    // Compute isSaved directly during render to prevent stale lag
     const checkIfSaved = () => {
         if (!selectedQuestions || !savedQuestions) {
             return true
@@ -168,26 +192,14 @@ function CodingChallenge({
             return false
         }
 
-        // Check if all selected questions are in saved questions
         return selectedQuestions.every((selectedQ) =>
             savedQuestions.some((savedQ) => savedQ.id === selectedQ.id)
         )
     }
 
-    // IMMEDIATE UPDATE: React to content prop changes immediately
-    useEffect(() => {
-        const newCodingQuestions = content?.codingQuestionDetails || []
-        setSelectedQuestions(newCodingQuestions)
-        setSavedQuestions(newCodingQuestions)
-        setIsSaved(true)
-    }, [contentKey]) // Use contentKey instead of content
-
-    useEffect(() => {
-        setIsSaved(checkIfSaved())
-    }, [selectedQuestions, savedQuestions])
+    const isSaved = checkIfSaved()
 
     // Disable Save button after save, re-enable if there are unsaved changes
-    // Enable save if a coding problem is selected and title is being edited
     const isSaveButtonDisabled =
         !canEdit ||
         isSubmitting ||
@@ -197,74 +209,46 @@ function CodingChallenge({
         (isSaved && !hasTitleChanged);
 
 
+// Use reusable hook for fetching coding questions
+const {
+    codingQuestions: fetchedQuestions,
+    loading: questionsLoading,
+    error: questionsError,
+    fetchCodingQuestions,
+    refetch: refetchCodingQuestions,
+} = useCodingQuestions({
+    orgId: Number(orgId),
+    selectedTopics: selectedOptions,
+    selectedDifficulties: selectedDifficulty,
+    searchTerm: debouncedSearch,
+    initialFetch: false,
+})
+
+// Mirror previous behavior: update local filteredQuestions and loading when hook data changes
 useEffect(() => {
-    async function getAllCodingQuestions() {
-        try {
+    setFilteredQuestions(fetchedQuestions || [])
+    setIsDataLoading(questionsLoading)
+}, [fetchedQuestions, questionsLoading])
 
-            let url = `/Content/${orgId}/allCodingQuestions`
-            const queryParams = []
-
-            let selectedTagIds = ''
-            selectedOptions.forEach((topic: any) => {
-                if (topic.id !== -1 && topic.id !== 0) {
-                    selectedTagIds += `&tagId=${topic.id}`
-                }
-            })
-
-            let selectedDiff = ''
-            selectedDifficulty.forEach((difficulty: string) => {
-                if (difficulty !== 'Any Difficulty') {
-                    selectedDiff += `&difficulty=${difficulty}`
-                }
-            })
-
-            if (selectedTagIds.length > 0) {
-                queryParams.push(selectedTagIds.substring(1))
-            }
-
-            if (selectedDiff.length > 0) {
-                queryParams.push(selectedDiff.substring(1))
-            }
-
-            if (debouncedSearch) {
-                queryParams.push(
-                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
-                )
-            }
-
-            if (queryParams.length > 0) {
-                url += `?${queryParams.join('&')}`
-            }
-
-            const response = await api.get(url)
-            setFilteredQuestions(response.data.data)
-
-            setIsDataLoading(false)
-
-        } catch (error) {
-            console.error('Error:', error)
-        }
-    }
-
-    getAllCodingQuestions()
-}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions])
+// Trigger fetch when filters/search/selection changes (keeps original dependency list)
+useEffect(() => {
+    fetchCodingQuestions({ topics: selectedOptions, difficulties: selectedDifficulty, search: debouncedSearch })
+}, [selectedDifficulty, debouncedSearch, selectedOptions, fetchCodingQuestions])
 
 
 
     async function getAllTags() {
+        if (tags.length > 0) return
+
         try {
-            const response = await api.get('Content/allTags')
-            if (response) {
-                const tagArr = [
-                    { tagName: 'All Topics', id: -1 },
-                    ...response.data.allTags,
-                ]
-                setTags(tagArr)
-            }
+            tagsRequest ??= fetchAllTags()
+            const tagArr = await tagsRequest
+            setTags(tagArr)
         } catch (error) {
             console.error('Error fetching tags:', error)
-        } 
-        
+        } finally {
+            tagsRequest = null
+        }
     }
 
     useEffect(() => {
@@ -273,10 +257,12 @@ useEffect(() => {
         getAllTags()
     }, [])
 
-    // Update chapter title when activeChapterTitle prop changes
+    // Update chapter title when activeChapterTitle prop or content title changes
     useEffect(() => {
-        setChapterTitle(activeChapterTitle)
-    }, [activeChapterTitle])
+        const currentTitle = activeChapterTitle || content?.title || content?.name || ''
+        setChapterTitle(currentTitle)
+        form.setValue('title', currentTitle, { shouldValidate: true })
+    }, [activeChapterTitle, content?.title, content?.name])
 
     if (isDataLoading) {
         return<CodingChallengeSkeleton/>
@@ -374,14 +360,15 @@ useEffect(() => {
                         chapterTitle={''}
                         canEdit={canEdit}
                     />
-                    <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
+                    <h1 className="text-left text-[15px] text-foreground/80 font-bold mt-5 pb-3">
                         Coding Library
                     </h1>
 
                     <div className="grid grid-cols-2">
                         <div className="">
-                            <div className="">
-                                <ScrollArea className="h-screen pb-80">
+                            <div>
+                                <ScrollArea className="h-[calc(100vh-20rem)] pr-3">
+                                    <div>
                                     {filteredQuestions?.map((question: any) => {
                                         const selectedTagName = tags?.filter(
                                             (tag: any) =>
@@ -390,12 +377,12 @@ useEffect(() => {
                                         return (
                                             <div
                                                 key={question.id}
-                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-500 mb-4"
                                             >
                                                 <div className="flex justify-between text-start items-center w-full">
                                                     <div className="w-full">
                                                         <div className="flex items-center gap-2 justify-between">
-                                                            <h2 className="font-bold text-[16px] text-gray-600">
+                                                            <h2 className="font-bold text-[16px] text-gray-600 dark:text-muted-foreground">
                                                                 {ellipsis(
                                                                     question.title,
                                                                     30
@@ -403,7 +390,7 @@ useEffect(() => {
                                                             </h2>
 
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
+                                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-gray-600 py-1 rounded-2xl px-2">
                                                                     {
                                                                         selectedTagName[0]
                                                                             ?.tagName
@@ -479,7 +466,7 @@ useEffect(() => {
                                                             </div>
                                                         </div>
                                                         <div className="w-full">
-                                                            <p className="text-gray-600 text-[15px] mt-1">
+                                                            <p className="text-gray-600 dark:text-muted-foreground text-[15px] mt-1">
                                                                 {ellipsis(
                                                                     question.description,
                                                                     60
@@ -508,6 +495,7 @@ useEffect(() => {
                                             </div>
                                         )
                                     })}
+                                    </div>
                                 </ScrollArea>
                             </div>
                         </div>

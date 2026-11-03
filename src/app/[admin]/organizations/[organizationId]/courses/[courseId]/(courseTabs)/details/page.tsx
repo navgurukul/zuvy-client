@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -30,7 +31,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { LANGUAGES } from '@/utils/constant'
-import { useCourseDetails } from '@/hooks/useCourseDetails'
+import { useCourseDetails } from '@/app/[admin]/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 import {GeneralDetailsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
@@ -413,11 +414,20 @@ if (!courseData || !courseData.id) {
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
-                                            <OptimizedImageWithFallback
-                                                src={'/logo_white.png'}
-                                                alt={'Course Image'}
-                                                fallBackSrc={'/logo_white.png'}
+                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary dark:from-emerald-900/40 dark:to-emerald-950/60">
+                                            <Image
+                                                src="/zuvy-logo-horizontal-dark.png"
+                                                alt="Course Image"
+                                                width={240}
+                                                height={80}
+                                                className="object-contain dark:block hidden"
+                                            />
+                                            <Image
+                                                src="/zuvy-logo-horizontal.png"
+                                                alt="Course Image"
+                                                width={240}
+                                                height={80}
+                                                className="object-contain dark:hidden block"
                                             />
                                         </div>
                                     )}
@@ -570,17 +580,20 @@ if (!courseData || !courseData.id) {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
-                                                            <OptimizedImageWithFallback
-                                                                src={
-                                                                    '/logo_white.png'
-                                                                }
-                                                                alt={
-                                                                    'Collaborator Image'
-                                                                }
-                                                                fallBackSrc={
-                                                                    '/logo_white.png'
-                                                                }
+                                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary dark:from-emerald-900/40 dark:to-emerald-950/60">
+                                                            <Image
+                                                                src="/zuvy-logo-horizontal-dark.png"
+                                                                alt="Collaborator Image"
+                                                                width={240}
+                                                                height={80}
+                                                                className="object-contain dark:block hidden"
+                                                            />
+                                                            <Image
+                                                                src="/zuvy-logo-horizontal.png"
+                                                                alt="Collaborator Image"
+                                                                width={240}
+                                                                height={80}
+                                                                className="object-contain dark:hidden block"
                                                             />
                                                         </div>
                                                     )}

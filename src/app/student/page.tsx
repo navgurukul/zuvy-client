@@ -1,54 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import StudentDashboard from './_pages/StudentDashboard';
-import ZoeFlashScreen from '../_components/ZoeFlashScreen';
-// import FlashAnnouncementDialog from '../_components/FlashAnnouncement';
-
-
+import { useTour } from './_components/guided-tour';
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile';
 
 const Page = () => {
-  const [showAnnouncement, setShowAnnouncement] = useState<boolean>(false);
-  const [isClient, setIsClient] = useState<boolean>(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isTourCompleted, isOpen } = useTour();
+  const { onboardingData, isLoading } = useOnboardingStorage();
+  const stayOnDashboard = searchParams.get('stay') === 'dashboard';
 
+  // Route guard: only redirect to profile for first-time logins.
   useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const isLoginFirst = localStorage.getItem('isLoginFirst');
-      setShowAnnouncement(!!isLoginFirst);
+    if (isLoading) return;
+    if (isOpen || isTourCompleted) return;
+    if (stayOnDashboard) return;
+    // showTooltip was false on login — user should stay on dashboard regardless of profile completion
+    const skipProfileSetup = localStorage.getItem('skipProfileSetup');
+    const isFirstTimeLogin = localStorage.getItem('isFirstTImeLogin');
+    if (skipProfileSetup || isFirstTimeLogin === 'false') return;
+    if (onboardingData && !onboardingData.isCompleted) {
+      router.push('/student/profile');
     }
-  }, []);
+  }, [onboardingData, isLoading, router, isOpen, isTourCompleted, stayOnDashboard]);
 
-  const handleCloseAnnouncement = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
-
-  const handleStartInterview = () => {
-    setShowAnnouncement(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoginFirst');
-    }
-  };
-
-
-  if (!isClient) {
-    return (
-      <div>
-        <StudentDashboard />
-      </div>
-    );
+  // Prevent UI flash while redirecting
+  if (isLoading || (!isOpen && !isTourCompleted && onboardingData && !onboardingData.isCompleted && !stayOnDashboard && !localStorage.getItem('skipProfileSetup') && localStorage.getItem('isFirstTImeLogin') !== 'false')) {
+    return null;
   }
 
   return (
     <div>
-      <ZoeFlashScreen 
-        isOpen={showAnnouncement}
-        onClose={handleCloseAnnouncement}
-        onStartInterview={handleStartInterview}
-      />
       <StudentDashboard />
     </div>
   );

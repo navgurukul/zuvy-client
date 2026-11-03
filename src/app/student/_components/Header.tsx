@@ -1,31 +1,43 @@
 'use client'
 import { Button } from '@/components/ui/button'
-
-import { Moon, Sun } from 'lucide-react'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Moon, Sun, Menu } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import StudentProfileDropDown from './StudentProfileDropDown'
-import useLearnerProfileStrength from '@/hooks/useLearnerProfileStrength'
-import { useOnboardingStorage } from '@/hooks/use-profile'
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
+import { useOnboardingStorage } from '@/app/student/hooks/use-profile'
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse'
+import { getMentorsHref } from '@/utils/studentMentorshipRoutes'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
     const { studentData } = useLazyLoadedStudentData()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const [isClient, setIsClient] = useState(false)
-    const { strengthPercentage, loading: isStrengthLoading } = useLearnerProfileStrength()
     const { onboardingData, isLoading: isOnboardingLoading } = useOnboardingStorage()
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const params = useParams()
+    const orgId = params.orgId
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/)
+    const orgIdMatch = pathname.match(/\/org\/([^\/]+)/)
     const courseIdFromPath = courseIdMatch?.[1]
+    const orgIdFromPath = orgIdMatch?.[1] || (orgId as string | undefined)
     const courseIdFromQuery = searchParams.get('courseId')
+    const orgIdFromQuery = searchParams.get('orgId')
     const currentCourseId = courseIdFromPath || courseIdFromQuery || ''
     const { latestCourseData } = useLatestUpdatedCourse(currentCourseId)
+    const fallbackOrgId = studentData?.orgId
+    const currentOrgId = orgIdFromPath || orgIdFromQuery || (fallbackOrgId ? String(fallbackOrgId) : '')
     const shouldShowMentorshipLinks = Boolean(latestCourseData?.mentorshipEnabled)
 
     // Ensure client-side rendering for hydration
@@ -39,11 +51,11 @@ const Header = () => {
     }
 
     const handleLogoClick = () => {
-        router.push('/student')
+        router.push('/student?stay=dashboard')
     }
 
     const handleDashboardClick = () => {
-        router.push(`/student`)
+        router.push('/student?stay=dashboard')
     }
 
     const getCurrentCourseId = () => {
@@ -54,7 +66,7 @@ const Header = () => {
     const handleSyllabusClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/course/${courseId}/courseSyllabus`)
+            router.push(`/student/course/${courseId}/org/${currentOrgId}/courseSyllabus`)
             return
         }
 
@@ -64,7 +76,7 @@ const Header = () => {
     const handleMentorshipClick = () => {
         const courseId = getCurrentCourseId()
         if (courseId) {
-            router.push(`/student/mentors?courseId=${courseId}`)
+            router.push(getMentorsHref({ courseId, orgId: currentOrgId }))
             return
         }
 
@@ -89,11 +101,23 @@ const Header = () => {
         !isOnboardingLoading &&
         !onboardingData?.isCompleted
 
-    const showProfileOption =
-        !isInProfileSetupFlow &&
-        !isStrengthLoading &&
-        strengthPercentage !== null &&
-        strengthPercentage >= 20
+    // Derive email from localStorage AUTH key (safe for SSR — guarded by isClient) # For Career Tours
+    const storedEmail: string = (() => {
+        if (typeof window === 'undefined') return ''
+        try {
+            const auth = localStorage.getItem('AUTH')
+            return auth ? (JSON.parse(auth)?.email ?? '') : ''
+        } catch {
+            return ''
+        }
+    })()
+    const hasEmail = storedEmail.trim().length > 0
+
+    // Career Tours: hide View/Edit Profile when no email OR on a career-tour bootcamp
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(currentCourseId))
+
+    // Show profile option only when not in onboarding flow AND the account has an email AND not a career-tour bootcamp
+    const showProfileOption = !isInProfileSetupFlow && hasEmail && !isCareerTour
 
     // Check if we're on a course-related page
     const isOnCoursePage = pathname.includes('/course/')
@@ -105,45 +129,44 @@ const Header = () => {
     const showMentorshipNavLink = shouldShowMentorshipLinks || isMentorOrSessionFlow
 
     // Check active page states
-
     const isOnCourseSyllabus = () => {
         return pathname.includes('/courseSyllabus')
     }
 
-    // Don't render theme toggle until client-side
+    // Shared nav link styles
+    const navLinkBase = 'font-semibold text-foreground hover:underline hover:text-primary'
+    const navLinkActive = 'text-primary font-semibold'
+
+    // Don't render theme toggle until client-side (SSR skeleton)
     if (!isClient) {
         return (
-            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50 ">
-                {/* Left - Logo and Navigation */}
+            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+                {/* Left - Logo */}
                 <div className="flex items-center gap-2 sm:gap-4">
                     <div
-                        className="flex items-center cursor-pointer"
+                        className="flex items-center cursor-pointer mb-1 flex-shrink-0"
                         onClick={handleLogoClick}
                     >
-                        
-                        <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
+                        <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
                     </div>
 
-                    {/* Course Navigation Buttons */}
+                    {/* Desktop nav links (md and above) */}
                     {showCourseNavLinks && (
-                        <div className="flex items-center gap-1 sm:gap-2">
+                        <nav className="hidden md:flex items-center gap-1">
                             <Button
                                 variant="link"
                                 size="sm"
                                 onClick={handleDashboardClick}
-                                className={`text-xs font-semibold sm:text-sm ${'text-foreground  hover:text-primary'}`}
+                                className={`text-sm ${navLinkBase}`}
                             >
                                 Dashboard
                             </Button>
                             <Button
+                                id="tour-course-syllabus"
                                 variant="link"
                                 size="sm"
                                 onClick={handleSyllabusClick}
-                                className={` text-xs font-semibold sm:text-sm ${
-                                    isOnCourseSyllabus()
-                                        ? 'text-primary font-semibold'
-                                        : 'text-foreground hover:text-primary'
-                                }`}
+                                className={`text-sm ${navLinkBase}`}
                             >
                                 Course Syllabus
                             </Button>
@@ -152,89 +175,48 @@ const Header = () => {
                                     variant="link"
                                     size="sm"
                                     onClick={handleMentorshipClick}
-                                    className="text-xs font-semibold sm:text-sm text-foreground hover:text-primary"
+                                    className={`text-sm ${navLinkBase}`}
                                 >
                                     Mentorship
                                 </Button>
                             )}
-                        </div>
+                        </nav>
                     )}
                 </div>
 
-                {/* Right - Theme Switch and Avatar with Dropdown */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-9 h-9"></div>{' '}
-                    {/* Placeholder for theme toggle */}
-                    {/* Student Avatar with Dropdown */}
-                    {/* <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                                <AvatarImage
-                                    src={studentData?.profile_picture}
-                                    alt="Student"
-                                />
-                                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                                    {getUserInitials(studentData?.name)}
-                                </AvatarFallback>
-                            </Avatar>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end">
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">
-                                        {studentData?.name}
-                                    </p>
-                                    <p className="text-xs leading-none text-muted-foreground">
-                                        {studentData?.email}
-                                    </p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-xs text-muted-foreground">
-                                        Role
-                                    </p>
-                                    <p className="text-sm capitalize">
-                                        {studentData?.rolesList?.join(', ')}
-                                    </p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={handleLogoutClick}
-                                className="text-red-600 focus:text-red-600"
-                            >
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Logout</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <AlertDialog
-                        open={showLogoutDialog}
-                        onOpenChange={setShowLogoutDialog}
-                    >
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Are you sure you want to logout?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    You will be signed out of your account and
-                                    redirected to the login page.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={handleLogout}
-                                    className="bg-primary hover:bg-primary-dark"
-                                >
-                                    Logout
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog> */}
+                {/* Right - actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Mobile hamburger (only when nav links exist) */}
+                    {showCourseNavLinks && (
+                        <div className="flex md:hidden">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
+                                        <Menu className="h-5 w-5" />
+                                        <span className="sr-only">Open menu</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem onClick={handleDashboardClick} className="text-sm font-medium cursor-pointer">
+                                        Dashboard
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleSyllabusClick} className="text-sm font-medium cursor-pointer">
+                                        Course Syllabus
+                                    </DropdownMenuItem>
+                                    {showMentorshipNavLink && (
+                                        <DropdownMenuItem onClick={handleMentorshipClick} className="text-sm font-medium cursor-pointer">
+                                            Mentorship
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
+
+                    {/* Theme toggle placeholder */}
+                    <div className="w-8 h-8 sm:w-9 sm:h-9" />
+
+                    {/* Profile dropdown */}
                     <StudentProfileDropDown
                         studentData={studentData}
                         handleLogoutClick={handleLogoutClick}
@@ -250,60 +232,96 @@ const Header = () => {
     }
 
     return (
-        <header className="w-screen h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
-            {/* Left - Logo and Navigation */}
+        <header className="w-full h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+            {/* Left - Logo and Desktop Nav */}
             <div className="flex items-center gap-2 sm:gap-4">
                 <div
-                    className="flex items-center cursor-pointer mb-1"
+                    className="flex items-center cursor-pointer mb-1 flex-shrink-0"
                     onClick={handleLogoClick}
                 >
-                    {isDark ? 
-                  <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
-
-                :     
-                    <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
-                }
+                    {isDark ?
+                        <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
+                        :
+                        <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
+                    }
                 </div>
 
-                {/* Course Navigation Buttons */}
+                {/* Desktop nav links — hidden on mobile */}
                 {showCourseNavLinks && (
-                    <div className="flex items-center gap-1 sm:gap-2">
+                    <nav className="hidden md:flex items-center gap-1">
                         <Button
                             variant="link"
                             size="sm"
                             onClick={handleDashboardClick}
-                            className={`text-xs sm:text-sm font-semibold ${'text-foreground hover:underline hover:text-primary'}`}
+                            className={`text-sm font-semibold ${navLinkBase}`}
                         >
                             Dashboard
                         </Button>
                         <Button
+                            id="tour-course-syllabus"
                             variant="link"
                             size="sm"
                             onClick={handleSyllabusClick}
-                            className={`text-xs sm:text-sm font-semibold ${
-                                isOnCourseSyllabus()
-                                    ? 'text-primary font-medium'
-                                    : 'text-foreground hover:underline hover:text-primary'
+                            className={`text-sm font-semibold ${
+                                isOnCourseSyllabus() ? navLinkActive : navLinkBase
                             }`}
                         >
                             Course Syllabus
                         </Button>
                         {showMentorshipNavLink && (
                             <Button
+                                id="tour-mentorship"
                                 variant="link"
                                 size="sm"
                                 onClick={handleMentorshipClick}
-                                className="text-xs sm:text-sm font-semibold text-foreground hover:underline hover:text-primary"
+                                className={`text-sm font-semibold ${navLinkBase}`}
                             >
                                 Mentorship
                             </Button>
                         )}
-                    </div>
+                    </nav>
                 )}
             </div>
 
-            {/* Right - Theme Switch and Avatar with Dropdown */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Right - Theme Switch, Mobile Menu, Avatar */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                {/* Mobile hamburger — shown only when nav links exist, hidden on md+ */}
+                {showCourseNavLinks && (
+                    <div className="flex md:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-9 h-9 p-0 text-muted-foreground hover:text-foreground">
+                                    <Menu className="h-5 w-5" />
+                                    <span className="sr-only">Open navigation menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                    onClick={handleDashboardClick}
+                                    className="text-sm font-medium cursor-pointer"
+                                >
+                                    Dashboard
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={handleSyllabusClick}
+                                    className={`text-sm font-medium cursor-pointer ${isOnCourseSyllabus() ? 'text-primary' : ''}`}
+                                >
+                                    Course Syllabus
+                                </DropdownMenuItem>
+                                {showMentorshipNavLink && (
+                                    <DropdownMenuItem
+                                        onClick={handleMentorshipClick}
+                                        className="text-sm font-medium cursor-pointer"
+                                    >
+                                        Mentorship
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
+
+                {/* Theme toggle */}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -317,6 +335,7 @@ const Header = () => {
                     )}
                 </Button>
 
+                {/* Profile dropdown */}
                 <StudentProfileDropDown
                     studentData={studentData}
                     handleLogoutClick={handleLogoutClick}

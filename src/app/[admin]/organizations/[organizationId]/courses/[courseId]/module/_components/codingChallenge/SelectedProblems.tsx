@@ -46,7 +46,7 @@ const SelectedProblems = ({
         <div className="flex w-full">
             <Separator orientation="vertical" className="w-0.5 h-screen mx-2" />
             <div className="text-start w-full">
-                <h2 className="font-bold mb-5 text-[15px] text-gray-600">
+                <h2 className="font-bold mb-5 text-[15px] text-foreground/80">
                     Selected Coding Problems
                 </h2>
                 {selectedQuestions?.length > 0 ? (
@@ -63,14 +63,14 @@ const SelectedProblems = ({
                                 return (
                                     <div
                                         key={selectedQuestion?.id}
-                                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-500 mb-4"
                                     >
                                         <div className="flex items-center gap-2 justify-between w-full">
-                                            <h3 className="font-bold text-[16px] text-gray-600">
+                                            <h3 className="font-bold text-[16px] text-gray-600 dark:text-muted-foreground">
                                                 {selectedQuestion.title}
                                             </h3>
                                             <div className="flex gap-2 items-center">
-                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
+                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] dark:bg-gray-600 py-1 rounded-2xl px-2">
                                                     {
                                                         selectedTagName[0]
                                                             ?.tagName
@@ -105,7 +105,7 @@ const SelectedProblems = ({
                                                 />
                                             </div>
                                         </div>
-                                        <p className=" text-gray-600 mt-1 mb-2 text-[15px]">
+                                        <p className=" text-foreground/70 mt-1 mb-2 text-[15px]">
                                             {ellipsis(
                                                 selectedQuestion.description,
                                                 60

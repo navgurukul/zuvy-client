@@ -81,8 +81,7 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
     <div>
         {selectedRows.length > 0 ? (
             <Button
-                className="border-2 border-red-300 flex p-2 " 
-                variant={'ghost'}
+                className="border-2 border-red-300 bg-background hover:bg-background text-foreground flex p-2 " 
                 onClick={() => setDeleteModalOpen(true)}
             >
                 <Trash2 className="text-destructive mr-2" size={17} /> 

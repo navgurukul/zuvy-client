@@ -7,13 +7,20 @@ import {
     useCallback,
   } from "react";
   import { useRouter, useSearchParams } from "next/navigation";
-  import useDebounce from "@/hooks/useDebounce";
+  import useDebounce from "@/app/[admin]/hooks/useDebounce";
   import {
     Suggestion,
     UseSearchWithSuggestionsProps,
     UseSearchWithSuggestionsReturn,
   } from "@/utils/searchType"
   
+  const NOT_FOUND_SUGGESTION: Suggestion = {
+    id: "__not_found__",
+    name: "No results found",
+    question: "No results found",
+    title:"No results found",
+  };
+
   export function useSearchWithSuggestions({
     fetchSuggestionsApi,
     fetchSearchResultsApi,
@@ -23,6 +30,7 @@ import {
     maxSuggestions = 6,
     onError,
     initialQuery,
+    autoFetchOnMount = true,
   }: UseSearchWithSuggestionsProps): UseSearchWithSuggestionsReturn {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -37,13 +45,6 @@ import {
     const debouncedQuery = useDebounce(searchQuery, debounceTime);
     const previousQueryRef = useRef<string>("");
     const [hasFetchedSuggestions, setHasFetchedSuggestions] = useState(false);
-
-    const NOT_FOUND_SUGGESTION: Suggestion = {
-      id: "__not_found__",
-      name: "No results found",
-      question: "No results found",
-      title:"No results found",
-    };
   
     const safeApiCall = useCallback(
       async <T,>(apiFn: () => Promise<T>, fallback: T): Promise<T> => {
@@ -66,7 +67,10 @@ import {
         const newURL = params.toString()
           ? `?${params.toString()}`
           : window.location.pathname;
-        router.replace(newURL, { scroll: false });
+        const currentURL = window.location.pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+        if (newURL !== currentURL) {
+          router.replace(newURL, { scroll: false });
+        }
       },
       [router, searchParams]
     );
@@ -74,6 +78,7 @@ import {
     useEffect(() => {
       const urlQuery = searchParams.get("search")?.trim() || initialQuery || "";
       setSearchQuery(urlQuery);
+      if (!autoFetchOnMount) return;
       (async () => {
         if (urlQuery) {
           previousQueryRef.current = urlQuery;
@@ -83,7 +88,7 @@ import {
         }
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [autoFetchOnMount]);
     
     useEffect(() => {
       if (debouncedQuery.trim()) {
@@ -161,11 +166,12 @@ import {
         if (e.key === "Enter") {
           e.preventDefault();
           const trimmed = searchQuery.trim();
-          updateURL(trimmed);
           if (trimmed && trimmed !== previousQueryRef.current) {
             previousQueryRef.current = trimmed;
+            updateURL(trimmed);
             await safeApiCall(() => fetchSearchResultsApi(trimmed), []);
-          } else {
+          } else if (!trimmed) {
+            updateURL("");
             await safeApiCall(() => defaultFetchApi?.() ?? Promise.resolve([]), []);
           }
         }
@@ -195,14 +201,16 @@ import {
             await handleSuggestionClick(filteredSuggestions[selectedIndex]);
           } else {
             const trimmed = searchQuery.trim();
-            updateURL(trimmed);
             setShowSuggestions(false);
             if (trimmed && trimmed !== previousQueryRef.current) {
               previousQueryRef.current = trimmed;
+              updateURL(trimmed);
               await safeApiCall(() => fetchSearchResultsApi(trimmed), []);
-            } else {
+            } else if (!trimmed) {
+              updateURL("");
               await safeApiCall(() => defaultFetchApi?.() ?? Promise.resolve([]), []);
             }
+            // Same query pressed again → no-op
           }
           break;
         case "Escape":

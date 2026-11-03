@@ -7,7 +7,7 @@ import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor"
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
 import {EditorDoc,ArticleContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 import {ArticleSkeleton} from "@/app/student/_components/Skeletons";
 
@@ -113,7 +113,7 @@ useEffect(() => {
         {/* Header with Badge */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-left">{chapterDetails?.title}</h1>
+            <h1 className="text-xl font-extrabold font-body text-left">{chapterDetails?.title}</h1>
             {chapterDetails?.description && (
               <p className="text-muted-foreground text-base mt-6 text-start">
                 {chapterDetails?.description}

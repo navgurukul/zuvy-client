@@ -8,9 +8,15 @@ import { api } from '@/utils/axios.config'
 import { SubmissionComponentProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
     const { downloadCsv } = useDownloadCsv()
@@ -22,19 +28,21 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
     const handleDownloadCsv = () => {
         if (!props.moduleId || !props.chapterId || !props.questionId) return
         downloadCsv({
-          endpoint: `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`,
+          endpoint: `submission/practiseProblemStatus/${props.moduleId}?bootcampId=${props.courseId}&chapterId=${props.chapterId}&questionId=${props.questionId}`,
           fileName: props.title || 'practice-problem',
       
           dataPath: 'data',
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Status', key: 'status' },
           ],
       
           mapData: (item) => ({
             name: item.name || 'N/A',
+            studentId: item.userId ?? item.id ?? 'NA',
             email: item.email || 'N/A',
             status: item.status || 'N/A',
           }),
@@ -52,22 +60,31 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
         props.totalSubmissions > 0 && props.studentsSubmitted > 0
 
     return (
-        <div className="bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
+        <div className="bg-card border border-border rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
             <div className="flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-md">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                        <div className="p-2 rounded-md flex-shrink-0">
                             <Code className="w-4 h-4" />
                         </div>
-                        <h3 className="font-medium text-base">{props.title}</h3>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <h3 className="font-medium text-base truncate">{props.title}</h3>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {props.title}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                     <div className="flex items-center gap-3">
                     <div className="relative group">
                         <button
                             className={`ml-2 ${
                                 isDisabled
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-gray-500 hover:text-gray-700 cursor-pointer'
+                                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer'
                             }`}
                             onClick={
                                 isDisabled ? undefined : () => handleDownloadCsv()
@@ -89,13 +106,13 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     href={`/${userRole}/organizations/${orgId}/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
                                 >
                                     <div>
-                                        <Eye className="text-gray-500 mb-2 hover:text-gray-700" size={20} />
+                                        <Eye className="text-gray-500 mb-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" size={20} />
                                     </div>
                                 </Link>
                             ) : (
                             <div className="group relative">
                                 <button
-                                className="text-gray-400 cursor-not-allowed"
+                                className="text-gray-400 dark:text-gray-500 cursor-not-allowed"
                                 onClick={(e) => e.preventDefault()}
                                 disabled
                             >

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { DialogHeader } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import useGetMCQs from '@/hooks/useGetMcq'
+import useGetMCQs from '@/app/[admin]/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
@@ -11,6 +11,7 @@ import {
     Tags,
     QuizVariant,
 } from './adminResourceComponentType'
+import { getDifficultyColor } from '@/lib/utils'
 
 const PreviewMCQ = ({
     quizQuestionId,
@@ -61,19 +62,6 @@ const PreviewMCQ = ({
         setCodeSnippet(updatedHtml)
     }
 
-    const difficultyColor = (difficulty: string) => {
-        switch (difficulty) {
-            case 'Easy':
-                return 'bg-green-100 text-secondary'
-            case 'Medium':
-                return 'bg-orange-100 text-yellow-dark'
-            case 'Hard':
-                return 'bg-red-100 text-destructive'
-            default:
-                return 'bg-gray-200 text-gray-800'
-        }
-    }
-
     if (!quizData) return null
 
     const handleTabChange = (variantId: QuizVariant) => {
@@ -113,11 +101,11 @@ const PreviewMCQ = ({
                 <div className="flex gap-x-3 text-foreground">
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
-                        <span className="font-md text-[14px] text-success bg-success-foreground px-2 py-0.5 my-0.5 rounded-md">
+                        <span className="font-md text-[14px] text-success bg-slate-200 dark:bg-slate-600 px-2 py-0.5 my-0.5 rounded-md">
                             {displayTagName}
                         </span>
                         <span
-                            className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
+                            className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${getDifficultyColor(
                                 difficulty as any
                             )}`}
                         >
@@ -132,7 +120,7 @@ const PreviewMCQ = ({
                 className="w-full mt-5 flex flex-col flex-1 min-h-0"
                 onValueChange={(value) => setActiveTab(value)}
             >
-                <TabsList className="flex justify-start bg-white flex-shrink-0">
+                <TabsList className="flex justify-start bg-card flex-shrink-0">
                     {quizData.quizVariants.map((variant: any) => (
                         <TabsTrigger
                             key={variant.id}
@@ -159,7 +147,7 @@ const PreviewMCQ = ({
                                     className="w-full mt-0"
                                 >
                                     <div className="mb-4 p-2">
-                                        <div className="text-left text-gray-600 mb-2">
+                                        <div className="text-left text-gray-600 dark:text-muted-foreground mb-2">
                                             <RemirrorForm
                                                 description={variant.question}
                                                 preview={true}
@@ -181,7 +169,7 @@ const PreviewMCQ = ({
                                                             parseInt(key) ===
                                                             variant.correctOption
                                                                 ? 'border-2 border-[rgb(81,134,114)] text-[rgb(81,134,114)]'
-                                                                : 'border-gray-300'
+                                                                : 'border-border'
                                                         }
                                                     />
                                                 </li>

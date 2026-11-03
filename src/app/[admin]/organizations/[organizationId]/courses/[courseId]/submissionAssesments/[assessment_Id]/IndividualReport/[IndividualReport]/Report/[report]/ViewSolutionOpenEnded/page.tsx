@@ -4,39 +4,18 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { api } from '@/utils/axios.config'
 import { difficultyColor } from '@/lib/utils'
-import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore, getUser } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import type { PageAssessmentData, PageSubmissionData, BootcampData } from './ViewSolutionPageType'
+import type { PageSubmissionData } from './ViewSolutionPageType'
 import { useParams } from 'next/navigation'
-
-type SubmissionData = {
-    id: number
-    userId: number
-    answer: string
-    questionId: number
-    submitAt: string
-    assessmentSubmissionId: number
-}
-
-type OpenEndedQuestion = {
-    id: number
-    question: string
-    difficulty: string
-}
-
-type AssessmentData = {
-    id: number
-    openEndedQuestionId: number
-    assessmentOutsourseId: number
-    bootcampId: number
-    moduleId: number
-    chapterId: number
-    createdAt: string
-    submissionsData: SubmissionData[]
-    OpenEndedQuestion: OpenEndedQuestion
-    answer: string
-}
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useStudentAssessments from '@/app/[admin]/hooks/useStudentAssessments'
+import useOpenEndedSolutionForStudents from '@/app/[admin]/hooks/useOpenEndedSolutionForStudents'
+import type { OpenEndedSubmissionData } from '@/app/[admin]/hooks/hookType'
+import { toast } from '@/components/ui/use-toast'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export type paramsType = {
     courseId: string
@@ -48,18 +27,15 @@ export type paramsType = {
 
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
-    const [openEndedQuestionDetails, setOpenEndedQuestionsDetails] = useState<
-        PageAssessmentData[]
-    >([])
-    const [individualAssesmentData, setIndividualAssesmentData] =
-        useState<any>()
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    const { fetchStudentAssessments } = useStudentAssessments()
+    const { data: openEndedQuestionDetails, error: openEndedError } = useOpenEndedSolutionForStudents(params?.report)
+    const { courseData: bootcampData } = useCourseExistenceCheck(params.courseId)
     const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
+    const router = useRouter()
 
     const crumbs = [
         {
@@ -93,54 +69,36 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: true,
         },
     ]
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
-
     const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.assessment_Id}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-            })
-    }, [params.assessment_Id])
-    const fetchOpenEndedQuestionsDetails = useCallback(async () => {
         try {
-            const res = await api.get(
-                `admin/getOpenEndedSolutionForStudents/assessmentSubmissionId?assessmentSubmissionId=${params?.report}`
-            )
-            setOpenEndedQuestionsDetails(res?.data?.data)
-        } catch (error: any) {
-            toast.error({
-                title: 'Error',
-                description: 'Unable to Fetch Data',
+            const { moduleAssessment } = await fetchStudentAssessments({
+                assessmentId: params.assessment_Id,
             })
-        } finally {
-            setLoading(false)
+            setAssesmentData(moduleAssessment)
+        } catch (error) {
+            console.error('Error fetching student assessment data:', error)
         }
-    }, [params.report])
+    }, [params.assessment_Id, fetchStudentAssessments])
 
     useEffect(() => {
-        fetchOpenEndedQuestionsDetails()
         fetchProctoringData(params.report, params.IndividualReport)
-        getBootcampHandler()
         getStudentAssesmentDataHandler()
     }, [
-        fetchOpenEndedQuestionsDetails,
         fetchProctoringData,
         params,
-        getBootcampHandler,
         getStudentAssesmentDataHandler,
     ])
 
-    const getquestionAnswerData = openEndedQuestionDetails.map((data) => {
+    useEffect(() => {
+        if (openEndedError) {
+            toast.error({
+                title: 'Error',
+                description: openEndedError,
+            })
+        }
+    }, [openEndedError])
+
+    const getquestionAnswerData = (openEndedQuestionDetails ?? []).map((data: OpenEndedSubmissionData) => {
         const question = data?.OpenEndedQuestion?.question
         const answer = data?.answer
         const difficulty = data?.OpenEndedQuestion?.difficulty
@@ -154,7 +112,16 @@ const Page = ({ params }: { params: paramsType }) => {
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
+            <div className='text-start mt-10'>
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
             <MaxWidthWrapper className="flex flex-col gap-5">
                 <div className="flex items-center gap-x-3">
                     <div className="flex flex-col gap-x-2">
@@ -179,7 +146,7 @@ const Page = ({ params }: { params: paramsType }) => {
                 <div className="my-5 flex flex-col gap-y-3 text-left ">
                     <h1 className="text-left text-[1.2rem] font-semibold">Student Answers</h1>
                     {getquestionAnswerData.map(
-                        ({ question, answer, difficulty }, index) => (
+                        ({ question, answer, difficulty }: { question: string; answer: string; difficulty: string }, index: number) => (
                             <div key={index}>
                                 <div className="flex gap-x-3">
                                     <h3 className="text-left font-semibold capitalize text-[1rem]">

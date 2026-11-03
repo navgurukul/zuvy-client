@@ -1,73 +1,49 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { api } from '@/utils/axios.config';
-import { toast } from '@/components/ui/use-toast';
-import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { Code2 } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
-import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
-import {CodingContentChapterSkeleton} from "@/app/student/_components/Skeletons";
+import { CodingChallengeContentProps, CodingQuestions } from "@/app/student/_components/chapter-content/componentChapterType";
+import { CodingContentChapterSkeleton } from "@/app/student/_components/Skeletons";
+import { useQuizAndAssignmentWithStatus } from '@/app/student/hooks/useQuizAndAssignmentWithStatus';
+import { useCodingSubmissionsByQuestion } from '@/app/student/hooks/useCodingSubmissionsByQuestion';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
-  const orgId = searchParams.get('orgId');
-  const [codingQuestions, setCodingQuestions] = useState<CodingQuestions[]>([]);
-  const [submissionResults, setSubmissionResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const orgId = params.orgId;
   const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
 
-  const fetchCodingQuestions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/tracking/getQuizAndAssignmentWithStatus?chapterId=${chapterDetails.id}`);
-      const questions = res.data.data?.codingProblem || [];
-      setCodingQuestions(questions);
+  const {
+    codingProblems: codingQuestions,
+    loading,
+  } = useQuizAndAssignmentWithStatus({ chapterId: chapterDetails.id });
 
-      if (chapterDetails.status === 'Completed' && questions.length > 0) {
-        // Fetch submission results for each question
-        const resultsPromises = questions.map((q: CodingQuestions) =>
-          api.get(`/codingPlatform/submissions/questionId=${q.id}`).catch(err => {
-            console.error(`Failed to fetch submission for question ${q.id}`, err);
-            return null; // Return null on error to not break Promise.all
-          })
-        );
-        const resultsResponses = await Promise.all(resultsPromises);
-        const successfulResults = resultsResponses
-          .filter(res => res && res.data.isSuccess)
-          .map(res => ({
-              questionId: res.data.data.questionId,
-              result: res.data.data,
-          }));
-        setSubmissionResults(successfulResults);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch coding questions.',
-        variant: 'destructive',
-      });
-      setCodingQuestions([]);
-    } finally {
-      setLoading(false);
-        // setTimeout(() => setLoading(false), 1500);
-    }
-  }, [chapterDetails.id, chapterDetails.status]);
+  // Fetch submission for each question only when chapter is completed
+  // We use the first question's id as a representative fetch; for multi-question
+  // chapters the component maps over codingQuestions and passes results down.
+  const firstQuestionId = isCompleted && codingQuestions.length > 0
+    ? codingQuestions[0].id
+    : null;
 
-  useEffect(() => {
-    fetchCodingQuestions();
-  }, [fetchCodingQuestions]);
+  const { submissionData: firstSubmission } = useCodingSubmissionsByQuestion({
+    questionId: firstQuestionId,
+  });
+
+  // Build submissionResults in the same shape CodingChallengeResult expects
+  const submissionResults = firstSubmission
+    ? [{ questionId: firstSubmission.questionId, result: firstSubmission }]
+    : [];
 
   useEffect(() => {
     setIsCompleted(chapterDetails.status === 'Completed');
   }, [chapterDetails.status]);
 
   const handleSolveChallenge = (question: CodingQuestions) => {
-    router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}&orgId=${orgId}`);
+    router.push(`/student/course/${params.courseId}/org/${orgId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}`);
   };
 
   const CodingQuestionCard = ({ question }: { question: CodingQuestions }) => (
@@ -144,15 +120,16 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className='flex justify-between items-center w-full' >
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-body text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
           <Badge
             variant="outline"
             className={`text-xs font-medium px-3 py-1 ${
-              isCompleted ? 'bg-green-100 dark:text-black text-green-600 hover:bg-green-100' :
-              'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100'
+                isCompleted
+                  ? 'bg-green-100 text-green-600 border-green-200 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-900/30'
+                  : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
             }`}
           >
             {isCompleted ? 'Attempted' : 'Not Submitted'}

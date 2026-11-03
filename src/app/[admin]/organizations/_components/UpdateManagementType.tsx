@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/components/ui/use-toast';
-import useOrgSettings from '@/hooks/useOrgSettings'
+import useOrgSettings from '@/app/[admin]/hooks/useOrgSettings'
 
 // Management Type Cell Component
 
@@ -87,7 +87,7 @@ export const UpdateManagementType = ({ org, managementType, management, onUpdate
             onValueChange={handleRoleChange}
             disabled={isUpdating}
         >
-            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
+            <SelectTrigger className="w-auto min-w-28 bg-card border-border h-8 text-sm capitalize">
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>

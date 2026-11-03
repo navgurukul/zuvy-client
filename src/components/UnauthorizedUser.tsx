@@ -10,7 +10,8 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
     const router = useRouter()
     const { organizationId } = useParams()
     const { user } = getUser()
-    const orgId = user?.orgId || Number(organizationId); 
+    const rawOrgId = user?.orgId || (organizationId && organizationId !== 'undefined' ? organizationId : null);
+    const validOrgId = rawOrgId && String(rawOrgId) !== 'NaN' && String(rawOrgId) !== 'undefined' ? rawOrgId : null;
 
     return (
         <div className="flex flex-col items-center pt-24">
@@ -31,7 +32,15 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
                         {`The page is meant to be viewed by ${roleFromPath}. You do
                         not have ${roleFromPath} access to access this page`}
                     </p>
-                    <Button onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}>
+                    <Button onClick={() => {
+                        if (userRole && validOrgId) {
+                            router.push(`/${userRole}/organizations/${validOrgId}/courses`);
+                        } else if (userRole) {
+                            router.push(`/${userRole}/organizations`);
+                        } else {
+                            router.push(`/`);
+                        }
+                    }}>
                         Return to Dashboard
                     </Button>
                 </div>

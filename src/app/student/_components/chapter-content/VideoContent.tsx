@@ -3,15 +3,19 @@ import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
-import useChapterCompletion from '@/hooks/useChapterCompletion'
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
 import ReactPlayer, { ReactPlayerProps } from 'react-player'
 import { getEmbedLink } from '@/utils/students'
 import { VideoContentProps } from '@/app/student/_components/chapter-content/componentChapterType'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useVideoStore } from '@/store/store'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 import { VideoSkeleton } from "@/app/student/_components/Skeletons";
+
+const DURATION_OVERRIDE_BOOTCAMP_IDS = ['136', '135', '134', '133', '132', '131', '130', '129'];
 
 function getYoutubeId(url: string) {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
@@ -32,6 +36,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const [isCompleted, setIsCompleted] = useState(
         chapterDetails.status === 'Completed'
     )
+    const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
+    const hasShownFeedbackReminderRef = useRef<string | null>(null)
 
     const { isCompleting, completeChapter } = useChapterCompletion({
         courseId: courseId as string,
@@ -56,16 +62,19 @@ const VideoContent: React.FC<VideoContentProps> = ({
             ? [chapterDetails.file]
             : []
     const flatLinks = videoLinks.flat()
-    const isYouTubeandZoom =
+    const isTrackableVideo =
         flatLinks.some(
-            (link) => link.includes('youtube.com') || link.includes('youtu.be')
+            (link) =>
+                link.includes('youtube.com') ||
+                link.includes('youtu.be') ||
+                link.includes('vimeo.com')
         ) ||
         flatLinks.some(
             (link) => link.includes('zoom.us') || link.includes('zoom')
         )
 
     // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
-    const savedTime = isYouTubeandZoom
+    const savedTime = isTrackableVideo
         ? progress[chapterDetails.id.toString()] || 0
         : 0
     const handleReady = useCallback(() => {
@@ -78,21 +87,49 @@ const VideoContent: React.FC<VideoContentProps> = ({
     // Throttle saving progress every 2 seconds
     const lastSaveRef = useRef<number>(0)
     const hasCompletedRef = useRef(false)
+    // This is hardcoded for Career Tours and may change in the future.
+    const chapterKey = chapterDetails.id.toString()
+    const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
+    const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
+    const completionThreshold = isBootcampVideoOverride ? 0.99 : 0.75
+
+    const showFeedbackReminderOnce = useCallback(() => {
+        if (!isCareerTour || hasShownFeedbackReminderRef.current === chapterKey) return
+
+        const storageKey = `career-tour-feedback-reminder:${courseId}:${chapterKey}`
+        try {
+            if (window.localStorage.getItem(storageKey)) {
+                hasShownFeedbackReminderRef.current = chapterKey
+                return
+            }
+            window.localStorage.setItem(storageKey, 'shown')
+        } catch {
+            // Keep the reminder one-time for this mounted video if storage is unavailable.
+        }
+
+        hasShownFeedbackReminderRef.current = chapterKey
+        setShowFeedbackReminder(true)
+    }, [chapterKey, courseId, isCareerTour])
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
             const now = Date.now()
             // Save progress every 2 seconds
             if (now - lastSaveRef.current > 2000) {
-                setProgress(chapterDetails.id.toString(), state.playedSeconds)
+                setProgress(chapterKey, state.playedSeconds)
                 lastSaveRef.current = now
             }
 
-            // Call completeChapter when 75% is reached (only once)
+            if (state.played >= 1) {
+                showFeedbackReminderOnce()
+            }
+
+            // For bootcamp video overrides, the reward should wait until full video completion.
+            // Otherwise, standard videos reward at 75% watched.
             if (
                 !isCompleted &&
                 !hasCompletedRef.current &&
-                state.played >= 0.75
+                state.played >= completionThreshold
             ) {
                 hasCompletedRef.current = true
                 completeChapter()
@@ -100,10 +137,13 @@ const VideoContent: React.FC<VideoContentProps> = ({
             }
         },
         [
-            chapterDetails.id.toString(),
+            chapterKey,
             setProgress,
             completeChapter,
             isCompleted,
+            completionThreshold,
+            refetch,
+            showFeedbackReminderOnce,
         ]
     )
 
@@ -121,13 +161,14 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
 
     return (
+        <>
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
             <div className="max-w-4xl mx-auto">
                 <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}>
                     <div className="flex flex-col space-y-2 mb-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-xl text-left font-extrabold">
+                                <h1 className="text-xl text-left font-extrabold font-body">
                                     {chapterDetails.title}
                                 </h1>
                                 {chapterDetails.description && (
@@ -140,8 +181,9 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                 variant="secondary"
                                 className={`${
                                     isCompleted
-                                        ? 'bg-green-100 text-green-600 hover:bg-green-100'
-                                        : 'bg-white text-slate-700 hover:bg-white border border-slate-200'
+                                        ? 'bg-green-100 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/30'
+                                        : 'bg-white text-slate-700 hover:bg-white border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:border-slate-700'
+
                                 } text-xs font-medium px-2 py-1 mb-5`}
                             >
                                 {isCompleted ? 'Watched' : 'Not Watched'}
@@ -151,35 +193,40 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
                     {videoLinks.length > 0 ? (
                         videoLinks.map((link, idx) => {
+                            const rawLink = Array.isArray(link) ? link[0] : link
                             const isYouTube =
-                                link[0].includes('youtube.com') ||
-                                link[0].includes('youtu.be')
-                            const isDrive = link[0].includes('drive.google.com')
-                            const isZoom = link[0].includes('zoom.us')
-                            const embedLink = getEmbedLink(link)
+                                rawLink.includes('youtube.com') ||
+                                rawLink.includes('youtu.be')
+                            const isVimeo = rawLink.includes('vimeo.com')
+                            const isDrive = rawLink.includes('drive.google.com')
+                            const isZoom = rawLink.includes('zoom.us')
+                            const embedLink = getEmbedLink(rawLink)
+                            const isReactPlayerVideo =
+                                isYouTube || isVimeo || isZoom
                             return (
                                 <div
-                                    key={`${idx}-${link[0]}`}
+                                    key={`${idx}-${rawLink}`}
                                     className="mb-8 bg-card-elevated rounded-lg shadow-16dp overflow-hidden border border-border"
                                 >
                                     <div className="aspect-video bg-black flex items-center justify-center relative">
-                                        {isYouTube  ? (
+                                        {isReactPlayerVideo ? (
                                             <ReactPlayer
                                                 ref={playerRef}
-                                                url={embedLink[0]}
+                                                url={embedLink}
                                                 playing={playing}
                                                 controls={isCompleted}
                                                 width="100%"
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
+                                                onEnded={showFeedbackReminderOnce}
                                                
 
                                                 // onEnded={() => completeChapter()}
                                             />
                                         ) : isDrive ? (
                                             <iframe
-                                                src={embedLink[0]}
+                                                src={embedLink}
                                                 title="Google Drive Video"
                                                 allow="autoplay"
                                                 allowFullScreen
@@ -188,13 +235,14 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                         ) : isZoom ? 
                                         <ReactPlayer
                                                 ref={playerRef}
-                                                url={embedLink[0]}
+                                                url={embedLink}
                                                 playing={playing}
                                                 controls={isCompleted}
                                                 width="100%"
                                                 height="100%"
                                                 // onReady={handleReady}
                                                 onProgress={handleProgress}
+                                                onEnded={showFeedbackReminderOnce}
                                               
 
                                                 // onEnded={() => completeChapter()}
@@ -214,6 +262,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                             <span className="text-xs text-white font-medium">
                                                 {isYouTube
                                                     ? 'YouTube'
+                                                    : isVimeo
+                                                    ? 'Vimeo'
                                                     : isDrive
                                                     ? 'Google Drive'
                                                     : 'Video'}
@@ -241,7 +291,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     {/* Mark as Watched Button */}
                     {!isCompleted &&
                         videoLinks.length > 0 &&
-                        !isYouTubeandZoom && (
+                        !isTrackableVideo && (
                             <div className="flex justify-end mt-6">
                                 <Button
                                     onClick={completeChapter}
@@ -259,11 +309,36 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 </ScrollArea>
             </div>
         </div>
+        <Dialog open={showFeedbackReminder} onOpenChange={setShowFeedbackReminder}>
+            <DialogContent className="max-w-lg overflow-hidden border-border bg-card p-0 shadow-2xl">
+                {/* <div className="h-1 w-full bg-primary" /> */}
+                <div className="p-6 sm:p-7">
+                    <DialogHeader className="space-y-3 text-left">
+                        <DialogTitle className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                            Please fill out the feedback form
+                        </DialogTitle>
+                        <DialogDescription className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                            Before moving to the next module, click the{' '}
+                            <span className="font-semibold text-primary">Feedback Form</span>{' '}
+                            chapter in the left sidebar and submit your feedback.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6">
+                        <Button
+                            onClick={() => setShowFeedbackReminder(false)}
+                            className="w-full bg-primary font-semibold text-primary-foreground shadow-hover hover:bg-primary-dark sm:w-auto"
+                        >
+                            Got it
+                        </Button>
+                    </DialogFooter>
+                </div>
+            </DialogContent>
+        </Dialog>
+        </>
     )
 }
 
 export default VideoContent
-
 
 
 

@@ -8,9 +8,15 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ProjectsComponentProps {
     courseId: string
@@ -38,11 +44,13 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
             dataPath: 'projectSubmissionData.projectTrackingData',
             columns: [
                 { header: 'Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Project Links', key: 'projectLink' },
             ],
             mapData: (student: any) => ({
                 name: student.name || 'N/A',
+                studentId: student.userId ?? student.id ?? 'NA',
                 email: student.email || 'N/A',
                 projectLink: formatProjectLinks(student.projectLink),
             }),
@@ -79,13 +87,13 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                 return (
                     <div
                         key={item.id}
-                        className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                        className="relative bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
                     >
                         <div className="absolute top-2 right-2 z-10 flex items-center gap-[2px]">
                             {submissions > 0 ? (
                                 <button
                                     onClick={() => handleDownloadCsv(projectId, projectTitle)}
-                                    className="cursor-pointer text-gray-500 hover:text-gray-700 px-1"
+                                    className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-1"
                                     title="Download Report"
                                 >
                                     <ArrowDownToLine size={20} />
@@ -93,7 +101,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                             ) : (
                                 <div className="relative group inline-flex">
                                         <button disabled className="cursor-not-allowed px-1 text-gray-400 mt-2">
-                                            <ArrowDownToLine size={20} className="text-gray-400" />
+                                            <ArrowDownToLine size={20} className="text-gray-400 dark:text-gray-500" />
                                         </button>
 
                                         <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
@@ -107,7 +115,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                         variant="ghost"
                                         className="hover:bg-white-500  px-1 hover:text-gray-700 transition-colors"
                                     >
-                                        <Eye className="text-gray-500" size={20} />
+                                        <Eye className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" size={20} />
                                     </Button>
                                 </Link>
                             ) : (
@@ -116,7 +124,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                             disabled
                                             className="cursor-not-allowed px-1 mt-2"
                                         >
-                                            <Eye className="text-gray-400" size={20} />
+                                            <Eye className="text-gray-400 dark:text-gray-500" size={20} />
                                         </button>
                                     <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
                                         No submissions to view
@@ -127,11 +135,20 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
 
 
                         <div className="flex flex-col w-full">
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 rounded-md">
+                            <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                                <div className="p-2 rounded-md flex-shrink-0">
                                     <BookOpen className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base">{projectTitle}</h3>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <h3 className="font-medium text-base truncate">{projectTitle}</h3>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {projectTitle}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                             <div className="flex items-center justify-between mt-4 text-sm">
                                 <div className="flex items-center gap-1">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { DataTable } from '@/app/_components/datatable/data-table';
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
@@ -12,10 +12,12 @@ import { useOrganizations, Organization } from '@/hooks/useOrganizations'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
-import { api } from '@/utils/axios.config'
 import { useSearchParams, useRouter } from 'next/navigation'
 import MultiSelector from '@/components/ui/multi-selector'
 import { OFFSET, POSITION } from '@/utils/constant'
+import { getOrganizations } from '@/utils/organizations'
+import { getUser } from '@/store/store'
+import Notfound from '@/app/not-found'
 
 // Add interface for filter options
 interface FilterOption {
@@ -24,8 +26,12 @@ interface FilterOption {
 }
 
 export default function OrganizationsPage() {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+
     const router = useRouter()
     const searchParams = useSearchParams()
+    const prev = useRef<any>();
 
     // Get page and limit from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
@@ -69,6 +75,7 @@ export default function OrganizationsPage() {
 
     // Function to update URL params
     const updateURLParams = useCallback((page: number, newLimit?: number, filters?: string) => {
+
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(newLimit || limit))
@@ -78,8 +85,11 @@ export default function OrganizationsPage() {
         } else {
             newParams.delete('filterType')
         }
+        const newUrl = newParams.toString()
 
-        router.replace(`?${newParams.toString()}`)
+        if (newUrl !== searchParams.toString()) {
+            router.replace(`?${newUrl}`)
+        }
     }, [searchParams, router, limit])
 
     // Initialize from URL
@@ -115,26 +125,23 @@ export default function OrganizationsPage() {
     // Update URL when filters change
     useEffect(() => {
         if (!urlInitialized) return
+        if (user.email.length > 0 && userRole !== 'super_admin') return
 
         const filterQuery = getFilterQuery()
         updateURLParams(currentPage, limit, filterQuery)
-    }, [managementTypeFilter, urlInitialized, updateURLParams, currentPage, limit])
+    }, [managementTypeFilter, urlInitialized, updateURLParams, currentPage, limit, user.email, userRole])
 
     // Search API functions for SearchBox - ADD FILTER TO SUGGESTIONS
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
-            const queryParams = new URLSearchParams()
-            queryParams.append('search', query)
-            queryParams.append('limit', '10')
-
-            // ADD CURRENT FILTER TO SUGGESTIONS API CALL
             const currentFilter = getFilterQuery()
-            if (currentFilter) {
-                queryParams.append('filterType', currentFilter)
-            }
+            const response = await getOrganizations({
+                search: query,
+                limit: 10,
+                filterType: currentFilter,
+            })
 
-            const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
-            return response.data.data || []
+            return response.data || []
         } catch (error) {
             console.error('Error fetching suggestions:', error)
             return []
@@ -159,6 +166,7 @@ export default function OrganizationsPage() {
         fetchSuggestionsApi,
         fetchSearchResultsApi,
         defaultFetchApi,
+        autoFetchOnMount: false,
     })
 
     // Handle management type filter - Enforce single selection
@@ -173,11 +181,13 @@ export default function OrganizationsPage() {
 
     // Fetch data when URL params change
     useEffect(() => {
+
         if (!urlInitialized) return
+        if (user.email.length > 0 && userRole !== 'super_admin') return
 
         const filterQuery = getFilterQuery()
         fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
-    }, [currentPage, limit, urlInitialized, managementTypeFilter, fetchOrganizations])
+    }, [currentPage, limit, urlInitialized, managementTypeFilter, fetchOrganizations, user.email, userRole])
 
     // Transform API data to match your existing interface
     const transformedOrganizations = useMemo(() => {
@@ -249,23 +259,6 @@ export default function OrganizationsPage() {
         // The pagination component handles URL updates automatically
     }
 
-    // Loading skeleton component
-    const LoadingSkeleton = () => (
-        <div className="space-y-4">
-            {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex space-x-4 p-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2 flex-1">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </div>
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                </div>
-            ))}
-        </div>
-    )
-
     // Error component
     if (error) {
         return (
@@ -280,15 +273,24 @@ export default function OrganizationsPage() {
         )
     }
 
+    if (user.email.length > 0 && userRole !== 'super_admin') {
+        return (
+            <Notfound
+                error={new Error('Unauthorized access')}
+                reset={() => console.error('URL Not Found')}
+            />
+        )
+    }
+
     return (
         <div className="p-8">
             <div className="mx-auto">
                 <div className="flex justify-between items-start mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-start">
+                        <h1 className="text-3xl font-bold text-foreground mb-2 text-start">
                             Organisations ({loading ? '...' : totalCount})
                         </h1>
-                        <p className="text-gray-600">Manage organisations onboarded on the platform</p>
+                        <p className="text-muted-foreground">Manage organisations onboarded on the platform</p>
                     </div>
 
                     {/* Add Organization Dialog */}
@@ -313,7 +315,7 @@ export default function OrganizationsPage() {
 
                 <div className="flex gap-4 mb-6">
                     {/* SearchBox */}
-                    <div className="flex-1 relative">
+                    <div className="relative w-full max-w-[420px]">
                         <SearchBox
                             placeholder="Search organisations..."
                             fetchSuggestionsApi={fetchSuggestionsApi}
@@ -381,3 +383,20 @@ export default function OrganizationsPage() {
         </div>
     );
 }
+
+// Loading skeleton component
+const LoadingSkeleton = () => (
+    <div className="space-y-4">
+        {[...Array(5)].map((_, index) => (
+            <div key={index} className="flex space-x-4 p-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+            </div>
+        ))}
+    </div>
+)

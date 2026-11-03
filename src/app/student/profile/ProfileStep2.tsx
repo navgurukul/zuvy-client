@@ -18,9 +18,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, X, AlertCircle, Check, Github, Globe, Trash2, Briefcase, Code, Calendar, Scissors } from 'lucide-react';
 import type { OnboardingStep2 as Step2Type, ExternalProject } from '@/lib/profile.types';
 import { TECH_STACK, SKILLS_BY_CATEGORY, MONTHS, getYearsArray } from '@/lib/profile.mockData';
-import { useLearnerTechnicalSkills } from '@/hooks/useLearnerTechnicalSkills';
+import { useLearnerTechnicalSkills } from '@/app/student/hooks/useLearnerTechnicalSkills';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { formatDateForInput, getTodayInputValue, isEarlierThan } from '@/app/student/_utils/dateUtils';
+import { isValidUrl } from '@/app/student/_utils/urlValidation';
 
 const formatProjectDate = (dateValue?: ExternalProject['startDate']) => {
   if (!dateValue) {
@@ -73,48 +75,7 @@ export const ProjectModal: React.FC<{
     teamSize: 2,
   });
 
-  const parseMonthToIso = (monthValue: string) => {
-    const trimmedMonth = String(monthValue || '').trim();
-    if (!trimmedMonth) {
-      return '01';
-    }
-
-    const numericMonth = Number(trimmedMonth);
-    if (Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
-      return String(Math.trunc(numericMonth)).padStart(2, '0');
-    }
-
-    const monthIndex = MONTHS.findIndex(
-      (month) => month.toLowerCase() === trimmedMonth.toLowerCase()
-    );
-    return monthIndex >= 0 ? String(monthIndex + 1).padStart(2, '0') : '01';
-  };
-
-  const parseDayToIso = (dayValue?: string) => {
-    const numericDay = Number(String(dayValue || '').trim());
-    if (Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31) {
-      return String(Math.trunc(numericDay)).padStart(2, '0');
-    }
-    return '01';
-  };
-
-  const formatDateForInput = (dateValue?: ExternalProject['startDate']) => {
-    if (!dateValue) {
-      return '';
-    }
-
-    if (typeof dateValue === 'string') {
-      return dateValue;
-    }
-
-    if (!dateValue.year || !dateValue.month) {
-      return '';
-    }
-
-    const month = parseMonthToIso(dateValue.month);
-    const day = parseDayToIso(dateValue.day);
-    return `${dateValue.year}-${month}-${day}`;
-  };
+  // formatDateForInput, getTodayInputValue, isEarlierThan moved to _utils/dateUtils.ts
 
   const parseInputDate = (dateValue: string) => {
     const [year = '', month = '', day = '01'] = dateValue.split('-');
@@ -127,23 +88,6 @@ export const ProjectModal: React.FC<{
       month: String(Number(month)),
       day: String(Number(day || '1')),
     };
-  };
-
-  const getTodayInputValue = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  };
-
-  const isEarlierThan = (leftDate?: string, rightDate?: string) => {
-    if (!leftDate || !rightDate) {
-      return false;
-    }
-
-    return leftDate < rightDate;
   };
 
   const isLaterThan = (leftDate?: string, rightDate?: string) => {
@@ -222,14 +166,7 @@ export const ProjectModal: React.FC<{
     return newErrors;
   };
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+
   const isValidGithubUrl = (url: string) => {
     try {
       const parsed = new URL(url);
@@ -346,7 +283,7 @@ export const ProjectModal: React.FC<{
           {/* Detailed Description (placed after title) */}
           <div className="space-y-2">
             <Label htmlFor="detailedDescription" className="font-medium text-left block">
-              Detailed Description (Optional)
+              Detailed Description 
             </Label>
             <Textarea
               id="detailedDescription"
@@ -499,6 +436,7 @@ export const ProjectModal: React.FC<{
                 Start Date
               </Label>
               <div className="relative">
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   ref={startDateInputRef}
                   id="startDate"
@@ -553,11 +491,8 @@ export const ProjectModal: React.FC<{
                       setFormData((prev) => ({ ...prev, startDate: undefined }));
                     }
                   }}
-                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  className="pr-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <Calendar className="h-4 w-4" />
-                </div>
               </div>
               {errors.startDate && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -571,6 +506,7 @@ export const ProjectModal: React.FC<{
                 End Date
               </Label>
               <div className="relative">
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   ref={endDateInputRef}
                   id="endDate"
@@ -615,11 +551,8 @@ export const ProjectModal: React.FC<{
                       setFormData((prev) => ({ ...prev, endDate: undefined }));
                     }
                   }}
-                  className="px-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  className="pr-10 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <Calendar className="h-4 w-4" />
-                </div>
               </div>
               {errors.endDate && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -868,12 +801,14 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     ? allAvailableSkills.filter(
         (skill) =>
           skill.toLowerCase().includes(customSkill.toLowerCase()) &&
-          !skills.includes(skill) &&
-          !autoDetectedSkills.includes(skill)
+          !skills.some((s) => s.toLowerCase() === skill.toLowerCase()) &&
+          !autoDetectedSkills.some((s) => s.toLowerCase() === skill.toLowerCase())
       )
     : allAvailableSkills.filter(
-        (skill) => !skills.includes(skill) && !autoDetectedSkills.includes(skill)
-      ).slice(0, 20); // Show top 20 suggestions when no search
+        (skill) =>
+          !skills.some((s) => s.toLowerCase() === skill.toLowerCase()) &&
+          !autoDetectedSkills.some((s) => s.toLowerCase() === skill.toLowerCase())
+      ).slice(0, 20);
 
   const totalSkills = autoDetectedSkills.length + skills.length;
   
@@ -935,17 +870,30 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
     }
   };
 
+  const toTitleCase = (str: string) =>
+    str.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
+  const isDuplicateSkill = (skill: string) => {
+    const normalized = skill.toLowerCase();
+    return (
+      skills.some((s) => s.toLowerCase() === normalized) ||
+      autoDetectedSkills.some((s) => s.toLowerCase() === normalized)
+    );
+  };
+
   const handleAddSkill = (skill: string) => {
-    if (!skills.includes(skill) && totalSkills < 100) {
-      setSkills((prev) => [...prev, skill].sort());
+    const normalized = toTitleCase(skill.trim());
+    if (!isDuplicateSkill(normalized) && totalSkills < 100) {
+      setSkills((prev) => [...prev, normalized].sort());
     }
     setCustomSkill('');
     setShowSkillDropdown(false);
   };
 
   const handleAddCustomSkill = () => {
-    if (customSkill.trim() && !skills.includes(customSkill) && totalSkills < 100) {
-      setSkills((prev) => [...prev, customSkill].sort());
+    const normalized = toTitleCase(customSkill.trim());
+    if (normalized && !isDuplicateSkill(normalized) && totalSkills < 100) {
+      setSkills((prev) => [...prev, normalized].sort());
       setCustomSkill('');
       setShowSkillDropdown(false);
     }
@@ -982,7 +930,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Technical Skills Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center justify-between mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <div className="flex items-center gap-2">
@@ -1039,9 +987,9 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
               disabled={totalSkills >= 100 || isSkillsLoading}
             />
             
-            {/* Dropdown with skill suggestions */}
+            {/* Dropdown with skill suggestions - 2 rows with scroll */}
             {showSkillDropdown && !isSkillsLoading && filteredSkills.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[80px] overflow-y-auto overflow-x-hidden">
                 {isSkillsLoading ? (
                   <div className="p-4 text-center text-muted-foreground text-sm">
                     Loading skills...
@@ -1052,7 +1000,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
                       <Badge
                         key={skill}
                         variant="outline"
-                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors shrink-0"
                         onClick={() => handleAddSkill(skill)}
                       >
                         {skill}
@@ -1087,7 +1035,7 @@ export const ProfileStep2Component: React.FC<ProfileStep2Props> = ({
       </Card>
 
       {/* Projects Card */}
-      <Card className="border-border/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur">
+      <Card className="border-border/50 bg-white/50 dark:bg-card backdrop-blur">
         <CardContent className="pb-6">
           <div className="flex items-center gap-2 mb-6 bg-muted -mx-6 px-6 py-3 rounded-t-md">
             <Briefcase className="w-5 h-5 text-primary" />

@@ -1,7 +1,6 @@
-// components/DeleteConfirmationModal.tsx
 'use client'
-import { Fragment, useEffect, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { useEffect, useState } from 'react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
@@ -24,12 +23,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
-    const [deleteWithSession, setDeleteWithSession] = useState<boolean>(false)
     useEffect(() => {
         if (!isOpen) {
             setInputValue('')
             setError(null)
-            setDeleteWithSession(false)
         }
     }, [isOpen])
 
@@ -59,37 +56,13 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     }
 
     return (
-        <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog
-                as="div"
-                className="relative z-50"
-                onClose={() => onClose?.()}
-            >
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="fixed inset-0 bg-black/5  transition-opacity" />
-
-                </Transition.Child>
-
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                            enterTo="opacity-100 translate-y-0 sm:scale-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        >
-                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left transition-all">
+        <Dialog
+            open={Boolean(isOpen)}
+            onOpenChange={(open) => {
+                if (!open) onClose?.()
+            }}
+        >
+            <DialogContent className="z-[101] max-w-md p-6 text-left">
                                 {/* Close button */}
                                 <button
                                     onClick={onClose}
@@ -107,12 +80,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <div className="flex-shrink-0">
                                             <AlertTriangle className="h-6 w-6 text-destructive" />
                                         </div>
-                                        <Dialog.Title
-                                            as="h3"
-                                            className="text-lg font-semibold text-gray-900"
-                                        >
+                                        <DialogTitle className="text-lg font-semibold text-foreground">
                                             {input ? 'Delete Batch' : modalTitle || 'Permanent Deletion'}
-                                        </Dialog.Title>
+                                        </DialogTitle>
                                     </div>
                                     
                                     <p className="text-sm text-muted-foreground">
@@ -120,8 +90,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </p>
 
                                     {(modalText2 || instructorInfo?.name) && (
-                                        <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
-                                            <p className="text-gray-600 font-normal">
+                                        <div className="text-sm flex gap-x-2 text-foreground font-semibold mt-3">
+                                            <p className="text-muted-foreground font-normal">
                                                 {modalText2}
                                             </p>
                                             {instructorInfo?.name}
@@ -144,27 +114,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Live Class System Deletion Checkbox */}
-                                    {topicId === 8 && (
-                                        <div className="mt-2 pt-4 border-t">
-                                            <label className="flex items-start space-x-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={deleteWithSession}
-                                                    onChange={(e) => setDeleteWithSession(e.target.checked)}
-                                                    className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                                />
-                                                <div>
-                                                    <span className="text-sm font-medium text-foreground block">
-                                                        Delete live class from system
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        It will not be available anymore
-                                                    </span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    )}
+
                                 </div>
                                 <div className="mt-6 flex justify-end gap-2 sm:gap-3">
                                     <Button
@@ -188,7 +138,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <Button
                                             variant="destructive"
                                             onClick={() => {
-                                                if (topicId === 8 && deleteWithSession) {
+                                                if (topicId === 8) {
                                                     onDeleteChapterWithSession?.()
                                                 } else {
                                                     handleConfirm()
@@ -200,15 +150,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         </Button>
                                     )}
                                 </div>
-                            </Dialog.Panel>
-                        </Transition.Child>
-                    </div>
-                </div>
-            </Dialog>
-        </Transition.Root>
+            </DialogContent>
+        </Dialog>
     )
 }
 
 export default DeleteConfirmationModal
-
-

@@ -58,9 +58,9 @@ import {
     ChapterDetailsResponse,
     EditorContent,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType'
-import useEditChapter from '@/hooks/useEditChapter'
-import useUploadPdf from '@/hooks/useUploadPdf'
-import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
+import useUploadPdf from '@/app/[admin]/hooks/useUploadPdf'
+import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 import {AssignmentSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 import PermissionAlert from '@/app/_components/PermissionAlert'
@@ -228,6 +228,70 @@ const AddAssignent = ({
         }
     }
 
+    const applyAssignmentContent = (assignmentData: any) => {
+        // Convert string to Date object
+        if (assignmentData.completionDate) {
+            setDeadline(parseISO(assignmentData.completionDate))
+        } else {
+            setDeadline(null)
+        }
+
+        // Newly created assignments may have an empty contentDetails array
+        const contentDetails = Array.isArray(assignmentData.contentDetails) && assignmentData.contentDetails.length > 0
+            ? assignmentData.contentDetails[0]
+            : null
+
+        const fetchedTitle = assignmentData.title || assignmentData.name || ''
+        // Only update title if content.id changed or initial load
+        if (lastLoadedContentId.current !== content.id) {
+            setTitle(fetchedTitle)
+            lastLoadedContentId.current = content.id
+        }
+
+        setIsDataLoading(false)
+
+        const link = contentDetails?.links?.[0]
+        if (link) {
+            setpdfLink(link)
+            setDefaultValue('pdf')
+            setIsPdfUploaded(true)
+            setIsEditorSaved(false)
+        } else {
+            setpdfLink(null)
+            setIsPdfUploaded(false)
+            setDefaultValue('editor')
+            // Check if editor has content
+            const data = contentDetails?.content
+            let hasEditorContent = false
+            if (data && data.length > 0) {
+                hasEditorContent = true
+                setHasUserSaved(true)
+                setWasContentNonEmptyWhenSaved(true)
+            }
+            setIsEditorSaved(hasEditorContent)
+        }
+
+        const data = contentDetails?.content
+        let parsedContent: { doc: any } | undefined
+
+        if (!data || data.length === 0) {
+            // No content yet (newly created chapter) — leave editor empty
+            parsedContent = undefined
+        } else if (typeof data[0] === 'string') {
+            parsedContent = JSON.parse(data[0])
+        } else {
+            parsedContent = { doc: data[0] }
+        }
+
+        setInitialContent(parsedContent)
+
+        // Set initial content states
+        setHasEditorContent(!isEditorContentEmpty(parsedContent))
+        setPreviousContentHash(generateContentHash(parsedContent))
+        setIsDataLoading(false)
+        setTimeout(() => setIsInitialLoad(false), 1000)
+    }
+
     const getAssignmentContent = async () => {
         try {
             const response = await getChapterDetails({
@@ -236,59 +300,7 @@ const AddAssignent = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-      
-            // Convert string to Date object
-            if (response.data.completionDate) {
-                setDeadline(parseISO(response.data.completionDate))
-            } else {
-                setDeadline(null)
-            }
-           
-            const contentDetails = response.data.contentDetails[0]
-            const fetchedTitle = response.data.title || response.data.name || ''
-            // Only update title if content.id changed or initial load
-            if (lastLoadedContentId.current !== content.id) {
-                setTitle(fetchedTitle)
-                lastLoadedContentId.current = content.id
-            }
-            
-            setIsDataLoading(false)
-            
-            const link = contentDetails?.links?.[0]
-            if (link) {
-                setpdfLink(link)
-                setDefaultValue('pdf')
-                setIsPdfUploaded(true)
-                setIsEditorSaved(false)
-            } else {
-                setpdfLink(null)
-                setIsPdfUploaded(false)
-                setDefaultValue('editor')
-                // Check if editor has content
-                const data = contentDetails?.content
-                let hasEditorContent = false
-                if (data && data.length > 0) {
-                    hasEditorContent = true
-                    setHasUserSaved(true)
-                    setWasContentNonEmptyWhenSaved(true)
-                }
-                setIsEditorSaved(hasEditorContent)
-            }
-            
-            const data = contentDetails?.content
-            let parsedContent
-            if (typeof data?.[0] === 'string') {
-                parsedContent = JSON.parse(data[0])
-            } else {
-                parsedContent = { doc: data?.[0] }
-            }
-
-            setInitialContent(parsedContent)
-
-            // Set initial content states
-            setHasEditorContent(!isEditorContentEmpty(parsedContent))
-            setPreviousContentHash(generateContentHash(parsedContent))
-            
+            applyAssignmentContent(response.data)
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         } finally {
@@ -353,19 +365,25 @@ const AddAssignent = ({
     useEffect(() => {
         if (content?.id && !hasLoaded.current) {
             hasLoaded.current = true
-            getAssignmentContent()
+            applyAssignmentContent(content)
         }
     }, [content?.id])
 
     // Keep form title in sync with state
     useEffect(() => {
-        form.setValue('title', title)
+        form.setValue('title', title, { shouldValidate: true })
+        form.trigger()
     }, [title])
 
     // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
         if (ispdfUploaded) setIsEditorSaved(false)
     }, [ispdfUploaded])
+
+    // Trigger initial form validation on mount
+    useEffect(() => {
+        form.trigger()
+    }, [])
 
     // Save button logic: editor disables after save, enables only after edit; PDF disables after save, enables after file/title/deadline edit
     useEffect(() => {
@@ -375,7 +393,7 @@ const AddAssignent = ({
             setCanSave(!!hasContent && !isSaving && hasChangedAfterSave)
         } else if (defaultValue === 'pdf') {
             // Only enable Save if a file is selected for upload or a PDF is already uploaded
-            setCanSave(((!!file || !!pdfLink) && hasChangedAfterSave && !isSaving) || (!!file && !isSaving))
+            setCanSave(((!!file || !!pdfLink) && !isSaving) || (!!file && !isSaving))
         } else {
             setCanSave(false)
         }
@@ -386,8 +404,15 @@ const AddAssignent = ({
         if (defaultValue !== 'editor') return
 
         const hasContent = initialContent && !isEditorContentEmpty(initialContent)
-        if (!hasContent || !previousContentHash) {
+        if (!hasContent) {
             setHasChangedAfterSave(false)
+            return
+        }
+
+        const emptyHash = generateContentHash(undefined)
+        if (!previousContentHash || previousContentHash === emptyHash) {
+            // For a new assignment with non-empty content, allow saving
+            setHasChangedAfterSave(true)
             return
         }
 

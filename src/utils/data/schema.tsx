@@ -11,6 +11,11 @@ export const taskSchema = z.object({
     profilePicture: z.string().nullable(),
     progress: z.number(),
     batchName: z.string(),
+    careerStatus: z.string().nullable().optional(),
+    graduationMonth: z.number().nullable().optional(),
+    graduationYear: z.number().nullable().optional(),
+    graduationDate: z.string().nullable().optional(),
+    skills: z.array(z.string()).nullable().optional(),
     attendance: z.number(),
     status: z.string(),
     lastActive: z.string().nullable().optional(), // Add this for last active date

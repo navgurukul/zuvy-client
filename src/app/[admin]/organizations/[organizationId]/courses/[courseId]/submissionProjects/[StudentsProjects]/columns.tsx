@@ -1,9 +1,9 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Task } from '@/utils/data/schema'
 
 import Link from 'next/link'
@@ -16,34 +16,17 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
+        cell: ({ row }) => (
+            <div className="flex items-center">
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
                     />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+                </Avatar>
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },
@@ -72,6 +55,28 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'userId',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Student ID"
+                onSort={onSort}
+                sortField="userId"
+            />
+        ),
+        id: 'userId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium whitespace-nowrap">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: 'email',
         header: ({ column, onSort }: any) => (
             <DataTableColumnHeader 
@@ -97,12 +102,12 @@ export const columns: ColumnDef<Task>[] = [
 
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-black border-black">
                         {batchName}
                     </Badge>
                 </div>
@@ -111,6 +116,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
+        header: () => <div className="text-left w-full">Actions</div>,
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
 

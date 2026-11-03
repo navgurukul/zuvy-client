@@ -16,6 +16,9 @@ export interface TopicItem {
   description?: string;
   duration?: string;
   scheduledDateTime?: Date;
+  isLock?: boolean;
+  lockReason?: string | null;
+  lockMessage?: string | null;
 }
 
 export interface Topic {

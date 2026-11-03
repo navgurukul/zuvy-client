@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
-import{CodingChallengeProps} from '@/app/student/_components/componentStudentType'
+import { CodingChallengeProps } from '@/app/student/_components/componentStudentType'
+import { getDifficultyColor } from '@/lib/utils'
 
 const CodingChallenge = ({ challenge, onBack, onComplete, timeLeft }: CodingChallengeProps) => {
   const [code, setCode] = useState('// Write your solution here\n\n');
@@ -57,11 +58,7 @@ function maxSubarraySum(nums) {
           <div className="mb-4">
             <h1 className="text-2xl font-heading font-bold mb-2">{challenge.title}</h1>
             <div className="flex gap-2 mb-4">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                challenge.difficulty === 'Easy' ? 'bg-success-light text-success' :
-                challenge.difficulty === 'Medium' ? 'bg-warning-light text-black' :
-                'bg-destructive-light text-destructive'
-              }`}>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(challenge.difficulty)}`}>
                 {challenge.difficulty}
               </span>
               <span className="px-2 py-1 rounded text-xs font-medium bg-muted text-muted-foreground">

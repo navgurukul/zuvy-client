@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,25 +14,28 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
-import { useBootcampProgress } from '@/hooks/useBootcampProgress';
-import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
-import { MentorSessionEvent, UpcomingEvent } from '@/hooks/hookType';
-import { useCompletedClasses } from '@/hooks/useCompletedClasses';
-import { CompletedClass, Module } from '@/hooks/hookType';
-import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
-import { useMentors } from '@/hooks/useMentors';
+import { useBootcampProgress } from '@/app/student/hooks/useBootcampProgress';
+import { useAllModulesForStudents } from '@/app/student/hooks/useAllModulesForStudents';
+import { useUpcomingEvents } from '@/app/student/hooks/useUpcomingEvents';
+import { UpcomingEvent, CompletedClass } from '@/hooks/hookType';
+import { useStudentCompletedClasses } from '@/app/student/hooks/useStudentCompletedClasses';
+import { useLatestUpdatedCourse } from '@/app/student/hooks/useLatestUpdatedCourse';
+import { useMentors } from '@/app/student/hooks/useMentors';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
-import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
+import { useIsStudentEnrolledInOneCourseStore, useThemeStore } from "@/store/store";
 import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudentType'
 import { formatUpcomingItem } from "@/utils/students"
 import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
-import { cn } from "@/lib/utils";
-import Leaderboard from '@/components/Leaderboard';
-import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { cn, CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
+import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
+import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
+import { MentorSessionEvent, Module } from "../hooks/hookTypes";
+import AnimatedLeaderboard from '@/components/AnimatedLeaderboard';
+import LeaderboardModal from '@/app/student/_components/LeaderboardModal';
+import { useLeaderboard } from '@/app/student/hooks/useLeaderboard';
 
 import {
   Select,
@@ -44,22 +47,32 @@ import {
 
 type WhatsNextItem = UpcomingEvent | MentorSessionEvent;
 
-
+// This is hardcoded for Career Tours and may change in the future.
+const DURATION_OVERRIDE_BOOTCAMP_IDS = [ '136', '135', '134', '133', '132', '131', '130', '129'];
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
-  const searchParams = useSearchParams();
-  const orgId = searchParams.get('orgId');
+  const params = useParams();
+  const orgId = params.orgId;
 
   const [showAllModules, setShowAllModules] = useState(false);
   const { setIsStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore()
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
-  const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
+  const { completedClassesData, loading: classesLoading, error: classesError } = useStudentCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
-  const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0);
-  const { topEntries: leaderboardEntries, selfEntry: leaderboardSelfEntry, isSelfInTopFive, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard(courseId);
+  const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0, orgId as string | undefined);
+  const {
+    topEntries: leaderboardEntries,
+    modalEntries: leaderboardModalEntries,
+    selfEntry: leaderboardSelfEntry,
+    isSelfInTopFive,
+    loading: leaderboardLoading,
+    error: leaderboardError,
+  } = useLeaderboard(courseId);
   const { width } = useWindowSize();
+  const { isDark } = useThemeStore();
   const isMobile = width < 768;
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
 
 
   const mentorshipSessionCount = upcomingEventsData?.mentorSessions?.length ?? 0;
@@ -71,7 +84,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     {
       label: "Find a Mentor",
       sub: availableMentorCount > 0 ? `${availableMentorCount} mentor available now` : "No mentors available now",
-      href: `/student/mentors?courseId=${courseId}`,
+      href: getMentorsHref({ courseId, orgId: orgId as string | undefined }),
       icon: Search,
       color: "text-primary",
       bg: "bg-primary/10",
@@ -79,7 +92,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     {
       label: "My Sessions",
       sub: `${mentorshipSessionCount} upcoming`,
-      href: `/student/sessions?courseId=${courseId}`,
+      href: getSessionsHref({ courseId, orgId: orgId as string | undefined }),
       icon: CalendarDays,
       color: "text-accent",
       bg: "bg-accent/10",
@@ -115,6 +128,20 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   }
   // Use real progress data if available, otherwise fall back to mock data
   const currentProgress = progressData?.data?.progress || 0;
+
+  // Career Tours: bootcamp IDs that belong to the career tour programme
+  const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId));
+
+  // Email gate: hide certain cards when the user account has no email OR is a career-tour bootcamp
+  const hasEmail: boolean = (() => {
+    try {
+      const auth = typeof window !== 'undefined' ? localStorage.getItem('AUTH') : null;
+      return auth ? (JSON.parse(auth)?.email ?? '').trim().length > 0 : false;
+    } catch {
+      return false;
+    }
+  })();
+  const showEmailGatedCards = hasEmail && !isCareerTour;
   const batchName = progressData?.batchInfo?.batchName || '';
   const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
   const instructorName = progressData?.instructorDetails?.instructorName || '';
@@ -127,11 +154,19 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const courseName = progressData?.data?.bootcampTracking?.name || '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';
   const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
-  const validCourseCoverImage = isValidImageUrl(courseCoverImage) ? courseCoverImage : '/logo.PNG';
+  const validCourseCoverImage = isValidImageUrl(courseCoverImage)
+    ? courseCoverImage
+    : isDark
+      ? '/zuvy-logo-horizontal-dark.png'
+      : '/zuvy-logo-horizontal.png';
   const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
   const validCollaborator = isValidImageUrl(collaborator) ? collaborator : '';
   const duration = progressData?.data?.bootcampTracking?.duration || 0;
 
+  // This is hardcoded for Career Tours and may change in the future.
+  const displayedDuration = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
+    ? '30 mins'
+    : (+duration) > 1 ? `${duration} weeks` : `${duration} week`;
   // Use API modules if available, otherwise fall back to mock modules
   const modulesToDisplay = apiModules || [];
   const modulesToShow = showAllModules ? modulesToDisplay : modulesToDisplay.slice(0, 7);
@@ -182,31 +217,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     switch (getEventType(type)) {
       case 'Live Class':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       case 'Assessment':
         return (
-          <div className="w-5 h-5 rounded-full bg-warning-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-warning/15 flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-warning" />
           </div>
         );
       case 'Assignment':
         return (
-          <div className="w-5 h-5 rounded-full bg-info-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-info/15 flex items-center justify-center">
             <FileText className="w-5 h-5 text-info" />
           </div>
         );
       case 'Mentor Session':
         return (
-          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       default:
         return (
-          <div className="w-5 h-5 rounded-full bg-muted-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
         );
@@ -248,37 +283,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return new Date(eventDate).getTime() <= new Date().getTime();
   };
 
-  const parseDateValue = (value?: string | null) => {
-    if (!value) return null;
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-
-    return date;
-  };
-
-  const isMentorSessionJoinWindowOpen = (
-    startTime?: string | null,
-    endTime?: string | null,
-    nowTimestamp: number = Date.now()
-  ) => {
-    const startDate = parseDateValue(startTime);
-    if (!startDate) return false;
-
-    const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000;
-    const endDate = parseDateValue(endTime);
-
-    if (!endDate) {
-      return nowTimestamp >= tenMinutesBeforeStart;
-    }
-
-    return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime();
-  };
-
   const getMentorSessionJoinHref = (item: MentorSessionEvent) => {
     if (!item.meetingLink) return null;
 
-    return `/student/sessions/${item.id}/join?joinUrl=${encodeURIComponent(item.meetingLink)}`;
+    return getSessionJoinHref(item.id, item.meetingLink, { courseId, orgId: orgId as string | undefined });
   };
 
   const getEventActionText = (type: string) => {
@@ -326,7 +334,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const getModuleHref = (module: Module, isCurrentModule: boolean, upcomingChapterId: number | null) => {
     const chapterId = isCurrentModule ? upcomingChapterId : module.ChapterId;
-    return `/student/course/${courseId}/modules/${module.id}?chapterId=${chapterId}${orgId ? `&orgId=${orgId}` : ''}`;
+    return `/student/course/${courseId}/org/${orgId}/modules/${module.id}?chapterId=${chapterId}`;
   };
 
   const formatTimeAlloted = (seconds: number) => {
@@ -404,7 +412,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       ) : (
                         <Link
                           className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                          href={`/student/course/${courseId}/org/${orgId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
                         >
                           {classItem.title}
                         </Link>
@@ -419,25 +427,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Badge
                         variant="outline"
                         className={
-                          classItem.s3Link === null ||
-                            classItem.s3Link ===
-                            'not found'
-                            ? 'text-warning border-warning'
-                            : classItem.s3Link &&
-                              classItem.attendanceStatus ===
-                              'absent'
-                              ? 'text-destructive border-destructive'
-                              : 'text-success border-success'
+                          classItem.attendanceStatus === 'absent'
+                            ? 'text-destructive border-destructive'
+                            : 'text-success border-success'
                         }
                       >
-                        {classItem.s3Link === null ||
-                          classItem.s3Link === 'not found'
-                          ? 'Processing'
-                          : classItem.s3Link &&
-                            classItem.attendanceStatus ===
-                            'absent'
-                            ? 'Absent'
-                            : 'Present'}
+                        {classItem.attendanceStatus === 'absent'
+                          ? 'Absent'
+                          : 'Present'}
                       </Badge>
                       <TooltipProvider>
                         <Tooltip>
@@ -559,7 +556,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       ) : (
                         <Link
                           className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                          href={`/student/course/${courseId}/org/${orgId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
                         >
                           {classItem.title}
                         </Link>
@@ -574,25 +571,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Badge
                         variant="outline"
                         className={
-                          classItem.s3Link === null ||
-                            classItem.s3Link ===
-                            'not found'
-                            ? 'text-warning border-warning'
-                            : classItem.s3Link &&
-                              classItem.attendanceStatus ===
-                              'absent'
-                              ? 'text-destructive border-destructive'
-                              : 'text-success border-success'
+                          classItem.attendanceStatus === 'absent'
+                            ? 'text-destructive border-destructive'
+                            : 'text-success border-success'
                         }
                       >
-                        {classItem.s3Link === null ||
-                          classItem.s3Link === 'not found'
-                          ? 'Processing'
-                          : classItem.s3Link &&
-                            classItem.attendanceStatus ===
-                            'absent'
-                            ? 'Absent'
-                            : 'Present'}{' '}
+                        {classItem.attendanceStatus === 'absent'
+                          ? 'Absent'
+                          : 'Present'}{' '}
                       </Badge>
                       <TooltipProvider>
                         <Tooltip>
@@ -613,7 +599,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-red-500 bg-primary-light text-sm border-primary"
+                                className="text-red-500 text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -630,7 +616,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     classItem.s3Link
                                   )
                                 }
-                                className="text-primary bg-primary-light text-sm border-primary"
+                                className="text-primary text-sm border-primary"
                               >
                                 <Video className="w-4 h-4 " />
                               </button>
@@ -774,7 +760,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
-                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                              href={`/student/course/${courseId}/org/${orgId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                               className="text-primary text-sm font-medium hover:underline"
                             >
                               {isEventReady
@@ -876,7 +862,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             })()
                           ) : isRegularUpcomingEvent(item) ? (
                             <Link
-                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                              href={`/student/course/${courseId}/org/${orgId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                               className="text-primary text-sm font-medium hover:underline"
                             >
                               {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
@@ -903,83 +889,86 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-4 pb-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)] lg:items-start">
-            {/* Left Column - Stats and Course Modules */}
-            <div className="space-y-6 min-w-0">
-              <div className="w-full rounded-lg border bg-white p-4 md:p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-0">
-                  <div className="flex-shrink-0">
+      <div className="w-full">
+        {/* Course Information Banner - Full Width */}
+          <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8  border-border/50">
+            <div className="max-w-[89rem] mx-auto p-3 md:p-4">
+              {/* Mobile Layout */}
+              <div className="md:hidden mb-3">
+                <Image
+                  src={validCourseCoverImage}
+                  alt={courseName}
+                  width={400}
+                  height={160}
+                  className="mx-auto mb-4 aspect-[5/2] h-auto max-h-20 w-full max-w-[220px] rounded-lg object-contain"
+                />
+                <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
+                <div className={`flex items-center gap-2 mb-4 ${instructorName ? '' : 'hidden'}`}>
+                  <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
+                </div>
+                {validCollaborator && <div className="flex items-center gap-2 mb-4">
+                    <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                     <Image
-                      src={validCourseCoverImage}
-                      alt={courseName}
-                      width={128}
-                      height={128}
-                      className="rounded-lg object-contain"
+                      src={validCollaborator}
+                      alt="Collaborator Brand"
+                      width={48}
+                      height={48}
+                      className="h-12"
                     />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                        <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
-                        <div className="flex items-center gap-2 mb-4">
-                          {/* <Avatar className="w-8 h-8">
-                          <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
-                          <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                        </Avatar> */}
-                          <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
+                  </div>}
+              </div>
+            </div>
+          </div>
+
+              <div className="max-w-[88rem] mx-auto px-4 md:px-6 pt-2 pb-8">
+          <div className={`grid grid-cols-1 gap-6 lg:items-start ${showEmailGatedCards ? 'lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)]' : 'lg:grid-cols-1'}`}>
+            {/* Left Column - Course Header, Progress, and Modules */}
+            <div className="space-y-4 min-w-0">
+              {/* Course Header Card - Desktop only, matches module cards width */}
+              <div className="hidden md:block">
+                <div className="rounded-lg bg-card p-6 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-start gap-6">
+                    <div className="flex-shrink-0 self-center">
+                      <Image
+                        src={validCourseCoverImage}
+                        alt={courseName}
+                        width={128}
+                        height={128}
+                        className="rounded-lg object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                          <TruncatedDescription text={courseDescription} maxLength={200} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
+                          </div>
                         </div>
+                        {validCollaborator ? <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
+                            <Image
+                              src={validCollaborator}
+                              alt="Collaborator Brand"
+                              width={75}
+                              height={56}
+                              className="h-12"
+                            />
+                          </div> : collaborator ?
+                          <div className="flex  items-center gap-2">
+                            <p className="text-sm font-bold text-muted-foreground ">In Collaboration With</p>
+                            <p className="text-sm font-bold text-primary">{collaborator}</p>
+                          </div> : ''}
                       </div>
-                      {validCollaborator ? <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                          <Image
-                            src={validCollaborator}
-                            alt="Collaborator Brand"
-                            width={75}
-                            height={56}
-                            className="h-12"
-                          />
-                        </div> : collaborator ?
-                        <div className="flex  items-center gap-2">
-                          <p className="text-sm font-bold text-muted-foreground ">In Collaboration With</p>
-                          <p className="text-sm font-bold text-primary">{collaborator}</p>
-                        </div> : ''}
                     </div>
                   </div>
                 </div>
-
-                <div className="md:hidden mb-0">
-                  <Image
-                    src={validCourseCoverImage}
-                    alt={courseName}
-                    width={400}
-                    height={160}
-                    className="w-full h-40 rounded-lg object-cover mb-4"
-                  />
-                  <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                  <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
-                  <div className="flex items-center gap-2 mb-4">
-                    {/* <Avatar className="w-8 h-8">
-                      <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
-                      <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                    </Avatar> */}
-                    <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
-                  </div>
-                  {validCollaborator && <div className="flex items-center gap-2 mb-4">
-                      <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                      <Image
-                        src={validCollaborator}
-                        alt="Collaborator Brand"
-                        width={48}
-                        height={48}
-                        className="h-12"
-                      />
-                    </div>}
-                </div>
               </div>
 
-              <div className="w-full rounded-lg bg-white p-4 md:p-5 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              {/* Progress Stats Card - Full width on desktop, matches course header width */}
+              <div className="w-full rounded-lg bg-card p-4 md:p-5 border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 w-full">
                     <div className="relative bg-primary-light rounded-full h-1.5 flex-1">
@@ -994,7 +983,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div className="flex items-center gap-2.5 text-foreground/80">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                         <BookOpen size={16} className="text-foreground/60" />
@@ -1019,7 +1008,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       </div>
                       <div>
                         <div className="text-[11px] leading-4 text-muted-foreground text-left">Duration</div>
-                        <div className="text-sm font-semibold leading-5">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div>
+                        {/* <div className="text-sm font-semibold leading-5">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</div> */}
+                         <div className="text-sm font-semibold leading-5">{displayedDuration}</div>
                       </div>
                     </div>
                   </div>
@@ -1044,10 +1034,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           <div className="flex flex-1 flex-col lg:flex-row lg:justify-between lg:items-start gap-3 min-w-0">
                             <div className="flex-1 min-w-0 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 self-start rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary dark:text-white border-primary/20 hover:bg-primary-light/80">Current Module</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary border-primary/20 hover:bg-primary/25">Current Module</Badge>
                               )}
                               {isCompleted && (
-                                <Badge className="mb-2 self-start rounded-full bg-success-light px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success-light/80">Completed</Badge>
+                                <Badge className="mb-2 self-start rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-success border-success/20 hover:bg-success/25">Completed</Badge>
                               )}
                               {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
@@ -1090,7 +1080,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       >
                                         {module.typeId !== 2 ? <Link key={module.id} className="" href={getModuleHref(module, isCurrentModule, upcomingChapterId)}>
                                           {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}&orgId=${orgId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm  hover:underline`} >View Project</Link>}
+                                        </Link> : <Link href={`/student/course/${courseId}/org/${orgId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm  hover:underline`} >View Project</Link>}
                                       </Button>
                                     </div>
                                   </TooltipTrigger>
@@ -1144,7 +1134,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     >
                                       {module.typeId !== 2 ? <Link key={module.id} href={getModuleHref(module, isCurrentModule, upcomingChapterId)}>
                                         {getModuleCTA(module, moduleProgress)}
-                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}&orgId=${orgId}`} className={` text-sm  text-primary hover:underline`} >View Project</Link>}
+                                      </Link> : <Link href={`/student/course/${courseId}/org/${orgId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={` text-sm  text-primary hover:underline`} >View Project</Link>}
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
@@ -1193,36 +1183,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               </div>
             </div>
 
-            {/* Right Column - Mentorship */}
+            {/* Right Column - Leaderboard and What's Next */}
             <div className="space-y-4 min-w-0 w-full lg:max-w-[300px] lg:justify-self-end">
+              {/* Mentorship Card - All screens */}
               {latestCourseData?.mentorshipEnabled && (
-                // <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
-                //   <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
-                //     <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">Mentorship</p>
-                //   </div>
-                //   <div>
-                //   </div>
-                //   {QUICK_ACTIONS.map((a) => (
-                //     <Link
-                //       key={a.href}
-                //       href={a.href}
-                //       className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted transition-colors group"
-                //     >
-                //       <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", a.bg)}>
-                //         <a.icon className={cn("h-3.5 w-3.5", a.color)} />
-                //       </div>
-                //       <div className="flex-1 min-w-0">
-                //         <p className="text-sm font-semibold leading-5 text-text-primary">{a.label}</p>
-                //         <p className="text-xs leading-4 text-text-muted">{a.sub}</p>
-                //       </div>
-                //       <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-colors group-hover:text-text-secondary" />
-                //     </Link>
-                //   ))}
-                // </div>
                 <div className="w-full rounded-lg border border-border bg-card p-4 space-y-3 text-left shadow-sm">
-                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-gray-200 px-4 pb-3">
+                    <div className="-mx-4 mb-3 flex items-center justify-between border-b border-border px-4 pb-3">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
-                        Mentorship
+                        MENTORSHIP
                       </p>
                     </div>
 
@@ -1230,37 +1198,70 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Link
                         key={a.href}
                         href={a.href}
-                        className="group flex items-center gap-3 rounded-xl border border-[#E7ECE8] bg-white px-3 py-3 transition-all duration-200 hover:border-[#CFE5D3] hover:bg-[#F4FBF5]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 transition-all duration-200 hover:border-primary/40 hover:bg-primary/5"
                       >
                         {/* Icon */}
                         <div
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEF7F0] transition-colors duration-200 group-hover:bg-[#DDF3E2]"
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-200 group-hover:bg-primary/20"
                           )}
                         >
-                          <a.icon className="h-4 w-4 text-[#2F6F3E]" />
+                          <a.icon className={cn("h-4 w-4", a.color)} />
                         </div>
 
                         {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold leading-5 text-[#1F2937]">
+                          <p className="text-sm font-semibold leading-5 text-foreground">
                             {a.label}
                           </p>
 
-                          <p className="text-xs leading-4 text-[#6B7280]">
+                          <p className="text-xs leading-4 text-muted-foreground">
                             {a.sub}
                           </p>
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight className="h-4 w-4 shrink-0 text-[#9CA3AF] transition-all duration-200 group-hover:text-[#2F6F3E]" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:text-primary" />
                       </Link>
                     ))}
                   </div>
               )}
 
+              {/* Leaderboard - All screens when enabled */}
+              {latestCourseData?.leaderboardEnabled && (
+                <Card className="w-full shadow-4dp text-left rounded-lg bg-card border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        🏆 Leaderboard
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0 flex flex-col overflow-hidden">
+                    <AnimatedLeaderboard
+                      entries={leaderboardEntries}
+                      loading={leaderboardLoading}
+                      error={leaderboardError}
+                      selfEntry={leaderboardSelfEntry}
+                      showSelfEntry={!isSelfInTopFive}
+                      onViewLeaderboard={() => setIsLeaderboardModalOpen(true)}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              <LeaderboardModal
+                open={isLeaderboardModalOpen}
+                onOpenChange={setIsLeaderboardModalOpen}
+                entries={leaderboardModalEntries}
+                selfEntry={leaderboardSelfEntry}
+                loading={leaderboardLoading}
+                error={leaderboardError}
+              />
+
               {/* What's Next Section */}
-              <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              {showEmailGatedCards && (
+              <Card className="w-full shadow-4dp text-left rounded-lg bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold">What&apos;s Next?</CardTitle>
                   {/* <p className="text-sm text-muted-foreground">
@@ -1287,7 +1288,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
                                     {eventType === 'Mentor Session' ? (
                                       <Link
-                                        href={`/student/sessions?courseId=${courseId}`}
+                                        href={getSessionsHref({ courseId, orgId: orgId as string | undefined })}
                                         target="_self"
                                         className="hover:text-primary hover:underline underline-offset-[4px]"
                                       >
@@ -1295,7 +1296,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       </Link>
                                     ) : isRegularUpcomingEvent(item) ? (
                                       <Link
-                                        href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                                        href={`/student/course/${courseId}/org/${orgId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                                         target="_self"
                                         className="hover:text-primary hover:underline underline-offset-[4px]"
                                       >
@@ -1307,7 +1308,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 {eventType === 'Mentor Session' && isMentorSession(item) && (
                                   <p className="text-sm text-muted-foreground mb-2">Mentor: {item.mentorName}</p>
                                 )}
-                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                <Badge className={`my-2 ${item.type === 'Live Class' || item.type === 'Mentor Session' ? 'bg-primary/15 text-primary border-primary/20 hover:bg-primary/25' : item.type === 'Assessment' ? 'bg-warning/15 text-warning border-warning/20 hover:bg-warning/25' : 'bg-info/15 text-info border-info/20 hover:bg-info/25'} `} >{item.type}</Badge>
                                 <div className="flex items-center justify-between mb-3">
                                   <p className="text-sm font-medium">
                                     {eventType === 'Mentor Session' && isMentorSession(item)
@@ -1406,8 +1407,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
+              )}
 
-              {latestCourseData?.leaderboardEnabled && (
+              {/* {latestCourseData?.leaderboardEnabled && (
                 <Card className="w-full shadow-4dp text-left rounded-lg bg-white border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-xl">Leaderboard</CardTitle>
@@ -1424,9 +1426,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              )} */}
 
               {/* Attendance */}
+              {showEmailGatedCards && (
               <Card className="w-full text-left rounded-lg border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-xl">Attendance</CardTitle>
@@ -1512,7 +1515,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   ) : (
                                     <Link
                                       className="w-fit font-manrope text-sm  hover:text-primary hover:underline underline-offset-[5px]"
-                                      href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}${orgId ? `&orgId=${orgId}` : ''}`}
+                                      href={`/student/course/${courseId}/org/${orgId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
                                     >
                                       {ellipsis(
                                         classItem.title,
@@ -1529,28 +1532,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <Badge
                                   variant="outline"
                                   className={
-                                    classItem.s3Link ===
-                                      null ||
-                                      classItem.s3Link ===
-                                      'not found'
-                                      ? 'text-warning border-warning'
-                                      : classItem.s3Link &&
-                                        classItem.attendanceStatus ===
-                                        'absent'
-                                        ? 'text-destructive border-destructive'
-                                        : 'text-success border-success'
+                                    classItem.attendanceStatus === 'absent'
+                                      ? 'text-destructive border-destructive'
+                                      : 'text-success border-success'
                                   }
                                 >
-                                  {classItem.s3Link ===
-                                    null ||
-                                    classItem.s3Link ===
-                                    'not found'
-                                    ? 'Processing'
-                                    : classItem.s3Link &&
-                                      classItem.attendanceStatus ===
-                                      'absent'
-                                      ? 'Absent'
-                                      : 'Present'}{' '}
+                                  {classItem.attendanceStatus === 'absent'
+                                    ? 'Absent'
+                                    : 'Present'}{' '}
                                 </Badge>
                                 <TooltipProvider>
                                   <Tooltip>
@@ -1656,6 +1645,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   )}
                 </CardContent>
               </Card>
+              )}
+              </div>
             </div>
           </div>
         </div>

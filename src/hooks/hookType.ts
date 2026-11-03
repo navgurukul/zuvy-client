@@ -9,6 +9,10 @@ export interface TrackingDataItem {
   topicId: number;
   chapterTrackingDetails: ChapterTrackingDetail[];
   status: 'Pending' | 'Completed';
+  sparks?: number;
+  isLock?: boolean;
+  lockReason?: string | null;
+  lockMessage?: string | null;
 }
 
 export interface ModuleDetail {
@@ -42,208 +46,21 @@ export interface UseAllChaptersWithStatusReturn {
 
 
 
-
-// UseAllModulesForStudents
-
-export interface Module {
-  id: number;
-  name: string;
-  description: string;
-  typeId: number;
-  order: number;
-  projectId: number | null;
-  isLock: boolean;
-  timeAlloted: number;
-  progress: number;
-  ChapterId: number;
-  quizCount: number;
-  topic: string;
-  assignmentCount: number;
-  codingProblemsCount: number;
-  articlesCount: number;
-  formCount: number;
-}
-
-export interface UseAllModulesForStudentsReturn {
-  modules: Module[];
-  loading: boolean;
-  error: string | null;
-}
-
-
-
-// UseAssessmentDetailsResponse
-export interface AssessmentDetails {
-  status: string;
-  statusCode: number;
-  assessmentState: string;
-  message: string;
-  id: number;
-  assessmentId: number;
-  bootcampId: number;
-  moduleId: number;
-  chapterId: number;
-  codingQuestionTagId: number[];
-  mcqTagId: number[];
-  easyCodingQuestions: number;
-  mediumCodingQuestions: number;
-  hardCodingQuestions: number;
-  totalCodingQuestions: number;
-  totalMcqQuestions: number;
-  easyMcqQuestions: number;
-  mediumMcqQuestions: number;
-  hardMcqQuestions: number;
-  weightageCodingQuestions: number;
-  weightageMcqQuestions: number;
-  easyCodingMark: number;
-  mediumCodingMark: number;
-  hardCodingMark: number;
-  easyMcqMark: number;
-  mediumMcqMark: number;
-  hardMcqMark: number;
-  tabChange: any | null;
-  webCamera: any | null;
-  passPercentage: number;
-  screenRecord: any | null;
-  embeddedGoogleSearch: any | null;
-  deadline: string | null;
-  timeLimit: number;
-  marks: any | null;
-  copyPaste: any | null;
-  order: number;
-  canEyeTrack: boolean;
-  canTabChange: boolean;
-  canScreenExit: boolean;
-  canCopyPaste: boolean;
-  publishDatetime: string;
-  startDatetime: string;
-  endDatetime: string;
-  unpublishDatetime: string | null;
-  currentState: number;
-  createdAt: string;
-  updatedAt: string;
-  version: any | null;
-  submitedOutsourseAssessments: any[];
-  ModuleAssessment: {
-    id: number;
-    title: string;
-    description: string;
-  };
-  totalQuizzes: number;
-  totalOpenEndedQuestions: number;
-}
-
-export interface UseAssessmentDetailsResponse {
-  assessmentDetails: AssessmentDetails | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-
-// UseAssignmentDetailsReturn
-export interface AssignmentTracking {
-  id: number;
-  projectUrl: string | string[];
-  timeLimit: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  chapterId: number;
-  bootcampId: number;
-  moduleId: number;
-}
-
-export interface AssignmentChapterDetails {
-  completionDate: string; // This is the deadline
-}
-
-export interface AssignmentDetailsData {
-  assignmentTracking: AssignmentTracking[];
-  chapterDetails: AssignmentChapterDetails;
-  status: 'Completed' | 'Pending';
-  quizDetails?: any[];
-}
-
-export interface ApiResponse {
-  data: AssignmentDetailsData;
-}
-
-export interface UseAssignmentDetailsReturn {
-  assignmentData: AssignmentDetailsData | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-
-
-// BootcampProgressResponse 
-
-export interface BootcampTracking {
-  id: number;
-  name: string;
-  description: string | null;
-  collaborator: string | null;
-  coverImage: string;
-  bootcampTopic: string;
-  startTime: string;
-  duration: string;
-  language: string;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-}
-
-export interface InstructorDetails {
-  instructorId: number;
-  instructorName: string;
-  instructorProfilePicture: string | null;
-}
-
-export interface BatchInfo {
-  batchName: string;
-  totalEnrolledStudents: number;
-}
-
-export interface BootcampProgressData {
-  id: number;
-  userId: number;
-  progress: number;
-  bootcampId: number;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-  bootcampTracking: BootcampTracking;
-}
-
-export interface BootcampProgressResponse {
-  status: string;
-  message: string;
-  data: BootcampProgressData;
-  instructorDetails: InstructorDetails;
-  batchInfo: BatchInfo;
-}
-
-
-
-
-// useChapterCompletion
-export interface UseChapterCompletionParams {
-  courseId: string;
-  moduleId: string;
-  chapterId: string;
-  onSuccess?: () => void;
-}
-
-export interface UseChapterCompletionReturn {
-  isCompleting: boolean;
-  completeChapter: () => Promise<void>;
-}
-
-
-
 // UseChapterDetails
+export interface LiveClassSession {
+  id: number;
+  meetingId: string;
+  hangoutLink: string;
+  startTime: string;
+  endTime: string;
+  title: string;
+  s3link: string;
+  status: string;          // 'upcoming' | 'ongoing' | 'completed'
+  attendance: string;      // 'present' | 'absent'
+  duration: number;
+  batchId?: number;        // which batch this session belongs to
+}
+
 export interface ChapterDetails {
   id: number;
   title: string;
@@ -262,6 +79,7 @@ export interface ChapterDetails {
   version: string | null;
   chapterTrackingDetails: any[];
   status: string;
+  sessions?: LiveClassSession[];  // present when topicId === 8 (live class)
 }
 
 export interface UseChapterDetailsResponse {
@@ -275,34 +93,6 @@ export interface ChapterDetailsResponse {
   status: 'success' | 'error';
   trackingData: ChapterDetails;
 }
-
-
-// useCodingChallenge
-export interface UseCodingChallengeProps {
-  questionId: string;
-  onChapterComplete?: () => void;
-  orgId?: string | null;
-}
-
-// useCodingSubmissions
-export interface CodingSubmissionsResponse {
-  status?: string;
-  action?: string;
-  message?: string;
-  data?: {
-    sourceCode: string;
-    TestCasesSubmission: any[];
-  };
-}
-
-export interface UseCodingSubmissionsParams {
-  codingOutsourseId: string | null;
-  assessmentSubmissionId: string | null;
-  questionId: string | null;
-  enabled?: boolean;
-}
-
-
 
 
 
@@ -343,130 +133,8 @@ export interface UseCompletedClassesReturn {
   completedClassesData: CompletedClassesData | null;
   loading: boolean;
   error: string | null;
+  fetchCompletedClasses: (courseId: string | number, studentId: string | number) => Promise<any>;
 }
-
-
-
-
-
-
-// useCourseSyllabus
-export interface Chapter {
-  chapterId: number;
-  chapterName: string;
-  chapterDescription: string | null;
-  chapterType: string;
-  chapterDuration: string;
-  chapterOrder: number;
-}
-
-export interface Module {
-  moduleId: number;
-  moduleName: string;
-  moduleDescription: string;
-  moduleDuration: string;
-  chapters: Chapter[];
-  isLock: boolean
-}
-
-export interface CourseSyllabusData {
-  bootcampId: number;
-  bootcampName: string;
-  bootcampDescription: string;
-  collaboratorName: string;
-  courseDuration: string;
-  totalStudentsInCourse: number;
-  studentBatchId: number;
-  studentBatchName: string;
-  instructorName: string;
-  instructorProfilePicture: string | null;
-  modules: Module[];
-  coverImage: string;
-  collaboratorImage: string;
-}
-
-export interface ApiResponses {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: CourseSyllabusData;
-}
-
-
-
-export interface UseCourseSyllabusReturn {
-  syllabusData: CourseSyllabusData | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-
-
-// UseFeedbackForm
-export interface UseFeedbackFormProps {
-  moduleId: string
-  chapterId: number
-  bootcampId: number
-  onSuccess?: () => void
-}
-
-type QuestionType = 'mcq' | 'checkbox' | 'text' | 'date' | 'time';
-
-export interface FeedbackQuestion {
-  id: string;
-  question: string;
-  type: QuestionType;
-  options?: { id: string; label: string }[];
-  required: boolean;
-}
-
-export interface FeedbackTracking {
-  questionId: string;
-  selectedOptions?: string[];
-  answerText?: string;
-  answerDate?: string;
-  answerTime?: string;
-}
-
-export interface FeedbackFormResponse {
-  questions: FeedbackQuestion[];
-  trackedData: FeedbackTracking[];
-  status: string;
-}
-
-
-
-// useGetMCQs
-
-export interface QuizVariant {
-  id: number;
-  text: string;
-}
-
-export interface QuizData {
-  id: number;
-  question: string;
-  difficulty: string;
-  tagId: number;
-  quizVariants: QuizVariant[];
-}
-
-export interface QuizApiResponse {
-  data: QuizData[];
-}
-
-export interface Tag {
-  id: number;
-  tagName: string;
-}
-
-export interface Props {
-  id: number;
-  tags?: Tag[];
-  assesmentSide?: boolean;
-}
-
 
 
 
@@ -497,105 +165,6 @@ export interface LatestUpdatedCourseResponse {
   leaderboardEnabled: boolean;
   data: LatestUpdatedCourseData;
 }
-
-
-
-
-
-
-// useProjectDetails
-export interface ProjectInstruction {
-  description: string;
-}
-
-export interface ProjectTrackingData {
-  // Add tracking data properties as needed
-  projectLink: string | string[];
-}
-
-export interface ProjectData {
-  id: number;
-  title: string;
-  instruction: ProjectInstruction;
-  isLock: boolean;
-  deadline: string;
-  version: number | null;
-  projectTrackingData: ProjectTrackingData[];
-}
-
-export interface ProjectDetailsResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: {
-    moduleId: number;
-    bootcampId: number;
-    typeId: number;
-    projectData: ProjectData[];
-    status: 'Pending' | 'Completed';
-  };
-}
-
-export interface UseProjectDetailsReturn {
-  projectData: ProjectData[];
-  moduleId: number;
-  bootcampId: number;
-  typeId: number;
-  status: 'Pending' | 'Completed';
-  loading: boolean;
-  isRefetching: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
-
-
-
-// UseProjectSubmission
-export interface ProjectSubmissionResponse {
-  message: string;
-  status: string;
-  data?: any;
-}
-
-export interface UseProjectSubmissionReturn {
-  submitProject: (projectLinks: string[], projectId: string, moduleId: string, courseId: string) => Promise<boolean>;
-  isSubmitting: boolean;
-  error: string | null;
-}
-
-
-
-
-// useQuizResults
-export interface QuizOption {
-  [key: string]: string;
-}
-
-
-export interface SubmissionData {
-  status: string;
-  chosenOption?: number;
-}
-
-export interface QuizResult {
-  quizId: number;
-  question: string;
-  options: QuizOption;
-  correctOption: number;
-  mark: string;
-  difficulty: string;
-  submissionsData?: SubmissionData;
-}
-
-export interface QuizResultsResponse {
-  mcqs: QuizResult[];
-}
-
-export interface UseQuizResultsParams {
-  submissionId: string | null;
-  enabled?: boolean;
-}
-
 
 
 
@@ -649,145 +218,6 @@ export interface StudentData {
 
 
 
-
-// useUpcomingEvents
-
-export interface Event {
-  type: "Live Class" | "Assessment" | "Assignment";
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  bootcampId: number;
-  bootcampName: string;
-  batchId: number;
-  eventDate: string;
-  moduleId: number;
-  chapterId: number;
-}
-
-export interface MentorSessionEvent {
-  type: "Mentor Session";
-  id: number;
-  mentorName: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  sessionStatus: string;
-  bookingStatus: string;
-  meetingLink: string | null;
-  meetingType: string;
-  slotType: string;
-  eventDate: string;
-}
-
-export interface UpcomingEventsData {
-  events: Event[];
-  mentorSessions?: MentorSessionEvent[];
-  totalEvents: number;
-  totalPages: number;
-}
-export interface UseUpcomingEventsReturn {
-  upcomingEventsData: UpcomingEventsData | null;
-  loading: boolean;
-  error: string | null;
-}
-
-// useBootcampSettings.tsx
-export interface BootcampSettingsData {
-  type: string;
-  isModuleLocked: boolean;
-  mentorshipEnabled: boolean;
-  leaderboardEnabled: boolean;
-}
-
-export interface UseBootcampSettingsReturn {
-  bootcampSettings: BootcampSettingsData | null;
-  loading: boolean;
-  error: string | null;
-  updateError: string | null; // Add this
-  updateSettings: (settings: BootcampSettingsData) => Promise<void>;
-  refetch: () => Promise<void>;
-}
-
-// useBootcampDelete.tsx
-export interface UseBootcampDeleteReturn {
-  deleteBootcamp: (bootcampId: string) => Promise<void>
-  isDeleting: boolean
-  error: string | null
-}
-
-export interface coursePermissions {
-  createCourse: boolean;
-  viewCourse: boolean;
-  editCourse: boolean;
-  deleteCourse: boolean;
-  viewContent: boolean;
-  viewRolesAndPermissions: boolean;
-};
-
-
-// useCreateCodingQuestion
-export interface CreateCodingQuestionData {
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  tagId: number;
-  constraints: string;
-  testCases: Array<{
-    inputs: Array<{
-      parameterType: string;
-      parameterValue: any;
-      parameterName: string;
-    }>;
-    expectedOutput: {
-      parameterType: string;
-      parameterValue: any;
-    };
-  } | null>;
-  createdAt: string;
-  updatedAt: string;
-  content: any;
-}
-
-export interface UseCreateCodingQuestionReturn {
-  createQuestion: (data: CreateCodingQuestionData) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-}
-
-
-
-// useEditCodingQuestion
-export interface EditCodingQuestionData {
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  tagId: number;
-  constraints: string;
-  testCases: Array<{
-    inputs: Array<{
-      parameterType: string;
-      parameterValue: any;
-      parameterName: string;
-    }>;
-    expectedOutput: {
-      parameterType: string;
-      parameterValue: any;
-    };
-  } | null>;
-  updatedAt: string;
-  content: any;
-}
-
-export interface UseEditCodingQuestionReturn {
-  editQuestion: (orgId: number, questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-}
-
-
 // useCreateOpenEndedQuestion
 export interface CreateOpenEndedQuestionData {
   question: string;
@@ -801,146 +231,7 @@ export interface UseCreateOpenEndedQuestionReturn {
   error: string | null;
 }
 
-// Tracking Log Types
-export interface TrackingLogEntry {
-  id: number
-  orgId: number
-  actorUserId: number
-  actorName: string
-  actorEmail: string
-  permissionId: number
-  resourceId: number
-  action: string
-  resourceType: string
-  description: string
-  createdAt: string
-  status: string
-  actorRoles: string[]
-}
 
-export interface TrackingLogPagination {
-  offset: number
-  limit: number
-  total: number
-}
-
-export interface TrackingLogData {
-  logs: TrackingLogEntry[]
-  pagination: TrackingLogPagination
-}
-
-export interface TrackingLogResponse {
-  success: boolean
-  message: string
-  data: TrackingLogData
-}
-
-export interface UseTrackingLogArgs {
-  orgId?: number
-  actorUserId?: number | string
-  action?: string
-  role?: string
-  status?: string
-  offset?: number
-  limit?: number
-  timeRange?: string
-  search?: string
-  initialFetch?: boolean
-}
-
-export interface UseTrackingLogReturn {
-  trackingLogs: TrackingLogEntry[]
-  loading: boolean
-  error: unknown
-  totalRows: number
-  pagination: TrackingLogPagination
-  refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
-  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
-}
-
-
-
-// useFetchGlobalCourses
-export interface GlobalCourseInstructorDetails {
-  name: string;
-  profilePicture: string | null;
-}
-
-export interface GlobalCourseBatchInfo {
-  id: number;
-  name: string;
-  bootcampId: number;
-  instructorId: number;
-  startDate: string | null;
-  endDate: string | null;
-  status: string;
-  capEnrollment: number;
-  createdAt: string;
-  updatedAt: string;
-  instructorDetails: GlobalCourseInstructorDetails;
-}
-
-export interface GlobalCourseEnrolledInfo {
-  students_in_bootcamp: number;
-  unassigned_students: number;
-}
-
-export interface GlobalCourseData {
-  id: number;
-  name: string;
-  description: string;
-  collaborator: string;
-  coverImage: string;
-  bootcampTopic: string;
-  startTime: string;
-  duration: number;
-  language: string;
-  organizationId: number;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-  bootcampId: number;
-  type: string;
-  isModuleLocked: boolean;
-  batchInfo: GlobalCourseBatchInfo;
-  enrolledInfo: GlobalCourseEnrolledInfo;
-  courseOrgName?: string;
-}
-
-export interface GlobalCourseResponse {
-  message?: string;
-  code?: number;
-  isSuccess?: boolean;
-  data?: GlobalCourseData[]; // Array of courses
-}
-
-export interface UseFetchGlobalCoursesReturn {
-  globalCourses: GlobalCourseData[]; // Changed to array
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-
-// useEnrollCourse
-export interface EnrollCourseResponse {
-  isSuccess?: boolean;
-  status?: 'success' | 'error';
-  message?: string;
-  code?: number;
-}
-
-export interface EnrollCourseResult {
-  success: boolean;
-  message: string;
-  code?: number;
-}
-
-export interface UseEnrollCourseReturn {
-  enrollCourse: (bootcampId: number) => Promise<EnrollCourseResult>;
-  isEnrolling: boolean;
-  error: string | null;
-}
 
 // useSwitchOrg
 export interface SwitchOrgPayload {
@@ -985,4 +276,524 @@ export interface UseSwitchOrgReturn {
   switchOrg: (payload: SwitchOrgPayload) => Promise<SwitchOrgResult>;
   isSwitching: boolean;
   error: string | null;
+}
+
+
+
+// usePracticeCodeSubmit
+export interface PracticeCodeSubmitPayload {
+  languageId: number;
+  sourceCode: string;
+}
+
+export interface PracticeCodeTestCaseResult {
+  status: string;
+  stdout?: string;
+  stdOut?: string;
+  stderr?: string;
+  stdErr?: string;
+  stdIn?: any;
+  expectedOutput?: any;
+  compileOutput?: any;
+  testCases?: any;
+  memory?: string;
+  time?: string;
+  [key: string]: any;
+}
+
+export interface PracticeCodeSubmitResponse {
+  status?: string;
+  message?: string;
+  data: PracticeCodeTestCaseResult[];
+}
+
+export interface UsePracticeCodeSubmitParams {
+  questionId: string | null;
+  assessmentSubmitId: number | null | undefined;
+  selectedCodingOutsourseId: number | null | undefined;
+}
+
+
+// useQuizSubmission
+export interface QuizAnswerDto {
+  questionId: number;
+  variantId: number;
+  attemptCount: number;
+  chosenOption: number;
+}
+
+export interface QuizSubmissionPayload {
+  quizSubmissionDto: QuizAnswerDto[];
+}
+
+export interface QuizSubmissionResponse {
+  status?: string;
+  message?: string;
+  data?: any;
+}
+
+export interface UseQuizSubmissionReturn {
+  submitQuiz: (payload: QuizSubmissionPayload) => Promise<QuizSubmissionResponse | null>;
+  isSubmitting: boolean;
+  error: string | null;
+}
+
+// useOpenEndedSolutionForStudents
+export interface OpenEndedQuestionDetail {
+  id: number;
+  question: string;
+  difficulty: string;
+}
+
+export interface OpenEndedSubmissionData {
+  id: number;
+  openEndedQuestionId: number;
+  assessmentSubmissionId: number;
+  answer: string;
+  OpenEndedQuestion: OpenEndedQuestionDetail;
+}
+
+export interface UseOpenEndedSolutionForStudentsReturn {
+  data: OpenEndedSubmissionData[] | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+export interface TopicSubtopic {
+  [key: string]: string;
+}
+
+export interface Topic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: TopicSubtopic;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TopicListResponse = Topic[];
+
+export interface NewTopicSubtopicMap {
+  [key: string]: string;
+}
+
+export interface CreatedTopic {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTopicRequestBody {
+  name: string;
+  description: string;
+  subtopic: NewTopicSubtopicMap;
+}
+
+export type CreateTopicApiResponse = CreatedTopic;
+
+export interface DifficultyDistribution {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface QuestionCounts {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicConfiguration {
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  totalQuestions: number;
+  questionCounts: QuestionCounts;
+}
+
+export interface TopicsMap {
+  [topicName: string]: number;
+}
+
+export interface GenerateQuestionsRequestBody {
+  // domainName: string;
+  topicName: string;
+  topicDescription: string;
+  subtopics: string[];
+  numberOfQuestions: number;
+  learningObjectives: string;
+  targetAudience: string;
+  focusAreas: string;
+  bloomsLevel: string;
+  questionStyle: string;
+  difficultyDistribution: DifficultyDistribution;
+  questionCounts: QuestionCounts;
+  topics: TopicsMap;
+  topicConfigurations: TopicConfiguration[];
+  levelId: number | null;
+}
+
+export type GenerateQuestionsApiResponse = GenerateQuestionsRequestBody;
+
+
+export interface AddSubtopicRequestBody {
+  subtopic: string;
+}
+
+export interface SubtopicMap {
+  [key: string]: string;
+}
+
+export interface TopicWithSubtopics {
+  id: number;
+  orgId: string;
+  name: string;
+  description: string;
+  subtopic: SubtopicMap | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AddSubtopicApiResponse = TopicWithSubtopics;
+
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+  startDatetime: string; // ISO 8601 string, e.g. "2026-04-10T09:00:00+05:30"
+  endDatetime: string;   // ISO 8601 string
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+// types/topic.ts
+
+export interface DifficultyLevel {
+  easy: number;
+  medium: number;
+  hard: number;
+}
+
+export interface TopicWithDifficultyLevel {
+  id: number;
+  name: string;
+  difficultyLevel: DifficultyLevel;
+}
+
+// types/aiAssessment.ts
+
+export interface PoolTopic {
+  id: number;
+  name: string;
+}
+
+export interface CreateAiAssessmentPayload {
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  objective: string;
+  description: string;
+  audience: string;
+  expectedOutcomes: string;
+  totalNumberOfQuestions: number;
+  chapterIds: number[];
+  moduleId: number;
+  poolTopics: PoolTopic[];
+}
+
+// Adjust to match your actual API response shape
+export interface CreateAiAssessmentResponse {
+  id: number;
+  bootcampId: number;
+  chapterId: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface MapQuestionsRequestBody {
+    aiAssessmentId: number;
+}
+
+export interface MapQuestionsApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface QuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface AiAssessmentQuestion {
+    position: number;
+    isCommon: boolean;
+    questionId: number;
+    question: string;
+    difficulty: "easy" | "medium" | "hard";
+    language: string;
+    options: QuestionOption;
+    correctOption: number;
+    levelId: string;
+    topicName: string;
+    topicDescription: string;
+}
+
+export interface AiAssessmentSet {
+    id: number;
+    setIndex: number;
+    label: string;
+    levelCode: string;
+    status: string;
+    questions: AiAssessmentQuestion[];
+}
+
+export interface GetQuestionSetsApiResponse {
+    aiAssessmentId: number;
+    bootcampId: number;
+    title: string;
+    description: string | null;
+    totalNumberOfQuestions: number;
+    scope: string;
+    status: string;
+    publishedAt: string | null;
+    isPublished: boolean;
+    setCount: number;
+    sets: AiAssessmentSet[];
+}
+
+export interface PublishAssessmentRequestBody {
+    endDatetime: string;
+}
+
+export interface ScheduleAssessmentRequestBody {
+  startDatetime: string;
+  endDatetime: string;
+}
+
+export interface PublishAssessmentApiResponse {
+    success: boolean;
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface PoolTopic {
+    id: number;
+    name: string;
+}
+
+export interface AiAssessmentByChapter {
+    id: number;
+    bootcampId: number;
+    chapterId: number;
+    scope: string;
+    status: string;
+    moduleId: number;
+    title: string;
+    description: string | null;
+    objective: string;
+    expectedOutcomes: string;
+    audience: string | null;
+    chapterIds: number[];
+    poolTopics: PoolTopic[];
+    totalNumberOfQuestions: number;
+    totalQuestionsWithBuffer: number;
+    startDatetime: string | null;
+    endDatetime: string | null;
+    publishedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type GetAiAssessmentsByChapterApiResponse = AiAssessmentByChapter[];
+
+export interface ReplaceQuestionOption {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface ReplaceQuestionOption_ {
+    id: number;
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+    question: string;
+    options: ReplaceQuestionOption;
+    correctOption: number;
+    levelId: string;
+}
+
+export interface GetReplacementQuestionsApiResponse {
+    data: ReplaceQuestionOption_[];
+    total: number;
+}
+
+export interface GetReplacementQuestionsParams {
+    topicName: string;
+    difficulty: "easy" | "medium" | "hard";
+  questionSetId: number;
+  excludeId: number;
+}
+
+export interface ReplaceQuestionRequestBody {
+    questionSetId: number;
+    replacementQuestionId: number;
+}
+
+export interface ReplaceQuestionApiResponse {
+    message?: string;
+    // add actual response fields once you confirm the API shape
+}
+
+export interface ReplaceQuestionResult {
+  data: ReplaceQuestionApiResponse;
+  status: number;
+}
+
+export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
+}
+
+// export type Difficulty = "easy" | "medium" | "hard";
+
+export interface QuestionOptionMap {
+    "1": string;
+    "2": string;
+    "3": string;
+    "4": string;
+}
+
+export interface DifficultyDistribution {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface QuestionCounts {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface GetQuestionByIdApiResponse {
+    id: number;
+    orgId: string;
+    domainName: string;
+    topicName: string;
+    topicDescription: string;
+    subtopics: string[];
+    learningObjectives: string;
+    targetAudience: string;
+    focusAreas: string;
+    bloomsLevel: string;
+    questionStyle: string;
+    question: string;
+    difficulty: Difficulty;
+    language: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+    difficultyDistribution: DifficultyDistribution;
+    questionCounts: QuestionCounts;
+    levelId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateQuestionRequestBody {
+    question: string;
+    options: QuestionOptionMap;
+    correctOption: number;
+}
+
+export interface UpdateQuestionApiResponse {
+    success: boolean;
+    message?: string;
 }

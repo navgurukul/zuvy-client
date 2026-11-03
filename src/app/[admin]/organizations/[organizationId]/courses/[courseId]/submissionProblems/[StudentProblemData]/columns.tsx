@@ -1,48 +1,32 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { usePathname } from 'next/navigation'
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { getUser } from '@/store/store'
+
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
+        cell: ({ row }) => (
+            <div className="flex items-center">
+                <Avatar className="ml-2 h-[35px] w-[35px]">
+                    <AvatarImage
+                        src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
                     />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+                </Avatar>
+            </div>
+        ),
         enableSorting: false,
         enableHiding: false,
     },
@@ -57,38 +41,56 @@ export const columns: ColumnDef<Task>[] = [
             />
         ),
         cell: ({ row }) => (
-            <div className="w-[150px] text-left">{row.getValue('name')}</div>
+            <div className="w-[150px] text-left font-medium">{row.getValue('name')}</div>
         ),
         enableHiding: false,
-    }
-,    
-{
-    accessorKey: 'email',
-    header: ({ column, onSort }: any) => (
-        <DataTableColumnHeader
-            column={column}
-            title="Email"
-            onSort={onSort}
-            sortField="email"
-        />
-    ),
-    cell: ({ row }) => (
-        <div className="flex space-x-2">
-            <span className="max-w-[500px] truncate font-medium">
-                {row.getValue('email')}
-            </span>
-        </div>
-    ),
-}
-,
+    },
+    {
+        accessorKey: 'id',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Student ID" />
+        ),
+        id: 'studentId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: false,
+    },
+    {
+        accessorKey: 'email',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Email"
+                onSort={onSort}
+                sortField="email"
+            />
+        ),
+        cell: ({ row }) => (
+            <div className="flex space-x-2">
+                <span className="max-w-[500px] truncate font-medium">
+                    {row.getValue('email')}
+                </span>
+            </div>
+        ),
+    },
     {
         accessorKey: 'batchName',
-        header: 'Batch',
+        header: () => <div className="flex w-full items-center justify-start text-left">Batch</div>,
+        // header: 'Batch',
         cell: ({ row }) => {
             const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
+                    <Badge variant="outline" className="text-foreground border-foreground">
                         {batchName}
                     </Badge>
                 </div>

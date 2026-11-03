@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useParams } from 'next/navigation';
-import useAssignmentDetails from '@/hooks/useAssignmentDetails';
-import useChapterCompletion from '@/hooks/useChapterCompletion';
-import { api } from '@/utils/axios.config';
+import useAssignmentDetails from '@/app/student/hooks/useAssignmentDetails';
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion';
+import useSubmitQuizAndAssignment from '@/app/student/hooks/useSubmitQuizAndAssignment';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import parse from 'html-react-parser';
@@ -43,6 +43,12 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
       setLocalIsCompleted(true);
       onChapterComplete();
     },
+  });
+
+  const { submitQuiz } = useSubmitQuizAndAssignment({
+    courseId: courseId as string,
+    moduleId: moduleId as string,
+    chapterId: chapterDetails.id,
   });
 
   // Update local state when assignment data changes
@@ -88,21 +94,17 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     );
     
     try {
-      await api.post(
-        `/tracking/updateQuizAndAssignmentStatus/${courseId}/${moduleId}?chapterId=${chapterDetails.id}`,
-        { submitQuiz: mappedAnswers }
-      );
+      await submitQuiz({ submitQuiz: mappedAnswers });
       await completeChapter();
       refetchAssignmentDetails();
-      toast({
-        title: 'Success',
-        description: 'Submitted Quiz Successfully',
-      });
+      // toast({
+      //   title: 'Success',
+      //   description: 'Submitted Quiz Successfully',
+      // });
     } catch (err: any) {
-      toast({
+      toast.error({
         title: 'Error',
         description: err.response?.data?.message || 'Failed to submit quiz.',
-        variant: 'destructive',
       });
     } finally {
       // setIsSubmitting(false);
@@ -202,7 +204,7 @@ if (loading) {
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 max-w-3xl ">
-          <h5 className=" font-bold text-foreground ml-5">{chapterDetails.title}</h5>
+          <h5 className="font-bold font-body text-foreground ml-5">{chapterDetails.title}</h5>
           <Badge 
             variant="outline" 
             className={cn(

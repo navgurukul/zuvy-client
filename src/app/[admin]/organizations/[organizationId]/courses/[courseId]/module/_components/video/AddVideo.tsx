@@ -26,8 +26,12 @@ import {
     AddVideoProps,
     EditChapterResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
-import { getEmbedLink, isLinkValid } from '@/utils/admin'
-import useEditChapter from '@/hooks/useEditChapter'
+import {
+    getEmbedLink,
+    isLinkValid,
+    isTrackableVideoLink,
+} from '@/utils/admin'
+import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
@@ -52,7 +56,7 @@ const formSchema = z.object({
             return links.every((link) => isLinkValid(link))
         },
         {
-            message: 'Only YouTube and Google Drive links are allowed.',
+            message: 'Only YouTube, Vimeo, Google Drive, and Zoom links are allowed.',
         }
     ),
 })
@@ -73,6 +77,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
+    const [videoDurationSeconds, setVideoDurationSeconds] = useState<number>()
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -109,6 +114,10 @@ const AddVideo: React.FC<AddVideoProps> = ({
             title: values.videoTitle,
             description: values.description,
             links: [modifiedLink],
+            ...(isTrackableVideoLink(modifiedLink) &&
+            videoDurationSeconds !== undefined
+                ? { videoDurationSeconds }
+                : {}),
         }
 
         try {
@@ -131,6 +140,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
 
 
     useEffect(() => {
+        setVideoDurationSeconds(undefined)
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
@@ -313,6 +323,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                     content?.contentDetails?.[0]
                                                         ?.links?.[0] || ''
                                                 )}
+                                                onDuration={setVideoDurationSeconds}
                                             />
                                         )}
                                     </div>
@@ -411,14 +422,15 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                         !isValid ||
                                         isSubmitting
                                     }
-                                    className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
-                                        !canEdit ||
-                                        !isDirty ||
-                                        !isValid ||
-                                        isSubmitting
-                                            ? 'bg-muted/20 cursor-not-allowed opacity-70'
-                                            : 'bg-primary'
-                                    }`}
+                                    // className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                                    //     !canEdit ||
+                                    //     !isDirty ||
+                                    //     !isValid ||
+                                    //     isSubmitting
+                                    //         ? 'bg-muted/20 cursor-not-allowed opacity-70'
+                                    //         : 'bg-primary'
+                                    // }`}
+                                    
                                 >
                                     {isSubmitting
                                         ? 'Saving...'

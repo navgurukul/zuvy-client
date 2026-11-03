@@ -124,7 +124,7 @@ const Dropzone = ({
                                         Upload Status
                                     </h3>
                                     <div className="w-2 h-2 rounded-full bg-green-500" />
-                                    <span className="text-black">
+                                    <span className="text-foreground">
                                         PDF is uploaded
                                     </span>
                                     <span className="flex space-x-2 ">
@@ -195,7 +195,7 @@ const Dropzone = ({
                                                     )}
                                                 </span>
                                             </div>
-                                            <span className="text-black ">
+                                            <span className="text-foreground ">
                                                 {previewPdfLink && (
                                                     <div>
                                                         <Link

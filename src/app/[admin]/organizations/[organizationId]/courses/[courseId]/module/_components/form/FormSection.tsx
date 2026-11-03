@@ -201,9 +201,9 @@ const FormSection: React.FC<FormSectionProps> = ({
     }, [selectedSection, index, form, questionData])
 
     return (
-        <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white">
+        <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white dark:bg-card dark:border-gray-700">
             <div className="flex flex-row justify-between">
-                <p className="flex text-left text-md text-gray-600 font-semibold mb-1">
+                <p className="flex text-left text-md text-gray-600 dark:text-muted-foreground font-semibold mb-1">
                     Question {index + 1}
                 </p>
                 <button
@@ -257,7 +257,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 render={({ field }) => (
                     <FormItem>
                         <div className="flex flex-row justify-between mt-4">
-                            <p className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                            <p className="flex text-left text-sm text-gray-600 dark:text-muted-foreground font-semibold mb-1">
                                 Question Type
                             </p>
                             <div className="flex flex-row justify-end gap-4">

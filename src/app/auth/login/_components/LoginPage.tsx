@@ -7,27 +7,31 @@ declare global {
 }
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { setCookie } from 'cookies-next'
+import { setCookie, deleteCookie } from 'cookies-next'
 import {
     GoogleLogin,
     GoogleOAuthProvider,
     CredentialResponse,
 } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
-import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { getUser } from '@/store/store'
+import { getUser, useThemeStore, useStudentData } from '@/store/store'
+import { setApiAuthToken } from '@/utils/axios.config'
 import Image from 'next/image'
-import { MentorProfileResponse } from '@/hooks/useGetMentorProfile'
-import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
-import { useThemeStore } from '@/store/store'
+import { MentorProfileResponse } from '@/app/[admin]/hooks/hookType'
+import { getMentorProfileApi } from '@/app/[admin]/hooks/useGetMentorProfile'
+import { useLogin } from '@/hooks/useLogin'
+import { DecodedGoogleToken, AuthResponse } from "@/app/auth/login/_components/componentLogin"
+import { isRedirectAllowed } from '@/utils/redirectValidation'
+import { rememberAuthEntryRoute } from '@/utils/authEntryRoute'
 
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
+    const { login } = useLogin()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
 
@@ -82,30 +86,6 @@ function LoginPage() {
     const firstRowCards = socialProofData.slice(0, 5)
     const secondRowCards = socialProofData.slice(5, 8)
 
-    type LearnerProfileStrengthResponse = {
-        percentage?: number
-        profileCompletion?: number
-        isProfileComplete?: boolean
-        level?: string
-        message?: string
-    }
-
-    const getStudentStrengthPercentage = async (): Promise<number | null> => {
-        try {
-            const res = await api.get<LearnerProfileStrengthResponse>('/learner-profile/strength')
-            const completionValue =
-                typeof res.data?.profileCompletion === 'number'
-                    ? res.data.profileCompletion
-                    : typeof res.data?.percentage === 'number'
-                        ? res.data.percentage
-                        : null
-
-            return completionValue
-        } catch (error) {
-            console.error('Failed to fetch learner profile strength:', error)
-            return null
-        }
-    }
 
     const isMentorProfileComplete = (profile: MentorProfileResponse | null) => {
         if (!profile) return false
@@ -132,9 +112,7 @@ function LoginPage() {
 
     const getMentorProfileCompletion = async (): Promise<boolean | null> => {
         try {
-            const res = await api.get<MentorProfileResponse>(
-                '/instructor/mentor-slots/profile'
-            )
+            const res = await getMentorProfileApi()
             return isMentorProfileComplete(res.data)
         } catch (error) {
             const status = (error as { response?: { status?: number } })?.response?.status
@@ -158,15 +136,15 @@ function LoginPage() {
         avatar: string
         image: string
     }) => (
-        <div className="bg-primary-light p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
+        <div className="bg-primary-light dark:bg-primary-light/20 p-3 rounded-lg flex items-center gap-3 min-w-fit flex-shrink-0">
             <div className="h-12 w-12 relative rounded-full overflow-hidden">
                 <Image src={image} alt={name} fill className="object-cover" />
             </div>
             <div className="text-left">
-                <div className="text-primary-dark font-bold text-md">
+                <div className="text-primary-dark dark:text-primary-dark font-bold text-md">
                     {name}
                 </div>
-                <div className="text-primary-dark text-sm">{role}</div>
+                <div className="text-primary-dark dark:text-primary-dark text-sm">{role}</div>
             </div>
         </div>
     )
@@ -179,14 +157,14 @@ function LoginPage() {
         number: string
         description: string
     }) => (
-        <div className="bg-accent-light p-3 rounded-lg text-center min-w-fit flex-shrink-0">
-            <div className="text-accent-dark font-bold text-md">{number}</div>
-            <div className="text-accent-dark text-sm">{description}</div>
+        <div className="bg-accent-light dark:bg-accent-light/20 p-3 rounded-lg text-center min-w-fit flex-shrink-0">
+            <div className="text-accent-dark dark:text-accent-dark font-bold text-md">{number}</div>
+            <div className="text-accent-dark dark:text-accent-dark text-sm">{description}</div>
         </div>
     )
 
     // Handle successful Google Sign-In
-const handleGoogleSuccess = async (
+    const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
     ) => {
         if (!credentialResponse.credential) {
@@ -211,32 +189,39 @@ const handleGoogleSuccess = async (
                 googleIdToken: credentialResponse.credential,
             }
 
-            const response = await api.post<AuthResponse>(`/auth/login`, googleData)
+            const response = await login(googleData)
 
             // Handle your backend response
             if (response.data.access_token) {
-                localStorage.setItem('access_token', response.data.access_token)
+                rememberAuthEntryRoute()
+                setApiAuthToken(response.data.access_token)
                 localStorage.setItem(
                     'refresh_token',
                     response.data.refresh_token
                 )
 
                 setUser(response.data.user)
+                // useStudentData.setState({ studentData: response.data.user as any })
+                useStudentData.setState({ studentData: response.data.user as any })
+
                 localStorage.setItem('AUTH', JSON.stringify(response.data.user))
 
                 toast.success({
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
                 })
-                localStorage.setItem('isLoginFirst' , 'true')
+
+             
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const normalizedRoles = Array.isArray(response.data.user.rolesList)
+                    // ? response.data.user.rolesList.map((role: any) =>
                     ? response.data.user.rolesList.map((role) =>
-                          String(role).toLowerCase()
-                      )
+
+                        String(role).toLowerCase()
+                    )
                     : []
                 const userRole = normalizedRoles[0] || ''
                 const organizationId = response.data.user.orgId || null
@@ -254,27 +239,35 @@ const handleGoogleSuccess = async (
                 }
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+                if (organizationId) {
+                    setCookie('orgId', String(organizationId))
+                }
+
+                // Clear redirectedUrl so subsequent header navigation isn't trapped by middleware
+                localStorage.removeItem('redirectedUrl')
+                deleteCookie('redirectedUrl', { path: '/' })
+                deleteCookie('redirectedUrl')
+                document.cookie =
+                    'redirectedUrl=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 
                 const shouldForceProfilePage =
                     shouldCheckMentorProfile && mentorProfileCompleted !== true
 
+                const isRedirectValid = isRedirectAllowed(userRole, redirectedUrl)
+
                 if (shouldForceProfilePage && organizationId) {
                     router.push(`/${userRole}/organizations/${organizationId}/profile`)
-                } else if (redirectedUrl) {
+                } else if (isRedirectValid) {
                     router.push(redirectedUrl)
-                } else if (userRole === 'student') {
-                    const strengthPercentage = await getStudentStrengthPercentage()
-                    if (strengthPercentage !== null && strengthPercentage > 20) {
-                        router.push('/student')
-                    } else {
-                        router.push('/student/profile')
-                    }
-                    
                 } else if (userRole === 'super_admin') {
-                     router.push(`/${userRole}/organizations`)
+                    router.push(`/${userRole}/organizations?page=1&limit=10`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
+                    if (organizationId) {
+                        router.push(`/${userRole}/organizations/${organizationId}/courses`)
+                    } else {
+                        router.push(`/${userRole}`)
+                    }
                 }
             }
         } catch (err: any) {
@@ -306,17 +299,11 @@ const handleGoogleSuccess = async (
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
-        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
-        console.log('Current URL:', window.location.href)
-        if (window.location.href.includes('route')) {
-        // if (window.location.href) {
-            console.log('URL has route param')
+        if (urlParams.has('route')) {
             const route = urlParams.get('route')
-            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
-            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
-            setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
+            setCookie('redirectedUrl', btoa(redirectedUrl))
         }
     }, [router])
 
@@ -375,17 +362,17 @@ const handleGoogleSuccess = async (
                                             src={'/zuvy-logo-horizontal-dark.png'}
                                             alt="Zuvy Logo"
                                             className="mx-auto"
-                                            width={48}  
+                                            width={48}
                                             height={48}
                                         />
                                     ) : (
-                                    <Image
-                                        src={'/zuvy-logo-horizontal.png'}
-                                        alt="Zuvy Logo"
-                                        className="mx-auto"
-                                        width={48}
-                                        height={48}
-                                    />
+                                        <Image
+                                            src={'/zuvy-logo-horizontal.png'}
+                                            alt="Zuvy Logo"
+                                            className="mx-auto"
+                                            width={48}
+                                            height={48}
+                                        />
                                     )
                                 }
                             </div>

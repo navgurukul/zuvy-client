@@ -1,50 +1,24 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
-import useDebounce from '@/hooks/useDebounce'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import useDebounce from '@/app/[admin]/hooks/useDebounce'
 import {
     AssessmentSubmissions,
-    StudentAssessmentSubmission,
-    APIResponses,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
-// import assesmentNotfound from @/public
 import {AssessmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
+import useBootcampAssessments from '@/app/[admin]/hooks/useBootcampAssessments'
 
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const { downloadCsv } = useDownloadCsv()
-    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
-        null
-    )
-    const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
-    const getAssessments = useCallback(async () => {
-        try {
-            const url = debouncedSearch
-                ? `/admin/bootcampAssessment/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
-                : `/admin/bootcampAssessment/bootcamp_id${courseId}`
-
-            const res = await api.get(url)
-            setAssesments(res.data)
-             setLoading(false)
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description: 'Error fetching assessments:',
-            })
-        }
-    }, [courseId, debouncedSearch])
-
-    useEffect(() => {
-        getAssessments()
-    }, [getAssessments])
+    const { assessments: assesments, loading, fetchAssessments } = useBootcampAssessments({
+        courseId,
+        searchTerm: debouncedSearch,
+    })
 
     const handleDownloadCsv = (assessment: AssessmentSubmissions) => {
         if (!assessment) return
@@ -57,6 +31,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Qualified', key: 'qualified' },
             { header: 'Percentage', key: 'percentage' },
@@ -72,6 +47,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
       
           mapData: (student) => ({
             name: student.name || 'N/A',
+            studentId: student.userId ?? student.id ?? 'NA',
             email: student.email || 'N/A',
             qualified: student.isPassed ? 'Yes' : 'No',
             percentage: `${(student.percentage || 0).toFixed(2)}%`,
@@ -93,13 +69,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     Object.keys(assesments).map(
                         (key) =>
                             key !== 'totalStudents' && (
-                                <div key={key}>
-                                    <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white mb-4">
+                                <div key={key} className="mb-6">
+                                    <h2 className="text-lg text-start font-bold text-foreground mb-3">
                                         Module - {key}
                                     </h2>
                                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {Array.isArray(assesments[key]) &&
-                                            assesments[key].map(
+                                            (assesments[key] as AssessmentSubmissions[]).map(
                                                 (assessment: AssessmentSubmissions) => (
                                                     <AssesmentComponent
                                                         key={assessment.id}
@@ -123,6 +99,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                         bootcampId={courseId}
                                                         qualifiedStudents={
                                                             assessment.qualifiedStudents
+                                                        }
+                                                        hasReattemptRequest={
+                                                            Boolean(assessment.hasReattemptRequest)
                                                         }
                                                         // onDownloadClick={() =>
                                                         //     handleDownloadClick(

@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
@@ -10,153 +9,174 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import usePathname from 'next/navigation'
 import { getUser } from '@/store/store'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
-export const columns: ColumnDef<Task>[] = [
-    {
-        accessorKey: 'profilePicture',
+
+
+export const createColumns = (courseId: number | string): ColumnDef<Task>[] => {
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
+
+    const studentIdColumn: ColumnDef<Task> = {
+        accessorKey: 'id',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Picture" />
+            <DataTableColumnHeader column={column} title="Student ID" />
         ),
+        id: 'studentId',
         cell: ({ row }) => {
-            const student = row.original
-            const profilePicture = student.profilePicture
-            const ImageContainer = () => {
-                return profilePicture ? (
-                    <Image
-                        src={profilePicture}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? 'NA'
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
+                        {studentId}
+                    </span>
+                </div>
+            )
         },
         enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'name',
-        header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Student Name" 
-                onSort={onSort}
-                sortField="name"
-            />
-        ),
-        id: 'name',
-        cell: ({ row }) => {
-            const name = row.original.name
+    }
 
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {name}
-                    </span>
+    const baseColumns: ColumnDef<Task>[] = [
+        {
+            accessorKey: 'profilePicture',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Profile Picture" />
+            ),
+            cell: ({ row }) => (
+                <div className="flex items-center">
+                    <Avatar className="ml-2 h-[35px] w-[35px]">
+                        <AvatarImage
+                            src={row.original.profilePicture ?? 'https://github.com/shadcn.png'}
+                        />
+                    </Avatar>
                 </div>
-            )
+            ),
+            enableSorting: false,
+            enableHiding: false,
         },
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'email',
-        header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Email" 
-                onSort={onSort}
-                sortField="email"
-            />
-        ),
-        id: 'email',
-        cell: ({ row }) => {
-            const email = row.original.email
+        {
+            accessorKey: 'name',
+            header: ({ column, onSort }: any) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Student Name"
+                    onSort={onSort}
+                    sortField="name"
+                />
+            ),
+            id: 'name',
+            cell: ({ row }) => {
+                const name = row.original.name
 
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {email}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'batchName',
-        header: () => <div className="text-left w-full">Batch</div>,
-        cell: ({ row }) => {
-            const batchName = row.original.batchName || 'N/A'
-            return (
-                <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="text-black border-black-200">
-                        {batchName}
-                    </Badge>
-                </div>
-            )
-        },
-    },
-   
-    {
-        accessorKey: 'Status',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
-        ),
-        cell: ({ row }) => {
-            const isSubmitted = row.original.status === 'Submitted'
-            return (
-                <div className="flex space-x-2">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
-                        {isSubmitted ? (
-                            <div className="bg-green-600 h-3 w-3 rounded-full" />
-                        ) : (
-                            <div className="bg-red-600 h-3 w-3 rounded-full " />
-                        )}
-                        {isSubmitted ? ' Submitted' : ' Not Submitted'}
+                return (
+                    <div className="flex space-x-2">
+                        <span className="max-w-[500px] truncate font-medium text-foreground">
+                            {name}
+                        </span>
                     </div>
-                </div>
-            )
+                )
+            },
+            enableHiding: false,
         },
-    },
-    {
-        id: 'actions',
-        cell: ({ row }) => {
-            const { bootcampId, moduleId, userId, chapterId } = row.original
-            const isSubmitted = row.original.status !== 'Submitted'
-            const pathname = window.location.pathname
-            const organizationId = pathname.split('/')[3]
-            const { user } = getUser()
-            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-            const orgId = Number(organizationId) || user?.orgId; 
+        {
+            accessorKey: 'email',
+            header: ({ column, onSort }: any) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Email"
+                    onSort={onSort}
+                    sortField="email"
+                />
+            ),
+            id: 'email',
+            cell: ({ row }) => {
+                const email = row.original.email
 
-            return (
-                <div className="flex space-x-2">
-                    <Button
-                        variant={'ghost'}
-                        className="text-lg font-bold  hover:bg-muted/30"
-                        disabled={isSubmitted}
-                    >
-                        <Link
-                            href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
-                            className="max-w-[500px] text-primary font-medium flex items-center"
-                        >
-                            <FileText size={16} />
-                            <p className="text-[15px]"> View Report</p>
-                        </Link>
-                    </Button>
-                </div>
-            )
+                return (
+                    <div className="flex space-x-2">
+                        <span className="max-w-[500px] truncate font-medium text-foreground">
+                            {email ?? 'NA'}
+                        </span>
+                    </div>
+                )
+            },
         },
-    },
-]
+        {
+            accessorKey: 'batchName',
+            header: () => <div className="text-left w-full">Batch</div>,
+            cell: ({ row }) => {
+                const batchName = row.original.batchName || 'N/A'
+                return (
+                    <div className="flex items-center justify-start">
+                        <Badge variant="outline" className="text-foreground border-foreground">
+                            {batchName}
+                        </Badge>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: 'Status',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Status" />
+            ),
+            cell: ({ row }) => {
+                const isSubmitted = row.original.status === 'Submitted'
+                return (
+                    <div className="flex space-x-2">
+                        <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium text-foreground">
+                            {isSubmitted ? (
+                                <div className="bg-green-600 h-3 w-3 rounded-full" />
+                            ) : (
+                                <div className="bg-red-600 h-3 w-3 rounded-full " />
+                            )}
+                            {isSubmitted ? ' Submitted' : ' Not Submitted'}
+                        </div>
+                    </div>
+                )
+            },
+        },
+        {
+            id: 'actions',
+            header: () => <div className="flex w-full items-center justify-start text-left">Actions</div>,
+            cell: ({ row }) => {
+                const { bootcampId, moduleId, userId, chapterId } = row.original
+                const isSubmitted = row.original.status !== 'Submitted'
+                const pathname = window.location.pathname
+                const organizationId = pathname.split('/')[3]
+                const { user } = getUser()
+                const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+                const orgId = Number(organizationId) || user?.orgId;
+
+                return (
+                    <div className="flex w-full items-center justify-start">
+                        <Button
+                            variant={'ghost'}
+                            className="flex items-center justify-start p-0 text-left text-lg font-bold hover:bg-muted/30"
+                            disabled={isSubmitted}
+                        >
+                            <Link
+                                href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
+                                className="max-w-[500px] text-primary font-medium flex items-center"
+                            >
+                                <FileText size={16} />
+                                <p className="text-[15px]"> View Report</p>
+                            </Link>
+                        </Button>
+                    </div>
+                )
+            },
+        },
+    ]
+
+    return [
+        baseColumns[0],
+        baseColumns[1],
+        studentIdColumn,
+        ...baseColumns.slice(2),
+    ]
+}
+
+// Kept for backwards compatibility; non-Career-Tour default
+export const columns = createColumns(0)

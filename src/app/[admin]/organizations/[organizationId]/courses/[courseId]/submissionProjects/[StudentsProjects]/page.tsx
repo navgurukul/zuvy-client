@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useRouter ,useSearchParams} from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { columns } from './columns'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -11,9 +11,13 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
-import useDownloadCsv from '@/hooks/useDownloadCsv'
+import useDownloadCsv from '@/app/[admin]/hooks/useDownloadCsv'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import { useProjectSubmissions } from '@/app/[admin]/hooks/useProjectSubmissions'
+import useProjectStudentSubmissions from '@/app/[admin]/hooks/useProjectStudentSubmissions'
 
 type Props = {}
 
@@ -28,34 +32,21 @@ const Page = ({ params }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'projects'
     const [data, setData] = useState<any>()
-    const [totalStudents, setTotalStudents] = useState<number>(0)
+    const { rawResponse, totalStudents } = useProjectSubmissions(params.courseId)
+    const { fetchProjectStudentSubmissions } = useProjectStudentSubmissions()
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState<boolean>(false)
     const [submitStudents, setSubmitStudents] = useState<number>(0)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const { batchData: batches, loading: isLoadingBatches } = useBatchList(params.courseId)
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId; 
+    const orgId = Number(organizationId) || user?.orgId;
 
-     // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
-    
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -74,7 +65,7 @@ const Page = ({ params }: any) => {
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
-    
+
         const queryParams = new URLSearchParams()
         queryParams.append('searchStudent', query)
         queryParams.append('limit', '10')
@@ -84,117 +75,99 @@ const Page = ({ params }: any) => {
         }
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
+
         const res = await api.get(
             `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
         )
-    
+
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
         setLoading(false)
-    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
-    
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection, selectedBatch])
+
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
-    
-        const queryParams = new URLSearchParams()
-        if (selectedBatch !== 'all') {
-            queryParams.append('batchId', selectedBatch)
-        }
-        if (sortField) queryParams.append('orderBy', sortField)
-        if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
-        const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
-        )
-    
-        const students = res.data.projectSubmissionData?.projectTrackingData || []
-        setProjectStudentData(students)
-        setLoading(false)
-    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
-    
 
-    const getProjectsData = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/submission/submissionsOfProjects/${params.courseId}`
-            )
-            setData(res.data.data.bootcampModules[0])
-            setSubmitStudents(res.data.data.bootcampModules[0]?.projectData[0]?.submitStudents || 0)
-            setTotalStudents(res.data.totalStudents)
-        } catch (error) {
-            console.error(error)
-        }
-    }, [params.courseId])
+            const { projectTrackingData } =
+                await fetchProjectStudentSubmissions({
+                    projectId: params.StudentsProjects,
+                    bootcampId: params.courseId,
+                    batchId:
+                        selectedBatch !== 'all' ? selectedBatch : undefined,
+                    orderBy: sortField,
+                    orderDirection: sortDirection,
+                })
 
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
+            setProjectStudentData(projectTrackingData)
+        } finally {
+            setLoading(false)
         }
-    }, [params.courseId])
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection, selectedBatch, fetchProjectStudentSubmissions])
+
+
+    useEffect(() => {
+        if (rawResponse?.data?.bootcampModules) {
+            setData(rawResponse.data.bootcampModules[0])
+            setSubmitStudents(rawResponse.data.bootcampModules[0]?.projectData?.[0]?.submitStudents || 0)
+        }
+    }, [rawResponse])
 
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
-    
+
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
+
         downloadCsv({
             endpoint: `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`,
-    
+
             fileName: `project_submissions_${data?.projectData?.[0]?.title || 'project'}_${new Date()
                 .toISOString()
                 .split('T')[0]}`,
-    
+
             dataPath: 'projectSubmissionData.projectTrackingData',
-    
+
             columns: [
                 { header: 'Student Name', key: 'name' },
+                { header: 'Student ID', key: 'studentId' },
                 { header: 'Email', key: 'email' },
                 { header: 'Batch', key: 'batchName' },
                 { header: 'Project Links', key: 'projectLink' },
             ],
-    
+
             mapData: (item: any) => ({
                 name: item.name || '',
+                studentId: item.userId ?? item.id ?? 'NA',
                 email: item.email || '',
                 batchName: item.batchName || '',
                 projectLink: formatProjectLinks(item.projectLink),
 
             }),
         })
-    }, [params.courseId,params.StudentsProjects,selectedBatch,sortField,sortDirection,data])
-    
+    }, [params.courseId, params.StudentsProjects, selectedBatch, sortField, sortDirection, data])
+
     // Handle sorting change
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
         setSortDirection(direction)
     }, [])
 
-    useEffect(() => {
-        getProjectsData()
-        getBootcampHandler()
-    }, [getProjectsData, getBootcampHandler])
-    useEffect(() => {
-        fetchBatches()
-    }, [fetchBatches])
+
     useEffect(() => {
         defaultFetchApi()
-    }, [sortField, sortDirection, defaultFetchApi,selectedBatch])
+    }, [sortField, sortDirection, defaultFetchApi, selectedBatch])
 
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
                 <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
-                        variant="ghost"                 
+                        variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -204,9 +177,9 @@ const Page = ({ params }: any) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
+            <Card className="mb-8 border border-border shadow-sm bg-card">
                 <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
+                    <CardTitle className="text-2xl text-foreground text-left">
                         {data?.projectData[0].title || 'Loading...'}
                     </CardTitle>
 
@@ -218,13 +191,13 @@ const Page = ({ params }: any) => {
                             <div className="text-lg font-semibold">{submitStudents || 0}</div>
                         </div>
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Project</div>
+                            <div className="font-medium text-muted-foreground mb-1">Submission Type:</div>
+                            <div className="text-lg font-semibold">Project</div>
                         </div>
 
                         <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                            <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            <div className="font-medium text-muted-foreground mb-1">Course ID:</div>
+                            <div className="text-lg font-semibold">{params.courseId}</div>
                         </div>
                         <div className="text-left">
                             <label className="font-medium text-muted-foreground">Batch Filter</label>
@@ -235,13 +208,13 @@ const Page = ({ params }: any) => {
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
-                                        {batches.map(batch => (
-                                            <SelectItem key={batch.id} value={batch.id.toString()}>
-                                                {batch.name}
-                                            </SelectItem>
-                                        ))}      
+                                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                                    <SelectItem value="all" className='text-lg font-semibold'>All Batches</SelectItem>
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
 
                             </Select>
@@ -252,7 +225,7 @@ const Page = ({ params }: any) => {
             <Card className='bg-card'>
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
+                        <CardTitle className="text-xl text-foreground">
                             Student Submissions
                         </CardTitle>
                         <Button
@@ -282,8 +255,8 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable 
-                        data={projectStudentData} 
+                    <DataTable
+                        data={projectStudentData}
                         columns={columns}
                         onSortingChange={handleSortingChange}
                     />

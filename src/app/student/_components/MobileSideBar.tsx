@@ -12,12 +12,17 @@ import {
   FileText, 
   Play, 
   Circle,
-  User
+  User,
+  Lock
 } from "lucide-react";
-import{Topic,ModuleSidebarProps,TopicItem} from '@/app/student/_components/componentStudentType'
+import { Topic, ModuleSidebarProps, TopicItem } from '@/app/student/_components/componentStudentType'
+import { getIconColor } from "@/app/student/_utils/sidebarUtils";
+import { useParams } from "next/navigation";
 
 const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect }: ModuleSidebarProps) => {
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
+  const params = useParams();
+  const orgId = params.orgId;
 
   // Auto-expand the topic that contains the selected item
   useEffect(() => {
@@ -35,9 +40,9 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     const getIconComponent = () => {
       switch (type) {
         case 'live-class':
-          return <Video className="w-6 h-6" />;
-        case 'video':
           return <Play className="w-6 h-6" />;
+        case 'video':
+          return <Video className="w-6 h-6" />;
         case 'article':
           return <FileText className="w-6 h-6" />;
         case 'assignment':
@@ -55,28 +60,8 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
       }
     };
 
-    const getIconColor = () => {
-      switch (type) {
-        case 'live-class':
-        case 'video':
-          return status === 'completed' ? 'text-success' : 'text-primary';
-        case 'article':
-        case 'assessment':
-          return status === 'completed' ? 'text-success' : 'text-accent';
-        case 'assignment':
-          return status === 'completed' ? 'text-success' : 'text-secondary';
-        case 'quiz':
-        case 'coding-challenge':
-          return status === 'completed' ? 'text-success' : 'text-warning';
-        case 'feedback-form':
-          return status === 'completed' ? 'text-success' : 'text-info';
-        default:
-          return 'text-muted-foreground';
-      }
-    };
-
     return (
-      <div className={getIconColor()}>
+      <div className={getIconColor(type, status)}>
         {getIconComponent()}
       </div>
     );
@@ -105,7 +90,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
       return 'Practice problem';
     }
     if (item.type === 'feedback-form') {
-      return 'Share your feedback';
+      return '';
     }
     return '';
   };
@@ -122,7 +107,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     <div className="w-full lg:w-80 h-full bg-background border-r border-border shadow-4dp flex flex-col">
       <div className="p-4 lg:p-6 text-left border-b border-border">
         <Button variant="link" size="sm" asChild className="mb-4 font-semibold p-0 h-auto text-foreground hover:text-foreground hover:no-underline">
-          <Link href={`/student/course/${courseId}`}>
+          <Link href={`/student/course/${courseId}/org/${orgId}`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Course
           </Link>
@@ -180,17 +165,17 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                         onClick={() => onItemSelect(item.id)}
                       >
                         <div className="flex items-start gap-2 lg:gap-3 w-full">
-                          <div className="flex-shrink-0 mt-1">
+                          <div className="flex-shrink-0 mt-0.5">
                             {getItemIcon(item.type, item.status)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium break-words whitespace-normal text-left mb-1">
+                            <div className="font-medium font-body break-words whitespace-normal text-left mb-1">
                               {item.type === 'live-class' ? `Live Class: ${item.title}` :
                                item.type === 'video' ? `Video: ${item.title}` :
                                item.type === 'article' ? `Article: ${item.title}` :
                                item.type === 'assignment' ? `Assignment: ${item.title}` :
                                item.type === 'assessment' ? `Assessment: ${item.title}` :
-                               item.type === 'feedback-form' ? `Feedback Form: ${item.title}` :
+                               item.type === 'feedback-form' ? ` ${item.title}` :
                                item.type === 'quiz' ? `Quiz: ${item.title}` :
                                item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
                                item.title}
@@ -199,11 +184,15 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                               {getItemDetails(adjustedItem)}
                             </div> */}
                           </div>
-                          {item.status === 'completed' && (
+                          {item.isLock ? (
+                            <div className="flex-shrink-0">
+                              <Lock className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground" />
+                            </div>
+                          ) : item.status === 'completed' ? (
                             <div className="flex-shrink-0">
                               <Check className="w-3 h-3 lg:w-4 lg:h-4 text-success" />
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </Button>
                     );

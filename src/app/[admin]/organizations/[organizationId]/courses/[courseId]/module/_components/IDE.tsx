@@ -44,6 +44,8 @@ import {
     TestCase,
     questionDetails,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
+import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
+import { useLanguageSelection } from '@/hooks/useLanguageSelection'
 
 // export interface questionDetails{
 //     title: string
@@ -79,14 +81,23 @@ const IDE: React.FC<IDEProps> = ({
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [codeResult, setCodeResult] = useState<any>([])
-    const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
 
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
-    const [loading, setLoading] = useState(false)
+
+    const {
+        submitCode,
+        loading,
+        codeResult,
+        setCodeResult,
+    } = usePracticeCodeSubmit({
+        questionId: params.editor ?? null,
+        assessmentSubmitId: assessmentSubmitId,
+        selectedCodingOutsourseId: selectedCodingOutsourseId,
+    })
+
     const [isOpen, setIsOpen] = useState(false)
     const [modalType, setModalType] = useState<'success' | 'error'>('success')
 
@@ -102,33 +113,14 @@ const IDE: React.FC<IDEProps> = ({
         // { lang: 'c', id: 104 },
     ]
 
-    const [language, setLanguage] = useState(
-        runCodeLanguageId
-            ? editorLanguages.find((lang) => lang.id === runCodeLanguageId)
-                  ?.lang || ''
-            : ''
-    )
-
-    const handleLanguageChange = (lang: string) => {
-        setLanguage(lang)
-        const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
-        setLanguageId(langID)
-    }
-
-    const getDataFromField = (
-        array: any[],
-        searchValue: any,
-        searchField: string | number,
-        targetField: string | number
-    ) => {
-        let result = languageId
-        array.forEach((obj) => {
-            if (obj[searchField] === searchValue) {
-                result = obj[targetField]
-            }
-        })
-        return result
-    }
+    const {
+        language,
+        setLanguage,
+        languageId,
+        setLanguageId,
+        handleLanguageChange,
+        getDataFromField,
+    } = useLanguageSelection(runCodeLanguageId, editorLanguages)
 
     const formatValue = (value: any, type: string): string => {
         if (type === 'jsonType') {
@@ -161,11 +153,10 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
-        setLoading(true)
 
         try {
-            const response = await api.post(
-                `/codingPlatform/practicecode/questionId=${params.editor}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
+            const response = await submitCode(
+                action as 'run' | 'submit',
                 {
                     languageId: Number(
                         getDataFromField(
@@ -179,11 +170,10 @@ const IDE: React.FC<IDEProps> = ({
                 }
             )
 
-            // Set the code result data
-            setCodeResult(response.data.data)
+            if (!response) return
 
             // Check if all test cases passed
-            const allTestCasesPassed = response.data.data.every(
+            const allTestCasesPassed = response.data.every(
                 (testCase: any) => testCase.status === 'Accepted'
             )
 
@@ -192,24 +182,9 @@ const IDE: React.FC<IDEProps> = ({
                 setIsSubmitted(true)
                 setIsOpen(true)
 
-                // toast({
-                //     title: 'You have submitted the question. You can go back and do other questions',
-                //     className:
-                //         'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                // })
-
                 if (allTestCasesPassed) {
                     setModalType('success')
-                    // toast({
-                    //     title: Test Cases Passed Solution submitted,
-                    //     className:
-                    //         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                    // })
                     getAssessmentData()
-
-                    // if (onBack) {
-                    //     onBack()
-                    // }
                 } else {
                     setModalType('error')
                 }
@@ -229,19 +204,16 @@ const IDE: React.FC<IDEProps> = ({
 
             // Trigger re-render for the output window
             setResult(
-                response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
+                response.data[0].stdOut ||
+                    response.data[0].stdout ||
                     'No Output Available'
             )
-            setLoading(false)
 
             const closeTimeout = setTimeout(() => {
                 setIsOpen(false)
             }, 7000)
             return () => clearTimeout(closeTimeout)
         } catch (error: any) {
-            setLoading(false)
-            setCodeResult(error.response?.data?.data)
             toast.error({
                 title: 'Failed',
                 description:

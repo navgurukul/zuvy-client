@@ -12,6 +12,7 @@ export interface Suggestion {
     maxSuggestions?: number;
     onError?: (error: unknown) => void;
     initialQuery?: string;
+    autoFetchOnMount?: boolean;
   }
   
   export  interface UseSearchWithSuggestionsReturn {

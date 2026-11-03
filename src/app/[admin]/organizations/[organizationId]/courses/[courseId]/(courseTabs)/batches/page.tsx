@@ -1,11 +1,10 @@
 "use client"
-import React, { useState, useMemo,useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useSearchParams } from "next/navigation"
-
 import {
     Card,
     CardContent,
@@ -35,6 +34,7 @@ import {
 } from '@/components/ui/form'
 import { CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { MAX_EMAIL_LENGTH } from '@/utils/validation/nameEmail'
 // import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
@@ -67,7 +67,7 @@ import {
     EnhancedBatch,
     PermissionsType,
 } from './courseBatchesType'
-import useBatches from '@/hooks/useBatches'
+import useBatches from '@/app/[admin]/hooks/useBatches'
 import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
@@ -141,6 +141,12 @@ const Page = ({ params }: { params: ParamsType }) => {
     useEffect(() => {
         setBatchesPerPage(position);   // update hook limit when URL changes
     }, [position, setBatchesPerPage]);
+    
+    // Memoized callback — sirf tab change hoga jab defaultFetchApi ya position actually change ho
+    const handleFetchStudentData = useCallback(
+        (off: number) => defaultFetchApi(off, position),
+        [defaultFetchApi, position]
+    );
     
     // Local UI-only value derived from the form provided by the hook
     const capEnrollmentValue = form.watch('capEnrollment')
@@ -506,12 +512,21 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
+                                                                {...field}
                                                                 placeholder="instructor@navgurukul.org"
                                                                 type="email"
-                                                                {...field}
+                                                                className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                                onChange={(event) => {
+                                                                    field.onChange(event)
+                                                                    void form.trigger('instructorEmail')
+                                                                }}
                                                             />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage>
+                                                            {field.value.length > MAX_EMAIL_LENGTH
+                                                                ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                                : undefined}
+                                                        </FormMessage>
                                                     </FormItem>
                                                 )}
                                             />
@@ -721,12 +736,21 @@ const Page = ({ params }: { params: ParamsType }) => {
                                         <FormLabel>Instructor Email</FormLabel>
                                         <FormControl>
                                             <Input
+                                                {...field}
                                                 placeholder="instructor@navgurukul.org"
                                                 type="email"
-                                                {...field}
+                                                className={field.value.length > MAX_EMAIL_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                                onChange={(event) => {
+                                                    field.onChange(event)
+                                                    void form.trigger('instructorEmail')
+                                                }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage>
+                                            {field.value.length > MAX_EMAIL_LENGTH
+                                                ? `Email cannot exceed ${MAX_EMAIL_LENGTH} characters`
+                                                : undefined}
+                                        </FormMessage>
                                     </FormItem>
                                 )}
                             />
@@ -990,7 +1014,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     totalStudents={totalBatches}
                     pages={Math.ceil(totalBatches / position)}
                     lastPage={Math.ceil(totalBatches / position)}
-                    fetchStudentData={(offset: number) => defaultFetchApi(offset, position)}
+                    fetchStudentData={handleFetchStudentData}
                 />
             </div>
         )

@@ -77,7 +77,7 @@ export default function MultiSelector({
                     </button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className={`w-full lg:w-[180px] p-2 shadow-4bp text-sm`}
+                    className="w-[var(--radix-popover-trigger-width)] p-2 shadow-4bp text-sm"
                 >
                     {type === 'Topic' || type === 'Topics' ? (
                         <ScrollArea

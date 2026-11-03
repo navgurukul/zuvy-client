@@ -1,0 +1,678 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+
+import {
+    ResizablePanelGroup,
+    ResizablePanel,
+    ResizableHandle,
+} from '@/components/ui/resizable'
+import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle, Sun, Moon } from 'lucide-react'
+import { useLazyLoadedStudentData, useThemeStore } from '@/store/store'
+import { api } from '@/utils/axios.config'
+import Editor from '@monaco-editor/react'
+import { ArrowLeft } from 'lucide-react'
+import { useRouter, usePathname, useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useToast } from '@/components/ui/use-toast'
+import { Spinner } from '@/components/ui/spinner'
+import { formatValue } from "@/utils/students"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
+import TimerDisplay from './TimerDisplay'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { X } from 'lucide-react'
+
+import { IDEProps, questionDetails, TestCases, Input, TestCasesSubmission } from '@/app/student/course/[courseId]/org/[orgId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { usePracticeCodeSubmit } from '@/hooks/usePracticeCodeSubmit'
+import { useGetCodingQuestion } from '@/app/student/hooks/useGetCodingQuestion'
+import { useLanguageSelection } from '@/hooks/useLanguageSelection'
+
+const IDE: React.FC<IDEProps> = ({
+    params,
+    onBack,
+    remainingTime,
+    assessmentSubmitId,
+    selectedCodingOutsourseId,
+    getAssessmentData,
+    runCodeLanguageId,
+    runSourceCode,
+}) => {
+    const pathname = usePathname()
+    const router = useRouter()
+    const { toast } = useToast()
+    const { viewcourses, moduleID, chapterID, orgId } = useParams()
+    const [isDisabled, setIsDisabled] = useState(false)
+    const [isSubmitted, setIsSubmitted] = useState(false)
+    const [currentCode, setCurrentCode] = useState('')
+    const [result, setResult] = useState('')
+    const [codeError, setCodeError] = useState('')
+
+    const editorLanguages = [
+        { lang: 'java', id: 96 },
+        { lang: 'python', id: 100 },
+        { lang: 'javascript', id: 102 },
+        { lang: 'cpp', id: 105 },
+        // { lang: 'c', id: 104 },
+    ]
+
+    const {
+        language,
+        setLanguage,
+        languageId,
+        setLanguageId,
+        handleLanguageChange,
+        getDataFromField,
+    } = useLanguageSelection(runCodeLanguageId, editorLanguages)
+
+    const {
+        questionDetails,
+        testCases,
+        templates,
+        examples,
+    } = useGetCodingQuestion({
+        questionId: params.editor ?? null,
+        orgId: orgId as string ?? null,
+    })
+
+    const {
+        submitCode,
+        loading,
+        codeResult,
+        setCodeResult,
+    } = usePracticeCodeSubmit({
+        questionId: params.editor ?? null,
+        assessmentSubmitId: assessmentSubmitId,
+        selectedCodingOutsourseId: selectedCodingOutsourseId,
+    })
+
+    const [isOpen, setIsOpen] = useState(false)
+    const [modalType, setModalType] = useState<'success' | 'error'>('success')
+    const isDarkMode = useThemeStore((state) => state.isDark)
+    const theme = isDarkMode ? 'vs-dark' : 'vs'
+
+    const { studentData } = useLazyLoadedStudentData()
+    const userID = studentData?.id && studentData?.id
+    const { isDark, toggleTheme } = useThemeStore();
+
+
+    const handleSubmit = async (
+        e: { preventDefault: () => void },
+        action: string
+    ) => {
+        e.preventDefault()
+
+        try {
+            const response = await submitCode(
+                action as 'run' | 'submit',
+                {
+                    languageId: Number(
+                        getDataFromField(
+                            editorLanguages,
+                            languageId,
+                            'lang',
+                            'id'
+                        )
+                    ),
+                    sourceCode: b64EncodeUnicode(currentCode),
+                }
+            )
+
+            if (!response) return
+
+            // Check if all test cases passed
+            const allTestCasesPassed = response.data.every(
+                (testCase: any) => testCase.status === 'Accepted'
+            )
+
+            if (action === 'submit') {
+                setIsDisabled(true)
+                setIsSubmitted(true)
+                setIsOpen(true)
+
+                if (allTestCasesPassed) {
+                    setModalType('success')
+                    getAssessmentData()
+                } else {
+                    setModalType('error')
+                }
+            } else if (allTestCasesPassed && action === 'run') {
+                toast.success({
+                    title: 'Success',
+                    description: 'Test Cases Passed'
+                })
+            } else {
+                toast({
+                    title: 'Failed',
+                    description: 'Test Cases Failed'
+                })
+            }
+
+            setCodeError('')
+
+            // Trigger re-render for the output window
+            setResult(
+                response.data[0].stdOut ||
+                response.data[0].stdout ||
+                'No Output Available'
+            )
+
+            const closeTimeout = setTimeout(() => {
+                setIsOpen(false)
+            }, 7000)
+            return () => clearTimeout(closeTimeout)
+        } catch (error: any) {
+            toast.error({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'Network connection lost.',
+            })
+            setCodeError(
+                error.response?.data?.data?.[0]?.stderr || error.response?.data?.data?.[0]?.stdErr ||
+                'Error occurred during submission. Network connection lost.'
+            )
+        }
+    }
+
+    function handleEditorChange(value: any) {
+        setCurrentCode(value)
+    }
+
+    useEffect(() => {
+        if (templates?.[language]?.template) {
+            setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
+        }
+    }, [language, templates])
+
+
+    useEffect(() => {
+        if (runCodeLanguageId && runSourceCode) {
+            const selectedLanguage = editorLanguages.find(
+                (lang) => lang.id === runCodeLanguageId
+            )
+            if (selectedLanguage) {
+                setLanguage(selectedLanguage.lang)
+                setLanguageId(runCodeLanguageId)
+                setCurrentCode(b64DecodeUnicode(runSourceCode))
+            }
+        }
+    }, [runCodeLanguageId, runSourceCode])
+
+     useEffect(() => {
+        setIsSubmitted(false)
+        setIsDisabled(false)
+        setIsOpen(false)
+        setCodeError('')
+        setResult('')
+        setCurrentCode('')
+        setCodeResult(null)
+    }, [params.editor, setCodeResult])
+
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
+            {/* Header Bar with Navigation and Actions */}
+            <div className="sticky top-0 z-50  backdrop-blur-sm border-b border-border shadow-4dp">
+                <div className="w-full px-3 py-2 sm:px-6 sm:py-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:justify-between">
+                        {/* Left: Back Button and Question Title */}
+                        <div className="flex min-w-0 items-center space-x-4 sm:flex-1">
+                            {isSubmitted ? <button onClick={onBack} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
+                                <X className="w-5 h-5" />
+                            </button> :
+
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-card border-border shadow-32dp">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-foreground">
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription className="text-muted-foreground">
+                                                This action cannot be undone. If you have not
+                                                submitted your solution, it will be lost.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
+                                                Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
+                                                onClick={onBack}
+                                            >
+                                                Go Back
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            }
+                            {questionDetails && (
+                                <div className="hidden min-w-0 items-center space-x-3 sm:flex">
+                                    <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                                        <Code className="w-4 h-4 text-accent" />
+                                    </div>
+                                    <h1 className="truncate text-xl font-bold text-foreground">
+                                        {questionDetails.title}
+                                    </h1>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Timer and theme controls */}
+                        <div className="ml-auto flex items-center gap-2 sm:ml-0 sm:gap-4">
+                            <TimerDisplay remainingTime={remainingTime} />
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={toggleTheme}
+                                className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            >
+                                {isDark ? (
+                                    <Sun className="h-4 w-4" />
+                                ) : (
+                                    <Moon className="h-4 w-4" />
+                                )}
+                            </Button>
+                        </div>
+                        {/* Action buttons */}
+                        <div className="ml-auto flex w-full items-center justify-end gap-1.5 sm:ml-0 sm:w-auto sm:gap-2">
+                                <Button
+                                    onClick={(e) => handleSubmit(e, 'run')}
+                                    size="sm"
+                                    variant="outline"
+                                    className="px-2 text-xs text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 sm:px-3 sm:text-sm dark:text-white"
+                                    disabled={(loading || isSubmitted)}
+                                >
+                                    {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                                    <span className="ml-1.5 font-medium sm:ml-2">Run Code</span>
+                                </Button>
+                                <Button
+                                    onClick={(e) => handleSubmit(e, 'submit')}
+                                    size="sm"
+                                    className="px-2 text-xs bg-primary-dark hover:bg-primary text-primary-foreground sm:px-3 sm:text-sm"
+                                    disabled={(loading || isSubmitted)}
+                                >
+                                    {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+                                    <span className="ml-1.5 font-medium sm:ml-2">Submit Solution</span>
+                                </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Success/Error Modal */}
+            <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+                <AlertDialogContent className="bg-card border-border shadow-32dp max-w-md">
+                    <button
+                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors duration-200 p-1 rounded-lg hover:bg-muted"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                    <AlertDialogHeader className="text-center">
+                        {modalType === 'success' ? (
+                            <>
+                                <div className="w-16 h-16 bg-success/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <CheckCircle className="w-8 h-8 text-success" />
+                                </div>
+                                <AlertDialogTitle className="text-success text-xl">
+                                    Test Cases Passed!
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">
+                                    Great job! You have successfully submitted the question. You can
+                                    go back and work on other questions.
+                                </AlertDialogDescription>
+                            </>
+                        ) : (
+                            <>
+
+                                <AlertDialogTitle className="text-destructive text-xl">
+                                    Test Cases Failed
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">
+                                    Your solution didn&apos;t pass all test cases. You have submitted the question. You can
+                                    go back and work on other questions.
+                                </AlertDialogDescription>
+                            </>
+                        )}
+                    </AlertDialogHeader>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Main Content Area */}            {/* Main Content Area */}
+            <div className="w-full" style={{ height: 'calc(100vh - 80px)' }}>
+                {questionDetails && (
+                    <ResizablePanelGroup
+                        direction="horizontal"
+                        className="w-full h-full"
+                    >                        {/* Left Panel: Problem Description */}
+                        <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
+                            <div className="h-full text-left border-r border-border">
+                                <div className="h-full overflow-y-auto scrollbar-hide">
+                                    <div className="p-4">
+                                        <div className="space-y-6">
+                                            {/* Problem Title */}
+                                            <div>
+                                                <h1 className="text-xl font-semibold text-foreground mb-4">
+                                                    {questionDetails.title}
+                                                </h1>
+                                            </div>
+
+                                            {/* Problem Description */}
+                                            <div>
+                                                <h2 className="text-base font-semibold text-foreground mb-3">
+                                                    Description
+                                                </h2>
+                                                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                                                    {questionDetails.description}
+                                                </div>
+                                            </div>
+
+                                            {/* Constraints */}
+                                            {questionDetails.constraints && (
+                                                <div>
+                                                    <h2 className="text-base font-semibold text-foreground mb-3">
+                                                        Constraints
+                                                    </h2>
+                                                    <div className="text-sm leading-relaxed whitespace-pre-wrap font-mono text-foreground">
+                                                        {questionDetails.constraints}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Test Cases */}
+                                            <div>
+                                                <h2 className="text-base font-semibold text-foreground mb-3">
+                                                    Examples
+                                                </h2>
+                                                <div className="space-y-4">
+                                                    {testCases?.slice(0, 2).map((testCase: TestCases, index: number) => (
+                                                        <div
+                                                            key={index}
+                                                            className="border border-border rounded-lg overflow-hidden"
+                                                        >
+                                                            <div className="bg-muted/50 px-4 py-2">
+                                                                <h4 className="font-medium text-foreground text-sm">
+                                                                    Example {index + 1}
+                                                                </h4>
+                                                            </div>
+
+                                                            <div className="p-4 space-y-3">
+                                                                {/* Input Section */}
+                                                                <div>
+                                                                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                                                                        Input:
+                                                                    </div>
+                                                                    <div className="bg-muted/30 rounded-md p-3 border">
+                                                                        <pre className="text-sm font-mono text-foreground whitespace-pre-wrap">
+                                                                            {Array.isArray(testCase.inputs)
+                                                                                ? testCase.inputs.map((input: Input, idx: number) => (
+                                                                                    <div key={idx}>
+                                                                                        {input.parameterName || `param${idx + 1}`} = {formatValue(input.parameterValue, input.parameterType)}
+                                                                                    </div>
+                                                                                ))
+                                                                                : Object.entries(testCase.inputs).map(([key, value]) => (
+                                                                                    <div key={key}>
+                                                                                        {key} = {formatValue(value, typeof value === 'number' ? 'int' : 'str')}
+                                                                                    </div>
+                                                                                ))
+                                                                            }
+                                                                        </pre>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Output Section */}
+                                                                <div>
+                                                                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                                                                        Output:
+                                                                    </div>
+                                                                    <div className="bg-muted/30 rounded-md p-3 border">
+                                                                        <pre className="text-sm font-mono text-foreground">
+                                                                            {formatValue(
+                                                                                testCase.expectedOutput.parameterValue,
+                                                                                testCase.expectedOutput.parameterType
+                                                                            )}
+                                                                        </pre>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+
+                                                    {testCases && testCases.length > 2 && (
+                                                        <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3 text-center">
+                                                            + {testCases.length - 2} more test case{testCases.length - 2 !== 1 ? 's' : ''} available
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ResizablePanel>
+
+                        <ResizableHandle withHandle />                        {/* Right Panel: Code Editor and Output */}
+                        <ResizablePanel defaultSize={50}>
+                            <ResizablePanelGroup direction="vertical">
+                                {/* Code Editor Panel */}
+                                <ResizablePanel defaultSize={65} minSize={30}>
+                                    <div className="h-full ">
+                                        {/* Editor Header */}
+                                        <div className=" border-b border-border p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-3">
+                                                    {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+<Code className="w-4 h-4 text-primary" />
+</div> */}
+                                                    <h6 className="font-bold text-foreground">Code Editor </h6>
+                                                </div>
+
+                                                {/* Language Selector */}
+                                                <Select
+                                                    value={language}
+                                                    onValueChange={(e: any) => handleLanguageChange(e)}
+                                                >
+                                                    <SelectTrigger className="w-48 border-border">
+                                                        <SelectValue placeholder="Select Language" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className=" border-border">
+                                                        {editorLanguages.map((lang) => (
+                                                            <SelectItem
+                                                                key={lang.id}
+                                                                value={lang.lang}
+                                                                className={`hover:bg-primary ${language === lang.lang ? 'text-white' : ''} focus:bg-primary cursor-pointer data-[highlighted]:bg-primary data-[state=checked]:bg-primary`}
+                                                            >
+                                                                {lang.lang === "cpp" ? "c++" : lang.lang}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>                                        {/* Monaco Editor */}
+                                        <div style={{ height: 'calc(100% - 80px)' }}>
+                                            <Editor
+                                                height="100%"
+                                                language={language}
+                                                theme={theme}
+                                                value={currentCode}
+                                                onChange={handleEditorChange}
+                                                defaultValue={language || 'Please Select a language above!'}
+                                                options={{
+                                                    wordWrap: 'on',
+                                                    fontSize: 14,
+                                                    lineHeight: 1.6,
+                                                    minimap: { enabled: true },
+                                                    scrollBeyondLastLine: false,
+                                                    automaticLayout: true,
+                                                    tabSize: 4,
+                                                    insertSpaces: true,
+                                                    renderWhitespace: 'selection',
+                                                    bracketPairColorization: { enabled: true },
+                                                    contextmenu: false,
+                                                    suggestOnTriggerCharacters: false,
+                                                    quickSuggestions: false,
+                                                    parameterHints: { enabled: false },
+                                                    tabCompletion: 'off',
+                                                    acceptSuggestionOnEnter: 'off',
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </ResizablePanel>
+
+                                <ResizableHandle withHandle />
+
+                                {/* Output Panel */}
+                                <ResizablePanel defaultSize={35} minSize={20}>
+                                    <div className="h-full bg-white dark:bg-gray-950 flex flex-col">
+                                        {/* Output Header */}
+                                        <div className="bg-gray-50 dark:bg-gray-900/50 border-b border-border p-3">
+                                            <div className="flex items-center space-x-3">
+                                                <h3 className="font-semibold text-foreground text-sm">Output</h3>
+                                            </div>
+                                        </div>
+
+                                        {/* Output Content */}
+                                        <div
+                                            style={{ height: 'calc(100% - 45px)' }}
+                                            className="p-4 overflow-y-auto font-mono text-sm bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200"
+                                        >
+                                            {/* Loading State */}
+                                            {loading && (
+                                                <div className="flex items-center space-x-2 text-gray-500 animate-pulse">
+                                                    <div className="w-2 h-2 bg-primary rounded-full animate-ping"></div>
+                                                    <span>Executing...</span>
+                                                </div>
+                                            )}
+
+                                            {/* Error Results (Compile/Runtime) */}
+                                            {!loading && codeError && codeResult?.map((testCase: any, index: number) => (
+                                                <div key={index} className="mb-4">
+                                                    <div className="flex items-center space-x-2 text-red-500 font-bold">
+                                                        <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
+                                                    </div>
+                                                    <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
+                                                        {index < 3 && <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                            {testCase?.stdIn && index < 2 && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
+                                                                </>
+                                                            )}
+                                                            {testCase?.expectedOutput && index < 2 && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
+                                                                </>
+                                                            )}
+                                                            {(testCase?.stdOut || testCase?.stdout) && index < 2 && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Output:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
+                                                                </>
+                                                            )}
+                                                            {(testCase?.stdErr || testCase?.stderr) && (
+                                                                <>
+                                                                    <span className="font-semibold text-red-500 justify-self-end">Error:</span>
+                                                                    <pre className="text-red-500 whitespace-pre-wrap break-all">{testCase?.stdErr || testCase?.stderr}</pre>
+                                                                </>
+                                                            )}
+                                                            {testCase?.compileOutput && (
+                                                                <>
+                                                                    <span className="font-semibold text-yellow-600 justify-self-end">Compile Msg:</span>
+                                                                    <pre className="text-yellow-600 whitespace-pre-wrap break-all">{testCase.compileOutput}</pre>
+                                                                </>
+                                                            )}
+                                                        </div>}
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Success/Run Results */}
+                                            {!loading && !codeError && codeResult?.map((testCase: any, index: number) => (
+                                                <div key={index} className="mb-4">
+                                                    {testCase.status === 'Accepted' ? (
+                                                        <div className="flex items-center space-x-2 text-green-600 font-bold">
+                                                            <span>[✓] Test Case #{index + 1}: Accepted</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <div className="flex items-center space-x-2 text-red-500 font-bold">
+                                                                <span>[✗] Test Case #{index + 1}: {testCase.status} </span>
+                                                            </div>
+                                                            <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
+                                                                <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                                    {testCase?.stdIn && index < 2 &&  (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
+                                                                        </>
+                                                                    )}
+                                                                    {testCase?.expectedOutput  && index < 2 && (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
+                                                                        </>
+                                                                    )}
+                                                                    {(testCase?.stdOut || testCase?.stdout) && index < 2 && (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Your Output:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
+                                                                        </>
+                                                                    )}
+                                                                    {testCase?.compileOutput && (
+                                                                        <>
+                                                                            <span className="font-semibold text-yellow-600 justify-self-end">Compile Msg:</span>
+                                                                            <pre className="text-yellow-600 whitespace-pre-wrap break-all">{testCase.compileOutput}</pre>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+
+                                            {/* Empty State */}
+                                            {!loading && !codeResult?.length && (
+                                                <div className="flex items-center text-gray-400">
+                                                    <span className="mr-2">&gt;</span>
+                                                    <span>Console output will appear here.</span>
+                                                    <span className="w-2 h-4 bg-primary ml-1 animate-pulse"></span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                )}
+            </div>
+        </div>
+    )
+}
+
+export default IDE

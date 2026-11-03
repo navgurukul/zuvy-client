@@ -5,58 +5,50 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PageParams,
-    BootcampData,
     IndividualStudentData,
-    ProjectSubmissionDetails,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType'
+import { useCourseExistenceCheck } from '@/app/[admin]/hooks/useCourseExistenceCheck'
+import useIndividualProjectReport from '@/app/[admin]/hooks/useIndividualProjectReport'
+import { normalizeLinks } from '@/utils/admin'
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const [indiviDualStudentData, setIndividualStudentData] =
         useState<IndividualStudentData | null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    useCourseExistenceCheck(params.courseId)
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
+    const { fetchIndividualProjectReport } = useIndividualProjectReport()
 
     const getIndividualStudentData = useCallback(async () => {
-        await api
-            .get<ProjectSubmissionDetails>(
-                `/submission/projectDetail/${params.individualReport}?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
-            )
-            .then((res) => {
-                setIndividualStudentData(res?.data)
-                const projectDetail =
-                    res?.data?.projectSubmissionDetails?.instruction
-                        ?.description
-                if (projectDetail) {
-                    setInitialContent(JSON.parse(projectDetail))
-                }
-                setSubmittedDate(
-                    res?.data.projectSubmissionDetails?.projectTrackingData[0]
-                        ?.updatedAt
-                )
-            })
-    }, [params.individualReport, params.courseId, params.StudentsProjects])
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get<{ bootcamp: BootcampData }>(
-                `/bootcamp/${params.courseId}`
-            )
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.courseId])
+        const data = await fetchIndividualProjectReport({
+            userId: params.individualReport,
+            projectId: params.StudentsProjects,
+            bootcampId: params.courseId,
+        })
 
+        setIndividualStudentData(data)
+        const projectDetail =
+            data?.projectSubmissionDetails?.instruction?.description
+        if (projectDetail) {
+            setInitialContent(JSON.parse(projectDetail))
+        }
+        setSubmittedDate(
+            data.projectSubmissionDetails?.projectTrackingData[0]?.updatedAt
+        )
+    }, [
+        fetchIndividualProjectReport,
+        params.individualReport,
+        params.courseId,
+        params.StudentsProjects,
+    ])
     useEffect(() => {
         getIndividualStudentData()
-        getBootcampHandler()
-    }, [getIndividualStudentData, getBootcampHandler])
+    }, [getIndividualStudentData])
 
     const dateString = submittedDate
     const date = new Date(dateString?.toString())
@@ -94,8 +86,7 @@ const Page = ({ params }: PageParams) => {
     if (indiviDualStudentData) {
         return (
             <div className="min-h-screen font-semibold bg-background">
-                {/* Back Button */}
-                <MaxWidthWrapper>
+                <MaxWidthWrapper className='container mx-auto px-2 pt-2 pb-2 max-w-7xl'>
                     <div className="flex items-center gap-4 mb-8">
                         <Button
                             variant="ghost"
@@ -106,9 +97,6 @@ const Page = ({ params }: PageParams) => {
                             Back to Projects Submission
                         </Button>
                     </div>
-                </MaxWidthWrapper>
-
-                <MaxWidthWrapper>
                     <div className="space-y-8">
                         {/* Student Info Card */}
                         <div className="bg-card border border-border rounded-lg p-8">
@@ -124,7 +112,7 @@ const Page = ({ params }: PageParams) => {
                                 </Avatar>
                                 <div className="flex-1 space-y-4">
                                     <div>
-                                        <h1 className="text-2xl text-left font-heading font-bold text-foreground">
+                                        <h1 className="text-2xl text-left font-bold">
                                             {
                                                 indiviDualStudentData
                                                     ?.projectSubmissionDetails
@@ -132,7 +120,7 @@ const Page = ({ params }: PageParams) => {
                                                     .userDetails.name
                                             }
                                         </h1>
-                                        <p className="text-left text-muted-foreground font-semibold text-lg mt-2">
+                                        <p className="text-left text-muted-foreground font-semibold text-lg mt-0">
                                             Individual Report
                                         </p>
                                     </div>
@@ -214,17 +202,6 @@ const Page = ({ params }: PageParams) => {
     }
 
     return null
-}
-
-const normalizeLinks = (links?: string | string[]): string[] => {
-    if (!links) return []
-    if (Array.isArray(links)) {
-        return links.map((link) => link.trim()).filter(Boolean)
-    }
-    return links
-        .split(/\r?\n+/)
-        .map((link) => link.trim())
-        .filter(Boolean)
 }
 
 export default Page

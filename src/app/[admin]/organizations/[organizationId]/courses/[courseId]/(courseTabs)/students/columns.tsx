@@ -16,10 +16,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
+
+
 
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
-    const { userId } = row.original
+    const { userId, bootcampId, studentId } = row.original
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -39,34 +43,68 @@ const StudentNameCell = ({ row }: { row: any }) => {
     const handleStudentClick = () => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
+    const studentName = String(row.getValue('name') ?? '')
+    const studentEmail = row.original.email?.trim() || ''
+
+    // For Career Tour bootcamps: show email if available, otherwise show student ID
+    const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)
+    const subLabel = isCareerTourBootcamp
+        ? (studentEmail || `ID: ${studentId ?? 'NA'}`)
+        : studentEmail
+    const tooltipSubLabel = isCareerTourBootcamp
+        ? (studentEmail || `Student ID: ${studentId ?? 'NA'}`)
+        : studentEmail
     
     return (
         <>
             {isStudent === userId ? (
-                <Input
-                    id="name"
-                    name="name"
-                    value={studentData.name}
-                    onChange={handleSingleStudent}
-                />
-            ) : (
-                <div 
-                    className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
-                    onClick={handleStudentClick}
-                >
-                    {row.getValue('name')}
+                <div className="space-y-1">
+                    <Input
+                        id="name"
+                        name="name"
+                        value={studentData.name}
+                        onChange={handleSingleStudent}
+                    />
+                    <Input
+                        id="email"
+                        name="email"
+                        value={studentData.email}
+                        onChange={handleSingleStudent}
+                    />
                 </div>
+            ) : (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className="w-[220px] cursor-pointer text-left"
+                                onClick={handleStudentClick}
+                            >
+                                <div className="truncate font-medium text-gray-800 hover:text-blue-600 hover:underline dark:text-muted-foreground">
+                                    {studentName}
+                                </div>
+                                <div className="truncate text-xs text-muted-foreground">
+                                    {subLabel}
+                                </div>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <div>{studentName}</div>
+                            <div className="text-xs">{tooltipSubLabel}</div>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             )}
         </>
     )
 }
 
-export const columns: ColumnDef<Task>[] = [
+const allColumns: ColumnDef<Task>[] = [
     {
         id: 'select',
         header: ({ table }) => {
             return (
-                <div className="ml-5">
+                <div className="flex items-center justify-center">
                     <Checkbox
                         checked={
                             table.getIsAllPageRowsSelected() ||
@@ -79,16 +117,18 @@ export const columns: ColumnDef<Task>[] = [
                         aria-label="Select all"
                         className="translate-y-[2px]"
                     />
-                </div>
+               </div>
             )
         },
         cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="translate-y-[2px]"
-            />
+            <div className="flex items-center justify-center">
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                    className="translate-y-[1px]"
+                />
+            </div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -103,45 +143,26 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: true,
     },
     {
-        accessorKey: 'email',
+        accessorKey: 'userId',
+        id: 'studentId',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
+            <DataTableColumnHeader column={column} title="Student Id" />
         ),
         cell: ({ row }) => {
-            const { userId } = row.original
-            const { isStudent, setIsStudent } = getEditStudent()
-            const { studentData, setStudentData } = getStudentData()
-            const handleSingleStudent = (
-                e: React.ChangeEvent<HTMLInputElement>
-            ) => {
-                const { name, value } = e.target
-                setStudentData({ ...studentData, [name]: value })
-            }
-
+            const userId = row.original.userId
             return (
-                <>
-                    {isStudent === userId ? (
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email}
-                            onChange={handleSingleStudent}
-                        />
-                    ) : (
-                        <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium text-gray-800">
-                                {row.getValue('email')}
-                            </span>
-                        </div>
-                    )}
-                </>
+                <div className="text-sm text-gray-800 dark:text-muted-foreground">
+                    {userId ?? '—'}
+                </div>
             )
         },
+        enableSorting: true,
+        enableHiding: true,
     },
     {
         accessorKey: 'batchName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Batch" />
+            <DataTableColumnHeader column={column} title="Batch" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const { batchName, userId, bootcampId, batchId } = row.original
@@ -154,7 +175,7 @@ export const columns: ColumnDef<Task>[] = [
             })
 
             return (
-                <div className="flex text-gray-800">
+                <div className="flex text-gray-800 w-full justify-start items-center">
                     <ComboboxStudent
                         batchData={newBatchData || []}
                         batchName={batchName}
@@ -168,9 +189,87 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
+        id: 'careerStatus',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Career status" />
+        ),
+        cell: ({ row }) => {
+            const careerStatus = row.original.careerStatus
+            const status = typeof careerStatus === 'string' && careerStatus.trim()
+                ? careerStatus.trim()
+                : 'Not set'
+
+            return status === 'Not set' ? (
+                <span className="text-sm text-muted-foreground">Not set</span>
+            ) : (
+                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                    status === 'Looking for Job'
+                        ? 'border-primary/30 bg-primary/10 text-primary'
+                        : status === 'Working'
+                          ? 'border-secondary bg-secondary text-secondary-foreground'
+                          : 'border-border bg-muted text-foreground'
+                }`}>
+                    {status}
+                </span>
+            )
+        },
+        enableSorting: false,
+    },
+    {
+        id: 'graduating',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Graduating" />
+        ),
+        cell: ({ row }) => {
+            const { graduationDate, graduationMonth, graduationYear } = row.original
+            const monthName = graduationMonth && graduationMonth >= 1 && graduationMonth <= 12
+                ? new Date(2000, graduationMonth - 1, 1).toLocaleString('en-US', { month: 'short' })
+                : null
+            const graduation = graduationDate?.trim()
+                || (monthName && graduationYear ? `${monthName} ${graduationYear}` : null)
+
+            return <span className="text-sm">{graduation || '—'}</span>
+        },
+        enableSorting: false,
+    },
+    {
+        id: 'topSkills',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Top skills" />
+        ),
+        cell: ({ row }) => {
+            const skills = row.original.skills
+            const skillList = Array.isArray(skills)
+                ? skills
+                    .filter((skill): skill is string => typeof skill === 'string' && skill.trim().length > 0)
+                    .map((skill) => skill.trim())
+                : []
+            const visibleSkills = skillList.slice(0, 3)
+            const remainingCount = skillList.length - visibleSkills.length
+
+            if (skillList.length === 0) return <span className="text-sm text-muted-foreground">—</span>
+
+            return (
+                <div className="flex max-w-[160px] flex-wrap gap-1">
+                    {visibleSkills.map((skill, index) => (
+                        <span key={`${skill}-${index}`} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
+                            {skill}
+                        </span>
+                    ))}
+                    {remainingCount > 0 && (
+                        <span className="rounded-full border bg-muted px-2 py-0.5 text-xs text-foreground">
+                            +{remainingCount}
+                        </span>
+                    )}
+                </div>
+            )
+        },
+        enableSorting: false,
+    },
+    {
         accessorKey: 'enrolledDate',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Enrolled Date" />
+            <DataTableColumnHeader column={column} title="Enrolled Date" className="w-full text-left"/>
         ),
         cell: ({ row }) => {
             const enrolledDate = row.original.enrolledDate
@@ -192,7 +291,7 @@ export const columns: ColumnDef<Task>[] = [
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
-                <div className="flex items-center text-gray-800">
+                <div className="flex w-full justify-start items-center text-left text-gray-800 dark:text-muted-foreground">
                     <span className="text-sm">{formattedDate}</span>
                 </div>
             )
@@ -202,19 +301,19 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'progress',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Progress" />
+            <DataTableColumnHeader column={column} title="Progress" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const progress = Math.max(0, Math.min(100, row.original.progress))
-            return (
-                <div className="flex flex-grow justify-center min-w-[70px]">
+            return (                                
+            <div className="flex w-full justify-center items-center">
                     {/* <div className="h-2 w-full rounded-full progress-bg">
                         <div
                             className="h-2 rounded-full progress-fill"
                             style={{ width: `${progress}%` }}
                         />
                     </div> */}
-                    <div className="text-sm text-gray-800">{progress}%</div>
+                    <div className="text-sm text-gray-800 dark:text-muted-foreground">{progress}%</div>
                 </div>
             )
         },
@@ -223,7 +322,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendance" />
+            <DataTableColumnHeader column={column} title="Attendance" className="w-full text-left" />
         ),
         cell: ({ row }) => {
             const attendance =
@@ -234,7 +333,7 @@ export const columns: ColumnDef<Task>[] = [
             const circleColorClass = getAttendanceColorClass(attendance)
 
             return (
-                <div className="relative size-9">
+                <div className="relative flex size-9 w-full items-center justify-start text-left">
                     <svg
                         className="size-full"
                         width="24"
@@ -402,3 +501,26 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 ]
+
+// Export allColumns as columns for backward compatibility
+export const columns = allColumns
+
+/**
+ * Helper function to filter columns based on bootcamp ID.
+ *
+ * For Career Tour bootcamp IDs [1113, 1112, 1111, 1110, 1109, 1108, 1107, 1106]:
+ *   - Hides the "attendance" column (no live-class attendance tracked)
+ *   - Hides the "status" column (active/dropout/graduate status not applicable)
+ *
+ * Prod IDs (kept for reference): [136, 135, 134, 133, 132, 131, 130, 129]
+ */
+export const getFilteredColumns = (bootcampId?: number): ColumnDef<Task>[] => {
+    if (bootcampId && CAREER_TOUR_BOOTCAMP_IDS.includes(bootcampId)) {
+        // Hide attendance, status, careerStatus, graduating, and topSkills for career tour bootcamps
+        const hiddenKeys = new Set(['attendance', 'status', 'careerStatus', 'graduating', 'topSkills'])
+        return allColumns.filter((col: any) =>
+            !hiddenKeys.has(col.accessorKey) && !hiddenKeys.has(col.id)
+        )
+    }
+    return allColumns
+}

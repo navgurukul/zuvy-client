@@ -82,7 +82,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Difficulty" />
+            <DataTableColumnHeader className='flex justify-center' column={column} title="Difficulty" />
         ),
         cell: ({ row }: { row: any }) => {
             const openEndedQuestion = row.original
@@ -104,7 +104,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         accessorKey: 'usage',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-center w-22"
+                className="flex justify-center"
                 column={column}
                 title="Usage"
             />
@@ -120,7 +120,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         id: 'actions1',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]  flex justify-end ml-4"
+                className="flex justify-center"
                 column={column}
                 title="Preview"
             />
@@ -128,7 +128,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         cell: ({ row }) => {
             const question = row.original
             return (
-                <div className="mr-5 flex justify-end">
+                <div className="flex justify-center">
                 <Dialog>
                     <DialogTrigger asChild>
                         <button>
@@ -184,7 +184,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
 
             return (
                 <>
-                    <div className="flex justify-end">
+                    <div className="flex justify-center">
                         <Dialog
                             onOpenChange={setIsOpenEndDialogOpen}
                             open={isOpenEndDialogOpen}

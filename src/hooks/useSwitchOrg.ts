@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
-import { api } from '@/utils/axios.config';
+import { api, setApiAuthToken } from '@/utils/axios.config';
 import { UseSwitchOrgReturn, SwitchOrgPayload, SwitchOrgResponse, SwitchOrgResult } from '@/hooks/hookType';
 import { getUser } from '@/store/store';
 import { toast } from '@/components/ui/use-toast';
+import { setCookie } from 'cookies-next';
+
 const useSwitchOrg = (): UseSwitchOrgReturn => {
     const [isSwitching, setIsSwitching] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,10 +25,17 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
             const data = response.data;
 
             if (data.access_token) {
-                // Update tokens in localStorage
-                localStorage.setItem('access_token', data.access_token);
+                // Update tokens in localStorage & axios headers
+                setApiAuthToken(data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
                 localStorage.setItem('AUTH', JSON.stringify(data.user))
+                setCookie('orgId', String(payload.orgId));
+
+                // Set the user's role in a cookie
+                const role = data.user.rolesList?.[0];
+                if (role) {
+                    setCookie('secure_typeuser', JSON.stringify(btoa(String(role).toLowerCase())));
+                }
 
                 // Update user in store
                 setUser(data.user);
@@ -64,6 +73,8 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
         } finally {
             inFlightRef.current = false;
             setIsSwitching(false);
+            // Keep isSwitchingOrg true — the layout will reset it once it
+            // confirms the new role matches the path (i.e. the transition is done).
         }
     };
 

@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { api } from '@/utils/axios.config'
 import {
     BookOpenText,
     SquareCode,
@@ -22,6 +21,9 @@ import { useParams, useRouter, usePathname } from 'next/navigation'
 import { Reorder, useDragControls } from 'framer-motion'
 import { ChapterItems } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ModuleComponentType'
 import { LucideIcon } from 'lucide-react'
+import { useChapterActions } from '@/app/[admin]/hooks/useChapterActions'
+import { useDeleteSession } from '@/app/[admin]/hooks/useDeleteSession'
+import { useGetChapterDetails } from '@/app/[admin]/hooks/useGetChapterDetails'
 
 // Topic icon mapping
 const TOPIC_ICONS: Record<number, LucideIcon> = {
@@ -67,11 +69,14 @@ function ChapterItem({
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
     const dragControls = useDragControls()
-
+    const { deleteChapter } = useChapterActions()
+    const { deleteSession } = useDeleteSession()
+    const { getChapterDetails } = useGetChapterDetails()
+    
     const isActive = activeChapter === chapterId
     const activeChapterClasses = isActive
-        ? 'bg-primary-light border border-primary text-primary'
-        : 'bg-white hover:bg-gray-50 border border-gray-200'
+        ? 'bg-primary-light dark:bg-primary/30 border border-primary text-primary'
+        : 'bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-muted border border-gray-300 dark:border-primary/20'
 
     const handleClick = () => {
         if (isDragging) return
@@ -85,9 +90,7 @@ function ChapterItem({
 
     const handleDeleteChapter = async () => {
         try {
-            const res = await api.delete(
-                `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
-            )
+            const res = await deleteChapter(moduleId, chapterId)
             
             toast.success({
                 title: res.data.title,
@@ -121,14 +124,17 @@ function ChapterItem({
             console.log('Deleting chapter with session:', chapterId)
             // /Content/chapterDetailsById/6226?bootcampId=718&moduleId=810&topicId=8
 
-            const response = await api.get(`/Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=8`)
+            const response = await getChapterDetails({
+                chapterId,
+                bootcampId: Array.isArray(courseId) ? courseId[0] : courseId,
+                moduleId,
+                topicId: 8,
+            })
             const sessionId = response.data.sessionDetails[0].id;
             console.log(sessionId)
 
 
-            const res = await api.delete(
-                `/classes/sessions/${sessionId}?deleteChapter=true`
-            )
+            const res = await deleteSession(sessionId, { deleteChapter: true })
             
             toast.success({
                 title: res.data.title,
@@ -209,7 +215,7 @@ function ChapterItem({
                     )}
                     onClick={handleClick}
                 >
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center dark:text-muted-foreground">
                         <div className="flex gap-2 items-center">
                             <span className="text-sm">{getTopicIcon(topicId)}</span>
                             <h5 className="font-medium text-sm">{title}</h5>

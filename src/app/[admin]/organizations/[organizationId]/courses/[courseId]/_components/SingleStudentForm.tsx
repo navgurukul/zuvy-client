@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -8,12 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { api } from '@/utils/axios.config'
-
-type BatchType = { 
-    id: string | number
-    name: string 
-}
+import { useBatchList } from '@/app/[admin]/hooks/useBatchList'
+import { requiredEmailSchema, requiredNameSchema } from '@/utils/validation/nameEmail'
 
 type StudentDataType = {
     name: string
@@ -26,32 +22,19 @@ interface SingleStudentFormProps {
     setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
     courseId: string | number
     showBatchSelection?: boolean
+    showValidationErrors?: boolean
 }
 
 const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
     studentData,
     setStudentData,
     courseId,
-    showBatchSelection = true
+    showBatchSelection = true,
+    showValidationErrors = false,
 }) => {
-    const [localBatchData, setLocalBatchData] = useState<BatchType[]>([])
-
-    // Fetch batches when component mounts
-    useEffect(() => {
-        const fetchBatches = async () => {
-            if (showBatchSelection) {
-                try {
-                    const response = await api.get(`/bootcamp/batches/${courseId}`)
-                    setLocalBatchData(response.data.data || [])
-                } catch (error) {
-                    console.error('Error fetching batches:', error)
-                    setLocalBatchData([])
-                }
-            }
-        }
-
-        fetchBatches()
-    }, [courseId, showBatchSelection])
+    // enabled mirrors showBatchSelection — no fetch happens when the section is hidden
+    const { batchData } = useBatchList(courseId, { enabled: showBatchSelection })
+    const [touchedFields, setTouchedFields] = useState<{ name?: boolean; email?: boolean }>({})
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -59,11 +42,15 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
     }
 
     const handleBatchChange = (value: string) => {
-        setStudentData({
-            ...studentData,
-            batchId: value,
-        })
+        setStudentData({ ...studentData, batchId: value })
     }
+
+    const nameResult = requiredNameSchema.safeParse(studentData.name || '')
+    const emailResult = requiredEmailSchema.safeParse(studentData.email || '')
+    const nameError = nameResult.success ? undefined : nameResult.error.issues[0]?.message
+    const emailError = emailResult.success ? undefined : emailResult.error.issues[0]?.message
+    const showNameError = showValidationErrors || touchedFields.name
+    const showEmailError = showValidationErrors || touchedFields.email
 
     return (
         <div className="space-y-4">
@@ -73,10 +60,16 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                     id="name"
                     name="name"
                     value={studentData.name || ''}
-                    onChange={handleInputChange}
+                    onChange={(event) => {
+                        setTouchedFields((prev) => ({ ...prev, name: true }))
+                        handleInputChange(event)
+                    }}
                     placeholder="Enter student's full name"
-                    className="mt-1"
+                    className={`mt-1 ${showNameError && nameError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
+                {showNameError && nameError && (
+                    <p className="text-red-500 text-xs mt-1">{nameError}</p>
+                )}
             </div>
 
             <div className="text-left">
@@ -84,11 +77,18 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                 <Input
                     id="email"
                     name="email"
+                    type="email"
                     value={studentData.email || ''}
-                    onChange={handleInputChange}
+                    onChange={(event) => {
+                        setTouchedFields((prev) => ({ ...prev, email: true }))
+                        handleInputChange(event)
+                    }}
                     placeholder="Enter student's email address"
-                    className="mt-1"
+                    className={`mt-1 ${showEmailError && emailError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
+                {showEmailError && emailError && (
+                    <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                )}
             </div>
 
             {showBatchSelection && (
@@ -102,8 +102,8 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                             <SelectValue placeholder="Select a batch" />
                         </SelectTrigger>
                         <SelectContent>
-                            {localBatchData && localBatchData.length > 0 ? (
-                                localBatchData.map((batch) => (
+                            {batchData.length > 0 ? (
+                                batchData.map((batch) => (
                                     <SelectItem
                                         key={batch.id}
                                         value={batch.id.toString()}

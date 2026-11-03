@@ -3,11 +3,11 @@ import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Play, Check, VideoIcon } from 'lucide-react'
-import useChapterCompletion from '@/hooks/useChapterCompletion'
+import { Check, VideoIcon, Lock } from 'lucide-react'
+import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
+import useCourseSyllabus from '@/app/student/hooks/useCourseSyllabus'
 import { getEmbedLink } from '@/utils/students'
 import {
-    Session,
     LiveClassContentProps,
 } from '@/app/student/_components/chapter-content/componentChapterType'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -22,6 +22,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
 }) => {
     const { courseId, moduleId } = useParams()
     const { progress, setProgress } = useVideoStore()
+
+    // Get student's own batch ID to check against the session's batch
+    const { syllabusData } = useCourseSyllabus(courseId as string)
+    const studentBatchId = syllabusData?.studentBatchId ?? null
 
     const playerRef = useRef<ReactPlayer>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -239,7 +243,16 @@ if (loading) {
         hangoutLink: session.hangoutLink,
         s3link: session.s3link,
         attendance: session.attendance,
+        attendanceMessage: session.attendanceMessage,
+        batchId: session.batchId,
     }
+
+    // Batch restriction: if we know the session's batch and the student's batch,
+    // and they don't match → student is not allowed to join this session
+    const isWrongBatch =
+        typeof studentBatchId === 'number' &&
+        typeof item.batchId === 'number' &&
+        item.batchId !== studentBatchId
 
     if (item.type === 'live-class') {
         const isScheduled = item.status === 'upcoming'
@@ -250,7 +263,7 @@ if (loading) {
             return (
                 <div className="max-w-4xl mx-auto p-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-heading font-bold">
+                        <h1 className="text-3xl font-body font-bold text-left">
                             {item.title}
                         </h1>
                         <Badge
@@ -328,19 +341,33 @@ if (loading) {
                         </div>
                     </div>
                     <div className="text-left">
-                        <Button
-                            className="mb-6 text-left font-semibold bg-primary hover:bg-primary-dark text-white"
-                            onClick={() =>
-                                item.hangoutLink &&
-                                window.open(item.hangoutLink, '_blank')
-                            }
-                            disabled={
-                                !item.hangoutLink ||
-                                item.hangoutLink === 'not found'
-                            }
-                        >
-                            Join Class
-                        </Button>
+                        {isWrongBatch ? (
+                            <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 mb-6">
+                                <Lock className="w-5 h-5 text-destructive flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-semibold text-destructive">
+                                        Session not available for your batch
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                        This live session was scheduled for a different batch. Please check your batch schedule.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <Button
+                                className="mb-6 text-left font-semibold bg-primary hover:bg-primary-dark text-white"
+                                onClick={() =>
+                                    item.hangoutLink &&
+                                    window.open(item.hangoutLink, '_blank')
+                                }
+                                disabled={
+                                    !item.hangoutLink ||
+                                    item.hangoutLink === 'not found'
+                                }
+                            >
+                                Join Class
+                            </Button>
+                        )}
                     </div>
                 </div>
             )
@@ -382,6 +409,11 @@ if (loading) {
                             {item.description ||
                                 'This live class has been completed.'}
                         </p>
+                        {item.attendance === 'N/A' && item.attendanceMessage && (
+                            <p className="text-sm text-muted-foreground text-left mb-6">
+                                {item.attendanceMessage}
+                            </p>
+                        )}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <div className="text-left">
                                 <p className="text-sm text-muted-foreground">
@@ -393,34 +425,34 @@ if (loading) {
                                         : 'TBD'}
                                 </p>
                             </div>
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Your Attendance Duration{' '}
-                                    </p>
-                                    <p className="font-medium">
-                                        {item.duration} mins
-                                    </p>
-                                </div>
-                            )}
-                            {item.s3link && (
-                                <div className="text-left">
-                                    <p className="text-sm text-muted-foreground">
-                                        Attendance
-                                    </p>
-                                    <p
-                                        className={`font-medium ${
-                                            item.attendance === 'present'
-                                                ? 'text-success'
-                                                : 'text-destructive'
-                                        }`}
-                                    >
-                                        {item.attendance === 'present'
-                                            ? 'Present'
-                                            : 'Absent'}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Your Attendance Duration{' '}
+                                </p>
+                                <p className="font-medium">
+                                    {item.duration} mins
+                                </p>
+                            </div>
+                            <div className="text-left">
+                                <p className="text-sm text-muted-foreground">
+                                    Attendance
+                                </p>
+                                <p
+                                    className={`font-medium text-sm ${
+                                        item.attendance === 'present'
+                                            ? 'text-success'
+                                            : item.attendance === 'N/A'
+                                            ? 'text-muted-foreground'
+                                            : 'text-destructive'
+                                    }`}
+                                >
+                                    {item.attendance === 'present'
+                                        ? 'Present'
+                                        : item.attendance === 'N/A'
+                                        ? 'Not Applicable'
+                                        : 'Absent'}
+                                </p>
+                            </div>
                         </div>
                         <p className="text-success mb-2 flex items-center gap-2">
                             <Check className="w-5 h-5" />
@@ -576,8 +608,8 @@ if (loading) {
                                     )}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center w-full h-[70vh] bg-card">
-                                <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
+                            <div className="flex h-[25vh] w-full flex-col items-center justify-center bg-card sm:h-[55vh]">
+                                <VideoIcon className="mb-2 h-12 w-12 opacity-60 sm:h-16 sm:w-16" />
                                 <p>Recording Not Found</p>
                             </div>
                         )}
