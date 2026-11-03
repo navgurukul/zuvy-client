@@ -1,3 +1,4 @@
+import ReactPlayer from 'react-player'
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -71,6 +72,10 @@ const LiveClass = ({
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
     const [recordingLink, setRecordingLink] = useState<string | null>(null)
+    const [isClient, setIsClient] = useState(false)
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -668,24 +673,40 @@ const LiveClass = ({
                                 <Video className="w-4 h-4" />
                                 Meeting Recording
                             </h4>
-                            <div className="bg-foreground/5 rounded-lg overflow-hidden">
+                            <div className="relative w-full h-80 rounded-lg overflow-hidden bg-black flex items-center justify-center">
                                 {(() => {
                                     const activeUrl =
                                         recordingLink ||
                                         (session.s3link && session.s3link !== 'not found'
                                             ? session.s3link
                                             : session.recordingLink || session.youtubeLink) || '';
-                                    const isDirectVideo =
-                                        activeUrl.includes('amazonaws.com') ||
-                                        activeUrl.includes('.mp4');
 
-                                    if (isDirectVideo) {
+                                    if (!activeUrl) return null;
+
+                                    if (!isClient) {
                                         return (
-                                            <video
-                                                src={activeUrl}
+                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground animate-pulse">
+                                                <Video className="w-8 h-8 opacity-40" />
+                                            </div>
+                                        );
+                                    }
+
+                                    const isPlayable = ReactPlayer.canPlay(activeUrl) || activeUrl.includes('amazonaws.com') || activeUrl.includes('.mp4');
+                                    if (isPlayable) {
+                                        return (
+                                            <ReactPlayer
+                                                url={activeUrl}
                                                 controls
-                                                playsInline
-                                                className="w-full h-80 rounded-lg bg-black"
+                                                width="100%"
+                                                height="100%"
+                                                config={{
+                                                    file: {
+                                                        attributes: {
+                                                            controlsList: 'nodownload',
+                                                            preload: 'metadata',
+                                                        },
+                                                    },
+                                                }}
                                             />
                                         );
                                     }
@@ -693,7 +714,7 @@ const LiveClass = ({
                                     return (
                                         <iframe
                                             src={getEmbedLink(activeUrl)}
-                                            className="w-full h-80 border-0"
+                                            className="w-full h-full border-0"
                                             allowFullScreen
                                             title={`Recording: ${session.title}`}
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

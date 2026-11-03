@@ -1293,6 +1293,11 @@ export const getEmbedLink = (url: string) => {
             return `https://geo.dailymotion.com/player.html?video=${videoId}`
         }
 
+        // S3 / Direct Video URL
+        if (urlObj.hostname.includes('amazonaws.com') || url.includes('.mp4')) {
+          return url
+        }
+
         // Zoom Meetings
         if (urlObj.hostname.includes('zoom.us')) {
           return url
