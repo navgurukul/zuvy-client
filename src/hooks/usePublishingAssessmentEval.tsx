@@ -30,7 +30,7 @@ export function usePublishAssessment(): UsePublishAssessmentResult {
             setPublishError(null);
             try {
                 const response = await api.post<PublishAssessmentApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${aiAssessmentId}/publish`,
+                    `/ai-assessment/${aiAssessmentId}/publish`,
                     body
                 );
                 setPublishedResult(response.data);

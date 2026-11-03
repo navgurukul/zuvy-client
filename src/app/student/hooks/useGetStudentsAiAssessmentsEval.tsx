@@ -42,7 +42,7 @@ export function useGetStudentAiAssessments(
       setError(null)
 
       const response = await api.get<StudentAiAssessment[]>(
-        `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/by/studentId`,
+        `/ai-assessment/by/studentId`,
         {
           params: {
             bootcampId,

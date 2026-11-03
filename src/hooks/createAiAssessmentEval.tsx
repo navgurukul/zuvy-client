@@ -28,7 +28,7 @@ export const useCreateAiAssessment = ({ org }: { org: number }): UseCreateAiAsse
 
             try {
                 const response = await api.post<CreateAiAssessmentResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment?orgId=${org}`,
+                    `/ai-assessment?orgId=${org}`,
                     payload
                 );
                 setData(response.data);

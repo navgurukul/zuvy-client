@@ -28,7 +28,7 @@ export function useGetReplacementQuestions(): UseGetReplacementQuestionsResult {
             setFetchError(null);
             try {
                 const response = await api.get<GetReplacementQuestionsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/questions/replace`,
+                    `/eval/questions/replace`,
                     { params }
                 );
                 setReplacementQuestions(response.data);

@@ -25,7 +25,7 @@ export function useGetAiAssessmentsByChapter({ org }: { org: number }): UseGetAi
             setFetchError(null);
             try {
                 const response = await api.get<GetAiAssessmentsByChapterApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment?orgId=${org}`,
+                    `/ai-assessment?orgId=${org}`,
                     { params: { chapterId } }
                 );
                 setAiAssessments(response.data);

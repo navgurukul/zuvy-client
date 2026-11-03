@@ -30,7 +30,7 @@ export function useScheduleAssessment(): UseScheduleAssessmentResult {
             setScheduleError(null);
             try {
                 const response = await api.post<PublishAssessmentApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${assessmentId}/schedule`,
+                    `/ai-assessment/${assessmentId}/schedule`,
                     body
                 );
                 setScheduledResult(response.data);

@@ -29,7 +29,7 @@ export const useTopicsWithDifficultyLevels =
 
                 try {
                     const response = await api.get<TopicWithDifficultyLevel[]>(
-                        `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/with-difficulty-levels?orgId=${options.org}`,
+                        `/eval/topic/with-difficulty-levels?orgId=${options.org}`,
                         {
                             params: search ? { search } : undefined,
                         }

@@ -33,7 +33,7 @@ export function useGenerateAiAssessment() {
                 setMappedQuestionsResponse(null)
 
                 const createResponse = await api.post<GenerateAiAssessmentResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment`,
+                    `/ai-assessment`,
                     payload
                 )
 

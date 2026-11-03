@@ -27,7 +27,7 @@ export function useGetQuestionSets({ org }: { org: number }): UseGetQuestionSets
             setFetchError(null);
             try {
                 const response = await api.get<GetQuestionSetsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${aiAssessmentId}/question-sets?orgId=${org}`,
+                    `/ai-assessment/${aiAssessmentId}/question-sets?orgId=${org}`,
                     { params: levelCode ? { levelCode } : undefined }
                 );
                 setQuestionSets((previousQuestionSets) => {

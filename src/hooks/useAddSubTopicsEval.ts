@@ -28,7 +28,7 @@ export function useAddSubtopic(): UseAddSubtopicResult {
             setAddError(null);
             try {
                 const response = await api.post<AddSubtopicApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/topic/${topicId}/subtopics`,
+                    `/eval/topic/${topicId}/subtopics`,
                     body
                 );
                 setAddedResult(response.data);

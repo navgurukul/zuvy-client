@@ -26,7 +26,7 @@ export function useMapQuestions({ org }: { org: number }): UseMapQuestionsResult
             setMapError(null);
             try {
                 const response = await api.post<MapQuestionsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/map-questions?orgId=${org}   `,
+                    `/ai-assessment/map-questions?orgId=${org}   `,
                     body
                 );
                 setMappedResult(response.data);

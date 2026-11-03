@@ -33,7 +33,7 @@ export function useGenerateQuestions(): UseGenerateQuestionsResult {
             setGenerateError(null);
             try {
                 const response = await api.post<GenerateQuestionsApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/questions/generate?orgId=${orgId}`,
+                    `/eval/questions/generate?orgId=${orgId}`,
                     body
                 );
                 

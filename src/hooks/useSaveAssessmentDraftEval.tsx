@@ -25,7 +25,7 @@ export function useSaveAssessmentDraft(): UseSaveAssessmentDraftResult {
             setDraftError(null);
             try {
                 const response = await api.post<PublishAssessmentApiResponse>(
-                    `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${assessmentId}/draft`
+                    `/ai-assessment/${assessmentId}/draft`
                 );
                 setDraftResult(response.data);
                 return response.data;

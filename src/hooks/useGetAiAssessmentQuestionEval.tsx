@@ -42,7 +42,7 @@ export function useGetStudentAiAssessmentQuestions() {
       setError(null)
 
       const response = await api.get<StudentAiAssessmentQuestionsResponse>(
-        `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/${assessmentId}/my-questions`
+        `/ai-assessment/${assessmentId}/my-questions`
       )
 
       const data = response.data

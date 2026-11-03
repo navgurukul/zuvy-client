@@ -22,7 +22,7 @@ export function useCreateTopic(orgId: number): UseCreateTopicResult {
             setIsSubmitting(true);
             setSubmitError(null);
             try {
-                const response = await api.post<CreateTopicApiResponse>(`${process.env.NEXT_PUBLIC_EVAL_URL}/topic?orgId=${orgId}`, body);
+                const response = await api.post<CreateTopicApiResponse>(`/eval/topic?orgId=${orgId}`, body);
                 
                 setCreatedTopic(response.data);
                 toast({

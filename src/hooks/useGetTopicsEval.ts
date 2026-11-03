@@ -19,8 +19,8 @@ export function useTopics(orgId: number): UseTopicsReturn {
         setIsLoading(true);
         setError(null);
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_EVAL_URL?.trim() || 'http://localhost:5000';
-            const response = await api.get(`${baseUrl.replace(/\/$/, '')}/topic?orgId=${orgId}`);
+            const baseUrl = process.env.NEXT_PUBLIC_MAIN_URL?.trim() || 'http://localhost:5000';
+            const response = await api.get(`${baseUrl.replace(/\/$/, '')}/eval/topic?orgId=${orgId}`);
             const topicsData = Array.isArray(response.data) ? response.data : 
                                Array.isArray(response.data?.data) ? response.data.data : 
                                Array.isArray(response.data?.topics) ? response.data.topics : [];

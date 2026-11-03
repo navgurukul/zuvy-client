@@ -22,7 +22,7 @@ export function useGetQuestionExplanation() {
         setError(null)
 
         const response = await api.post<QuestionExplanation>(
-          `${process.env.NEXT_PUBLIC_EVAL_URL}/ai-assessment/questions/explain`,
+          `/ai-assessment/questions/explain`,
           {
             assessmentId,
             questionId,
