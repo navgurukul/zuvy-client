@@ -82,7 +82,11 @@ const AdaptiveAssessementStudentView = ({ chapterDetails, details, onChapterComp
     //   return
     // }
 
-    const assessmentRoute = `/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessmentId}?domainId=${domainId}&chapterId=${chapterId}`
+    const query = new URLSearchParams({
+      domainId: String(domainId),
+      chapterId: String(chapterId),
+    })
+    const assessmentRoute = `/student/course/${bootcampId}/org/${orgId}/aiAssessmentEval/${assessmentId}?${query.toString()}`
     window.open(assessmentRoute, '_blank')?.focus()
   }
 
