@@ -207,12 +207,12 @@ export function ReplaceModal({
                 </div>
                 <div style={{ display: 'flex', gap: 5 }}>
                   <DiffBadge d={c.difficulty} />
-                  <Badge 
+                  {/* <Badge 
                     bg={isDark ? THEME_DARK.infoLight : THEME.infoLight} 
                     color={isDark ? THEME_DARK.info : THEME.info}
                   >
                     {apiCandidates.length > 0 ? 'API' : 'Validated'}
-                  </Badge>
+                  </Badge> */}
                 </div>
               </div>
               <Btn size="sm" disabled={isReplacing} onClick={() => doReplace(c)}>
