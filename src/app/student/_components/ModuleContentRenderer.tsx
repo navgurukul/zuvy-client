@@ -30,6 +30,7 @@ import AssessmentView from "./AssessmentView";
 import CodingProblemPage from "./CodingProblemPage";
 import {ModuleContentRendererProps} from "@/app/student/_components/componentStudentType"
 import AdaptiveAssessementStudentView from "./chapter-content/AdaptiveAssessmentStudentView";
+import CertificateContent from "./chapter-content/CertificateContent";
 import { useParams } from "next/navigation";
 
 const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleContentRendererProps) => {
@@ -132,7 +133,9 @@ if (loading) {
               courseId: Number.isNaN(parsedCourseId) ? null : parsedCourseId,
             }}
           />
-        )  
+        )
+      case 10:
+        return <CertificateContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       default:
     return (
       <div className="max-w-4xl mx-auto ">
