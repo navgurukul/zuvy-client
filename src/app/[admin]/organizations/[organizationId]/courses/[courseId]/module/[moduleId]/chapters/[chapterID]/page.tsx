@@ -11,6 +11,7 @@ import Quiz from '@/app/[admin]/organizations/[organizationId]/courses/[courseId
 import Assignment from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/assignment/Assignment'
 import AddAssessment from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Assessment/AddAssessment'
 import AddForm from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/form/AddForm'
+import CertificateChapter from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/certificate/CertificateChapter'
 import {
     getChapterContentState,
     getChapterDataState,
@@ -276,6 +277,16 @@ export default function Page({
                             canEdit={canEditChapter}
                             chapterId={chapter_id}
                             topicId={topicId}
+                        />
+                    )
+
+                case 10:
+                    return (
+                        <CertificateChapter
+                            key={chapterId}
+                            content={chapterContent}
+                            courseId={courseID}
+                            canEdit={canEditChapter}
                         />
                     )
 
