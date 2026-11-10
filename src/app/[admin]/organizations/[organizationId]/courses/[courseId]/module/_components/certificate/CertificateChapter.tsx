@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
 import { Award } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
@@ -12,7 +11,7 @@ import useGetChapterDetails from '@/app/[admin]/hooks/useGetChapterDetails'
 import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import useUploadCertificate from '@/app/[admin]/hooks/useUploadCertificate'
 import UploadArticle from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/Article/UploadPdf'
-import { getUser } from '@/store/store'
+import { getChapterDataState, getChapterUpdateStatus, getModuleData } from '@/store/store'
 
 interface CertificateChapterProps {
     content: any
@@ -25,11 +24,9 @@ const CertificateChapter: React.FC<CertificateChapterProps> = ({
     courseId,
     canEdit = true,
 }) => {
-    const router = useRouter()
-    const { organizationId } = useParams()
-    const { user } = getUser()
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgId = Number(organizationId) || user?.orgId
+    const { chapterData, setChapterData } = getChapterDataState()
+    const { moduleData, setModuleData } = getModuleData()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const [title, setTitle] = useState('')
     const [file, setFile] = useState<File | null>(null)
@@ -43,6 +40,20 @@ const CertificateChapter: React.FC<CertificateChapterProps> = ({
     const { editChapter } = useEditChapter()
     const { getChapterDetails } = useGetChapterDetails()
     const { uploadCertificate, loading: certificateLoading } = useUploadCertificate()
+
+    const syncChapterTitle = (updatedTitle: string) => {
+        setChapterData(chapterData.map((chapter: any) =>
+            chapter.chapterId === Number(content.id)
+                ? { ...chapter, chapterTitle: updatedTitle }
+                : chapter
+        ))
+        setModuleData(moduleData.map((chapter: any) =>
+            chapter.chapterId === Number(content.id)
+                ? { ...chapter, chapterTitle: updatedTitle }
+                : chapter
+        ))
+        setIsChapterUpdated(!isChapterUpdated)
+    }
 
     const fetchCertificateChapter = async () => {
         try {
@@ -81,6 +92,7 @@ const CertificateChapter: React.FC<CertificateChapterProps> = ({
                 try {
                     setLoading(true)
                     await editChapter(content.moduleId, content.id, { title })
+                    syncChapterTitle(title)
                     setOriginalTitle(title)
                     toast.success({
                         title: 'Success',
@@ -128,6 +140,7 @@ const CertificateChapter: React.FC<CertificateChapterProps> = ({
 
             setFile(null)
             setUploadDisabled(false)
+            syncChapterTitle(title)
             setOriginalTitle(title)
             await fetchCertificateChapter()
 
