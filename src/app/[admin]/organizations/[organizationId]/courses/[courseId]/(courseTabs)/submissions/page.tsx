@@ -29,6 +29,8 @@ import { useGetAssessmentSubmissions } from '@/app/[admin]/hooks/useGetAssessmen
 import { useGetProjectSubmissions } from '@/app/[admin]/hooks/useGetProjectSubmissions'
 import { useGetAssignmentSubmissions } from '@/app/[admin]/hooks/useGetAssignmentSubmissions'
 import { useGetVideoSubmissions } from '@/app/[admin]/hooks/useGetVideoSubmissions'
+import { useGetQuizSubmissions } from '@/app/[admin]/hooks/useGetQuizSubmissions'
+import QuizSubmission from './components/QuizSubmission'
 interface SearchSuggestion {
     id: string
     title: string
@@ -38,6 +40,7 @@ interface SearchSuggestion {
     | 'projects'
     | 'form'
     | 'assignments'
+    | 'quiz'
     | 'video'
     | 'live'
 }
@@ -50,6 +53,7 @@ const submissionTypes = [
     { id: 'projects', label: 'Projects', icon: BookOpen },
     { id: 'form', label: 'Feedback Forms', icon: MessageSquare },
     { id: 'practice', label: 'Practice Problems', icon: Code },
+    { id: 'quiz', label: 'Quizzes', icon: CheckSquare },
     { id: 'video', label: 'Videos', icon: Video },
     { id: 'live', label: 'Live Classes', icon: Play },
 ]
@@ -82,6 +86,7 @@ const Page = ({ params }: { params: any }) => {
     const { getProjectSubmissions } = useGetProjectSubmissions()
     const { getAssignmentSubmissions } = useGetAssignmentSubmissions()
     const { getVideoSubmissions } = useGetVideoSubmissions()
+    const { getQuizSubmissions } = useGetQuizSubmissions()
 
     // Fetch suggestions API function
     const fetchSuggestionsApi = useCallback(async (searchTerm: string): Promise<SearchSuggestion[]> => {
@@ -209,6 +214,22 @@ const Page = ({ params }: { params: any }) => {
                 }
                 break
 
+            case 'quiz':
+                try {
+                    const quizRes = await getQuizSubmissions(params.courseId, searchTerm)
+                    const responseData = quizRes.data?.data ?? quizRes.data
+                    const quizzes = (responseData?.modules || []).flatMap((module: any) => module.quizChapters || [])
+                    quizzes.forEach((quiz: any) => {
+                        const title = quiz.chapterTitle || ''
+                        if (title.toLowerCase().includes(term)) {
+                            newSuggestions.push({ id: String(quiz.chapterId ?? title), title, type: 'quiz' })
+                        }
+                    })
+                } catch (error) {
+                    console.error('Error fetching quizzes for suggestions:', error)
+                }
+                break
+
             case 'video':
                 try {
                     const videoRes = await getVideoSubmissions(params.courseId, searchTerm)
@@ -270,7 +291,7 @@ const Page = ({ params }: { params: any }) => {
 
 
         return uniqueSuggestions.slice(0, 8)
-    }, [params.courseId, activeTab, fetchPracticeSubmissions, getAssessmentSubmissions, getProjectSubmissions, getFormSubmissions, getAssignmentSubmissions, getVideoSubmissions, fetchLiveClassSubmissions])
+    }, [params.courseId, activeTab, fetchPracticeSubmissions, getAssessmentSubmissions, getProjectSubmissions, getFormSubmissions, getAssignmentSubmissions, getVideoSubmissions, getQuizSubmissions, fetchLiveClassSubmissions])
 
     // Modified: Only apply search when user selects suggestion or presses enter
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -492,6 +513,12 @@ const Page = ({ params }: { params: any }) => {
                                     {type.id === 'assignments' && (
                                         <Assignments
                                             debouncedSearch={appliedSearchQuery}
+                                            courseId={params.courseId}
+                                        />
+                                    )}
+                                    {type.id === 'quiz' && (
+                                        <QuizSubmission
+                                            searchTerm={appliedSearchQuery}
                                             courseId={params.courseId}
                                         />
                                     )}
