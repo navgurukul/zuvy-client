@@ -10,6 +10,7 @@ import React, {
 import {
   ZuvyRewardAnimation,
 } from './ZuvyRewardAnimation';
+import { X } from 'lucide-react';
 
 import './reward-animation.css';
 
@@ -22,6 +23,8 @@ export interface ZuvyRewardModalProps {
   hideSparks?: boolean;
   onClose: () => void;
   onContinue?: () => void;
+  onWatchMore?: () => void;
+  isVideoCompletion?: boolean;
 }
 
 export const ZuvyRewardModal: React.FC<
@@ -33,6 +36,8 @@ export const ZuvyRewardModal: React.FC<
   hideSparks = false,
   onClose,
   onContinue,
+  onWatchMore,
+  isVideoCompletion = false,
 }) => {
     const popupRef =
       useRef<HTMLDivElement>(null);
@@ -339,7 +344,7 @@ export const ZuvyRewardModal: React.FC<
     // Close / Continue
     // =========================================================
 
-    const handleClose = () => {
+    const handleClose = (continueToNext = true) => {
       if (isExiting) return;
 
       setIsExiting(true);
@@ -352,8 +357,16 @@ export const ZuvyRewardModal: React.FC<
 
       window.setTimeout(() => {
         onClose();
-        onContinue?.();
+        if (continueToNext) {
+          onContinue?.();
+        }
       }, 250);
+    };
+
+    const handleWatchMore = () => {
+      window.dispatchEvent(new Event('zuvy:resume-video'));
+      handleClose(false);
+      onWatchMore?.();
     };
 
     // =========================================================
@@ -374,7 +387,7 @@ export const ZuvyRewardModal: React.FC<
             ? 'exiting'
             : ''
           }`}
-        onClick={handleClose}
+        onClick={() => handleClose()}
       >
         <div
           className={`reward-popup ${isExiting ? 'exiting' : ''} ${
@@ -385,6 +398,14 @@ export const ZuvyRewardModal: React.FC<
             e.stopPropagation()
           }
         >
+          <button
+            type="button"
+            aria-label="Close congratulation popup"
+            className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => handleClose(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
           {/* ===================================================
             1. Success / Zero-Sparks Badge
         =================================================== */}
@@ -433,6 +454,11 @@ export const ZuvyRewardModal: React.FC<
           <p className="reward-subtitle">
             {chapterTitle}
           </p>
+          {isVideoCompletion && (
+            <p className="mt-2 text-center text-sm font-medium text-primary">
+              You have watched 75% of this video.
+            </p>
+          )}
 
           {/* ===================================================
             3. Spark Counter
@@ -515,16 +541,30 @@ export const ZuvyRewardModal: React.FC<
             6. Continue Button
         =================================================== */}
 
-          <Button
-            className={`reward-continue-btn ${canContinue
-                ? 'visible'
-                : ''
-              }`}
-            ref={continueBtnRef}
-            onClick={handleClose}
-          >
-            {isZeroSparks ? 'Try Again →' : 'Continue →'}
-          </Button>
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              className={`reward-continue-btn ${canContinue
+                  ? 'visible'
+                  : ''
+                }`}
+              ref={continueBtnRef}
+              onClick={() => handleClose()}
+            >
+              {isZeroSparks ? 'Try Again →' : isVideoCompletion ? 'Continue to next chapter →' : 'Continue →'}
+            </Button>
+            {isVideoCompletion && (
+              <Button
+                variant="outline"
+                className={`reward-continue-btn ${canContinue
+                    ? 'visible'
+                    : ''
+                  }`}
+                onClick={handleWatchMore}
+              >
+                Complete video to 100%
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );

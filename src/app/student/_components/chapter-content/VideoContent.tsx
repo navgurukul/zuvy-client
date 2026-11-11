@@ -38,16 +38,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
     )
     const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
     const hasShownFeedbackReminderRef = useRef<string | null>(null)
-
-    const { isCompleting, completeChapter } = useChapterCompletion({
-        courseId: courseId as string,
-        moduleId: moduleId as string,
-        chapterId: chapterDetails.id.toString(),
-        onSuccess: () => {
-            setIsCompleted(true)
-            onChapterComplete()
-        },
-    })
+    const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
 
     useEffect(() => {
         setIsCompleted(chapterDetails.status === 'Completed')
@@ -77,6 +68,39 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const savedTime = isTrackableVideo
         ? progress[chapterDetails.id.toString()] || 0
         : 0
+    const pausePlayer = useCallback(() => {
+        setPlaying(false)
+
+        const internalPlayer = playerRef.current?.getInternalPlayer()
+        if (internalPlayer?.pauseVideo) {
+            internalPlayer.pauseVideo()
+        } else if (internalPlayer?.pause) {
+            internalPlayer.pause()
+        }
+    }, [])
+
+    const resumePlayer = useCallback(() => {
+        setPlaying(true)
+
+        const internalPlayer = playerRef.current?.getInternalPlayer()
+        if (internalPlayer?.playVideo) {
+            internalPlayer.playVideo()
+        } else if (internalPlayer?.play) {
+            internalPlayer.play()
+        }
+    }, [])
+
+    useEffect(() => {
+        const handleResumeVideo = () => {
+            resumePlayer()
+        }
+
+        window.addEventListener('zuvy:resume-video', handleResumeVideo)
+        return () => {
+            window.removeEventListener('zuvy:resume-video', handleResumeVideo)
+        }
+    }, [resumePlayer])
+
     const handleReady = useCallback(() => {
         if (savedTime && playerRef.current) {
             playerRef.current.seekTo(savedTime, 'seconds')
@@ -90,8 +114,18 @@ const VideoContent: React.FC<VideoContentProps> = ({
     // This is hardcoded for Career Tours and may change in the future.
     const chapterKey = chapterDetails.id.toString()
     const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
-    const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
     const completionThreshold = isBootcampVideoOverride ? 0.99 : 0.75
+
+    const { isCompleting, completeChapter } = useChapterCompletion({
+        courseId: courseId as string,
+        moduleId: moduleId as string,
+        chapterId: chapterDetails.id.toString(),
+        onWatchMore: isBootcampVideoOverride ? undefined : resumePlayer,
+        onSuccess: () => {
+            setIsCompleted(true)
+            onChapterComplete()
+        },
+    })
 
     const showFeedbackReminderOnce = useCallback(() => {
         if (!isCareerTour || hasShownFeedbackReminderRef.current === chapterKey) return
@@ -132,6 +166,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 state.played >= completionThreshold
             ) {
                 hasCompletedRef.current = true
+                setProgress(chapterKey, state.playedSeconds)
+                pausePlayer()
                 completeChapter()
                 refetch()
             }
@@ -144,6 +180,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
             completionThreshold,
             refetch,
             showFeedbackReminderOnce,
+            pausePlayer,
         ]
     )
 
@@ -339,6 +376,3 @@ const VideoContent: React.FC<VideoContentProps> = ({
 }
 
 export default VideoContent
-
-
-
