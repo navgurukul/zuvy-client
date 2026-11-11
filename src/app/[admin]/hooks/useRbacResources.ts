@@ -3,8 +3,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { RawRbacResource, RbacResource, RbacResourcesResponse } from './hookType'
 
-function normalizeResource(raw: RawRbacResource, index: number): RbacResource {
-    const id = typeof raw.id === 'number' ? raw.id : index + 1
+function normalizeResource(
+    raw: RawRbacResource,
+    index: number,
+    parentGroupId: number | null = null,
+    parentId: number | null = null,
+    depth = 0,
+): RbacResource {
+    const id = typeof raw.resourceId === 'number'
+        ? raw.resourceId
+        : typeof raw.id === 'number'
+            ? raw.id
+            : index + 1
     const title = (
         raw.title ||
         raw.name ||
@@ -17,7 +27,18 @@ function normalizeResource(raw: RawRbacResource, index: number): RbacResource {
         : Array.isArray(raw.actions)
         ? raw.actions
         : []
-    return { id, title, description, permissions }
+    const isParent = raw.isParent ?? (raw.parentResourceId !== undefined && raw.parentResourceId === null)
+    return {
+        id,
+        title,
+        description,
+        permissions,
+        parentResourceId: isParent ? null : raw.parentResourceId ?? parentGroupId,
+        parentId: isParent ? null : parentId,
+        parentGroupId: isParent ? raw.id ?? null : parentGroupId,
+        isParent,
+        depth,
+    }
 }
 
 export function useRbacResources(initialFetch = true) {
@@ -31,7 +52,33 @@ export function useRbacResources(initialFetch = true) {
             setError(null)
             const res = await api.get<RbacResourcesResponse>('/rbac/resources')
             const raw = (res.data?.data ?? []) as RawRbacResource[]
-            const normalized = raw.map(normalizeResource)
+            let nextIndex = raw.length
+            const normalized: RbacResource[] = []
+            const visit = (
+                resource: RawRbacResource,
+                index: number,
+                parentGroupId: number | null = null,
+                parentId: number | null = null,
+                depth = 0,
+            ) => {
+                const normalizedResource = normalizeResource(
+                    resource,
+                    index,
+                    parentGroupId,
+                    parentId,
+                    depth,
+                )
+                normalized.push(normalizedResource)
+
+                const childGroupId = normalizedResource.isParent
+                    ? resource.id ?? null
+                    : parentGroupId
+                ;(resource.children ?? []).forEach((child) => {
+                    visit(child, nextIndex++, childGroupId, normalizedResource.id, depth + 1)
+                })
+            }
+
+            raw.forEach((resource, index) => visit(resource, index))
             setResources(normalized)
         } catch (err) {
             setError(err)

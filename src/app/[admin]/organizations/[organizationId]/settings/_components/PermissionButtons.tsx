@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { PERMISSION_TIERS, type PermissionTier } from '@/utils/types/rbac'
+import { PERMISSION_LEVELS, PERMISSION_TIERS, PERMISSION_TIER_LEVELS, type PermissionTier } from '@/utils/types/rbac'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -19,22 +19,18 @@ interface PermissionButtonsProps {
     onChange: (resourceId: number, tier: PermissionTier, isParent?: boolean) => void
 }
 
-// Labels aligned with the RBAC prototype:
-// tier 0=No access, 1=Viewer, 2=Editor, 3=Creator, 4=Manager
-const TIER_LABELS = [
-    { tier: 0, label: 'No access' },
-    { tier: 1, label: 'Viewer' },
-    { tier: 2, label: 'Editor' },
-    { tier: 3, label: 'Creator' },
-    { tier: 4, label: 'Manager' },
-] as const
+// Permission combinations used by the RBAC permission selector.
+const TIER_LABELS = Object.entries(PERMISSION_TIER_LEVELS).map(([tier, label]) => ({
+    tier: Number(tier) as PermissionTier,
+    label,
+}))
 
 // Ordered: View(1), Create(3), Edit(2), Delete(4) — matches prototype column order
 const PERM_COLUMNS = [
-    { label: 'View',   minTier: 1 },
-    { label: 'Create', minTier: 3 },
-    { label: 'Edit',   minTier: 2 },
-    { label: 'Manager', minTier: 4 },
+    { label: 'View', permission: 'view' as const },
+    { label: 'Create', permission: 'create' as const },
+    { label: 'Edit', permission: 'edit' as const },
+    { label: 'Delete', permission: 'delete' as const },
 ]
 
 const PermissionButtons: React.FC<PermissionButtonsProps> = ({
@@ -47,14 +43,22 @@ const PermissionButtons: React.FC<PermissionButtonsProps> = ({
     parentName,
     onChange,
 }) => {
-    const tier = Math.max(0, Math.min(4, currentTier)) as PermissionTier
+    const tier = Math.max(0, Math.min(6, currentTier)) as PermissionTier
     const tierStyle = PERMISSION_TIERS[tier]
+    const tierPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[tier]]
 
-    const isOptionDisabled = (optionTier: number) =>
-        isChild && typeof maxAllowedTier === 'number' && optionTier > maxAllowedTier
+    const isOptionDisabled = (optionTier: PermissionTier) => {
+        if (!isChild || typeof maxAllowedTier !== 'number') return false
+        const parentPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[maxAllowedTier]]
+        const optionPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[optionTier]]
+        return (Object.keys(optionPermissions) as Array<keyof typeof optionPermissions>)
+            .some((permission) => optionPermissions[permission] && !parentPermissions[permission])
+    }
 
-    const isColumnLocked = (minTier: number) =>
-        isChild && typeof maxAllowedTier === 'number' && minTier > maxAllowedTier
+    const isColumnLocked = (permission: keyof typeof tierPermissions) =>
+        isChild
+        && typeof maxAllowedTier === 'number'
+        && !PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[maxAllowedTier]][permission]
 
     return (
         <div className="grid w-full min-w-0 grid-cols-[44%_repeat(4,minmax(0,1fr))] items-center">
@@ -106,9 +110,9 @@ const PermissionButtons: React.FC<PermissionButtonsProps> = ({
             </div>
 
             {/* Permission indicator chips */}
-            {PERM_COLUMNS.map(({ label, minTier }) => {
-                const granted = tier >= minTier
-                const locked = isColumnLocked(minTier)
+            {PERM_COLUMNS.map(({ label, permission }) => {
+                const granted = tierPermissions[permission]
+                const locked = isColumnLocked(permission)
 
                 return (
                     <div key={label} className="flex justify-center">

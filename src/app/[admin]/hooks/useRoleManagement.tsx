@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
-import { getPermissionLevelFromPermissions, permissionLevelToTier, PERMISSION_TIERS, PERMISSION_LEVELS } from '@/utils/types/rbac'
+import { getPermissionLevelFromPermissions, permissionLevelToTier, PERMISSION_LEVELS, PERMISSION_TIER_LEVELS } from '@/utils/types/rbac'
 
 import type { PermissionLevel, PermissionTier } from '@/utils/types/rbac'
 
@@ -20,6 +20,11 @@ export interface RoleAction {
     description: string
     isSelected?: boolean
     permissions?: string[]
+    parentResourceId?: number | null
+    parentId?: number | null
+    isParent?: boolean
+    parentGroupId?: number | null
+    depth?: number
 }
 
 export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: string) => void) => {
@@ -209,51 +214,57 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                 title: r.title,
                 description: r.description,
                 permissions: r.permissions || [],
+                parentResourceId: r.parentResourceId,
+                parentId: r.parentId,
+                isParent: r.isParent,
+                parentGroupId: r.parentGroupId,
+                depth: r.depth,
             })),
         [resources]
     )
 
     const groupedResources = useMemo(() => {
-        const groups: Record<string, { id: string; children: RoleAction[] }> = {}
+        const groups: Record<string, {
+            id: string
+            parentId: number
+            parent: RoleAction
+            children: RoleAction[]
+        }> = {}
 
-        roleActions.forEach(action => {
-            let mainModule = 'Course Studio'
-
-            const title = (action.title || '').toLowerCase()
-            const description = (action.description || '').toLowerCase()
-
-            if (title.includes('mcq') ||
-                title.includes('question') ||
-                title.includes('coding') ||
-                description.includes('content bank') ||
-                description.includes('mcq') ||
-                description.includes('question')) {
-                mainModule = 'Content Bank'
+        roleActions.filter((action) => action.isParent).forEach((parent) => {
+            groups[String(parent.id)] = {
+                id: String(parent.id),
+                parentId: parent.id,
+                parent,
+                children: [],
             }
-
-            if (!groups[mainModule]) {
-                groups[mainModule] = {
-                    id: mainModule.toLowerCase().replace(/\s+/g, '-'),
-                    children: []
-                }
-            }
-
-            groups[mainModule].children.push(action)
         })
 
-        return groups
+        const appendChildren = (group: (typeof groups)[string], parentId: number) => {
+            roleActions
+                .filter((action) => !action.isParent && action.parentId === parentId)
+                .forEach((action) => {
+                    group.children.push(action)
+                    appendChildren(group, action.id)
+                })
+        }
+
+        Object.values(groups).forEach((group) => appendChildren(group, group.parentId))
+
+        const parentOrder = ['course studio', 'question bank', 'roles & permissions']
+        return Object.fromEntries(
+            Object.entries(groups).sort(([firstKey, firstGroup], [secondKey, secondGroup]) => {
+                const firstIndex = parentOrder.indexOf(firstGroup.parent.title.toLowerCase())
+                const secondIndex = parentOrder.indexOf(secondGroup.parent.title.toLowerCase())
+                return (firstIndex === -1 ? parentOrder.length : firstIndex)
+                    - (secondIndex === -1 ? parentOrder.length : secondIndex)
+                    || firstKey.localeCompare(secondKey)
+            }),
+        )
     }, [roleActions])
 
     const handlePermissionChange = (resourceId: number, tier: PermissionTier, isParent: boolean = false) => {
-        const tierToLevel: Record<PermissionTier, PermissionLevel> = {
-            0: 'No access',
-            1: 'Viewer',
-            2: 'Editor',
-            3: 'Creator',
-            4: 'Manager',
-        }
-
-        const level = tierToLevel[tier]
+        const level = PERMISSION_TIER_LEVELS[tier]
         const levelPermissions = PERMISSION_LEVELS
         // build new permissions for a resource
         const updateResourcePermissions = (resId: number) => {
@@ -278,7 +289,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
                     newPerms[perm.id] = levelPerms ? levelPerms[level].create : false
                 } else if (permName.includes('edit') || permName.includes('update')) {
                     newPerms[perm.id] = levelPerms ? levelPerms[level].edit : false
-                } else if (permName.includes('delete') || permName.includes('remove')) {
+                } else if (permName.includes('delete') || permName.includes('remove') || permName.includes('manager')) {
                     newPerms[perm.id] = levelPerms ? levelPerms[level].delete : false
                 } else {
                     newPerms[perm.id] = resourcePermissions[resId]?.[perm.id] || false
@@ -289,31 +300,44 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
         }
 
         if (isParent) {
-            const newResourcePermissions: Record<number, Record<number, boolean>> = { ...resourcePermissions }
-            const newPermissionLevels: Record<number, PermissionLevel> = { ...permissionLevels }
+            const newPerms = updateResourcePermissions(resourceId)
+            if (!newPerms) return
 
-            for (const resourceGroup of Object.values(groupedResources)) {
-                if (!resourceGroup.children.some(child => child.id === resourceId)) continue
-
-                resourceGroup.children.forEach((child) => {
-                    const updated = updateResourcePermissions(child.id)
-                    if (!updated) return
-
-                    newResourcePermissions[child.id] = updated
-                    newPermissionLevels[child.id] = tierToLevel[tier]
-                })
-
-                setParentLockedModules((prev) => {
-                    const next = new Set(prev)
-                    if (tierToLevel[tier] === 'No access') next.add(resourceGroup.id)
-                    else next.delete(resourceGroup.id)
-                    return next
-                })
-                setResourcePermissions(newResourcePermissions)
-                setPermissionLevels(newPermissionLevels)
-                setHasPendingPermissionChanges(true)
-                break
+            const nextResourcePermissions: Record<number, Record<number, boolean>> = {
+                ...resourcePermissions,
+                [resourceId]: newPerms,
             }
+            const nextPermissionLevels: Record<number, PermissionLevel> = {
+                ...permissionLevels,
+                [resourceId]: level,
+            }
+
+            if (tier === 0) {
+                Object.values(groupedResources)
+                    .filter((resourceGroup) => resourceGroup.parentId === resourceId)
+                    .flatMap((resourceGroup) => resourceGroup.children)
+                    .forEach((child) => {
+                        const childPermissions = permissionsData[child.id] || []
+                        const permissionIds = childPermissions.length > 0
+                            ? childPermissions.map((permission) => permission.id)
+                            : Object.keys(resourcePermissions[child.id] || {}).map(Number)
+
+                        nextResourcePermissions[child.id] = Object.fromEntries(
+                            permissionIds.map((permissionId) => [permissionId, false]),
+                        )
+                        nextPermissionLevels[child.id] = 'No access'
+                    })
+            }
+
+            setResourcePermissions((prev) => ({
+                ...prev,
+                ...nextResourcePermissions,
+            }))
+            setPermissionLevels((prev) => ({
+                ...prev,
+                ...nextPermissionLevels,
+            }))
+            setHasPendingPermissionChanges(true)
         } else {
             const newPerms = updateResourcePermissions(resourceId)
             if (!newPerms) return
@@ -325,7 +349,7 @@ export const useRoleManagement = (selectedRole?: string, onRoleChange?: (role: s
 
             setPermissionLevels((prev) => ({
                 ...prev,
-                [resourceId]: tierToLevel[tier],
+                [resourceId]: level,
             }))
             setHasPendingPermissionChanges(true)
 

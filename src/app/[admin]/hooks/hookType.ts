@@ -915,6 +915,11 @@ export interface RbacResource {
   title: string
   description: string
   permissions: string[]
+  parentResourceId?: number | null
+  parentId?: number | null
+  isParent?: boolean
+  parentGroupId?: number | null
+  depth?: number
 }
 
 export interface RawRbacResource {
@@ -925,6 +930,11 @@ export interface RawRbacResource {
   permissions?: string[]
   actions?: string[]
   resource?: string
+  resourceId?: number
+  parentResourceId?: number | null
+  parentId?: number | null
+  isParent?: boolean
+  children?: RawRbacResource[]
 }
 
 export interface RbacResourcesResponse {

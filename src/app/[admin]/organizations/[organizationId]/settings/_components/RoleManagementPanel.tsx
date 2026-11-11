@@ -10,7 +10,6 @@ import React, {
 import {
     Save,
     AlertTriangle,
-    ChevronDown,
     X,
 } from 'lucide-react'
 import useRoleManagement from '@/app/[admin]/hooks/useRoleManagement'
@@ -19,7 +18,7 @@ import RoleList from './RoleList'
 import PermissionButtons from './PermissionButtons'
 import UnsavedChangesDialog from './UnsavedChangesDialog'
 import { cn } from '@/lib/utils'
-import { permissionLevelToTier, PERMISSION_TIERS, type PermissionTier } from '@/utils/types/rbac'
+import { getEffectivePermissionTier, permissionLevelToTier, PERMISSION_TIERS, type PermissionTier } from '@/utils/types/rbac'
 import { Button } from '@/components/ui/button'
 import { getUser } from '@/store/store'
 
@@ -128,11 +127,12 @@ const LowerToast: React.FC<LowerToastProps> = ({ message, onUndo, onDismiss }) =
 
 interface CardSectionProps {
     moduleName: string
-    mod: { id: string; children: any[] }
+    mod: { id: string; parentId: number; parent: any; children: any[] }
     isExpanded: boolean
     parentLevel: number
     showDisabledMessage: boolean
     permissionLevels: Record<number, any>
+    effectivePermissionLevels: Record<number, PermissionTier>
     permissionsData: Record<number, any>
     focusedId: number | null        // child row id that is hovered/focused; -1 = header hovered; null = not active
     focusLocked: boolean            // true when a dropdown is open
@@ -147,6 +147,8 @@ interface CardSectionProps {
     onPermissionChange: (resourceId: number, tier: PermissionTier, isParent?: boolean) => void
     onPermissionChangeParent: (resourceId: number, tier: PermissionTier, isParent?: boolean) => void
     getModuleSummary: (children: any[]) => string
+    expandedResourceIds: Set<number>
+    onToggleResource: (resourceId: number) => void
 }
 
 const CardSection: React.FC<CardSectionProps> = ({
@@ -156,6 +158,7 @@ const CardSection: React.FC<CardSectionProps> = ({
     parentLevel,
     showDisabledMessage,
     permissionLevels,
+    effectivePermissionLevels,
     focusedId,
     focusLocked,
     isAdminRole,
@@ -169,6 +172,8 @@ const CardSection: React.FC<CardSectionProps> = ({
     onPermissionChange,
     onPermissionChangeParent,
     getModuleSummary,
+    expandedResourceIds,
+    onToggleResource,
 }) => {
     const cardRef = useRef<HTMLDivElement>(null)
     const headerRowRef = useRef<HTMLDivElement>(null)
@@ -180,6 +185,20 @@ const CardSection: React.FC<CardSectionProps> = ({
     //   ≥ 0    → that child id is hovered         → box covers header + that child
 
     const thisCardActive = focusedId !== null
+    const getSubtreeIds = (resourceId: number): number[] => {
+        const descendants = mod.children
+            .filter((child: any) => child.parentId === resourceId)
+            .flatMap((child: any) => [child.id, ...getSubtreeIds(child.id)])
+        return descendants
+    }
+
+    const getSubtreeRootId = (resourceId: number): number => {
+        let current = mod.children.find((child: any) => child.id === resourceId)
+        while (current && current.parentId !== mod.parentId) {
+            current = mod.children.find((child: any) => child.id === current.parentId)
+        }
+        return current?.id ?? resourceId
+    }
 
     const focusedEls: HTMLElement[] = []
 
@@ -197,35 +216,14 @@ const CardSection: React.FC<CardSectionProps> = ({
                 })
             }
         } else if (focusedId !== null && focusedId >= 0) {
-            const hoveredIndex = mod.children.findIndex(
-                (child: any) => child.id === focusedId
-            )
-
-            if (hoveredIndex === 0) {
-                // First child: header + first child
-                if (headerRowRef.current) {
-                    focusedEls.push(headerRowRef.current)
-                }
-
-                const childEl = childRowRefs.current.get(focusedId)
-                if (childEl) focusedEls.push(childEl)
-            } else if (hoveredIndex === 1) {
-                // Second child: header + first child + second child
-                if (headerRowRef.current) {
-                    focusedEls.push(headerRowRef.current)
-                }
-
-                for (let i = 0; i <= hoveredIndex; i++) {
-                    const childEl = childRowRefs.current.get(
-                        mod.children[i].id
-                    )
+            const subtreeRootId = getSubtreeRootId(focusedId)
+            const subtreeIds = new Set([subtreeRootId, ...getSubtreeIds(subtreeRootId)])
+            mod.children
+                .filter((child: any) => subtreeIds.has(child.id))
+                .forEach((child: any) => {
+                    const childEl = childRowRefs.current.get(child.id)
                     if (childEl) focusedEls.push(childEl)
-                }
-            } else {
-                // Third child onward: only hovered child
-                const childEl = childRowRefs.current.get(focusedId)
-                if (childEl) focusedEls.push(childEl)
-            }
+                })
         }
     }
 
@@ -238,26 +236,17 @@ const CardSection: React.FC<CardSectionProps> = ({
         if (focusedId === -1) return 8
 
         if (focusedId !== null && focusedId >= 0) {
-            const idx = mod.children.findIndex(
-                (child: any) => child.id === focusedId
+            const subtreeRootId = getSubtreeRootId(focusedId)
+            const subtreeIds = new Set([subtreeRootId, ...getSubtreeIds(subtreeRootId)])
+            const lastSubtreeIndex = mod.children.reduce(
+                (lastIndex: number, child: any, index: number) =>
+                    subtreeIds.has(child.id) ? index : lastIndex,
+                -1,
             )
 
-            // First/second child outline starts at header
-            if (idx === 0 || idx === 1) {
-                const reachesCardBottom =
-                    isExpanded && idx === mod.children.length - 1
-
-                return reachesCardBottom
-                    ? 8
-                    : '8px 8px 0 0'
-            }
-
-            // Third child onward: independent outline
-            const isLast = idx === mod.children.length - 1
-
-            return isLast
-                ? '0 0 8px 8px'
-                : 0
+            return lastSubtreeIndex === mod.children.length - 1
+                ? 8
+                : '8px 8px 0 0'
         }
 
         return 8
@@ -295,12 +284,9 @@ const CardSection: React.FC<CardSectionProps> = ({
                         onClick={onToggleExpand}
                         className="flex-shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
                     >
-                        <ChevronDown
-                            className={cn(
-                                'h-4 w-4 transition-transform duration-200',
-                                !isExpanded && '-rotate-90',
-                            )}
-                        />
+                        <span className="text-xs leading-none" aria-hidden="true">
+                            {isExpanded ? '▼' : '▶'}
+                        </span>
                     </button>
                     <div className="min-w-0">
                         <span className="block truncate text-left text-sm font-semibold text-foreground">
@@ -312,7 +298,7 @@ const CardSection: React.FC<CardSectionProps> = ({
                     </div>
                 </div>
                 <PermissionButtons
-                    resourceId={mod.children[0]?.id || 0}
+                    resourceId={mod.parentId}
                     isChild={false}
                     moduleChildren={mod.children}
                     currentTier={parentLevel as PermissionTier}
@@ -325,10 +311,24 @@ const CardSection: React.FC<CardSectionProps> = ({
             {/* ── Child rows ── */}
             {isExpanded &&
                 mod.children.map((child: any, idx: number) => {
-                    const childTier = permissionLevelToTier(
-                        (permissionLevels as any)[child.id] || 'No access',
-                    )
-                    const isAtLimit = childTier === parentLevel && parentLevel > 0
+                    let ancestorId = child.parentId
+                    let isVisible = child.parentId === mod.parentId
+                    while (!isVisible && ancestorId !== null && ancestorId !== undefined) {
+                        if (!expandedResourceIds.has(ancestorId)) break
+                        const ancestor = mod.children.find((item: any) => item.id === ancestorId)
+                        if (!ancestor) break
+                        isVisible = ancestor.parentId === mod.parentId
+                        ancestorId = ancestor.parentId
+                    }
+                    if (!isVisible) return null
+
+                    const childTier = effectivePermissionLevels[child.id] ?? 0
+                    const childParentTier = child.parentId === mod.parentId
+                        ? parentLevel
+                        : effectivePermissionLevels[child.parentId] ?? 0
+                    const hasNestedChildren = mod.children.some((item: any) => item.parentId === child.id)
+                    const isExpanded = expandedResourceIds.has(child.id)
+                    const isAtLimit = childTier === childParentTier && childTier > 0
                     const isHovered = focusedId === child.id
                     const isLast = idx === mod.children.length - 1
                     // Dim siblings only when a specific child (not header) is hovered
@@ -353,7 +353,24 @@ const CardSection: React.FC<CardSectionProps> = ({
                             onMouseLeave={onChildMouseLeave}
                         >
                             <div className="grid min-h-11 grid-cols-[46%_54%] items-center">
-                                <div className="flex h-full min-w-0 items-center gap-2 border-r border-border px-3 pl-8">
+                                <div
+                                    className="flex h-full min-w-0 items-center gap-2 border-r border-border px-3"
+                                    style={{ paddingLeft: `${24 + (child.depth ?? 1) * 20}px` }}
+                                >
+                                    {hasNestedChildren ? (
+                                        <button
+                                            type="button"
+                                            aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${child.title}`}
+                                            onClick={() => onToggleResource(child.id)}
+                                            className="mr-1 flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted"
+                                        >
+                                            <span className="text-[10px] leading-none" aria-hidden="true">
+                                                {isExpanded ? '▼' : '▶'}
+                                            </span>
+                                        </button>
+                                    ) : (
+                                        <span aria-hidden="true" className="mr-1 h-5 w-5 shrink-0" />
+                                    )}
                                     <span
                                         aria-hidden="true"
                                         className="mr-1 shrink-0 self-stretch inline-flex items-center"
@@ -383,7 +400,7 @@ const CardSection: React.FC<CardSectionProps> = ({
                                     resourceId={child.id}
                                     isChild={true}
                                     currentTier={childTier}
-                                    maxAllowedTier={parentLevel as PermissionTier}
+                                    maxAllowedTier={childParentTier as PermissionTier}
                                     parentName={moduleName}
                                     isAdminRole={isAdminRole}
                                     isOwnRole={isOwnRole}
@@ -454,6 +471,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         moduleId: string
         childId: number | null   // null = header hovered
     } | null>(null)
+    const [expandedResourceIds, setExpandedResourceIds] = useState<Set<number>>(new Set())
 
     // Focus locked when a Select dropdown is open (prevents hover from clearing)
     const [focusLocked, setFocusLocked] = useState(false)
@@ -548,6 +566,15 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             const next = new Set(prev)
             if (next.has(moduleId)) next.delete(moduleId)
             else next.add(moduleId)
+            return next
+        })
+    }
+
+    const toggleResourceExpansion = (resourceId: number) => {
+        setExpandedResourceIds((prev) => {
+            const next = new Set(prev)
+            if (next.has(resourceId)) next.delete(resourceId)
+            else next.add(resourceId)
             return next
         })
     }
@@ -688,7 +715,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         <tr className="h-9">
                             <th className="border-r border-border px-3 text-left font-medium">Role Actions</th>
                             <th className="border-r border-border px-3 text-left font-medium">Permission Level</th>
-                            {['View', 'Create', 'Edit', 'Manager'].map((label) => (
+                            {['View', 'Create', 'Edit', 'Delete'].map((label) => (
                                 <th key={label} className="px-1 text-center font-medium">{label}</th>
                             ))}
                         </tr>
@@ -703,15 +730,42 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 ) : roleActions.length === 0 ? (
                     <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">No resources found.</div>
                 ) : (
-                    Object.entries(groupedResources as Record<string, { id: string; children: any[] }>).map(([moduleName, mod]) => {
+                    Object.entries(groupedResources as Record<string, { id: string; parentId: number; parent: any; children: any[] }>)
+                        .sort(([, first], [, second]) => {
+                            const order = ['course studio', 'question bank', 'roles & permissions']
+                            const firstIndex = order.indexOf(first.parent.title.trim().toLowerCase())
+                            const secondIndex = order.indexOf(second.parent.title.trim().toLowerCase())
+                            return (firstIndex === -1 ? order.length : firstIndex)
+                                - (secondIndex === -1 ? order.length : secondIndex)
+                        })
+                        .map(([, mod]) => {
                         const isExpanded = (expandedModules as Set<string>).has(mod.id)
-                        const inheritedParentLevel = mod.children.length
+                        const childParentLevel = mod.children.length
                             ? mod.children.reduce((acc: number, child: any) => {
                                 const lvl = (permissionLevels as any)[child.id] || 'No access'
                                 return Math.max(acc, permissionLevelToTier(lvl))
                             }, 0)
                             : 0
-                        const parentLevel = parentLevelOverrides[mod.id] ?? inheritedParentLevel
+                        const loadedParentLevel = permissionLevelToTier(
+                            (permissionLevels as any)[mod.parentId] || 'No access',
+                        )
+                        const parentLevel = parentLevelOverrides[mod.id]
+                            ?? ((permissionLevels as any)[mod.parentId] !== undefined
+                                ? loadedParentLevel
+                                : childParentLevel)
+                        const effectivePermissionLevels: Record<number, PermissionTier> = {}
+                        mod.children.forEach((child: any) => {
+                            const childTier = permissionLevelToTier(
+                                (permissionLevels as any)[child.id] || 'No access',
+                            )
+                            const directParentTier = child.parentId === mod.parentId
+                                ? parentLevel
+                                : effectivePermissionLevels[child.parentId] ?? 0
+                            effectivePermissionLevels[child.id] = getEffectivePermissionTier(
+                                childTier,
+                                directParentTier,
+                            )
+                        })
                         const isParentLocked = (parentLockedModules as Set<string>).has(mod.id)
                         const showDisabledMessage = isParentLocked && parentLevel === 0
 
@@ -727,12 +781,13 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         return (
                             <CardSection
                                 key={mod.id}
-                                moduleName={moduleName}
+                                moduleName={mod.parent.title}
                                 mod={mod}
                                 isExpanded={isExpanded}
                                 parentLevel={parentLevel}
                                 showDisabledMessage={showDisabledMessage}
                                 permissionLevels={permissionLevels}
+                                effectivePermissionLevels={effectivePermissionLevels}
                                 permissionsData={permissionsData}
                                 // null = header hovered (whole card in focus, no specific child)
                                 // number = specific child hovered
@@ -742,6 +797,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 isOwnRole={isOwnRole}
                                 isAnyFocused={isAnyFocused}
                                 onToggleExpand={() => toggleModuleExpansion(mod.id)}
+                                expandedResourceIds={expandedResourceIds}
+                                onToggleResource={toggleResourceExpansion}
                                 onChildMouseEnter={(childId) => {
                                     if (focusLocked) return
                                     setHoveredState({ moduleId: mod.id, childId })
@@ -764,7 +821,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 getModuleSummary={getModuleSummary}
                             />
                         )
-                    })
+                        })
                 )}
             </div>
 
