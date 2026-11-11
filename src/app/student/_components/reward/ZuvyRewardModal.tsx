@@ -10,6 +10,7 @@ import React, {
 import {
   ZuvyRewardAnimation,
 } from './ZuvyRewardAnimation';
+import { X } from 'lucide-react';
 
 import './reward-animation.css';
 
@@ -22,6 +23,9 @@ export interface ZuvyRewardModalProps {
   hideSparks?: boolean;
   onClose: () => void;
   onContinue?: () => void;
+  onWatchMore?: () => void;
+  isVideoCompletion?: boolean;
+  hasNextChapter?: boolean;
 }
 
 export const ZuvyRewardModal: React.FC<
@@ -33,6 +37,9 @@ export const ZuvyRewardModal: React.FC<
   hideSparks = false,
   onClose,
   onContinue,
+  onWatchMore,
+  isVideoCompletion = false,
+  hasNextChapter = true,
 }) => {
     const popupRef =
       useRef<HTMLDivElement>(null);
@@ -68,6 +75,10 @@ export const ZuvyRewardModal: React.FC<
       : isZeroSparks
         ? 'Keep Trying!'
         : 'Chapter Completed!';
+
+    // On the last chapter there's nowhere to continue to, so hide the
+    // Continue button (zero-sparks "Try Again" is still shown).
+    const showContinueButton = isZeroSparks || hasNextChapter;
 
     // =========================================================
     // Confetti
@@ -190,6 +201,13 @@ export const ZuvyRewardModal: React.FC<
       if (!hideSparks && totalSparks > 0) {
         spawnConfetti();
       }
+
+      // Reveal the action buttons early instead of waiting for the full
+      // mascot / spark-throw sequence to finish.
+      const buttonsTimer = window.setTimeout(() => {
+        if (!isSubscribed) return;
+        setCanContinue(true);
+      }, 900);
 
       const timer =
         window.setTimeout(() => {
@@ -322,6 +340,7 @@ export const ZuvyRewardModal: React.FC<
         isSubscribed = false;
 
         window.clearTimeout(timer);
+        window.clearTimeout(buttonsTimer);
 
         cleanupConfetti();
 
@@ -339,7 +358,7 @@ export const ZuvyRewardModal: React.FC<
     // Close / Continue
     // =========================================================
 
-    const handleClose = () => {
+    const handleClose = (continueToNext = true) => {
       if (isExiting) return;
 
       setIsExiting(true);
@@ -352,8 +371,16 @@ export const ZuvyRewardModal: React.FC<
 
       window.setTimeout(() => {
         onClose();
-        onContinue?.();
+        if (continueToNext) {
+          onContinue?.();
+        }
       }, 250);
+    };
+
+    const handleWatchMore = () => {
+      window.dispatchEvent(new Event('zuvy:resume-video'));
+      handleClose(false);
+      onWatchMore?.();
     };
 
     // =========================================================
@@ -374,7 +401,7 @@ export const ZuvyRewardModal: React.FC<
             ? 'exiting'
             : ''
           }`}
-        onClick={handleClose}
+        onClick={() => handleClose()}
       >
         <div
           className={`reward-popup ${isExiting ? 'exiting' : ''} ${
@@ -385,6 +412,14 @@ export const ZuvyRewardModal: React.FC<
             e.stopPropagation()
           }
         >
+          <button
+            type="button"
+            aria-label="Close congratulation popup"
+            className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => handleClose(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
           {/* ===================================================
             1. Success / Zero-Sparks Badge
         =================================================== */}
@@ -433,6 +468,11 @@ export const ZuvyRewardModal: React.FC<
           <p className="reward-subtitle">
             {chapterTitle}
           </p>
+          {isVideoCompletion && (
+            <p className="mt-2 text-center text-sm font-medium text-primary">
+              You have watched 75% of this video.
+            </p>
+          )}
 
           {/* ===================================================
             3. Spark Counter
@@ -515,16 +555,32 @@ export const ZuvyRewardModal: React.FC<
             6. Continue Button
         =================================================== */}
 
-          <Button
-            className={`reward-continue-btn ${canContinue
-                ? 'visible'
-                : ''
-              }`}
-            ref={continueBtnRef}
-            onClick={handleClose}
-          >
-            {isZeroSparks ? 'Try Again →' : 'Continue →'}
-          </Button>
+          <div className="flex flex-col items-center gap-2">
+            {showContinueButton && (
+              <Button
+                className={`reward-continue-btn ${canContinue
+                    ? 'visible'
+                    : ''
+                  }`}
+                ref={continueBtnRef}
+                onClick={() => handleClose()}
+              >
+                {isZeroSparks ? 'Try Again →' : 'Continue to next chapter →'}
+              </Button>
+            )}
+            {isVideoCompletion && (
+              <Button
+                variant="outline"
+                className={`reward-continue-btn ${canContinue
+                    ? 'visible'
+                    : ''
+                  }`}
+                onClick={handleWatchMore}
+              >
+                Complete video to 100%
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );

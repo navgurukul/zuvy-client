@@ -3,6 +3,7 @@ const PENDING_HIDE_SPARKS_KEY = 'zuvy_pending_reward_hide_sparks';
 
 let memoryPendingChapterId: string | null = null;
 let memoryHideSparks = false;
+let memoryOnWatchMore: (() => void) | undefined;
 
 export const chapterRewardManager = {
   /**
@@ -11,11 +12,16 @@ export const chapterRewardManager = {
    * @param hideSparks - If true, the reward card shows only a message (no sparks counter).
    *                     Use for chapter types that don't award sparks (e.g. feedback forms).
    */
-  markChapterCompleted(chapterId: string | number, hideSparks = false) {
+  markChapterCompleted(
+    chapterId: string | number,
+    hideSparks = false,
+    onWatchMore?: () => void
+  ) {
     if (!chapterId) return;
     const strId = String(chapterId);
     memoryPendingChapterId = strId;
     memoryHideSparks = hideSparks;
+    memoryOnWatchMore = onWatchMore;
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.setItem(PENDING_REWARD_KEY, strId);
@@ -63,11 +69,17 @@ export const chapterRewardManager = {
   /**
    * Consumes and clears the pending chapter completion ID, ensuring it is triggered at most once.
    */
-  consumePendingCompletion(): { id: string; hideSparks: boolean } | null {
+  consumePendingCompletion(): {
+    id: string;
+    hideSparks: boolean;
+    onWatchMore?: () => void;
+  } | null {
     const id = this.getPendingChapterId();
     const hideSparks = this.getPendingHideSparks();
+    const onWatchMore = memoryOnWatchMore;
     memoryPendingChapterId = null;
     memoryHideSparks = false;
+    memoryOnWatchMore = undefined;
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.removeItem(PENDING_REWARD_KEY);
@@ -76,7 +88,6 @@ export const chapterRewardManager = {
     } catch {
       // ignore storage errors
     }
-    return id ? { id, hideSparks } : null;
+    return id ? { id, hideSparks, onWatchMore } : null;
   },
 };
-

@@ -5,7 +5,7 @@ import { UseChapterCompletionReturn, UseChapterCompletionParams } from './hookTy
 
 import { chapterRewardManager } from '@/app/student/_components/reward/chapterRewardManager';
 
-const useChapterCompletion = ({ courseId, moduleId, chapterId, onSuccess, skipRewardManager = false }: UseChapterCompletionParams): UseChapterCompletionReturn => {
+const useChapterCompletion = ({ courseId, moduleId, chapterId, onSuccess, onWatchMore, skipRewardManager = false }: UseChapterCompletionParams): UseChapterCompletionReturn => {
   const [isCompleting, setIsCompleting] = useState(false);
 
   const completeChapter = async () => {
@@ -20,7 +20,7 @@ const useChapterCompletion = ({ courseId, moduleId, chapterId, onSuccess, skipRe
       // Skipped when the caller manages its own reward display (e.g. coding challenge editor)
       // to prevent the module page from firing a duplicate reward on the next navigation.
       if (chapterId && !skipRewardManager) {
-        chapterRewardManager.markChapterCompleted(chapterId);
+        chapterRewardManager.markChapterCompleted(chapterId, false, onWatchMore);
       }
 
       // toast({

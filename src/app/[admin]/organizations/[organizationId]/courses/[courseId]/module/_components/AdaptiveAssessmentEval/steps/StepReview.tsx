@@ -123,9 +123,9 @@ export function StepReview({
                 </option>
               ))}
           </select>
-          <Btn variant="outline" onClick={() => setShowPreview(true)}>
+          {/* <Btn variant="outline" onClick={() => setShowPreview(true)}>
             <Eye size={13} className="mr-1" /> Preview form
-          </Btn>
+          </Btn> */}
         </div>
       </div>
 

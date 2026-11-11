@@ -18,6 +18,7 @@ import { useExplanationStore } from '@/store/useExplanationStore'
 import { useGetQuestionExplanation } from '@/hooks/useExplanationEval'
 import { PDF_COLORS } from '@/lib/utils'
 import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
+import { useGetStudentAiAssessments } from '@/app/student/hooks/useGetStudentsAiAssessmentsEval'
 
 const AssessmentQuestionsPage = () => {
   const router = useRouter()
@@ -29,6 +30,17 @@ const AssessmentQuestionsPage = () => {
 
   const assessmentIdParam = params?.assessmentId
   const assessmentId = Number(assessmentIdParam)
+  const bootcampId = Number(params?.courseId)
+  const assessmentChapterId = Number(chapterId)
+  const assessmentDomainId = Number(domainId)
+
+  const { assessments } = useGetStudentAiAssessments(
+    Number.isFinite(bootcampId) ? bootcampId : null,
+    Number.isFinite(assessmentChapterId) ? assessmentChapterId : null,
+    Number.isFinite(assessmentDomainId) ? assessmentDomainId : null
+  )
+  const assessmentTitle =
+    assessments.find((assessment) => assessment.id === assessmentId)?.title || ''
 
   const { completeChapter } = useChapterCompletion({
     courseId: params?.courseId as string,
@@ -428,6 +440,17 @@ const AssessmentQuestionsPage = () => {
     if (!result || !assessmentMeta) return
 
     const doc = new jsPDF()
+    let studentName = 'N/A'
+
+    const storedAuth = localStorage.getItem('AUTH')
+    if (storedAuth) {
+      try {
+        const storedUser = JSON.parse(storedAuth)
+        studentName = storedUser?.name?.trim() || studentName
+      } catch {
+        studentName = 'N/A'
+      }
+    }
 
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(PDF_COLORS.primary[0], PDF_COLORS.primary[1], PDF_COLORS.primary[2])
@@ -438,10 +461,12 @@ const AssessmentQuestionsPage = () => {
     doc.setFontSize(11)
     doc.setTextColor(0, 0, 0)
 
-    doc.text(`Total Questions: ${result.totalQuestions}`, 15, 25)
-    doc.text(`Score: ${result.score}`, 15, 30)
-    doc.text(`Percentage: ${result.percentage}%`, 15, 35)
-    doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 40)
+    doc.text(`Assessment Name: ${assessmentTitle || `Assessment ${assessmentMeta.aiAssessmentId}`}`, 15, 25)
+    doc.text(`Student Name: ${studentName}`, 15, 30)
+    doc.text(`Total Questions: ${result.totalQuestions}`, 15, 35)
+    doc.text(`Score: ${result.score}`, 15, 40)
+    doc.text(`Percentage: ${result.percentage}%`, 15, 45)
+    doc.text(`Grade: ${result.level?.grade || 'N/A'}`, 15, 50)
 
     autoTable(doc, {
       head: [['Q#', 'Question', 'Topic', 'Difficulty', 'Language', 'Status', 'Your Answer', 'Correct Answer']],
@@ -464,7 +489,7 @@ const AssessmentQuestionsPage = () => {
           correctOptionLabel
         ]
       }),
-      startY: 50,
+      startY: 60,
       theme: 'grid',
       headStyles: {
         fillColor: PDF_COLORS.primary,

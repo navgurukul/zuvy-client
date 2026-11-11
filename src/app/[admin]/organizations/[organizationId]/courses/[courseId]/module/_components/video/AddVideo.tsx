@@ -28,8 +28,9 @@ import {
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import {
     getEmbedLink,
+    getYoutubeVideoDetails,
     isLinkValid,
-    isTrackableVideoLink,
+    isYouTubeLink,
 } from '@/utils/admin'
 import useEditChapter from '@/app/[admin]/hooks/useEditChapter'
 import {VideoSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
@@ -77,7 +78,6 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
-    const [videoDurationSeconds, setVideoDurationSeconds] = useState<number>()
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -104,18 +104,38 @@ const AddVideo: React.FC<AddVideoProps> = ({
         formState: { isDirty, isValid, isSubmitting },
     } = form
 
+    const savedEmbedLink = getEmbedLink(
+        content?.contentDetails?.[0]?.links?.[0] || ''
+    )
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!canEdit) {
             return
         }
-        const modifiedLink = getEmbedLink(values.links)
+
+        let modifiedLink = getEmbedLink(values.links)
+        let videoDurationSeconds: number | undefined
+
+        // YouTube: verify the video exists and is embeddable, and get its
+        // duration from the YouTube Data API before saving.
+        if (isYouTubeLink(values.links)) {
+            const result = await getYoutubeVideoDetails(values.links)
+            if (!result.ok) {
+                form.setError('links', { message: result.error })
+                toast.error({
+                    title: 'Invalid YouTube video',
+                    description: result.error,
+                })
+                return
+            }
+            modifiedLink = result.embedLink
+            videoDurationSeconds = result.durationSeconds
+        }
 
         const convertedObj = {
             title: values.videoTitle,
             description: values.description,
             links: [modifiedLink],
-            ...(isTrackableVideoLink(modifiedLink) &&
-            videoDurationSeconds !== undefined
+            ...(videoDurationSeconds !== undefined
                 ? { videoDurationSeconds }
                 : {}),
         }
@@ -140,7 +160,6 @@ const AddVideo: React.FC<AddVideoProps> = ({
 
 
     useEffect(() => {
-        setVideoDurationSeconds(undefined)
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
@@ -319,11 +338,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                     content?.contentDetails?.[0]
                                                         ?.title || ''
                                                 }
-                                                src={getEmbedLink(
-                                                    content?.contentDetails?.[0]
-                                                        ?.links?.[0] || ''
-                                                )}
-                                                onDuration={setVideoDurationSeconds}
+                                                src={savedEmbedLink}
                                             />
                                         )}
                                     </div>
