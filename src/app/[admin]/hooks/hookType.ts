@@ -660,6 +660,7 @@ export interface MarkAttendanceResponse {
 // useMentorMetrics
 export interface SessionMetrics {
   total: string | number
+  upcoming: string | number
   completed: string | number
   cancelled: string | number
   missed: string | number
@@ -681,7 +682,6 @@ export interface UtilizationMetrics {
 export interface MentorMetrics {
   sessions: SessionMetrics
   ratings: RatingMetrics
-  upcomingSessions: string | number
   utilization: UtilizationMetrics
 }
 

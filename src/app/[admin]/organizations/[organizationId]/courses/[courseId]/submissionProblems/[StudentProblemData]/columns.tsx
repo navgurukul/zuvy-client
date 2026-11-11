@@ -44,27 +44,44 @@ export const columns: ColumnDef<Task>[] = [
             <div className="w-[150px] text-left font-medium">{row.getValue('name')}</div>
         ),
         enableHiding: false,
-    }
-,    
-{
-    accessorKey: 'email',
-    header: ({ column, onSort }: any) => (
-        <DataTableColumnHeader
-            column={column}
-            title="Email"
-            onSort={onSort}
-            sortField="email"
-        />
-    ),
-    cell: ({ row }) => (
-        <div className="flex space-x-2">
-            <span className="max-w-[500px] truncate font-medium">
-                {row.getValue('email')}
-            </span>
-        </div>
-    ),
-}
-,
+    },
+    {
+        accessorKey: 'id',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Student ID" />
+        ),
+        id: 'studentId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: false,
+    },
+    {
+        accessorKey: 'email',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Email"
+                onSort={onSort}
+                sortField="email"
+            />
+        ),
+        cell: ({ row }) => (
+            <div className="flex space-x-2">
+                <span className="max-w-[500px] truncate font-medium">
+                    {row.getValue('email')}
+                </span>
+            </div>
+        ),
+    },
     {
         accessorKey: 'batchName',
         header: () => <div className="flex w-full items-center justify-start text-left">Batch</div>,

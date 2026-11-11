@@ -201,13 +201,8 @@ function DashboardPageContent() {
     metricsLoading ||
     notificationsLoading
 
-  const upcomingSessionsCount = Number(metrics?.upcomingSessions) || 0
-  const isEmptyDashboard =
-    upcomingSessionsCount === 0 &&
-    (Number(metrics?.sessions?.total) || 0) === 0 &&
-    (Number(metrics?.sessions?.completed) || 0) === 0 &&
-    upcomingSessions.length === 0 &&
-    apiNotifications.length === 0
+  const upcomingSessionsCount = Number(metrics?.sessions?.upcoming) || 0
+  const isEmptyDashboard = (Number(metrics?.utilization?.totalSlots) || 0) === 0
   // return isInitialLoading ? (
   //   <MentorDashboardSkeleton />
   // ) : 

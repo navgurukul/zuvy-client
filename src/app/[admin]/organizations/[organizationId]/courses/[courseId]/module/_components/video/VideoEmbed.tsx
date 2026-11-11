@@ -1,6 +1,6 @@
 import React from 'react'
-import ReactPlayer from 'react-player/youtube'
-import { isYouTubeLink } from '@/utils/admin'
+import ReactPlayer from 'react-player'
+import { isTrackableVideoLink } from '@/utils/admin'
 
 const VideoEmbed = ({
     src,
@@ -11,7 +11,7 @@ const VideoEmbed = ({
     title: string
     onDuration?: (duration: number) => void
 }) => {
-    if (isYouTubeLink(src)) {
+    if (isTrackableVideoLink(src)) {
         return (
             <div>
                 <ReactPlayer

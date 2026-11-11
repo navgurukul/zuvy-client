@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { StudentLogin, StudentSignup } from '@/app/auth/_components/StudentAuth'
-import { CareerToursGoogleLoginButton } from './CareerToursGoogleLoginButton'
 
 type AuthTab = 'signup' | 'login'
 
@@ -21,16 +20,9 @@ export function CareerToursAuth() {
             </div>
             <div id="careertours-auth-panel" role="tabpanel" aria-labelledby={activeTab === 'signup' ? 'careertours-signup-tab' : 'careertours-login-tab'}>
                 {activeTab === 'signup'
-                    ? <StudentSignup onLoginClick={() => setActiveTab('login')} googleFooter={<GoogleAuthFooter />} />
-                    : <StudentLogin onSignupClick={() => setActiveTab('signup')} googleFooter={<GoogleAuthFooter />} />}
+                    ? <StudentSignup onLoginClick={() => setActiveTab('login')} />
+                    : <StudentLogin onSignupClick={() => setActiveTab('signup')} />}
             </div>
         </section>
     </main>
-}
-
-function GoogleAuthFooter() {
-    return <div className="space-y-4 pt-2">
-        <div className="flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />OR<span className="h-px flex-1 bg-border" /></div>
-        <CareerToursGoogleLoginButton />
-    </div>
 }

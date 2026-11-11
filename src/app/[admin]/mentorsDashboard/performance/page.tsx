@@ -73,7 +73,7 @@ export default function PerformanceMetrics() {
   const sessionMix = useMemo(() => {
     const completedCount = Number(metrics?.sessions.completed) || 0
     const cancelledCount = Number(metrics?.sessions.cancelled) || 0
-    const upcomingCount = Number(metrics?.upcomingSessions) || 0
+    const upcomingCount = Number(metrics?.sessions?.upcoming) || 0
     const missedCount = Number(metrics?.sessions.missed) || 0
 
     return [
@@ -82,7 +82,7 @@ export default function PerformanceMetrics() {
       { label: "Cancelled", value: cancelledCount, barClass: "bg-gray-400" },
       { label: "Missed", value: missedCount, barClass: "bg-orange-400" },
     ]
-  }, [metrics?.sessions.cancelled, metrics?.sessions.completed, metrics?.sessions.missed, metrics?.upcomingSessions])
+  }, [metrics?.sessions.cancelled, metrics?.sessions.completed, metrics?.sessions.missed, metrics?.sessions?.upcoming])
 
   const maxSessionMixValue = useMemo(
     () => Math.max(1, ...sessionMix.map((item) => item.value)),

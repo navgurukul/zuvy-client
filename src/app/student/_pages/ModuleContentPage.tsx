@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon, Lock } from "lucide-react";
+import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle, SparkleIcon, Lock, Award } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
@@ -119,6 +119,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         case 7: return 'feedback-form';
         case 8: return 'live-class';
         case 9: return 'adaptive-assessment';
+        case 10: return 'certificate';
         default: return 'video';
       }
     };
@@ -134,6 +135,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         case 7: return 'Feedback Form';
         case 8: return 'Live Class';
         case 9: return 'adaptive-assessment';
+        case 10: return 'Certificate';
         default: return 'Video';
       }
     };
@@ -369,6 +371,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
           return <BookOpen className="w-4 h-4" />;
         case 'adaptive-assessment':
           return <SparkleIcon className="w-4 h-4" />;
+        case 'certificate':
+          return <Award className="w-4 h-4" />;
         default:
           return <Circle className="w-4 h-4" />;
       }

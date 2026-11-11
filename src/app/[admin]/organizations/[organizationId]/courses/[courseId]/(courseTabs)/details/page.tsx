@@ -72,6 +72,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     const [isCropping, setIsCropping] = useState(false)
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Collaborator image states
@@ -146,6 +147,19 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         setCollaboratorType('text')
     }
 
+    // Flag to skip watch callback during form.reset() from courseData
+    const isResettingForm = useRef(false)
+
+    // Watch form field changes to mark dirty
+    useEffect(() => {
+        const subscription = form.watch(() => {
+            if (!isResettingForm.current) {
+                setHasUnsavedChanges(true)
+            }
+        })
+        return () => subscription.unsubscribe()
+    }, [form])
+
     // Reset states on component mount/unmount
     useEffect(() => {
         return () => {
@@ -172,6 +186,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     // Populate form when courseData changes
     useEffect(() => {
         if (courseData) {
+            isResettingForm.current = true
             form.reset({
                 name: courseData.name || '',
                 bootcampTopic: courseData.bootcampTopic || '',
@@ -184,6 +199,8 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                     ? new Date(courseData.startTime)
                     : undefined,
             })
+            // Allow watch callback again on next tick
+            setTimeout(() => { isResettingForm.current = false }, 0)
 
             // Set cover image if exists
             if (courseData.coverImage) {
@@ -198,6 +215,9 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 setCollaboratorType('text')
                 setCroppedCollaboratorImage(null)
             }
+
+            // Reset dirty flag whenever courseData syncs (initial load + after save)
+            setHasUnsavedChanges(false)
         }
     }, [courseData, form])
 
@@ -224,16 +244,27 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
 
     // Handle collaborator type change
     const handleCollaboratorTypeChange = (type: 'text' | 'image') => {
-        setCollaboratorType(type)
+        // Check if there's actual content before switching — read values before clearing
+        const hadImage = !!croppedCollaboratorImage
+        const hadText = !!(form.getValues('collaborator')?.trim())
 
-        // Clear collaborator field when switching types
+        // Suppress the watch callback for this internal setValue
+        isResettingForm.current = true
         form.setValue('collaborator', '')
+        setTimeout(() => { isResettingForm.current = false }, 0)
+
+        setCollaboratorType(type)
 
         // Reset image states when switching away from image
         if (type === 'text') {
             setCroppedCollaboratorImage(null)
             setCollaboratorImage(null)
             setIsCollaboratorCropping(false)
+        }
+
+        // Only mark dirty if there was actual content being cleared
+        if (hadImage || hadText) {
+            setHasUnsavedChanges(true)
         }
     }
 
@@ -266,6 +297,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                     setImage(reader.result as string)
                     setIsCropping(true)
                     setCroppedImage(null)
+                    setHasUnsavedChanges(true)
                 }, 100)
             }
             reader.readAsDataURL(file)
@@ -284,6 +316,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                     setCollaboratorImage(reader.result as string)
                     setIsCollaboratorCropping(true)
                     setCroppedCollaboratorImage(null)
+                    setHasUnsavedChanges(true)
                 }, 100)
             }
             reader.readAsDataURL(file)
@@ -316,6 +349,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         setImage(null)
         setIsCropping(false)
         form.setValue('coverImage', '')
+        setHasUnsavedChanges(true)
     }
 
     const handleCollaboratorButtonClick = () => {
@@ -933,7 +967,8 @@ if (!courseData || !courseData.id) {
                         <Button
                             type="submit"
                             className="bg-primary hover:bg-primary-dark mb-5"
-                            disabled={!Permissions?.editCourse || isLoading || isImageUploading}
+                            disabled={!Permissions?.editCourse || isLoading || isImageUploading || isCropping || isCollaboratorCropping || !hasUnsavedChanges}
+                            title={isCropping || isCollaboratorCropping ? 'Please crop or cancel the image first' : undefined}
                         >
                             {isLoading ? 'Saving...' : 'Save Changes'}
                         </Button>

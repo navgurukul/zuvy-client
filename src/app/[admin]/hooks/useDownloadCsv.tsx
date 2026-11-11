@@ -5,8 +5,10 @@ type CsvConfig = {
   endpoint: string
   fileName: string
   columns: { header: string; key: string }[]
-  mapData: (item: any) => any
+  mapData: (item: any, responseData?: any) => any
   dataPath?: string //NEW (for different APIs)
+  /** Optional footer row appended after all data rows (e.g. totals) */
+  buildFooterRow?: (responseData: any) => Record<string, any> | null
 }
 
 const useDownloadCsv = () => {
@@ -16,6 +18,7 @@ const useDownloadCsv = () => {
     columns,
     mapData,
     dataPath = 'data.data',
+    buildFooterRow,
   }: CsvConfig) => {
     try {
       const response = await api.get(endpoint)
@@ -31,15 +34,32 @@ const useDownloadCsv = () => {
 
       const headers = columns.map((col) => col.header).join(',')
 
-      const csvRows = data.map((item: any) =>
-        columns
+      const csvRows = data.map((item: any) => {
+        const mappedItem = mapData(item, response.data)
+
+        return columns
           .map((col) =>
-            `"${(mapData(item)[col.key] ?? '')
+            `"${(mappedItem[col.key] ?? '')
               .toString()
               .replace(/"/g, '""')}"`
           )
           .join(',')
-      )
+      })
+
+      // Append optional footer row (e.g. "Total Watch Time" summary)
+      if (buildFooterRow) {
+        const footerData = buildFooterRow(response.data)
+        if (footerData) {
+          const footerRow = columns
+            .map((col) =>
+              `"${(footerData[col.key] ?? '')
+                .toString()
+                .replace(/"/g, '""')}"`
+            )
+            .join(',')
+          csvRows.push(footerRow)
+        }
+      }
 
       const csvContent = [headers, ...csvRows].join('\n')
 

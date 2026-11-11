@@ -35,12 +35,14 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
       
           columns: [
             { header: 'Name', key: 'name' },
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Status', key: 'status' },
           ],
       
           mapData: (item) => ({
             name: item.name || 'N/A',
+            studentId: item.userId ?? item.id ?? 'NA',
             email: item.email || 'N/A',
             status: item.status || 'N/A',
           }),

@@ -11,6 +11,26 @@ import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 export const createColumns = (courseId: number | string): ColumnDef<Task>[] => {
     const isCareerTourBootcamp = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
 
+    const studentIdColumn: ColumnDef<Task> = {
+        accessorKey: 'id',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Student ID" />
+        ),
+        id: 'studentId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium text-foreground">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: false,
+    }
+
     const baseColumns: ColumnDef<Task>[] = [
         {
             accessorKey: 'profilePicture',
@@ -109,34 +129,11 @@ export const createColumns = (courseId: number | string): ColumnDef<Task>[] => {
         },
     ]
 
-    if (!isCareerTourBootcamp) return baseColumns
-
-    // Insert Student ID column after the name column (index 2, after profilePicture and name)
-    const studentIdColumn: ColumnDef<Task> = {
-        accessorKey: 'studentId',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Student ID" />
-        ),
-        id: 'studentId',
-        cell: ({ row }) => {
-            const studentId = (row.original as any).studentId
-
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium text-foreground">
-                        {studentId ?? 'NA'}
-                    </span>
-                </div>
-            )
-        },
-        enableSorting: false,
-    }
-
     return [
-        baseColumns[0], // profilePicture
-        baseColumns[1], // name
-        studentIdColumn, // Student ID (Career Tour only)
-        ...baseColumns.slice(2), // email, batchName, date
+        baseColumns[0],
+        baseColumns[1],
+        studentIdColumn,
+        ...baseColumns.slice(2),
     ]
 }
 

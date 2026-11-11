@@ -31,6 +31,12 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
                 localStorage.setItem('AUTH', JSON.stringify(data.user))
                 setCookie('orgId', String(payload.orgId));
 
+                // Set the user's role in a cookie
+                const role = data.user.rolesList?.[0];
+                if (role) {
+                    setCookie('secure_typeuser', JSON.stringify(btoa(String(role).toLowerCase())));
+                }
+
                 // Update user in store
                 setUser(data.user);
 
@@ -67,6 +73,8 @@ const useSwitchOrg = (): UseSwitchOrgReturn => {
         } finally {
             inFlightRef.current = false;
             setIsSwitching(false);
+            // Keep isSwitchingOrg true — the layout will reset it once it
+            // confirms the new role matches the path (i.e. the transition is done).
         }
     };
 

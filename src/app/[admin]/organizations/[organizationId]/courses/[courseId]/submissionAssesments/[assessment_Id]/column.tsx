@@ -39,6 +39,28 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
         },
     },
     {
+        accessorKey: 'userId',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Student ID" 
+                onSort={onSort}
+                sortField="userId"
+            />
+        ),
+        id: 'userId',
+        cell: ({ row }) => {
+            const studentId = (row.original as any).userId ?? (row.original as any).id ?? (row.original as any).studentId ?? 'NA'
+            return (
+                <div className="flex w-full items-center justify-start text-left">
+                    <span className="max-w-[500px] truncate font-medium text-foreground whitespace-nowrap">
+                        {studentId}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: 'batchName',
         header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {

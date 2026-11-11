@@ -104,10 +104,12 @@ const Page = ({ params }: any) => {
     const handleVideoDownloadCsv = useCallback(() => {
         const csvColumns = [
             { header: 'Student Name', key: 'name' },
-            ...(isCareerTourBootcamp ? [{ header: 'Student ID', key: 'studentId' }] : []),
+            { header: 'Student ID', key: 'studentId' },
             { header: 'Email', key: 'email' },
             { header: 'Batch', key: 'batchName' },
             { header: 'Watched At', key: 'completedAt' },
+            { header: 'Title', key: 'title' },
+            { header: 'Watch Time (seconds)', key: 'watchTime' },
         ]
 
         downloadCsv({
@@ -125,12 +127,25 @@ const Page = ({ params }: any) => {
 
             columns: csvColumns,
 
-            mapData: (item: any) => ({
+            mapData: (item: any, responseData: any) => ({
                 name: item.name || '',
-                ...(isCareerTourBootcamp ? { studentId: item.studentId ?? 'NA' } : {}),
+                studentId: item.userId ?? item.id ?? 'NA',
                 email: item.email ?? 'NA',
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',
+                title: responseData?.moduleVideochapter?.title || '',
+                watchTime: item.watchedTime ?? '',
+            }),
+
+            // Footer row: total watch time for the chapter
+            buildFooterRow: (responseData: any) => ({
+                name: 'Total Watch Time',
+                studentId: '',
+                email: '',
+                batchName: '',
+                completedAt: '',
+                title: '',
+                watchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
             }),
         })
     }, [params.videoId, selectedBatch, sortField, sortDirection, videoData, isCareerTourBootcamp])

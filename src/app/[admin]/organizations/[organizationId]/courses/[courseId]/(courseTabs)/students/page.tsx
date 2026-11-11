@@ -747,6 +747,7 @@ const StudentsPage = ({ params }: { params: any }) => {
             ? ['Name', 'Student ID', 'Email', 'Batch', 'Enrolled Date', 'Progress (%)']
             : [
                 'Name',
+                'Student ID',
                 'Email',
                 'Batch',
                 'Career Status',
@@ -764,10 +765,11 @@ const StudentsPage = ({ params }: { params: any }) => {
             ]
 
         const rows = students.map((student: any) => {
+            const studentId = student.userId ?? 'NA'
             const row = isCareerTour
                 ? [
                     student.name || '',
-                    student.studentId || 'NA',
+                    studentId,
                     student.email || '',
                     student.batchName || '',
                     student.enrolledDate || '',
@@ -775,6 +777,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                 ]
                 : [
                     student.name || '',
+                    studentId,
                     student.email || '',
                     student.batchName || '',
                     student.careerStatus || '',

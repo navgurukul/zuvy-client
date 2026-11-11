@@ -13,7 +13,8 @@ import {
   Play, 
   Circle,
   User,
-  Lock
+  Lock,
+  Award,
 } from "lucide-react";
 import { Topic, ModuleSidebarProps, TopicItem } from '@/app/student/_components/componentStudentType'
 import { getIconColor } from "@/app/student/_utils/sidebarUtils";
@@ -55,6 +56,8 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
           return <User className="w-6 h-6" />;
         case 'coding-challenge':
           return <BookOpen className="w-6 h-6" />;
+        case 'certificate':
+          return <Award className="w-6 h-6" />;
         default:
           return <Circle className="w-6 h-6" />;
       }
