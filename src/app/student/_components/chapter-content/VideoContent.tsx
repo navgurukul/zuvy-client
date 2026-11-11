@@ -39,6 +39,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
     )
     const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
     const hasShownFeedbackReminderRef = useRef<string | null>(null)
+    const hasCompletedRef = useRef(false)
+    const keepVideoPausedRef = useRef(false)
     const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
     // const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
     // const hasShownFeedbackReminderRef = useRef<string | null>(null)
@@ -55,9 +57,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
     useEffect(() => {
         setIsCompleted(chapterDetails.status === 'Completed')
-        // Reset completion ref when chapter changes
-        hasCompletedRef.current = false
     }, [chapterDetails.status])
+
+    useEffect(() => {
+        hasCompletedRef.current = false
+        keepVideoPausedRef.current = false
+    }, [chapterDetails.id])
 
     const videoLinks =
         chapterDetails.links && chapterDetails.links.length > 0
@@ -93,6 +98,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
     }, [])
 
     const resumePlayer = useCallback(() => {
+        keepVideoPausedRef.current = false
         setPlaying(true)
 
         const internalPlayer = playerRef.current?.getInternalPlayer()
@@ -118,12 +124,17 @@ const VideoContent: React.FC<VideoContentProps> = ({
         if (savedTime && playerRef.current) {
             playerRef.current.seekTo(savedTime, 'seconds')
         }
+
+        if (keepVideoPausedRef.current) {
+            pausePlayer()
+            return
+        }
+
         setPlaying(true)
-    }, [savedTime, setPlaying])
+    }, [pausePlayer, savedTime])
 
     // Throttle saving progress every 2 seconds
     const lastSaveRef = useRef<number>(0)
-    const hasCompletedRef = useRef(false)
     // This is hardcoded for Career Tours and may change in the future.
     const chapterKey = chapterDetails.id.toString()
     const isCareerTour = CAREER_TOUR_BOOTCAMP_IDS.includes(Number(courseId))
@@ -183,10 +194,14 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 state.played >= completionThreshold
             ) {
                 hasCompletedRef.current = true
+                keepVideoPausedRef.current = true
                 setProgress(chapterKey, state.playedSeconds)
                 pausePlayer()
+                // Don't refetch chapter details here: it toggles the renderer's
+                // loading state, which remounts this component and auto-resumes
+                // the video behind the reward modal. onChapterComplete already
+                // refreshes module tracking (which opens the modal).
                 completeChapter()
-                refetch()
             }
         },
         [
@@ -195,7 +210,6 @@ const VideoContent: React.FC<VideoContentProps> = ({
             completeChapter,
             isCompleted,
             completionThreshold,
-            refetch,
             showFeedbackReminderOnce,
             pausePlayer,
             // showFeedbackReminderOnce,

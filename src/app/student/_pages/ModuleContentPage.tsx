@@ -609,6 +609,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         hideSparks={rewardModalState.hideSparks}
         isVideoCompletion={rewardModalState.isVideoCompletion}
         onWatchMore={rewardModalState.onWatchMore}
+        hasNextChapter={Boolean(nextItem)}
         onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
         onContinue={
           // Advance when: there is a next chapter AND either the chapter awarded

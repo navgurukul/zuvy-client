@@ -25,6 +25,7 @@ export interface ZuvyRewardModalProps {
   onContinue?: () => void;
   onWatchMore?: () => void;
   isVideoCompletion?: boolean;
+  hasNextChapter?: boolean;
 }
 
 export const ZuvyRewardModal: React.FC<
@@ -38,6 +39,7 @@ export const ZuvyRewardModal: React.FC<
   onContinue,
   onWatchMore,
   isVideoCompletion = false,
+  hasNextChapter = true,
 }) => {
     const popupRef =
       useRef<HTMLDivElement>(null);
@@ -73,6 +75,10 @@ export const ZuvyRewardModal: React.FC<
       : isZeroSparks
         ? 'Keep Trying!'
         : 'Chapter Completed!';
+
+    // On the last chapter there's nowhere to continue to, so hide the
+    // Continue button (zero-sparks "Try Again" is still shown).
+    const showContinueButton = isZeroSparks || hasNextChapter;
 
     // =========================================================
     // Confetti
@@ -195,6 +201,13 @@ export const ZuvyRewardModal: React.FC<
       if (!hideSparks && totalSparks > 0) {
         spawnConfetti();
       }
+
+      // Reveal the action buttons early instead of waiting for the full
+      // mascot / spark-throw sequence to finish.
+      const buttonsTimer = window.setTimeout(() => {
+        if (!isSubscribed) return;
+        setCanContinue(true);
+      }, 900);
 
       const timer =
         window.setTimeout(() => {
@@ -327,6 +340,7 @@ export const ZuvyRewardModal: React.FC<
         isSubscribed = false;
 
         window.clearTimeout(timer);
+        window.clearTimeout(buttonsTimer);
 
         cleanupConfetti();
 
@@ -542,16 +556,18 @@ export const ZuvyRewardModal: React.FC<
         =================================================== */}
 
           <div className="flex flex-col items-center gap-2">
-            <Button
-              className={`reward-continue-btn ${canContinue
-                  ? 'visible'
-                  : ''
-                }`}
-              ref={continueBtnRef}
-              onClick={() => handleClose()}
-            >
-              {isZeroSparks ? 'Try Again →' : isVideoCompletion ? 'Continue to next chapter →' : 'Continue →'}
-            </Button>
+            {showContinueButton && (
+              <Button
+                className={`reward-continue-btn ${canContinue
+                    ? 'visible'
+                    : ''
+                  }`}
+                ref={continueBtnRef}
+                onClick={() => handleClose()}
+              >
+                {isZeroSparks ? 'Try Again →' : 'Continue to next chapter →'}
+              </Button>
+            )}
             {isVideoCompletion && (
               <Button
                 variant="outline"

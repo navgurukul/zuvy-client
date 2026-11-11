@@ -1278,6 +1278,143 @@ export const isVimeoLink = (url: string) => {
 export const isTrackableVideoLink = (url: string) =>
     isYouTubeLink(url) || isVimeoLink(url)
 
+// ---------------------------------------------------------------------------
+// YouTube video validation + duration (YouTube Data API v3)
+// ---------------------------------------------------------------------------
+
+const YOUTUBE_VIDEO_ID_REGEX = /^[A-Za-z0-9_-]{11}$/
+
+/**
+ * Extracts the 11-char YouTube video ID from watch, youtu.be, embed,
+ * shorts and live URLs. Returns null if the link isn't a YouTube video link.
+ */
+export const extractYoutubeVideoId = (link: string): string | null => {
+    try {
+        const url = new URL(link.trim())
+        const host = url.hostname.replace(/^(www\.|m\.)/, '')
+        let id: string | null = null
+
+        if (host === 'youtu.be') {
+            id = url.pathname.split('/')[1] ?? null
+        } else if (
+            host === 'youtube.com' ||
+            host === 'youtube-nocookie.com' ||
+            host === 'music.youtube.com'
+        ) {
+            if (url.pathname === '/watch') {
+                id = url.searchParams.get('v')
+            } else {
+                const [, kind, value] = url.pathname.split('/')
+                if (['embed', 'shorts', 'live', 'v'].includes(kind)) {
+                    id = value ?? null
+                }
+            }
+        }
+
+        return id && YOUTUBE_VIDEO_ID_REGEX.test(id) ? id : null
+    } catch {
+        return null
+    }
+}
+
+/** Converts an ISO 8601 duration (e.g. "PT1H2M3S", "P1DT2H") to seconds. */
+export const parseIsoDurationToSeconds = (iso: string): number => {
+    const match = iso.match(
+        /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
+    )
+    if (!match) return 0
+    const [, d = '0', h = '0', m = '0', s = '0'] = match
+    return Number(d) * 86400 + Number(h) * 3600 + Number(m) * 60 + Number(s)
+}
+
+export type YoutubeVideoCheckResult =
+    | {
+          ok: true
+          videoId: string
+          embedLink: string
+          durationSeconds: number
+      }
+    | { ok: false; error: string }
+
+/**
+ * Validates that a link is an existing, embeddable YouTube video and
+ * fetches its duration via the YouTube Data API.
+ * Requires NEXT_PUBLIC_YOUTUBE_API_KEY.
+ */
+export const getYoutubeVideoDetails = async (
+    link: string
+): Promise<YoutubeVideoCheckResult> => {
+    const videoId = extractYoutubeVideoId(link)
+    if (!videoId) {
+        return { ok: false, error: 'Please enter a valid YouTube video link.' }
+    }
+
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
+    if (!apiKey) {
+        return {
+            ok: false,
+            error: 'YouTube API key is not configured. Please contact support.',
+        }
+    }
+
+    try {
+        const params = new URLSearchParams({
+            id: videoId,
+            part: 'contentDetails,status',
+            key: apiKey,
+        })
+        const res = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?${params.toString()}`
+        )
+        if (!res.ok) {
+            return {
+                ok: false,
+                error: 'Could not verify the YouTube video. Please try again.',
+            }
+        }
+
+        const data = await res.json()
+        const video = data?.items?.[0]
+        if (!video) {
+            return {
+                ok: false,
+                error: 'This YouTube video does not exist or is private.',
+            }
+        }
+        if (video.status?.privacyStatus === 'private') {
+            return { ok: false, error: 'This YouTube video is private.' }
+        }
+        if (video.status?.embeddable === false) {
+            return {
+                ok: false,
+                error: 'This YouTube video does not allow embedding.',
+            }
+        }
+
+        const durationSeconds = parseIsoDurationToSeconds(
+            video.contentDetails?.duration ?? ''
+        )
+        if (durationSeconds <= 0) {
+            return {
+                ok: false,
+                error: 'Could not read the video duration (live streams are not supported).',
+            }
+        }
+
+        return {
+            ok: true,
+            videoId,
+            embedLink: `https://www.youtube.com/embed/${videoId}`,
+            durationSeconds,
+        }
+    } catch {
+        return {
+            ok: false,
+            error: 'Could not verify the YouTube video. Please check your connection.',
+        }
+    }
+}
+
 export const getEmbedLink = (url: string) => {
     if (!url) return ''
     try {
