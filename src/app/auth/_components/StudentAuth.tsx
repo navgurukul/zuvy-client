@@ -295,7 +295,7 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
             <AuthLogo />
 
             <div>
-                <h1 className="text-2xl font-bold">Create your student account</h1>
+                <h1 className="text-2xl font-bold">Create your account</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Sign up with a name and password to receive your Student ID.
                 </p>
@@ -673,7 +673,7 @@ export function StudentLogin({ onSignupClick, googleFooter }: { onSignupClick?: 
         >
             <AuthLogo />
             <div>
-                <h2 className="text-xl font-bold">Login with Student ID</h2>
+                <h2 className="text-xl font-bold">Login with your ID</h2>
             </div>
 
             <div className="space-y-0 text-left">

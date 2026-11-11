@@ -454,7 +454,7 @@
 }
 
 .reward-continue-btn.visible {
-  animation: rowIn 0.4s ease forwards;
+  animation: rowIn 0.25s ease forwards;
   pointer-events: auto;
 }
 

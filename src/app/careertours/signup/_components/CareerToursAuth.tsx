@@ -6,7 +6,7 @@ import { StudentLogin, StudentSignup } from '@/app/auth/_components/StudentAuth'
 type AuthTab = 'signup' | 'login'
 
 export function CareerToursAuth() {
-    const [activeTab, setActiveTab] = useState<AuthTab>('signup')
+    const [activeTab, setActiveTab] = useState<AuthTab>('login')
 
     return <main className="flex min-h-screen items-center justify-center bg-background px-4 py-6">
         <section className="w-full max-w-md" aria-label="Student account access">
