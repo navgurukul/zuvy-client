@@ -2,8 +2,9 @@
 
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { PERMISSION_TIERS } from '@/utils/types/rbac'
-import type { PermissionTier } from '@/utils/types/rbac'
+import { PERMISSION_LEVELS, PERMISSION_TIERS, PERMISSION_TIER_LEVELS, type PermissionTier } from '@/utils/types/rbac'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface PermissionButtonsProps {
     resourceId: number
@@ -14,52 +15,140 @@ interface PermissionButtonsProps {
     isAdminRole?: boolean
     isOwnRole?: boolean
     hoveredRowId?: number | null
+    parentName?: string
     onChange: (resourceId: number, tier: PermissionTier, isParent?: boolean) => void
 }
 
-const PermissionButtons: React.FC<PermissionButtonsProps> = ({ resourceId, isChild = false, moduleChildren, maxAllowedTier, currentTier, isAdminRole = false, isOwnRole = false, hoveredRowId, onChange }) => {
-    return (
-        <div className="flex gap-8 flex-shrink-0" style={{ width: '620px' }}>
-            {Object.values(PERMISSION_TIERS)
-                .sort((a, b) => a.tier - b.tier)
-                .map((tier) => {
-                    const isActive = currentTier === tier.tier
-                    const isDisabledByParent = isChild && typeof maxAllowedTier === 'number' && tier.tier > (maxAllowedTier as number)
-                    const showLabel = !isChild || isActive || hoveredRowId === resourceId
+// Permission combinations used by the RBAC permission selector.
+const TIER_LABELS = Object.entries(PERMISSION_TIER_LEVELS).map(([tier, label]) => ({
+    tier: Number(tier) as PermissionTier,
+    label,
+}))
 
-                    return (
-                        <button
-                            key={tier.tier}
-                            onClick={() => {
-                                if (!isAdminRole && !isOwnRole) {
-                                    if (!isDisabledByParent) {
-                                        onChange(resourceId, tier.tier as PermissionTier, !isChild)
-                                    }
-                                }
-                            }}
-                            disabled={isAdminRole || isDisabledByParent || isOwnRole}
-                            className={cn(
-                                'transition-all duration-200 rounded-md',
-                                'h-10 flex items-center justify-center flex-1',
-                                'text-xs font-semibold uppercase',
-                                'min-w-0 relative group',
-                                (isAdminRole || isDisabledByParent || isOwnRole) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                                isActive
-                                    ? cn('border-2', tier.borderColorClass, tier.backgroundColor, tier.darkBackgroundColor, tier.textColorClass)
-                                    : cn(isChild ? 'bg-card hover:bg-foreground/10' : 'bg-muted-light hover:bg-foreground/20', tier.textColorClass)
-                            )}
-                        >
-                            {showLabel ? (
-                                <span className="truncate px-2">{tier.label}</span>
-                            ) : (
-                                <span className="text-muted-foreground text-lg">•</span>
-                            )}
-                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity delay-500 pointer-events-none z-50">
-                                {tier.label} - {tier.description}
-                            </span>
-                        </button>
-                    )
-                })}
+// Ordered: View(1), Create(3), Edit(2), Delete(4) — matches prototype column order
+const PERM_COLUMNS = [
+    { label: 'View', permission: 'view' as const },
+    { label: 'Create', permission: 'create' as const },
+    { label: 'Edit', permission: 'edit' as const },
+    { label: 'Delete', permission: 'delete' as const },
+]
+
+const PermissionButtons: React.FC<PermissionButtonsProps> = ({
+    resourceId,
+    isChild = false,
+    maxAllowedTier,
+    currentTier,
+    isAdminRole = false,
+    isOwnRole = false,
+    parentName,
+    onChange,
+}) => {
+    const tier = Math.max(0, Math.min(6, currentTier)) as PermissionTier
+    const tierStyle = PERMISSION_TIERS[tier]
+    const tierPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[tier]]
+
+    const isOptionDisabled = (optionTier: PermissionTier) => {
+        if (!isChild || typeof maxAllowedTier !== 'number') return false
+        const parentPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[maxAllowedTier]]
+        const optionPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[optionTier]]
+        return (Object.keys(optionPermissions) as Array<keyof typeof optionPermissions>)
+            .some((permission) => optionPermissions[permission] && !parentPermissions[permission])
+    }
+
+    const isColumnLocked = (permission: keyof typeof tierPermissions) =>
+        isChild
+        && typeof maxAllowedTier === 'number'
+        && !PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[maxAllowedTier]][permission]
+
+    return (
+        <div className="grid w-full min-w-0 grid-cols-[44%_repeat(4,minmax(0,1fr))] items-center">
+            {/* Permission level selector */}
+            <div className="px-2">
+                <Select
+                    value={String(tier)}
+                    onValueChange={(value) => onChange(resourceId, Number(value) as PermissionTier, !isChild)}
+                    disabled={isAdminRole || isOwnRole}
+                >
+                    <SelectTrigger className={cn(
+                        'h-7 rounded border px-2 py-0 text-left text-[11px] font-normal shadow-none focus:ring-1 focus:ring-offset-0',
+                        tierStyle.borderColorClass,
+                        tierStyle.backgroundColor,
+                        tierStyle.darkBackgroundColor,
+                        tierStyle.colorClass,
+                    )}>
+                        <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+                            {/* Coloured dot matching the tier heat-map */}
+                            <span className={cn('h-2 w-2 shrink-0 rounded-full', tierStyle.dotColorClass)} />
+                            <SelectValue className="min-w-0 text-left" />
+                        </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {TIER_LABELS.map(({ tier: optionTier, label }) => {
+                            const disabled = isOptionDisabled(optionTier)
+                            const optStyle = PERMISSION_TIERS[optionTier as PermissionTier]
+                            return (
+                                <SelectItem
+                                    key={label}
+                                    value={String(optionTier)}
+                                    disabled={disabled}
+                                    className={cn('text-xs', disabled && 'opacity-40 cursor-not-allowed')}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', optStyle.dotColorClass)} />
+                                        <span>{label}</span>
+                                        {disabled && parentName && (
+                                            <span className="ml-auto text-[10px] italic text-muted-foreground">
+                                                exceeds {parentName}
+                                            </span>
+                                        )}
+                                    </div>
+                                </SelectItem>
+                            )
+                        })}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Permission indicator chips */}
+            {PERM_COLUMNS.map(({ label, permission }) => {
+                const granted = tierPermissions[permission]
+                const locked = isColumnLocked(permission)
+
+                return (
+                    <div key={label} className="flex justify-center">
+                        <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span
+                                        aria-label={
+                                            locked
+                                                ? `${label}: locked by parent`
+                                                : `${label}: ${granted ? 'granted' : 'not granted'}`
+                                        }
+                                        className={cn(
+                                            'inline-flex h-[22px] min-w-[30px] cursor-default items-center justify-center rounded-full px-2 text-[11px] leading-none transition-colors',
+                                            locked
+                                                ? 'bg-muted/70 text-muted-foreground'
+                                                : granted
+                                                    ? cn(tierStyle.backgroundColor, tierStyle.colorClass, 'font-semibold')
+                                                    : 'border border-dashed border-border bg-background text-muted-foreground'
+                                        )}
+                                    >
+                                        {locked ? '⊘' : granted ? '✓' : '–'}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-[11px]">
+                                    {locked
+                                        ? `Locked: parent doesn't have ${label}`
+                                        : granted
+                                            ? `${label} granted`
+                                            : `${label} not granted`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )
+            })}
         </div>
     )
 }

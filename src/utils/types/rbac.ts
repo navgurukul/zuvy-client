@@ -1,19 +1,33 @@
 // RBAC types and helpers
-export type PermissionTier = 0 | 1 | 2 | 3 | 4
+export type PermissionTier = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
 export type PermissionLevel =
   | 'No access'
-  | 'Viewer'
-  | 'Editor'
-  | 'Creator'
-  | 'Manager'
+  | 'View only'
+  | 'View + Edit'
+  | 'View + Delete'
+  | 'View + Edit + Delete'
+  | 'View + Create + Edit'
+  | 'Full access'
 
 export const PERMISSION_LEVELS: Record<PermissionLevel, { view: boolean; create: boolean; edit: boolean; delete: boolean }> = {
   'No access': { view: false, create: false, edit: false, delete: false },
-  Viewer: { view: true, create: false, edit: false, delete: false },
-  Editor: { view: true, create: false, edit: true, delete: false },
-  Creator: { view: true, create: true, edit: true, delete: false },
-  Manager: { view: true, create: true, edit: true, delete: true },
+  'View only': { view: true, create: false, edit: false, delete: false },
+  'View + Edit': { view: true, create: false, edit: true, delete: false },
+  'View + Delete': { view: true, create: false, edit: false, delete: true },
+  'View + Edit + Delete': { view: true, create: false, edit: true, delete: true },
+  'View + Create + Edit': { view: true, create: true, edit: true, delete: false },
+  'Full access': { view: true, create: true, edit: true, delete: true },
+}
+
+export const PERMISSION_TIER_LEVELS: Record<PermissionTier, PermissionLevel> = {
+  0: 'No access',
+  1: 'View only',
+  2: 'View + Edit',
+  3: 'View + Delete',
+  4: 'View + Edit + Delete',
+  5: 'View + Create + Edit',
+  6: 'Full access',
 }
 
 export const PERMISSION_TIERS: Record<PermissionTier, {
@@ -73,8 +87,30 @@ export const PERMISSION_TIERS: Record<PermissionTier, {
   },
   4: {
     tier: 4,
-    label: 'MANAGER',
-    description: 'Full Access',
+    label: 'VIEW + EDIT + DELETE',
+    description: 'View + Edit + Delete',
+    colorClass: 'text-success',
+    textColorClass: 'text-success',
+    borderColorClass: 'border-success',
+    backgroundColor: 'bg-success-light',
+    darkBackgroundColor: 'dark:bg-success/20',
+    dotColorClass: 'bg-success',
+  },
+  5: {
+    tier: 5,
+    label: 'VIEW + CREATE + EDIT',
+    description: 'View + Create + Edit',
+    colorClass: 'text-secondary-dark',
+    textColorClass: 'text-secondary-dark',
+    borderColorClass: 'border-secondary-dark',
+    backgroundColor: 'bg-secondary-light',
+    darkBackgroundColor: 'dark:bg-secondary/20',
+    dotColorClass: 'bg-secondary-dark',
+  },
+  6: {
+    tier: 6,
+    label: 'FULL ACCESS',
+    description: 'Full access',
     colorClass: 'text-success',
     textColorClass: 'text-success',
     borderColorClass: 'border-success',
@@ -91,20 +127,36 @@ export function getPermissionLevelFromPermissions(
   deletePerm: boolean
 ): PermissionLevel {
   if (!view && !create && !edit && !deletePerm) return 'No access'
-  if (view && !create && !edit && !deletePerm) return 'Viewer'
-  if (view && !create && edit && !deletePerm) return 'Editor'
-  if (view && create && edit && !deletePerm) return 'Creator'
-  if (view && create && edit && deletePerm) return 'Manager'
+  if (view && !create && !edit && !deletePerm) return 'View only'
+  if (view && !create && edit && !deletePerm) return 'View + Edit'
+  if (view && !create && !edit && deletePerm) return 'View + Delete'
+  if (view && !create && edit && deletePerm) return 'View + Edit + Delete'
+  if (view && create && edit && !deletePerm) return 'View + Create + Edit'
+  if (view && create && edit && deletePerm) return 'Full access'
   return 'No access'
 }
 
 export function permissionLevelToTier(level: PermissionLevel): PermissionTier {
   const mapping: Record<PermissionLevel, PermissionTier> = {
     'No access': 0,
-    Viewer: 1,
-    Editor: 2,
-    Creator: 3,
-    Manager: 4,
+    'View only': 1,
+    'View + Edit': 2,
+    'View + Delete': 3,
+    'View + Edit + Delete': 4,
+    'View + Create + Edit': 5,
+    'Full access': 6,
   }
   return mapping[level]
+}
+
+export function getEffectivePermissionTier(
+  childTier: PermissionTier,
+  parentTier: PermissionTier,
+): PermissionTier {
+  const childPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[childTier]]
+  const parentPermissions = PERMISSION_LEVELS[PERMISSION_TIER_LEVELS[parentTier]]
+  const isAllowed = (Object.keys(childPermissions) as Array<keyof typeof childPermissions>)
+    .every((permission) => !childPermissions[permission] || parentPermissions[permission])
+
+  return isAllowed ? childTier : 0
 }
