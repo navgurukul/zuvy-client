@@ -34,11 +34,14 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     sparks: number;
     chapterTitle: string;
     hideSparks: boolean;
+    onWatchMore?: () => void;
+    isVideoCompletion: boolean;
   }>({
     isOpen: false,
     sparks: 0,
     chapterTitle: "",
     hideSparks: false,
+    isVideoCompletion: false,
   });
 
   useEffect(() => {
@@ -57,6 +60,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
           sparks,
           chapterTitle: title,
           hideSparks,
+          onWatchMore: pending.onWatchMore,
+          isVideoCompletion: Boolean(pending.onWatchMore),
         });
       }
     }
@@ -602,6 +607,9 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         totalSparks={rewardModalState.sparks}
         chapterTitle={rewardModalState.chapterTitle}
         hideSparks={rewardModalState.hideSparks}
+        isVideoCompletion={rewardModalState.isVideoCompletion}
+        onWatchMore={rewardModalState.onWatchMore}
+        hasNextChapter={Boolean(nextItem)}
         onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
         onContinue={
           // Advance when: there is a next chapter AND either the chapter awarded
