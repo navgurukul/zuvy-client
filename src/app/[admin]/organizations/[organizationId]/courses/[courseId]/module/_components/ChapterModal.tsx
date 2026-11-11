@@ -8,6 +8,7 @@ import {
     Newspaper,
     Play,
     Sparkle,
+    Award,
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -174,6 +175,13 @@ function ChapterModal({
                     >
                         <Sparkle className="mr-2 h-6 w-6" />
                         <span>Adaptive Assessment</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
+                        onClick={() => createChapter(10)}
+                    >
+                        <Award className="mr-2 h-6 w-6" />
+                        <span>Certificate chapter</span>
                     </div>
                 </div>
 

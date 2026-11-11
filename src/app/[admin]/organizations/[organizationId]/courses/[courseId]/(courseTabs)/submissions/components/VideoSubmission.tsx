@@ -74,7 +74,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
             { header: 'Email', key: 'email' },
             { header: 'Completed Date', key: 'completedAt' },
             { header: 'Title', key: 'title' },
-            { header: 'Total Watch Time', key: 'totalWatchTime' },
+            { header: 'Watch Time (seconds)', key: 'watchTime' },
           ],
       
           mapData: (student: any, responseData: any) => ({
@@ -85,7 +85,17 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
               ? new Date(student.completedAt).toLocaleString()
               : 'N/A',
             title: responseData?.moduleVideochapter?.title || 'N/A',
-            totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? 'N/A',
+            watchTime: student.watchedTime ?? 'N/A',
+          }),
+
+          // Footer row: total watch time across all students
+          buildFooterRow: (responseData: any) => ({
+            name: 'Total Watch Time',
+            studentId: '',
+            email: '',
+            completedAt: '',
+            title: '',
+            watchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
           }),
         })
       }

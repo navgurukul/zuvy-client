@@ -109,7 +109,7 @@ const Page = ({ params }: any) => {
             { header: 'Batch', key: 'batchName' },
             { header: 'Watched At', key: 'completedAt' },
             { header: 'Title', key: 'title' },
-            { header: 'Total Watch Time', key: 'totalWatchTime' },
+            { header: 'Watch Time (seconds)', key: 'watchTime' },
         ]
 
         downloadCsv({
@@ -134,7 +134,18 @@ const Page = ({ params }: any) => {
                 batchName: item.batchName || '',
                 completedAt: item.completedAt || '',
                 title: responseData?.moduleVideochapter?.title || '',
-                totalWatchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
+                watchTime: item.watchedTime ?? '',
+            }),
+
+            // Footer row: total watch time for the chapter
+            buildFooterRow: (responseData: any) => ({
+                name: 'Total Watch Time',
+                studentId: '',
+                email: '',
+                batchName: '',
+                completedAt: '',
+                title: '',
+                watchTime: responseData?.moduleVideochapter?.totalwatchedtime ?? '',
             }),
         })
     }, [params.videoId, selectedBatch, sortField, sortDirection, videoData, isCareerTourBootcamp])

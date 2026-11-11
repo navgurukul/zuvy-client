@@ -35,8 +35,8 @@ export type EditorDocArcticle = {
 // UploadPdf
 export type UploadProps = {
     className?: string;  
-    file:File ;
-    setFile:any; 
+    file: File | null;
+    setFile: React.Dispatch<React.SetStateAction<File | null>>; 
     isPdfUploaded: boolean; 
     pdfLink: string;  
     loading: boolean;

@@ -10,10 +10,11 @@ import { VideoContentProps } from '@/app/student/_components/chapter-content/com
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useVideoStore } from '@/store/store'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+// import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 import { VideoSkeleton } from "@/app/student/_components/Skeletons";
+import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const DURATION_OVERRIDE_BOOTCAMP_IDS = ['136', '135', '134', '133', '132', '131', '130', '129'];
 
@@ -39,6 +40,18 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
     const hasShownFeedbackReminderRef = useRef<string | null>(null)
     const isBootcampVideoOverride = DURATION_OVERRIDE_BOOTCAMP_IDS.includes(String(courseId))
+    // const [showFeedbackReminder, setShowFeedbackReminder] = useState(false)
+    // const hasShownFeedbackReminderRef = useRef<string | null>(null)
+
+    // const { isCompleting, completeChapter } = useChapterCompletion({
+    //     courseId: courseId as string,
+    //     moduleId: moduleId as string,
+    //     chapterId: chapterDetails.id.toString(),
+    //     onSuccess: () => {
+    //         setIsCompleted(true)
+    //         onChapterComplete()
+    //     },
+    // })
 
     useEffect(() => {
         setIsCompleted(chapterDetails.status === 'Completed')
@@ -129,21 +142,25 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
     const showFeedbackReminderOnce = useCallback(() => {
         if (!isCareerTour || hasShownFeedbackReminderRef.current === chapterKey) return
+    }, [chapterKey, isCareerTour])
 
-        const storageKey = `career-tour-feedback-reminder:${courseId}:${chapterKey}`
-        try {
-            if (window.localStorage.getItem(storageKey)) {
-                hasShownFeedbackReminderRef.current = chapterKey
-                return
-            }
-            window.localStorage.setItem(storageKey, 'shown')
-        } catch {
-            // Keep the reminder one-time for this mounted video if storage is unavailable.
-        }
+    // const showFeedbackReminderOnce = useCallback(() => {
+    //     if (!isCareerTour || hasShownFeedbackReminderRef.current === chapterKey) return
 
-        hasShownFeedbackReminderRef.current = chapterKey
-        setShowFeedbackReminder(true)
-    }, [chapterKey, courseId, isCareerTour])
+    //     const storageKey = `career-tour-feedback-reminder:${courseId}:${chapterKey}`
+    //     try {
+    //         if (window.localStorage.getItem(storageKey)) {
+    //             hasShownFeedbackReminderRef.current = chapterKey
+    //             return
+    //         }
+    //         window.localStorage.setItem(storageKey, 'shown')
+    //     } catch {
+    //         // Keep the reminder one-time for this mounted video if storage is unavailable.
+    //     }
+
+    //     hasShownFeedbackReminderRef.current = chapterKey
+    //     setShowFeedbackReminder(true)
+    // }, [chapterKey, courseId, isCareerTour])
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
@@ -154,9 +171,9 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 lastSaveRef.current = now
             }
 
-            if (state.played >= 1) {
-                showFeedbackReminderOnce()
-            }
+            // if (state.played >= 1) {
+            //     showFeedbackReminderOnce()
+            // }
 
             // For bootcamp video overrides, the reward should wait until full video completion.
             // Otherwise, standard videos reward at 75% watched.
@@ -181,6 +198,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
             refetch,
             showFeedbackReminderOnce,
             pausePlayer,
+            // showFeedbackReminderOnce,
         ]
     )
 
@@ -256,7 +274,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
-                                                onEnded={showFeedbackReminderOnce}
+                                                // onEnded={showFeedbackReminderOnce}
                                                
 
                                                 // onEnded={() => completeChapter()}
@@ -279,7 +297,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 // onReady={handleReady}
                                                 onProgress={handleProgress}
-                                                onEnded={showFeedbackReminderOnce}
+                                                // onEnded={showFeedbackReminderOnce}
                                               
 
                                                 // onEnded={() => completeChapter()}
@@ -346,9 +364,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 </ScrollArea>
             </div>
         </div>
-        <Dialog open={showFeedbackReminder} onOpenChange={setShowFeedbackReminder}>
+        {/* <Dialog open={showFeedbackReminder} onOpenChange={setShowFeedbackReminder}>
             <DialogContent className="max-w-lg overflow-hidden border-border bg-card p-0 shadow-2xl">
-                {/* <div className="h-1 w-full bg-primary" /> */}
                 <div className="p-6 sm:p-7">
                     <DialogHeader className="space-y-3 text-left">
                         <DialogTitle className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -370,7 +387,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     </DialogFooter>
                 </div>
             </DialogContent>
-        </Dialog>
+        </Dialog> */}
         </>
     )
 }
