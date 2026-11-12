@@ -536,7 +536,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                         type="submit"
                         className="bg-primary hover:bg-primary-dark text-primary-foreground px-6"
                     >
-                        Submit Feedback
+                        Submit
                     </Button>
                 </div>
             )}
