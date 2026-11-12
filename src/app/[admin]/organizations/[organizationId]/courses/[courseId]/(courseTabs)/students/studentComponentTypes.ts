@@ -30,5 +30,6 @@ export interface ActionCellProps {
         email: string
         status?: string
         batchId?: string
+        certificateIssuedAt?: string | null
     }
 }

@@ -480,6 +480,56 @@ const allColumns: ColumnDef<Task>[] = [
     },
 
     {
+        id: 'certificate',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Certificate"
+                className="w-full text-left"
+            />
+        ),
+        cell: ({ row }) => {
+            const issuedAt = row.original.certificateIssuedAt ?? null
+
+            if (!issuedAt) {
+                return (
+                    <span className="text-sm text-muted-foreground">—</span>
+                )
+            }
+
+            const formatted = new Date(issuedAt).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+            })
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    {/* Graduation cap icon */}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-primary shrink-0"
+                        aria-hidden="true"
+                    >
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                    <span className="text-sm font-medium text-primary underline underline-offset-2 cursor-pointer hover:text-primary/80 whitespace-nowrap">
+                        {formatted}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: false,
+    },
+
+    {
         id: 'actions',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Actions" />
@@ -495,6 +545,7 @@ const allColumns: ColumnDef<Task>[] = [
                         email: student.email,
                         status: student.status,
                         batchId: String(student.batchId),
+                        certificateIssuedAt: student.certificateIssuedAt ?? null,
                     }}
                 />
             )

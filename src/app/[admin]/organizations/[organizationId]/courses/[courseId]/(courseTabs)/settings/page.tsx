@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Info } from 'lucide-react'
+import { Info, Upload, Award } from 'lucide-react'
 import { AlertCircle, RefreshCw, AlertTriangle, Trash2 } from 'lucide-react'
 import { getUser } from '@/store/store'
 import { api } from '@/utils/axios.config'
@@ -48,10 +49,27 @@ const Page = ({ params }: { params: PageProps }) => {
         isChapterLocked: false,
         mentorshipEnabled: false,
         leaderboardEnabled: false,
+        certificateEnabled: false,
+        certificateTitle: 'Certificate of Completion',
+        partnerName: '',
+        signatoryName: '',
+        signatoryTitle: '',
+        partnerLogoUrl: '',
+        signatureUrl: '',
     })
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [isSaved, setIsSaved] = useState(false)
+
+    // Refs for file inputs
+    const partnerLogoRef = useRef<HTMLInputElement>(null)
+    const signatureRef = useRef<HTMLInputElement>(null)
+
+    // Local preview states for uploaded images (before persisting)
+    const [partnerLogoPreview, setPartnerLogoPreview] = useState<string>('')
+    const [signaturePreview, setSignaturePreview] = useState<string>('')
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+    const [isUploadingSignature, setIsUploadingSignature] = useState(false)
 
     // Update local state when bootcamp settings load
     React.useEffect(() => {
@@ -62,7 +80,16 @@ const Page = ({ params }: { params: PageProps }) => {
                 isChapterLocked: bootcampSettings.isChapterLocked,
                 mentorshipEnabled: bootcampSettings.mentorshipEnabled,
                 leaderboardEnabled: bootcampSettings.leaderboardEnabled,
+                certificateEnabled: bootcampSettings.certificateEnabled ?? false,
+                certificateTitle: bootcampSettings.certificateTitle ?? 'Certificate of Completion',
+                partnerName: bootcampSettings.partnerName ?? '',
+                signatoryName: bootcampSettings.signatoryName ?? '',
+                signatoryTitle: bootcampSettings.signatoryTitle ?? '',
+                partnerLogoUrl: bootcampSettings.partnerLogoUrl ?? '',
+                signatureUrl: bootcampSettings.signatureUrl ?? '',
             })
+            if (bootcampSettings.partnerLogoUrl) setPartnerLogoPreview(bootcampSettings.partnerLogoUrl)
+            if (bootcampSettings.signatureUrl) setSignaturePreview(bootcampSettings.signatureUrl)
         }
     }, [bootcampSettings])
 
@@ -99,6 +126,73 @@ const Page = ({ params }: { params: PageProps }) => {
             ...prev,
             leaderboardEnabled: !prev.leaderboardEnabled,
         }))
+    }
+
+    const handleCertificateToggle = () => {
+        setLocalSettings((prev) => ({
+            ...prev,
+            certificateEnabled: !prev.certificateEnabled,
+        }))
+    }
+
+    const handleCertificateFieldChange = (field: string, value: string) => {
+        setLocalSettings((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
+
+    const handleImageUpload = async (
+        file: File,
+        type: 'partnerLogo' | 'signature'
+    ) => {
+        const isLogo = type === 'partnerLogo'
+        if (isLogo) setIsUploadingLogo(true)
+        else setIsUploadingSignature(true)
+
+        try {
+            // Create local preview immediately
+            const objectUrl = URL.createObjectURL(file)
+            if (isLogo) {
+                setPartnerLogoPreview(objectUrl)
+            } else {
+                setSignaturePreview(objectUrl)
+            }
+
+            // Upload to server
+            const formData = new FormData()
+            formData.append('file', file)
+            const response = await api.post('/bootcamp/upload-image', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            const uploadedUrl = response.data?.url || response.data?.fileUrl || objectUrl
+
+            setLocalSettings((prev) => ({
+                ...prev,
+                [isLogo ? 'partnerLogoUrl' : 'signatureUrl']: uploadedUrl,
+            }))
+            if (isLogo) setPartnerLogoPreview(uploadedUrl)
+            else setSignaturePreview(uploadedUrl)
+
+            toast.success({ title: 'Uploaded', description: `${isLogo ? 'Partner logo' : 'Signature'} uploaded successfully.` })
+        } catch (err: any) {
+            // Keep the local preview even if upload failed — will retry on save
+            toast.error({ title: 'Upload failed', description: `Could not upload the image. Please try again.` })
+        } finally {
+            if (isLogo) setIsUploadingLogo(false)
+            else setIsUploadingSignature(false)
+        }
+    }
+
+    const handleFileInputChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        type: 'partnerLogo' | 'signature'
+    ) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        handleImageUpload(file, type)
+        // Reset input so same file can be re-selected
+        e.target.value = ''
     }
 
     const handleSaveSettings = async () => {
@@ -375,6 +469,283 @@ const Page = ({ params }: { params: PageProps }) => {
                         </div>
                     </div>
                 )}
+
+                {/* Certificate Toggle Switch */}
+                <div className="mt-4 pt-2 border-t border-border">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h2 className="text-base font-medium text-foreground">
+                                    Certificate
+                                </h2>
+                                <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                                    New
+                                </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                If enabled, students automatically receive a shareable certificate when they complete the course
+                            </p>
+                        </div>
+                        <div
+                            className={`relative w-11 h-6 rounded-full bg-gray-300 p-0.5 cursor-pointer flex-shrink-0 ${
+                                localSettings.certificateEnabled ? 'bg-primary' : ''
+                            }`}
+                            onClick={handleCertificateToggle}
+                        >
+                            <div
+                                className={`absolute ml-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                                    localSettings.certificateEnabled ? 'translate-x-full' : ''
+                                }`}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Certificate configuration form — shown only when enabled */}
+                    {localSettings.certificateEnabled && (
+                        <div className="mt-5 space-y-5">
+                            {/* Row 1: Certificate title | Partner name | Signatory name */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="cert-title"
+                                        className="text-sm font-medium text-foreground"
+                                    >
+                                        Certificate title
+                                    </Label>
+                                    <Input
+                                        id="cert-title"
+                                        placeholder="Certificate of Completion"
+                                        value={localSettings.certificateTitle}
+                                        onChange={(e) =>
+                                            handleCertificateFieldChange(
+                                                'certificateTitle',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="partner-name"
+                                        className="text-sm font-medium text-foreground"
+                                    >
+                                        Partner name{' '}
+                                        <span className="text-muted-foreground font-normal">
+                                            (optional)
+                                        </span>
+                                    </Label>
+                                    <Input
+                                        id="partner-name"
+                                        placeholder="e.g. Amazon Future Engineer"
+                                        value={localSettings.partnerName}
+                                        onChange={(e) =>
+                                            handleCertificateFieldChange(
+                                                'partnerName',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="signatory-name"
+                                        className="text-sm font-medium text-foreground"
+                                    >
+                                        Signatory name{' '}
+                                        <span className="text-muted-foreground font-normal">
+                                            (optional)
+                                        </span>
+                                    </Label>
+                                    <Input
+                                        id="signatory-name"
+                                        placeholder="Defaults to Zuvy Team"
+                                        value={localSettings.signatoryName}
+                                        onChange={(e) =>
+                                            handleCertificateFieldChange(
+                                                'signatoryName',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Row 2: Signatory title | Partner logo | Signature */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="signatory-title"
+                                        className="text-sm font-medium text-foreground"
+                                    >
+                                        Signatory title{' '}
+                                        <span className="text-muted-foreground font-normal">
+                                            (optional)
+                                        </span>
+                                    </Label>
+                                    <Input
+                                        id="signatory-title"
+                                        placeholder="e.g. Programme Director"
+                                        value={localSettings.signatoryTitle}
+                                        onChange={(e) =>
+                                            handleCertificateFieldChange(
+                                                'signatoryTitle',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Partner logo upload */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium text-foreground">
+                                        Partner logo
+                                    </Label>
+                                    <div className="flex items-center gap-3 border border-border rounded-md px-3 py-2 bg-background">
+                                        {partnerLogoPreview ? (
+                                            <img
+                                                src={partnerLogoPreview}
+                                                alt="Partner logo"
+                                                className="h-8 w-auto max-w-[80px] object-contain rounded"
+                                            />
+                                        ) : (
+                                            <div className="h-8 w-16 bg-muted rounded flex items-center justify-center">
+                                                <span className="text-xs text-muted-foreground">No logo</span>
+                                            </div>
+                                        )}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isUploadingLogo}
+                                            onClick={() => partnerLogoRef.current?.click()}
+                                            className="ml-auto flex items-center gap-1.5"
+                                        >
+                                            <Upload className="h-3.5 w-3.5" />
+                                            {isUploadingLogo ? 'Uploading...' : 'Upload'}
+                                        </Button>
+                                        <input
+                                            ref={partnerLogoRef}
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/jpg"
+                                            className="hidden"
+                                            onChange={(e) => handleFileInputChange(e, 'partnerLogo')}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        PNG or JPG under 2 MB. Transparent PNG works best.
+                                    </p>
+                                </div>
+
+                                {/* Signature upload */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium text-foreground">
+                                        Signature
+                                    </Label>
+                                    <div className="flex items-center gap-3 border border-border rounded-md px-3 py-2 bg-background">
+                                        {signaturePreview ? (
+                                            <img
+                                                src={signaturePreview}
+                                                alt="Signature"
+                                                className="h-8 w-auto max-w-[80px] object-contain rounded"
+                                            />
+                                        ) : (
+                                            <div className="h-8 w-16 bg-muted rounded flex items-center justify-center">
+                                                <span className="text-xs text-muted-foreground">No signature</span>
+                                            </div>
+                                        )}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isUploadingSignature}
+                                            onClick={() => signatureRef.current?.click()}
+                                            className="ml-auto flex items-center gap-1.5"
+                                        >
+                                            <Upload className="h-3.5 w-3.5" />
+                                            {isUploadingSignature ? 'Uploading...' : 'Upload'}
+                                        </Button>
+                                        <input
+                                            ref={signatureRef}
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/jpg"
+                                            className="hidden"
+                                            onChange={(e) => handleFileInputChange(e, 'signature')}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Shown above the signatory name.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Certificate Preview */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium text-foreground">Preview</Label>
+                                <div className="border-2 border-primary/60 rounded-lg p-6 bg-gradient-to-br from-white to-green-50 dark:from-background dark:to-green-950/20 relative overflow-hidden min-h-[180px]">
+                                    {/* Decorative border lines */}
+                                    <div className="absolute inset-2 border border-primary/20 rounded pointer-events-none" />
+
+                                    <div className="relative flex flex-col items-center text-center gap-2">
+                                        {/* Zuvy / partner logo row */}
+                                        <div className="flex items-center justify-center gap-4 mb-1">
+                                            <Award className="h-7 w-7 text-primary" aria-hidden />
+                                            {partnerLogoPreview && (
+                                                <>
+                                                    <span className="text-muted-foreground text-xs">×</span>
+                                                    <img
+                                                        src={partnerLogoPreview}
+                                                        alt="Partner"
+                                                        className="h-7 w-auto max-w-[80px] object-contain"
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                                            This is to certify that
+                                        </p>
+                                        <p className="text-lg font-semibold text-foreground italic">
+                                            Student Name
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            has successfully completed
+                                        </p>
+                                        <p className="text-base font-bold text-foreground">
+                                            {localSettings.certificateTitle || 'Certificate of Completion'}
+                                        </p>
+                                        {localSettings.partnerName && (
+                                            <p className="text-xs text-muted-foreground">
+                                                in partnership with{' '}
+                                                <span className="font-medium">{localSettings.partnerName}</span>
+                                            </p>
+                                        )}
+
+                                        {/* Signatory row */}
+                                        <div className="mt-3 flex flex-col items-center">
+                                            {signaturePreview ? (
+                                                <img
+                                                    src={signaturePreview}
+                                                    alt="Signature"
+                                                    className="h-10 w-auto max-w-[100px] object-contain mb-1"
+                                                />
+                                            ) : (
+                                                <div className="h-8 w-24 border-b border-foreground/40 mb-1" />
+                                            )}
+                                            <p className="text-xs font-medium text-foreground">
+                                                {localSettings.signatoryName || 'Zuvy Team'}
+                                            </p>
+                                            {localSettings.signatoryTitle && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    {localSettings.signatoryTitle}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="mt-4 pt-8 border-t border-border">
                     {/* Error Banner */}

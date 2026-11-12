@@ -34,7 +34,14 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
         isModuleLocked: settings.isModuleLocked ?? false,
         isChapterLocked: settings.isChapterLocked ?? false,
         mentorshipEnabled: settings.mentorshipEnabled ?? false,
-        leaderboardEnabled: settings.leaderboardEnabled ?? false
+        leaderboardEnabled: settings.leaderboardEnabled ?? false,
+        certificateEnabled: settings.certificateEnabled ?? false,
+        certificateTitle: settings.certificateTitle ?? 'Certificate of Completion',
+        partnerName: settings.partnerName ?? '',
+        signatoryName: settings.signatoryName ?? '',
+        signatoryTitle: settings.signatoryTitle ?? '',
+        partnerLogoUrl: settings.partnerLogoUrl ?? '',
+        signatureUrl: settings.signatureUrl ?? '',
       });
       setError(null);
     } catch (err: any) {

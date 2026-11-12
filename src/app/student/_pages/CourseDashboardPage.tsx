@@ -12,6 +12,7 @@ import {
   Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer, User, Star, X, CalendarDays, ChevronRight,
   Search,
   CheckCircle2,
+  Award,
 } from "lucide-react";
 import Image from "next/image";
 import { useBootcampProgress } from '@/app/student/hooks/useBootcampProgress';
@@ -1015,6 +1016,29 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   </div>
                 </div>
               </div>
+
+              {/* Certificate Banner - shown when course is 100% complete */}
+              {currentProgress === 100 && (
+                <div className="w-full rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Award className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-primary">Certificate earned</p>
+                      <p className="text-xs text-muted-foreground">
+                        Download it or share it with your{' '}
+                        <span className="text-primary">friends and family</span>.
+                      </p>
+                    </div>
+                  </div>
+                  <Link href={`/student/certificate/${courseId}?orgId=${orgId}`}>
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary-dark font-semibold text-sm flex-shrink-0">
+                      View certificate
+                    </Button>
+                  </Link>
+                </div>
+              )}
 
               {/* Course Modules Section */}
               <div className="w-full">

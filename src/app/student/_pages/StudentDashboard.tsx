@@ -11,7 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
+import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen, Award } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
@@ -33,7 +33,7 @@ import { CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
 import { useBootcampProgress } from "@/app/student/hooks/useBootcampProgress";
 
 // This is hardcoded for Career Tours and may change in the future.
-const PROFILE_STRENGTH_CARD_CUTOFF_DATE = new Date('2026-10-14T00:00:00.000Z');
+const PROFILE_STRENGTH_CARD_CUTOFF_DATE = new Date('2027-10-14T00:00:00.000Z');
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -119,19 +119,33 @@ const StudentDashboard = () => {
     if (filter === 'completed') {
       return (
         <div className="flex items-center gap-3 w-full">
-          <div className="hidden md:flex items-center gap-3 w-full">
-            <Button variant="outline" className="flex-1 bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
+          {/* Desktop */}
+          <div className="hidden md:flex flex-col gap-2 w-full">
+            <Button variant="outline" className="w-full bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
               <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course
               </Link>
             </Button>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary-dark font-semibold" asChild>
+              <Link href={`/student/certificate/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+                <Award className="w-4 h-4 mr-2" />
+                Certificate
+              </Link>
+            </Button>
           </div>
-          <div className="md:hidden flex flex-col gap-3 w-full">
+          {/* Mobile */}
+          <div className="md:hidden flex flex-col gap-2 w-full">
             <Button variant="outline" className="w-full bg-transparent border-success text-success hover:bg-success hover:text-success-foreground" asChild>
               <Link href={`/student/course/${bootcamp.id}/org/${bootcamp.organizationId}`}>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 View Course
+              </Link>
+            </Button>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary-dark font-semibold" asChild>
+              <Link href={`/student/certificate/${bootcamp.id}?orgId=${bootcamp.organizationId}`}>
+                <Award className="w-4 h-4 mr-2" />
+                Certificate
               </Link>
             </Button>
           </div>

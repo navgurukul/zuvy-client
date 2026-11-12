@@ -189,6 +189,13 @@ export interface BootcampSettingsData {
   isChapterLocked: boolean;
   mentorshipEnabled: boolean;
   leaderboardEnabled: boolean;
+  certificateEnabled: boolean;
+  certificateTitle: string;
+  partnerName: string;
+  signatoryName: string;
+  signatoryTitle: string;
+  partnerLogoUrl: string;
+  signatureUrl: string;
 }
 
 export interface UseBootcampSettingsReturn {

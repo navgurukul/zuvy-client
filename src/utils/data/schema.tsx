@@ -22,6 +22,7 @@ export const taskSchema = z.object({
     studentStatus: z.enum(['active', 'dropout', 'graduate']).optional(), // Add this for student status
     enrolledDate: z.string().nullable().optional(), // Add this for enrolled date
     reattemptCount: z.number().optional(),
+    certificateIssuedAt: z.string().nullable().optional(),
     isChecked: z.boolean(),
     userEmail: z.string(),
     projectId: z.number(),
