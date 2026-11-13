@@ -21,12 +21,13 @@ export function useUploadCertificate() {
 
             try {
                 const safeTitle = title?.trim() || 'Certificate'
-                if (!formData.has('title')) {
-                    formData.append('title', safeTitle)
-                }
+                // Send the typed chapter title under both field names supported by
+                // the upload API/backend versions.
+                formData.set('title', safeTitle)
+                formData.set('chapterTitle', safeTitle)
 
                 const res = await api.post(
-                    `/Content/curriculum/upload-certificate?moduleId=${moduleId}&chapterId=${chapterId}&title=${encodeURIComponent(safeTitle)}`,
+                    `/Content/curriculum/upload-certificate?moduleId=${moduleId}&chapterId=${chapterId}`,
                     formData,
                     {
                         headers: {
