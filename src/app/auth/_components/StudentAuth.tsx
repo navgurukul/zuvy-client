@@ -312,6 +312,7 @@ export function StudentSignup({ onLoginClick, googleFooter }: { onLoginClick?: (
                     value={name}
                     onChange={event => setName(event.target.value)}
                 />
+                <p className="text-xs leading-relaxed text-muted-foreground">Please enter your name correctly, as it will be printed on your Certificate.</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
