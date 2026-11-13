@@ -1238,6 +1238,7 @@ export const useIsStudentEnrolledInOneCourseStore =
 interface VideoProgressState {
     progress: Record<string, number>
     setProgress: (videoId: string, time: number) => void
+    clearProgress: (videoId: string) => void
 }
 
 export const useVideoStore = create<VideoProgressState>()(
@@ -1251,6 +1252,11 @@ export const useVideoStore = create<VideoProgressState>()(
                         [videoId]: time,
                     },
                 })),
+            clearProgress: (videoId) =>
+                set((state) => {
+                    const { [videoId]: _removed, ...rest } = state.progress
+                    return { progress: rest }
+                }),
         }),
         {
             name: 'video-progress', // key in localStorage
