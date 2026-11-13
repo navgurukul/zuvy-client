@@ -17,6 +17,10 @@ import { VideoSkeleton } from "@/app/student/_components/Skeletons";
 import { CAREER_TOUR_BOOTCAMP_IDS } from '@/lib/utils'
 
 const DURATION_OVERRIDE_BOOTCAMP_IDS = ['136', '135', '134', '133', '132', '131', '130', '129'];
+// Position at/after which the video counts as fully watched (100%), used to
+// clear the saved resume position. Slightly under 1 to absorb rounding in
+// the players' reported currentTime/duration.
+const VIDEO_END_FRACTION = 0.999;
 
 function getYoutubeId(url: string) {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
@@ -29,7 +33,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
 }) => {
     const { courseId, moduleId } = useParams()
     const playerRef = useRef<ReactPlayer>(null)
-    const { progress, setProgress } = useVideoStore()
+    const { progress, setProgress, clearProgress } = useVideoStore()
     const [playing, setPlaying] = useState(false)
     const [loading, setLoading] = useState(true);
     const { width } = useWindowSize()
@@ -146,6 +150,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
         chapterId: chapterDetails.id.toString(),
         onWatchMore: isBootcampVideoOverride ? undefined : resumePlayer,
         onSuccess: () => {
+            // Saved position is intentionally kept here so the student can
+            // resume where they left off; it is cleared only when the video
+            // is watched to the very end (see handleEnded / saveVideoPosition).
+            // Keep keepVideoPausedRef as-is: the player remounts with controls
+            // after completion and must stay paused behind the reward modal.
+            // "Watch more" (resumePlayer) clears it and starts playback.
             setIsCompleted(true)
             onChapterComplete()
         },
@@ -173,48 +183,115 @@ const VideoContent: React.FC<VideoContentProps> = ({
     //     setShowFeedbackReminder(true)
     // }, [chapterKey, courseId, isCareerTour])
 
-    const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
-        (state: any) => {
-            const now = Date.now()
-            // Save progress every 2 seconds
-            if (now - lastSaveRef.current > 2000) {
-                setProgress(chapterKey, state.playedSeconds)
-                lastSaveRef.current = now
+    // Persist the playback position for resuming. Once the video has been
+    // watched to the end (100%), the saved position is removed instead.
+    const saveVideoPosition = useCallback(
+        (seconds: number, fraction?: number) => {
+            if (fraction !== undefined && fraction >= VIDEO_END_FRACTION) {
+                clearProgress(chapterKey)
+            } else {
+                setProgress(chapterKey, seconds)
             }
+        },
+        [chapterKey, setProgress, clearProgress]
+    )
 
-            // if (state.played >= 1) {
-            //     showFeedbackReminderOnce()
-            // }
+    // Single place that decides whether the video counts as watched. It is
+    // called from progress ticks, seeks, pauses, the end of the video and a
+    // polling fallback, so jumping straight past the threshold (e.g. skipping
+    // from 10% to 90%) still completes the chapter.
+    const tryCompleteVideo = useCallback(
+        (playedFraction?: number, playedSeconds?: number) => {
+            if (isCompleted || hasCompletedRef.current) return
+
+            let fraction = playedFraction
+            let seconds = playedSeconds
+
+            // Fall back to reading the position straight from the player.
+            if (fraction === undefined || Number.isNaN(fraction)) {
+                const player = playerRef.current
+                const duration = player?.getDuration()
+                const current = player?.getCurrentTime()
+                if (!duration || current === undefined || current === null) return
+                seconds = current
+                fraction = current / duration
+            }
 
             // For bootcamp video overrides, the reward should wait until full video completion.
             // Otherwise, standard videos reward at 75% watched.
-            if (
-                !isCompleted &&
-                !hasCompletedRef.current &&
-                state.played >= completionThreshold
-            ) {
-                hasCompletedRef.current = true
-                keepVideoPausedRef.current = true
-                setProgress(chapterKey, state.playedSeconds)
-                pausePlayer()
-                // Don't refetch chapter details here: it toggles the renderer's
-                // loading state, which remounts this component and auto-resumes
-                // the video behind the reward modal. onChapterComplete already
-                // refreshes module tracking (which opens the modal).
-                completeChapter()
-            }
+            if (fraction < completionThreshold) return
+
+            hasCompletedRef.current = true
+            keepVideoPausedRef.current = true
+            if (seconds !== undefined) saveVideoPosition(seconds, fraction)
+            pausePlayer()
+            // Don't refetch chapter details here: it toggles the renderer's
+            // loading state, which remounts this component and auto-resumes
+            // the video behind the reward modal. onChapterComplete already
+            // refreshes module tracking (which opens the modal).
+            completeChapter()
         },
         [
-            chapterKey,
-            setProgress,
-            completeChapter,
             isCompleted,
             completionThreshold,
-            showFeedbackReminderOnce,
+            saveVideoPosition,
             pausePlayer,
-            // showFeedbackReminderOnce,
+            completeChapter,
         ]
     )
+
+    const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
+        (state: any) => {
+            const now = Date.now()
+            // Save progress every 2 seconds (also after 75% completion, so the
+            // student can resume where they left off).
+            if (now - lastSaveRef.current > 2000) {
+                saveVideoPosition(state.playedSeconds, state.played)
+                lastSaveRef.current = now
+            }
+
+            tryCompleteVideo(state.played, state.playedSeconds)
+        },
+        [saveVideoPosition, tryCompleteVideo]
+    )
+
+    const handleSeek = useCallback(
+        (seconds: number) => {
+            const duration = playerRef.current?.getDuration()
+            if (duration) {
+                saveVideoPosition(seconds, seconds / duration)
+                tryCompleteVideo(seconds / duration, seconds)
+            } else {
+                tryCompleteVideo()
+            }
+        },
+        [saveVideoPosition, tryCompleteVideo]
+    )
+
+    const handleEnded = useCallback(() => {
+        // Watched to 100%: clear the saved position so the next visit starts
+        // from the beginning instead of resuming at (and stalling on) the end.
+        clearProgress(chapterKey)
+        lastSaveRef.current = Date.now()
+        // Reaching the end always satisfies the threshold, even if the
+        // student skipped straight to it and no progress tick caught it.
+        tryCompleteVideo(1)
+    }, [chapterKey, clearProgress, tryCompleteVideo])
+
+    const handlePlayerStateCheck = useCallback(() => {
+        tryCompleteVideo()
+    }, [tryCompleteVideo])
+
+    // Polling fallback: some embeds (e.g. YouTube with controls hidden and
+    // keyboard seeking) don't emit seek events, so check the real position
+    // periodically until the chapter is completed.
+    useEffect(() => {
+        if (isCompleted || !isTrackableVideo) return
+        const interval = window.setInterval(() => {
+            tryCompleteVideo()
+        }, 1000)
+        return () => window.clearInterval(interval)
+    }, [isCompleted, isTrackableVideo, tryCompleteVideo])
 
 
     useEffect(() => {
@@ -280,6 +357,10 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                     <div className="aspect-video bg-black flex items-center justify-center relative">
                                         {isReactPlayerVideo ? (
                                             <ReactPlayer
+                                                // YouTube/Vimeo read `controls` only when the
+                                                // embed is created, so remount the player once
+                                                // the chapter is completed to show the controls.
+                                                key={isCompleted ? 'completed' : 'in-progress'}
                                                 ref={playerRef}
                                                 url={embedLink}
                                                 playing={playing}
@@ -288,8 +369,11 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
-                                                // onEnded={showFeedbackReminderOnce}
-                                               
+                                                onSeek={handleSeek}
+                                                onPause={handlePlayerStateCheck}
+                                                onBufferEnd={handlePlayerStateCheck}
+                                                onEnded={handleEnded}
+
 
                                                 // onEnded={() => completeChapter()}
                                             />
@@ -303,6 +387,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                             />
                                         ) : isZoom ? 
                                         <ReactPlayer
+                                                key={isCompleted ? 'completed' : 'in-progress'}
                                                 ref={playerRef}
                                                 url={embedLink}
                                                 playing={playing}
@@ -311,7 +396,10 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 // onReady={handleReady}
                                                 onProgress={handleProgress}
-                                                // onEnded={showFeedbackReminderOnce}
+                                                onSeek={handleSeek}
+                                                onPause={handlePlayerStateCheck}
+                                                onBufferEnd={handlePlayerStateCheck}
+                                                onEnded={handleEnded}
                                               
 
                                                 // onEnded={() => completeChapter()}
