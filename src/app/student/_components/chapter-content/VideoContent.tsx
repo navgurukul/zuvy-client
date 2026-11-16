@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'rea
 import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
+import { Play, CheckCircle2, Youtube, Video as VideoIcon, Maximize, Minimize } from 'lucide-react'
 import useChapterCompletion from '@/app/student/hooks/useChapterCompletion'
 import ReactPlayer, { ReactPlayerProps } from 'react-player'
 import { getEmbedLink } from '@/utils/students'
@@ -110,6 +110,40 @@ const VideoContent: React.FC<VideoContentProps> = ({
             internalPlayer.playVideo()
         } else if (internalPlayer?.play) {
             internalPlayer.play()
+        }
+    }, [])
+
+    // Custom fullscreen: the embed's own fullscreen button only exists inside
+    // its control bar, which stays hidden (no seeking) until completion. So we
+    // fullscreen the wrapper element instead; the player keeps controls off.
+    const [isFullscreen, setIsFullscreen] = useState(false)
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const doc = document as any
+            setIsFullscreen(
+                !!(document.fullscreenElement || doc.webkitFullscreenElement)
+            )
+        }
+        document.addEventListener('fullscreenchange', handleFullscreenChange)
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange)
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+        }
+    }, [])
+
+    const toggleFullscreen = useCallback((container: HTMLElement | null) => {
+        if (!container) return
+        const doc = document as any
+        const el = container as any
+        if (document.fullscreenElement || doc.webkitFullscreenElement) {
+            if (document.exitFullscreen) document.exitFullscreen()
+            else doc.webkitExitFullscreen?.()
+        } else if (el.requestFullscreen) {
+            el.requestFullscreen()
+        } else {
+            el.webkitRequestFullscreen?.()
         }
     }, [])
 
@@ -354,7 +388,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                     key={`${idx}-${rawLink}`}
                                     className="mb-8 bg-card-elevated rounded-lg shadow-16dp overflow-hidden border border-border"
                                 >
-                                    <div className="aspect-video bg-black flex items-center justify-center relative">
+                                    <div className="aspect-video bg-black flex items-center justify-center relative group">
                                         {isReactPlayerVideo ? (
                                             <ReactPlayer
                                                 // YouTube/Vimeo read `controls` only when the
@@ -426,6 +460,35 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                     : 'Video'}
                                             </span>
                                         </div>
+                                        {/* Before completion the native controls (incl. fullscreen)
+                                            are hidden to block seeking, so offer our own button. */}
+                                        {isReactPlayerVideo && !isCompleted && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) =>
+                                                    toggleFullscreen(
+                                                        e.currentTarget.parentElement
+                                                    )
+                                                }
+                                                aria-label={
+                                                    isFullscreen
+                                                        ? 'Exit fullscreen'
+                                                        : 'Enter fullscreen'
+                                                }
+                                                title={
+                                                    isFullscreen
+                                                        ? 'Exit fullscreen'
+                                                        : 'Fullscreen'
+                                                }
+                                                className="absolute bottom-4 right-4 z-10 flex items-center justify-center rounded-full bg-black/60 p-2 text-white transition hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                            >
+                                                {isFullscreen ? (
+                                                    <Minimize className="w-5 h-5" />
+                                                ) : (
+                                                    <Maximize className="w-5 h-5" />
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )
