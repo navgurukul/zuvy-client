@@ -416,7 +416,11 @@ export const ZuvyRewardModal: React.FC<
             type="button"
             aria-label="Close congratulation popup"
             className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            onClick={() => handleClose(false)}
+            onClick={() =>
+              // For video completions the player is held paused behind the
+              // modal; closing it should resume playback like "Watch more".
+              isVideoCompletion ? handleWatchMore() : handleClose(false)
+            }
           >
             <X className="h-5 w-5" />
           </button>
