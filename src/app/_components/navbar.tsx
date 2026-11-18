@@ -7,6 +7,7 @@ import {
     Database,
     Bell,
     Users,
+    Video,
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -23,6 +24,7 @@ import { getPermissions } from '@/lib/GetPermissions'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
 import { formattedRole } from '@/lib/utils'
+import { useBootcamps } from '@/app/[admin]/hooks/useBootcamps'
 
 
 //Test
@@ -51,6 +53,8 @@ const Navbar = () => {
             ? String(user.orgId)
             : undefined
     const orgId = orgIdFromPath || orgIdFromQuery || orgIdFromUser || ''
+    const { courses: orgCourses } = useBootcamps({ limit: 1000, searchTerm: '', offset: 0, auto: Boolean(orgId) })
+    const hasMentorshipCourse = orgCourses.some((course) => course.mentorshipEnabled)
     const profileHref = orgId
         ? `/${role}/organizations/${orgId}/profile`
         : `/${role}`
@@ -99,6 +103,12 @@ const Navbar = () => {
             icon: Settings,
             active: `/${role}/organizations/${orgId}/settings`,
         },
+        ...(hasMentorshipCourse ? [{
+            name: 'Mentorship',
+            href: `/${role}/organizations/${orgId}/mentorship`,
+            icon: Video,
+            active: (pathname: string) => pathname === `/${role}/organizations/${orgId}/mentorship` || pathname.startsWith(`/${role}/organizations/${orgId}/mentorship/`),
+        }] : []),
         ...(isInstructorUser
             ? [
                 {

@@ -20,6 +20,7 @@ import {
     Users,
     Settings,
     FileText,
+    CalendarCheck,
     Upload,
     ExternalLink
 } from 'lucide-react'
@@ -60,6 +61,12 @@ function CourseLayout() {
             value: 'batches',
             href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/batches`,
             icon: Users,
+        },
+        {
+            title: 'Mentorship',
+            value: 'mentorship',
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/mentorship`,
+            icon: CalendarCheck,
         },
         {
             title: 'Sessions',
@@ -153,6 +160,8 @@ if (loading) {
                                             return Permissions?.viewBatch;
                                         case 'Submissions':
                                             return Permissions?.viewSubmission;
+                                        case 'Mentorship':
+                                            return Permissions?.viewSubmission || Permissions?.viewSetting;
                                         case 'Settings':
                                             return Permissions?.viewSetting;
                                         default:
