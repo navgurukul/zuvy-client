@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Tabs, TabsList } from '@/components/ui/tabs'
 import { getUser } from '@/store/store'
@@ -10,6 +10,7 @@ import { getCourseData } from '@/store/store'
 import Link from 'next/link'
 import { useParams, useRouter, usePathname } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
+import { api } from '@/utils/axios.config'
 import {
     ChevronLeft,
     ArrowLeft,
@@ -21,9 +22,17 @@ import {
     Settings,
     FileText,
     Upload,
-    ExternalLink
+    ExternalLink,
+    UserCheck,
 } from 'lucide-react'
 import {CourseLayoutSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+
+type CourseMenuItem = {
+    title: string
+    value: string
+    href: string
+    icon: typeof Info
+}
 
 function CourseLayout() {
     const router = useRouter()
@@ -35,8 +44,10 @@ function CourseLayout() {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const [loading, setLoading] = useState(true)
+    const [mentorshipEnabled, setMentorshipEnabled] = useState(false)
+    const initialLoadDone = useRef(false)
 
-    const courseMenu = [
+    const courseMenu: CourseMenuItem[] = [
         {
             title: 'General Details',
             value: 'generalDetails',
@@ -74,6 +85,12 @@ function CourseLayout() {
             icon: FileText,
         },
         {
+            title: 'Mentorship',
+            value: 'mentorship',
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/mentorship`,
+            icon: UserCheck,
+        },
+        {
             title: 'Settings',
             value: 'settings',
             href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/settings`,
@@ -81,33 +98,55 @@ function CourseLayout() {
         },
     ]
 
+    const courseID = Array.isArray(courseId) ? courseId[0] : courseId as string
+
     const handleFetch = async () => {
-        if (courseId) {
-            try {
-                const courseID = Array.isArray(courseId)
-                    ? courseId[0]
-                    : courseId
-                const success = await getCourseData
-                    .getState()
-                    .fetchCourseDetails(parseInt(courseID))
-                if (!success) {
-                    router.push(`/${userRole}/organizations/${orgId}/courses`)
-                    toast.info({
-                        title: 'Caution',
-                        description:
-                            'The Course has been deleted by another Admin',
-                    })
-                }
-                setLoading(false)
-            } catch (error) {
-                console.error('Caught in handleFetch', error)
+        if (!courseID) return
+        try {
+            const success = await getCourseData
+                .getState()
+                .fetchCourseDetails(parseInt(courseID))
+            if (!success) {
+                router.push(`/${userRole}/organizations/${orgId}/courses`)
+                toast.info({
+                    title: 'Caution',
+                    description: 'The Course has been deleted by another Admin',
+                })
             }
+
+            // Fetch mentorship flag for tab visibility
+            try {
+                const settingsRes = await api.get(`/bootcamp/bootcampSetting/${courseID}`)
+                const settings = settingsRes.data.bootcampSetting?.[0]
+                setMentorshipEnabled(settings?.mentorshipEnabled ?? false)
+            } catch {
+                setMentorshipEnabled(false)
+            }
+        } catch (error) {
+            console.error('Caught in handleFetch', error)
+        } finally {
+            setLoading(false)
         }
     }
 
+    // Run once on mount — same as the original code
     useEffect(() => {
-        handleFetch()
+        handleFetch().then(() => {
+            initialLoadDone.current = true
+        })
     }, [])
+
+    // When the user navigates back from Settings (where they may have toggled
+    // mentorship), refresh only the mentorship flag — no full reload needed.
+    useEffect(() => {
+        if (!initialLoadDone.current || !courseID) return
+        api.get(`/bootcamp/bootcampSetting/${courseID}`)
+            .then(res => {
+                const settings = res.data.bootcampSetting?.[0]
+                setMentorshipEnabled(settings?.mentorshipEnabled ?? false)
+            })
+            .catch(() => {/* silently keep previous value */})
+    }, [pathname])
 
 if (loading) {
   return <CourseLayoutSkeleton/>
@@ -151,8 +190,12 @@ if (loading) {
                                             return Permissions?.viewStudent;
                                         case 'Batches':
                                             return Permissions?.viewBatch;
+                                        case 'Sessions':
+                                            return Permissions?.viewBatch;
                                         case 'Submissions':
                                             return Permissions?.viewSubmission;
+                                        case 'Mentorship':
+                                            return mentorshipEnabled;
                                         case 'Settings':
                                             return Permissions?.viewSetting;
                                         default:
