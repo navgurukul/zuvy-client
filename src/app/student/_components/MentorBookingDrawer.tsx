@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Calendar, Clock, Check, X } from "lucide-react"
+import { Check, Info, AlertCircle } from "lucide-react"
 import { Mentor } from "../hooks/hookTypes"
 import type { MentorAvailabilitySlot } from "@/hooks/useMentorAvailability"
 import { useMentorAvailability } from "@/hooks/useMentorAvailability"
@@ -22,12 +22,32 @@ type MentorBookingDrawerProps = {
   orgId?: string
 }
 
-const formatSlotDate = (value: string) =>
-  new Date(value).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  })
+// Cooldown between bookings, counted from the booked session's start
+const BOOKING_COOLDOWN_DAYS = 14
+const SUPPORT_EMAIL = "team@zuvy.org"
+
+// e.g. "Fri, 6 Nov 2026"
+const formatSlotDate = (value: string | Date) => {
+  console.log('value', value)
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return ""
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" })
+  const rest = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+  return `${weekday}, ${rest}`
+}
+
+// e.g. "20 Nov 2026"
+const formatShortDate = (value: string | Date) => {
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return ""
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+}
+
+const GOOD_TO_KNOW = [
+  "Cancel up to 24 hours before. Your credit comes back.",
+  "Reschedule up to 24 hours before. Your mentor needs to accept.",
+  "Join opens 10 minutes before the start.",
+]
 
 const formatSlotTime = (value: string) =>
   new Date(value).toLocaleTimeString("en-US", {
@@ -108,6 +128,21 @@ export default function MentorBookingDrawer({
 
   const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !bookingEligibilityBlocked && !bookingNotYetEligible
 
+  const selectedSlot = useMemo(
+    () => availableSlots.find((slot) => slot.id === selectedSlotId) || null,
+    [availableSlots, selectedSlotId]
+  )
+  const remainingCredits = typeof metrics?.remainingCredits === "number" ? metrics.remainingCredits : null
+  const creditsLeftAfter = remainingCredits !== null ? Math.max(remainingCredits - 1, 0) : null
+  const nextBookingOpensOn = useMemo(() => {
+    if (!selectedSlot) return null
+    const start = new Date(selectedSlot.slotStartDateTime)
+    if (Number.isNaN(start.getTime())) return null
+    start.setDate(start.getDate() + BOOKING_COOLDOWN_DAYS)
+    return start
+  }, [selectedSlot])
+  const subtitle = [mentor?.title || mentor?.role || "Mentor", mentor?.orgName].filter(Boolean).join(" · ")
+
   const handleBook = async () => {
     if (selectedSlotId === null) return
 
@@ -139,9 +174,9 @@ export default function MentorBookingDrawer({
           <div className="relative flex h-full flex-col">
             {/* Header with mentor info - Hidden when booking success */}
             {!bookingSuccess && (
-              <SheetHeader className="border-b border-border px-6 py-5">
+              <SheetHeader className="border-b border-border px-6 py-5 pr-20">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12 shrink-0 border border-border">
+                  <Avatar className="h-10 w-10 shrink-0">
                     <AvatarFallback className="bg-green-800 text-xs font-semibold text-white">
                       {initials}
                     </AvatarFallback>
@@ -151,31 +186,18 @@ export default function MentorBookingDrawer({
                     <SheetTitle className="text-left text-base font-semibold leading-tight text-foreground">
                       {mentor.name}
                     </SheetTitle>
-                    <div className="mt-2 flex flex-col gap-1">
-                      {mentor.email ? (
-                        <p className="text-left text-xs text-muted-foreground">
-                          {mentor.email}
-                        </p>
-                      ) : null}
-                      {mentor.orgName ? (
-                        <p className="text-left text-xs text-muted-foreground">{mentor.orgName}</p>
-                      ) : null}
-                    </div>
-
-                    <p className="text-left text-xs text-muted-foreground mt-0.5">
-                      {mentor.title || mentor.role || "Mentor"}
+                    <p className="mt-1 truncate text-left text-xs text-muted-foreground">
+                      {subtitle}
                     </p>
-                    <div className="mt-2">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          isAvailable
-                            ? "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {isAvailable ? "Accepting sessions" : "Not available"}
-                      </span>
-                    </div>
+                    <span
+                      className={`mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        isAvailable
+                          ? "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {isAvailable ? "Available" : "Not available"}
+                    </span>
                   </div>
                 </div>
               </SheetHeader>
@@ -183,12 +205,11 @@ export default function MentorBookingDrawer({
 
             {/* Main content */}
             <div className={`flex-1 overflow-y-auto px-6 py-5 transition-all duration-300 ${bookingSuccess ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              {/* Slot selection view */}
               <div className="space-y-5">
                 {/* Available Slots */}
                 <section>
-                  <h3 className="text-left text-sm font-semibold text-foreground mb-2">Available Slots</h3>
-                  <p className="text-left text-xs text-muted-foreground mb-3">Select one slot to continue.</p>
+                  <h3 className="text-left text-sm font-semibold text-foreground">Available Slots</h3>
+                  <p className="mt-1 mb-3 text-left text-xs text-muted-foreground">Select one slot. Slots starting in under 24 hours aren&apos;t shown.</p>
 
                   {loading ? (
                     <p className="text-xs text-muted-foreground">Loading slots...</p>
@@ -205,9 +226,9 @@ export default function MentorBookingDrawer({
                         return (
                           <label
                             key={slot.id}
-                            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+                            className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
                               selected
-                                ? "border-green-600 bg-green-50 shadow-sm dark:border-green-500/70 dark:bg-green-950/30"
+                                ? "border-green-700 bg-green-50 dark:border-green-500/70 dark:bg-green-950/30"
                                 : "border-border bg-card hover:bg-muted/60"
                             }`}
                           >
@@ -217,19 +238,17 @@ export default function MentorBookingDrawer({
                               value={slot.id}
                               checked={selected}
                               onChange={() => setSelectedSlotId(slot.id)}
-                              className="mt-0.5 h-5 w-5 shrink-0 dark:appearance-none dark:rounded-full dark:border-2 dark:border-green-500 dark:bg-transparent dark:checked:border-green-500 dark:checked:bg-green-500 dark:focus-visible:outline-none dark:focus-visible:ring-2 dark:focus-visible:ring-green-500 dark:focus-visible:ring-offset-2 dark:focus-visible:ring-offset-background"
+                              className="h-4 w-4 shrink-0 accent-green-800 dark:accent-green-500"
                             />
                             <div className="min-w-0 text-left">
-                              <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <p className="text-sm font-medium text-foreground">
                                 {formatSlotDate(slot.slotStartDateTime)}
                               </p>
-                              <p className="mt-1.5 flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
+                              <p className="mt-0.5 text-sm text-muted-foreground">
                                 {formatSlotRange(slot.slotStartDateTime, slot.slotEndDateTime)}
                               </p>
                               {slot.topic ? (
-                                <p className="mt-2 text-sm text-muted-foreground">Topic: {slot.topic}</p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">Topic: {slot.topic}</p>
                               ) : null}
                             </div>
                           </label>
@@ -239,30 +258,69 @@ export default function MentorBookingDrawer({
                   )}
                 </section>
 
+                {/* Credit summary - shown once a slot is selected */}
+                {selectedSlot && !metricsLoading && (
+                  <section className="rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950/30">
+                    <p className="text-left text-sm font-semibold text-foreground">
+                      {creditsLeftAfter !== null
+                        ? `Uses 1 credit, ${creditsLeftAfter} left after this`
+                        : "Uses 1 credit"}
+                    </p>
+                    {nextBookingOpensOn ? (
+                      <p className="mt-1 text-left text-xs text-muted-foreground">
+                        Your next booking opens on {formatShortDate(nextBookingOpensOn)}, 2 weeks after this session.
+                      </p>
+                    ) : null}
+                  </section>
+                )}
+
+                {/* Good to know */}
+                <section className="border-b border-border pb-4">
+                  <h3 className="mb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Good to know</h3>
+                  <ul className="space-y-2">
+                    {GOOD_TO_KNOW.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-left text-xs text-foreground/80">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/70" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                    <li className="flex items-start gap-2 text-left text-xs text-foreground/80">
+                      <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
+                      <span>
+                        Inside 24 hours, email{" "}
+                        <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">
+                          {SUPPORT_EMAIL}
+                        </a>{" "}
+                        if you can&apos;t attend. If you miss the session, you lose the credit.
+                      </span>
+                    </li>
+                  </ul>
+                </section>
+
                 {/* About */}
-                <section className="border-b border-border ">
+                <section className="border-b border-border pb-4">
                   <h3 className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">About</h3>
-                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-foreground/80 mb-4">
+                  <p className="max-w-full whitespace-pre-wrap break-words text-left text-sm leading-relaxed text-foreground/80">
                     {aboutText || "No bio added."}
                   </p>
                 </section>
 
                 {/* Expertise */}
-                <section className="border-b border-border">
-                  <h3 className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Areas of Expertise</h3>
+                <section className="border-b border-border pb-4">
+                  <h3 className="mb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Expertise</h3>
                   {expertise.length ? (
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-1.5">
                       {expertise.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-medium text-foreground/80 shadow-sm"
+                          className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-foreground/80"
                         >
                           {skill}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-left text-sm text-muted-foreground mb-4">No expertise listed.</p>
+                    <p className="text-left text-xs text-muted-foreground">No expertise listed.</p>
                   )}
                 </section>
 
@@ -402,7 +460,7 @@ export default function MentorBookingDrawer({
                       disabled={!canBook}
                       className="h-10 w-full bg-green-800 text-white text-sm font-medium cursor-pointer hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-500 disabled:cursor-not-allowed disabled:hover:bg-green-800 dark:disabled:hover:bg-green-600"
                     >
-                      {isBooking ? "Booking..." : "Book this Session"}
+                      {isBooking ? "Booking..." : "Book Session"}
                     </Button>
                 </div>
               </div>
