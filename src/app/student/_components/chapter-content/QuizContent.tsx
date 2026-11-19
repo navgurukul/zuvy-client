@@ -14,6 +14,7 @@ import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { cn, difficultyColor } from '@/lib/utils';
 import {QuizSkeleton} from "@/app/student/_components/Skeletons";
+import { chapterRewardManager } from '@/app/student/_components/reward/chapterRewardManager';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +63,15 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   const quizQuestions = assignmentData?.quizDetails || [];
   const isCompleted = localIsCompleted || assignmentData?.status === 'Completed';
 
+  // The option the student picked for a question. Falls back to the local
+  // selection while the refetch after submission is still in flight.
+  const getChosenOption = (question: Question): number | undefined => {
+    const tracked = question.quizTrackingData?.[0]?.chosenOption;
+    if (tracked !== undefined && tracked !== null) return Number(tracked);
+    const local = selectedAnswers[question.id];
+    return local !== undefined ? Number(local) : undefined;
+  };
+
   // Handle answer selection
   const handleSelect = (questionId: number, optionId: string) => {
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }));
@@ -95,6 +105,9 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     
     try {
       await submitQuiz({ submitQuiz: mappedAnswers });
+      // Must be set before completeChapter() queues the reward modal; the modal
+      // then fetches the saved results to show the score.
+      chapterRewardManager.markQuizCompletion(chapterDetails.id);
       await completeChapter();
       refetchAssignmentDetails();
       // toast({
@@ -123,9 +136,8 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
       };
     }
     
-    const quizTrack = question.quizTrackingData?.[0];
-    const isAttempted = !!quizTrack;
-    const isSelected = isAttempted ? quizTrack.chosenOption === parseInt(optionId) : false;
+    const chosen = getChosenOption(question);
+    const isSelected = chosen === parseInt(optionId);
     const isCorrect = question.correctOption === parseInt(optionId);
     
     if (isCorrect && isSelected) {
@@ -163,10 +175,9 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   const getQuestionStatus = (question: Question) => {
     if (!isCompleted) return null;
     
-    const quizTrack = question.quizTrackingData?.[0];
-    const isAttempted = !!quizTrack;
-    
-    if (!isAttempted) {
+    const chosen = getChosenOption(question);
+
+    if (chosen === undefined) {
       return {
         text: "Not attempted",
         color: "text-warning",
@@ -175,7 +186,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
       };
     }
     
-    const isCorrect = quizTrack.chosenOption === question.correctOption;
+    const isCorrect = chosen === question.correctOption;
     
     if (isCorrect) {
       return {
@@ -202,20 +213,46 @@ if (loading) {
   return (
     <div className="h-full bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8 max-w-3xl ">
+        {/* Header — sticky so Submit stays reachable while scrolling */}
+        <div className="sticky top-0 z-10 mb-8 flex items-center justify-between gap-4 border-b bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <h5 className="font-bold font-body text-foreground ml-5">{chapterDetails.title}</h5>
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "px-3 py-1 text-sm font-medium border",
-              isCompleted 
-                ? "bg-success/10 text-success border-success/20" 
-                : "bg-muted text-muted-foreground border-border"
+          <div className="flex shrink-0 items-center gap-3">
+            <Badge
+              variant="outline"
+              className={cn(
+                "px-3 py-1 text-sm font-medium border",
+                isCompleted
+                  ? "bg-success/10 text-success border-success/20"
+                  : "bg-muted text-muted-foreground border-border"
+              )}
+            >
+              {isCompleted ? 'Completed' : 'Not Completed'}
+            </Badge>
+            {!isCompleted && quizQuestions.length > 0 && (
+              <Button
+                onClick={handleSubmitClick}
+                disabled={
+                  isSubmitting || isCompleting ||
+                  Object.keys(selectedAnswers).length === 0
+                }
+                className={cn(
+                  "px-6 rounded-md font-semibold transition-all duration-200",
+                  isSubmitting || isCompleting
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-primary hover:bg-primary-dark text-primary-foreground"
+                )}
+              >
+                {isSubmitting || isCompleting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting...</span>
+                  </div>
+                ) : (
+                  <span>Submit Quiz</span>
+                )}
+              </Button>
             )}
-          >
-            {isCompleted ? 'Completed' : 'Not Completed'}
-          </Badge>
+          </div>
         </div>
         
         {chapterDetails.description && (
@@ -235,8 +272,7 @@ if (loading) {
           <div className="">
             {quizQuestions.map((q: Question, index: number) => {
               const questionStatus = getQuestionStatus(q);
-              const quizTrack = q.quizTrackingData?.[0];
-              const isAttempted = !!quizTrack;
+              const chosenOption = getChosenOption(q);
               
               return (
                 <div key={q.id} className="rounded-2xl transition-all duration-300 overflow-hidden">
@@ -302,8 +338,8 @@ if (loading) {
 
                     <RadioGroup
                       value={
-                        isCompleted && isAttempted 
-                          ? quizTrack.chosenOption.toString() 
+                        isCompleted
+                          ? chosenOption?.toString() ?? ''
                           : selectedAnswers[q.id] ?? ''
                       }
                       onValueChange={(value) => handleSelect(q.id, value)}
@@ -312,8 +348,8 @@ if (loading) {
                     >
                       {Object.entries(q.options).map(([optionId, optionText]) => {
                         const styling = getOptionStyling(q, optionId);
-                        const isSelected = isCompleted && isAttempted 
-                          ? quizTrack.chosenOption === parseInt(optionId)
+                        const isSelected = isCompleted
+                          ? chosenOption === parseInt(optionId)
                           : selectedAnswers[q.id] === optionId;
                         const isCorrect = isCompleted && q.correctOption === parseInt(optionId);
                         
@@ -363,34 +399,7 @@ if (loading) {
           </div>
         )}
         
-        {!isCompleted && quizQuestions.length > 0 && (
-          <div className="flex justify-center pt-8 pb-6">
-            <Button
-              onClick={handleSubmitClick}
-              disabled={
-                isSubmitting || isCompleting ||
-                Object.keys(selectedAnswers).length === 0
-              }
-              className={cn(
-                "px-3 py-4 rounded-md font-semibold  transition-all duration-200 " ,
-                isSubmitting || isCompleting
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary hover:bg-primary-dark text-primary-foreground"
-              )}
-            >
-              {isSubmitting || isCompleting ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
-                  <span>Submitting...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <span>Submit Quiz</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        )}
+        <div className="h-8" />
 
         {/* Confirmation Dialog */}
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

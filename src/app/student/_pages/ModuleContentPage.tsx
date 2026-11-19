@@ -36,6 +36,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     hideSparks: boolean;
     onWatchMore?: () => void;
     isVideoCompletion: boolean;
+    quizChapterId?: string;
   }>({
     isOpen: false,
     sparks: 0,
@@ -62,6 +63,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
           hideSparks,
           onWatchMore: pending.onWatchMore,
           isVideoCompletion: Boolean(pending.onWatchMore),
+          quizChapterId: pending.isQuiz ? pendingChapterId : undefined,
         });
       }
     }
@@ -609,6 +611,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         hideSparks={rewardModalState.hideSparks}
         isVideoCompletion={rewardModalState.isVideoCompletion}
         onWatchMore={rewardModalState.onWatchMore}
+        quizChapterId={rewardModalState.quizChapterId}
         hasNextChapter={Boolean(nextItem)}
         onClose={() => setRewardModalState((prev) => ({ ...prev, isOpen: false }))}
         onContinue={
