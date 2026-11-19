@@ -169,13 +169,13 @@ function ChapterModal({
                         <Play className="mr-2 h-6 w-6" />
                         <span>Live Classes</span>
                     </div>
-                    <div
+                    {/* <div
                         className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(9)}
                     >
                         <Sparkle className="mr-2 h-6 w-6" />
                         <span>Adaptive Assessment</span>
-                    </div>
+                    </div> */}
                     <div
                         className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 dark:hover:bg-[#3A7E4F] p-2 rounded-sm text-gray-600 dark:text-muted-foreground text-[16px]"
                         onClick={() => createChapter(10)}
