@@ -111,8 +111,8 @@ useEffect(() => {
 
       <div className={`${isMobile ? 'max-w-xs' : 'max-w-4xl'} mx-auto`}>
         {/* Header with Badge */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
+        <div className={`flex justify-between mb-6 gap-4 ${isMobile ? 'flex-col items-start' : 'items-center'}`}>
+          <div className="min-w-0">
             <h1 className="text-xl font-extrabold font-body text-left">{chapterDetails?.title}</h1>
             {chapterDetails?.description && (
               <p className="text-muted-foreground text-base mt-6 text-start">
@@ -120,12 +120,23 @@ useEffect(() => {
               </p>
             )}
           </div>
-          <Badge 
-            variant="outline" 
-            className={isCompleted ? "text-success border-success" : "text-muted-foreground"}
-          >
-            {isCompleted ? 'Read' : 'To be Read'}
-          </Badge>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Badge
+              variant="outline"
+              className={isCompleted ? "text-success border-success" : "text-muted-foreground"}
+            >
+              {isCompleted ? 'Read' : 'To be Read'}
+            </Badge>
+            {!isCompleted && (
+              <Button
+                disabled={(viewPdf ? !pdfLink : !action) || isCompleting}
+                onClick={completeChapter}
+                className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-6 py-2 rounded-lg"
+              >
+                {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="text-left">
@@ -146,35 +157,13 @@ useEffect(() => {
                 >
                   View Learning Material: {fileName}
                 </Link>
-                 <div className="mt-6 flex justify-end w-full">
-                 <Button
-                   disabled={!pdfLink || isCompleting}
-                   onClick={completeChapter}
-                   className='bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg'
-                 >
-                   {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
-                 </Button>
-               </div>
                </>
               ) : (
-                <>
                 <iframe
                   src={pdfLink}
                   className="h-[100%] w-full border rounded"
                   title="Learning Material"
                 />
-                  {!isCompleted && (
-                <div className="mt-6 flex justify-end w-full">
-                  <Button
-                    disabled={!pdfLink || isCompleting}
-                    onClick={completeChapter}
-                    className='bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg'
-                  >
-                    {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
-                  </Button>
-                </div>
-              )}
-                </>
               )}
             </div>
           ) : (
@@ -186,17 +175,6 @@ useEffect(() => {
                   setInitialContent={setInitialContent}
                   preview={true}
                 />
-              {!isCompleted && (
-                <div className="mt-6 text-end">
-                  <Button
-                    disabled={!action || isCompleting}
-                    onClick={completeChapter}
-                    className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg"
-                  >
-                    {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
-                  </Button>
-                </div>
-              )}
               </div>
             </div>
           )}
