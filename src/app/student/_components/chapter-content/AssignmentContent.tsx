@@ -239,7 +239,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
               Due: {formatDate(deadlineDate)}
             </p>
           </div>
-          <div className="flex flex-col items-end space-y-2">
+          <div className="flex  items-end space-x-2">
             <Badge 
               variant={isCompleted ? "secondary" : "outline"}
               // className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
@@ -251,6 +251,16 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
             >
               {getSubmissionStatus()}
             </Badge>
+            {!isCompleted && (
+              <Button
+                type="button"
+                onClick={onSubmit}
+                disabled={isSubmitDisabled}
+                className="px-4 py-2 bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover"
+              >
+                {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -353,18 +363,6 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                 </p>
               )}
             </div>
-            {!isCompleted && (
-              <div className="flex justify-start">
-                <Button
-                  type="button"
-                  onClick={onSubmit}
-                  disabled={isSubmitDisabled}
-                  className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover `}
-                >
-                  {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </div>
