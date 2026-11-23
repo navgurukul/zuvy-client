@@ -66,6 +66,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
     useEffect(() => {
         hasCompletedRef.current = false
         keepVideoPausedRef.current = false
+        hasStartedRef.current = false
+        setNeedsManualPlay(false)
     }, [chapterDetails.id])
 
     const videoLinks =
@@ -90,7 +92,68 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const savedTime = isTrackableVideo
         ? progress[chapterDetails.id.toString()] || 0
         : 0
+    // ReactPlayer only calls play() on a false -> true change of `playing`, so
+    // if that single attempt is dropped (YouTube iframe not accepting commands
+    // yet, or the browser's autoplay policy blocking a play that didn't come
+    // straight from a click, e.g. after "Continue" in the reward modal) the
+    // video just sits there. This watchdog retries until playback really starts
+    // and otherwise falls back to a click-to-play overlay.
+    const playbackWatchdogRef = useRef<number | null>(null)
+    const hasStartedRef = useRef(false)
+    const [needsManualPlay, setNeedsManualPlay] = useState(false)
+
+    const stopPlaybackWatchdog = useCallback(() => {
+        if (playbackWatchdogRef.current !== null) {
+            window.clearInterval(playbackWatchdogRef.current)
+            playbackWatchdogRef.current = null
+        }
+    }, [])
+
+    const playInternal = useCallback(() => {
+        const internalPlayer = playerRef.current?.getInternalPlayer()
+        if (internalPlayer?.playVideo) {
+            internalPlayer.playVideo()
+        } else if (internalPlayer?.play) {
+            // HTML5 / Vimeo return a promise that rejects when autoplay is blocked.
+            const result = internalPlayer.play()
+            result?.catch?.(() => {})
+        }
+    }, [])
+
+    const isActuallyPlaying = useCallback(() => {
+        const internalPlayer = playerRef.current?.getInternalPlayer()
+        if (typeof internalPlayer?.getPlayerState === 'function') {
+            // YouTube: 1 = PLAYING, 3 = BUFFERING
+            const state = internalPlayer.getPlayerState()
+            return state === 1 || state === 3
+        }
+        return hasStartedRef.current
+    }, [])
+
+    const startPlaybackWatchdog = useCallback(() => {
+        stopPlaybackWatchdog()
+        let attempts = 0
+        playbackWatchdogRef.current = window.setInterval(() => {
+            if (keepVideoPausedRef.current || isActuallyPlaying()) {
+                stopPlaybackWatchdog()
+                return
+            }
+            attempts += 1
+            if (attempts > 8) {
+                // Most likely blocked by the browser's autoplay policy; a
+                // play started from a real click always works.
+                stopPlaybackWatchdog()
+                setNeedsManualPlay(true)
+                return
+            }
+            playInternal()
+        }, 500)
+    }, [isActuallyPlaying, playInternal, stopPlaybackWatchdog])
+
+    useEffect(() => stopPlaybackWatchdog, [stopPlaybackWatchdog])
+
     const pausePlayer = useCallback(() => {
+        stopPlaybackWatchdog()
         setPlaying(false)
 
         const internalPlayer = playerRef.current?.getInternalPlayer()
@@ -99,18 +162,19 @@ const VideoContent: React.FC<VideoContentProps> = ({
         } else if (internalPlayer?.pause) {
             internalPlayer.pause()
         }
-    }, [])
+    }, [stopPlaybackWatchdog])
 
     const resumePlayer = useCallback(() => {
         keepVideoPausedRef.current = false
+        setNeedsManualPlay(false)
         setPlaying(true)
+        playInternal()
+        startPlaybackWatchdog()
+    }, [playInternal, startPlaybackWatchdog])
 
-        const internalPlayer = playerRef.current?.getInternalPlayer()
-        if (internalPlayer?.playVideo) {
-            internalPlayer.playVideo()
-        } else if (internalPlayer?.play) {
-            internalPlayer.play()
-        }
+    const handlePlay = useCallback(() => {
+        hasStartedRef.current = true
+        setNeedsManualPlay(false)
     }, [])
 
     // Custom fullscreen: the embed's own fullscreen button only exists inside
@@ -159,17 +223,25 @@ const VideoContent: React.FC<VideoContentProps> = ({
     }, [resumePlayer])
 
     const handleReady = useCallback(() => {
-        if (savedTime && playerRef.current) {
-            playerRef.current.seekTo(savedTime, 'seconds')
-        }
-
         if (keepVideoPausedRef.current) {
+            if (savedTime && playerRef.current) {
+                playerRef.current.seekTo(savedTime, 'seconds')
+            }
             pausePlayer()
             return
         }
 
+        if (savedTime && playerRef.current) {
+            // keepPlaying=true: otherwise ReactPlayer's YouTube seekTo issues
+            // a pauseVideo() because `playing` is still false at this point,
+            // which can race with the play request below.
+            ;(playerRef.current as any).seekTo(savedTime, 'seconds', true)
+        }
+
         setPlaying(true)
-    }, [pausePlayer, savedTime])
+        playInternal()
+        startPlaybackWatchdog()
+    }, [pausePlayer, playInternal, savedTime, startPlaybackWatchdog])
 
     // Throttle saving progress every 2 seconds
     const lastSaveRef = useRef<number>(0)
@@ -402,6 +474,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 width="100%"
                                                 height="100%"
                                                 onReady={handleReady}
+                                                onPlay={handlePlay}
                                                 onProgress={handleProgress}
                                                 onSeek={handleSeek}
                                                 onPause={handlePlayerStateCheck}
@@ -460,6 +533,19 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                     : 'Video'}
                                             </span>
                                         </div>
+                                        {/* Autoplay was blocked: a play started from this click always works. */}
+                                        {isReactPlayerVideo && needsManualPlay && (
+                                            <button
+                                                type="button"
+                                                onClick={resumePlayer}
+                                                aria-label="Play video"
+                                                className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 text-white focus:outline-none"
+                                            >
+                                                <span className="flex items-center justify-center rounded-full bg-black/70 p-5 transition hover:bg-black/90">
+                                                    <Play className="w-10 h-10" />
+                                                </span>
+                                            </button>
+                                        )}
                                         {/* Before completion the native controls (incl. fullscreen)
                                             are hidden to block seeking, so offer our own button. */}
                                         {isReactPlayerVideo && !isCompleted && (

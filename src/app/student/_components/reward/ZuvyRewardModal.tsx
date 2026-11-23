@@ -15,6 +15,14 @@ import { X } from 'lucide-react';
 import './reward-animation.css';
 
 import { Button } from '@/components/ui/button';
+import { api } from '@/utils/axios.config';
+
+interface QuizResultSummary {
+  total: number;
+  correct: number;
+  incorrect: number;
+  unattempted: number;
+}
 
 export interface ZuvyRewardModalProps {
   isOpen: boolean;
@@ -26,6 +34,11 @@ export interface ZuvyRewardModalProps {
   onWatchMore?: () => void;
   isVideoCompletion?: boolean;
   hasNextChapter?: boolean;
+  /**
+   * Set only for quiz completions. The modal fetches this chapter's saved quiz
+   * results (same API as QuizContent) and shows how many answers were right/wrong.
+   */
+  quizChapterId?: string;
 }
 
 export const ZuvyRewardModal: React.FC<
@@ -40,6 +53,7 @@ export const ZuvyRewardModal: React.FC<
   onWatchMore,
   isVideoCompletion = false,
   hasNextChapter = true,
+  quizChapterId,
 }) => {
     const popupRef =
       useRef<HTMLDivElement>(null);
@@ -79,6 +93,67 @@ export const ZuvyRewardModal: React.FC<
     // On the last chapter there's nowhere to continue to, so hide the
     // Continue button (zero-sparks "Try Again" is still shown).
     const showContinueButton = isZeroSparks || hasNextChapter;
+
+    // =========================================================
+    // Quiz results — fetched from the same API QuizContent uses,
+    // so the score matches the ✓ / ✗ marks shown on the quiz.
+    // =========================================================
+
+    const [quizResult, setQuizResult] =
+      useState<QuizResultSummary | null>(null);
+    // Chapter whose results have been fetched (success or failure)
+    const [quizFetchedFor, setQuizFetchedFor] =
+      useState<string | null>(null);
+
+    useEffect(() => {
+      if (!isOpen || !quizChapterId) return;
+      let cancelled = false;
+      setQuizResult(null);
+
+      api
+        .get(`/tracking/getQuizAndAssignmentWithStatus?chapterId=${quizChapterId}`)
+        .then((res) => {
+          if (cancelled) return;
+          const questions: any[] = res.data?.data?.quizDetails || [];
+          let correct = 0;
+          let incorrect = 0;
+          let unattempted = 0;
+          questions.forEach((q) => {
+            const chosen = q.quizTrackingData?.[0]?.chosenOption;
+            if (chosen === undefined || chosen === null) {
+              unattempted += 1;
+            } else if (Number(chosen) === Number(q.correctOption)) {
+              correct += 1;
+            } else {
+              incorrect += 1;
+            }
+          });
+          setQuizResult(
+            questions.length
+              ? { total: questions.length, correct, incorrect, unattempted }
+              : null
+          );
+        })
+        .catch(() => {
+          if (!cancelled) setQuizResult(null);
+        })
+        .finally(() => {
+          if (!cancelled) setQuizFetchedFor(quizChapterId);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }, [isOpen, quizChapterId]);
+
+    // Hold the mascot animation until the quiz score is known so its message
+    // matches the result instead of replaying when the data arrives.
+    const isQuizResultPending =
+      !!quizChapterId && quizFetchedFor !== quizChapterId;
+
+    // Quiz: don't say "Good job" when some answers were wrong
+    const quizHasMistakes =
+      !!quizResult && quizResult.correct < quizResult.total;
 
     // =========================================================
     // Confetti
@@ -189,6 +264,8 @@ export const ZuvyRewardModal: React.FC<
 
         return;
       }
+
+      if (isQuizResultPending) return;
 
       let isSubscribed = true;
 
@@ -305,10 +382,12 @@ export const ZuvyRewardModal: React.FC<
 
             message:
               hideSparks
-                ? 'Thank you! 🎉'
+                ? 'Thanks! 🎉'
                 : totalSparks > 0
-                  ? 'Good job! 🎉'
-                  : "Don't give up! Try again 💪",
+                  ? quizHasMistakes
+                    ? 'Nice try! 👀'
+                    : 'Good job! 🎉'
+                  : 'Try again 💪',
 
             // ===================================================
             // Animation complete
@@ -352,6 +431,8 @@ export const ZuvyRewardModal: React.FC<
       isOpen,
       totalSparks,
       hideSparks,
+      isQuizResultPending,
+      quizHasMistakes,
     ]);
 
     // =========================================================
@@ -476,6 +557,33 @@ export const ZuvyRewardModal: React.FC<
             <p className="mt-2 text-center text-sm font-medium text-primary">
               You have watched 75% of this video.
             </p>
+          )}
+          {quizResult && quizResult.total > 0 && (
+            <div className="mb-2 mt-1 flex flex-col items-center gap-1.5 text-center">
+              <p className="text-sm font-medium text-foreground">
+                You got {quizResult.correct} of {quizResult.total} correct
+              </p>
+              <div className="flex flex-wrap justify-center gap-1.5 text-xs font-medium">
+                <span className="rounded-full bg-success/10 px-2 py-0.5 text-success">
+                  ✓ {quizResult.correct} correct
+                </span>
+                {quizResult.incorrect > 0 && (
+                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-destructive">
+                    ✗ {quizResult.incorrect} incorrect
+                  </span>
+                )}
+                {quizResult.unattempted > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">
+                    {quizResult.unattempted} skipped
+                  </span>
+                )}
+              </div>
+              {quizHasMistakes && (
+                <p className="text-xs text-muted-foreground">
+                  Close this to see the correct answers.
+                </p>
+              )}
+            </div>
           )}
 
           {/* ===================================================

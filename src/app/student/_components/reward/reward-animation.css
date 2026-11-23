@@ -404,6 +404,9 @@
   gap: 0.6rem;
   margin-bottom: 1.6rem;
   text-align: left;
+  /* Keep the mascot's speech bubble above the Continue button that follows */
+  position: relative;
+  z-index: 6;
 }
 
 .reward-row {
@@ -552,6 +555,11 @@
   margin-bottom: 0;
   margin-top: 10px;
   transform-origin: 50% 0%;
+  /* Compact one-line bubble; it overlaps the Continue button, so let clicks pass through */
+  padding: 6px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .reward-mascot-slot .zm-bubble::after {

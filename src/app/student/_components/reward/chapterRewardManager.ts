@@ -5,7 +5,20 @@ let memoryPendingChapterId: string | null = null;
 let memoryHideSparks = false;
 let memoryOnWatchMore: (() => void) | undefined;
 
+// Kept in memory only: the quiz and module page live in the same SPA session.
+let memoryQuizChapterId: string | null = null;
+
 export const chapterRewardManager = {
+  /**
+   * Flags the next completion event for this chapter as a quiz, so the reward
+   * modal fetches the saved quiz results and shows the score.
+   * Call before the chapter is marked complete.
+   */
+  markQuizCompletion(chapterId: string | number) {
+    if (!chapterId) return;
+    memoryQuizChapterId = String(chapterId);
+  },
+
   /**
    * Registers a chapter completion action initiated by the student.
    * Call this when a completion/submission API succeeds.
@@ -73,13 +86,16 @@ export const chapterRewardManager = {
     id: string;
     hideSparks: boolean;
     onWatchMore?: () => void;
+    isQuiz: boolean;
   } | null {
     const id = this.getPendingChapterId();
     const hideSparks = this.getPendingHideSparks();
     const onWatchMore = memoryOnWatchMore;
+    const isQuiz = !!id && memoryQuizChapterId === id;
     memoryPendingChapterId = null;
     memoryHideSparks = false;
     memoryOnWatchMore = undefined;
+    memoryQuizChapterId = null;
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.removeItem(PENDING_REWARD_KEY);
@@ -88,6 +104,6 @@ export const chapterRewardManager = {
     } catch {
       // ignore storage errors
     }
-    return id ? { id, hideSparks, onWatchMore } : null;
+    return id ? { id, hideSparks, onWatchMore, isQuiz } : null;
   },
 };

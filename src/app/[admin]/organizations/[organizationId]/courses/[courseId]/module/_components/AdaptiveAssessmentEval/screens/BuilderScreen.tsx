@@ -8,7 +8,9 @@ import { StepPool } from '../steps/StepPool';
 import { StepReview } from '../steps/StepReview';
 import { StepSettings } from '../steps/StepSettings';
 import { StepPublish } from '../steps/StepPublish';
-import { BuilderState, Question, Chapter } from '../types';
+import { BuilderState, Question, Chapter, BandCounts } from '../types';
+import { DistributionSummary } from '../distribution';
+import { TopicWithDifficultyLevel } from '@/hooks/hookType';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -63,6 +65,11 @@ interface BuilderScreenProps {
   baselineOptions: Chapter[];
   bankTopics: string[];
   bankQuestions: Question[];
+  orgTopics: TopicWithDifficultyLevel[];
+  orgTopicsLoading: boolean;
+  refreshOrgTopics: () => Promise<unknown>;
+  topicAvailability: Record<string, BandCounts>;
+  distributionSummary: DistributionSummary;
   moduleId?: number;
   courseId?: any;
   chapterId?: number;
@@ -107,6 +114,11 @@ export function BuilderScreen({
   baselineOptions,
   bankTopics,
   bankQuestions,
+  orgTopics,
+  orgTopicsLoading,
+  refreshOrgTopics,
+  topicAvailability,
+  distributionSummary,
   moduleId,
   courseId,
   chapterId,
@@ -128,31 +140,43 @@ export function BuilderScreen({
           MCQ history — no separate baseline test needed.
         </p>
 
-        <div className="flex gap-0.5 mb-3 border-b border-slate-200 dark:border-gray-600">
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto py-1">
           {STEPS.map((s: string, i: number) => {
             const isPublished = a.status === 'published' || a.status === 'scheduled';
-            const done = i < step || (!!aiAssessmentId && i <= 2) || isPublished;
+            const done = !(i === step) && (i < step || (!!aiAssessmentId && i <= 2) || isPublished);
             const active = i === step;
             const reachable = (i <= step || stepValid.slice(0, i).every(Boolean)) && (i < 3 || !!aiAssessmentId);
 
-            // Determine Tailwind classes for dynamic styles
-            const cursorClass = reachable ? 'cursor-pointer' : 'cursor-not-allowed';
-            const colorClass = active ? 'text-primary' : done ? 'text-primary/80' : 'text-slate-400';
-            const borderClass = active || done ? 'border-primary' : 'border-transparent';
+            const circleClass = active
+              ? 'bg-primary border-primary text-primary-foreground'
+              : done
+                ? 'bg-transparent border-primary text-primary'
+                : 'bg-muted/60 border-border text-muted-foreground';
+            const labelClass = active
+              ? 'text-foreground'
+              : done
+                ? 'text-foreground/80'
+                : 'text-muted-foreground';
 
             return (
-              <button
-                key={s}
-                onClick={() => reachable && setStep(i)}
-                className={`flex-1 border-none bg-transparent font-semibold text-[11px] font-[inherit] flex items-center justify-center gap-1 transition-all duration-200 pt-[7px] px-1 pb-[9px] border-b-[3px] ${cursorClass} ${colorClass} ${borderClass}`}
-              >
-                {done ? (
-                  <Check size={10} />
-                ) : (
-                  <span className="opacity-60">{i + 1}</span>
-                )}{' '}
-                {s}
-              </button>
+              <React.Fragment key={s}>
+                {i > 0 && (
+                  <div
+                    className={`h-px min-w-[16px] flex-1 ${i <= step ? 'bg-primary' : 'bg-border'}`}
+                  />
+                )}
+                <button
+                  onClick={() => reachable && setStep(i)}
+                  className={`flex shrink-0 items-center gap-2 border-none bg-transparent p-0 font-[inherit] text-[13px] font-semibold transition-colors ${reachable ? 'cursor-pointer' : 'cursor-not-allowed'} ${labelClass}`}
+                >
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold ${circleClass}`}
+                  >
+                    {done ? <Check size={13} /> : i + 1}
+                  </span>
+                  {s}
+                </button>
+              </React.Fragment>
             );
           })}
         </div>
@@ -166,6 +190,11 @@ export function BuilderScreen({
             baselineOptions={baselineOptions}
             bankTopics={bankTopics}
             bankQuestions={bankQuestions}
+            orgTopics={orgTopics}
+            orgTopicsLoading={orgTopicsLoading}
+            refreshOrgTopics={refreshOrgTopics}
+            topicAvailability={topicAvailability}
+            distributionSummary={distributionSummary}
             moduleId={moduleId}
             courseId={courseId}
             chapterId={chapterId}
