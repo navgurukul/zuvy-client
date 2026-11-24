@@ -745,7 +745,32 @@ export interface GetMentorsParams {
     limit?: number
     offset?: number
     organizationId?: string | number
+    expertise?: string[]
 }
+
+// useMentorSkills
+export interface MentorSkill {
+    id: string | number
+    name: string
+    mentorCount: number | null
+}
+
+type RawMentorSkill =
+    | string
+    | {
+          id?: string | number
+          name?: string
+          skill?: string
+          title?: string
+          mentorCount?: number
+          mentorsCount?: number
+          count?: number
+          usageCount?: number
+      }
+
+export type MentorSkillsApiResponse =
+    | RawMentorSkill[]
+    | { data?: RawMentorSkill[] | { skills?: RawMentorSkill[] }; skills?: RawMentorSkill[] }
 
 
 // useOpenEndedSubmission

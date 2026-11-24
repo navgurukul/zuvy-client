@@ -17,6 +17,15 @@ import { useMarkMentorSlotAttendance } from "@/app/[admin]/hooks/useMarkMentorSl
 import { useCompleteMentorSlotSession } from "@/app/[admin]/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/app/[admin]/hooks/useSubmitMentorSlotFeedback"
 import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
+import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { SessionsSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { toast } from "@/components/ui/use-toast"
 import {
@@ -40,6 +49,50 @@ const formatDateTime = (value?: string | null) => {
     hour: "numeric",
     minute: "2-digit",
   })
+}
+
+// Mentors (like students) can cancel only until this many hours before the start
+const CANCEL_CUTOFF_HOURS = 24
+const MIN_CANCEL_REASON_LENGTH = 10
+
+// e.g. "Fri, 6 Nov 2026"
+const formatPanelDate = (value?: string | null) => {
+  if (!value) return "-"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "short" })
+  const rest = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+  return `${weekday}, ${rest}`
+}
+
+// e.g. "Thu, 5 Nov at 6:00 PM"
+const formatCancelDeadline = (date: Date) => {
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "short" })
+  const dayMonth = date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+  return `${weekday}, ${dayMonth} at ${time}`
+}
+
+// e.g. "20 Nov"
+const formatDayMonth = (value?: string | null) => {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+}
+
+type StudentCredits = {
+  remainingCredits?: number | null
+  totalCredits?: number | null
+  quotaUsed?: number | null
+  nextEligible?: string | null
+}
+
+// Student credit info is optional on the session payload: read `studentCredits`
+// if the backend sends it, otherwise the panel shows "—".
+const getStudentCredits = (session: MyMentorSession): StudentCredits => {
+  const maybe = session as MyMentorSession & { studentCredits?: StudentCredits | null }
+  return maybe.studentCredits || {}
 }
 
 const getRescheduleStatus = (session: MyMentorSession) => {
@@ -117,6 +170,8 @@ export default function SessionsPage() {
   // const [joinedAt, setJoinedAt] = useState("")
   // const [leftAt, setLeftAt] = useState("")
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now())
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState("")
 
   const [feedbackDrafts, setFeedbackDrafts] = useState<
     Record<number, { rating: string; notes: string; areasOfImprovement: string }>
@@ -221,8 +276,25 @@ export default function SessionsPage() {
     .slice(0, 2)
     .toUpperCase() || "S"
 
-  const selectedCourseLabel =
-    (selectedSession as any)?.courseName || (selectedSession as any)?.moduleName || ""
+  const selectedCourseLabel = [
+    (selectedSession as any)?.courseName || (selectedSession as any)?.moduleName,
+    (selectedSession as any)?.batchName,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
+  const selectedCredits = selectedSession ? getStudentCredits(selectedSession) : {}
+  const creditsLeftLabel =
+    typeof selectedCredits.remainingCredits === "number" ? selectedCredits.remainingCredits : null
+  const nextBookingOpensLabel = formatDayMonth(selectedCredits.nextEligible)
+
+  const cancelDeadline = useMemo(() => {
+    if (!selectedSession?.slotStart) return null
+    const start = new Date(selectedSession.slotStart)
+    if (Number.isNaN(start.getTime())) return null
+    return new Date(start.getTime() - CANCEL_CUTOFF_HOURS * 60 * 60 * 1000)
+  }, [selectedSession?.slotStart])
+  const isCancelWindowOpen = Boolean(cancelDeadline && cancelDeadline.getTime() > nowTimestamp)
 
   const selectedSlotId = selectedSession?.slotAvailabilityId
 
@@ -407,6 +479,29 @@ export default function SessionsPage() {
     }
   }
 
+  const {
+    isCancelling,
+    error: cancelError,
+    cancelBooking,
+  } = useCancelMentorSlotBooking()
+
+  const handleCancelSession = async () => {
+    if (!selectedSession) return
+    const reason = cancelReason.trim()
+    if (reason.length < MIN_CANCEL_REASON_LENGTH) return
+
+    const ok = await cancelBooking(selectedSession.id, reason, "mentor", "instructor")
+    if (ok) {
+      toast.success({
+        title: "Session cancelled",
+        description: "The student has been notified and gets the credit back.",
+      })
+      setCancelDialogOpen(false)
+      setCancelReason("")
+      await refetchMySessions()
+    }
+  }
+
   const handleCompleteSession = async () => {
     if (!selectedSession) return
 
@@ -576,8 +671,8 @@ export default function SessionsPage() {
           </div>
         </div>
       ) : (
-        <div className="flex h-[720px] overflow-hidden">
-          <div className="flex w-[410px] flex-col border-r border-[#e5e7eb]">
+        <div className="flex h-[600px] overflow-hidden rounded-xl border border-border bg-card">
+          <div className="flex w-[410px] flex-col border-r border-border">
             <div className="flex-1 space-y-0 overflow-y-auto p-0">
               {loading && <p className="text-sm text-muted-foreground">Loading sessions...</p>}
               {!loading && error && <p className="text-sm text-red-500">{error}</p>}
@@ -639,14 +734,15 @@ export default function SessionsPage() {
           <div className="flex-1 overflow-y-auto p-0">
             {selectedSession ? (
               <div className="space-y-0">
-                <div className="p-4 text-left">
-                  <div className="flex items-start justify-between gap-3 border-b pb-4">
+                <div className="p-6 text-left">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] dark:bg-emerald-800/50 text-xs font-semibold text-[#4b6b50] dark:text-emerald-600">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#e5efe7] dark:bg-emerald-800/50 text-sm font-semibold text-[#4b6b50] dark:text-emerald-600">
                         {selectedInitials}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="truncate text-base font-semibold text-foreground">
                           {selectedDisplayName}
                         </p>
                         {selectedCourseLabel && (
@@ -662,18 +758,43 @@ export default function SessionsPage() {
                     </Badge>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-4 border-b pb-4">
-                    <div>
-                      <p className="text-[11px] font-semibold tracking-wide text-gray-500">DATE</p>
-                      <p className="mt-1 text-sm text-foreground">
-                        {formatDateOnly(selectedSession.slotStart || selectedSession.slotEnd)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold tracking-wide text-gray-500">TIME</p>
-                      <p className="mt-1 text-sm text-foreground">
-                        {formatTimeRange(selectedSession.slotStart, selectedSession.slotEnd)}
-                      </p>
+                  {/* Date & time */}
+                  <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-foreground">
+                    <span>{formatPanelDate(selectedSession.slotStart || selectedSession.slotEnd)}</span>
+                    <span>{formatTimeRange(selectedSession.slotStart, selectedSession.slotEnd)}</span>
+                  </div>
+
+                  {/* Student credits */}
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold text-foreground">Student credits</p>
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+                        <p className="text-xs text-muted-foreground">Credits left</p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                          {creditsLeftLabel !== null ? (
+                            <>
+                              {creditsLeftLabel}
+                              {typeof selectedCredits.totalCredits === "number" && (
+                                <span className="text-warning-dark"> of {selectedCredits.totalCredits}</span>
+                              )}
+                            </>
+                          ) : (
+                            "—"
+                          )}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+                        <p className="text-xs text-muted-foreground">Sessions used</p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                          {typeof selectedCredits.quotaUsed === "number" ? selectedCredits.quotaUsed : "—"}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+                        <p className="text-xs text-muted-foreground">Next booking opens</p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                          {nextBookingOpensLabel || "—"}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -704,41 +825,59 @@ export default function SessionsPage() {
                   )}
 
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
-                    <p className="text-xs text-muted-foreground pt-4 pb-2">
+                    <p className="mt-6 text-xs text-muted-foreground">
                       Join opens 10 min before start
                     </p>
                   )}
 
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
-                    selectedSession.meetingLink ? (
-                      <Button
-                        type="button"
-                        className="bg-green-700 hover:bg-green-800 mt-4"
-                        asChild={canJoinSelectedSession}
-                        disabled={!canJoinSelectedSession}
-                      >
-                        {canJoinSelectedSession ? (
-                          <a
-                            href={selectedSession.meetingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                    <>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {selectedSession.meetingLink ? (
+                          <Button
+                            type="button"
+                            className="bg-green-700 hover:bg-green-800"
+                            asChild={canJoinSelectedSession}
+                            disabled={!canJoinSelectedSession}
                           >
-                            <Video size={16} className="mr-2" />
-                            Join the Session
-                          </a>
+                            {canJoinSelectedSession ? (
+                              <a
+                                href={selectedSession.meetingLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Join the Session
+                              </a>
+                            ) : (
+                              <>Join the Session</>
+                            )}
+                          </Button>
                         ) : (
-                          <>
-                            <Video size={16} className="mr-2" />
-                            Join the Session
-                          </>
+                          <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
+                            Join unavailable
+                          </Button>
                         )}
-                      </Button>
-                    ) : (
-                      <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>
-                        <Video size={16} className="mr-2" />
-                        Join unavailable
-                      </Button>
-                    )
+
+                        {isUpcomingSession && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setCancelDialogOpen(true)}
+                            disabled={!isCancelWindowOpen || isCancelling}
+                          >
+                            Cancel session
+                          </Button>
+                        )}
+                      </div>
+
+                      {isUpcomingSession && cancelDeadline && (
+                        <div className="mt-3 rounded-lg bg-info/10 px-4 py-3 text-sm text-foreground">
+                          {isCancelWindowOpen
+                            ? `You can cancel until ${formatCancelDeadline(cancelDeadline)}, ${CANCEL_CUTOFF_HOURS} hours before the session. The student gets the credit back.`
+                            : `The cancellation window closed on ${formatCancelDeadline(cancelDeadline)}, ${CANCEL_CUTOFF_HOURS} hours before the session.`}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {selectedSession.sessionLifecycleState === "COMPLETED" && completedRecordingUrl && (
@@ -890,6 +1029,60 @@ export default function SessionsPage() {
           </div>
         </div>
       )}
+
+      <Dialog
+        open={cancelDialogOpen}
+        onOpenChange={(open) => {
+          if (isCancelling) return
+          setCancelDialogOpen(open)
+          if (!open) setCancelReason("")
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-left">Cancel session</DialogTitle>
+            <DialogDescription className="text-left">
+              {selectedDisplayName
+                ? `${selectedDisplayName} will be notified and gets the credit back.`
+                : "The student will be notified and gets the credit back."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5 text-left">
+            <label htmlFor="mentor-cancel-reason" className="text-sm font-medium">
+              Reason for cancellation
+            </label>
+            <Textarea
+              id="mentor-cancel-reason"
+              value={cancelReason}
+              onChange={(event) => setCancelReason(event.target.value)}
+              placeholder="Unable to attend due to schedule conflict"
+              className="min-h-[100px]"
+            />
+            <p className="text-xs text-muted-foreground">
+              Minimum {MIN_CANCEL_REASON_LENGTH} characters. The student will see this.
+            </p>
+            {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+              disabled={isCancelling}
+            >
+              Keep session
+            </Button>
+            <Button
+              type="button"
+              className="bg-green-700 hover:bg-green-800"
+              onClick={handleCancelSession}
+              disabled={isCancelling || cancelReason.trim().length < MIN_CANCEL_REASON_LENGTH}
+            >
+              {isCancelling ? "Cancelling..." : "Confirm cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

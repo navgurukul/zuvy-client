@@ -43,7 +43,16 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch mentors'
 }
 
-export function useMentors(search?: string, initialFetch = true, limit = 10, offset = 0, organizationId?: string | number) {
+export function useMentors(
+    search?: string,
+    initialFetch = true,
+    limit = 10,
+    offset = 0,
+    organizationId?: string | number,
+    expertise?: string[]
+) {
+    // Joined key keeps the fetch effect stable when callers pass a new array with the same values
+    const expertiseKey = (expertise || []).join(',')
     const [mentors, setMentors] = useState<Mentor[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -74,6 +83,11 @@ export function useMentors(search?: string, initialFetch = true, limit = 10, off
                 queryParams.append('organizationId', String(params.organizationId))
             }
 
+            const expertiseValues = (params.expertise || []).map((skill) => skill.trim()).filter(Boolean)
+            if (expertiseValues.length > 0) {
+                queryParams.append('expertise', expertiseValues.join(','))
+            }
+
             const url = `/student/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
             const response = await api.get<MentorsApiResponse>(url)
             const parsedResponse = parseMentorsResponse(response.data)
@@ -94,9 +108,15 @@ export function useMentors(search?: string, initialFetch = true, limit = 10, off
 
     useEffect(() => {
         if (initialFetch) {
-            getMentors({ searchTerm: search, limit, offset, organizationId })
+            getMentors({
+                searchTerm: search,
+                limit,
+                offset,
+                organizationId,
+                expertise: expertiseKey ? expertiseKey.split(',') : [],
+            })
         }
-    }, [initialFetch, getMentors, limit, offset, organizationId, search])
+    }, [initialFetch, getMentors, limit, offset, organizationId, search, expertiseKey])
 
     return {
         mentors,
