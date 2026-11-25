@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
-import { CalendarDays, CheckCircle2, Clock3, Download, Link2, Mail, RefreshCw, Search, Star, Users, XCircle } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, Download, Mail, RefreshCw, Search, Star, Users, XCircle, AlertTriangle } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -17,22 +16,17 @@ import { useOrganizationMentorSessionMetrics } from '@/app/[admin]/hooks/useOrga
 import { useDownloadMentorSessionsCsv } from '@/app/[admin]/hooks/useDownloadMentorSessionsCsv'
 import { useCancelMentorSlotBooking } from '@/app/student/hooks/useCancelMentorSlotBooking'
 import type { OrganizationMentorSession } from '@/app/[admin]/hooks/useOrganizationMentorSessions'
+import { useLiveMentorSessions } from '@/app/[admin]/hooks/useLiveMentorSessions'
+import type { LiveMentorSession } from '@/app/[admin]/hooks/useLiveMentorSessions'
 import { CancelMentorSessionDialog, type CancelSessionDetails } from './_components/CancelMentorSessionDialog'
 import { MentorshipBookingsTable } from './_components/MentorshipBookingsTable'
 import { type MentorshipBooking } from './_components/columns'
 
-const liveSessions = [
-  { status: 'Mentor not joined', tone: 'red', started: 'Started 6 min ago', time: '4:00–4:45 PM · Batch A', mentor: 'Arjun Mehta', student: 'Riya Sharma', mentorJoined: false, studentJoined: true, initials: ['AM', 'RS'] },
-  { status: 'Student not joined', tone: 'amber', started: 'Started 7 min ago', time: '4:30–5:00 PM · Batch B', mentor: 'Neha Kapoor', student: 'Karan Patel', mentorJoined: true, studentJoined: false, initials: ['NK', 'KP'] },
-  { status: 'In progress', tone: 'green', started: 'Started 22 min ago', time: '3:45–4:30 PM · Batch C', mentor: 'Vikram Rao', student: 'Sana Qureshi', mentorJoined: true, studentJoined: true, initials: ['VR', 'SQ'] },
-  { status: 'Starting soon', tone: 'blue', started: 'Starts in 8 min', time: '4:15–5:00 PM · Batch A', mentor: 'Arjun Mehta', student: 'Ishita Verma', mentorJoined: false, studentJoined: false, initials: ['AM', 'IV'] },
-]
-
 const toneStyles: Record<string, string> = {
-  red: 'border-red-200 bg-red-50/40',
-  amber: 'border-amber-200 bg-amber-50/40',
-  green: 'border-emerald-200 bg-emerald-50/40',
-  blue: 'border-sky-200 bg-sky-50/40',
+  red: 'border-red-300 ring-2 ring-red-100',
+  amber: 'border-amber-300 ring-2 ring-amber-100',
+  green: 'border-slate-200',
+  blue: 'border-slate-200',
 }
 
 function toBooking(session: OrganizationMentorSession): MentorshipBooking {
@@ -78,6 +72,31 @@ function toBooking(session: OrganizationMentorSession): MentorshipBooking {
   }
 }
 
+/** Derive tone, label, and time strings from a live session */
+function getLiveCardProps(session: LiveMentorSession) {
+  const mentorJoined = !session.notJoined.includes('mentor')
+  const studentJoined = !session.notJoined.includes('student')
+  const state = (session.lifecycleState ?? '').toUpperCase()
+
+  let tone: string
+  let statusLabel: string
+  if (!mentorJoined && studentJoined) { tone = 'red'; statusLabel = 'Mentor not joined' }
+  else if (mentorJoined && !studentJoined) { tone = 'amber'; statusLabel = 'Student not joined' }
+  else if (state === 'STARTING_SOON' || session.phase === 'starting_soon') { tone = 'blue'; statusLabel = 'Starting soon' }
+  else { tone = 'green'; statusLabel = 'In progress' }
+
+  const slotStart = new Date(session.slotStart)
+  const slotEnd = new Date(session.slotEnd)
+  const minutesAgo = Math.floor((Date.now() - slotStart.getTime()) / 60_000)
+  const started = minutesAgo < 0 ? `Starts in ${Math.abs(minutesAgo)} min` : `Started ${minutesAgo} min ago`
+  const fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' })
+  const time = `${fmt.format(slotStart)}–${fmt.format(slotEnd)}`
+
+  const initials = (name: string) => name.split(' ').map((n) => n[0] ?? '').join('').slice(0, 2).toUpperCase()
+
+  return { tone, statusLabel, started, time, mentorJoined, studentJoined, initials }
+}
+
 export default function MentorshipPage() {
   const { organizationId, courseId } = useParams<{ organizationId: string; courseId: string }>()
   const pathname = usePathname()
@@ -115,11 +134,195 @@ export default function MentorshipPage() {
   }, [courseId])
   const courseSessions = useMemo(() => course ? apiSessions.filter((session) => session.courseName === course.name) : [], [apiSessions, course])
   const bookings = useMemo(() => courseSessions.map(toBooking), [courseSessions])
+
+  // Live Now — real API (orgId required, bootcampId scopes to this course)
+  const { sessions: liveSessionsFromApi, total: liveTotalFromApi, needsAttentionCount: needsAttentionCountFromApi, loading: liveLoading, stale: liveStale, refetch: refetchLive } = useLiveMentorSessions(organizationId, courseId)
+
+  // ── TODO: REMOVE BEFORE PUSH ── dummy data to preview Live Now cards while API returns empty ──
+  const DUMMY_LIVE_SESSIONS: LiveMentorSession[] = [
+    {
+      bookingId: 9001,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'React hooks deep dive',
+      slotStart: new Date(Date.now() - 12 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 48 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: [],
+      needsAttention: false,
+      mentor: { id: '101', name: 'Priya Sharma', email: 'priya@example.com', joinedAt: new Date(Date.now() - 11 * 60_000).toISOString() },
+      student: { id: '201', name: 'Arjun Mehta', email: 'arjun@example.com', joinedAt: new Date(Date.now() - 10 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-1',
+    },
+    {
+      bookingId: 9002,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Node.js REST APIs',
+      slotStart: new Date(Date.now() - 5 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 55 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: ['student'],
+      needsAttention: true,
+      mentor: { id: '102', name: 'Rahul Verma', email: 'rahul@example.com', joinedAt: new Date(Date.now() - 4 * 60_000).toISOString() },
+      student: { id: '202', name: 'Sneha Patel', email: 'sneha@example.com', joinedAt: null },
+      meetingLink: 'https://meet.example.com/room-2',
+    },
+    {
+      bookingId: 9003,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'SQL & Database design',
+      slotStart: new Date(Date.now() + 3 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 63 * 60_000).toISOString(),
+      lifecycleState: 'STARTING_SOON',
+      phase: 'starting_soon',
+      notJoined: ['mentor', 'student'],
+      needsAttention: false,
+      mentor: { id: '103', name: 'Anita Nair', email: 'anita@example.com', joinedAt: null },
+      student: { id: '203', name: 'Karan Singh', email: 'karan@example.com', joinedAt: null },
+      meetingLink: 'https://meet.example.com/room-3',
+    },
+    // row 2
+    {
+      bookingId: 9004,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Pandas & NumPy',
+      slotStart: new Date(Date.now() - 8 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 52 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: ['mentor'],
+      needsAttention: true,
+      mentor: { id: '104', name: 'Vikram Rao', email: 'vikram@example.com', joinedAt: null },
+      student: { id: '204', name: 'Pooja Iyer', email: 'pooja@example.com', joinedAt: new Date(Date.now() - 7 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-4',
+    },
+    {
+      bookingId: 9005,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Machine Learning basics',
+      slotStart: new Date(Date.now() - 2 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 58 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: [],
+      needsAttention: false,
+      mentor: { id: '105', name: 'Deepa Menon', email: 'deepa@example.com', joinedAt: new Date(Date.now() - 2 * 60_000).toISOString() },
+      student: { id: '205', name: 'Rohan Das', email: 'rohan@example.com', joinedAt: new Date(Date.now() - 1 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-5',
+    },
+    {
+      bookingId: 9006,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Statistics for ML',
+      slotStart: new Date(Date.now() + 7 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 67 * 60_000).toISOString(),
+      lifecycleState: 'STARTING_SOON',
+      phase: 'starting_soon',
+      notJoined: ['mentor', 'student'],
+      needsAttention: false,
+      mentor: { id: '106', name: 'Suresh Nair', email: 'suresh@example.com', joinedAt: null },
+      student: { id: '206', name: 'Meena Pillai', email: 'meena@example.com', joinedAt: null },
+      meetingLink: 'https://meet.example.com/room-6',
+    },
+    {
+      bookingId: 9007,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Figma prototyping',
+      slotStart: new Date(Date.now() - 15 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 45 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: ['student'],
+      needsAttention: true,
+      mentor: { id: '107', name: 'Kavya Reddy', email: 'kavya@example.com', joinedAt: new Date(Date.now() - 14 * 60_000).toISOString() },
+      student: { id: '207', name: 'Amit Shah', email: 'amit@example.com', joinedAt: null },
+      meetingLink: 'https://meet.example.com/room-7',
+    },
+    // row 3
+    {
+      bookingId: 9008,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'User research methods',
+      slotStart: new Date(Date.now() - 20 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 40 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: [],
+      needsAttention: false,
+      mentor: { id: '108', name: 'Nisha Kulkarni', email: 'nisha@example.com', joinedAt: new Date(Date.now() - 19 * 60_000).toISOString() },
+      student: { id: '208', name: 'Pradeep Joshi', email: 'pradeep@example.com', joinedAt: new Date(Date.now() - 18 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-8',
+    },
+    {
+      bookingId: 9009,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Docker & Kubernetes',
+      slotStart: new Date(Date.now() + 1 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 61 * 60_000).toISOString(),
+      lifecycleState: 'STARTING_SOON',
+      phase: 'starting_soon',
+      notJoined: ['mentor', 'student'],
+      needsAttention: false,
+      mentor: { id: '109', name: 'Ravi Shankar', email: 'ravi@example.com', joinedAt: null },
+      student: { id: '209', name: 'Latha Bose', email: 'latha@example.com', joinedAt: null },
+      meetingLink: 'https://meet.example.com/room-9',
+    },
+    {
+      bookingId: 9010,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'CI/CD pipelines',
+      slotStart: new Date(Date.now() - 3 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 57 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: ['mentor'],
+      needsAttention: true,
+      mentor: { id: '110', name: 'Ganesh Murthy', email: 'ganesh@example.com', joinedAt: null },
+      student: { id: '210', name: 'Swati Desai', email: 'swati@example.com', joinedAt: new Date(Date.now() - 2 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-10',
+    },
+    {
+      bookingId: 9011,
+      bootcampId: 1041,
+      bootcampName: 'Full Stack Bootcamp',
+      topic: 'Terraform basics',
+      slotStart: new Date(Date.now() - 9 * 60_000).toISOString(),
+      slotEnd: new Date(Date.now() + 51 * 60_000).toISOString(),
+      lifecycleState: 'IN_PROGRESS',
+      phase: 'in_progress',
+      notJoined: [],
+      needsAttention: false,
+      mentor: { id: '111', name: 'Sonal Tiwari', email: 'sonal@example.com', joinedAt: new Date(Date.now() - 8 * 60_000).toISOString() },
+      student: { id: '211', name: 'Kunal Saxena', email: 'kunal@example.com', joinedAt: new Date(Date.now() - 7 * 60_000).toISOString() },
+      meetingLink: 'https://meet.example.com/room-11',
+    },
+  ]
+  const useDummy = liveSessionsFromApi.length === 0 && !liveLoading
+  const liveSessions = useDummy ? DUMMY_LIVE_SESSIONS : liveSessionsFromApi
+  const liveTotal = useDummy ? DUMMY_LIVE_SESSIONS.length : liveTotalFromApi
+  const needsAttentionCount = useDummy ? 4 : needsAttentionCountFromApi
+  // ── END DUMMY DATA ──
+  const [liveRefreshedAt, setLiveRefreshedAt] = useState('')
+  const handleRefreshLive = async () => {
+    await refetchLive()
+    setLiveRefreshedAt('Updated just now')
+  }
+
   const [query, setQuery] = useState('')
   const [batchFilter, setBatchFilter] = useState('All batches')
   const [mentorFilter, setMentorFilter] = useState('All mentors')
   const [dateFilter, setDateFilter] = useState('Last 30 days')
-  const [refreshedAt, setRefreshedAt] = useState('Updated 2 min ago')
   const { downloadCsv, downloading: exporting, error: exportError } = useDownloadMentorSessionsCsv(organizationId, courseId, lifecycleStateFilter)
 
   const visibleBookings = useMemo(() => bookings.filter((booking) => {
@@ -148,7 +351,7 @@ export default function MentorshipPage() {
       <section className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Mentorship</h1>
-          <p className="mt-1 text-sm text-muted-foreground">See who booked, what’s live right now, and every session recording for this course.</p>
+          <p className="mt-1 text-sm text-muted-foreground">See who booked, what's live right now, and every session recording for this course.</p>
         </div>
         <Button variant="outline" size="sm" disabled={exporting} onClick={downloadCsv}><Download className="mr-2 h-4 w-4" />{exporting ? 'Preparing CSV…' : 'Download CSV'}</Button>
       </section>
@@ -172,40 +375,128 @@ export default function MentorshipPage() {
       </section>
       {isAdminRoute && metricsError && <p role="alert" className="text-xs text-red-600">{metricsError}</p>}
 
+      {/* ── Live Now ── */}
       <Card className="shadow-none">
         <CardContent className="p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-500" /><h2 className="font-semibold">Live now</h2><span className="text-xs text-muted-foreground">4 sessions · 2 need attention · {refreshedAt}</span></div>
-            <Button variant="outline" size="sm" onClick={() => setRefreshedAt('Updated just now')}><RefreshCw className="mr-2 h-3.5 w-3.5" />Refresh</Button>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+              <h2 className="font-semibold text-base">Live now</h2>
+              <span className="text-xs text-muted-foreground">
+                {liveLoading
+                  ? 'Loading…'
+                  : `${liveTotal} session${liveTotal !== 1 ? 's' : ''} · ${needsAttentionCount} need attention${liveRefreshedAt ? ` · ${liveRefreshedAt}` : ''}`}
+              </span>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleRefreshLive} disabled={liveLoading}>
+              <RefreshCw className={`mr-2 h-3.5 w-3.5 ${liveLoading ? 'animate-spin' : ''}`} />Refresh
+            </Button>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {liveSessions.map((session) => (
-              <article key={`${session.mentor}-${session.student}`} className={`rounded-lg border p-3 ${toneStyles[session.tone]}`}>
-                <div className="flex items-center justify-between gap-2"><Badge variant="outline" className="rounded-full border-0 bg-white/80 px-2 py-1 text-[10px] font-medium text-foreground"><span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${session.tone === 'red' ? 'bg-red-500' : session.tone === 'amber' ? 'bg-amber-500' : session.tone === 'green' ? 'bg-green-600' : 'bg-sky-500'}`} />{session.status}</Badge><span className="text-[10px] text-muted-foreground">{session.started}</span></div>
-                <p className="mt-3 text-xs text-muted-foreground">{session.time}</p>
-                <div className="mt-2 space-y-2">
-                  {[session.mentor, session.student].map((name, index) => <div key={name} className="flex items-center gap-2 text-xs">
-                    <Avatar className="h-6 w-6"><AvatarFallback className={`text-[9px] ${index ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{session.initials[index]}</AvatarFallback></Avatar>
-                    <span className="font-medium">{name}</span><span className="text-muted-foreground">· {index ? 'Student' : 'Mentor'}</span>
-                    {!session.mentorJoined && !index && <span className="text-red-600">Not joined yet</span>}
-                    {!session.studentJoined && index === 1 && <span className="text-amber-700">Not joined yet</span>}
-                  </div>)}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <Button size="sm" className="h-7 px-2 text-xs" disabled={session.tone === 'blue'}>Join session</Button>
-                  <Button size="sm" variant="outline" className="h-7 bg-white px-2 text-xs" onClick={() => copyLink(`https://meet.example.com/${session.student.toLowerCase().replaceAll(' ', '-')}`)}><Link2 className="mr-1 h-3 w-3" />Link</Button>
-                  <Button size="sm" variant="outline" className="h-7 bg-white px-2 text-xs" onClick={() => copyLink(`${session.student.toLowerCase().replaceAll(' ', '.')}@example.com`)}><Mail className="mr-1 h-3 w-3" />Copy student email</Button>
-                </div>
-              </article>
-            ))}
-          </div>
+
+          {liveStale && (
+            <div className="mb-3 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+              Last refresh failed — showing data that may be out of date. Click Refresh to try again.
+            </div>
+          )}
+
+          {liveLoading && (
+            <p className="py-6 text-center text-sm text-muted-foreground">Loading live sessions…</p>
+          )}
+
+          {!liveLoading && liveSessions.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">No live sessions right now.</p>
+          )}
+
+          {!liveLoading && liveSessions.length > 0 && (
+            <div className="max-h-[500px] overflow-y-auto pr-1">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {liveSessions.map((session) => {
+                const { tone, statusLabel, started, time, mentorJoined, studentJoined, initials } = getLiveCardProps(session)
+                const dotColor = tone === 'red' ? 'text-red-500' : tone === 'amber' ? 'text-amber-500' : tone === 'green' ? 'text-green-600' : 'text-sky-500'
+                const labelColor = tone === 'red' ? 'text-red-600' : tone === 'amber' ? 'text-amber-600' : tone === 'green' ? 'text-green-700' : 'text-sky-600'
+                return (
+                  <article key={session.bookingId} className={`rounded-lg border bg-white p-3 ${toneStyles[tone]}`}>
+
+                    {/* Row 1 — status + elapsed */}
+                    <div className="flex items-center justify-between gap-1">
+                      <span className={`flex items-center gap-1 text-[11px] font-semibold ${labelColor}`}>
+                        <span className={dotColor}>●</span>
+                        {statusLabel}
+                      </span>
+                      <span className="shrink-0 text-[10px] text-slate-400">{started}</span>
+                    </div>
+
+                    {/* Row 2 — time only */}
+                    <p className="mt-1 text-[11px] text-slate-500">{time}</p>
+
+                    {/* Person rows */}
+                    <div className="mt-2 space-y-1.5">
+                      {([
+                        { person: session.mentor, role: 'Mentor', joined: mentorJoined, avatarClass: 'bg-green-100 text-green-700' },
+                        { person: session.student, role: 'Student', joined: studentJoined, avatarClass: 'bg-blue-100 text-blue-700' },
+                      ] as const).map(({ person, role, joined, avatarClass }) => (
+                        <div key={person.id} className="flex items-center gap-1.5">
+                          <Avatar className="h-5 w-5 shrink-0">
+                            <AvatarFallback className={`text-[8px] font-bold ${avatarClass}`}>{initials(person.name)}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[11px] font-medium leading-tight text-slate-800">
+                              {person.name}
+                              <span className="ml-1 font-normal text-slate-400">· {role}</span>
+                            </p>
+                            <p className={`text-[10px] leading-tight ${joined ? 'text-slate-400' : role === 'Mentor' ? 'font-medium text-red-500' : 'font-medium text-amber-500'}`}>
+                              {joined
+                                ? `Joined ${new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(person.joinedAt ?? ''))}`
+                                : 'Not joined yet'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Actions — all in one row */}
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1">
+                      <Button
+                        size="sm"
+                        disabled={!session.meetingLink}
+                        className="h-6 bg-[#28622f] px-2.5 text-[11px] font-medium hover:bg-[#204f26]"
+                        onClick={() => session.meetingLink && window.open(session.meetingLink, '_blank')}
+                      >
+                        Join session
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-6 bg-white px-2 text-[11px]">Details</Button>
+                      {!mentorJoined && (
+                        <Button size="sm" variant="outline" className="h-6 bg-white px-2 text-[11px]" onClick={() => copyLink(session.mentor.email)}>
+                          <Mail className="mr-1 h-3 w-3" />Mentor email
+                        </Button>
+                      )}
+                      {!studentJoined && (
+                        <Button size="sm" variant="outline" className="h-6 bg-white px-2 text-[11px]" onClick={() => copyLink(session.student.email)}>
+                          <Mail className="mr-1 h-3 w-3" />Student email
+                        </Button>
+                      )}
+                      {tone !== 'green' && (
+                        <Button size="sm" variant="outline" className="h-6 border-red-200 bg-white px-2 text-[11px] text-red-600 hover:bg-red-50 hover:text-red-700">
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+
+                  </article>
+                )
+              })}
+            </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
+      {/* ── Bookings ── */}
       <Card className="shadow-none">
         <CardContent className="p-4">
           <div className="flex flex-col justify-between gap-3 xl:flex-row xl:items-center">
-            <div><h2 className="font-semibold text-lg">Bookings</h2><p className="mt-0.5 text-xs text-muted-foreground">Browse mentorship sessions and attendance.</p></div>
+            <div><h2 className="font-semibold text-lg text-base">Bookings</h2><p className="mt-0.5 text-xs text-muted-foreground">Browse mentorship sessions and attendance.</p></div>
             <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Filter bookings by status">
               {[{ label: 'All', value: 'All' }, { label: 'Upcoming', value: 'Upcoming' }, { label: 'Completed', value: 'Completed' }, { label: 'No-shows', value: 'Missed' }, { label: 'Cancelled', value: 'Cancelled' }].map(({ label, value }) => {
                 const count = isAdminRoute && metrics
