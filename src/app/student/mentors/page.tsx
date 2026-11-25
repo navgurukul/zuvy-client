@@ -52,18 +52,18 @@ export default function MentorsPage() {
     const courseId = searchParams.get("courseId") || ""
     const orgId = searchParams.get("orgId") || ""
     const mentorIdToOpen = searchParams.get("mentorId") || ""
-    // Selected expertise lives in the URL (?expertise=React,SQL) like search/page
+    // Selected expertise slugs live in the URL (?expertise=react,node-js) like search/page
     const expertiseParam = searchParams.get("expertise") || ""
     const selectedExpertise = useMemo(
-        () => expertiseParam.split(",").map((skill) => skill.trim()).filter(Boolean),
+        () => expertiseParam.split(",").map((slug) => slug.trim()).filter(Boolean),
         [expertiseParam]
     )
     const [showAllMentors, setShowAllMentors] = useState(false)
     const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null)
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-    // Full skill list (no search) - used for the mentor counts on the selected chips
-    const { skills } = useMentorSkills()
+    // GET /student/mentors/skills?inUse=true - fetched once, feeds the dropdown and the chips
+    const { skills, loading: skillsLoading, error: skillsError } = useMentorSkills()
 
     const { mentors, total, loading, error, refetchMentors } = useMentors(
         searchQuery,
@@ -303,6 +303,9 @@ export default function MentorsPage() {
                     </Toggle>
 
                     <MentorExpertiseDropdown
+                        skills={skills}
+                        loading={skillsLoading}
+                        error={skillsError}
                         selected={selectedExpertise}
                         onChange={handleExpertiseChange}
                         className="sm:mt-2"
@@ -320,10 +323,8 @@ export default function MentorsPage() {
             <MentorExpertiseChips
                 skills={skills}
                 selected={selectedExpertise}
-                onRemove={(name) =>
-                    handleExpertiseChange(
-                        selectedExpertise.filter((skill) => skill.toLowerCase() !== name.toLowerCase())
-                    )
+                onRemove={(slug) =>
+                    handleExpertiseChange(selectedExpertise.filter((item) => item !== slug))
                 }
                 onClearAll={() => handleExpertiseChange([])}
             />

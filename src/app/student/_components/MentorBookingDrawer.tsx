@@ -9,6 +9,8 @@ import { useMentorAvailability } from "@/hooks/useMentorAvailability"
 import { useBookMentorSlot } from "@/app/student/hooks/useBookMentorSlot"
 import { useMentorProfile } from "@/app/student/hooks/useMentorProfile"
 import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics"
+import { useMentorBookingPreview } from "@/app/student/hooks/useMentorBookingPreview"
+import BookSlotErrorAlert from "@/app/student/_components/BookSlotErrorAlert"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
@@ -23,8 +25,21 @@ type MentorBookingDrawerProps = {
 }
 
 // Cooldown between bookings, counted from the booked session's start
+// Used only when the booking preview API has not answered
 const BOOKING_COOLDOWN_DAYS = 14
-const SUPPORT_EMAIL = "team@zuvy.org"
+
+// Turns email addresses inside API text (e.g. "email team@zuvy.org") into mailto links
+const EMAIL_PATTERN = /([\w.+-]+@[\w-]+\.[\w.-]+)/g
+const renderWithEmailLinks = (text: string) =>
+  text.split(EMAIL_PATTERN).map((part, index) =>
+    index % 2 === 1 ? (
+      <a key={index} href={`mailto:${part}`} className="hover:underline">
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  )
 
 // e.g. "Fri, 6 Nov 2026"
 const formatSlotDate = (value: string | Date) => {
@@ -42,12 +57,6 @@ const formatShortDate = (value: string | Date) => {
   if (Number.isNaN(d.getTime())) return ""
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
 }
-
-const GOOD_TO_KNOW = [
-  "Cancel up to 24 hours before. Your credit comes back.",
-  "Reschedule up to 24 hours before. Your mentor needs to accept.",
-  "Join opens 10 minutes before the start.",
-]
 
 const formatSlotTime = (value: string) =>
   new Date(value).toLocaleTimeString("en-US", {
@@ -88,11 +97,12 @@ export default function MentorBookingDrawer({
     open && !!mentor?.userId,
     mentor?.organizationId
   )
-  const { isBooking, error: bookingError, bookSlot } = useBookMentorSlot()
+  const { isBooking, errorInfo: bookingError, clearError: clearBookingError, bookSlot } = useBookMentorSlot()
 
   const { metrics, loading: metricsLoading } = useStudentMentorMetrics(Boolean(open && mentor?.userId))
 
   useEffect(() => {
+    clearBookingError()
     if (!open) {
       setSelectedSlotId(null)
       setBookedSlotDetails(null)
@@ -102,7 +112,7 @@ export default function MentorBookingDrawer({
 
     setSelectedSlotId(null)
     setBookedSlotDetails(null)
-  }, [open, mentor?.userId])
+  }, [open, mentor?.userId, clearBookingError])
 
   const availableSlots = useMemo(
     () => availability.filter((slot) => slot.status?.toUpperCase() === "AVAILABLE"),
@@ -126,12 +136,24 @@ export default function MentorBookingDrawer({
   const bookingEligibilityBlocked = Boolean(metrics && metrics.canBook === false)
   const bookingNotYetEligible = Boolean(metrics && metrics.nextEligible && new Date(metrics.nextEligible).getTime() > Date.now())
 
-  const canBook = !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !bookingEligibilityBlocked && !bookingNotYetEligible
 
   const selectedSlot = useMemo(
     () => availableSlots.find((slot) => slot.id === selectedSlotId) || null,
     [availableSlots, selectedSlotId]
   )
+
+  // Booking preview: the selected slot, or the first slot so "Good to know" shows before a pick
+  const previewSlotId = selectedSlotId ?? availableSlots[0]?.id ?? null
+  const { preview, loading: previewLoading } = useMentorBookingPreview(
+    previewSlotId,
+    open && !bookingSuccess && previewSlotId !== null
+  )
+  const goodToKnow = preview?.goodToKnow ?? []
+  // Preview answers that belong to the slot the student picked
+  const selectedPreview =
+    preview && selectedSlotId !== null && Number(preview.slot?.id) === selectedSlotId ? preview : null
+  const previewBlockedMessage =
+    selectedPreview && !selectedPreview.canBook ? selectedPreview.blocked?.message || "You can't book this slot." : null
   const remainingCredits = typeof metrics?.remainingCredits === "number" ? metrics.remainingCredits : null
   const creditsLeftAfter = remainingCredits !== null ? Math.max(remainingCredits - 1, 0) : null
   const nextBookingOpensOn = useMemo(() => {
@@ -141,6 +163,9 @@ export default function MentorBookingDrawer({
     start.setDate(start.getDate() + BOOKING_COOLDOWN_DAYS)
     return start
   }, [selectedSlot])
+  const canBook = selectedPreview
+    ? !!mentor && isAvailable && !isBooking && selectedPreview.canBook
+    : !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !previewLoading && !bookingEligibilityBlocked && !bookingNotYetEligible
   const subtitle = [mentor?.title || mentor?.role || "Mentor", mentor?.orgName].filter(Boolean).join(" · ")
 
   const handleBook = async () => {
@@ -149,7 +174,12 @@ export default function MentorBookingDrawer({
     const slotDetails = availability.find((slot) => slot.id === selectedSlotId) || null
 
     const booking = await bookSlot(selectedSlotId)
-    if (!booking) return
+    if (!booking) {
+      // Refused (see BookSlotErrorAlert): drop the pick and reload the slots
+      setSelectedSlotId(null)
+      refetchMentorAvailability()
+      return
+    }
 
     setBookedSlotDetails(slotDetails)
     setSelectedSlotId(null)
@@ -237,7 +267,10 @@ export default function MentorBookingDrawer({
                               name="mentor-slot"
                               value={slot.id}
                               checked={selected}
-                              onChange={() => setSelectedSlotId(slot.id)}
+                              onChange={() => {
+                                setSelectedSlotId(slot.id)
+                                clearBookingError()
+                              }}
                               className="h-4 w-4 shrink-0 accent-green-800 dark:accent-green-500"
                             />
                             <div className="min-w-0 text-left">
@@ -259,7 +292,18 @@ export default function MentorBookingDrawer({
                 </section>
 
                 {/* Credit summary - shown once a slot is selected */}
-                {selectedSlot && !metricsLoading && (
+                {selectedSlot && selectedPreview?.impact ? (
+                  <section className="rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950/30">
+                    <p className="text-left text-sm font-semibold text-foreground">
+                      {selectedPreview.impact.summary}
+                    </p>
+                    {selectedPreview.impact.detail ? (
+                      <p className="mt-1 text-left text-xs text-muted-foreground">
+                        {selectedPreview.impact.detail}
+                      </p>
+                    ) : null}
+                  </section>
+                ) : selectedSlot && !selectedPreview && !previewLoading && !metricsLoading && (
                   <section className="rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950/30">
                     <p className="text-left text-sm font-semibold text-foreground">
                       {creditsLeftAfter !== null
@@ -277,24 +321,30 @@ export default function MentorBookingDrawer({
                 {/* Good to know */}
                 <section className="border-b border-border pb-4">
                   <h3 className="mb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Good to know</h3>
-                  <ul className="space-y-2">
-                    {GOOD_TO_KNOW.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-left text-xs text-foreground/80">
-                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/70" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    <li className="flex items-start gap-2 text-left text-xs text-foreground/80">
-                      <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-                      <span>
-                        Inside 24 hours, email{" "}
-                        <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">
-                          {SUPPORT_EMAIL}
-                        </a>{" "}
-                        if you can&apos;t attend. If you miss the session, you lose the credit.
-                      </span>
-                    </li>
-                  </ul>
+                  {previewLoading && goodToKnow.length === 0 ? (
+                    <div className="space-y-2">
+                      {[0, 1, 2, 3].map((item) => (
+                        <div key={item} className="h-4 w-full animate-pulse rounded bg-muted" />
+                      ))}
+                    </div>
+                  ) : goodToKnow.length === 0 ? (
+                    <p className="text-left text-xs text-muted-foreground">
+                      {availableSlots.length === 0 ? "Shown when the mentor has open slots." : "Couldn't load the booking rules."}
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {goodToKnow.map((item) => (
+                        <li key={item.text} className="flex items-start gap-2 text-left text-xs text-foreground/80">
+                          {item.tone === "warning" ? (
+                            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
+                          ) : (
+                            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/70" />
+                          )}
+                          <span>{renderWithEmailLinks(item.text)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </section>
 
                 {/* About */}
@@ -441,10 +491,14 @@ export default function MentorBookingDrawer({
             {!bookingSuccess && (
               <div className="sticky bottom-0 border-t border-border bg-background px-6 py-4">
                 <div className="space-y-2">
-                  {bookingError ? <p className="text-xs text-red-500 dark:text-red-300">{bookingError}</p> : null}
+                  {bookingError ? <BookSlotErrorAlert error={bookingError} /> : null}
 
                   {/* Validation message when user cannot book */}
-                  {selectedSlotId !== null && (bookingEligibilityBlocked || bookingNotYetEligible) && (
+                  {bookingError ? null : previewBlockedMessage ? (
+                    <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-left text-sm text-warning-dark dark:border-warning/50 dark:bg-warning/20 dark:text-warning-dark">
+                      {previewBlockedMessage}
+                    </div>
+                  ) : !selectedPreview && selectedSlotId !== null && (bookingEligibilityBlocked || bookingNotYetEligible) && (
                     <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-dark dark:border-warning/50 dark:bg-warning/20 dark:text-warning-dark">
                       {bookingEligibilityBlocked ? (
                         <>

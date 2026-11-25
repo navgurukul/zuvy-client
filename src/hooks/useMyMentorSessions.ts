@@ -36,9 +36,69 @@ export interface MyMentorSession {
     studentFeedback?: string | null
     studentFeedbackSubmittedAt?: string | null
     studentFeedbackLocked?: boolean | null
+    mentorTitle?: string | null
+    // Card fields (student My Sessions) - computed by the backend per booking
+    displayState?: SessionDisplayState
+    changesCloseAt?: string | null
+    joinOpensAt?: string | null
+    joinClosesAt?: string | null
+    actions?: SessionCardActions
+    message?: string | null
+    reschedule?: {
+        proposedStart: string | null
+        proposedEnd: string | null
+        replyBy: string | null
+    } | null
+    cancellation?: {
+        by: 'you' | 'mentor' | 'ops'
+        byName: string | null
+        reason: string | null
+        at: string | null
+        creditReturned: boolean
+    } | null
+    recording?: { state: RecordingState; url: string | null } | null
+    usesCredit?: boolean
+    rescheduleOutcome?: {
+        status: 'accepted' | 'declined' | 'expired'
+        message: string
+    } | null
 }
 
-type WrappedMyMentorSession = {
+export type SessionDisplayState =
+    | 'UPCOMING'
+    | 'STARTING_SOON'
+    | 'IN_PROGRESS'
+    | 'RESCHEDULE_REQUESTED'
+    | 'COMPLETED'
+    | 'CANCELLED'
+    | 'MISSED'
+
+export type RecordingState = 'NOT_YET' | 'PROCESSING' | 'READY' | 'NONE' | 'NOT_HELD'
+
+export interface SessionCardAction {
+    allowed: boolean
+    reason: string | null
+}
+
+export interface SessionCardActions {
+    join: SessionCardAction & { url: string | null }
+    reschedule: SessionCardAction
+    cancel: SessionCardAction
+    viewRecording: SessionCardAction & { url: string | null }
+    giveFeedback: SessionCardAction
+}
+
+/** The student's credits, sent with GET /student/mentor-sessions/my. */
+export interface MentorSessionCredits {
+    creditsAssigned: number
+    creditsUsed: number
+    creditsLeft: number
+    nextEligibleDate: string | null
+    canBook: boolean
+    blockReason: string | null
+}
+
+type WrappedMyMentorSession = Partial<Omit<MyMentorSession, 'id'>> & {
     booking: MyMentorSession
     mentorName?: string | null
     studentName?: string | null
@@ -54,11 +114,19 @@ export interface SessionCounts {
     completed?: string | number
     cancelled?: string | number
     reschedule?: string | number
+    missed?: string | number
 }
 
 type MyMentorSessionsResponse =
     | MyMentorSessionsPayload
-    | { data: MyMentorSessionsPayload; counts?: SessionCounts }
+    | { data: MyMentorSessionsPayload; counts?: SessionCounts; credits?: MentorSessionCredits }
+
+const parseCreditsResponse = (
+    response: MyMentorSessionsResponse
+): MentorSessionCredits | null => {
+    if (!response || Array.isArray(response)) return null
+    return response.credits ?? null
+}
 
 const isWrappedSession = (
     value: MyMentorSession | WrappedMyMentorSession
@@ -70,7 +138,10 @@ const normalizeSession = (
     value: MyMentorSession | WrappedMyMentorSession
 ): MyMentorSession => {
     if (isWrappedSession(value)) {
+        // Keep the card fields that sit beside `booking` (displayState, actions, ...)
+        const { booking: _booking, ...cardFields } = value
         return {
+            ...cardFields,
             ...value.booking,
             mentorName: value.mentorName ?? value.booking.mentorName ?? null,
             studentName: value.studentName ?? value.booking.studentName ?? null,
@@ -124,6 +195,7 @@ export type SessionFilter =
     | 'completed'
     | 'cancelled'
     | 'reschedule'
+    | 'missed'
 
 export type SessionSortOrder = 'asc' | 'desc'
 
@@ -135,6 +207,7 @@ export function useMyMentorSessions(
 ) {
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
     const [counts, setCounts] = useState<SessionCounts>({})
+    const [credits, setCredits] = useState<MentorSessionCredits | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
@@ -157,10 +230,12 @@ export function useMyMentorSessions(
 
             setSessions(parseSessionsResponse(response.data))
             setCounts(parseCountsResponse(response.data))
+            setCredits(parseCreditsResponse(response.data))
         } catch (error) {
             console.error('Error fetching my mentor sessions:', error)
             setSessions([])
             setCounts({})
+            setCredits(null)
             setError(getErrorMessage(error))
         } finally {
             setLoading(false)
@@ -174,6 +249,7 @@ export function useMyMentorSessions(
     return {
         sessions,
         counts,
+        credits,
         loading,
         error,
         refetchMySessions: getMySessions,

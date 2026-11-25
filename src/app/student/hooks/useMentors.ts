@@ -83,12 +83,15 @@ export function useMentors(
                 queryParams.append('organizationId', String(params.organizationId))
             }
 
-            const expertiseValues = (params.expertise || []).map((skill) => skill.trim()).filter(Boolean)
-            if (expertiseValues.length > 0) {
-                queryParams.append('expertise', expertiseValues.join(','))
+            // Skill slugs, comma-separated: expertise=react,node-js
+            const expertiseSlugs = (params.expertise || []).map((slug) => slug.trim()).filter(Boolean)
+            const queryParts = [queryParams.toString()]
+            if (expertiseSlugs.length > 0) {
+                queryParts.push(`expertise=${expertiseSlugs.map(encodeURIComponent).join(',')}`)
             }
+            const query = queryParts.filter(Boolean).join('&')
 
-            const url = `/student/mentors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+            const url = `/student/mentors${query ? `?${query}` : ''}`
             const response = await api.get<MentorsApiResponse>(url)
             const parsedResponse = parseMentorsResponse(response.data)
 

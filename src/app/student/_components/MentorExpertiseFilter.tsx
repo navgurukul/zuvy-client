@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Check, ChevronDown, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -11,48 +11,55 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
-import useDebounce from "@/app/[admin]/hooks/useDebounce"
-import { useMentorSkills } from "@/app/student/hooks/useMentorSkills"
 import type { MentorSkill } from "@/app/student/hooks/hookTypes"
 
 type MentorExpertiseDropdownProps = {
+  /** Skills from GET /student/mentors/skills?inUse=true (loaded once by the page) */
+  skills: MentorSkill[]
+  loading?: boolean
+  error?: string | null
+  /** Selected skill slugs, sent as /student/mentors?expertise=<slug,slug> */
   selected: string[]
   onChange: (next: string[]) => void
   className?: string
 }
 
-const SKILL_SEARCH_DEBOUNCE_MS = 300
-
-const isSelected = (selected: string[], name: string) =>
-  selected.some((item) => item.toLowerCase() === name.toLowerCase())
+const isSelected = (selected: string[], slug: string) => selected.includes(slug)
 
 /**
- * Searchable multi-select of mentor skills.
- * Opens with /student/mentors/skills?inUse=true; typing sends the text to the
- * same API (see useMentorSkills) - no filtering in the browser.
+ * Searchable multi-select of mentor skills. The search box narrows the skill
+ * list that was loaded once on mount; picking skills filters the mentors via
+ * /student/mentors?expertise=<slugs>.
  */
 export function MentorExpertiseDropdown({
+  skills,
+  loading = false,
+  error = null,
   selected,
   onChange,
   className,
 }: MentorExpertiseDropdownProps) {
   const [open, setOpen] = useState(false)
   const [skillSearch, setSkillSearch] = useState("")
-  const debouncedSkillSearch: string = useDebounce(skillSearch, SKILL_SEARCH_DEBOUNCE_MS)
-  // Only fetch while the dropdown is open
-  const { skills, loading, error } = useMentorSkills(debouncedSkillSearch, open)
-  const isSearching = loading || skillSearch.trim() !== debouncedSkillSearch.trim()
+
+  const visibleSkills = useMemo(() => {
+    const term = skillSearch.trim().toLowerCase()
+    if (!term) return skills
+    return skills.filter(
+      (skill) => skill.name.toLowerCase().includes(term) || skill.slug.includes(term)
+    )
+  }, [skills, skillSearch])
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
     if (!nextOpen) setSkillSearch("")
   }
 
-  const toggleSkill = (name: string) => {
+  const toggleSkill = (slug: string) => {
     onChange(
-      isSelected(selected, name)
-        ? selected.filter((item) => item.toLowerCase() !== name.toLowerCase())
-        : [...selected, name]
+      isSelected(selected, slug)
+        ? selected.filter((item) => item !== slug)
+        : [...selected, slug]
     )
   }
 
@@ -79,7 +86,7 @@ export function MentorExpertiseDropdown({
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] p-0 text-left">
-        {/* shouldFilter={false}: results come pre-filtered from the API */}
+        {/* shouldFilter={false}: visibleSkills is already narrowed by the search box */}
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search skills..."
@@ -87,23 +94,23 @@ export function MentorExpertiseDropdown({
             onValueChange={setSkillSearch}
           />
           <CommandList className="max-h-64">
-            {isSearching && skills.length === 0 ? (
+            {loading && skills.length === 0 ? (
               <p className="px-3 py-4 text-center text-sm text-muted-foreground">Loading skills...</p>
             ) : error ? (
               <p className="px-3 py-4 text-center text-sm text-destructive">{error}</p>
             ) : (
               <>
-                {!isSearching && skills.length === 0 && (
+                {visibleSkills.length === 0 && (
                   <p className="px-3 py-4 text-center text-sm text-muted-foreground">No skills found.</p>
                 )}
                 <CommandGroup>
-                  {skills.map((skill) => {
-                    const checked = isSelected(selected, skill.name)
+                  {visibleSkills.map((skill) => {
+                    const checked = isSelected(selected, skill.slug)
                     return (
                       <CommandItem
-                        key={skill.id}
-                        value={skill.name}
-                        onSelect={() => toggleSkill(skill.name)}
+                        key={skill.slug}
+                        value={skill.slug}
+                        onSelect={() => toggleSkill(skill.slug)}
                         className="flex cursor-pointer items-center gap-2 text-left text-foreground aria-selected:bg-muted aria-selected:text-foreground"
                       >
                         <span
@@ -147,7 +154,8 @@ export function MentorExpertiseDropdown({
 type MentorExpertiseChipsProps = {
   skills: MentorSkill[]
   selected: string[]
-  onRemove: (name: string) => void
+  /** Selected skill slugs */
+  onRemove: (slug: string) => void
   onClearAll: () => void
 }
 
@@ -155,25 +163,26 @@ type MentorExpertiseChipsProps = {
 export function MentorExpertiseChips({ skills, selected, onRemove, onClearAll }: MentorExpertiseChipsProps) {
   if (selected.length === 0) return null
 
-  const getCount = (name: string) =>
-    skills.find((skill) => skill.name.toLowerCase() === name.toLowerCase())?.mentorCount ?? null
+  const findSkill = (slug: string) => skills.find((skill) => skill.slug === slug)
 
   return (
     <div className="space-y-2 text-left">
       <p className="text-sm font-semibold text-foreground">Filter by expertise</p>
       <div className="flex flex-wrap items-center gap-2">
-        {selected.map((name) => {
-          const count = getCount(name)
+        {selected.map((slug) => {
+          const skill = findSkill(slug)
+          const name = skill?.name ?? slug
+          const count = skill?.mentorCount ?? null
           return (
             <span
-              key={name}
+              key={slug}
               className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-card py-1.5 pl-3.5 pr-2 text-sm text-foreground"
             >
               <span className="truncate">{name}</span>
               {count !== null && <span className="text-xs text-muted-foreground">{count}</span>}
               <button
                 type="button"
-                onClick={() => onRemove(name)}
+                onClick={() => onRemove(slug)}
                 aria-label={`Remove ${name} filter`}
                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >

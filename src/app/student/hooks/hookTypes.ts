@@ -169,6 +169,19 @@ export interface UseAssignmentDetailsReturn {
 
 
 // useBookMentorSlot
+/** Refusal codes POST /student/mentor-slots/book sends as `code` (plain 400s have none). */
+export type BookSlotErrorCode = 'SLOT_TOO_SOON' | 'NO_CREDITS' | 'GAP_ACTIVE' | 'SLOT_UNAVAILABLE'
+
+export interface BookSlotError {
+    /** HTTP status (400 / 403), null when the request never got a response */
+    status: number | null
+    /** Backend `code`; SLOT_UNAVAILABLE for a 400 without one (slot full, passed, no meeting licence) */
+    code: BookSlotErrorCode | null
+    /** Fixed text for SLOT_TOO_SOON / NO_CREDITS / GAP_ACTIVE; the backend message for other 400s */
+    message: string
+    data?: Record<string, unknown>
+}
+
 export interface MentorSlotBooking {
     id: number
     slotAvailabilityId: number
@@ -752,6 +765,8 @@ export interface GetMentorsParams {
 export interface MentorSkill {
     id: string | number
     name: string
+    /** Sent to GET /student/mentors?expertise=<slug,slug> */
+    slug: string
     mentorCount: number | null
 }
 
@@ -760,6 +775,7 @@ type RawMentorSkill =
     | {
           id?: string | number
           name?: string
+          slug?: string
           skill?: string
           title?: string
           mentorCount?: number
@@ -771,6 +787,43 @@ type RawMentorSkill =
 export type MentorSkillsApiResponse =
     | RawMentorSkill[]
     | { data?: RawMentorSkill[] | { skills?: RawMentorSkill[] }; skills?: RawMentorSkill[] }
+
+
+// useMentorBookingPreview - GET /student/mentor-slots/:slotId/booking-preview
+export interface BookingPreviewGoodToKnowItem {
+    tone: 'info' | 'warning' | string
+    text: string
+}
+
+export interface BookingPreviewImpact {
+    creditsUsed: number
+    creditsLeftAfter: number
+    nextBookingOpensAt: string | null
+    summary: string
+    detail: string | null
+}
+
+export interface MentorBookingPreview {
+    slot: {
+        id: number
+        slotStartDateTime: string
+        slotEndDateTime: string
+        durationMinutes: number
+    }
+    canBook: boolean
+    blocked: { code: string; message: string; data?: unknown } | null
+    credits: {
+        creditsAssigned: number
+        creditsUsed: number
+        creditsLeft: number
+        nextEligibleDate: string | null
+        canBook: boolean
+        blockReason: string | null
+    } | null
+    impact: BookingPreviewImpact | null
+    goodToKnow: BookingPreviewGoodToKnowItem[]
+    serverTime: string
+}
 
 
 // useOpenEndedSubmission

@@ -1,10 +1,18 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { MentorSkill, MentorSkillsApiResponse } from './hookTypes'
 
 type RawSkillList = Extract<MentorSkillsApiResponse, unknown[]>
+
+/** Same shape as the backend slugs, e.g. "Node.js" -> "node-js" (used only if the API sends no slug). */
+export const toSkillSlug = (value: string): string =>
+    value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
 
 const extractSkillList = (response: MentorSkillsApiResponse): RawSkillList => {
     if (Array.isArray(response)) return response
@@ -20,7 +28,8 @@ const normalizeSkills = (response: MentorSkillsApiResponse): MentorSkill[] => {
     return extractSkillList(response)
         .map((item, index): MentorSkill => {
             if (typeof item === 'string') {
-                return { id: item, name: item.trim(), mentorCount: null }
+                const name = item.trim()
+                return { id: item, name, slug: toSkillSlug(name), mentorCount: null }
             }
 
             const name = (item.name || item.skill || item.title || '').trim()
@@ -28,13 +37,13 @@ const normalizeSkills = (response: MentorSkillsApiResponse): MentorSkill[] => {
             return {
                 id: item.id ?? name ?? index,
                 name,
+                slug: item.slug?.trim() || toSkillSlug(name),
                 mentorCount: typeof count === 'number' ? count : null,
             }
         })
         .filter((skill) => {
-            const key = skill.name.toLowerCase()
-            if (!skill.name || seen.has(key)) return false
-            seen.add(key)
+            if (!skill.name || !skill.slug || seen.has(skill.slug)) return false
+            seen.add(skill.slug)
             return true
         })
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -48,59 +57,36 @@ const getErrorMessage = (error: unknown): string => {
 }
 
 /**
- * Query param that carries the dropdown's search text to GET /student/mentors/skills.
- * The backend's `search` currently matches mentors (name, email, title, skill)
- * and returns the skills those mentors have (with inUse=true). If the backend adds
- * a param that matches skill names only, change this to its name.
+ * Skills for the expertise filter: GET /student/mentors/skills?inUse=true,
+ * fetched once on mount. Mentors are then filtered with
+ * GET /student/mentors?expertise=<slug,slug> (see useMentors).
  */
-const SKILL_SEARCH_PARAM = 'search'
-
-/**
- * Skills for the expertise filter, searched on the server.
- * - empty search -> GET /student/mentors/skills?inUse=true
- * - with search  -> GET /student/mentors/skills?inUse=true&search=<text>
- */
-export function useMentorSkills(search = '', initialFetch = true) {
+export function useMentorSkills(initialFetch = true) {
     const [skills, setSkills] = useState<MentorSkill[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
-    // Ignore responses from older requests that finish after a newer one
-    const latestRequestId = useRef(0)
 
-    const getMentorSkills = useCallback(async (searchTerm = '') => {
-        const requestId = ++latestRequestId.current
-
+    const getMentorSkills = useCallback(async () => {
         try {
             setLoading(true)
             setError(null)
 
-            const queryParams = new URLSearchParams({ inUse: 'true' })
-            const searchValue = searchTerm.trim()
-            if (searchValue) {
-                // inUse=true is kept so the API drops skills no matching mentor has;
-                // without it the API returns every skill (mostly with 0 mentors).
-                queryParams.append(SKILL_SEARCH_PARAM, searchValue)
-            }
-
             const response = await api.get<MentorSkillsApiResponse>(
-                `/student/mentors/skills?${queryParams.toString()}`
+                '/student/mentors/skills?inUse=true'
             )
-
-            if (requestId !== latestRequestId.current) return
             setSkills(normalizeSkills(response.data))
         } catch (error) {
-            if (requestId !== latestRequestId.current) return
             console.error('Error fetching mentor skills:', error)
             setSkills([])
             setError(getErrorMessage(error))
         } finally {
-            if (requestId === latestRequestId.current) setLoading(false)
+            setLoading(false)
         }
     }, [])
 
     useEffect(() => {
-        if (initialFetch) getMentorSkills(search)
-    }, [initialFetch, getMentorSkills, search])
+        if (initialFetch) getMentorSkills()
+    }, [initialFetch, getMentorSkills])
 
     return {
         skills,

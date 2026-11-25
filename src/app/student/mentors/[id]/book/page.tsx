@@ -10,6 +10,7 @@ import {
   type MentorAvailabilitySlot,
 } from "@/hooks/useMentorAvailability";
 import { useBookMentorSlot } from "@/app/student/hooks/useBookMentorSlot";
+import BookSlotErrorAlert from "@/app/student/_components/BookSlotErrorAlert";
 import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
 import { getMentorsHref } from "@/utils/studentMentorshipRoutes";
 import { getMentorId } from "@/utils/mentorUtils";
@@ -75,7 +76,7 @@ export default function BookSessionPage() {
     error: slotsError,
     refetchMentorAvailability,
   } = useMentorAvailability(mentorId, true, organizationId);
-  const { booking, isBooking, error: bookingError, bookSlot } = useBookMentorSlot();
+  const { booking, isBooking, errorInfo: bookingError, bookSlot } = useBookMentorSlot();
   const { metrics, refetchStudentMentorMetrics } = useStudentMentorMetrics(true);
 
   const selectedSlot = useMemo(
@@ -108,7 +109,13 @@ export default function BookSessionPage() {
       setSelectedSlotId(null);
       await refetchMentorAvailability();
       await refetchStudentMentorMetrics();
+      return;
     }
+
+    // Refused: the slot itself is the problem, so drop it and reload the list
+    setSelectedSlotId(null);
+    await refetchMentorAvailability();
+    await refetchStudentMentorMetrics();
   };
 
   return (
@@ -276,7 +283,7 @@ export default function BookSessionPage() {
             )}
 
             {bookingError && (
-              <p className="mt-3 text-left text-xs text-destructive">{bookingError}</p>
+              <BookSlotErrorAlert error={bookingError} className="mt-3" />
             )}
 
           </div>

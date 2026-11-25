@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotBooking";
+import { useMyMentorSessions } from "@/hooks/useMyMentorSessions";
 import { useGetRescheduleSlots } from "@/app/student/hooks/useGetRescheduleSlots";
 import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
-import { formatDateOnly, formatTimeRange } from "@/utils/sessionDateTime";
+import { cn } from "@/lib/utils";
+
+// Slots offered by GET .../reschedule/slots start at least this far ahead (backend notice hours)
+const RESCHEDULE_NOTICE_HOURS = 24;
+const REASON_MIN_LENGTH = 10;
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -23,6 +28,39 @@ const getBookingIdFromParam = (
 	return Number.isFinite(parsedId) ? parsedId : undefined;
 };
 
+const toDate = (value?: string | null): Date | null => {
+	if (!value) return null;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatTime = (date: Date): string =>
+	date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+// e.g. "Fri, 6 Nov"
+const formatDay = (date: Date): string =>
+	`${date.toLocaleDateString("en-GB", { weekday: "short" })}, ${date.toLocaleDateString("en-GB", {
+		day: "numeric",
+		month: "short",
+	})}`;
+
+// e.g. "Fri, 6 Nov at 6:00 PM"
+const formatSessionTiming = (value?: string | null): string | null => {
+	const date = toDate(value);
+	return date ? `${formatDay(date)} at ${formatTime(date)}` : null;
+};
+
+// e.g. "Sat, 7 Nov at 11:00 AM - 11:45 AM"
+const formatSlotLabel = (start?: string | null, end?: string | null): string => {
+	const startDate = toDate(start);
+	const endDate = toDate(end);
+	if (!startDate) return "Time not available";
+	const range = endDate
+		? `${formatTime(startDate)} - ${formatTime(endDate)}`
+		: formatTime(startDate);
+	return `${formatDay(startDate)} at ${range}`;
+};
+
 export default function RescheduleBookingPage() {
 	const params = useParams();
 	const searchParams = useSearchParams();
@@ -35,6 +73,7 @@ export default function RescheduleBookingPage() {
 	const organizationId = searchParams.get("organizationId") || orgId || undefined;
 	const currentSlotIdParam = searchParams.get("currentSlotId");
 	const currentSlotId = currentSlotIdParam ? Number(currentSlotIdParam) : null;
+	const sessionsHref = getSessionsHref({ courseId, orgId });
 
 	const [selectedNewSlotId, setSelectedNewSlotId] = useState<number | null>(null);
 	const [reason, setReason] = useState("");
@@ -47,21 +86,50 @@ export default function RescheduleBookingPage() {
 		refetchSlots,
 	} = useGetRescheduleSlots(bookingId, true);
 
+	// Booking details (mentor name, current timing) come from the student's upcoming sessions
+	const { sessions, loading: sessionsLoading } = useMyMentorSessions(
+		bookingId !== undefined,
+		"/student/mentor-sessions/my",
+		"upcoming"
+	);
+	const session = useMemo(
+		() => sessions.find((item) => Number(item.id) === bookingId) || null,
+		[sessions, bookingId]
+	);
+
 	const { mentorProfile } = useMentorProfile(mentorId, true, organizationId);
-	const mentorDisplayName =
-		mentorProfile?.name?.trim() || (mentorId ? `Mentor ${mentorId}` : "-");
+	const mentorName =
+		session?.mentorName?.trim() || mentorProfile?.name?.trim() || null;
+	const mentorFirstName = mentorName?.split(/\s+/)[0] || "Your mentor";
+	const currentTiming = formatSessionTiming(session?.slotStart || session?.slotEnd);
+
+	const bookingMeta = [
+		`Booking #${bookingId ?? "-"}`,
+		mentorName,
+		currentTiming ? `Now on ${currentTiming}` : null,
+	].filter(Boolean);
+
+	const selectableSlots = useMemo(
+		() =>
+			slots
+				.filter((slot) => !(currentSlotId !== null && Number.isFinite(currentSlotId) && slot.id === currentSlotId))
+				.sort(
+					(a, b) =>
+						(toDate(a.slotStartDateTime)?.getTime() ?? 0) -
+						(toDate(b.slotStartDateTime)?.getTime() ?? 0)
+				),
+		[slots, currentSlotId]
+	);
 
 	const { proposeReschedule, isRescheduling, error, responseData } =
 		useRescheduleMentorSlotBooking();
+	const isSubmitted = !!responseData;
+	const canSubmit =
+		!!selectedNewSlotId && reason.trim().length >= REASON_MIN_LENGTH && !isRescheduling && !isSubmitted;
 
 	const handleProposeReschedule = async () => {
 		if (!bookingId) {
 			setValidationError("Invalid booking id.");
-			return;
-		}
-
-		if (!mentorId) {
-			setValidationError("Missing mentor id for slot availability.");
 			return;
 		}
 
@@ -70,13 +138,8 @@ export default function RescheduleBookingPage() {
 			return;
 		}
 
-		if (Number.isFinite(currentSlotId) && currentSlotId !== null && selectedNewSlotId === currentSlotId) {
-			setValidationError("Cannot reschedule to the same slot.");
-			return;
-		}
-
-		if (reason.trim().length < 10) {
-			setValidationError("Reschedule reason must be at least 10 characters.");
+		if (reason.trim().length < REASON_MIN_LENGTH) {
+			setValidationError(`Reason must be at least ${REASON_MIN_LENGTH} characters.`);
 			return;
 		}
 
@@ -85,116 +148,159 @@ export default function RescheduleBookingPage() {
 	};
 
 	return (
-		<div className="max-w-3xl mx-auto p-6 space-y-6">
+		<div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
 			<Link
-				href={getSessionsHref({ courseId, orgId })}
+				href={sessionsHref}
 				className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft size={16} />
 				Back to Sessions
 			</Link>
 
-			<div className="border border-border rounded-2xl bg-card p-6 space-y-4">
-				<h1 className="text-xl font-semibold text-left">Propose Reschedule</h1>
-				<p className="text-sm text-muted-foreground text-left">Booking ID: {bookingId ?? "-"}</p>
-				<p className="text-sm text-muted-foreground text-left">Mentor: {mentorDisplayName}</p>
-
+			<div className="space-y-5 rounded-2xl border border-border bg-card p-5 text-left sm:p-8">
 				<div className="space-y-2">
-					<label className="text-sm font-medium block text-left">Select New Slot</label>
+					<h1 className="text-xl font-bold text-foreground sm:text-2xl">Propose Reschedule</h1>
+					{sessionsLoading && !session ? (
+						<div className="h-5 w-72 max-w-full animate-pulse rounded bg-muted" />
+					) : (
+						<p className="text-sm text-muted-foreground sm:text-base">
+							{bookingMeta.join(" · ")}
+						</p>
+					)}
+				</div>
+
+				{!isSubmitted && (
+					<div className="rounded-xl bg-blue-50 px-4 py-3 text-sm leading-relaxed text-foreground dark:bg-blue-950/30">
+						{mentorFirstName} needs to accept the new time. Your session stays as it is until then.
+						Your credit doesn&apos;t change. You can reschedule a booking once.
+					</div>
+				)}
+
+				<div className="space-y-3">
+					<p className="text-sm font-semibold text-foreground">
+						{mentorName ? `${mentorFirstName}'s` : "Mentor's"} slots, {RESCHEDULE_NOTICE_HOURS}+ hours away
+					</p>
 
 					{slotsLoading && (
-						<p className="text-sm text-muted-foreground text-left">Loading available slots...</p>
+						<div className="space-y-3">
+							{[0, 1, 2].map((item) => (
+								<div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />
+							))}
+						</div>
 					)}
 
 					{!slotsLoading && slotsError && (
 						<div className="space-y-2">
-							<p className="text-sm text-destructive text-left">{slotsError}</p>
+							<p className="text-sm text-destructive">{slotsError}</p>
 							<button
+								type="button"
 								onClick={refetchSlots}
-								className="text-xs border border-border px-3 py-1.5 rounded-full hover:bg-muted"
+								className="rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted"
 							>
 								Retry slots
 							</button>
 						</div>
 					)}
 
-					{!slotsLoading && !slotsError && slots.length === 0 && (
-						<p className="text-sm text-muted-foreground text-left">No slots available for reschedule.</p>
+					{!slotsLoading && !slotsError && selectableSlots.length === 0 && (
+						<p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">
+							{mentorFirstName} has no open slots {RESCHEDULE_NOTICE_HOURS}+ hours away right now.
+							Check back later, or keep your current time.
+						</p>
 					)}
 
-					{!slotsLoading && !slotsError && slots.length > 0 && (
-						<div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-							{slots.map((slot) => {
-								const isCurrent = Number.isFinite(currentSlotId) && currentSlotId !== null && slot.id === currentSlotId;
-								const isSelectable = !isCurrent;
+					{!slotsLoading && !slotsError && selectableSlots.length > 0 && (
+						<div role="radiogroup" aria-label="New slot" className="max-h-80 space-y-3 overflow-y-auto pr-1">
+							{selectableSlots.map((slot) => {
 								const isSelected = selectedNewSlotId === slot.id;
 
 								return (
 									<button
 										key={slot.id}
 										type="button"
-										onClick={() => isSelectable && setSelectedNewSlotId(slot.id)}
-										disabled={!isSelectable}
-										className={`w-full border rounded-xl p-3 text-left ${
+										role="radio"
+										aria-checked={isSelected}
+										disabled={isSubmitted}
+										onClick={() => {
+											setSelectedNewSlotId(slot.id);
+											setValidationError(null);
+										}}
+										className={cn(
+											"flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm text-foreground transition-colors sm:text-base",
 											isSelected
-												? "border-primary bg-primary/10"
-												: "border-border bg-card hover:bg-muted/60"
-										} ${!isSelectable ? "opacity-60 cursor-not-allowed" : ""}`}
+												? "border-green-800 bg-green-50 dark:border-green-600 dark:bg-green-950/30"
+												: "border-border bg-card hover:bg-muted/50",
+											isSubmitted && "cursor-not-allowed opacity-60"
+										)}
 									>
-										{/* Slot id removed from UI for students */}
-										<div className="mt-1 space-y-1 text-xs text-muted-foreground">
-											<p className="flex items-center gap-2">
-												<Calendar size={12} />
-												{formatDateOnly(slot.slotStartDateTime || slot.slotEndDateTime)}
-											</p>
-											<p className="flex items-center gap-2">
-												<Clock size={12} />
-												{formatTimeRange(slot.slotStartDateTime, slot.slotEndDateTime)}
-											</p>
-											<p>
-												{isCurrent
-													? "Current booked slot"
-													: `Status: ${slot.status} · Capacity: ${slot.currentBookedCount}/${slot.maxCapacity}`}
-											</p>
-										</div>
+										<span
+											className={cn(
+												"flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+												isSelected
+													? "border-green-800 dark:border-green-500"
+													: "border-muted-foreground/50"
+											)}
+										>
+											{isSelected && (
+												<span className="h-2.5 w-2.5 rounded-full bg-green-800 dark:bg-green-500" />
+											)}
+										</span>
+										<span>{formatSlotLabel(slot.slotStartDateTime, slot.slotEndDateTime)}</span>
 									</button>
 								);
 							})}
 						</div>
 					)}
-
-					{/* Current slot id hidden from UI — retained only in URL params for logic */}
 				</div>
 
+				{/* The API requires a reason (min 10 characters) for a reschedule request */}
 				<div className="space-y-2">
-					<label className="text-sm font-medium block text-left">Reason</label>
+					<label htmlFor="reschedule-reason" className="block text-sm font-semibold text-foreground">
+						Reason
+					</label>
 					<textarea
+						id="reschedule-reason"
 						value={reason}
 						onChange={(event) => setReason(event.target.value)}
 						placeholder="Need to move to another time"
-						className="w-full min-h-[120px] border border-border bg-background text-foreground placeholder:text-muted-foreground rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+						disabled={isSubmitted}
+						className="min-h-[96px] w-full rounded-xl border border-border bg-muted/40 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 					/>
+					<p className="text-xs text-muted-foreground">
+						Minimum {REASON_MIN_LENGTH} characters. {mentorFirstName} will see this.
+					</p>
 				</div>
 
-				{validationError && <p className="text-sm text-destructive text-left">{validationError}</p>}
-				{error && <p className="text-sm text-destructive text-left">{error}</p>}
+				{validationError && <p className="text-sm text-destructive">{validationError}</p>}
+				{error && <p className="text-sm text-destructive">{error}</p>}
 
 				{responseData && (
-					<div className="text-sm text-left rounded-xl border border-success/30 bg-success/10 text-success-dark p-3">
-						<p className="font-semibold">{responseData.message || "Reschedule request submitted."}</p>
-						<p>
-							Reschedule status: {responseData.rescheduleStatus || "pending"}
+					<div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-foreground dark:bg-green-950/30">
+						<p className="font-semibold">{responseData.message || "Reschedule request sent."}</p>
+						<p className="text-muted-foreground">
+							{mentorFirstName} needs to accept it. Your session stays as it is until then.
 						</p>
 					</div>
 				)}
 
-				<button
-					onClick={handleProposeReschedule}
-					disabled={isRescheduling}
-					className="bg-primary text-primary-foreground hover:bg-primary-dark px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					{isRescheduling ? "Submitting..." : "Submit Reschedule Request"}
-				</button>
+				<div className="flex flex-wrap items-center gap-3">
+					<button
+						type="button"
+						onClick={handleProposeReschedule}
+						disabled={!canSubmit}
+						className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{isRescheduling ? "Sending..." : "Send Reschedule Request"}
+					</button>
+					{isSubmitted && (
+						<Link
+							href={sessionsHref}
+							className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+						>
+							Back to Sessions
+						</Link>
+					)}
+				</div>
 			</div>
 		</div>
 	);
