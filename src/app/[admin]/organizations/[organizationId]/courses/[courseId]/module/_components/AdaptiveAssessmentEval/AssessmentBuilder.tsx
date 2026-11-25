@@ -19,8 +19,11 @@ import { useSaveAssessmentDraft } from '@/hooks/useSaveAssessmentDraftEval';
 import { useGetAiAssessmentsByChapter } from '@/hooks/useGetAiAsssessmentEval';
 import { toast } from '@/components/ui/use-toast';
 import { usePathname } from 'next/navigation';
+import { useTopicsWithDifficultyLevels } from '@/hooks/useTopicsWithDifficultiesEval';
+import { summarizeDistribution } from './distribution';
+import { BandCounts } from './types';
 
-const STEPS = ['Details', 'Topics & Baseline', 'Build Pool', 'Review', 'Settings', 'Publish'];
+const STEPS = ['Details', 'Topics', 'Build Pool', 'Review', 'Settings', 'Publish'];
 
 interface AssessmentBuilderProps {
   chapterId?: number;
@@ -75,6 +78,8 @@ export default function AssessmentBuilder({
     poolTopics: [],
     poolTopicDescriptions: {},
     poolTopicOutcomes: {},
+    distribution: {},
+    distributionKey: '',
     mode: 'formative',
     gateLevel: 'C',
     timeLimit: '45 min',
@@ -103,6 +108,36 @@ export default function AssessmentBuilder({
     const orgId = +pathname.split('/')[3];
 
   const { questions: bankQuestions } = useQuestionBank();
+
+  // Org topics with easy/medium/hard question counts (same list as the Question Bank).
+  const {
+    fetchTopics: fetchOrgTopics,
+    data: orgTopics,
+    isLoading: orgTopicsLoading,
+  } = useTopicsWithDifficultyLevels({ org: orgId });
+  useEffect(() => {
+    fetchOrgTopics();
+  }, [fetchOrgTopics]);
+  const topicAvailability = useMemo(() => {
+    const m: Record<string, BandCounts> = {};
+    (orgTopics || []).forEach((t) => {
+      m[t.name] = {
+        easy: t.difficultyLevel?.easy ?? 0,
+        medium: t.difficultyLevel?.medium ?? 0,
+        hard: t.difficultyLevel?.hard ?? 0,
+      };
+    });
+    return m;
+  }, [orgTopics]);
+  const distributionSummary = useMemo(
+    () =>
+      summarizeDistribution(
+        a.poolTopics.map((t) => t.name),
+        a.distribution,
+        topicAvailability
+      ),
+    [a.poolTopics, a.distribution, topicAvailability]
+  );
   const bankTopics = Array.from(new Set(bankQuestions.map((q: Question) => q.topic)));
 
   const { createAiAssessment, isLoading: isCreatingAssessment, error: createAssessmentError } = useCreateAiAssessment({ org: orgId });
@@ -465,7 +500,12 @@ export default function AssessmentBuilder({
 
   const stepValid = [
     !!(a.name.trim() && a.objective.trim()),
-    a.chapterIds.length > 0,
+    // Step 2: once generated the configuration is read-only; before that the
+    // topics must fill a full set and the bank must hold enough questions.
+    !!aiAssessmentId ||
+      (a.poolTopics.length > 0 &&
+        distributionSummary.perSet === a.questionsPerForm &&
+        distributionSummary.totalShort === 0),
     true,
     true,
     true,
@@ -514,6 +554,11 @@ export default function AssessmentBuilder({
     baselineOptions,
     bankTopics,
     bankQuestions,
+    orgTopics,
+    orgTopicsLoading,
+    refreshOrgTopics: fetchOrgTopics,
+    topicAvailability,
+    distributionSummary,
     moduleId: _moduleId,
     courseId: restProps.courseId,
     chapterId: _chapterId,

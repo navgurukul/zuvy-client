@@ -23,6 +23,9 @@ export interface Question {
   explanation?: string;
 }
 
+export type Band = 'easy' | 'medium' | 'hard';
+export type BandCounts = Record<Band, number>;
+
 export interface BuilderState {
   name: string;
   objective: string;
@@ -32,6 +35,10 @@ export interface BuilderState {
   poolTopics: { id: number; name: string }[];
   poolTopicDescriptions: Record<string, string>;
   poolTopicOutcomes: Record<string, string>;
+  /** Questions per set, per topic and difficulty (keyed by topic name). */
+  distribution: Record<string, BandCounts>;
+  /** Topics + set size the distribution was proposed for; a change re-proposes it. */
+  distributionKey: string;
   mode: 'formative' | 'summative';
   gateLevel: LevelId;
   timeLimit: string;

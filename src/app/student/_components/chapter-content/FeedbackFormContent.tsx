@@ -69,6 +69,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         })
     const [emailErrors, setEmailErrors] = useState<Record<number, boolean>>({})
     const [numberErrors, setNumberErrors] = useState<Record<number, boolean>>({})
+    const [openDatePickerId, setOpenDatePickerId] = useState<number | null>(null)
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -142,19 +143,32 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         return <FeedbackFormSkeleton/>;
     }
     const isCompleted = status === 'Completed'
+    const formId = `feedback-form-${chapterId ?? 'chapter'}`
 
     return (
         <div className={`${isMobile ? '' : 'pt-10'} min-h-full bg-gradient-to-br from-background via-card-light to-background  px-2 sm:px-0`}>
             <div className="max-w-4xl mx-auto">
-                <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}  >
+                {/* Header sits above the scroll area so Submit is always reachable */}
+                <div className="sticky top-0 z-10 mb-4 flex items-center justify-between gap-4 border-b bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                    <h5 className="font-semibold">
+                        {chapterDetails.title || 'Module 2 Feedback'}
+                    </h5>
+                    <Button
+                        type="submit"
+                        form={formId}
+                        disabled={isCompleted}
+                        className="shrink-0 bg-primary hover:bg-primary-dark text-primary-foreground px-6"
+                    >
+                        {isCompleted ? 'Submitted ✓' : 'Submit'}
+                    </Button>
+                </div>
+                <ScrollArea className={`${isMobile ? 'h-[70vh]' : 'h-[75vh]'}`}  >
                 <form
+                    id={formId}
                     onSubmit={handleSubmit}
                     className="w-full"
                 >
             <div className="mb-6 text-left">
-                <h5 className=" font-semibold mb-2">
-                    {chapterDetails.title || 'Module 2 Feedback'}
-                </h5>
                 {status === 'Completed' && (
                     <div className="text-md mb-4 rounded-md bg-[#E5FFF3] p-3 text-[#00B37E] dark:bg-[#12352B] dark:text-[#4ADEA8]">
                         Your response has been submitted successfully.
@@ -399,7 +413,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                 {isCompleted ? (
                                     <div className="flex items-center mt-2">
                                         <Popover>
-                                            <PopoverTrigger>
+                                            <PopoverTrigger asChild>
                                                 <Button
                                                     variant="outline"
                                                     disabled
@@ -422,7 +436,12 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                     </div>
                                 ) : (
                                     <div className="flex items-center mt-2">
-                                        <Popover>
+                                        <Popover
+                                            open={openDatePickerId === item.id}
+                                            onOpenChange={(open) =>
+                                                setOpenDatePickerId(open ? item.id : null)
+                                            }
+                                        >
                                             <PopoverTrigger asChild>
                                                 <Button
                                                     variant="outline"
@@ -453,13 +472,19 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                             : undefined
                                                     }
                                                     onSelect={(date) => {
+                                                        // Close the picker on every selection so it
+                                                        // can't swallow the next click (e.g. Submit).
+                                                        setOpenDatePickerId(null)
+                                                        // Re-clicking the selected day deselects it in
+                                                        // single mode; keep the existing answer instead.
+                                                        if (!date) return
                                                         const updatedQuestions =
                                                             [...questions]
                                                         updatedQuestions[
                                                             index
                                                         ] = {
                                                             ...item,
-                                                            answer: date?.toISOString(),
+                                                            answer: date.toISOString(),
                                                         }
                                                         setQuestions(
                                                             updatedQuestions
@@ -520,26 +545,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 ))}
             </div>
 
-            {isCompleted? (
-                <div className="mt-8 mb-6">
-                    <Button
-                        type="submit"
-                        disabled
-                        className="bg-primary hover:bg-primary-dark text-primary-foreground px-6"
-                    >
-                        Submitted ✓
-                    </Button>
-                </div>
-            ) : (
-                <div className="mt-8 mb-6">
-                    <Button
-                        type="submit"
-                        className="bg-primary hover:bg-primary-dark text-primary-foreground px-6"
-                    >
-                        Submit
-                    </Button>
-                </div>
-            )}
+            <div className="h-8" />
                 </form>
                 </ScrollArea>
             </div>
