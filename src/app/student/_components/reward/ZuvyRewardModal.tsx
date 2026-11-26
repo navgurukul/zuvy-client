@@ -99,16 +99,22 @@ export const ZuvyRewardModal: React.FC<
     // so the score matches the ✓ / ✗ marks shown on the quiz.
     // =========================================================
 
-    const [quizResult, setQuizResult] =
+    const [fetchedQuizResult, setQuizResult] =
       useState<QuizResultSummary | null>(null);
+    // Only show a score for the quiz this modal was opened for; never let a
+    // previous quiz's result leak into a video/article reward.
+    const quizResult = quizChapterId ? fetchedQuizResult : null;
     // Chapter whose results have been fetched (success or failure)
     const [quizFetchedFor, setQuizFetchedFor] =
       useState<string | null>(null);
 
     useEffect(() => {
-      if (!isOpen || !quizChapterId) return;
-      let cancelled = false;
+      if (!isOpen) return;
+      // The modal stays mounted between completions, so clear any score left
+      // over from a previous quiz before showing a non-quiz (e.g. video) reward.
       setQuizResult(null);
+      if (!quizChapterId) return;
+      let cancelled = false;
 
       api
         .get(`/tracking/getQuizAndAssignmentWithStatus?chapterId=${quizChapterId}`)
