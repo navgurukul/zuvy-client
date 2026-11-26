@@ -62,6 +62,9 @@ export interface MyMentorSession {
         status: 'accepted' | 'declined' | 'expired'
         message: string
     } | null
+    // Mentor side only (GET /instructor/mentor-sessions/my)
+    student?: MentorSessionStudent | null
+    studentCredits?: MentorSessionCredits | null
 }
 
 export type SessionDisplayState =
@@ -88,7 +91,41 @@ export interface SessionCardActions {
     giveFeedback: SessionCardAction
 }
 
-/** The student's credits, sent with GET /student/mentor-sessions/my. */
+/** displayState on GET /instructor/mentor-sessions/my (mentor's card). */
+export type MentorSessionDisplayState =
+    | 'UPCOMING'
+    | 'STARTING_SOON'
+    | 'IN_PROGRESS'
+    | 'ACTION_NEEDED' // a student's reschedule request waits for the mentor
+    | 'COMPLETED'
+    | 'MISSED'
+    | 'CANCELLED'
+
+/**
+ * Actions on a mentor's session card (GET /instructor/mentor-sessions/my).
+ * The join link comes from GET .../bookings/:bookingId/join-link, not from here.
+ */
+export interface MentorSessionCardActions {
+    join: SessionCardAction
+    cancel: SessionCardAction
+    acceptReschedule: SessionCardAction
+    declineReschedule: SessionCardAction
+    viewRecording: SessionCardAction & { url: string | null }
+    giveFeedback: SessionCardAction
+}
+
+/** The student on a mentor's session, e.g. "React Bootcamp · Batch A". */
+export interface MentorSessionStudent {
+    userId: number | string
+    name: string | null
+    bootcampName: string | null
+    batchName: string | null
+}
+
+/**
+ * The student's credits: sent once with GET /student/mentor-sessions/my, and
+ * per session as `studentCredits` with GET /instructor/mentor-sessions/my.
+ */
 export interface MentorSessionCredits {
     creditsAssigned: number
     creditsUsed: number
@@ -98,7 +135,7 @@ export interface MentorSessionCredits {
     blockReason: string | null
 }
 
-/** Booking rules, sent with GET /student/mentor-sessions/my, e.g. { noticeHours: 72, joinOpenMinutes: 10 } */
+/** Booking rules, sent with GET /student|instructor/mentor-sessions/my, e.g. { noticeHours: 72, joinOpenMinutes: 10 } */
 export interface MentorSessionRules {
     noticeHours?: number
     joinOpenMinutes?: number
@@ -120,6 +157,7 @@ export interface SessionCounts {
     completed?: string | number
     cancelled?: string | number
     reschedule?: string | number
+    actionNeeded?: string | number
     missed?: string | number
 }
 

@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import {
   useMyMentorSessions,
+  type MentorSessionCardActions,
+  type MentorSessionDisplayState,
   type MyMentorSession,
   type SessionFilter,
 } from "@/hooks/useMyMentorSessions"
@@ -16,7 +18,6 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/app/[admin]/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/app/[admin]/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/app/[admin]/hooks/useSubmitMentorSlotFeedback"
-import { useMentorSlotRecording, type MentorSlotRecordingState } from "@/hooks/useMentorSlotRecording"
 import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking"
 import {
   Dialog,
@@ -51,8 +52,9 @@ const formatDateTime = (value?: string | null) => {
   })
 }
 
-// Mentors (like students) can cancel only until this many hours before the start
-const CANCEL_CUTOFF_HOURS = 24
+// Fallbacks for the API's `rules` (noticeHours / joinOpenMinutes)
+const DEFAULT_NOTICE_HOURS = 72
+const DEFAULT_JOIN_OPEN_MINUTES = 10
 const MIN_CANCEL_REASON_LENGTH = 10
 
 // e.g. "Fri, 6 Nov 2026"
@@ -65,14 +67,6 @@ const formatPanelDate = (value?: string | null) => {
   return `${weekday}, ${rest}`
 }
 
-// e.g. "Thu, 5 Nov at 6:00 PM"
-const formatCancelDeadline = (date: Date) => {
-  const weekday = date.toLocaleDateString("en-GB", { weekday: "short" })
-  const dayMonth = date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
-  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-  return `${weekday}, ${dayMonth} at ${time}`
-}
-
 // e.g. "20 Nov"
 const formatDayMonth = (value?: string | null) => {
   if (!value) return null
@@ -81,27 +75,13 @@ const formatDayMonth = (value?: string | null) => {
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
 }
 
-type StudentCredits = {
-  remainingCredits?: number | null
-  totalCredits?: number | null
-  quotaUsed?: number | null
-  nextEligible?: string | null
-}
+// The instructor API sends the mentor's card actions (acceptReschedule, declineReschedule, ...)
+const getMentorActions = (session?: MyMentorSession | null) =>
+  session?.actions as unknown as MentorSessionCardActions | undefined
 
-// Same wording the backend uses on the student's completed session cards
-// (the instructor sessions API has no `message`/`recording` fields)
-const RECORDING_STATE_MESSAGES: Record<MentorSlotRecordingState, string> = {
-  READY: "The recording is ready.",
-  PROCESSING: "Recording is being processed. Check back later.",
-  NONE: "No recording is available for this session. Email team@zuvy.org if you need it.",
-}
-
-// Student credit info is optional on the session payload: read `studentCredits`
-// if the backend sends it, otherwise the panel shows "—".
-const getStudentCredits = (session: MyMentorSession): StudentCredits => {
-  const maybe = session as MyMentorSession & { studentCredits?: StudentCredits | null }
-  return maybe.studentCredits || {}
-}
+// ...and the mentor's displayState (UPCOMING | STARTING_SOON | IN_PROGRESS | ACTION_NEEDED | COMPLETED | MISSED | CANCELLED)
+const getMentorDisplayState = (session?: MyMentorSession | null) =>
+  session?.displayState as MentorSessionDisplayState | undefined
 
 const getRescheduleStatus = (session: MyMentorSession) => {
   const maybeSession = session as MyMentorSession & {
@@ -133,26 +113,39 @@ const isRescheduleValue = (value?: string | null) => {
   return value.toLowerCase().includes("reschedule")
 }
 
+const UPCOMING_BADGE = {
+  label: "Upcoming",
+  className: "border-info/30 bg-info/5 text-info-dark hover:border-info/30 hover:bg-info/5 hover:text-info-dark hover:opacity-100",
+}
+
 const getSessionStatusBadge = (session: MyMentorSession) => {
+  // displayState from GET /instructor/mentor-sessions/my
+  const displayState = getMentorDisplayState(session)
+  if (displayState === "UPCOMING" || displayState === "STARTING_SOON" || displayState === "IN_PROGRESS") {
+    return UPCOMING_BADGE
+  }
+
   const lifecycle = (session.sessionLifecycleState || "").toLowerCase()
   const status = (session.status || "").toLowerCase()
-  const hasReschedule = Boolean(getRescheduleStatus(session))
+  const hasReschedule = displayState
+    ? displayState === "ACTION_NEEDED"
+    : Boolean(getRescheduleStatus(session))
 
-  if (isCancelledValue(status) || isCancelledValue(lifecycle)) {
+  if (displayState === "CANCELLED" || isCancelledValue(status) || isCancelledValue(lifecycle)) {
     return {
       label: "Cancelled",
       className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
-  if (isMissedValue(status) || isMissedValue(lifecycle)) {
+  if (displayState === "MISSED" || isMissedValue(status) || isMissedValue(lifecycle)) {
     return {
       label: "Missed",
       className: "border-border bg-muted/50 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-muted-foreground hover:opacity-100",
     }
   }
 
-  if (lifecycle === "completed") {
+  if (displayState === "COMPLETED" || lifecycle === "completed") {
     return {
       label: "Completed",
       className: "border-success/30 bg-success/5 text-success-dark hover:border-success/30 hover:bg-success/5 hover:text-success-dark hover:opacity-100",
@@ -166,10 +159,7 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
     }
   }
 
-  return {
-    label: "Upcoming",
-    className: "border-info/30 bg-info/5 text-info-dark hover:border-info/30 hover:bg-info/5 hover:text-info-dark hover:opacity-100",
-  }
+  return UPCOMING_BADGE
 }
 
 export default function SessionsPage() {
@@ -194,12 +184,15 @@ export default function SessionsPage() {
     error,
     refetchMySessions,
     counts,
+    rules,
   } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
+  const noticeHours = rules?.noticeHours ?? DEFAULT_NOTICE_HOURS
+  const joinOpenMinutes = rules?.joinOpenMinutes ?? DEFAULT_JOIN_OPEN_MINUTES
 
   const summaryCounts = {
     total: Number(counts.total) || 0,
     upcoming: Number(counts.upcoming) || 0,
-    reschedule: Number(counts.reschedule) || 0,
+    reschedule: Number(counts.actionNeeded ?? counts.reschedule) || 0,
     completed: Number(counts.completed) || 0,
     cancelled: Number(counts.cancelled) || 0,
   }
@@ -231,15 +224,18 @@ export default function SessionsPage() {
     [sessions, selectedBookingId]
   )
 
-  const {
-    recordingUrl: completedRecordingUrl,
-    recordingState: completedRecordingState,
-    loading: completedRecordingLoading,
-  } = useMentorSlotRecording(
-    selectedSession?.id,
-    Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED"),
-    "instructor",
-    selectedSession?.slotEnd
+  const selectedActions = getMentorActions(selectedSession)
+  // The card's line from the backend ("The recording is ready.", "You can cancel until ...", ...)
+  const selectedMessage = selectedSession?.message?.trim() || ""
+  const isCompletedSession = Boolean(
+    selectedSession &&
+    (getMentorDisplayState(selectedSession) === "COMPLETED" || selectedSession.sessionLifecycleState === "COMPLETED")
+  )
+  const completedRecordingUrl =
+    selectedActions?.viewRecording?.url || selectedSession?.recording?.url || null
+  const canViewRecording = Boolean(
+    completedRecordingUrl &&
+    (selectedSession?.recording?.state === "READY" || selectedActions?.viewRecording?.allowed)
   )
 
   const isReadOnlySession = Boolean(
@@ -270,14 +266,18 @@ export default function SessionsPage() {
   const isRescheduleTab = activeTab === "reschedule"
   const hasRescheduleRequest = Boolean(
     selectedSession &&
-    (getRescheduleStatus(selectedSession) ||
-      isRescheduleValue(selectedSession.status) ||
-      isRescheduleValue(selectedSession.sessionLifecycleState))
+    (getMentorDisplayState(selectedSession)
+      ? getMentorDisplayState(selectedSession) === "ACTION_NEEDED"
+      : getRescheduleStatus(selectedSession) ||
+        isRescheduleValue(selectedSession.status) ||
+        isRescheduleValue(selectedSession.sessionLifecycleState))
   )
 
   const canJoinSelectedSession = Boolean(
     selectedSession?.meetingLink?.trim() &&
-    isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
+    (selectedActions?.join
+      ? selectedActions.join.allowed
+      : isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp))
   )
 
   const selectedDisplayName = selectedSession
@@ -289,25 +289,25 @@ export default function SessionsPage() {
     .slice(0, 2)
     .toUpperCase() || "S"
 
+  // e.g. "React Bootcamp · Batch A"
   const selectedCourseLabel = [
-    (selectedSession as any)?.courseName || (selectedSession as any)?.moduleName,
-    (selectedSession as any)?.batchName,
+    selectedSession?.student?.bootcampName || (selectedSession as any)?.courseName || (selectedSession as any)?.moduleName,
+    selectedSession?.student?.batchName || (selectedSession as any)?.batchName,
   ]
     .filter(Boolean)
     .join(" · ")
 
-  const selectedCredits = selectedSession ? getStudentCredits(selectedSession) : {}
-  const creditsLeftLabel =
-    typeof selectedCredits.remainingCredits === "number" ? selectedCredits.remainingCredits : null
-  const nextBookingOpensLabel = formatDayMonth(selectedCredits.nextEligible)
+  // Per-session `studentCredits` from GET /instructor/mentor-sessions/my
+  const selectedCredits = selectedSession?.studentCredits ?? null
+  const nextBookingOpensLabel = formatDayMonth(selectedCredits?.nextEligibleDate)
 
-  const cancelDeadline = useMemo(() => {
-    if (!selectedSession?.slotStart) return null
-    const start = new Date(selectedSession.slotStart)
-    if (Number.isNaN(start.getTime())) return null
-    return new Date(start.getTime() - CANCEL_CUTOFF_HOURS * 60 * 60 * 1000)
-  }, [selectedSession?.slotStart])
-  const isCancelWindowOpen = Boolean(cancelDeadline && cancelDeadline.getTime() > nowTimestamp)
+  const isCancelWindowOpen = useMemo(() => {
+    if (selectedActions?.cancel) return selectedActions.cancel.allowed
+    // Older payloads without `actions`: cancel until noticeHours before the start
+    const start = selectedSession?.slotStart ? new Date(selectedSession.slotStart).getTime() : NaN
+    if (Number.isNaN(start)) return false
+    return start - noticeHours * 60 * 60 * 1000 > nowTimestamp
+  }, [selectedActions, selectedSession?.slotStart, noticeHours, nowTimestamp])
 
   const selectedSlotId = selectedSession?.slotAvailabilityId
 
@@ -784,11 +784,11 @@ export default function SessionsPage() {
                       <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
                         <p className="text-xs text-muted-foreground">Credits left</p>
                         <p className="mt-1 text-sm font-semibold text-foreground">
-                          {creditsLeftLabel !== null ? (
+                          {typeof selectedCredits?.creditsLeft === "number" ? (
                             <>
-                              {creditsLeftLabel}
-                              {typeof selectedCredits.totalCredits === "number" && (
-                                <span className="text-warning-dark"> of {selectedCredits.totalCredits}</span>
+                              {selectedCredits.creditsLeft}
+                              {typeof selectedCredits.creditsAssigned === "number" && (
+                                <span className="text-warning-dark"> of {selectedCredits.creditsAssigned}</span>
                               )}
                             </>
                           ) : (
@@ -799,7 +799,7 @@ export default function SessionsPage() {
                       <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
                         <p className="text-xs text-muted-foreground">Sessions used</p>
                         <p className="mt-1 text-sm font-semibold text-foreground">
-                          {typeof selectedCredits.quotaUsed === "number" ? selectedCredits.quotaUsed : "—"}
+                          {typeof selectedCredits?.creditsUsed === "number" ? selectedCredits.creditsUsed : "—"}
                         </p>
                       </div>
                       <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
@@ -839,7 +839,7 @@ export default function SessionsPage() {
 
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
                     <p className="mt-6 text-xs text-muted-foreground">
-                      Join opens 10 min before start
+                      Join opens {joinOpenMinutes} min before start
                     </p>
                   )}
 
@@ -883,31 +883,28 @@ export default function SessionsPage() {
                         )}
                       </div>
 
-                      {isUpcomingSession && cancelDeadline && (
+                      {/* Backend message: "You can cancel until ..." / "This session starts in under 72 hours ..." / "Starts in 5 min." */}
+                      {selectedMessage && !isCompletedSession && (
                         <div className="mt-3 rounded-lg bg-info/10 px-4 py-3 text-sm text-foreground">
-                          {isCancelWindowOpen
-                            ? `You can cancel until ${formatCancelDeadline(cancelDeadline)}, ${CANCEL_CUTOFF_HOURS} hours before the session. The student gets the credit back.`
-                            : `The cancellation window closed on ${formatCancelDeadline(cancelDeadline)}, ${CANCEL_CUTOFF_HOURS} hours before the session.`}
+                          {selectedMessage}
                         </div>
                       )}
                     </>
                   )}
 
                   {/* Completed: the recording, as on the student's session card */}
-                  {selectedSession.sessionLifecycleState === "COMPLETED" && (
-                    completedRecordingLoading ? (
-                      <div className="mt-4 h-11 w-full animate-pulse rounded-lg bg-muted" />
-                    ) : completedRecordingState === "READY" && completedRecordingUrl ? (
+                  {isCompletedSession && (
+                    canViewRecording && completedRecordingUrl ? (
                       <Button type="button" variant="outline" asChild className="mt-4 gap-2">
                         <a href={completedRecordingUrl} target="_blank" rel="noopener noreferrer">
                           <PlayCircle className="h-4 w-4" />
                           View Recording
                         </a>
                       </Button>
-                    ) : completedRecordingState ? (
+                    ) : selectedMessage ? (
                       <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-foreground">
                         <Video className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                        <span>{RECORDING_STATE_MESSAGES[completedRecordingState]}</span>
+                        <span>{selectedMessage}</span>
                       </div>
                     ) : null
                   )}
@@ -915,12 +912,16 @@ export default function SessionsPage() {
                 {(isRescheduleTab || hasRescheduleRequest) && (
                   <div className="space-y-3  px-4 py-0 text-left ">
                     <p className="text-sm font-semibold">Reschedule Request</p>
+                    {/* Backend message: "<Student> asked to move this session to ... Reply by ..., or the session stays as booked." */}
+                    {getMentorDisplayState(selectedSession) === "ACTION_NEEDED" && selectedMessage && (
+                      <p className="rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground">{selectedMessage}</p>
+                    )}
                     <div className="flex gap-2">
                       <Button
                         type="button"
                         className="bg-green-700 hover:bg-green-800"
                         onClick={handleAcceptReschedule}
-                        disabled={isRescheduling}
+                        disabled={isRescheduling || selectedActions?.acceptReschedule?.allowed === false}
                       >
                         {isRescheduling ? "Please wait..." : "Accept Reschedule"}
                       </Button>
@@ -928,7 +929,7 @@ export default function SessionsPage() {
                         type="button"
                         variant="outline"
                         onClick={handleDeclineReschedule}
-                        disabled={isRescheduling}
+                        disabled={isRescheduling || selectedActions?.declineReschedule?.allowed === false}
                       >
                         Decline Reschedule
                       </Button>
