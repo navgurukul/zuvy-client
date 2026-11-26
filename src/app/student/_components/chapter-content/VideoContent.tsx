@@ -197,19 +197,32 @@ const VideoContent: React.FC<VideoContentProps> = ({
         }
     }, [])
 
-    const toggleFullscreen = useCallback((container: HTMLElement | null) => {
-        if (!container) return
+    // Returns true if something was in fullscreen and an exit was requested.
+    const exitFullscreenIfActive = useCallback(() => {
         const doc = document as any
-        const el = container as any
-        if (document.fullscreenElement || doc.webkitFullscreenElement) {
-            if (document.exitFullscreen) document.exitFullscreen()
-            else doc.webkitExitFullscreen?.()
-        } else if (el.requestFullscreen) {
-            el.requestFullscreen()
-        } else {
-            el.webkitRequestFullscreen?.()
+        if (!(document.fullscreenElement || doc.webkitFullscreenElement)) {
+            return false
         }
+        const result = document.exitFullscreen
+            ? document.exitFullscreen()
+            : doc.webkitExitFullscreen?.()
+        result?.catch?.(() => {})
+        return true
     }, [])
+
+    const toggleFullscreen = useCallback(
+        (container: HTMLElement | null) => {
+            if (!container) return
+            if (exitFullscreenIfActive()) return
+            const el = container as any
+            const result = el.requestFullscreen
+                ? el.requestFullscreen()
+                : el.webkitRequestFullscreen?.()
+            // The browser can refuse (e.g. not triggered by a user gesture).
+            result?.catch?.(() => {})
+        },
+        [exitFullscreenIfActive]
+    )
 
     useEffect(() => {
         const handleResumeVideo = () => {
@@ -330,6 +343,9 @@ const VideoContent: React.FC<VideoContentProps> = ({
             hasCompletedRef.current = true
             keepVideoPausedRef.current = true
             if (seconds !== undefined) saveVideoPosition(seconds, fraction)
+            // The reward modal renders outside the fullscreen wrapper, so it
+            // would be invisible; leave fullscreen before it opens.
+            exitFullscreenIfActive()
             pausePlayer()
             // Don't refetch chapter details here: it toggles the renderer's
             // loading state, which remounts this component and auto-resumes
@@ -343,6 +359,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
             saveVideoPosition,
             pausePlayer,
             completeChapter,
+            exitFullscreenIfActive,
         ]
     )
 
