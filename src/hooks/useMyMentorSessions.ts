@@ -98,6 +98,12 @@ export interface MentorSessionCredits {
     blockReason: string | null
 }
 
+/** Booking rules, sent with GET /student/mentor-sessions/my, e.g. { noticeHours: 72, joinOpenMinutes: 10 } */
+export interface MentorSessionRules {
+    noticeHours?: number
+    joinOpenMinutes?: number
+}
+
 type WrappedMyMentorSession = Partial<Omit<MyMentorSession, 'id'>> & {
     booking: MyMentorSession
     mentorName?: string | null
@@ -119,13 +125,25 @@ export interface SessionCounts {
 
 type MyMentorSessionsResponse =
     | MyMentorSessionsPayload
-    | { data: MyMentorSessionsPayload; counts?: SessionCounts; credits?: MentorSessionCredits }
+    | {
+          data: MyMentorSessionsPayload
+          counts?: SessionCounts
+          credits?: MentorSessionCredits
+          rules?: MentorSessionRules
+      }
 
 const parseCreditsResponse = (
     response: MyMentorSessionsResponse
 ): MentorSessionCredits | null => {
     if (!response || Array.isArray(response)) return null
     return response.credits ?? null
+}
+
+const parseRulesResponse = (
+    response: MyMentorSessionsResponse
+): MentorSessionRules | null => {
+    if (!response || Array.isArray(response)) return null
+    return response.rules ?? null
 }
 
 const isWrappedSession = (
@@ -208,6 +226,7 @@ export function useMyMentorSessions(
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
     const [counts, setCounts] = useState<SessionCounts>({})
     const [credits, setCredits] = useState<MentorSessionCredits | null>(null)
+    const [rules, setRules] = useState<MentorSessionRules | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
@@ -231,11 +250,13 @@ export function useMyMentorSessions(
             setSessions(parseSessionsResponse(response.data))
             setCounts(parseCountsResponse(response.data))
             setCredits(parseCreditsResponse(response.data))
+            setRules(parseRulesResponse(response.data))
         } catch (error) {
             console.error('Error fetching my mentor sessions:', error)
             setSessions([])
             setCounts({})
             setCredits(null)
+            setRules(null)
             setError(getErrorMessage(error))
         } finally {
             setLoading(false)
@@ -250,6 +271,7 @@ export function useMyMentorSessions(
         sessions,
         counts,
         credits,
+        rules,
         loading,
         error,
         refetchMySessions: getMySessions,

@@ -91,6 +91,7 @@ export default function MySessions() {
     sessions: filteredSessions,
     counts,
     credits,
+    rules,
     loading: filteredLoading,
     error: filteredError,
     refetchMySessions: refetchFiltered,
@@ -105,6 +106,7 @@ export default function MySessions() {
     sessions: upcomingGroupSessions,
     counts: upcomingGroupCounts,
     credits: upcomingGroupCredits,
+    rules: upcomingGroupRules,
     loading: upcomingLoading,
     error: upcomingError,
     refetchMySessions: refetchUpcoming,
@@ -142,6 +144,7 @@ export default function MySessions() {
   const loading = isUpcomingGroupTab ? upcomingLoading : filteredLoading
   const error = isUpcomingGroupTab ? upcomingError : filteredError
   const studentCredits = credits ?? upcomingGroupCredits
+  const noticeHours = (rules ?? upcomingGroupRules)?.noticeHours
   const activeTabConfig = TABS.find((tab) => tab.key === activeTab) ?? TABS[0]
 
   const refetchAll = () => {
@@ -265,6 +268,7 @@ export default function MySessions() {
               key={session.id}
               session={session}
               now={nowTimestamp}
+              noticeHours={noticeHours}
               routeContext={routeContext}
               onGiveFeedback={openFeedback}
               feedbackSubmittedLocally={Boolean(locallySubmittedFeedbackIds[session.id])}

@@ -3,11 +3,27 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking";
-import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
+import { useCancelBookingPreview } from "@/app/student/hooks/useCancelBookingPreview";
 import { useMyMentorSessions } from "@/hooks/useMyMentorSessions";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
+
+// Used only until the cancel preview answers
+const DEFAULT_REASON_MIN_LENGTH = 10;
+
+// Bolds the credit count ("2 of 3 left") inside the API's cancel-preview message
+const CREDITS_LEFT_PATTERN = /(\d+ of \d+ left)/;
+const renderCreditMessage = (text: string) =>
+	text.split(CREDITS_LEFT_PATTERN).map((part, index) =>
+		index % 2 === 1 ? (
+			<span key={index} className="font-semibold">
+				{part}
+			</span>
+		) : (
+			part
+		)
+	);
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -60,9 +76,15 @@ export default function CancelBookingPage() {
 		[sessions, bookingId]
 	);
 
-	const { metrics } = useStudentMentorMetrics(true);
-	const creditsAfterCancel =
-		typeof metrics?.remainingCredits === "number" ? metrics.remainingCredits + 1 : null;
+	// Whether this booking can be cancelled, the credit message and the reason rule
+	const {
+		preview,
+		loading: previewLoading,
+		error: previewError,
+	} = useCancelBookingPreview(bookingId, bookingId !== null);
+	const reasonMinLength = preview?.reasonMinLength ?? DEFAULT_REASON_MIN_LENGTH;
+	const blockedMessage = preview && !preview.canCancel ? preview.blocked?.message || null : null;
+	const isBlocked = Boolean(preview && !preview.canCancel);
 
 	const mentorName = session?.mentorName?.trim() || null;
 	const sessionTiming = formatSessionTiming(session?.slotStart || session?.slotEnd);
@@ -72,13 +94,13 @@ export default function CancelBookingPage() {
 		sessionTiming,
 	].filter(Boolean);
 
-	const isReasonValid = reason.trim().length >= 10;
+	const isReasonValid = reason.trim().length >= reasonMinLength;
 
 	const handleCancelBooking = async () => {
 		const trimmedReason = reason.trim();
 
-		if (trimmedReason.length < 10) {
-			setValidationError("Reason must be at least 10 characters.");
+		if (trimmedReason.length < reasonMinLength) {
+			setValidationError(`Reason must be at least ${reasonMinLength} characters.`);
 			return;
 		}
 
@@ -113,20 +135,24 @@ export default function CancelBookingPage() {
 					)}
 				</div>
 
-				{!message && (
+				{/* Credit message / why it can't be cancelled - both from the cancel preview API */}
+				{!message && previewLoading && (
+					<div className="h-11 w-full animate-pulse rounded-xl bg-muted" />
+				)}
+				{!message && !previewLoading && blockedMessage && (
+					<div className="flex items-start gap-3 rounded-xl bg-amber-50 px-4 py-3 text-left text-sm text-foreground dark:bg-amber-950/30">
+						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+						<p>{blockedMessage}</p>
+					</div>
+				)}
+				{!message && !previewLoading && !isBlocked && preview?.message && (
 					<div className="flex items-start gap-3 rounded-xl bg-green-50 px-4 py-3 text-left text-sm text-foreground dark:bg-green-950/30">
 						<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-700 dark:text-green-400" />
-						<p>
-							Your credit comes back
-							{creditsAfterCancel !== null ? (
-								<>
-									, so you&apos;ll have{" "}
-									<span className="font-semibold">{creditsAfterCancel} left</span>
-								</>
-							) : null}
-							, and you can book again straight away.
-						</p>
+						<p>{renderCreditMessage(preview.message)}</p>
 					</div>
+				)}
+				{!message && !previewLoading && previewError && (
+					<p className="text-sm text-destructive text-left">{previewError}</p>
 				)}
 
 				<div className="space-y-2">
@@ -138,11 +164,11 @@ export default function CancelBookingPage() {
 						value={reason}
 						onChange={(event) => setReason(event.target.value)}
 						placeholder="Unable to attend due to schedule conflict"
-						disabled={!!message}
+						disabled={!!message || isBlocked}
 						className="w-full min-h-[120px] border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 					/>
 					<p className="text-xs text-muted-foreground text-left">
-						Minimum 10 characters. Your mentor will see this.
+						Minimum {reasonMinLength} characters. Your mentor will see this.
 					</p>
 				</div>
 
@@ -159,7 +185,7 @@ export default function CancelBookingPage() {
 				<div className="flex flex-wrap items-center gap-3">
 					<button
 						onClick={handleCancelBooking}
-						disabled={isCancelling || !!message || !isReasonValid}
+						disabled={isCancelling || !!message || !isReasonValid || isBlocked || previewLoading}
 						className="bg-primary text-primary-foreground hover:bg-primary-dark px-5 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{isCancelling ? "Cancelling..." : "Confirm Cancel Booking"}

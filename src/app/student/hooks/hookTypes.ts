@@ -826,6 +826,26 @@ export interface MentorBookingPreview {
 }
 
 
+// useCancelBookingPreview - GET /student/mentor-slots/bookings/:bookingId/cancel-preview
+export interface CancelBookingPreview {
+    bookingId: number
+    canCancel: boolean
+    /** Why the booking can't be cancelled: ALREADY_CANCELLED, SESSION_ENDED, RESCHEDULE_PENDING, TOO_LATE_TO_CHANGE */
+    blocked: { code: string; message: string; data?: unknown } | null
+    creditsAfter: {
+        creditsAssigned: number
+        creditsUsed: number
+        creditsLeft: number
+        nextEligibleDate: string | null
+        canBook: boolean
+        blockReason: string | null
+    } | null
+    /** e.g. "Your credit comes back, so you'll have 2 of 3 left, and you can book again straight away." (null when blocked) */
+    message: string | null
+    reasonMinLength: number
+    serverTime: string
+}
+
 // useOpenEndedSubmission
 export interface OpenEndedAnswerDto {
   questionId: number;

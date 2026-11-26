@@ -12,7 +12,7 @@ import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { cn } from "@/lib/utils";
 
 // Slots offered by GET .../reschedule/slots start at least this far ahead (backend notice hours)
-const RESCHEDULE_NOTICE_HOURS = 24;
+const RESCHEDULE_NOTICE_HOURS = 72;
 const REASON_MIN_LENGTH = 10;
 
 const getBookingIdFromParam = (

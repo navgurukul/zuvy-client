@@ -19,8 +19,8 @@ import { isJoinWindowOpen } from "@/utils/sessionDateTime"
 
 type RouteContext = { courseId?: string; orgId?: string }
 
-const SUPPORT_EMAIL = "team@zuvy.org"
-const CHANGE_CUTOFF_MS = 24 * 60 * 60 * 1000
+// Reschedule/cancel close this long before the session; the API sends it as rules.noticeHours
+const DEFAULT_NOTICE_HOURS = 72
 
 // ─── State helpers ────────────────────────────────────────────────────────────
 
@@ -45,13 +45,14 @@ export const getSessionDisplayState = (session: MyMentorSession, now: number): S
 const getSessionActions = (
   session: MyMentorSession,
   state: SessionDisplayState,
-  now: number
+  now: number,
+  noticeHours: number
 ): SessionCardActions => {
   if (session.actions) return session.actions
 
   const joinUrl = session.meetingLink?.trim() || null
   const startMs = session.slotStart ? new Date(session.slotStart).getTime() : NaN
-  const changesOpen = state === "UPCOMING" && Number.isFinite(startMs) && startMs - now > CHANGE_CUTOFF_MS
+  const changesOpen = state === "UPCOMING" && Number.isFinite(startMs) && startMs - now > noticeHours * 60 * 60 * 1000
   const canJoin = Boolean(joinUrl) && (state === "IN_PROGRESS" || isJoinWindowOpen(session.slotStart, session.slotEnd, now))
   const feedbackGiven = Boolean(session.studentFeedbackSubmittedAt || session.studentRating)
 
@@ -122,6 +123,8 @@ const getInitials = (name: string) => {
 type MentorSessionCardProps = {
   session: MyMentorSession
   now: number
+  /** rules.noticeHours from the API; only used when a session has no `actions` */
+  noticeHours?: number
   routeContext: RouteContext
   onGiveFeedback: (bookingId: number) => void
   /** Feedback submitted in this visit, before the list refreshes. */
@@ -131,12 +134,13 @@ type MentorSessionCardProps = {
 export default function MentorSessionCard({
   session,
   now,
+  noticeHours = DEFAULT_NOTICE_HOURS,
   routeContext,
   onGiveFeedback,
   feedbackSubmittedLocally,
 }: MentorSessionCardProps) {
   const state = getSessionDisplayState(session, now)
-  const actions = getSessionActions(session, state, now)
+  const actions = getSessionActions(session, state, now, noticeHours)
   const badge = STATE_BADGE[state]
   const mentorName = session.mentorName?.trim() || `Mentor ${session.mentorUserId}`
   const recordingState = session.recording?.state ?? null
@@ -145,10 +149,8 @@ export default function MentorSessionCard({
   const showChangeButtons = state === "UPCOMING" || state === "RESCHEDULE_REQUESTED"
   const changesOpen = actions.reschedule.allowed || actions.cancel.allowed
 
-  // The line under the session: from the backend, with a fallback for older responses
-  const message =
-    session.message?.trim() ||
-    (state === "UPCOMING" ? "You're all set. We'll remind you before the session." : "")
+  // The line under the session, as the backend words it
+  const message = session.message?.trim() || ""
 
   const messageTone =
     state === "UPCOMING"
@@ -161,22 +163,12 @@ export default function MentorSessionCard({
 
   // Completed sessions show their line next to a camera icon (it's about the recording)
   const showMessageBox = Boolean(message) && state !== "COMPLETED"
-  const completedRecordingLine =
-    state === "COMPLETED" && recordingState !== "READY"
-      ? message ||
-        (recordingState === "PROCESSING"
-          ? "Recording is being processed. Check back later."
-          : recordingState === "NONE"
-            ? `No recording is available for this session. Email ${SUPPORT_EMAIL} if you need it.`
-            : "")
-      : ""
-  const notHeldLine =
-    state === "CANCELLED" && recordingState === "NOT_HELD"
-      ? "No recording, because this session didn't take place."
-      : ""
+  const completedRecordingLine = state === "COMPLETED" ? message : ""
 
   const joinUrl = actions.join.url || session.meetingLink?.trim() || ""
   const recordingUrl = actions.viewRecording.url || session.recording?.url || ""
+  // View recording only when the recording is ready
+  const canViewRecording = (recordingState === "READY" || actions.viewRecording.allowed) && Boolean(recordingUrl)
   const feedbackGiven =
     feedbackSubmittedLocally ||
     actions.giveFeedback.reason === "FEEDBACK_GIVEN" ||
@@ -221,10 +213,10 @@ export default function MentorSessionCard({
         <p className="mt-2 text-xs text-muted-foreground">{session.rescheduleOutcome.message}</p>
       )}
 
-      {(completedRecordingLine || notHeldLine) && (
+      {completedRecordingLine && (
         <div className="mt-3 flex items-start gap-2 border-t border-border pt-3 text-sm text-muted-foreground">
           <Video className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{completedRecordingLine || notHeldLine}</span>
+          <span>{completedRecordingLine}</span>
         </div>
       )}
 
@@ -287,7 +279,7 @@ export default function MentorSessionCard({
 
         {state === "COMPLETED" && (
           <>
-            {actions.viewRecording.allowed && recordingUrl && (
+            {canViewRecording && (
               <Button size="sm" asChild className="bg-green-800 text-white hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-600">
                 <a href={recordingUrl} target="_blank" rel="noopener noreferrer">View Recording</a>
               </Button>

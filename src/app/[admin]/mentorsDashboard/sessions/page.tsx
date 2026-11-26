@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Calendar, Clock, Video } from "lucide-react"
+import { Calendar, Clock, PlayCircle, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,7 +16,7 @@ import { useRescheduleMentorSlotBooking } from "@/hooks/useRescheduleMentorSlotB
 import { useMarkMentorSlotAttendance } from "@/app/[admin]/hooks/useMarkMentorSlotAttendance"
 import { useCompleteMentorSlotSession } from "@/app/[admin]/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/app/[admin]/hooks/useSubmitMentorSlotFeedback"
-import { useMentorSlotRecording } from "@/hooks/useMentorSlotRecording"
+import { useMentorSlotRecording, type MentorSlotRecordingState } from "@/hooks/useMentorSlotRecording"
 import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking"
 import {
   Dialog,
@@ -86,6 +86,14 @@ type StudentCredits = {
   totalCredits?: number | null
   quotaUsed?: number | null
   nextEligible?: string | null
+}
+
+// Same wording the backend uses on the student's completed session cards
+// (the instructor sessions API has no `message`/`recording` fields)
+const RECORDING_STATE_MESSAGES: Record<MentorSlotRecordingState, string> = {
+  READY: "The recording is ready.",
+  PROCESSING: "Recording is being processed. Check back later.",
+  NONE: "No recording is available for this session. Email team@zuvy.org if you need it.",
 }
 
 // Student credit info is optional on the session payload: read `studentCredits`
@@ -223,10 +231,15 @@ export default function SessionsPage() {
     [sessions, selectedBookingId]
   )
 
-  const { recordingUrl: completedRecordingUrl } = useMentorSlotRecording(
+  const {
+    recordingUrl: completedRecordingUrl,
+    recordingState: completedRecordingState,
+    loading: completedRecordingLoading,
+  } = useMentorSlotRecording(
     selectedSession?.id,
     Boolean(selectedSession && selectedSession.sessionLifecycleState === "COMPLETED"),
-    "instructor"
+    "instructor",
+    selectedSession?.slotEnd
   )
 
   const isReadOnlySession = Boolean(
@@ -880,15 +893,23 @@ export default function SessionsPage() {
                     </>
                   )}
 
-                  {selectedSession.sessionLifecycleState === "COMPLETED" && completedRecordingUrl && (
-                    <a
-                      href={completedRecordingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-sm font-medium text-primary hover:underline"
-                    >
-                      View Recording
-                    </a>
+                  {/* Completed: the recording, as on the student's session card */}
+                  {selectedSession.sessionLifecycleState === "COMPLETED" && (
+                    completedRecordingLoading ? (
+                      <div className="mt-4 h-11 w-full animate-pulse rounded-lg bg-muted" />
+                    ) : completedRecordingState === "READY" && completedRecordingUrl ? (
+                      <Button type="button" variant="outline" asChild className="mt-4 gap-2">
+                        <a href={completedRecordingUrl} target="_blank" rel="noopener noreferrer">
+                          <PlayCircle className="h-4 w-4" />
+                          View Recording
+                        </a>
+                      </Button>
+                    ) : completedRecordingState ? (
+                      <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-foreground">
+                        <Video className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span>{RECORDING_STATE_MESSAGES[completedRecordingState]}</span>
+                      </div>
+                    ) : null
                   )}
                 </div>
                 {(isRescheduleTab || hasRescheduleRequest) && (
