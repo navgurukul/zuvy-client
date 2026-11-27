@@ -19,9 +19,6 @@ import { isJoinWindowOpen } from "@/utils/sessionDateTime"
 
 type RouteContext = { courseId?: string; orgId?: string }
 
-// Reschedule/cancel close this long before the session; the API sends it as rules.noticeHours
-const DEFAULT_NOTICE_HOURS = 72
-
 // ─── State helpers ────────────────────────────────────────────────────────────
 
 /** The backend sends displayState; fall back to the booking fields if it's missing. */
@@ -46,13 +43,16 @@ const getSessionActions = (
   session: MyMentorSession,
   state: SessionDisplayState,
   now: number,
-  noticeHours: number
+  noticeHours?: number
 ): SessionCardActions => {
   if (session.actions) return session.actions
 
   const joinUrl = session.meetingLink?.trim() || null
   const startMs = session.slotStart ? new Date(session.slotStart).getTime() : NaN
-  const changesOpen = state === "UPCOMING" && Number.isFinite(startMs) && startMs - now > noticeHours * 60 * 60 * 1000
+  // Reschedule/cancel close rules.noticeHours before the session (from the backend).
+  // No rule sent: leave it to the backend, which refuses with its own message.
+  const noticeMs = typeof noticeHours === "number" ? noticeHours * 60 * 60 * 1000 : 0
+  const changesOpen = state === "UPCOMING" && Number.isFinite(startMs) && startMs - now > noticeMs
   const canJoin = Boolean(joinUrl) && (state === "IN_PROGRESS" || isJoinWindowOpen(session.slotStart, session.slotEnd, now))
   const feedbackGiven = Boolean(session.studentFeedbackSubmittedAt || session.studentRating)
 
@@ -134,7 +134,7 @@ type MentorSessionCardProps = {
 export default function MentorSessionCard({
   session,
   now,
-  noticeHours = DEFAULT_NOTICE_HOURS,
+  noticeHours,
   routeContext,
   onGiveFeedback,
   feedbackSubmittedLocally,

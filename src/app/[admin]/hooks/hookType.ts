@@ -569,6 +569,8 @@ export interface MentorProfileResponse {
   title: string
   bio: string
   expertise: string[]
+  /** Skills from the fixed skill list (GET /mentors/skills), to pre-select the form */
+  skills?: { id: number; name: string; slug: string }[]
   pastExperiences: string | null
   status: string
   isVerified: boolean

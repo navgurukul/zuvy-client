@@ -13,6 +13,40 @@ export interface MentorCreatedSlot {
     maxCapacity: number
     currentBookedCount: number
     status: string
+    // NEW (MT2), worked out by the backend per slot
+    state?: MentorSlotState
+    /** Students can book this slot until then (noticeHours before it starts). */
+    bookableUntil?: string | null
+    canRemove?: boolean
+    removeBlockedReason?: 'SLOT_BOOKED' | 'SLOT_PAST' | null
+    /** The line for the Slot Details panel, e.g. "Students can book this slot until ..." */
+    message?: string | null
+    students?: MentorSlotStudent[]
+}
+
+export type MentorSlotState = 'open' | 'tooSoonToBook' | 'booked' | 'held' | 'past'
+
+export interface MentorSlotStudent {
+    bookingId: number
+    userId: string | number
+    name: string | null
+    /** e.g. "Karan P." */
+    shortName: string | null
+}
+
+/** "5 slots this week · 2 open · 2 booked" */
+export interface MentorSlotsSummary {
+    slots: number
+    open: number
+    tooSoonToBook: number
+    booked: number
+    held: number
+    past: number
+}
+
+export interface MentorSlotsRules {
+    noticeHours?: number
+    minSlotLeadDays?: number
 }
 
 type UpsertMySlotPayload = Omit<MentorCreatedSlot, 'mentorSlotManagementId'> & {
@@ -27,6 +61,9 @@ type MyMentorSlotsApiResponse =
           weekStart?: string
           weekEnd?: string
           metrics?: MentorSlotMetrics
+          summary?: MentorSlotsSummary
+          rules?: MentorSlotsRules
+          earliestNewSlotStart?: string
       }
 
 export interface MyMentorSlotsFilters {
@@ -38,6 +75,9 @@ export interface MyMentorSlotsResponse {
     metrics: MentorSlotMetrics | null
     weekStart: string | null
     weekEnd: string | null
+    summary: MentorSlotsSummary | null
+    rules: MentorSlotsRules | null
+    earliestNewSlotStart: string | null
 }
 
 const parseMySlotsResponse = (
@@ -67,6 +107,9 @@ const parseMyMentorSlotsPayload = (
             metrics: null,
             weekStart: null,
             weekEnd: null,
+            summary: null,
+            rules: null,
+            earliestNewSlotStart: null,
         }
     }
 
@@ -75,6 +118,9 @@ const parseMyMentorSlotsPayload = (
         metrics: response?.metrics ?? null,
         weekStart: response?.weekStart ?? null,
         weekEnd: response?.weekEnd ?? null,
+        summary: response?.summary ?? null,
+        rules: response?.rules ?? null,
+        earliestNewSlotStart: response?.earliestNewSlotStart ?? null,
     }
 }
 
@@ -93,6 +139,9 @@ export function useMyMentorSlots(
     const [metrics, setMetrics] = useState<MentorSlotMetrics | null>(null)
     const [weekStart, setWeekStart] = useState<string | null>(null)
     const [weekEnd, setWeekEnd] = useState<string | null>(null)
+    const [summary, setSummary] = useState<MentorSlotsSummary | null>(null)
+    const [rules, setRules] = useState<MentorSlotsRules | null>(null)
+    const [earliestNewSlotStart, setEarliestNewSlotStart] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
 
@@ -118,12 +167,18 @@ export function useMyMentorSlots(
             setMetrics(payload.metrics)
             setWeekStart(payload.weekStart)
             setWeekEnd(payload.weekEnd)
+            setSummary(payload.summary)
+            setRules(payload.rules)
+            setEarliestNewSlotStart(payload.earliestNewSlotStart)
         } catch (error) {
             console.error('Error fetching my mentor slots:', error)
             setSlots([])
             setMetrics(null)
             setWeekStart(null)
             setWeekEnd(null)
+            setSummary(null)
+            setRules(null)
+            setEarliestNewSlotStart(null)
             setError(getErrorMessage(error))
         } finally {
             setLoading(false)
@@ -160,6 +215,9 @@ export function useMyMentorSlots(
         metrics,
         weekStart,
         weekEnd,
+        summary,
+        rules,
+        earliestNewSlotStart,
         loading,
         error,
         refetchMySlots: getMySlots,

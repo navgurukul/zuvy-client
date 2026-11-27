@@ -18,7 +18,10 @@ export type UpdateMentorProfileResult = {
 
 export type UpdateMentorProfilePayload = {
   bio: string
-  expertise: string[]
+  /** Old free text; the backend now sets it from `skills` */
+  expertise?: string[]
+  /** Slugs (or names) from the skill list: GET /mentors/skills */
+  skills?: string[]
   title: string
   pastExperiences?: string
 }

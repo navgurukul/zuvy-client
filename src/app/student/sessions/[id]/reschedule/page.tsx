@@ -11,8 +11,6 @@ import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { cn } from "@/lib/utils";
 
-// Slots offered by GET .../reschedule/slots start at least this far ahead (backend notice hours)
-const RESCHEDULE_NOTICE_HOURS = 72;
 const REASON_MIN_LENGTH = 10;
 
 const getBookingIdFromParam = (
@@ -87,7 +85,7 @@ export default function RescheduleBookingPage() {
 	} = useGetRescheduleSlots(bookingId, true);
 
 	// Booking details (mentor name, current timing) come from the student's upcoming sessions
-	const { sessions, loading: sessionsLoading } = useMyMentorSessions(
+	const { sessions, loading: sessionsLoading, rules } = useMyMentorSessions(
 		bookingId !== undefined,
 		"/student/mentor-sessions/my",
 		"upcoming"
@@ -102,6 +100,9 @@ export default function RescheduleBookingPage() {
 		session?.mentorName?.trim() || mentorProfile?.name?.trim() || null;
 	const mentorFirstName = mentorName?.split(/\s+/)[0] || "Your mentor";
 	const currentTiming = formatSessionTiming(session?.slotStart || session?.slotEnd);
+	// Slots offered by GET .../reschedule/slots start at least rules.noticeHours ahead (from the backend)
+	const noticeLabel =
+		typeof rules?.noticeHours === "number" ? `${rules.noticeHours}+ hours away` : null;
 
 	const bookingMeta = [
 		`Booking #${bookingId ?? "-"}`,
@@ -178,7 +179,7 @@ export default function RescheduleBookingPage() {
 
 				<div className="space-y-3">
 					<p className="text-sm font-semibold text-foreground">
-						{mentorName ? `${mentorFirstName}'s` : "Mentor's"} slots, {RESCHEDULE_NOTICE_HOURS}+ hours away
+						{mentorName ? `${mentorFirstName}'s` : "Mentor's"} slots{noticeLabel ? `, ${noticeLabel}` : ""}
 					</p>
 
 					{slotsLoading && (
@@ -204,7 +205,7 @@ export default function RescheduleBookingPage() {
 
 					{!slotsLoading && !slotsError && selectableSlots.length === 0 && (
 						<p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">
-							{mentorFirstName} has no open slots {RESCHEDULE_NOTICE_HOURS}+ hours away right now.
+							{mentorFirstName} has no open slots{noticeLabel ? ` ${noticeLabel}` : ""} right now.
 							Check back later, or keep your current time.
 						</p>
 					)}

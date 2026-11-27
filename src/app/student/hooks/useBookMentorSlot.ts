@@ -42,10 +42,12 @@ const parseBookSlotError = (error: unknown): BookSlotError => {
     const status = response?.status ?? body?.statusCode ?? null
     const backendMessage = Array.isArray(body?.message) ? body?.message.join(' ') : body?.message
 
-    // 400 SLOT_TOO_SOON, 403 NO_CREDITS, 403 GAP_ACTIVE -> fixed text
+    // 400 SLOT_TOO_SOON, 403 NO_CREDITS, 403 GAP_ACTIVE -> the backend's message (fixed text only if it sends none)
     if (KNOWN_CODES.includes(body?.code as BookSlotErrorCode)) {
         const code = body?.code as Exclude<BookSlotErrorCode, 'SLOT_UNAVAILABLE'>
-        return { status, code, message: BOOK_SLOT_ERROR_MESSAGES[code], data: body?.data }
+        const backendMessage = Array.isArray(body?.message) ? body?.message.join(' ') : body?.message
+        const message = backendMessage?.trim() || BOOK_SLOT_ERROR_MESSAGES[code]
+        return { status, code, message, data: body?.data }
     }
 
     // 400 without a code: the backend's own text - "Slot not available." / "Slot is full." /

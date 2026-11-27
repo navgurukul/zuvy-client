@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Loader2, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
@@ -10,6 +10,11 @@ import { Button } from '@/components/ui/button'
 import { useGetMentorProfile } from '@/app/[admin]/hooks/useGetMentorProfile'
 import { useUpdateMentorProfile } from '@/app/[admin]/hooks/useUpdateMentorProfile'
 import { useBootcamps } from '@/app/[admin]/hooks/useBootcamps'
+import {
+  MENTOR_SKILL_LIST_ENDPOINT,
+  toSkillSlug,
+  useMentorSkills,
+} from '@/app/student/hooks/useMentorSkills'
 import { toast } from '@/components/ui/use-toast'
 
 type ProfileData = {
@@ -19,20 +24,8 @@ type ProfileData = {
   expertise: string[]
 }
 
-const SUGGESTED_EXPERTISE = [
-  'Frontend Development',
-  'Backend Engineering',
-  'System Design',
-  'Data Science',
-  'Machine Learning',
-  'Career Coaching',
-  'Interview Prep',
-  'Product Management',
-  'Node.js',
-  'NestJS',
-  'PostgreSQL',
-  'Backend Architecture',
-]
+// How many skills the suggestions box shows
+const MAX_SUGGESTED_SKILLS = 12
 
 type MentorProfileCreateUIProps = {
   initial?: ProfileData
@@ -76,6 +69,7 @@ function MentorProfileCreateUI({
   const [title, setTitle] = useState(initial.title)
   const [bio, setBio] = useState(initial.bio)
   const [pastExperiences, setPastExperiences] = useState(initial.pastExperiences)
+  // Skill keys: the skill's slug when it's on the list (GET /mentors/skills), else the old free text
   const [expertise, setExpertise] = useState<string[]>(initial.expertise)
   const [tagInput, setTagInput] = useState('')
   const [isDirty, setIsDirty] = useState(false)
@@ -87,21 +81,69 @@ function MentorProfileCreateUI({
     ? `/${roleSegment}/organizations/${orgId}/courses`
     : `/${roleSegment}/organizations`
 
-  // Initialize form with mentor profile data
+  // The whole skill list, so "React", "React.js" and "reactjs" are one skill
+  const { skills: skillList } = useMentorSkills(true, MENTOR_SKILL_LIST_ENDPOINT)
+  const skillBySlug = useMemo(
+    () => new Map(skillList.map((skill) => [skill.slug, skill])),
+    [skillList]
+  )
+
+  // A name or slug -> the skill on the list, e.g. "Node.js" -> node-js
+  const findSkill = useCallback(
+    (value: string) => {
+      const name = value.trim().toLowerCase()
+      const slug = toSkillSlug(value)
+      if (!name) return null
+      return skillList.find((skill) => skill.slug === slug || skill.name.toLowerCase() === name) || null
+    },
+    [skillList]
+  )
+  const toSkillKey = useCallback((value: string) => findSkill(value)?.slug ?? value, [findSkill])
+  const getSkillLabel = (key: string) => skillBySlug.get(key)?.name ?? key
+
+  // Initialize form with mentor profile data (skills from the list first, else the old expertise text)
   useEffect(() => {
     if (mentorProfile) {
       setTitle(mentorProfile.title || '')
       setBio(mentorProfile.bio || '')
       setPastExperiences(mentorProfile.pastExperiences || '')
-      setExpertise(mentorProfile.expertise || [])
+      setExpertise(
+        mentorProfile.skills?.length
+          ? mentorProfile.skills.map((skill) => skill.slug)
+          : mentorProfile.expertise || []
+      )
       setIsDirty(false)
     }
   }, [mentorProfile])
 
+  // Once the list loads, match the profile's old expertise text to list skills
+  useEffect(() => {
+    if (!skillList.length || isDirty) return
+    setExpertise((prev) => Array.from(new Set(prev.map(toSkillKey))))
+  }, [skillList, isDirty, toSkillKey])
+
+  // Skills matching what's typed, or the most used ones when the box is empty
+  const suggestedSkills = useMemo(() => {
+    const query = tagInput.trim().toLowerCase()
+    const querySlug = toSkillSlug(tagInput)
+    const list = query
+      ? skillList.filter(
+          (skill) => skill.name.toLowerCase().includes(query) || (querySlug && skill.slug.includes(querySlug))
+        )
+      : [...skillList].sort((a, b) => (b.mentorCount ?? 0) - (a.mentorCount ?? 0))
+    return list.slice(0, MAX_SUGGESTED_SKILLS)
+  }, [skillList, tagInput])
+
   const addTag = (raw: string) => {
-    const tag = raw.trim().replace(/,$/, '').trim()
-    if (tag && !expertise.includes(tag)) {
-      setExpertise((prev) => [...prev, tag])
+    const text = raw.trim().replace(/,$/, '').trim()
+    if (!text) return
+    // Only skills from the list; free text only if the list couldn't be loaded
+    const key = skillList.length
+      ? (findSkill(text) ?? suggestedSkills[0])?.slug
+      : text
+    if (!key) return
+    if (!expertise.includes(key)) {
+      setExpertise((prev) => [...prev, key])
     }
     setTagInput('')
   }
@@ -143,18 +185,20 @@ function MentorProfileCreateUI({
       // Use PATCH for any subsequent updates to an existing profile
       const isFirstTime = !mentorProfile?.mentorProfileId
 
+      // `skills`: slugs from the list; the backend links them and sets `expertise` to their names.
+      // Anything not on the list is refused with the backend's message.
       const result = await updateMentorProfile({
         title: title.trim(),
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
-        expertise,
+        skills: expertise,
       }, isFirstTime)
       await refetchMentorProfile()
       await onValidSubmit?.({
         title: title.trim(),
         bio: bio.trim(),
         pastExperiences: pastExperiences.trim(),
-        expertise,
+        expertise: expertise.map(getSkillLabel),
       })
       // Show success toast: title varies by isFirstTime, API message as description
       const apiMessage = result.message || result.data?.message
@@ -359,7 +403,7 @@ function MentorProfileCreateUI({
                     key={tag}
                     className="inline-flex items-center gap-2 rounded-full bg-primary-light dark:bg-primary-light/20 px-3 py-1.5 text-caption font-semibold text-primary"
                   >
-                    {tag}
+                    {getSkillLabel(tag)}
                     <button
                       type="button"
                       onClick={(e) => {
@@ -383,7 +427,8 @@ function MentorProfileCreateUI({
                   }}
                   onKeyDown={handleTagKeyDown}
                   onBlur={() => {
-                    if (tagInput.trim()) addTag(tagInput)
+                    // Without the list, keep the old behaviour of adding what was typed
+                    if (tagInput.trim() && !skillList.length) addTag(tagInput)
                   }}
                   placeholder={expertise.length === 0 ? 'Type a skill and press Enter…' : 'Add more…'}
                   className="min-w-[140px] flex-1 bg-transparent text-body1 text-text-primary placeholder:text-text-muted focus:outline-none"
@@ -391,18 +436,24 @@ function MentorProfileCreateUI({
               </div>
               <p className="mt-2.5 text-caption text-text-tertiary text-left">Press Enter or comma to add a skill</p>
 
-              {/* Suggested Skills */}
+              {/* Suggested Skills: from the skill list (GET /mentors/skills), filtered by what's typed */}
+              {suggestedSkills.length > 0 && (
               <div className="mt-6 rounded-md border border-border bg-muted/30 p-5">
                 <h3 className="mb-4 text-body2 font-semibold text-text-primary text-left">Suggested Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {SUGGESTED_EXPERTISE.map((skill) => {
-                    const active = expertise.includes(skill)
+                  {suggestedSkills.map(({ slug, name }) => {
+                    const active = expertise.includes(slug)
                     return (
                       <button
-                        key={skill}
+                        key={slug}
                         type="button"
                         onClick={() => {
-                          active ? removeTag(skill) : addTag(skill)
+                          if (active) {
+                            removeTag(slug)
+                          } else {
+                            setExpertise((prev) => [...prev, slug])
+                            setTagInput('')
+                          }
                           setIsDirty(true)
                         }}
                         className={cn(
@@ -413,12 +464,13 @@ function MentorProfileCreateUI({
                         )}
                       >
                         {active ? '✓ ' : ''}
-                        {skill}
+                        {name}
                       </button>
                     )
                   })}
                 </div>
               </div>
+              )}
             </div>
 
             {/* Action Buttons */}

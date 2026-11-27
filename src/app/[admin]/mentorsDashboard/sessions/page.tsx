@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Calendar, Clock, PlayCircle, Video } from "lucide-react"
+import { Calendar, Clock, Loader2, PlayCircle, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,6 +19,7 @@ import { useMarkMentorSlotAttendance } from "@/app/[admin]/hooks/useMarkMentorSl
 import { useCompleteMentorSlotSession } from "@/app/[admin]/hooks/useCompleteMentorSlotSession"
 import { useSubmitMentorSlotFeedback } from "@/app/[admin]/hooks/useSubmitMentorSlotFeedback"
 import { useCancelMentorSlotBooking } from "@/app/student/hooks/useCancelMentorSlotBooking"
+import { useMentorJoinLink } from "@/app/[admin]/hooks/useMentorJoinLink"
 import {
   Dialog,
   DialogContent,
@@ -52,8 +53,7 @@ const formatDateTime = (value?: string | null) => {
   })
 }
 
-// Fallbacks for the API's `rules` (noticeHours / joinOpenMinutes)
-const DEFAULT_NOTICE_HOURS = 72
+// Fallback for the API's `rules.joinOpenMinutes`
 const DEFAULT_JOIN_OPEN_MINUTES = 10
 const MIN_CANCEL_REASON_LENGTH = 10
 
@@ -186,7 +186,8 @@ export default function SessionsPage() {
     counts,
     rules,
   } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
-  const noticeHours = rules?.noticeHours ?? DEFAULT_NOTICE_HOURS
+  // From the backend (GET /instructor/mentor-sessions/my -> rules.noticeHours)
+  const noticeHours = rules?.noticeHours
   const joinOpenMinutes = rules?.joinOpenMinutes ?? DEFAULT_JOIN_OPEN_MINUTES
 
   const summaryCounts = {
@@ -273,12 +274,40 @@ export default function SessionsPage() {
         isRescheduleValue(selectedSession.sessionLifecycleState))
   )
 
-  const canJoinSelectedSession = Boolean(
-    selectedSession?.meetingLink?.trim() &&
-    (selectedActions?.join
-      ? selectedActions.join.allowed
-      : isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp))
-  )
+  // With `actions` the backend decides (it knows about Zoom and Google meetings); else the saved link + time window
+  const hasJoinTarget = Boolean(selectedActions?.join || selectedSession?.meetingLink?.trim())
+  const canJoinSelectedSession = selectedActions?.join
+    ? selectedActions.join.allowed
+    : Boolean(
+        selectedSession?.meetingLink?.trim() &&
+        isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
+      )
+
+  const { isFetchingJoinLink, getJoinLink } = useMentorJoinLink()
+
+  const handleJoinSession = async () => {
+    if (!selectedSession) return
+    // Open the tab now (inside the click) so pop-up blockers allow it, then point it at the link
+    const joinWindow = window.open("", "_blank")
+    const { data, error: joinError } = await getJoinLink(selectedSession.id)
+    const url = data?.url || data?.joinLink || null
+
+    if (!url) {
+      joinWindow?.close()
+      toast.error({
+        title: "Can't join the session",
+        description: joinError || "Could not get the join link",
+      })
+      return
+    }
+
+    if (joinWindow) {
+      joinWindow.opener = null
+      joinWindow.location.href = url
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer")
+    }
+  }
 
   const selectedDisplayName = selectedSession
     ? selectedSession.studentName || selectedSession.studentUserName || `Student #${selectedSession.studentUserId ?? "-"}`
@@ -306,6 +335,8 @@ export default function SessionsPage() {
     // Older payloads without `actions`: cancel until noticeHours before the start
     const start = selectedSession?.slotStart ? new Date(selectedSession.slotStart).getTime() : NaN
     if (Number.isNaN(start)) return false
+    // No rule sent: leave it to the backend, which refuses with its own message
+    if (typeof noticeHours !== "number") return start > nowTimestamp
     return start - noticeHours * 60 * 60 * 1000 > nowTimestamp
   }, [selectedActions, selectedSession?.slotStart, noticeHours, nowTimestamp])
 
@@ -837,7 +868,8 @@ export default function SessionsPage() {
                     </div>
                   )}
 
-                  {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && selectedSession.meetingLink && !canJoinSelectedSession && (
+                  {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && hasJoinTarget && !canJoinSelectedSession &&
+                    (!selectedActions?.join || selectedActions.join.reason === "JOIN_NOT_OPEN") && (
                     <p className="mt-6 text-xs text-muted-foreground">
                       Join opens {joinOpenMinutes} min before start
                     </p>
@@ -846,24 +878,16 @@ export default function SessionsPage() {
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && (
                     <>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                        {selectedSession.meetingLink ? (
+                        {hasJoinTarget ? (
+                          // Join fetches a fresh host link: GET /instructor/mentor-slots/bookings/:bookingId/join-link
                           <Button
                             type="button"
                             className="bg-green-700 hover:bg-green-800"
-                            asChild={canJoinSelectedSession}
-                            disabled={!canJoinSelectedSession}
+                            onClick={handleJoinSession}
+                            disabled={!canJoinSelectedSession || isFetchingJoinLink}
                           >
-                            {canJoinSelectedSession ? (
-                              <a
-                                href={selectedSession.meetingLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                Join the Session
-                              </a>
-                            ) : (
-                              <>Join the Session</>
-                            )}
+                            {isFetchingJoinLink && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                            Join the Session
                           </Button>
                         ) : (
                           <Button type="button" className="bg-green-700 hover:bg-green-800" disabled>

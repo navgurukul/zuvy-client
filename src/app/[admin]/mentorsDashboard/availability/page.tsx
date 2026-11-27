@@ -23,7 +23,8 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import { useMyMentorSlots, type MentorCreatedSlot } from "@/app/[admin]/hooks/useMyMentorSlots"
 import { useCreateMentorSlot } from "@/app/[admin]/hooks/useCreateMentorSlot"
-import { useDeleteMentorSlot } from "@/app/[admin]/hooks/useDeleteMentorSlot"
+import { useDeleteMentorSlot, type DeleteMentorSlotResult } from "@/app/[admin]/hooks/useDeleteMentorSlot"
+import { useSlotLicenceCheck } from "@/app/[admin]/hooks/useSlotLicenceCheck"
 import { CalendarSkeleton } from "@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton"
 import { cn } from "@/lib/utils"
 import {
@@ -37,12 +38,6 @@ import {
 const durationOptions = [30, 45, 60, 90]
 const defaultStartTime = "09:00"
 const defaultDurationMinutes = "60"
-
-// Students can't book a slot that starts within this window
-const BOOKING_CUTOFF_HOURS = 24
-const BOOKING_CUTOFF_MS = BOOKING_CUTOFF_HOURS * 60 * 60 * 1000
-// Mentors can't remove an open slot that starts within this window
-const minimumDeleteLeadTimeMs = 12 * 60 * 60 * 1000
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const toDateStr = (date: Date) => {
@@ -114,16 +109,26 @@ const isBookedSlot = (slot: MentorCreatedSlot) =>
   slot.currentBookedCount > 0 || normalizeStatus(slot.status) === "booked"
 const isPastSlot = (slot: MentorCreatedSlot, now = Date.now()) =>
   new Date(slot.slotEndDateTime).getTime() <= now
-const isTooSoonToBook = (slot: MentorCreatedSlot, now = Date.now()) =>
-  new Date(slot.slotStartDateTime).getTime() - now < BOOKING_CUTOFF_MS
+// Students can't book within rules.noticeHours of the start (both from the backend)
+const isTooSoonToBook = (slot: MentorCreatedSlot, now: number, noticeHours?: number) => {
+  const bookableUntil = slot.bookableUntil ? new Date(slot.bookableUntil).getTime() : NaN
+  if (Number.isFinite(bookableUntil)) return now >= bookableUntil
+  if (typeof noticeHours !== "number") return false
+  return new Date(slot.slotStartDateTime).getTime() - now < noticeHours * 60 * 60 * 1000
+}
+// The backend says whether a slot can be removed (open slots: any time; booked/held/past: no)
 const canDeleteSlot = (slot: MentorCreatedSlot, now = Date.now()) => {
-  if (isBookedSlot(slot) || isPastSlot(slot, now)) return false
-  return new Date(slot.slotStartDateTime).getTime() - now >= minimumDeleteLeadTimeMs
+  if (typeof slot.canRemove === "boolean") return slot.canRemove
+  return !isBookedSlot(slot) && !isPastSlot(slot, now)
 }
 const getSlotDateKey = (slot: MentorCreatedSlot) => toDateStr(new Date(slot.slotStartDateTime))
 
-// Booked student's name is optional on the slot payload. "Karan Patel" -> "Karan P."
+// Booked student's short name from the API (students[].shortName, e.g. "Karan P.")
 const getBookedStudentLabel = (slot: MentorCreatedSlot) => {
+  const shortNames = (slot.students ?? [])
+    .map((student) => student.shortName?.trim())
+    .filter(Boolean)
+  if (shortNames.length) return shortNames.join(", ")
   const name = ((slot as MentorCreatedSlot & { studentName?: string | null }).studentName || "").trim()
   if (!name) return null
   const [first, ...rest] = name.split(/\s+/)
@@ -131,12 +136,25 @@ const getBookedStudentLabel = (slot: MentorCreatedSlot) => {
   return last ? `${first} ${last[0].toUpperCase()}.` : first
 }
 
-type SlotState = "open" | "tooSoon" | "booked" | "past"
+type SlotState = "open" | "tooSoon" | "booked" | "held" | "past"
 
-const getSlotState = (slot: MentorCreatedSlot, now: number): SlotState => {
+const getSlotState = (slot: MentorCreatedSlot, now: number, noticeHours?: number): SlotState => {
+  // `state` from GET /instructor/mentor-slots/my
+  switch (slot.state) {
+    case "open":
+      return "open"
+    case "tooSoonToBook":
+      return "tooSoon"
+    case "booked":
+      return "booked"
+    case "held":
+      return "held"
+    case "past":
+      return "past"
+  }
   if (isPastSlot(slot, now)) return "past"
   if (isBookedSlot(slot)) return "booked"
-  if (isTooSoonToBook(slot, now)) return "tooSoon"
+  if (isTooSoonToBook(slot, now, noticeHours)) return "tooSoon"
   return "open"
 }
 
@@ -157,6 +175,12 @@ const SLOT_STATE_STYLES: Record<SlotState, { chip: string; selected: string; leg
     selected: "border-2 border-blue-700 dark:border-blue-400",
     legend: "Booked",
   },
+  // Held for a student's reschedule request: shown like a booked slot
+  held: {
+    chip: "border-blue-500 bg-blue-50 dark:border-blue-500/70 dark:bg-blue-950/30",
+    selected: "border-2 border-blue-700 dark:border-blue-400",
+    legend: "Held for a reschedule",
+  },
   past: {
     chip: "border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800/60",
     selected: "border-2 border-gray-500 dark:border-gray-400",
@@ -167,6 +191,7 @@ const SLOT_STATE_STYLES: Record<SlotState, { chip: string; selected: string; leg
 const getSlotChipLabel = (slot: MentorCreatedSlot, state: SlotState) => {
   if (state === "past") return "Past"
   if (state === "booked") return getBookedStudentLabel(slot) || "Booked"
+  if (state === "held") return "Held"
   if (state === "tooSoon") return "Too soon"
   return "Open"
 }
@@ -205,6 +230,7 @@ function SlotChip({
 function SlotDetailPanel({
   slot,
   now,
+  noticeHours,
   onClose,
   onDelete,
   isDeleting,
@@ -213,18 +239,19 @@ function SlotDetailPanel({
 }: {
   slot: MentorCreatedSlot
   now: number
+  noticeHours?: number
   onClose: () => void
-  onDelete: (id: number) => Promise<boolean>
+  onDelete: (id: number) => Promise<DeleteMentorSlotResult>
   isDeleting: boolean
   deletingSlotId: number | null
   deleteError: string | null
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const state = getSlotState(slot, now)
+  const state = getSlotState(slot, now, noticeHours)
   const deletable = canDeleteSlot(slot, now)
   const deleting = isDeleting && deletingSlotId === slot.id
-  const bookingClosesAt = new Date(new Date(slot.slotStartDateTime).getTime() - BOOKING_CUTOFF_MS)
-  const studentLabel = getBookedStudentLabel(slot)
+  // The panel's line comes from the backend (slot.message)
+  const slotMessage = slot.message?.trim() || ""
 
   useEffect(() => {
     setConfirmDelete(false)
@@ -237,36 +264,17 @@ function SlotDetailPanel({
   }, [confirmDelete])
 
   const handleDelete = async () => {
-    const removed = await onDelete(slot.id)
-    if (removed) onClose()
+    const result = await onDelete(slot.id)
+    if (result.success) onClose()
   }
 
-  const info = (() => {
-    switch (state) {
-      case "open":
-        return {
-          className: "bg-green-50 dark:bg-green-950/30",
-          text: `Students can book this slot until ${formatDayAtTime(bookingClosesAt)}, ${BOOKING_CUTOFF_HOURS} hours before it starts. You can remove it at any time while it's open.`,
-        }
-      case "tooSoon":
-        return {
-          className: "bg-amber-50 dark:bg-amber-950/30",
-          text: deletable
-            ? `This slot starts in under ${BOOKING_CUTOFF_HOURS} hours, so students can no longer book it. You can still remove it.`
-            : `This slot starts in under ${BOOKING_CUTOFF_HOURS} hours, so students can no longer book it, and it's too close to the start to remove.`,
-        }
-      case "booked":
-        return {
-          className: "bg-blue-50 dark:bg-blue-950/30",
-          text: `${studentLabel ? `Booked by ${studentLabel}` : "A student has booked this slot"}. Booked slots can't be removed.`,
-        }
-      default:
-        return {
-          className: "bg-muted",
-          text: "This slot has passed and is no longer active.",
-        }
-    }
-  })()
+  const infoClassName: Record<SlotState, string> = {
+    open: "bg-green-50 dark:bg-green-950/30",
+    tooSoon: "bg-amber-50 dark:bg-amber-950/30",
+    booked: "bg-blue-50 dark:bg-blue-950/30",
+    held: "bg-blue-50 dark:bg-blue-950/30",
+    past: "bg-muted",
+  }
 
   return (
     <Card className="rounded-xl border border-border bg-card shadow-none">
@@ -280,9 +288,11 @@ function SlotDetailPanel({
           </p>
         </div>
 
-        <div className={cn("rounded-lg px-4 py-3 text-sm leading-relaxed text-foreground", info.className)}>
-          {info.text}
-        </div>
+        {slotMessage && (
+          <div className={cn("rounded-lg px-4 py-3 text-sm leading-relaxed text-foreground", infoClassName[state])}>
+            {slotMessage}
+          </div>
+        )}
 
         {deleteError && <p className="text-xs font-medium text-destructive">{deleteError}</p>}
 
@@ -333,6 +343,12 @@ function AddSlotPanel({
   formError,
   createError,
   isCreating,
+  minDate,
+  checkMessages,
+  checking,
+  blockedByCheck,
+  nextFreeAt,
+  onUseNextFreeTime,
   onCancel,
   onConfirm,
 }: {
@@ -346,6 +362,13 @@ function AddSlotPanel({
   formError: string | null
   createError: string | null
   isCreating: boolean
+  minDate?: string
+  checkMessages: string[]
+  checking: boolean
+  blockedByCheck: boolean
+  /** licence-check `nextAvailableAt`: when a Zoom licence is free again */
+  nextFreeAt: Date | null
+  onUseNextFreeTime: () => void
   onCancel: () => void
   onConfirm: () => void
 }) {
@@ -364,6 +387,7 @@ function AddSlotPanel({
           <Input
             type="date"
             value={slotDate}
+            min={minDate}
             onChange={(e) => setSlotDate(e.target.value)}
             className="w-full text-sm font-medium [color-scheme:light] dark:[color-scheme:dark]"
           />
@@ -418,6 +442,28 @@ function AddSlotPanel({
           </div>
         </div>
       )}
+      {/* GET /instructor/mentor-slots/licence-check: lead time ("Slots need to start at least 4 days from now ...") and licence messages */}
+      {checkMessages.map((text) => (
+        <div
+          key={text}
+          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-left text-xs leading-relaxed text-foreground dark:border-amber-900/60 dark:bg-amber-950/30"
+        >
+          {text}
+        </div>
+      ))}
+      {/* No Zoom licence free at this time: one click moves the form to the next free time */}
+      {nextFreeAt && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onUseNextFreeTime}
+          className="w-full gap-1.5"
+        >
+          <Clock className="h-3.5 w-3.5" />
+          Use {formatDayAtTime(nextFreeAt)}
+        </Button>
+      )}
       {formError && <p className="text-left text-xs text-destructive">{formError}</p>}
       {createError && <p className="text-left text-xs text-destructive">{createError}</p>}
 
@@ -430,9 +476,9 @@ function AddSlotPanel({
           size="sm"
           className="flex-1 bg-green-800 hover:bg-green-900 text-white"
           onClick={onConfirm}
-          disabled={isCreating}
+          disabled={isCreating || checking || blockedByCheck}
         >
-          {isCreating ? "Creating..." : "Create slot"}
+          {isCreating ? "Creating..." : checking ? "Checking..." : "Create slot"}
         </Button>
       </div>
     </div>
@@ -507,6 +553,8 @@ export default function AvailabilityPage() {
     metrics,
     weekStart: apiWeekStart,
     weekEnd: apiWeekEnd,
+    summary,
+    rules,
     loading,
     error,
     refetchMySlots,
@@ -514,7 +562,9 @@ export default function AvailabilityPage() {
   } = useMyMentorSlots(true, { weekOffset })
 
   const { isCreating, error: createError, createSlot } = useCreateMentorSlot()
-  const { isDeleting, deletingSlotId, error: deleteError, message: deleteMessage, deleteSlot } = useDeleteMentorSlot()
+  const { isDeleting, deletingSlotId, error: deleteError, deleteSlot, clearError: clearDeleteError } = useDeleteMentorSlot()
+  // From the backend (GET /instructor/mentor-slots/my -> rules.noticeHours)
+  const noticeHours = rules?.noticeHours
 
   // Week computation
   const weekStart = useMemo(
@@ -559,8 +609,12 @@ export default function AvailabilityPage() {
 
   const selectedSlot = useMemo(() => slots.find((s) => s.id === selectedSlotId) || null, [slots, selectedSlotId])
 
-  const openSlotsCount = useMemo(() => sortedSlots.filter((s) => isOpenSlot(s)).length, [sortedSlots])
-  const bookedSlotsCount = useMemo(() => sortedSlots.filter((s) => isBookedSlot(s)).length, [sortedSlots])
+  // Header counts: `summary` from the API ("5 slots this week · 2 open · 2 booked")
+  const fallbackOpenCount = useMemo(() => sortedSlots.filter((s) => isOpenSlot(s)).length, [sortedSlots])
+  const fallbackBookedCount = useMemo(() => sortedSlots.filter((s) => isBookedSlot(s)).length, [sortedSlots])
+  const totalSlotsCount = summary?.slots ?? metrics?.totalSlots ?? sortedSlots.length
+  const openSlotsCount = summary?.open ?? fallbackOpenCount
+  const bookedSlotsCount = summary?.booked ?? fallbackBookedCount
 
   // Proposed slot for overlap detection
   const proposedStart = useMemo(() => combineDateAndTime(slotDate, startTime), [slotDate, startTime])
@@ -579,6 +633,37 @@ export default function AvailabilityPage() {
       return proposedStart < ee && proposedEnd > es
     }) || null
   }, [proposedStart, proposedEnd, sortedSlots])
+
+  const { check: slotCheck, loading: checkingSlot } = useSlotLicenceCheck(
+    showAddSlotPanel && proposedStart && proposedEnd ? proposedStart.toISOString() : null,
+    showAddSlotPanel && proposedStart && proposedEnd ? proposedEnd.toISOString() : null
+  )
+  const slotCheckMessages = useMemo(() => {
+    if (!slotCheck) return []
+    const messages: string[] = []
+    if (slotCheck.leadTime && !slotCheck.leadTime.ok && slotCheck.leadTime.message) messages.push(slotCheck.leadTime.message)
+    if (!slotCheck.available && slotCheck.message) messages.push(slotCheck.message)
+    return messages
+  }, [slotCheck])
+  const blockedBySlotCheck = slotCheck
+    ? slotCheck.canCreate === false || (slotCheck.canCreate === undefined && !slotCheck.available)
+    : false
+
+  // licence-check `nextAvailableAt`: shown only when the Zoom licence pool is full at the picked time
+  const nextFreeAt = useMemo(() => {
+    if (!slotCheck || slotCheck.available || !slotCheck.nextAvailableAt) return null
+    const date = new Date(slotCheck.nextAvailableAt)
+    return Number.isNaN(date.getTime()) ? null : date
+  }, [slotCheck])
+
+  const applyNextFreeTime = () => {
+    if (!nextFreeAt) return
+    setSlotDate(toDateStr(nextFreeAt))
+    setStartTime(
+      `${String(nextFreeAt.getHours()).padStart(2, "0")}:${String(nextFreeAt.getMinutes()).padStart(2, "0")}`
+    )
+    setFormError(null)
+  }
 
   // Effects
   useEffect(() => {
@@ -644,18 +729,21 @@ export default function AvailabilityPage() {
   }
 
   const handleDeleteSlot = async (slotId: number) => {
-    const removed = await deleteSlot(slotId)
-    if (removed) {
-      toast.success({ title: "Success", description: deleteMessage || "Slot removed successfully." })
+    const result = await deleteSlot(slotId)
+    if (result.success) {
+      toast.success({ title: "Success", description: result.message })
       await refetchMySlots()
       setSelectedSlotId(null)
     } else {
-      toast.error({ title: "Failed", description: deleteError || "Failed to remove slot." })
+      // e.g. 400 SLOT_BOOKED "Booked slots can't be removed. Cancel the booking first."
+      toast.error({ title: "Failed", description: result.message })
+      void refetchMySlots()
     }
-    return removed ?? false
+    return result
   }
 
   const openCreateSlot = (date?: Date) => {
+    // Open on the clicked day, or today. If it's too soon, the licence check shows the backend's lead-time message.
     setSlotDate(date ? toDateStr(date) : getDefaultSlotDate())
     setFormError(null)
     setSelectedSlotId(null)
@@ -674,14 +762,18 @@ export default function AvailabilityPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold">Availability</h1>
             <span
-              title={`Students can book open slots until ${BOOKING_CUTOFF_HOURS} hours before they start. Click an empty part of a day to add a slot.`}
+              title={`${
+                typeof noticeHours === "number"
+                  ? `Students can book open slots until ${noticeHours} hours before they start. `
+                  : ""
+              }Click an empty part of a day to add a slot.`}
               className="text-green-800 dark:text-green-400"
             >
               <Info className="h-4 w-4" />
             </span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {metrics?.totalSlots ?? sortedSlots.length} slots this week · {openSlotsCount} open · {bookedSlotsCount} booked · today is {formatDayAtTime(currentTime)}
+            {totalSlotsCount} slots this week · {openSlotsCount} open · {bookedSlotsCount} booked · today is {formatDayAtTime(currentTime)}
           </p>
         </div>
 
@@ -745,9 +837,12 @@ export default function AvailabilityPage() {
                           <SlotChip
                             key={slot.id}
                             slot={slot}
-                            state={getSlotState(slot, nowMs)}
+                            state={getSlotState(slot, nowMs, noticeHours)}
                             selected={selectedSlotId === slot.id}
-                            onClick={() => setSelectedSlotId((id) => (id === slot.id ? null : slot.id))}
+                            onClick={() => {
+                              clearDeleteError()
+                              setSelectedSlotId((id) => (id === slot.id ? null : slot.id))
+                            }}
                           />
                         ))}
                       </div>
@@ -768,7 +863,7 @@ export default function AvailabilityPage() {
 
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border px-4 py-3 text-xs text-muted-foreground">
-            {(Object.keys(SLOT_STATE_STYLES) as SlotState[]).map((state) => (
+            {(Object.keys(SLOT_STATE_STYLES) as SlotState[]).filter((state) => state !== "held").map((state) => (
               <div key={state} className="flex items-center gap-2">
                 <span className={cn("h-3.5 w-3.5 shrink-0 rounded-[3px] border", SLOT_STATE_STYLES[state].chip)} />
                 {SLOT_STATE_STYLES[state].legend}
@@ -783,6 +878,7 @@ export default function AvailabilityPage() {
             <SlotDetailPanel
               slot={selectedSlot}
               now={nowMs}
+              noticeHours={noticeHours}
               onClose={() => setSelectedSlotId(null)}
               onDelete={handleDeleteSlot}
               isDeleting={isDeleting}
@@ -815,6 +911,14 @@ export default function AvailabilityPage() {
             formError={formError}
             createError={createError}
             isCreating={isCreating}
+            // Only past days are blocked, so the picker opens on today. Days inside
+            // minSlotLeadDays get the backend's lead-time message from the licence check.
+            minDate={toDateStr(currentTime)}
+            checkMessages={slotCheckMessages}
+            checking={checkingSlot}
+            blockedByCheck={blockedBySlotCheck}
+            nextFreeAt={nextFreeAt}
+            onUseNextFreeTime={applyNextFreeTime}
             onCancel={() => setShowAddSlotPanel(false)}
             onConfirm={handleCreateSlot}
           />

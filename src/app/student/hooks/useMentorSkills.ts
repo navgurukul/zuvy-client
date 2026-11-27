@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { MentorSkill, MentorSkillsApiResponse } from './hookTypes'
 
+/** Skills some mentor has (student filter dropdown) */
+export const STUDENT_SKILL_FILTER_ENDPOINT = '/student/mentors/skills?inUse=true'
+/** The whole skill list (mentor profile form) */
+export const MENTOR_SKILL_LIST_ENDPOINT = '/mentors/skills'
+
 type RawSkillList = Extract<MentorSkillsApiResponse, unknown[]>
 
 /** Same shape as the backend slugs, e.g. "Node.js" -> "node-js" (used only if the API sends no slug). */
@@ -60,8 +65,12 @@ const getErrorMessage = (error: unknown): string => {
  * Skills for the expertise filter: GET /student/mentors/skills?inUse=true,
  * fetched once on mount. Mentors are then filtered with
  * GET /student/mentors?expertise=<slug,slug> (see useMentors).
+ * The mentor profile form passes MENTOR_SKILL_LIST_ENDPOINT for the whole list.
  */
-export function useMentorSkills(initialFetch = true) {
+export function useMentorSkills(
+    initialFetch = true,
+    endpoint: string = STUDENT_SKILL_FILTER_ENDPOINT
+) {
     const [skills, setSkills] = useState<MentorSkill[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -71,9 +80,7 @@ export function useMentorSkills(initialFetch = true) {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MentorSkillsApiResponse>(
-                '/student/mentors/skills?inUse=true'
-            )
+            const response = await api.get<MentorSkillsApiResponse>(endpoint)
             setSkills(normalizeSkills(response.data))
         } catch (error) {
             console.error('Error fetching mentor skills:', error)
@@ -82,7 +89,7 @@ export function useMentorSkills(initialFetch = true) {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [endpoint])
 
     useEffect(() => {
         if (initialFetch) getMentorSkills()
