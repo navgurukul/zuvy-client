@@ -17,6 +17,7 @@ import { useMentorProfile } from "../hooks/useMentorProfile";
 
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
+import { formatGapPhrase } from '@/utils/mentorshipRules';
 
 // The gap ends at an exact minute in IST, e.g. "Fri, 20 Nov 2026, 6:00 pm"
 const formatEligibleDate = (dateString: string | null): string | null => {
@@ -161,11 +162,8 @@ export default function MentorsPage() {
                 : credits.blockReason === "GAP_ACTIVE" && nextEligibleText
                     ? `You can book your next session from ${nextEligibleText}`
                     : "You can't book a session right now"
-    const gapText = rules?.gapDays
-        ? rules.gapDays % 7 === 0
-            ? `${rules.gapDays / 7} week${rules.gapDays === 7 ? "" : "s"}`
-            : `${rules.gapDays} days`
-        : "2 weeks"
+    // From the backend's rules.gapDays; no rules yet: the line is left out
+    const gapText = formatGapPhrase(rules?.gapDays)
 
     const handleShowAllMentorsToggle = useCallback((pressed: boolean) => {
         setShowAllMentors(pressed)
@@ -249,7 +247,7 @@ export default function MentorsPage() {
                             <p className="text-sm font-semibold text-foreground">
                                 {bannerTitle}
                             </p>
-                            {!mentorshipUnavailable && (
+                            {!mentorshipUnavailable && gapText && (
                                 <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
                                     Each session uses 1 credit. Sessions need to be {gapText} apart.
                                 </p>
@@ -510,6 +508,7 @@ export default function MentorsPage() {
                 courseId={courseId}
                 orgId={orgId}
                 noticeHours={rules?.noticeHours}
+                gapDays={rules?.gapDays}
                 onBooked={handleBooked}
             />
         </div>

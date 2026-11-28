@@ -136,10 +136,17 @@ export interface MentorSessionCredits {
 }
 
 /** Booking rules, sent with GET /student|instructor/mentor-sessions/my, e.g. { noticeHours: 72, joinOpenMinutes: 10 } */
+/** Every rule number from the backend's config (the same set on every mentorship response) */
 export interface MentorSessionRules {
+    totalCredits?: number
+    gapDays?: number
     noticeHours?: number
     joinOpenMinutes?: number
     maxAcceptedReschedules?: number
+    minSlotLeadDays?: number
+    creditsCountedFrom?: string
+    /** Cancel and reschedule reasons need at least this many characters */
+    reasonMinLength?: number
 }
 
 type WrappedMyMentorSession = Partial<Omit<MyMentorSession, 'id'>> & {
@@ -155,6 +162,8 @@ type MyMentorSessionsPayload = MyMentorSession[] | WrappedMyMentorSession[]
 export interface SessionCounts {
     total?: string | number
     upcoming?: string | number
+    /** Started and not ended yet (happening now) */
+    ongoing?: string | number
     completed?: string | number
     cancelled?: string | number
     reschedule?: string | number
@@ -255,6 +264,7 @@ export type MyMentorSessionsEndpoint =
 export type SessionFilter =
     | 'all'
     | 'upcoming'
+    | 'ongoing'
     | 'completed'
     | 'cancelled'
     | 'reschedule'

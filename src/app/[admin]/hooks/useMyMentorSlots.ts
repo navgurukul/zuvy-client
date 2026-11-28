@@ -44,9 +44,17 @@ export interface MentorSlotsSummary {
     past: number
 }
 
+/** Every rule number from the backend's config (the same set on every mentorship response) */
 export interface MentorSlotsRules {
+    totalCredits?: number
+    gapDays?: number
     noticeHours?: number
+    joinOpenMinutes?: number
+    maxAcceptedReschedules?: number
     minSlotLeadDays?: number
+    creditsCountedFrom?: string
+    /** Cancel and reschedule reasons need at least this many characters */
+    reasonMinLength?: number
 }
 
 type UpsertMySlotPayload = Omit<MentorCreatedSlot, 'mentorSlotManagementId'> & {

@@ -70,23 +70,32 @@ export const formatTimeRange = (start?: string | null, end?: string | null): str
 
 /**
  * Check whether the current time falls within the join window of a session slot.
- * The window opens 10 minutes before the slot start and closes at the slot end.
- * If no end time is provided, the window stays open indefinitely after opening.
+ * The window opens at the backend's `joinOpensAt` (or `joinOpenMinutes` before the
+ * start, from the API's `rules`) and closes at the slot end. Neither known: closed,
+ * so the screen never guesses the rule. Without an end time it stays open after opening.
  */
 export const isJoinWindowOpen = (
   slotStart?: string | null,
   slotEnd?: string | null,
-  nowTimestamp: number = Date.now()
+  nowTimestamp: number = Date.now(),
+  window: { joinOpensAt?: string | null; joinOpenMinutes?: number | null } = {}
 ): boolean => {
   const startDate = parseDateValue(slotStart)
   if (!startDate) return false
 
-  const tenMinutesBeforeStart = startDate.getTime() - 10 * 60 * 1000
+  const opensAtDate = parseDateValue(window.joinOpensAt ?? null)
+  const opensAt = opensAtDate
+    ? opensAtDate.getTime()
+    : typeof window.joinOpenMinutes === "number"
+      ? startDate.getTime() - window.joinOpenMinutes * 60 * 1000
+      : null
+  if (opensAt === null) return false
+
   const endDate = parseDateValue(slotEnd)
 
   if (!endDate) {
-    return nowTimestamp >= tenMinutesBeforeStart
+    return nowTimestamp >= opensAt
   }
 
-  return nowTimestamp >= tenMinutesBeforeStart && nowTimestamp <= endDate.getTime()
+  return nowTimestamp >= opensAt && nowTimestamp <= endDate.getTime()
 }

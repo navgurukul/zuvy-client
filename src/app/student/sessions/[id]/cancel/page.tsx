@@ -9,8 +9,6 @@ import { useCancelBookingPreview } from "@/app/student/hooks/useCancelBookingPre
 import { useMyMentorSessions } from "@/hooks/useMyMentorSessions";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 
-// Used only until the cancel preview answers
-const DEFAULT_REASON_MIN_LENGTH = 10;
 
 // Bolds the credit count ("2 of 3 left") inside the API's cancel-preview message
 const CREDITS_LEFT_PATTERN = /(\d+ of \d+ left)/;
@@ -82,7 +80,8 @@ export default function CancelBookingPage() {
 		loading: previewLoading,
 		error: previewError,
 	} = useCancelBookingPreview(bookingId, bookingId !== null);
-	const reasonMinLength = preview?.reasonMinLength ?? DEFAULT_REASON_MIN_LENGTH;
+	// From the cancel preview (the backend's rule); null until it answers, and the form waits for it
+	const reasonMinLength = typeof preview?.reasonMinLength === "number" ? preview.reasonMinLength : null;
 	const blockedMessage = preview && !preview.canCancel ? preview.blocked?.message || null : null;
 	const isBlocked = Boolean(preview && !preview.canCancel);
 
@@ -94,11 +93,12 @@ export default function CancelBookingPage() {
 		sessionTiming,
 	].filter(Boolean);
 
-	const isReasonValid = reason.trim().length >= reasonMinLength;
+	const isReasonValid = reasonMinLength !== null && reason.trim().length >= reasonMinLength;
 
 	const handleCancelBooking = async () => {
 		const trimmedReason = reason.trim();
 
+		if (reasonMinLength === null) return;
 		if (trimmedReason.length < reasonMinLength) {
 			setValidationError(`Reason must be at least ${reasonMinLength} characters.`);
 			return;
@@ -168,7 +168,7 @@ export default function CancelBookingPage() {
 						className="w-full min-h-[120px] border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 					/>
 					<p className="text-xs text-muted-foreground text-left">
-						Minimum {reasonMinLength} characters. Your mentor will see this.
+						{reasonMinLength !== null ? `Minimum ${reasonMinLength} characters. ` : ""}Your mentor will see this.
 					</p>
 				</div>
 

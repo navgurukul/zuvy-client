@@ -780,8 +780,14 @@ export interface MentorshipRules {
     gapDays: number
     noticeHours: number
     joinOpenMinutes: number
-    /** How many reschedules a mentor can accept per booking (currently 1) */
+    /** How many reschedules a mentor can accept per booking (config max_accepted_reschedules) */
     maxAcceptedReschedules?: number
+    /** New mentor slots start at least this many days ahead */
+    minSlotLeadDays?: number
+    /** Only bookings from this moment use a credit (ISO) */
+    creditsCountedFrom?: string
+    /** Cancel and reschedule reasons need at least this many characters */
+    reasonMinLength?: number
 }
 
 /** Whether the student's enrolment includes mentorship (same check booking makes) */

@@ -775,7 +775,7 @@ export default function AvailabilityPage() {
   return isInitialLoading ? (
     <CalendarSkeleton />
   ) : (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="text-left">
@@ -832,8 +832,9 @@ export default function AvailabilityPage() {
           {loading ? (
             <div className="h-[460px] animate-pulse bg-muted/40" />
           ) : (
-            <div>
-              <div className="grid grid-cols-7">
+            <div className="overflow-x-auto">
+              {/* Phones: the week scrolls sideways instead of squeezing each day */}
+              <div className="grid min-w-[640px] grid-cols-7">
                 {weekDays.map((day, idx) => {
                   const dateKey = toDateStr(day)
                   const daySlots = slotsByDate[dateKey] ?? []

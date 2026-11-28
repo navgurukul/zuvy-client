@@ -10,12 +10,9 @@ import { useGetRescheduleSlots } from "@/app/student/hooks/useGetRescheduleSlots
 import { useMentorProfile } from "@/app/student/hooks/useMentorProfile";
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { cn } from "@/lib/utils";
+import { formatTimesPhrase } from "@/utils/mentorshipRules";
 
-const REASON_MIN_LENGTH = 10;
 
-/** 1 -> "once", 2 -> "twice", 3 -> "3 times" */
-const formatTimes = (count: number): string =>
-	count === 1 ? "once" : count === 2 ? "twice" : `${count} times`;
 
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
@@ -113,6 +110,9 @@ export default function RescheduleBookingPage() {
 	// Slots offered by GET .../reschedule/slots start at least rules.noticeHours ahead (from the backend)
 	const noticeLabel =
 		typeof rules?.noticeHours === "number" ? `${rules.noticeHours}+ hours away` : null;
+	// From the backend (rules.reasonMinLength); null until the sessions response arrives
+	const reasonMinLength = typeof rules?.reasonMinLength === "number" ? rules.reasonMinLength : null;
+	const movedTimes = formatTimesPhrase(rules?.maxAcceptedReschedules);
 
 	const bookingMeta = [
 		`Booking #${bookingId ?? "-"}`,
@@ -147,7 +147,7 @@ export default function RescheduleBookingPage() {
 			case "RESCHEDULE_PENDING":
 				return "You've already asked to reschedule this session. Wait for your mentor's reply.";
 			case "RESCHEDULE_LIMIT":
-				return `This session has already been moved ${formatTimes(rules?.maxAcceptedReschedules ?? 1)}, so it can't be rescheduled again. You can still cancel it.`;
+				return `This session has already been moved${movedTimes ? ` ${movedTimes}` : ""}, so it can't be rescheduled again. You can still cancel it.`;
 			case "TOO_LATE_TO_CHANGE":
 				return typeof rules?.noticeHours === "number"
 					? `Rescheduling closes ${rules.noticeHours} hours before the session. If you can't attend, email team@zuvy.org.`
@@ -155,12 +155,13 @@ export default function RescheduleBookingPage() {
 			default:
 				return session.message?.trim() || "This session can't be rescheduled right now.";
 		}
-	}, [isSubmitted, sessionsLoading, sessionsError, session, rescheduleAction, rules?.noticeHours, rules?.maxAcceptedReschedules]);
+	}, [isSubmitted, sessionsLoading, sessionsError, session, rescheduleAction, rules?.noticeHours, movedTimes]);
 	const isBlocked = !!rescheduleBlockedMessage;
 
 	const canSubmit =
 		!!selectedNewSlotId &&
-		reason.trim().length >= REASON_MIN_LENGTH &&
+		reasonMinLength !== null &&
+		reason.trim().length >= reasonMinLength &&
 		!isRescheduling &&
 		!isSubmitted &&
 		!isBlocked;
@@ -176,8 +177,8 @@ export default function RescheduleBookingPage() {
 			return;
 		}
 
-		if (reason.trim().length < REASON_MIN_LENGTH) {
-			setValidationError(`Reason must be at least ${REASON_MIN_LENGTH} characters.`);
+		if (reasonMinLength !== null && reason.trim().length < reasonMinLength) {
+			setValidationError(`Reason must be at least ${reasonMinLength} characters.`);
 			return;
 		}
 
@@ -316,7 +317,7 @@ export default function RescheduleBookingPage() {
 						className="min-h-[96px] w-full rounded-xl border border-border bg-muted/40 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 					/>
 					<p className="text-xs text-muted-foreground">
-						Minimum {REASON_MIN_LENGTH} characters. {mentorFirstName} will see this.
+						{reasonMinLength !== null ? `Minimum ${reasonMinLength} characters. ` : ""}{mentorFirstName} will see this.
 					</p>
 				</div>
 

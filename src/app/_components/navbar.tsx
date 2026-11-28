@@ -186,10 +186,10 @@ const Navbar = () => {
 
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
-            <div className="flex h-16 items-center justify-between px-6">
-                <div className="flex items-center gap-2">
+            <div className="flex h-16 items-center justify-between gap-2 px-4 sm:px-6">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     {/* Logo and Brand */}
-                    <Link href={isSuperAdmin || !orgId ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
+                    <Link href={isSuperAdmin || !orgId ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex shrink-0 items-center space-x-3">
                         <Image
                             src={isDark ? '/zuvy-logo-horizontal-dark.png' : '/zuvy-logo-horizontal.png'}
                             height={100}
@@ -201,7 +201,8 @@ const Navbar = () => {
                     <OrganizationDropdown orgId={orgId} />
 
                     {/* Navigation Items */}
-                    <nav className="flex items-center space-x-1">
+                    {/* Below lg the links show their icon only, and the row scrolls if it still doesn't fit */}
+                    <nav className="flex min-w-0 items-center space-x-1 overflow-x-auto">
                         {routes.map((item) => {
                             const Icon = item.icon
 
@@ -234,15 +235,16 @@ const Navbar = () => {
                                                     ? `${item.href}?orgId=${orgId}`
                                                     : item.href
                                             }
+                                            title={item.name}
                                             className={cn(
-                                                'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
+                                                'flex shrink-0 items-center space-x-2 whitespace-nowrap px-3 lg:px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
                                                 isActive
                                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                                     : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10'
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
-                                            <span>{item.name}</span>
+                                            <span className="hidden lg:inline">{item.name}</span>
                                         </Link>
                                     )}
                                     {item.name === 'Question Bank' && !loading && permissions.viewQuestion && (
@@ -255,7 +257,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
-                <div className="flex items-center gap-2 sm:gap-3 text-left">
+                <div className="flex shrink-0 items-center gap-2 sm:gap-3 text-left">
 
                     {/* Role Badge */}
                     {/* {studentData?.rolesList?.[0] && (
@@ -265,7 +267,7 @@ const Navbar = () => {
                     )} */}
                     <Badge
                         // variant="yellow"
-                        className="py-1 px-4 text-sm font-medium bg-violet-50 dark:bg-violet-500/20 text-violet-700 dark:text-violet-600 border border-violet-200 dark:border-violet-400 hover:bg-violet-100"
+                        className="hidden sm:inline-flex py-1 px-4 text-sm font-medium bg-violet-50 dark:bg-violet-500/20 text-violet-700 dark:text-violet-600 border border-violet-200 dark:border-violet-400 hover:bg-violet-100"
                     >
                         {formattedRole(role)}
                     </Badge>
@@ -282,7 +284,7 @@ const Navbar = () => {
                             )}
                         >
                             <Settings className="h-4 w-4" />
-                            <span>Setting</span>
+                            <span className="hidden md:inline">Setting</span>
                         </Link>
                     )}
 
@@ -298,7 +300,7 @@ const Navbar = () => {
                             )}
                         >
                             <Bell className="h-4 w-4" />
-                            <span>Audit Log</span>
+                            <span className="hidden md:inline">Audit Log</span>
                         </Link>
                     )}
 
@@ -329,7 +331,7 @@ const Navbar = () => {
             </div>
 
             {isInstructorUser && isMentorsDashboardRoute && (
-                <div className="h-12 px-6 border-t bg-background flex items-center gap-2">
+                <div className="h-12 px-4 sm:px-6 border-t bg-background flex items-center gap-2 overflow-x-auto">
                     {mentorsTabs.map((tab) => {
                         const basePath = `/${role}/mentorsDashboard/${tab.path}`
                         const href = orgId ? `${basePath}?orgId=${orgId}` : basePath
@@ -340,7 +342,7 @@ const Navbar = () => {
                                 key={tab.path}
                                 href={href}
                                 className={cn(
-                                    'px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
+                                    'shrink-0 whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-2',
                                     isTabActive
                                         ? 'border-green-600 text-foreground'
                                         : 'border-transparent text-muted-foreground hover:text-foreground'

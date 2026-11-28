@@ -24,6 +24,7 @@ import {
   Star,
   RefreshCw,
   CircleSlash,
+  Radio,
   type LucideIcon,
 } from "lucide-react"
 import {
@@ -39,7 +40,7 @@ import { toast } from "@/components/ui/use-toast"
 import { useSubmitStudentFeedback } from "@/app/student/hooks/useSubmitStudentFeedback"
 import { getMentorsHref } from "@/utils/studentMentorshipRoutes"
 
-type Tab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled" | "missed"
+type Tab = "all" | "upcoming" | "ongoing" | "reschedule" | "completed" | "cancelled" | "missed"
 
 // Upcoming and Reschedule requested both come from the API's `upcoming` filter
 // (it includes sessions with a reschedule pending) and are split by displayState.
@@ -48,6 +49,8 @@ const RESCHEDULE_STATES: SessionDisplayState[] = ["RESCHEDULE_REQUESTED"]
 const TABS: { key: Tab; label: string; icon: LucideIcon; id?: string; emptyTitle: string; emptyText?: string }[] = [
   { key: "all", label: "All", icon: Calendar, id: "tour-all-sessions", emptyTitle: "No sessions yet", emptyText: "Your sessions will appear here once you book them." },
   { key: "upcoming", label: "Upcoming", icon: CalendarDays, id: "tour-upcoming-sessions", emptyTitle: "No upcoming sessions" },
+  // Started and not ended yet (GET ...?filter=ongoing); Upcoming holds sessions that haven't started
+  { key: "ongoing", label: "Ongoing", icon: Radio, emptyTitle: "No sessions happening now", emptyText: "A session shows here from its start time until it ends." },
   { key: "reschedule", label: "Reschedule requested", icon: RefreshCw, emptyTitle: "No reschedule requests" },
   { key: "completed", label: "Completed", icon: CheckCircle2, id: "tour-completed-sessions", emptyTitle: "No completed sessions yet", emptyText: "Your completed sessions will appear here after you attend them." },
   { key: "cancelled", label: "Cancelled", icon: XCircle, emptyTitle: "No cancelled sessions" },
@@ -99,8 +102,8 @@ export default function MySessions() {
     !isUpcomingGroupTab,
     "/student/mentor-sessions/my",
     activeTab as SessionFilter,
-    // Past tabs: latest session first. "All" mixes past and upcoming, so it keeps booking order.
-    activeTab === "all" ? undefined : "desc",
+    // Ongoing: soonest first. Past tabs: latest session first. "All" mixes past and upcoming, so it keeps booking order.
+    activeTab === "all" ? undefined : activeTab === "ongoing" ? "asc" : "desc",
     activeTab === "all" ? undefined : "start"
   )
 
@@ -134,6 +137,7 @@ export default function MySessions() {
   const tabCounts: Record<Tab, number> = {
     all: Number(allCounts.total) || 0,
     upcoming: Math.max((Number(allCounts.upcoming) || 0) - rescheduleSessions.length, upcomingSessions.length),
+    ongoing: Number(allCounts.ongoing) || 0,
     reschedule: rescheduleSessions.length,
     completed: Number(allCounts.completed) || 0,
     cancelled: Number(allCounts.cancelled) || 0,

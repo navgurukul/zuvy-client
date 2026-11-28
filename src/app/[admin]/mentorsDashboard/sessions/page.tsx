@@ -37,9 +37,9 @@ import {
   isJoinWindowOpen,
 } from "@/utils/sessionDateTime"
 
-type SessionTab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled" | "missed"
+type SessionTab = "all" | "upcoming" | "ongoing" | "reschedule" | "completed" | "cancelled" | "missed"
 
-const SESSION_TABS: SessionTab[] = ["all", "upcoming", "reschedule", "completed", "cancelled", "missed"]
+const SESSION_TABS: SessionTab[] = ["all", "upcoming", "ongoing", "reschedule", "completed", "cancelled", "missed"]
 
 // Dashboard links open a tab with ?tab=...; "action-needed" is the API's name for the reschedule tab
 const parseTabParam = (value: string | null): SessionTab | null => {
@@ -64,9 +64,6 @@ const formatDateTime = (value?: string | null) => {
   })
 }
 
-// Fallback for the API's `rules.joinOpenMinutes`
-const DEFAULT_JOIN_OPEN_MINUTES = 10
-const MIN_CANCEL_REASON_LENGTH = 10
 
 // e.g. "Fri, 6 Nov 2026"
 const formatPanelDate = (value?: string | null) => {
@@ -212,16 +209,21 @@ export default function SessionsPage() {
     "/instructor/mentor-sessions/my",
     activeTab as SessionFilter,
     // Upcoming: next session first. Past tabs: latest session first. "All" keeps booking order.
-    activeTab === "all" ? undefined : activeTab === "upcoming" || activeTab === "reschedule" ? "asc" : "desc",
+    activeTab === "all" ? undefined : activeTab === "upcoming" || activeTab === "ongoing" || activeTab === "reschedule" ? "asc" : "desc",
     activeTab === "all" ? undefined : "start"
   )
   // From the backend (GET /instructor/mentor-sessions/my -> rules.noticeHours)
   const noticeHours = rules?.noticeHours
-  const joinOpenMinutes = rules?.joinOpenMinutes ?? DEFAULT_JOIN_OPEN_MINUTES
+  // From the backend; null until the first response arrives
+  const joinOpenMinutes = rules?.joinOpenMinutes ?? null
+  // Cancel reasons need rules.reasonMinLength characters (the backend's rule)
+  const minCancelReasonLength = typeof rules?.reasonMinLength === "number" ? rules.reasonMinLength : null
 
   const summaryCounts = {
     total: Number(counts.total) || 0,
     upcoming: Number(counts.upcoming) || 0,
+    // Started and not ended yet (happening now)
+    ongoing: Number(counts.ongoing) || 0,
     reschedule: Number(counts.actionNeeded ?? counts.reschedule) || 0,
     completed: Number(counts.completed) || 0,
     cancelled: Number(counts.cancelled) || 0,
@@ -310,7 +312,10 @@ export default function SessionsPage() {
     ? selectedActions.join.allowed
     : Boolean(
         selectedSession?.meetingLink?.trim() &&
-        isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp)
+        isJoinWindowOpen(selectedSession?.slotStart, selectedSession?.slotEnd, nowTimestamp, {
+          joinOpensAt: selectedSession?.joinOpensAt,
+          joinOpenMinutes,
+        })
       )
 
   const { isFetchingJoinLink, getJoinLink } = useMentorJoinLink()
@@ -566,7 +571,7 @@ export default function SessionsPage() {
   const handleCancelSession = async () => {
     if (!selectedSession) return
     const reason = cancelReason.trim()
-    if (reason.length < MIN_CANCEL_REASON_LENGTH) return
+    if (minCancelReasonLength === null || reason.length < minCancelReasonLength) return
 
     const ok = await cancelBooking(selectedSession.id, reason, "mentor", "instructor")
     if (ok) {
@@ -641,7 +646,7 @@ export default function SessionsPage() {
   return isInitialLoading ? (
     <SessionsSkeleton />
   ) : (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
 
       <div className="mb-4 text-left">
         <h1 className="text-lg font-semibold">Sessions</h1>
@@ -650,7 +655,7 @@ export default function SessionsPage() {
         </p>
       </div>
 
-      <div className="mb-4 flex items-center gap-6  text-sm">
+      <div className="mb-4 flex items-center gap-6 overflow-x-auto whitespace-nowrap text-sm [&>button]:shrink-0">
         <button
           onClick={() => {
             setActiveTab("all")
@@ -683,6 +688,25 @@ export default function SessionsPage() {
             {Number(summaryCounts.upcoming) || 0}
           </span>
           {activeTab === "upcoming" && (
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("ongoing")
+            setSelectedBookingId(null)
+          }}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "ongoing"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
+            }`}
+        >
+          <span>Ongoing</span>
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
+            {Number(summaryCounts.ongoing) || 0}
+          </span>
+          {activeTab === "ongoing" && (
             <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
@@ -776,9 +800,9 @@ export default function SessionsPage() {
           </div>
         </div>
       ) : (
-        <div className="flex h-[600px] overflow-hidden rounded-xl border border-border bg-card">
-          <div className="flex w-[410px] flex-col border-r border-border">
-            <div className="flex-1 space-y-0 overflow-y-auto p-0">
+        <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card md:h-[600px] md:flex-row">
+          <div className="flex w-full flex-col border-b border-border md:w-[410px] md:border-b-0 md:border-r">
+            <div className="max-h-80 flex-1 space-y-0 overflow-y-auto p-0 md:max-h-none">
               {loading && <p className="text-sm text-muted-foreground">Loading sessions...</p>}
               {!loading && error && <p className="text-sm text-red-500">{error}</p>}
               {!loading && !error && sessions.length === 0 && (
@@ -936,7 +960,7 @@ export default function SessionsPage() {
                     </div>
                   )}
 
-                  {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && hasJoinTarget && !canJoinSelectedSession &&
+                  {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && hasJoinTarget && !canJoinSelectedSession && joinOpenMinutes !== null &&
                     (!selectedActions?.join || selectedActions.join.reason === "JOIN_NOT_OPEN") && (
                     <p className="mt-6 text-xs text-muted-foreground">
                       Join opens {joinOpenMinutes} min before start
@@ -1175,7 +1199,7 @@ export default function SessionsPage() {
               className="min-h-[100px]"
             />
             <p className="text-xs text-muted-foreground">
-              Minimum {MIN_CANCEL_REASON_LENGTH} characters. The student will see this.
+              {minCancelReasonLength !== null ? `Minimum ${minCancelReasonLength} characters. ` : ""}The student will see this.
             </p>
             {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
           </div>
@@ -1192,7 +1216,7 @@ export default function SessionsPage() {
               type="button"
               className="bg-green-700 hover:bg-green-800"
               onClick={handleCancelSession}
-              disabled={isCancelling || cancelReason.trim().length < MIN_CANCEL_REASON_LENGTH}
+              disabled={isCancelling || minCancelReasonLength === null || cancelReason.trim().length < minCancelReasonLength}
             >
               {isCancelling ? "Cancelling..." : "Confirm cancel"}
             </Button>

@@ -27,11 +27,14 @@ const parseBookingResponse = (
     return null
 }
 
-/** Fixed text per refusal code (from the API spec) */
+/**
+ * Used only if a refusal comes back without a message (the backend always sends one,
+ * with the configured numbers). No rule numbers here: they belong to the backend.
+ */
 const BOOK_SLOT_ERROR_MESSAGES: Record<Exclude<BookSlotErrorCode, 'SLOT_UNAVAILABLE'>, string> = {
-    SLOT_TOO_SOON: 'slot under 72 h away',
-    NO_CREDITS: 'no credits left',
-    GAP_ACTIVE: 'inside the 2-week gap',
+    SLOT_TOO_SOON: 'This slot starts too soon to book. Pick a later slot.',
+    NO_CREDITS: "You've used all your mentorship credits.",
+    GAP_ACTIVE: "You can't book another session yet. Sessions need a gap between them.",
 }
 
 const KNOWN_CODES = Object.keys(BOOK_SLOT_ERROR_MESSAGES) as BookSlotErrorCode[]

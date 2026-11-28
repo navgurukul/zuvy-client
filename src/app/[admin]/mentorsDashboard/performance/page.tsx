@@ -99,7 +99,7 @@ export default function PerformanceMetrics() {
   return isInitialLoading ? (
     <PerformanceSkeleton />
   ) : (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
       <div className="text-left mb-6">
         <h1 className="text-lg font-semibold">Performance Metrics</h1>
         <p className="text-sm text-muted-foreground">
@@ -107,7 +107,7 @@ export default function PerformanceMetrics() {
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {[
           { value: "30days", label: "Last 30 days" },
           { value: "3months", label: "Last 3 months" },

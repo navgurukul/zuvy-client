@@ -182,6 +182,12 @@ function DashboardPageContent() {
     loading: upcomingSessionsLoading,
     error: upcomingSessionsError,
   } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "upcoming", "asc", "start")
+  // Happening now (started, not ended): listed first, above the upcoming ones
+  const {
+    sessions: ongoingSessions,
+    loading: ongoingSessionsLoading,
+    error: ongoingSessionsError,
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "ongoing", "asc", "start")
   const {
     metrics,
     loading: metricsLoading,
@@ -202,6 +208,11 @@ function DashboardPageContent() {
     notificationsLoading
 
   const upcomingSessionsCount = Number(metrics?.sessions?.upcoming) || 0
+  const ongoingSessionsCount = Number(metrics?.sessions?.ongoing) || 0
+  const listLoading = upcomingSessionsLoading || ongoingSessionsLoading
+  const listError = upcomingSessionsError || ongoingSessionsError
+  const ongoingIds = new Set(ongoingSessions.map((session) => session.id))
+  const scheduleSessions = [...ongoingSessions, ...upcomingSessions.filter((session) => !ongoingIds.has(session.id))]
   const isEmptyDashboard = (Number(metrics?.utilization?.totalSlots) || 0) === 0
   // return isInitialLoading ? (
   //   <MentorDashboardSkeleton />
@@ -376,7 +387,7 @@ function DashboardPageContent() {
     )
   }
   return (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
       {dashboardAlerts.length > 0 && (
         <div className="space-y-3 mb-4 text-left">
           {dashboardAlerts.map((alert: any, index) => (
@@ -447,7 +458,9 @@ function DashboardPageContent() {
               <div className="text-left">
                 <p className="text-2xl font-bold">{upcomingSessionsCount}</p>
                 <p className="text-xs text-muted-foreground">Upcoming Sessions</p>
-                <p className="text-xs  mt-0">Next on your schedule</p>
+                <p className="text-xs  mt-0">
+                  {ongoingSessionsCount > 0 ? `${ongoingSessionsCount} happening now` : "Next on your schedule"}
+                </p>
               </div>
             </div>
 
@@ -519,7 +532,8 @@ function DashboardPageContent() {
         </Card>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* One column on phones; a session row can't widen it (min-w-0) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [&>*]:min-w-0">
         <div className="lg:col-span-2 space-y-6">
           <Card className='rounded-lg shadow-sm border-slate-200 hover:shadow-md transition-shadow min-h-[300px] flex flex-col'>
             <CardHeader className="flex flex-row justify-between items-center">
@@ -532,18 +546,18 @@ function DashboardPageContent() {
             </CardHeader>
 
             <CardContent className="">
-              {upcomingSessionsLoading && <p className="text-sm text-muted-foreground">Loading upcoming sessions...</p>}
-              {!upcomingSessionsLoading && upcomingSessionsError && <p className="text-sm text-red-500">{upcomingSessionsError}</p>}
-              {!upcomingSessionsLoading && !upcomingSessionsError && upcomingSessions.length === 0 && (
+              {listLoading && <p className="text-sm text-muted-foreground">Loading upcoming sessions...</p>}
+              {!listLoading && listError && <p className="text-sm text-red-500">{listError}</p>}
+              {!listLoading && !listError && scheduleSessions.length === 0 && (
                 <div className='flex flex-col items-center justify-center text-center mt-10'>
                   <CalendarX className="h-8 w-8 text-muted-foreground" />
                   <p className="text-sm font-semibold text-text-primary">No upcoming sessions</p>
                   <p className="text-xs text-text-muted mt-0.5">Update your availability to let learners book sessions</p>
                 </div>
               )}
-              {!upcomingSessionsLoading &&
-                !upcomingSessionsError &&
-                upcomingSessions.slice(0, 5).map((session) => (
+              {!listLoading &&
+                !listError &&
+                scheduleSessions.slice(0, 5).map((session) => (
                   <div key={session.id} className=" border-b p-3 flex items-center justify-between gap-3 mb-0">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-600">
@@ -562,7 +576,11 @@ function DashboardPageContent() {
                         </p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 hover:text-green-700">{session.status}</Badge>
+                    {ongoingIds.has(session.id) ? (
+                      <Badge className="bg-red-50 text-red-700 hover:bg-red-50 hover:text-red-700 dark:bg-red-950/40 dark:text-red-300">Live now</Badge>
+                    ) : (
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 hover:text-green-700">{session.status}</Badge>
+                    )}
                   </div>
                 ))}
             </CardContent>

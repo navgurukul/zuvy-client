@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle  } from "@/components/ui/sheet"
 import { getSessionsHref } from "@/utils/studentMentorshipRoutes"
+import { formatGapPhrase } from "@/utils/mentorshipRules"
 
 type MentorBookingDrawerProps = {
   mentor: Mentor | null
@@ -24,15 +25,12 @@ type MentorBookingDrawerProps = {
   orgId?: string
   /** rules.noticeHours from GET /student/mentorship/eligibility; slots closer than this aren't listed */
   noticeHours?: number
+  /** rules.gapDays from GET /student/mentorship/eligibility; days between a student's sessions */
+  gapDays?: number
   /** Called after a successful booking so the page can refresh credits and mentor counts */
   onBooked?: () => void
 }
 
-const DEFAULT_NOTICE_HOURS = 72
-
-// Cooldown between bookings, counted from the booked session's start
-// Used only when the booking preview API has not answered
-const BOOKING_COOLDOWN_DAYS = 14
 
 // Turns email addresses inside API text (e.g. "email team@zuvy.org") into mailto links
 const EMAIL_PATTERN = /([\w.+-]+@[\w-]+\.[\w.-]+)/g
@@ -86,7 +84,8 @@ export default function MentorBookingDrawer({
   onOpenChange,
   courseId,
   orgId,
-  noticeHours = DEFAULT_NOTICE_HOURS,
+  noticeHours,
+  gapDays,
   onBooked,
 }: MentorBookingDrawerProps) {
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null)
@@ -163,13 +162,15 @@ export default function MentorBookingDrawer({
     selectedPreview && !selectedPreview.canBook ? selectedPreview.blocked?.message || "You can't book this slot." : null
   const remainingCredits = typeof metrics?.remainingCredits === "number" ? metrics.remainingCredits : null
   const creditsLeftAfter = remainingCredits !== null ? Math.max(remainingCredits - 1, 0) : null
+  // Used only when the booking preview hasn't answered; the gap is the backend's rules.gapDays
   const nextBookingOpensOn = useMemo(() => {
-    if (!selectedSlot) return null
+    if (!selectedSlot || typeof gapDays !== "number") return null
     const start = new Date(selectedSlot.slotStartDateTime)
     if (Number.isNaN(start.getTime())) return null
-    start.setDate(start.getDate() + BOOKING_COOLDOWN_DAYS)
+    start.setDate(start.getDate() + gapDays)
     return start
-  }, [selectedSlot])
+  }, [selectedSlot, gapDays])
+  const gapPhrase = formatGapPhrase(gapDays)
   const canBook = selectedPreview
     ? !!mentor && isAvailable && !isBooking && selectedPreview.canBook
     : !!mentor && isAvailable && selectedSlotId !== null && !isBooking && !previewLoading && !bookingEligibilityBlocked && !bookingNotYetEligible
@@ -247,7 +248,9 @@ export default function MentorBookingDrawer({
                 {/* Available Slots */}
                 <section>
                   <h3 className="text-left text-sm font-semibold text-foreground">Available Slots</h3>
-                  <p className="mt-1 mb-3 text-left text-xs text-muted-foreground">Select one slot. Slots starting in under {noticeHours} hours aren&apos;t shown.</p>
+                  <p className="mt-1 mb-3 text-left text-xs text-muted-foreground">
+                    Select one slot.{typeof noticeHours === "number" ? <> Slots starting in under {noticeHours} hours aren&apos;t shown.</> : null}
+                  </p>
 
                   {loading ? (
                     <p className="text-xs text-muted-foreground">Loading slots...</p>
@@ -320,7 +323,7 @@ export default function MentorBookingDrawer({
                     </p>
                     {nextBookingOpensOn ? (
                       <p className="mt-1 text-left text-xs text-muted-foreground">
-                        Your next booking opens on {formatShortDate(nextBookingOpensOn)}, 2 weeks after this session.
+                        Your next booking opens on {formatShortDate(nextBookingOpensOn)}{gapPhrase ? `, ${gapPhrase} after this session` : ""}.
                       </p>
                     ) : null}
                   </section>

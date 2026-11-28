@@ -34,7 +34,7 @@ export const getSessionDisplayState = (session: MyMentorSession, now: number): S
   if (lifecycle === "COMPLETED") return "COMPLETED"
   if (lifecycle === "IN_PROGRESS") return "IN_PROGRESS"
   if (lifecycle === "RESCHEDULE_PENDING" || rescheduleStatus === "pending") return "RESCHEDULE_REQUESTED"
-  if (isJoinWindowOpen(session.slotStart, session.slotEnd, now)) return "STARTING_SOON"
+  if (isJoinWindowOpen(session.slotStart, session.slotEnd, now, { joinOpensAt: session.joinOpensAt })) return "STARTING_SOON"
   return "UPCOMING"
 }
 
@@ -53,7 +53,8 @@ const getSessionActions = (
   // No rule sent: leave it to the backend, which refuses with its own message.
   const noticeMs = typeof noticeHours === "number" ? noticeHours * 60 * 60 * 1000 : 0
   const changesOpen = state === "UPCOMING" && Number.isFinite(startMs) && startMs - now > noticeMs
-  const canJoin = Boolean(joinUrl) && (state === "IN_PROGRESS" || isJoinWindowOpen(session.slotStart, session.slotEnd, now))
+  // The join time comes from the backend (joinOpensAt); without it the button stays off
+  const canJoin = Boolean(joinUrl) && (state === "IN_PROGRESS" || isJoinWindowOpen(session.slotStart, session.slotEnd, now, { joinOpensAt: session.joinOpensAt }))
   const feedbackGiven = Boolean(session.studentFeedbackSubmittedAt || session.studentRating)
 
   return {

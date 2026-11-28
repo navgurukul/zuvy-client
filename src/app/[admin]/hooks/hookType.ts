@@ -663,6 +663,8 @@ export interface MarkAttendanceResponse {
 export interface SessionMetrics {
   total: string | number
   upcoming: string | number
+  /** Started and not ended yet (happening now) */
+  ongoing?: string | number
   completed: string | number
   cancelled: string | number
   missed: string | number

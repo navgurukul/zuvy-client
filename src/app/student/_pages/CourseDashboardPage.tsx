@@ -32,6 +32,7 @@ import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/st
 import { cn, CAREER_TOUR_BOOTCAMP_IDS } from "@/lib/utils";
 import { getMentorsHref, getSessionJoinHref, getSessionsHref } from "@/utils/studentMentorshipRoutes";
 import { isJoinWindowOpen as isMentorSessionJoinWindowOpen } from "@/utils/sessionDateTime";
+import { useMentorshipEligibility } from "@/app/student/hooks/useMentorshipEligibility";
 import { MentorSessionEvent, Module } from "../hooks/hookTypes";
 import AnimatedLeaderboard from '@/components/AnimatedLeaderboard';
 import LeaderboardModal from '@/app/student/_components/LeaderboardModal';
@@ -61,6 +62,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { completedClassesData, loading: classesLoading, error: classesError } = useStudentCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
   const { mentors: mentorshipMentors } = useMentors('', Boolean(latestCourseData?.mentorshipEnabled), 1000, 0, orgId as string | undefined);
+  // Mentorship rule numbers come from the backend (GET /student/mentorship/eligibility -> rules)
+  const { eligibility: mentorshipEligibility } = useMentorshipEligibility(Boolean(latestCourseData?.mentorshipEnabled));
+  const mentorJoinOpenMinutes = mentorshipEligibility?.rules?.joinOpenMinutes ?? null;
   const {
     topEntries: leaderboardEntries,
     modalEntries: leaderboardModalEntries,
@@ -734,7 +738,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             </Button>
                           ) : eventType === 'Mentor Session' && isMentorSession(item) ? (
                             (() => {
-                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime, Date.now(), { joinOpenMinutes: mentorJoinOpenMinutes })
                               const joinHref = getMentorSessionJoinHref(item)
 
                               if (canJoinNow && joinHref) {
@@ -753,7 +757,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     Join Session
                                   </Button>
                                   <p className="text-xs text-muted-foreground text-right">
-                                    Join opens 10 minutes before start.
+                                    {mentorJoinOpenMinutes !== null && `Join opens ${mentorJoinOpenMinutes} minutes before start.`}
                                   </p>
                                 </div>
                               )
@@ -836,7 +840,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             </Button>
                           ) : eventType === 'Mentor Session' && isMentorSession(item) ? (
                             (() => {
-                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                              const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime, Date.now(), { joinOpenMinutes: mentorJoinOpenMinutes })
                               const joinHref = getMentorSessionJoinHref(item)
 
                               if (canJoinNow && joinHref) {
@@ -855,7 +859,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     Join Session
                                   </Button>
                                   <p className="text-xs text-muted-foreground text-right">
-                                    Join opens 10 minutes before start.
+                                    {mentorJoinOpenMinutes !== null && `Join opens ${mentorJoinOpenMinutes} minutes before start.`}
                                   </p>
                                 </div>
                               )
@@ -1333,7 +1337,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   </div>
                                 )}
                                 {eventType === 'Mentor Session' && isMentorSession(item) && (() => {
-                                  const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime)
+                                  const canJoinNow = isMentorSessionJoinWindowOpen(item.startTime, item.endTime, Date.now(), { joinOpenMinutes: mentorJoinOpenMinutes })
                                   const joinHref = getMentorSessionJoinHref(item)
 
                                   return (
@@ -1351,7 +1355,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       )}
                                       {!canJoinNow && (
                                         <p className="text-xs text-muted-foreground text-right">
-                                          Join opens 10 minutes before start.
+                                          {mentorJoinOpenMinutes !== null && `Join opens ${mentorJoinOpenMinutes} minutes before start.`}
                                         </p>
                                       )}
                                     </div>
