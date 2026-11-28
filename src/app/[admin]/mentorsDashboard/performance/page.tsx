@@ -44,15 +44,17 @@ export default function PerformanceMetrics() {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "completed", "desc")
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "completed", "desc", "start")
 
+  const [feedbackFilter, setFeedbackFilter] = useState<"30days" | "3months" | "all">("30days")
+
+  // The period buttons drive both calls; metrics names the periods 30d / 3m
+  const metricsFilter = feedbackFilter === "30days" ? "30d" : feedbackFilter === "3months" ? "3m" : "all"
   const {
     metrics,
     loading: metricsLoading,
     error: metricsError,
-  } = useMentorMetrics(true)
-
-  const [feedbackFilter, setFeedbackFilter] = useState<"30days" | "3months" | "all">("30days")
+  } = useMentorMetrics(true, metricsFilter)
   const {
     feedbacks,
     loading: feedbacksLoading,
@@ -204,7 +206,7 @@ export default function PerformanceMetrics() {
                   "Student"
 
                 const dateVal = entry.createdAt || entry.submittedAt || entry.date
-                const feedbackText = entry.feedback || entry.notes || ""
+                const feedbackText = entry.studentFeedback || entry.feedback || entry.notes || ""
 
                 return (
                   <div key={entry.id || entry.bookingId} className="rounded-lg border p-3 bg-card space-y-1">

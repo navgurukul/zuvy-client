@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMentors } from "@/app/student/hooks/useMentors";
 import { api } from "@/utils/axios.config";
 import { SearchBox } from "@/utils/searchBox";
-import { useStudentMentorMetrics } from "@/app/student/hooks/useStudentMentorMetrics";
+import { useMentorshipEligibility } from "@/app/student/hooks/useMentorshipEligibility";
 import { useMentorSkills } from "@/app/student/hooks/useMentorSkills";
 import { MentorExpertiseChips, MentorExpertiseDropdown } from "@/app/student/_components/MentorExpertiseFilter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,14 +18,20 @@ import { useMentorProfile } from "../hooks/useMentorProfile";
 type MentorsSearchResponse = Mentor[] | { data?: Mentor[] };
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
 
-const formatEligibleDate = (dateString: string | null): string => {
-    if (!dateString) return "Soon";
+// The gap ends at an exact minute in IST, e.g. "Fri, 20 Nov 2026, 6:00 pm"
+const formatEligibleDate = (dateString: string | null): string | null => {
+    if (!dateString) return null;
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleString("en-GB", {
+        timeZone: "Asia/Kolkata",
         weekday: "short",
-        month: "short",
         day: "numeric",
+        month: "short",
         year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
     });
 };
 
@@ -65,20 +71,16 @@ export default function MentorsPage() {
     // GET /student/mentors/skills?inUse=true - fetched once, feeds the dropdown and the chips
     const { skills, loading: skillsLoading, error: skillsError } = useMentorSkills()
 
+    // "Show all" off sends available=true, so the server filters and pages the bookable mentors
     const { mentors, total, loading, error, refetchMentors } = useMentors(
         searchQuery,
-        showAllMentors,
+        true,
         limit,
         offset,
         orgId || undefined,
-        selectedExpertise
+        selectedExpertise,
+        !showAllMentors
     )
-
-    const {
-        mentors: availableMentorPool,
-        loading: availableMentorPoolLoading,
-        error: availableMentorPoolError,
-    } = useMentors(searchQuery, !showAllMentors, 10, 0, orgId || undefined, selectedExpertise)
 
     const { mentorProfile: requestedMentorProfile, loading: requestedMentorLoading } = useMentorProfile(
         mentorIdToOpen || undefined,
@@ -86,18 +88,14 @@ export default function MentorsPage() {
         orgId || undefined
     )
 
-    const { metrics, loading: metricsLoading } = useStudentMentorMetrics()
-
-    const availableMentors = useMemo(() => {
-        return availableMentorPool.filter((mentor) => {
-            return mentor.availabilityStatus?.trim().toLowerCase() === "available"
-        })
-    }, [availableMentorPool])
+    const { eligibility, loading: eligibilityLoading, refetchEligibility } = useMentorshipEligibility()
+    const credits = eligibility?.credits
+    const rules = eligibility?.rules
 
     useEffect(() => {
-        if (!mentorIdToOpen || availableMentorPoolLoading || requestedMentorLoading) return
+        if (!mentorIdToOpen || loading || requestedMentorLoading) return
 
-        const mentorToOpen = availableMentorPool.find(
+        const mentorToOpen = mentors.find(
             (mentor) => String(mentor.userId) === mentorIdToOpen
         )
 
@@ -123,18 +121,51 @@ export default function MentorsPage() {
             })
             setIsDrawerOpen(true)
         }
-    }, [availableMentorPool, availableMentorPoolLoading, mentorIdToOpen, requestedMentorLoading, requestedMentorProfile, orgId])
+    }, [mentors, loading, mentorIdToOpen, requestedMentorLoading, requestedMentorProfile, orgId])
 
-    const totalForPagination = showAllMentors ? total : availableMentors.length
+    const totalForPagination = total
     const totalPages = Math.max(1, Math.ceil(totalForPagination / limit))
-    const visibleMentors = useMemo(() => {
-        if (showAllMentors) return mentors
+    const visibleMentors = mentors
 
-        return availableMentors.slice(offset, offset + limit)
-    }, [showAllMentors, mentors, availableMentors, offset, limit])
+    const pageLoading = loading
+    const pageError = error
 
-    const pageLoading = showAllMentors ? loading : availableMentorPoolLoading
-    const pageError = showAllMentors ? error : availableMentorPoolError
+    // After a booking: refresh the credits banner and the mentors' slot counts
+    const handleBooked = useCallback(() => {
+        refetchEligibility()
+        refetchMentors({
+            searchTerm: searchQuery,
+            limit,
+            offset,
+            organizationId: orgId || undefined,
+            expertise: selectedExpertise,
+            available: !showAllMentors,
+        })
+    }, [refetchEligibility, refetchMentors, searchQuery, limit, offset, orgId, selectedExpertise, showAllMentors])
+
+    // nextEligibleDate is set only while the gap blocks; it is null when out of credits
+    const nextEligibleText = formatEligibleDate(credits?.nextEligibleDate ?? null)
+    // Not enrolled in a course with mentorship: credits and gaps don't apply.
+    // access is missing on older backends; blockReason alone still covers it.
+    const access = eligibility?.access
+    const mentorshipUnavailable =
+        access?.allowed === false || credits?.blockReason === "MENTORSHIP_NOT_AVAILABLE"
+    const bannerTitle = !credits
+        ? ""
+        : mentorshipUnavailable
+            ? access?.message || "One-on-one mentorship isn't available for your course."
+        : credits.canBook
+            ? "You can book a session now"
+            : credits.blockReason === "NO_CREDITS"
+                ? `You've used all ${credits.creditsAssigned} credits`
+                : credits.blockReason === "GAP_ACTIVE" && nextEligibleText
+                    ? `You can book your next session from ${nextEligibleText}`
+                    : "You can't book a session right now"
+    const gapText = rules?.gapDays
+        ? rules.gapDays % 7 === 0
+            ? `${rules.gapDays / 7} week${rules.gapDays === 7 ? "" : "s"}`
+            : `${rules.gapDays} days`
+        : "2 weeks"
 
     const handleShowAllMentorsToggle = useCallback((pressed: boolean) => {
         setShowAllMentors(pressed)
@@ -156,14 +187,13 @@ export default function MentorsPage() {
     }, [router, searchParams])
 
     const fetchMentorsData = useCallback((nextOffset: number) => {
-        if (!showAllMentors) return
-
         refetchMentors({
             searchTerm: searchQuery,
             limit,
             offset: nextOffset,
             organizationId: orgId || undefined,
             expertise: selectedExpertise,
+            available: !showAllMentors,
         })
     }, [showAllMentors, refetchMentors, searchQuery, limit, orgId, selectedExpertise])
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -208,31 +238,31 @@ export default function MentorsPage() {
             <MentorshipTabs courseId={courseId} orgId={orgId} />
 
             {/* Booking Metrics Banner */}
-            {!metricsLoading && metrics && (
+            {!eligibilityLoading && credits && (
                 <div className={`rounded-2xl border px-4 py-3 sm:px-5 ${
-                    metrics.canBook
+                    credits.canBook
                         ? 'bg-green-50 border-green-200 dark:bg-success/5 dark:border-success/20'
                         : 'bg-yellow-50 border-yellow-200 dark:bg-warning/5 dark:border-warning/20'
                 }`}>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="min-w-0 text-left">
                             <p className="text-sm font-semibold text-foreground">
-                                {metrics.canBook
-                                    ? 'You can book a session now'
-                                    : `You can book your next session from ${formatEligibleDate(metrics.nextEligible)}`}
+                                {bannerTitle}
                             </p>
-                            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
-                                Each session uses 1 credit. Sessions need to be 2 weeks apart.
-                            </p>
+                            {!mentorshipUnavailable && (
+                                <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+                                    Each session uses 1 credit. Sessions need to be {gapText} apart.
+                                </p>
+                            )}
                         </div>
-                        <span className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold text-foreground">
-                            <span className={`h-2 w-2 rounded-full ${
-                                metrics.canBook && metrics.remainingCredits > 0 ? 'bg-green-600' : 'bg-yellow-500'
-                            }`} />
-                            {typeof metrics.quotaUsed === 'number'
-                                ? `${metrics.remainingCredits} of ${metrics.remainingCredits + metrics.quotaUsed} credits left`
-                                : `${metrics.remainingCredits} credits left`}
-                        </span>
+                        {!mentorshipUnavailable && (
+                            <span className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold text-foreground">
+                                <span className={`h-2 w-2 rounded-full ${
+                                    credits.canBook && credits.creditsLeft > 0 ? 'bg-green-600' : 'bg-yellow-500'
+                                }`} />
+                                {`${credits.creditsLeft} of ${credits.creditsAssigned} credits left`}
+                            </span>
+                        )}
                     </div>
                 </div>
             )}
@@ -479,6 +509,8 @@ export default function MentorsPage() {
                 onOpenChange={setIsDrawerOpen}
                 courseId={courseId}
                 orgId={orgId}
+                noticeHours={rules?.noticeHours}
+                onBooked={handleBooked}
             />
         </div>
     );

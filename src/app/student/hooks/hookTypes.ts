@@ -759,6 +759,46 @@ export interface GetMentorsParams {
     offset?: number
     organizationId?: string | number
     expertise?: string[]
+    /** true = only mentors with a slot bookable now (filtered and paged on the server) */
+    available?: boolean
+}
+
+// useMentorshipEligibility - GET /student/mentorship/eligibility
+export interface MentorshipCredits {
+    creditsAssigned: number
+    creditsUsed: number
+    creditsLeft: number
+    /** Set only while blockReason is GAP_ACTIVE; null when out of credits */
+    nextEligibleDate: string | null
+    canBook: boolean
+    /** MENTORSHIP_NOT_AVAILABLE takes priority over NO_CREDITS and GAP_ACTIVE */
+    blockReason: 'MENTORSHIP_NOT_AVAILABLE' | 'NO_CREDITS' | 'GAP_ACTIVE' | string | null
+}
+
+export interface MentorshipRules {
+    totalCredits: number
+    gapDays: number
+    noticeHours: number
+    joinOpenMinutes: number
+    /** How many reschedules a mentor can accept per booking (currently 1) */
+    maxAcceptedReschedules?: number
+}
+
+/** Whether the student's enrolment includes mentorship (same check booking makes) */
+export interface MentorshipAccess {
+    allowed: boolean
+    code: 'MENTORSHIP_NOT_AVAILABLE' | string | null
+    message: string | null
+}
+
+export interface MentorshipEligibility {
+    credits: MentorshipCredits
+    rules: MentorshipRules
+    /** Missing on older backends */
+    access?: MentorshipAccess
+    /** Slots starting before this can't be booked (now + noticeHours) */
+    earliestBookableStart: string | null
+    serverTime: string
 }
 
 // useMentorSkills

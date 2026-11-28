@@ -94,6 +94,19 @@ type FailedRequest = {
     reject: (error: any) => void
 }
 
+/**
+ * A 403 that is a business-rule refusal, not a permission problem: it carries a
+ * `code` (GAP_ACTIVE, NO_CREDITS, ...) or comes from a mentorship endpoint
+ * ("Feedback is locked after 24 hours.", "You do not own this booking.").
+ * The screen shows these inline, so the global "Unauthorized Access" overlay is skipped.
+ */
+const MENTORSHIP_URL_PATTERN = /\/(mentor-slots|mentor-sessions|mentorship)(\/|\?|$)/
+const isRuleRefusal = (error: any) => {
+    const code = error?.response?.data?.code
+    if (typeof code === 'string' && code.length > 0) return true
+    return MENTORSHIP_URL_PATTERN.test(String(error?.config?.url || ''))
+}
+
 let isRefreshing = false
 let failedQueue: FailedRequest[] = []
 
@@ -170,7 +183,7 @@ api.interceptors.response.use(
             } finally {
                 isRefreshing = false
             }
-        } else if (error.response?.status === 403) {
+        } else if (error.response?.status === 403 && !isRuleRefusal(error)) {
             console.error('Unauthorized access - 403', error.response.data.message)
             unauthorizedModalStore.setShowModal(true)
             unauthorizedMessageStore.setMessage(error.response.data.message || 'You do not have permission to access this resource.')

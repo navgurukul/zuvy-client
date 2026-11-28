@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { SubmitFeedbackResponse, MentorSessionFeedbackPayload } from './hookType'
 
@@ -17,6 +17,9 @@ export function useSubmitMentorSlotFeedback() {
     const [error, setError] = useState<string | null>(null)
     const [feedbackData, setFeedbackData] =
         useState<SubmitFeedbackResponse | null>(null)
+    // State is read at render time; the ref gives the caller this call's response right after `await`
+    const lastResponseRef = useRef<SubmitFeedbackResponse | null>(null)
+    const getLastResponse = useCallback(() => lastResponseRef.current, [])
 
     const submitFeedback = async (
         bookingId: number,
@@ -31,12 +34,14 @@ export function useSubmitMentorSlotFeedback() {
             setIsSubmittingFeedback(true)
             setError(null)
             setFeedbackData(null)
+            lastResponseRef.current = null
 
             const response = await api.post<SubmitFeedbackResponse>(
                 `/instructor/mentor-slots/bookings/${bookingId}/feedback`,
                 payload
             )
 
+            lastResponseRef.current = response.data || null
             setFeedbackData(response.data || null)
             return true
         } catch (error) {
@@ -52,6 +57,7 @@ export function useSubmitMentorSlotFeedback() {
         isSubmittingFeedback,
         error,
         feedbackData,
+        getLastResponse,
         submitFeedback,
     }
 }

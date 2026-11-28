@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface MyMentorSession {
@@ -139,6 +139,7 @@ export interface MentorSessionCredits {
 export interface MentorSessionRules {
     noticeHours?: number
     joinOpenMinutes?: number
+    maxAcceptedReschedules?: number
 }
 
 type WrappedMyMentorSession = Partial<Omit<MyMentorSession, 'id'>> & {
@@ -168,7 +169,13 @@ type MyMentorSessionsResponse =
           counts?: SessionCounts
           credits?: MentorSessionCredits
           rules?: MentorSessionRules
+          serverTime?: string
       }
+
+const parseServerTime = (response: MyMentorSessionsResponse): string | null => {
+    if (!response || Array.isArray(response)) return null
+    return response.serverTime ?? null
+}
 
 const parseCreditsResponse = (
     response: MyMentorSessionsResponse
@@ -254,12 +261,48 @@ export type SessionFilter =
     | 'missed'
 
 export type SessionSortOrder = 'asc' | 'desc'
+/** booked (backend default): by booking time; start: by the session's slot start (no-slot rows last) */
+export type SessionSortBy = 'start' | 'booked'
+
+/** Rows per request; the hook pages through until the list is complete (the backend default is 10) */
+const PAGE_SIZE = 50
+const MAX_PAGES = 20
+/** Refetch a little after a time boundary so the server sees the window as open/closed */
+const BOUNDARY_GRACE_MS = 2000
+/** setTimeout can't take much more than 24 days; re-plan at least this often */
+const MAX_TIMER_MS = 6 * 60 * 60 * 1000
+
+/**
+ * The card actions (join, cancel, reschedule, accept/decline) are computed by the server at fetch time.
+ * Returns the next moment, in server time, when one of them can change.
+ */
+const getNextBoundaryMs = (sessions: MyMentorSession[], serverNowMs: number): number | null => {
+    let next: number | null = null
+    sessions.forEach((session) => {
+        const candidates = [
+            session.joinOpensAt,
+            session.joinClosesAt,
+            session.changesCloseAt,
+            session.reschedule?.replyBy,
+            session.slotStart,
+            session.slotEnd,
+        ]
+        candidates.forEach((value) => {
+            if (!value) return
+            const at = new Date(value).getTime()
+            if (Number.isNaN(at) || at <= serverNowMs) return
+            if (next === null || at < next) next = at
+        })
+    })
+    return next
+}
 
 export function useMyMentorSessions(
     initialFetch: boolean,
     endpoint: MyMentorSessionsEndpoint,
     filter?: SessionFilter,
-    sort?: SessionSortOrder
+    sort?: SessionSortOrder,
+    sortBy?: SessionSortBy
 ) {
     const [sessions, setSessions] = useState<MyMentorSession[]>([])
     const [counts, setCounts] = useState<SessionCounts>({})
@@ -267,43 +310,95 @@ export function useMyMentorSessions(
     const [rules, setRules] = useState<MentorSessionRules | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
+    /** serverTime - device time, in ms, from the latest response */
+    const [serverOffsetMs, setServerOffsetMs] = useState<number>(0)
+    // Only the latest request may update state (tab switches can overlap)
+    const latestRequestRef = useRef(0)
 
-    const getMySessions = useCallback(async () => {
+    /** silent: keep the current list on screen (no loading state) - used for the timed refreshes */
+    const getMySessions = useCallback(async (options: { silent?: boolean } = {}) => {
+        const requestId = ++latestRequestRef.current
         try {
-            setLoading(true)
+            if (!options.silent) setLoading(true)
             setError(null)
 
-            const queryParams = new URLSearchParams()
-            if (filter) {
-                queryParams.set('filter', filter)
-            }
-            if (sort) {
-                queryParams.set('sort', sort)
+            const allSessions: MyMentorSession[] = []
+            let firstPage: MyMentorSessionsResponse | null = null
+            let lastServerTime: string | null = null
+
+            for (let page = 0; page < MAX_PAGES; page++) {
+                const queryParams = new URLSearchParams()
+                if (filter) {
+                    queryParams.set('filter', filter)
+                }
+                if (sort) {
+                    queryParams.set('sort', sort)
+                }
+                if (sortBy) {
+                    queryParams.set('sortBy', sortBy)
+                }
+                queryParams.set('limit', String(PAGE_SIZE))
+                queryParams.set('offset', String(page * PAGE_SIZE))
+
+                const response = await api.get<MyMentorSessionsResponse>(`${endpoint}?${queryParams.toString()}`)
+                if (requestId !== latestRequestRef.current) return
+
+                if (page === 0) firstPage = response.data
+                lastServerTime = parseServerTime(response.data) ?? lastServerTime
+                const pageSessions = parseSessionsResponse(response.data)
+                allSessions.push(...pageSessions)
+
+                // A plain array response isn't paged; a short page is the last one
+                if (Array.isArray(response.data) || pageSessions.length < PAGE_SIZE) break
             }
 
-            const query = queryParams.toString()
-            const url = query ? `${endpoint}?${query}` : endpoint
-            const response = await api.get<MyMentorSessionsResponse>(url)
+            // Drop duplicates if a row moved between pages while paging
+            const seen = new Set<number>()
+            const uniqueSessions = allSessions.filter((session) => {
+                if (seen.has(session.id)) return false
+                seen.add(session.id)
+                return true
+            })
 
-            setSessions(parseSessionsResponse(response.data))
-            setCounts(parseCountsResponse(response.data))
-            setCredits(parseCreditsResponse(response.data))
-            setRules(parseRulesResponse(response.data))
+            setSessions(uniqueSessions)
+            setCounts(firstPage ? parseCountsResponse(firstPage) : {})
+            setCredits(firstPage ? parseCreditsResponse(firstPage) : null)
+            setRules(firstPage ? parseRulesResponse(firstPage) : null)
+            if (lastServerTime) {
+                const serverMs = new Date(lastServerTime).getTime()
+                if (!Number.isNaN(serverMs)) setServerOffsetMs(serverMs - Date.now())
+            }
         } catch (error) {
+            if (requestId !== latestRequestRef.current) return
             console.error('Error fetching my mentor sessions:', error)
+            if (options.silent) return // keep the list on screen; the next refresh tries again
             setSessions([])
             setCounts({})
             setCredits(null)
             setRules(null)
             setError(getErrorMessage(error))
         } finally {
-            setLoading(false)
+            if (requestId === latestRequestRef.current && !options.silent) setLoading(false)
         }
-    }, [endpoint, filter, sort])
+    }, [endpoint, filter, sort, sortBy])
 
     useEffect(() => {
         if (initialFetch) getMySessions()
     }, [initialFetch, getMySessions])
+
+    // Refresh quietly when the next join / cancel / reschedule window opens or closes
+    useEffect(() => {
+        if (!initialFetch || loading || error) return
+        const serverNowMs = Date.now() + serverOffsetMs
+        const nextBoundaryMs = getNextBoundaryMs(sessions, serverNowMs)
+        if (nextBoundaryMs === null) return
+
+        const delay = Math.min(nextBoundaryMs - serverNowMs + BOUNDARY_GRACE_MS, MAX_TIMER_MS)
+        const timer = setTimeout(() => {
+            getMySessions({ silent: true })
+        }, delay)
+        return () => clearTimeout(timer)
+    }, [initialFetch, loading, error, sessions, serverOffsetMs, getMySessions])
 
     return {
         sessions,
@@ -312,6 +407,7 @@ export function useMyMentorSessions(
         rules,
         loading,
         error,
+        serverOffsetMs,
         refetchMySessions: getMySessions,
     }
 }

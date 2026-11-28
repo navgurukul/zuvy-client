@@ -11,7 +11,10 @@ const getErrorMessage = (error: unknown): string => {
     return message || 'Failed to fetch mentor metrics'
 }
 
-export function useMentorMetrics(initialFetch = true) {
+/** GET /instructor/mentor-slots/metrics?filter=all|30d|3m */
+export type MentorMetricsFilter = 'all' | '30d' | '3m'
+
+export function useMentorMetrics(initialFetch = true, filter: MentorMetricsFilter = 'all') {
     const [metrics, setMetrics] = useState<MentorMetrics | null>(null)
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<string | null>(null)
@@ -21,7 +24,7 @@ export function useMentorMetrics(initialFetch = true) {
             setLoading(true)
             setError(null)
 
-            const response = await api.get<MentorMetrics>('/instructor/mentor-slots/metrics')
+            const response = await api.get<MentorMetrics>(`/instructor/mentor-slots/metrics?filter=${filter}`)
             setMetrics(response.data)
         } catch (error) {
             console.error('Error fetching mentor metrics:', error)
@@ -30,7 +33,7 @@ export function useMentorMetrics(initialFetch = true) {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [filter])
 
     useEffect(() => {
         if (initialFetch) getMetrics()

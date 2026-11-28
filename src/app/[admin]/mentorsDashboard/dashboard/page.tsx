@@ -176,12 +176,12 @@ function DashboardPageContent() {
     sessions: completedSessions,
     loading: completedSessionsLoading,
     error: completedSessionsError,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "completed", "desc")
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "completed", "desc", "start")
   const {
     sessions: upcomingSessions,
     loading: upcomingSessionsLoading,
     error: upcomingSessionsError,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "upcoming", "asc")
+  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", "upcoming", "asc", "start")
   const {
     metrics,
     loading: metricsLoading,
@@ -216,8 +216,10 @@ function DashboardPageContent() {
     (n) => n.type === "RESCHEDULE_REQUEST"
   )
 
+  // Mentors get BOOKING_CREATED, RESCHEDULE_REQUEST, BOOKING_CANCELLED and FEEDBACK_SUBMITTED.
+  // There is no UPCOMING_SESSION type, and session reminders go to students only.
   const upcomingNotifications = unreadNotifications.filter(
-    (n) => n.type === "UPCOMING_SESSION" || n.type === "BOOKING_CREATED"
+    (n) => n.type === "BOOKING_CREATED"
   )
 
   const getSessionsLink = (tab: string) => {
@@ -322,7 +324,7 @@ function DashboardPageContent() {
       dashboardAlerts.push({
         ids: upcomingNotifications.map((n) => n.id),
         type: "upcoming",
-        message: `${upcomingNotifications.length} sessions starting soon`,
+        message: `${upcomingNotifications.length} new sessions booked`,
         actionLabel: "View All",
         link: getSessionsLink("upcoming"),
       })

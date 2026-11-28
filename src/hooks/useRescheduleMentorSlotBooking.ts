@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
 interface RescheduleBookingResponse {
@@ -22,6 +22,9 @@ export function useRescheduleMentorSlotBooking() {
     const [error, setError] = useState<string | null>(null)
     const [responseData, setResponseData] =
         useState<RescheduleBookingResponse | null>(null)
+    // State is read at render time; the ref gives the caller this call's response right after `await`
+    const lastResponseRef = useRef<RescheduleBookingResponse | null>(null)
+    const getLastResponse = useCallback(() => lastResponseRef.current, [])
 
     const runRescheduleAction = async (
         endpoint: string,
@@ -31,12 +34,14 @@ export function useRescheduleMentorSlotBooking() {
             setIsRescheduling(true)
             setError(null)
             setResponseData(null)
+            lastResponseRef.current = null
 
             const response = await api.post<RescheduleBookingResponse>(
                 endpoint,
                 payload || {}
             )
 
+            lastResponseRef.current = response.data || null
             setResponseData(response.data || null)
             return true
         } catch (error) {
@@ -77,6 +82,7 @@ export function useRescheduleMentorSlotBooking() {
         isRescheduling,
         error,
         responseData,
+        getLastResponse,
         proposeReschedule,
         acceptReschedule,
         declineReschedule,

@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useState, useEffect, useRef } from "react"
+import { useCallback, useMemo, useState, useEffect, useRef } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
   Clock,
@@ -555,6 +555,7 @@ export default function AvailabilityPage() {
     weekEnd: apiWeekEnd,
     summary,
     rules,
+    earliestNewSlotStart,
     loading,
     error,
     refetchMySlots,
@@ -581,16 +582,35 @@ export default function AvailabilityPage() {
   )
   const isCurrentWeek = weekOffset === 0
 
+  // weekStart/weekEnd are Mon 00:00 – Sun 23:59 IST sent as UTC, so format them in IST
   const weekLabel = `${weekStart.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    timeZone: "UTC",
+    timeZone: "Asia/Kolkata",
   })} – ${weekEnd.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "Asia/Kolkata",
   })}`
+
+  // New slots need slot_min_lead_days of notice: the picker starts on the earliest allowed day
+  const earliestSlotDate = useMemo(() => {
+    if (!earliestNewSlotStart) return today
+    const earliest = new Date(earliestNewSlotStart)
+    if (Number.isNaN(earliest.getTime())) return today
+    const earliestStr = toDateStr(earliest)
+    return earliestStr > today ? earliestStr : today
+  }, [earliestNewSlotStart, today])
+  const clampSlotDate = useCallback(
+    (dateStr: string) => (dateStr < earliestSlotDate ? earliestSlotDate : dateStr),
+    [earliestSlotDate]
+  )
+
+  // Move a too-early date forward once the earliest day is known
+  useEffect(() => {
+    setSlotDate((current) => clampSlotDate(current))
+  }, [clampSlotDate])
 
   const sortedSlots = useMemo(
     () => [...slots].sort((a, b) => new Date(a.slotStartDateTime).getTime() - new Date(b.slotStartDateTime).getTime()),
@@ -707,7 +727,7 @@ export default function AvailabilityPage() {
         })
       }
       toast.success({ title: "Success", description: "Slot created successfully." })
-      setSlotDate(getDefaultSlotDate())
+      setSlotDate(clampSlotDate(getDefaultSlotDate()))
       setStartTime(defaultStartTime)
       setDurationMinutes(defaultDurationMinutes)
       setShowAddSlotPanel(false)
@@ -743,8 +763,8 @@ export default function AvailabilityPage() {
   }
 
   const openCreateSlot = (date?: Date) => {
-    // Open on the clicked day, or today. If it's too soon, the licence check shows the backend's lead-time message.
-    setSlotDate(date ? toDateStr(date) : getDefaultSlotDate())
+    // Open on the clicked day, or the earliest day a new slot is allowed (earliestNewSlotStart)
+    setSlotDate(clampSlotDate(date ? toDateStr(date) : getDefaultSlotDate()))
     setFormError(null)
     setSelectedSlotId(null)
     setShowAddSlotPanel(true)
@@ -911,9 +931,9 @@ export default function AvailabilityPage() {
             formError={formError}
             createError={createError}
             isCreating={isCreating}
-            // Only past days are blocked, so the picker opens on today. Days inside
-            // minSlotLeadDays get the backend's lead-time message from the licence check.
-            minDate={toDateStr(currentTime)}
+            // Days before earliestNewSlotStart (minSlotLeadDays) can't be picked; the licence check
+            // still reports a too-early time on that first day
+            minDate={earliestSlotDate}
             checkMessages={slotCheckMessages}
             checking={checkingSlot}
             blockedByCheck={blockedBySlotCheck}

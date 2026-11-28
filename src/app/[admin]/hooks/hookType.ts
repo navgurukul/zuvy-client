@@ -962,6 +962,8 @@ export interface StudentFeedbackEntry {
   learnerName?: string | null
   rating?: number
   studentRating?: number
+  /** The student's feedback text, as the backend sends it */
+  studentFeedback?: string | null
   feedback?: string | null
   notes?: string | null
   createdAt?: string | null

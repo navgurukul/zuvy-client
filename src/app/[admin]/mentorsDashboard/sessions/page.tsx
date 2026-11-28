@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Calendar, Clock, Loader2, PlayCircle, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,7 +37,17 @@ import {
   isJoinWindowOpen,
 } from "@/utils/sessionDateTime"
 
-type SessionTab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled"
+type SessionTab = "all" | "upcoming" | "reschedule" | "completed" | "cancelled" | "missed"
+
+const SESSION_TABS: SessionTab[] = ["all", "upcoming", "reschedule", "completed", "cancelled", "missed"]
+
+// Dashboard links open a tab with ?tab=...; "action-needed" is the API's name for the reschedule tab
+const parseTabParam = (value: string | null): SessionTab | null => {
+  if (!value) return null
+  const normalized = value.trim().toLowerCase()
+  if (normalized === "action-needed" || normalized === "actionneeded") return "reschedule"
+  return (SESSION_TABS as string[]).includes(normalized) ? (normalized as SessionTab) : null
+}
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-"
@@ -91,6 +102,10 @@ const getRescheduleStatus = (session: MyMentorSession) => {
   return maybeSession.rescheduleStatus || ""
 }
 
+// rescheduleStatus keeps "accepted" | "declined" | "expired" after the answer; only "pending" needs the mentor
+const hasPendingRescheduleStatus = (session: MyMentorSession) =>
+  getRescheduleStatus(session).toLowerCase() === "pending"
+
 const isCancelledValue = (value?: string | null) => {
   if (!value) return false
   const normalized = value.toLowerCase()
@@ -129,7 +144,7 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
   const status = (session.status || "").toLowerCase()
   const hasReschedule = displayState
     ? displayState === "ACTION_NEEDED"
-    : Boolean(getRescheduleStatus(session))
+    : hasPendingRescheduleStatus(session)
 
   if (displayState === "CANCELLED" || isCancelledValue(status) || isCancelledValue(lifecycle)) {
     return {
@@ -163,7 +178,14 @@ const getSessionStatusBadge = (session: MyMentorSession) => {
 }
 
 export default function SessionsPage() {
-  const [activeTab, setActiveTab] = useState<SessionTab>("all")
+  const searchParams = useSearchParams()
+  const tabParam = parseTabParam(searchParams.get("tab"))
+  const [activeTab, setActiveTab] = useState<SessionTab>(() => tabParam ?? "all")
+
+  // Follow ?tab= when the URL changes (e.g. a dashboard alert link while this page is open)
+  useEffect(() => {
+    if (tabParam) setActiveTab(tabParam)
+  }, [tabParam])
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
   // const [joinedAt, setJoinedAt] = useState("")
   // const [leftAt, setLeftAt] = useState("")
@@ -185,7 +207,14 @@ export default function SessionsPage() {
     refetchMySessions,
     counts,
     rules,
-  } = useMyMentorSessions(true, "/instructor/mentor-sessions/my", activeTab as SessionFilter)
+  } = useMyMentorSessions(
+    true,
+    "/instructor/mentor-sessions/my",
+    activeTab as SessionFilter,
+    // Upcoming: next session first. Past tabs: latest session first. "All" keeps booking order.
+    activeTab === "all" ? undefined : activeTab === "upcoming" || activeTab === "reschedule" ? "asc" : "desc",
+    activeTab === "all" ? undefined : "start"
+  )
   // From the backend (GET /instructor/mentor-sessions/my -> rules.noticeHours)
   const noticeHours = rules?.noticeHours
   const joinOpenMinutes = rules?.joinOpenMinutes ?? DEFAULT_JOIN_OPEN_MINUTES
@@ -196,6 +225,7 @@ export default function SessionsPage() {
     reschedule: Number(counts.actionNeeded ?? counts.reschedule) || 0,
     completed: Number(counts.completed) || 0,
     cancelled: Number(counts.cancelled) || 0,
+    missed: Number(counts.missed) || 0,
   }
 
   const sessions = apiSessions
@@ -250,7 +280,7 @@ export default function SessionsPage() {
   const isUpcomingSession = useMemo(() => {
     if (!selectedSession) return false
     if (activeTab === "upcoming") return true
-    if (activeTab === "completed" || activeTab === "cancelled" || activeTab === "reschedule") return false
+    if (activeTab === "completed" || activeTab === "cancelled" || activeTab === "reschedule" || activeTab === "missed") return false
 
     const isCompletedOrCancelled =
       selectedSession.sessionLifecycleState === "COMPLETED" ||
@@ -269,7 +299,7 @@ export default function SessionsPage() {
     selectedSession &&
     (getMentorDisplayState(selectedSession)
       ? getMentorDisplayState(selectedSession) === "ACTION_NEEDED"
-      : getRescheduleStatus(selectedSession) ||
+      : hasPendingRescheduleStatus(selectedSession) ||
         isRescheduleValue(selectedSession.status) ||
         isRescheduleValue(selectedSession.sessionLifecycleState))
   )
@@ -456,7 +486,7 @@ export default function SessionsPage() {
   const {
     isRescheduling,
     error: rescheduleError,
-    responseData: rescheduleResponse,
+    getLastResponse: getLastRescheduleResponse,
     acceptReschedule,
     declineReschedule,
   } = useRescheduleMentorSlotBooking()
@@ -479,6 +509,7 @@ export default function SessionsPage() {
     isSubmittingFeedback,
     error: feedbackError,
     feedbackData,
+    getLastResponse: getLastFeedbackResponse,
     submitFeedback,
   } = useSubmitMentorSlotFeedback()
 
@@ -496,15 +527,17 @@ export default function SessionsPage() {
 
     const ok = await acceptReschedule(selectedSession.id)
     if (ok) {
+      const response = getLastRescheduleResponse()
       toast.success({
         title: "Reschedule accepted",
         description:
-          (typeof rescheduleResponse?.message === "string" && rescheduleResponse.message) ||
+          (typeof response?.message === "string" && response.message) ||
           "Reschedule request accepted successfully.",
       })
-      await refetchMySessions()
       await refetchSlotDetails()
     }
+    // Refetch on failure too: the request may have expired or been answered elsewhere
+    await refetchMySessions()
   }
 
   const handleDeclineReschedule = async () => {
@@ -512,15 +545,16 @@ export default function SessionsPage() {
 
     const ok = await declineReschedule(selectedSession.id)
     if (ok) {
+      const response = getLastRescheduleResponse()
       toast.success({
         title: "Reschedule declined",
         description:
-          (typeof rescheduleResponse?.message === "string" && rescheduleResponse.message) ||
+          (typeof response?.message === "string" && response.message) ||
           "Reschedule request declined successfully.",
       })
-      await refetchMySessions()
       await refetchSlotDetails()
     }
+    await refetchMySessions()
   }
 
   const {
@@ -538,12 +572,16 @@ export default function SessionsPage() {
     if (ok) {
       toast.success({
         title: "Session cancelled",
-        description: "The student has been notified and gets the credit back.",
+        description:
+          selectedSession.usesCredit === false
+            ? "The student has been notified."
+            : "The student has been notified and gets the credit back.",
       })
       setCancelDialogOpen(false)
       setCancelReason("")
-      await refetchMySessions()
     }
+    // Refetch on failure too, so Cancel follows the server's current answer
+    await refetchMySessions()
   }
 
   const handleCompleteSession = async () => {
@@ -574,10 +612,11 @@ export default function SessionsPage() {
         ...prev,
         [selectedSession.id]: true,
       }))
+      const response = getLastFeedbackResponse()
       toast.success({
         title: "Feedback submitted successfully",
         description:
-          (typeof feedbackData?.message === "string" && feedbackData.message) ||
+          (typeof response?.message === "string" && response.message) ||
           "Your feedback has been submitted successfully.",
       })
       await refetchMySessions()
@@ -594,7 +633,10 @@ export default function SessionsPage() {
   }, [rescheduleError])
 
   const isInitialLoading = loading && sessions.length === 0
-  const showGlobalEmptyState = !loading && sessions.length === 0
+  // "No sessions yet" only when the mentor has none at all; an empty tab shows its own line in the list,
+  // and a failed fetch shows the error instead
+  const showGlobalEmptyState =
+    !loading && !error && sessions.length === 0 && summaryCounts.total === 0
 
   return isInitialLoading ? (
     <SessionsSkeleton />
@@ -698,6 +740,25 @@ export default function SessionsPage() {
             {Number(summaryCounts.cancelled) || 0}
           </span>
           {activeTab === "cancelled" && (
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("missed")
+            setSelectedBookingId(null)
+          }}
+          className={`relative flex items-center gap-2 pb-2.5 ${activeTab === "missed"
+            ? "font-medium text-foreground"
+            : "font-normal text-muted-foreground hover:text-foreground"
+            }`}
+        >
+          <span>Missed</span>
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
+            {Number(summaryCounts.missed) || 0}
+          </span>
+          {activeTab === "missed" && (
             <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
           )}
         </button>
@@ -868,6 +929,13 @@ export default function SessionsPage() {
                     </div>
                   )}
 
+                  {/* Backend message on read-only cards: "Cancelled by Riya on 26 Oct..." / "Riya didn't join. The session used their credit." */}
+                  {isReadOnlySession && selectedMessage && (
+                    <div className="mt-4 rounded-lg bg-muted/50 px-4 py-3 text-sm text-foreground">
+                      {selectedMessage}
+                    </div>
+                  )}
+
                   {!isRescheduleTab && !hasRescheduleRequest && selectedSession.sessionLifecycleState !== "COMPLETED" && !isReadOnlySession && hasJoinTarget && !canJoinSelectedSession &&
                     (!selectedActions?.join || selectedActions.join.reason === "JOIN_NOT_OPEN") && (
                     <p className="mt-6 text-xs text-muted-foreground">
@@ -978,7 +1046,9 @@ export default function SessionsPage() {
                   </div>
                 )}
 
-                {!isRescheduleTab && !hasRescheduleRequest && !isUpcomingSession && !isReadOnlySession && (
+                {/* The form follows actions.giveFeedback (e.g. locked 24 h after the session); submitted feedback still shows */}
+                {!isRescheduleTab && !hasRescheduleRequest && !isUpcomingSession && !isReadOnlySession &&
+                  (isAlreadySubmitted || selectedActions?.giveFeedback?.allowed !== false) && (
                   <div className="space-y-4 px-4 py-0 text-left">
                     {isAlreadySubmitted ? (
                       <div className="space-y-3">

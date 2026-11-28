@@ -22,7 +22,13 @@ type MentorBookingDrawerProps = {
   onOpenChange: (open: boolean) => void
   courseId?: string
   orgId?: string
+  /** rules.noticeHours from GET /student/mentorship/eligibility; slots closer than this aren't listed */
+  noticeHours?: number
+  /** Called after a successful booking so the page can refresh credits and mentor counts */
+  onBooked?: () => void
 }
+
+const DEFAULT_NOTICE_HOURS = 72
 
 // Cooldown between bookings, counted from the booked session's start
 // Used only when the booking preview API has not answered
@@ -43,7 +49,6 @@ const renderWithEmailLinks = (text: string) =>
 
 // e.g. "Fri, 6 Nov 2026"
 const formatSlotDate = (value: string | Date) => {
-  console.log('value', value)
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return ""
   const weekday = d.toLocaleDateString("en-GB", { weekday: "short" })
@@ -81,6 +86,8 @@ export default function MentorBookingDrawer({
   onOpenChange,
   courseId,
   orgId,
+  noticeHours = DEFAULT_NOTICE_HOURS,
+  onBooked,
 }: MentorBookingDrawerProps) {
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null)
   const [bookedSlotDetails, setBookedSlotDetails] = useState<MentorAvailabilitySlot | null>(null)
@@ -185,6 +192,7 @@ export default function MentorBookingDrawer({
     setSelectedSlotId(null)
     refetchMentorAvailability()
     setBookingSuccess(true)
+    onBooked?.()
   }
 
   const formatEligibleDate = (dateString?: string | null) => {
@@ -239,7 +247,7 @@ export default function MentorBookingDrawer({
                 {/* Available Slots */}
                 <section>
                   <h3 className="text-left text-sm font-semibold text-foreground">Available Slots</h3>
-                  <p className="mt-1 mb-3 text-left text-xs text-muted-foreground">Select one slot. Slots starting in under 24 hours aren&apos;t shown.</p>
+                  <p className="mt-1 mb-3 text-left text-xs text-muted-foreground">Select one slot. Slots starting in under {noticeHours} hours aren&apos;t shown.</p>
 
                   {loading ? (
                     <p className="text-xs text-muted-foreground">Loading slots...</p>

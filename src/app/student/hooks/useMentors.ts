@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { Mentor, MentorsApiResponse, MentorsPaginatedResponse, ParsedMentorsResponse, GetMentorsParams } from './hookTypes'
 
@@ -49,7 +49,8 @@ export function useMentors(
     limit = 10,
     offset = 0,
     organizationId?: string | number,
-    expertise?: string[]
+    expertise?: string[],
+    available = false
 ) {
     // Joined key keeps the fetch effect stable when callers pass a new array with the same values
     const expertiseKey = (expertise || []).join(',')
@@ -58,8 +59,11 @@ export function useMentors(
     const [error, setError] = useState<string | null>(null)
     const [total, setTotal] = useState<number>(0)
     const [hasMore, setHasMore] = useState<boolean>(false)
+    // Only the latest request may update state (pagination and the URL effect can both fetch)
+    const latestRequestRef = useRef(0)
 
     const getMentors = useCallback(async (params: GetMentorsParams = {}) => {
+        const requestId = ++latestRequestRef.current
         try {
             setLoading(true)
             setError(null)
@@ -83,6 +87,10 @@ export function useMentors(
                 queryParams.append('organizationId', String(params.organizationId))
             }
 
+            if (params.available) {
+                queryParams.append('available', 'true')
+            }
+
             // Skill slugs, comma-separated: expertise=react,node-js
             const expertiseSlugs = (params.expertise || []).map((slug) => slug.trim()).filter(Boolean)
             const queryParts = [queryParams.toString()]
@@ -94,18 +102,20 @@ export function useMentors(
             const url = `/student/mentors${query ? `?${query}` : ''}`
             const response = await api.get<MentorsApiResponse>(url)
             const parsedResponse = parseMentorsResponse(response.data)
+            if (requestId !== latestRequestRef.current) return
 
             setMentors(parsedResponse.data)
             setTotal(parsedResponse.total)
             setHasMore(parsedResponse.hasMore)
         } catch (error) {
+            if (requestId !== latestRequestRef.current) return
             console.error('Error fetching mentors:', error)
             setMentors([])
             setTotal(0)
             setHasMore(false)
             setError(getErrorMessage(error))
         } finally {
-            setLoading(false)
+            if (requestId === latestRequestRef.current) setLoading(false)
         }
     }, [])
 
@@ -117,9 +127,10 @@ export function useMentors(
                 offset,
                 organizationId,
                 expertise: expertiseKey ? expertiseKey.split(',') : [],
+                available,
             })
         }
-    }, [initialFetch, getMentors, limit, offset, organizationId, search, expertiseKey])
+    }, [initialFetch, getMentors, limit, offset, organizationId, search, expertiseKey, available])
 
     return {
         mentors,

@@ -98,7 +98,10 @@ export default function MySessions() {
   } = useMyMentorSessions(
     !isUpcomingGroupTab,
     "/student/mentor-sessions/my",
-    activeTab as SessionFilter
+    activeTab as SessionFilter,
+    // Past tabs: latest session first. "All" mixes past and upcoming, so it keeps booking order.
+    activeTab === "all" ? undefined : "desc",
+    activeTab === "all" ? undefined : "start"
   )
 
   // Upcoming sessions: the Upcoming and Reschedule requested tabs, and the reschedule count
@@ -110,7 +113,7 @@ export default function MySessions() {
     loading: upcomingLoading,
     error: upcomingError,
     refetchMySessions: refetchUpcoming,
-  } = useMyMentorSessions(true, "/student/mentor-sessions/my", "upcoming")
+  } = useMyMentorSessions(true, "/student/mentor-sessions/my", "upcoming", "asc", "start")
 
   const isRescheduleSession = (session: MyMentorSession) =>
     RESCHEDULE_STATES.includes(getSessionDisplayState(session, nowTimestamp))

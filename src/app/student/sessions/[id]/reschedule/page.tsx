@@ -13,6 +13,10 @@ import { cn } from "@/lib/utils";
 
 const REASON_MIN_LENGTH = 10;
 
+/** 1 -> "once", 2 -> "twice", 3 -> "3 times" */
+const formatTimes = (count: number): string =>
+	count === 1 ? "once" : count === 2 ? "twice" : `${count} times`;
+
 const getBookingIdFromParam = (
 	idParam: string | string[] | undefined
 ): number | undefined => {
@@ -85,7 +89,13 @@ export default function RescheduleBookingPage() {
 	} = useGetRescheduleSlots(bookingId, true);
 
 	// Booking details (mentor name, current timing) come from the student's upcoming sessions
-	const { sessions, loading: sessionsLoading, rules } = useMyMentorSessions(
+	const {
+		sessions,
+		loading: sessionsLoading,
+		error: sessionsError,
+		rules,
+		refetchMySessions,
+	} = useMyMentorSessions(
 		bookingId !== undefined,
 		"/student/mentor-sessions/my",
 		"upcoming"
@@ -125,8 +135,35 @@ export default function RescheduleBookingPage() {
 	const { proposeReschedule, isRescheduling, error, responseData } =
 		useRescheduleMentorSlotBooking();
 	const isSubmitted = !!responseData;
+
+	// The page follows the card's actions.reschedule, so a stale card or a typed URL can't send a request
+	// the backend will refuse (pending request, already moved once, inside the notice window, ...)
+	const rescheduleAction = session?.actions?.reschedule;
+	const rescheduleBlockedMessage = useMemo(() => {
+		if (isSubmitted || sessionsLoading || sessionsError) return null;
+		if (!session) return "This session can't be rescheduled. It may have been cancelled or already taken place.";
+		if (!rescheduleAction || rescheduleAction.allowed) return null;
+		switch (rescheduleAction.reason) {
+			case "RESCHEDULE_PENDING":
+				return "You've already asked to reschedule this session. Wait for your mentor's reply.";
+			case "RESCHEDULE_LIMIT":
+				return `This session has already been moved ${formatTimes(rules?.maxAcceptedReschedules ?? 1)}, so it can't be rescheduled again. You can still cancel it.`;
+			case "TOO_LATE_TO_CHANGE":
+				return typeof rules?.noticeHours === "number"
+					? `Rescheduling closes ${rules.noticeHours} hours before the session. If you can't attend, email team@zuvy.org.`
+					: "It's too late to reschedule this session. If you can't attend, email team@zuvy.org.";
+			default:
+				return session.message?.trim() || "This session can't be rescheduled right now.";
+		}
+	}, [isSubmitted, sessionsLoading, sessionsError, session, rescheduleAction, rules?.noticeHours, rules?.maxAcceptedReschedules]);
+	const isBlocked = !!rescheduleBlockedMessage;
+
 	const canSubmit =
-		!!selectedNewSlotId && reason.trim().length >= REASON_MIN_LENGTH && !isRescheduling && !isSubmitted;
+		!!selectedNewSlotId &&
+		reason.trim().length >= REASON_MIN_LENGTH &&
+		!isRescheduling &&
+		!isSubmitted &&
+		!isBlocked;
 
 	const handleProposeReschedule = async () => {
 		if (!bookingId) {
@@ -145,7 +182,12 @@ export default function RescheduleBookingPage() {
 		}
 
 		setValidationError(null);
-		await proposeReschedule(bookingId, selectedNewSlotId, reason.trim());
+		const ok = await proposeReschedule(bookingId, selectedNewSlotId, reason.trim());
+		if (!ok) {
+			// Refused: reload the card so the page shows why, and the slots in case one was taken
+			refetchMySessions();
+			refetchSlots();
+		}
 	};
 
 	return (
@@ -170,7 +212,13 @@ export default function RescheduleBookingPage() {
 					)}
 				</div>
 
-				{!isSubmitted && (
+				{isBlocked && (
+					<div className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-relaxed text-foreground dark:bg-amber-950/30">
+						{rescheduleBlockedMessage}
+					</div>
+				)}
+
+				{!isSubmitted && !isBlocked && (
 					<div className="rounded-xl bg-blue-50 px-4 py-3 text-sm leading-relaxed text-foreground dark:bg-blue-950/30">
 						{mentorFirstName} needs to accept the new time. Your session stays as it is until then.
 						Your credit doesn&apos;t change. You can reschedule a booking once.
@@ -221,7 +269,7 @@ export default function RescheduleBookingPage() {
 										type="button"
 										role="radio"
 										aria-checked={isSelected}
-										disabled={isSubmitted}
+										disabled={isSubmitted || isBlocked}
 										onClick={() => {
 											setSelectedNewSlotId(slot.id);
 											setValidationError(null);
@@ -231,7 +279,7 @@ export default function RescheduleBookingPage() {
 											isSelected
 												? "border-green-800 bg-green-50 dark:border-green-600 dark:bg-green-950/30"
 												: "border-border bg-card hover:bg-muted/50",
-											isSubmitted && "cursor-not-allowed opacity-60"
+											(isSubmitted || isBlocked) && "cursor-not-allowed opacity-60"
 										)}
 									>
 										<span
@@ -264,7 +312,7 @@ export default function RescheduleBookingPage() {
 						value={reason}
 						onChange={(event) => setReason(event.target.value)}
 						placeholder="Need to move to another time"
-						disabled={isSubmitted}
+						disabled={isSubmitted || isBlocked}
 						className="min-h-[96px] w-full rounded-xl border border-border bg-muted/40 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 					/>
 					<p className="text-xs text-muted-foreground">
